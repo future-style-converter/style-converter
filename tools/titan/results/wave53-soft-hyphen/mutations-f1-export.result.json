@@ -1,0 +1,30 @@
+[
+ {
+  "id": "M-d",
+  "why": "WordBreakOpportunities:87 treats U+00AD as an ordinary character",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/WordBreakOpportunities.kt",
+  "sha256Before": "5d0dc0528ad57607cc714a5d3ff55e3d410a94f47088aa3dfa71d953dc23e448",
+  "sha256Mutated": "63240a0a2ea01c75a277f5fc10c0813a58863fda0c0134108b36bd8c876fc7c1",
+  "sha256Restored": "5d0dc0528ad57607cc714a5d3ff55e3d410a94f47088aa3dfa71d953dc23e448",
+  "red": {
+   "exit": 1,
+   "total": 20,
+   "failed": [
+    "PreBreakPipelineTest.aMultiOpportunitySpacelessRunSplitsIntoFiveLines",
+    "PreBreakPipelineTest.aSpacelessSoftHyphenRunFiresWithTheTakenHyphen",
+    "PreBreakPipelineTest.composesWithTheSoftHyphenPolicy",
+    "PreBreakPipelineTest.firesWhenASoftHyphenBreakWasTaken"
+   ],
+   "compileError": false,
+   "tail": ""
+  },
+  "green": {
+   "exit": 0,
+   "total": 20,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "verdict": "RED->GREEN"
+ }
+]

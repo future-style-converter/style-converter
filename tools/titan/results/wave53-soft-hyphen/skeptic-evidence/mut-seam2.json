@@ -1,0 +1,15 @@
+{
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt",
+ "sha256_before": "d251ace7442ef6e6a3eb90c750d886a804082b1b639217a03c02e1178ad54b3f",
+ "sha256_restored": "d251ace7442ef6e6a3eb90c750d886a804082b1b639217a03c02e1178ad54b3f",
+ "red_exit": 1,
+ "red_ran": 1,
+ "red_failing": [
+  "RunFoldBreadcrumbSeamTest.the runs-fold breadcrumb names the dropped out-of-flow members"
+ ],
+ "green_exit": 0,
+ "green_ran": 1,
+ "green_failing": [],
+ "mutation_old": "                                            (if (runFold.droppedOutOfFlowMembers > 0)\n                                                \", ${runFold.droppedOutOfFlowMembers} out-of-flow member(s) dropped\" else \"\") +\n",
+ "mutation_new": ""
+}

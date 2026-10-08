@@ -177,18 +177,85 @@ final class PseudoTextFoldTests: XCTestCase {
             key: "pseudotext-after-children", message: "dup"))
     }
 
-    /// `meta.runs` owns the content slot (spec 03 §4.1) and the renderer
-    /// drops the `text` slot under a plan — a fold there would silently
-    /// vanish, so the fold refuses instead.
-    func testRunsCarrierRefusesTheFold() throws {
+    /// `meta.runs` owns the content slot (spec 03 §4.1). Wave-53 lane L1:
+    /// a CHILD-FIRST run list has no leading text run to prefix, so the
+    /// ::before fold still refuses there (named) — the pre-wave-53 blanket
+    /// refusal survives exactly for this shape.
+    func testChildFirstRunsCarrierRefusesTheFold() throws {
         let c = try component("""
-        {"id":"x","name":"div","properties":[],"text":"ab",
+        {"id":"x","name":"div","properties":[],"text":"b",
          "children":[{"id":"k","name":"span","properties":[]}],
-         "meta":{"runs":[{"text":"a"},{"child":"k"},{"text":"b"}]},
+         "meta":{"runs":[{"child":"k"},{"text":"b"}]},
          "pseudos":{"before":{"properties":{"content":"\\"1\\""},"_text":"1"}}}
         """)
-        // Identity: the text is exactly the wire's own, unfolded.
-        XCTAssertEqual(PseudoTextFold.resolve(c).text, "ab")
+        let r = PseudoTextFold.resolve(c)
+        // Identity: the text and the run list are exactly the wire's own.
+        XCTAssertEqual(r.text, "b")
+        XCTAssertEqual(r.meta?.runs, c.meta?.runs)
+        // …and the refusal was named once (no silent fallthrough).
+        XCTAssertFalse(PropertyTracker.logOnce(key: "pseudotext-runs-child-first", message: "dup"))
+    }
+
+    // MARK: - Wave 53 (lane L1, nested-list-extractor C): ::before into runs
+
+    /// N4 — css-lists/counter-reset-reversed-nested.html's `Two`: the
+    /// wave52-ship per-test IR line VERBATIM (tools/titan/runs/wave52-ship/
+    /// sections/css-lists/per-test-ir/wpt__css-lists__counter-reset-reversed-
+    /// nested.json, sha256 e1dd5c58…), with the two bake strings the fixed
+    /// extractor + counter bake produce for it substituted (`"11"` → `"2"`,
+    /// `_text` "11. " → "2. "; tools/titan/extract-fixture-implied-close.
+    /// test.mjs N1 pins them). CSS 2.1 §12.1 / §9.2.1.1: the ::before is the
+    /// first inline content, in the anonymous block with "Two", ahead of the
+    /// nested block `<ol>` — so BOTH paint channels must lead with "2. ".
+    /// MUTATION (executed, tools/titan/results/wave53-lists-bakes/_note.md):
+    /// restoring the blanket runs refusal turns this red.
+    func testNestedListItemFoldsBeforeIntoLeadingRunAndText() throws {
+        let c = try component("""
+        {"id":"counter-reset-reversed-nested__0__1-383","name":"counter-reset-reversed-nested__0__1","properties":[{"type":"Display","data":"BLOCK"}],"slot":{"parent":"wpt__css-lists__counter-reset-reversed-nested__0-381"},"text":"Two","pseudos":{"before":{"properties":{"counter-increment":"foo -1","content":"\\"2\\" \\". \\""},"_text":"2. ","_lossy":true,"_lossyReasons":["generated-content-baked"]}},"meta":{"sourceTag":"li","runs":[{"text":"Two "},{"child":"counter-reset-reversed-nested__0__1__0"}]}}
+        """)
+        let r = PseudoTextFold.resolve(c)
+        // The run plan's leading text run carries the marker…
+        XCTAssertEqual(r.meta?.runs?.first?.text, "2. Two ")
+        // …the child entry is untouched and still second…
+        XCTAssertEqual(r.meta?.runs?.count, 2)
+        XCTAssertEqual(r.meta?.runs?.last?.child, "counter-reset-reversed-nested__0__1__0")
+        // …and the leading-label channel carries it too.
+        XCTAssertEqual(r.text, "2. Two")
+        XCTAssertTrue(r.text?.hasPrefix("2. ") ?? false)
+        // The rest of meta rides through field for field.
+        XCTAssertEqual(r.meta?.sourceTag, "li")
+    }
+
+    /// N4 control — css-display/display-contents-dynamic-before-after-001's
+    /// `__1__3`, wave52-ship per-test IR VERBATIM (tools/titan/runs/
+    /// wave52-ship/sections/css-display/per-test-ir/): the corpus's ONLY
+    /// other runs + pseudos component. Its ::before bucket has no `_text`
+    /// (and no `content`), so the fold is identity — the census in
+    /// tools/titan/results/wave53-plan/nested-list-extractor.md §6.
+    func testRunsCarrierWithoutBeforeTextIsIdentity() throws {
+        let c = try component("""
+        {"id":"display-contents-dynamic-before-after-001__1__3-052","name":"display-contents-dynamic-before-after-001__1__3","properties":[{"type":"Display","data":"CONTENTS"},{"type":"Color","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":{"r":0,"g":128,"b":0}}}],"slot":{"parent":"wpt__css-display__display-contents-dynamic-before-after-001__1-047"},"text":"S","pseudos":{"before":{"properties":{"color":"green","display":"contents","border":"1px solid red"}}},"meta":{"runs":[{"text":"S"},{"child":"display-contents-dynamic-before-after-001__1__3__0"}]}}
+        """)
+        let r = PseudoTextFold.resolve(c)
+        // Text, runs and properties come back exactly as decoded.
+        XCTAssertEqual(r.text, "S")
+        XCTAssertEqual(r.meta?.runs, c.meta?.runs)
+        XCTAssertEqual(r.properties.count, c.properties.count)
+    }
+
+    /// ::after under a run plan stays refused and named: it must trail the
+    /// run list's children, which a text prefix cannot express.
+    func testRunsCarrierAfterIsStillRefused() throws {
+        let c = try component("""
+        {"id":"x","name":"li","properties":[],"text":"a",
+         "children":[{"id":"k","name":"ol","properties":[]}],
+         "meta":{"runs":[{"text":"a "},{"child":"k"}]},
+         "pseudos":{"after":{"properties":{"content":"\\"z\\""},"_text":"z"}}}
+        """)
+        let r = PseudoTextFold.resolve(c)
+        XCTAssertEqual(r.text, "a")
+        XCTAssertEqual(r.meta?.runs, c.meta?.runs)
+        XCTAssertFalse(PropertyTracker.logOnce(key: "pseudotext-runs", message: "dup"))
     }
 
     // MARK: - Wave 43 (lane V7): styled pseudo text, verbatim payloads

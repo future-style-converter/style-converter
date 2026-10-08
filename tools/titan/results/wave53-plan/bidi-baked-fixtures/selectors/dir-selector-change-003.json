@@ -1,0 +1,188 @@
+{
+  "_wpt": {
+    "test": "css/selectors/dir-selector-change-003.html",
+    "ref": "css/selectors/dir-selector-change-003-ref.html",
+    "bucket": "A",
+    "lossy": true,
+    "lossyReasons": [
+      "baked-bidi-visual-order"
+    ],
+    "specSection": "selectors",
+    "postLoadExtracted": true,
+    "bidiBaked": true
+  },
+  "components": {
+    "dir-selector-change-003__0": {
+      "properties": {
+        "direction": "ltr",
+        "position": "relative",
+        "width": "358px",
+        "height": "20px",
+        "box-sizing": "border-box",
+        "margin-top": "0px",
+        "margin-right": "0px",
+        "margin-bottom": "0px",
+        "margin-left": "0px",
+        "padding-top": "0px",
+        "padding-right": "0px",
+        "padding-bottom": "0px",
+        "padding-left": "0px",
+        "border-top-width": "0px",
+        "border-right-width": "0px",
+        "border-bottom-width": "0px",
+        "border-left-width": "0px",
+        "border-top-style": "none",
+        "border-right-style": "none",
+        "border-bottom-style": "none",
+        "border-left-style": "none",
+        "border-top-color": "rgb(0, 0, 0)",
+        "border-right-color": "rgb(0, 0, 0)",
+        "border-bottom-color": "rgb(0, 0, 0)",
+        "border-left-color": "rgb(0, 0, 0)",
+        "background-color": "rgba(0, 0, 0, 0)",
+        "display": "block",
+        "overflow-x": "visible",
+        "overflow-y": "visible",
+        "unicode-bidi": "normal",
+        "text-align": "left"
+      },
+      "children": {
+        "dir-selector-change-003__0__0": {
+          "id": "dir-selector-change-003__0__0",
+          "properties": {
+            "position": "absolute",
+            "width": "358px",
+            "height": "20px",
+            "box-sizing": "border-box",
+            "margin-top": "0px",
+            "margin-right": "0px",
+            "margin-bottom": "0px",
+            "margin-left": "0px",
+            "padding-top": "0px",
+            "padding-right": "0px",
+            "padding-bottom": "0px",
+            "padding-left": "0px",
+            "border-top-width": "0px",
+            "border-right-width": "0px",
+            "border-bottom-width": "0px",
+            "border-left-width": "0px",
+            "border-top-style": "none",
+            "border-right-style": "none",
+            "border-bottom-style": "none",
+            "border-left-style": "none",
+            "border-top-color": "rgb(0, 0, 0)",
+            "border-right-color": "rgb(0, 0, 0)",
+            "border-bottom-color": "rgb(0, 0, 0)",
+            "border-left-color": "rgb(0, 0, 0)",
+            "background-color": "rgba(0, 0, 0, 0)",
+            "display": "block",
+            "overflow-x": "visible",
+            "overflow-y": "visible",
+            "left": "0px",
+            "top": "0px"
+          },
+          "children": {
+            "dir-selector-change-003__0__0__0": {
+              "id": "dir-selector-change-003__0__0__0",
+              "properties": {
+                "width": "358px",
+                "height": "0px",
+                "position": "absolute",
+                "box-sizing": "border-box",
+                "margin-top": "0px",
+                "margin-right": "0px",
+                "margin-bottom": "0px",
+                "margin-left": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "border-top-width": "0px",
+                "border-right-width": "0px",
+                "border-bottom-width": "0px",
+                "border-left-width": "0px",
+                "border-top-style": "none",
+                "border-right-style": "none",
+                "border-bottom-style": "none",
+                "border-left-style": "none",
+                "border-top-color": "rgb(0, 0, 0)",
+                "border-right-color": "rgb(0, 0, 0)",
+                "border-bottom-color": "rgb(0, 0, 0)",
+                "border-left-color": "rgb(0, 0, 0)",
+                "background-color": "rgba(0, 0, 0, 0)",
+                "display": "block",
+                "overflow-x": "visible",
+                "overflow-y": "visible",
+                "left": "0px",
+                "top": "0px"
+              },
+              "_role": "ws-after"
+            },
+            "dir-selector-change-003__0__0__1": {
+              "id": "dir-selector-change-003__0__0__1",
+              "properties": {
+                "position": "absolute",
+                "box-sizing": "border-box",
+                "margin-top": "0px",
+                "margin-right": "0px",
+                "margin-bottom": "0px",
+                "margin-left": "0px",
+                "padding-top": "0px",
+                "padding-right": "0px",
+                "padding-bottom": "0px",
+                "padding-left": "0px",
+                "border-top-width": "0px",
+                "border-right-width": "0px",
+                "border-bottom-width": "0px",
+                "border-left-width": "0px",
+                "border-top-style": "none",
+                "border-right-style": "none",
+                "border-bottom-style": "none",
+                "border-left-style": "none",
+                "border-top-color": "rgb(0, 0, 0)",
+                "border-right-color": "rgb(0, 0, 0)",
+                "border-bottom-color": "rgb(0, 0, 0)",
+                "border-left-color": "rgb(0, 0, 0)",
+                "background-color": "rgb(0, 255, 0)",
+                "display": "inline",
+                "overflow-x": "visible",
+                "overflow-y": "visible",
+                "left": "0px",
+                "top": "0px",
+                "width": "281.08px",
+                "height": "20px"
+              },
+              "_tag": "span",
+              "children": {
+                "dir-selector-change-003__0__0__1__0": {
+                  "id": "dir-selector-change-003__0__0__1__0",
+                  "properties": {
+                    "position": "absolute",
+                    "left": "0px",
+                    "top": "0px",
+                    "width": "281.07px",
+                    "height": "20px",
+                    "line-height": "20px",
+                    "white-space": "pre",
+                    "direction": "ltr",
+                    "text-align": "left",
+                    "color": "rgb(0, 0, 0)",
+                    "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                    "font-size": "16px",
+                    "font-style": "normal",
+                    "font-weight": "400"
+                  },
+                  "_text": "The background color should be lime"
+                }
+              }
+            }
+          }
+        }
+      },
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ]
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+ "method": "sk-differential.mjs, one process per tree: base = git archive HEAD e330e255 of tools/titan+tools/visual; fix = base + seam-1.patch + the lane working-tree counter-bake.mjs/bidi-bake.mjs/bidi-marker-bake.mjs; extractFixture + counter-style bake (main() with no gate flags) over the 1435 wave52-ship tests.list entries; sha1 of JSON [fixture, refFixture]",
+ "tests": 1435,
+ "errorsBase": 0,
+ "errorsFix": 0,
+ "changed": [
+  "css/css-lists/counter-reset-reversed-nested.html"
+ ]
+}

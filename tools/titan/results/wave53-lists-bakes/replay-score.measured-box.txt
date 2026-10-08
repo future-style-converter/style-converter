@@ -1,0 +1,12 @@
+web (ship)       ssim 0.9818 pixelPct 0.173
+ios (ship)       ssim 0.9802 pixelPct 0.394
+android (ship)   ssim 0.9547 pixelPct 0.719
+web M            ssim 1 pixelPct 0
+ios M            ssim 0.9888 pixelPct 0.308
+android M        ssim 0.9466 pixelPct 0.806
+android P        ssim 0.9815 pixelPct 0.39
+android M+P      ssim 0.99 pixelPct 0.304
+android ship bidi__bidi-lines-002        ssim 0.9534
+android P bidi__bidi-lines-002           ssim 0.9818
+android ship bidi__bidi-lines-001        ssim 0.8934
+android P bidi__bidi-lines-001           ssim 0.9629

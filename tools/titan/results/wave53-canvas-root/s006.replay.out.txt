@@ -1,0 +1,3 @@
+web      shipped 0.9941  square→y56 1.0000  square-vanished 0.9945
+ios      shipped 0.9953  square→y56 0.9992  square-vanished 0.9937
+android  shipped 0.9944  square→y56 0.9983  square-vanished 0.9928

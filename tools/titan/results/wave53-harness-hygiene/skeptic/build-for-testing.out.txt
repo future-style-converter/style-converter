@@ -1,0 +1,8 @@
+# build-for-testing of export (HEAD + L5's four ios-harness files), generic iOS Simulator, Xcode 27
+** TEST BUILD SUCCEEDED **
+rc=0
+xctest: CaptureCanvas.swift Info.plist StyleConverterRuntime_StyleConverterRuntime.bundle StyleConverterTestTests wpt__CSS2__abspos__static-inside-inline-block.json wpt__css-cascade__scope-pseudo-element.json 
+app root swift/json: 
+e7abf8a41e086063dab5a0c3503a5d920101e01f74de2dc788133a341a7b35b7  wpt__CSS2__abspos__static-inside-inline-block.json
+6a252a3c5b38d30818939463636df86f6161f8d8bfb703e88cde13588a45ec82  wpt__css-cascade__scope-pseudo-element.json
+3da6fc574fbc98e87c291a07031a246a31cbe672118d3b2c888d06f3c761223a  CaptureCanvas.swift

@@ -1,0 +1,33 @@
+# Skeptic repros (2026-10-07), recorded from the executed runs (scratch dirs, nothing under the shared tree).
+
+## R-GRADLE-REAL: a REAL Gradle 9.6.1 daemon in a private GRADLE_USER_HOME (-g <scratch>/home), empty project <scratch>/proj
+- started: `gradle -g <home> --daemon --offline -q help` → rc 0; `--status`: `43528 IDLE 9.6.1`
+- argv tail `GradleDaemon 9.6.1`; log <home>/daemon/9.6.1/daemon-43528.out.log holds `currentDir=<scratch>/proj` (physical /private/tmp spelling)
+- `GRADLE_USER_HOME=<home> TITAN_GRADLE_PIDS=43528 bash -c 'set -uo pipefail; PROJECT_ROOT=/tmp/…/proj (SYMLINKED spelling); source tools/titan/own-processes.sh; kill_own_gradle_daemons'`
+  → `[own-processes] kill_own_gradle_daemons roots=[/private/tmp/…/proj]: stopped [43528] left []`  (pwd -P normalisation exercised)
+- daemon exited after 0.59 s; its log ends `Daemon vm is shutting down… terminated in response to a user interrupt` then
+  `PersistentDaemonRegistry Removing daemon address` (the daemon de-registers itself on SIGTERM)
+- `gradle -g <home> --status` → `No Gradle daemons are running.` (no stale registry entry)
+- a second build → rc 0 (new daemon 43647), stopped afterwards with `gradle -g <home> --stop` (private registry: only that daemon)
+- host daemon 78497 and adb server 15373 alive throughout
+
+## R-ADB-ERREXIT: kill_wedged_adb_server under bash 3.2 `set -euo pipefail` (section-runner / provision-devices options)
+- no listener on a throwaway port → returns 0, prints nothing (the "kill-server worked" case)
+- fake `adb -L tcp:59998 fork-server server --reply-fd 4` listener → `killed the wedged adb server pid … on tcp:59998`, rc 0, process gone
+- real server, read-only selection: `lsof -tiTCP:5037 -sTCP:LISTEN` → 15373 `adb -L tcp:5037 fork-server server --reply-fd 4` → WOULD-KILL (not killed)
+
+## R-DRIVER-OPTS: gate-driver's own log() + stop_our_processes() lifted verbatim, run under `set -uo pipefail` and `set -euo pipefail`
+- driver.log: one `… gradle daemon pid <foreign> (9.6.1) served [<other>] — not only this checkout's, not touching it` line and one
+  `… kill_own_gradle_daemons roots=[<chk>]: stopped [<ours>] left [<foreign>]` line; rc 0 under both option sets; ours gone, foreign alive
+
+## R-MINI-BUNDLE: minimal xcodegen 2.45.4 unit-test bundle, Xcode 27, `build-for-testing -destination 'generic/platform=iOS Simulator'`
+- `buildPhase: copyFiles: destination: resources` → .xctest holds CaptureCanvas.swift (sha256 3da6fc574fbc98e8 = HEAD text) + the JSON
+- `buildPhase: resources` → .xctest holds ONLY the JSON; build log: `warning: The Swift file "…/CaptureCanvas.swift" cannot be processed by a Copy Bundle Resources build phase`
+- M1 shape on the copyFiles variant (JSON entry removed, xcodegen regenerated, SAME DerivedData): the JSON is GONE from the .xctest
+  (Xcode 27 does not leave the stale resource behind, so window M1 can go red); restored → JSON back
+
+## R-VITE-STRICT: `BROWSER=none npx --no-install vite --port 3477 --strictPort` in apps/web-harness with a node server holding [::]:3477
+- vite did NOT exit: it printed `Local: http://localhost:3477/` and bound [::1]:3477 beside the wildcard holder (macOS co-bind of a
+  more specific address) — `--port` overrides vite.config.ts `server.port: 3000` (confirmed), but `--strictPort` is not an
+  exclusivity check; smoke_pick_web_port's lsof test is what refuses a foreign holder. The probe's vite (pid 78721, reparented
+  to launchd after the perl alarm) was stopped by the skeptic; port 3477 free afterwards.

@@ -1,0 +1,1653 @@
+# wave-53 lane L3 · canvas-root — revert unit A (PLAN.md §4 step 6, §6 rule 6)
+# base: campaign/applier-campaign e330e255 (HEAD)
+# apply: git apply tools/titan/results/wave53-canvas-root/unit-A.patch
+diff --git a/apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt b/apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt
+index 672aaab..5ca7a59 100644
+--- a/apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt
++++ b/apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt
+@@ -78,6 +78,10 @@ import com.styleconverter.runtime.core.renderer.composedCanvasBackground
+ import com.styleconverter.runtime.core.renderer.containmentBlocksCanvasPropagation
+ import com.styleconverter.runtime.core.renderer.captureCanvasBackground
+ import com.styleconverter.runtime.core.types.ValueExtractors
++// wave-53 lane L3 (item A) — the root's background-IMAGE layers propagate to
++// the canvas (css-backgrounds-3 §2.11.2): the pure plan, the forest strip and
++// the surface paint live in the runtime; this canvas only wires them.
++import com.styleconverter.runtime.background.RootBackgroundPropagation
+ // wave-26 lane BF-A — the two-pass backdrop-filter render. The composed WPT
+ // canvas is the only backdrop root the runtime can render honestly (a
+ // controlled tree we can paint twice), so the host hook lives here: arm the
+@@ -1346,6 +1350,24 @@ private fun containKeywords(data: JsonElement): List<String>? = when (data) {
+     else -> null
+ }
+ 
++/**
++ * wave-53 lane L3 (item A) — the root background-IMAGE plan, or null (no
++ * body-root / no image layer / contained — the SAME css-contain-2 §2 gate as
++ * the colour above). A scroll layer's tile origin is the root box: the ICB
++ * plus the margin this canvas owns ([resolveComposedCanvasMargin]). Rule and
++ * pins: runtime RootBackgroundPropagation + ComposedCanvasRootBackgroundTest.
++ */
++internal fun resolveComposedCanvasRootBackground(roots: List<IRComponent>): RootBackgroundPropagation.Plan? {
++    // One body per document, the same lookup as the colour resolver.
++    val bodyRoot = roots.firstOrNull { it.role == "body-root" } ?: return null
++    // The concrete margin sides the canvas owns (ZERO for a table-internal body).
++    val margin = resolveComposedCanvasMargin(roots)
++    // The colour's containment gate, read through the same local keyword reader.
++    val contained = containmentBlocksCanvasPropagation(
++        bodyRoot.properties.firstOrNull { it.type == "Contain" }?.data?.let { containKeywords(it) })
++    return RootBackgroundPropagation.plan(bodyRoot.properties, margin.top.value, margin.left.value, contained)
++}
++
+ /**
+  * wave-24 B-RC5 — the composed canvas's per-side pad, in dp. The native twin
+  * of the web harness's `resolveCanvasPadding` and iOS's
+@@ -1524,6 +1546,25 @@ internal fun withCanvasOwnedBodyMargin(roots: List<IRComponent>, margin: CanvasM
+     }
+ }
+ 
++/**
++ * wave-53 lane L3 — the forest rewrite the composed canvas adds AFTER the
++ * wave-52 M1 margin strip + T6 hoisted-UA-margin map (the composable applies
++ * those first, verbatim, then calls this). Each is identity for a document it
++ * does not concern, so 1432 of the 1435 documents come back unchanged:
++ *  - item A: the body-root loses the image layers the canvas paints;
++ * Commutes with T6 (that map touches canvas-hoisted roots only; neither step
++ * here touches one). One function so ComposedCanvasRootBackgroundTest pins the
++ * REAL chain the Column stacks.
++ */
++internal fun composedCanvasRoots(
++    roots: List<IRComponent>,
++    rootImagePlan: RootBackgroundPropagation.Plan?,
++): List<IRComponent> {
++    // Item A: the body-root minus the image layers the canvas owns.
++    val owned = RootBackgroundPropagation.withCanvasOwnedRootBackground(roots, rootImagePlan)
++    return owned
++}
++
+ /**
+  * COMPOSED capture host (TITAN Round 3; full-height since the ANDROID-STITCH
+  * lane). No progress chrome — the canvas renders the WHOLE document (all
+@@ -1701,9 +1742,25 @@ private fun ComposedCaptureCanvas(
+     // a UA-margin tag and no declared block margin gets its UA margin as two
+     // declared longhands (withUaBlockMarginOnHoistedRoot — CSS 2.1 §9.3.2,
+     // `top` offsets the margin edge); identity for every other root.
++    // wave-53 lane L3 (item A) — the root's background-IMAGE plan (null for
++    // 1432 of 1435 documents) and its surface paint, both read from the
++    // UNSTRIPPED roots: the canvas paints the layers the body-root then loses
++    // below. `Modifier` itself (identity under `then`) without a plan.
++    val rootImagePlan = androidx.compose.runtime.remember(roots) {
++        resolveComposedCanvasRootBackground(roots)
++    }
++    val rootImageModifier = androidx.compose.runtime.remember(roots, canvasBackground) {
++        RootBackgroundPropagation.canvasModifier(
++            roots.firstOrNull { it.role == "body-root" }?.properties.orEmpty(),
++            rootImagePlan, CaptureCanvasFrame, canvasBackground)
++    }
++    // wave-53 L3 (item A) rides the same rewrite: the body-root composes
++    // WITHOUT the image layers the canvas now owns (§2.11.2 "not painted
++    // again") — the same list instance whenever there is no plan.
+     @Suppress("NAME_SHADOWING")
+-    val roots = androidx.compose.runtime.remember(roots, canvasMargin) {
+-        withCanvasOwnedBodyMargin(roots, canvasMargin).map(::withUaBlockMarginOnHoistedRoot)
++    val roots = androidx.compose.runtime.remember(roots, canvasMargin, rootImagePlan) {
++        composedCanvasRoots(
++            withCanvasOwnedBodyMargin(roots, canvasMargin).map(::withUaBlockMarginOnHoistedRoot), rootImagePlan)
+     }
+     // FIX 1 (UA default margins) — TITAN Round 4b — per-root effective UA
+     // block margins, still the source of the HORIZONTAL blockquote/figure
+@@ -1840,6 +1897,13 @@ private fun ComposedCaptureCanvas(
+                     }
+                     ?: Modifier.background(canvasBackground)
+             )
++            // wave-53 lane L3 (item A) — the root's image layers, painted ON
++            // the propagated colour and UNDER every root (and inside a root
++            // clip, which the chain above applies first). A uniform stack
++            // covers the framed surface; any other stack gets the frame band
++            // repainted in the colour (capture-frame chrome, padColorFor).
++            // Identity (`then(Modifier)`) for every document without a plan.
++            .then(rootImageModifier)
+             // wave-52 lane L2 (Fix A) — THE HORIZONTAL VIEWPORT CROP. The
+             // browser-ref is RENDERED in a 358-px viewport and padded in
+             // image space (capture-browser-ref.mjs REF_RENDER_WIDTH /
+diff --git a/apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/ComposedCanvasRootBackgroundTest.kt b/apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/ComposedCanvasRootBackgroundTest.kt
+new file mode 100644
+index 0000000..e6170d2
+--- /dev/null
++++ b/apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/ComposedCanvasRootBackgroundTest.kt
+@@ -0,0 +1,214 @@
++package com.styleconverter.test.screenshot
++
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.unit.dp
++import com.styleconverter.runtime.background.RootBackgroundPropagation
++import com.styleconverter.runtime.background.RootBackgroundPropagation.Attachment
++import com.styleconverter.runtime.background.RootBackgroundPropagation.LayerOrigin
++import com.styleconverter.runtime.color.BackgroundImageConfig
++import com.styleconverter.runtime.core.ir.IRComponent
++import com.styleconverter.runtime.core.ir.IRProperty
++import kotlinx.serialization.json.Json
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertNotSame
++import org.junit.Assert.assertNull
++import org.junit.Assert.assertSame
++import org.junit.Assert.assertTrue
++import org.junit.Test
++import java.io.File
++
++/**
++ * wave-53 lane L3 (item A) — the composed canvas paints the ROOT's
++ * background-IMAGE layers (css-backgrounds-3 §2.11.2), Compose twin of the web
++ * harness ComposedCanvasRootBackgroundImage.test.tsx and the SwiftUI
++ * WPTCaptureModeTests root-background pins.
++ *
++ * THE DEFECT: resolveComposedCanvasBackground read only `BackgroundColor`, and
++ * the body-root is a SIBLING of the flow content, so nobody painted a root
++ * image across the canvas (wave52-ship display-contents-root-background
++ * android f 0.5355, background-attachment-margin-root-001/-002 f 0.451 / 0.3389).
++ *
++ * Pinned here on the VERBATIM wave52-ship per-test IR (decoded + slot-composed
++ * exactly as the harness does): the plan (layers, §3.4 origins, F2
++ * uniformity), the per-layer configs the existing ColorApplier paints, the
++ * forest strip, the containment gate, colour-only identity, and — because the
++ * JVM cannot draw a Compose chain — the call-site placement in
++ * ScreenshotCaptureScreen.kt (source pin).
++ *
++ * EXECUTED MUTATIONS (this class run alone, sources restored byte-exact —
++ * sha256 in tools/titan/results/wave53-canvas-root/_note.md):
++ *   CA1 resolveComposedCanvasRootBackground returns null (colour-only read) → a1_target red.
++ *   CA2 withCanvasOwnedRootBackground returns `roots` (strip dropped)       → a1_strip red
++ *       (a1_strip reads the real composedCanvasRoots chain the composable stacks).
++ *   CA3 plan's `uniform` forced true                                          → a2_marginRoot001 red.
++ *   CA4 attachmentAt always SCROLL (attachment ignored)                      → a2_marginRoot002 red.
++ *   CA5 dataPngIs1x1 returns true for any PNG url                             → a3_ihdr red.
++ *   CA6 the `contained` early return dropped                                  → a4_contained red.
++ */
++class ComposedCanvasRootBackgroundTest {
++
++    /** Decode + slot-compose a v2 document exactly as the harness does. */
++    private fun rootsOf(componentsJson: String): List<IRComponent> =
++        com.styleconverter.runtime.core.renderer.SlotComposer.compose(
++            com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(
++                """{"irVersion":2,"minReaderVersion":2,"components":[$componentsJson]}"""))
++
++    /** css-display/display-contents-root-background — both roots, verbatim. */
++    private val target = """
++        {"id":"wpt__css-display__display-contents-root-background__0-234","name":"wpt__css-display__display-contents-root-background__0","properties":[{"type":"Display","data":"CONTENTS"},{"type":"BackgroundImage","data":[{"url":"data:image/png,%89%50%4e%47%0d%0a%1a%0a%00%00%00%0d%49%48%44%52%00%00%00%01%00%00%00%01%01%03%00%00%00%25%db%56%ca%00%00%00%04%67%41%4d%41%00%00%af%c8%37%05%8a%e9%00%00%00%03%50%4c%54%45%00%80%00%9c%f9%a5%91%00%00%00%0a%49%44%41%54%78%da%63%60%00%00%00%02%00%01%e5%27%de%fc%00%00%00%19%74%45%58%74%53%6f%66%74%77%61%72%65%00%41%64%6f%62%65%20%49%6d%61%67%65%52%65%61%64%79%71%c9%65%3c%00%00%00%00%49%45%4e%44%ae%42%60%82","data":true}]}],"meta":{"role":"body-root"}},
++        {"id":"wpt__css-display__display-contents-root-background__1-235","name":"wpt__css-display__display-contents-root-background__1","properties":[],"text":"Pass if the background is green.","meta":{"sourceTag":"p"}}
++    """.trimIndent()
++
++    /** css-backgrounds/background-attachment-margin-root-001 — its root, verbatim (`scroll, fixed`). */
++    private val marginRoot001 = """
++        {"id":"wpt__css-backgrounds__background-attachment-margin-root-001__0-091","name":"wpt__css-backgrounds__background-attachment-margin-root-001__0","properties":[{"type":"BackgroundImage","data":[{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":1,"b":0,"a":0.5},"original":{"r":0,"g":255,"b":0,"a":0.5}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":1,"a":0.5},"original":{"r":0,"g":0,"b":255,"a":0.5}},"position":null}]},{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null}]}]},{"type":"BackgroundAttachment","data":[{"type":"scroll"},{"type":"fixed"}]},{"type":"BackgroundSize","data":[{"w":{"px":100},"h":{"px":100}},{"w":{"px":100},"h":{"px":100}}]},{"type":"Height","data":{"type":"length","px":300}},{"type":"MarginTop","data":{"px":50}},{"type":"MarginRight","data":{"px":50}},{"type":"MarginBottom","data":{"px":50}},{"type":"MarginLeft","data":{"px":50}}],"meta":{"role":"body-root"}}
++    """.trimIndent()
++
++    /** css-backgrounds/background-attachment-margin-root-002 — its root, verbatim (`fixed, scroll`). */
++    private val marginRoot002 = """
++        {"id":"wpt__css-backgrounds__background-attachment-margin-root-002__0-092","name":"wpt__css-backgrounds__background-attachment-margin-root-002__0","properties":[{"type":"BackgroundImage","data":[{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":1,"b":0,"a":0.5},"original":{"r":0,"g":255,"b":0,"a":0.5}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":1,"a":0.5},"original":{"r":0,"g":0,"b":255,"a":0.5}},"position":null}]},{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null}]}]},{"type":"BackgroundAttachment","data":[{"type":"fixed"},{"type":"scroll"}]},{"type":"BackgroundSize","data":[{"w":{"px":100},"h":{"px":100}},{"w":{"px":100},"h":{"px":100}}]},{"type":"Height","data":{"type":"length","px":300}},{"type":"MarginTop","data":{"px":50}},{"type":"MarginRight","data":{"px":50}},{"type":"MarginBottom","data":{"px":50}},{"type":"MarginLeft","data":{"px":50}}],"meta":{"role":"body-root"}}
++    """.trimIndent()
++
++    /** css-cascade/initial-background-color — all roots, verbatim (colour-only body). */
++    private val initialBg = """
++        {"id":"wpt__css-cascade__initial-background-color__0-033","name":"wpt__css-cascade__initial-background-color__0","properties":[{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"}],"meta":{"role":"body-root"}},
++        {"id":"wpt__css-cascade__initial-background-color__1-034","name":"wpt__css-cascade__initial-background-color__1","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}},{"type":"Left","data":{"px":0}},{"type":"Width","data":{"type":"percentage","value":100}},{"type":"Height","data":{"type":"percentage","value":100}},{"type":"BackgroundColor","data":{"original":"initial"}}]}
++    """.trimIndent()
++
++    /** css-color/a98rgb-003 — all roots, verbatim (colour-only body). */
++    private val a98 = """
++        {"id":"wpt__css-color__a98rgb-003__0-005","name":"wpt__css-color__a98rgb-003__0","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.5019607843137255,"g":0.5019607843137255,"b":0.5019607843137255},"original":"grey"}}],"meta":{"role":"body-root"}},
++        {"id":"wpt__css-color__a98rgb-003__1-006","name":"wpt__css-color__a98rgb-003__1","properties":[],"text":"Test passes if you see a single square, and not two rectangles of different colors.","meta":{"sourceTag":"p","role":"ws-after"}},
++        {"id":"wpt__css-color__a98rgb-003__2-007","name":"wpt__css-color__a98rgb-003__2","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.996078431372549,"g":0.996078431372549,"b":0.996078431372549},"original":{"r":254,"g":254,"b":254}}},{"type":"Width","data":{"type":"length","original":{"v":12,"u":"EM"}}},{"type":"Height","data":{"type":"length","original":{"v":6,"u":"EM"}}},{"type":"MarginBottom","data":{"px":0}}],"meta":{"role":"ws-after"}},
++        {"id":"wpt__css-color__a98rgb-003__3-008","name":"wpt__css-color__a98rgb-003__3","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.9999300658875595,"g":1,"b":1},"original":{"type":"color","colorSpace":"a98-rgb","values":[1,1,1]}}},{"type":"Width","data":{"type":"length","original":{"v":12,"u":"EM"}}},{"type":"Height","data":{"type":"length","original":{"v":6,"u":"EM"}}},{"type":"MarginTop","data":{"px":0}}]}
++    """.trimIndent()
++
++    /** css-contain/contain-body-bg-001 — all roots, verbatim (contained colour body). */
++    private val containBg = """
++        {"id":"wpt__css-contain__contain-body-bg-001__0-003","name":"wpt__css-contain__contain-body-bg-001__0","properties":[{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"Width","data":{"type":"length","px":300}},{"type":"Height","data":{"type":"length","px":200}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"Contain","data":["LAYOUT"]}],"meta":{"role":"body-root","lang":"en"}},
++        {"id":"contain-body-bg-001__0-004","name":"contain-body-bg-001__0","properties":[{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"Width","data":{"type":"length","px":300}},{"type":"Height","data":{"type":"length","px":200}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}}],"slot":{"parent":"wpt__css-contain__contain-body-bg-001__0-003"},"text":"Test passes if there is no red.","meta":{"sourceTag":"p","lang":"en"}}
++    """.trimIndent()
++
++    /** The body-root's properties of a composed document. */
++    private fun bodyProps(roots: List<IRComponent>) = roots.first { it.role == "body-root" }.properties
++
++    /** The target's data-URI layer URL, read from the verbatim wire. */
++    private val targetUrl: String by lazy {
++        val layers = bodyProps(rootsOf(target)).first { it.type == "BackgroundImage" }.data
++            as kotlinx.serialization.json.JsonArray
++        ((layers[0] as kotlinx.serialization.json.JsonObject)["url"] as kotlinx.serialization.json.JsonPrimitive).content
++    }
++
++    @Test
++    fun a1_target_oneUniformLayer_framedOrigin() {
++        val roots = rootsOf(target)
++        // One scroll layer at the ICB corner, uniform (1×1 PNG, initial repeat).
++        val plan = resolveComposedCanvasRootBackground(roots)
++        assertEquals(RootBackgroundPropagation.Plan(listOf(Attachment.SCROLL), listOf(LayerOrigin(0f, 0f)), true), plan)
++        // The existing ColorApplier paints exactly that URL, anchored at the frame (16,16).
++        val cfg = RootBackgroundPropagation.layerConfigs(bodyProps(roots), plan!!, 16f).single()
++        assertEquals(listOf(BackgroundImageConfig.Url(targetUrl)), cfg.backgroundImages)
++        assertEquals(16.dp, cfg.backgroundPosition.xOffset)
++        assertEquals(16.dp, cfg.backgroundPosition.yOffset)
++        // No colour rides the image layer (the propagated colour paints below it).
++        assertNull(cfg.backgroundColor)
++    }
++
++    @Test
++    fun a1_strip_bodyRootLosesTheImage() {
++        val roots = rootsOf(target)
++        // Through the REAL forest rewrite the composable stacks (composedCanvasRoots).
++        val out = composedCanvasRoots(withCanvasOwnedBodyMargin(roots, resolveComposedCanvasMargin(roots))
++            .map(::withUaBlockMarginOnHoistedRoot), resolveComposedCanvasRootBackground(roots))
++        // §2.11.2 "not painted again": the body-root keeps Display only; the <p> is untouched.
++        assertEquals(listOf("Display"), out.first { it.role == "body-root" }.properties.map { it.type })
++        assertEquals(roots[1], out[1])
++    }
++
++    @Test
++    fun a2_marginRoot001_notUniform_scrollAtRootBox_fixedAtIcb() {
++        val roots = rootsOf(marginRoot001)
++        // Layer 0 is a real green→blue ramp → ICB-only; origins per §3.4.
++        val plan = resolveComposedCanvasRootBackground(roots)
++        assertEquals(RootBackgroundPropagation.Plan(
++            listOf(Attachment.SCROLL, Attachment.FIXED), listOf(LayerOrigin(50f, 50f), LayerOrigin(0f, 0f)), false), plan)
++        // Folded into the painted box's coordinates (ICB corner at the 16-px frame).
++        val offs = RootBackgroundPropagation.layerConfigs(bodyProps(roots), plan!!, 16f)
++            .map { it.backgroundPosition.xOffset to it.backgroundPosition.yOffset }
++        assertEquals(listOf(66.dp to 66.dp, 16.dp to 16.dp), offs)
++    }
++
++    @Test
++    fun a2_marginRoot002_isTheMirror() {
++        val plan = resolveComposedCanvasRootBackground(rootsOf(marginRoot002))
++        // `fixed, scroll`: the top layer anchors at the viewport (ICB) corner.
++        assertEquals(listOf(LayerOrigin(0f, 0f), LayerOrigin(50f, 50f)), plan?.origins)
++        assertEquals(listOf(Attachment.FIXED, Attachment.SCROLL), plan?.attachments)
++        assertFalse(plan!!.uniform)
++    }
++
++    @Test
++    fun a3_ihdr1x1_isUniform_ihdr2x2_isNot() {
++        assertTrue(RootBackgroundPropagation.dataPngIs1x1(targetUrl))
++        // The SAME payload with the IHDR width/height patched to 2.
++        val twoByTwo = targetUrl.replace("%49%48%44%52%00%00%00%01%00%00%00%01", "%49%48%44%52%00%00%00%02%00%00%00%02")
++        assertTrue(twoByTwo != targetUrl)
++        assertFalse(RootBackgroundPropagation.dataPngIs1x1(twoByTwo))
++        // A non-PNG data URI is never uniform by construction.
++        assertFalse(RootBackgroundPropagation.dataPngIs1x1("data:image/gif,%47%49%46%38%39%61%01%00%01%00"))
++    }
++
++    @Test
++    fun a4_contained_noPropagation_noStrip() {
++        // The target + `contain: layout` → off the propagation path (css-contain-2 §2).
++        val roots = rootsOf(target).map { r -> if (r.role != "body-root") r else r.copy(properties =
++            r.properties + IRProperty("Contain", Json.parseToJsonElement("""["LAYOUT"]"""))) }
++        assertNull(resolveComposedCanvasRootBackground(roots))
++        assertSame(roots, RootBackgroundPropagation.withCanvasOwnedRootBackground(roots, null))
++    }
++
++    @Test
++    fun a5_colourOnlyBodies_identity() {
++        for (doc in listOf(initialBg, a98, containBg)) {
++            val roots = rootsOf(doc)
++            // No image layer → no plan, the same list, and the identity Modifier.
++            val plan = resolveComposedCanvasRootBackground(roots)
++            assertNull(plan)
++            assertSame(roots, RootBackgroundPropagation.withCanvasOwnedRootBackground(roots, plan))
++            assertSame(Modifier, RootBackgroundPropagation.canvasModifier(bodyProps(roots), plan, 16.dp,
++                androidx.compose.ui.graphics.Color.White))
++        }
++        // …while a planned stack's modifier is a real chain. (Measured on the
++        // gradient pair: on the JVM the url layer's synchronous BitmapFactory
++        // decode is stubbed, so ColorApplier skips it there — on device the
++        // same payload decodes; css-image-fallbacks-and-annotations002 android P.)
++        val roots = rootsOf(marginRoot001)
++        assertNotSame(Modifier, RootBackgroundPropagation.canvasModifier(bodyProps(roots),
++            resolveComposedCanvasRootBackground(roots), 16.dp, androidx.compose.ui.graphics.Color.White))
++    }
++
++    // ── the call site (the JVM cannot draw the chain, so its PLACEMENT is pinned) ──
++
++    /** The ComposedCaptureCanvas body of ScreenshotCaptureScreen.kt, comment lines dropped. */
++    private val composedCode: String by lazy {
++        val anchor = "apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt"
++        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
++        while (dir != null && !File(dir, anchor).exists()) dir = dir.parentFile
++        File(requireNotNull(dir), anchor).readText()
++            .substringAfter("private fun ComposedCaptureCanvas(").substringBefore("private fun CompleteView(")
++            .lines().filter { !it.trim().startsWith("//") }.joinToString("\n")
++    }
++
++    @Test
++    fun callSite_paintsOnTheColour_underTheIcbClip_andStripsTheForest() {
++        val bg = composedCode.indexOf("?: Modifier.background(canvasBackground)")
++        val img = composedCode.indexOf(".then(rootImageModifier)")
++        val clip = composedCode.indexOf("composedIcbClipBandPx(")
++        // Above the colour (later in the chain), below every root (before the clip node's content).
++        assertTrue(bg in 0 until img)
++        assertTrue(img < clip)
++        // The composable stacks the REAL rewrite (whose strip a1_strip pins) …
++        assertTrue(composedCode.contains("composedCanvasRoots(\n            withCanvasOwnedBodyMargin(roots, canvasMargin).map(::withUaBlockMarginOnHoistedRoot), rootImagePlan)"))
++    }
++}
+diff --git a/apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift b/apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift
+index 0733920..93c77bf 100644
+--- a/apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift
++++ b/apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift
+@@ -376,11 +376,40 @@ struct ComposedCaptureCanvas: View {
+         // UA-margin tag and no declared block margin gets that UA margin as
+         // declared longhands (CSS 2.1 §9.3.2 — `top` offsets the margin edge);
+         // identity for every other root.
++        // wave-53 lane L3 (item A) rides the same rewrite: the body-root is
++        // split WITHOUT the background-image layers the canvas now paints
++        // (§2.11.2 "not painted again") — the same array without a plan.
+         FixedHoist.split(roots: UABlockMargin.withCanvasOwnedBodyMargin(
+-            document.components, UABlockMargin.canvasBodyMargin(document.components))
++            RootBackgroundPropagation.withCanvasOwnedRootBackground(document.components, rootImagePlan),
++            UABlockMargin.canvasBodyMargin(document.components))
+             .map(UABlockMargin.withUaBlockMarginOnHoistedRoot))
+     }
+ 
++    /// wave-53 lane L3 (item A) — the root background-IMAGE plan, or nil (no
++    /// body-root / no image layer / contained — the SAME css-contain-2 §2 gate
++    /// as `canvasBackground`). A scroll layer's tile origin is the root box:
++    /// the ICB plus the margin this canvas owns (`canvasBodyMargin`). Rule and
++    /// Catalyst pins: the runtime's RootBackgroundPropagation.
++    private var rootImagePlan: RootBackgroundPropagation.Plan? {
++        // One body per document, the same lookup as the colour.
++        guard let body = document.components.first(where: { $0.meta?.role == "body-root" }) else { return nil }
++        // The concrete margin sides the canvas owns (zero for a table-internal body).
++        let m = UABlockMargin.canvasBodyMargin(document.components)
++        return RootBackgroundPropagation.plan(body.properties, marginTop: m.top, marginLeft: m.left,
++            contained: WPTCanvas.containmentBlocksPropagation(Self.containKeywords(of: body)))
++    }
++
++    /// wave-53 lane L3 (item A) — the root's image layers as a canvas
++    /// background view (RootCanvasBackground: framed for a uniform stack,
++    /// padded in to the ICB otherwise — capture-frame chrome, padColorFor).
++    /// Empty without a plan.
++    @ViewBuilder private var rootImageBackground: some View {
++        if let plan = rootImagePlan,
++           let body = document.components.first(where: { $0.meta?.role == "body-root" }) {
++            RootCanvasBackground(properties: body.properties, plan: plan, frame: Self.padding)
++        }
++    }
++
+     /// TITAN Round 4 GAP 1 + RC-A4 (wave 19) — the per-root stack plan.
+     /// Round 4 folded only the UA-INJECTED block margins (deferring to any
+     /// IR-declared side); RC-A4 additionally folds statically-resolvable
+@@ -937,6 +966,12 @@ struct ComposedCaptureCanvas: View {
+         // neither the viewport nor its crop. Twins: web `overflow-x: clip`
+         // on the ICB div; Compose `clipRect` around the content draw.
+         .clipShape(WPTCanvas.IcbClipBand(frame: Self.padding))
++        // wave-53 lane L3 (item A) — the root's background-IMAGE layers: ON
++        // the propagated colour (attached before it, so the colour paints
++        // further behind), UNDER every root, OUTSIDE the inline-axis clip (a
++        // uniform stack covers the frame) and inside a root clip (attached
++        // before `.rootCanvasClip`). Empty — no layer at all — without a plan.
++        .background(rootImageBackground)
+         // GAP 2 — the ref canvas background: corpus-v4 WHITE by default, or
+         // the document body-root's own background COMPOSITED over that white
+         // when it declares one (opaque grey for a98rgb-003; translucent
+diff --git a/apps/web-harness/src/ui/ComposedCaptureGallery.tsx b/apps/web-harness/src/ui/ComposedCaptureGallery.tsx
+index 1dd677b..33148f8 100644
+--- a/apps/web-harness/src/ui/ComposedCaptureGallery.tsx
++++ b/apps/web-harness/src/ui/ComposedCaptureGallery.tsx
+@@ -63,6 +63,14 @@ import { buildStyles } from '@style-converter/web/core/renderer/StyleBuilder';
+ // hops through; this canvas only decides WHERE to spend it. See
+ // RootClipPathResolver's banner for the measurement.
+ import { resolveRootClipPath } from '@style-converter/web/engine/effects/clip/RootClipPathResolver';
++// wave-53 lane L3 (item A) — the root's background-IMAGE layers propagate to
++// the canvas (css-backgrounds-3 §2.11.2): the pure plan, the surface CSS and
++// the forest strip live in the runtime's background category; this canvas only
++// decides WHERE to paint them (resolveCanvasRootBackground below).
++import {
++  rootBackgroundPlan, rootCanvasBackgroundStyle, withRootBackgroundStripped,
++  type RootBackgroundPlan,
++} from '@style-converter/web/engine/background/RootBackgroundPropagation';
+ import { composeTree } from '../sdui/Composer';
+ import { ComponentRenderer } from '../sdui/ComponentRenderer';
+ 
+@@ -682,6 +690,36 @@ export function withCanvasOwnedBodyMargin<N extends { component: IRComponent }>(
+   });
+ }
+ 
++/**
++ * wave-53 lane L3 (item A) — the root background-IMAGE plan for one document,
++ * or null (no body-root, no image layer, or a contained body: the SAME
++ * css-contain-2 §2 gate the colour reads). The tile origin of a scroll layer
++ * is the root box, i.e. the ICB plus the margin this canvas owns
++ * (resolveCanvasMargin). Rule and pins: RootBackgroundPropagation.ts.
++ */
++export function resolveCanvasRootBackground(doc: IRDocument): RootBackgroundPlan | null {
++  // Same lookup rule as the colour resolver — a document has one body.
++  const bodyRoot = doc.components.find((c) => c.meta?.role === 'body-root');
++  return bodyRoot ? rootBackgroundPlan(bodyRoot.properties, resolveCanvasMargin(doc),
++    bodyRootHasContainment(bodyRoot)) : null;
++}
++
++/**
++ * wave-53 lane L3 (item A) — ONE OWNER for the root's image layers, the twin
++ * of withCanvasOwnedBodyMargin: once the canvas paints them, the body-root
++ * node renders without them (§2.11.2 "not painted again"; margin-root-002's
++ * sized 300-px box would otherwise repaint wrong-phase tiles). Identity when
++ * there is no plan, so every other document renders the exact nodes it did.
++ */
++export function withCanvasOwnedRootBackground<N extends { component: IRComponent }>(
++  roots: N[], plan: RootBackgroundPlan | null,
++): N[] {
++  if (!plan) return roots;                                   // nothing owned → same array
++  return roots.map((node) => node.component.meta?.role !== 'body-root' ? node : {
++    ...node, component: { ...node.component, properties: withRootBackgroundStripped(node.component.properties) },
++  });
++}
++
+ interface ComposedCaptureGalleryProps {
+   /** The decoded COMBINED IR document (every WPT test's components, flat). */
+   document: IRDocument;
+@@ -830,8 +868,14 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
+   // The forest the wrapper below renders: the body-root node minus the
+   // margin sides the wrapper now owns (one owner, never applied twice).
+   // The SAME array as `roots` whenever the margin is all-zero.
++  // wave-53 L3 (item A): the root's background-IMAGE plan (null for 1432 of
++  // 1435 documents — no image layer on the body-root), and the forest with
++  // those layers stripped from the body-root node (the SAME array when null).
++  const rootImagePlan = React.useMemo(() => resolveCanvasRootBackground(doc), [doc]);
++  const canvasRoots = React.useMemo(
++    () => withCanvasOwnedRootBackground(roots, rootImagePlan), [roots, rootImagePlan]);
+   const flowRoots = React.useMemo(
+-    () => withCanvasOwnedBodyMargin(roots, canvasMargin), [roots, canvasMargin]);
++    () => withCanvasOwnedBodyMargin(canvasRoots, canvasMargin), [canvasRoots, canvasMargin]);
+   // wave-37 W6: the PRINCIPAL WRITING MODE (css-writing-modes-4 §8). Pure per
+   // document like the two resolvers above — memoised on the same identity.
+   // `undefined` for every horizontal document, which is what keeps the rest of
+@@ -850,6 +894,19 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
+   // which is what keeps the rest of the corpus byte-identical: no style key
+   // is written and the background stays exactly where wave-25 put it.
+   const canvasClipPath = React.useMemo(() => resolveRootClipPath(doc), [doc]);
++  // wave-53 L3 (item A) — WHERE the root's image layers paint (F2). A stack
++  // that is uniform by construction paints the FRAMED outer surface (the
++  // ref's padColorFor ring rule, capture-browser-ref.mjs:728, fills the 16-px
++  // frame with that one colour — capture-frame chrome); any other stack, and
++  // every stack under a root clip (css-masking-1 §5 puts the root background
++  // inside the clip, on the ICB), paints the ICB div only. `base` places the
++  // ICB corner inside the painted surface. Both null without a plan.
++  const rootImageBody = rootImagePlan
++    ? doc.components.find((c) => c.meta?.role === 'body-root') : undefined;
++  const rootImageOnIcb = !!rootImagePlan && (!rootImagePlan.uniform || !!canvasClipPath);
++  const rootImageCss = rootImagePlan && rootImageBody
++    ? rootCanvasBackgroundStyle(rootImageBody.properties, rootImagePlan, rootImageOnIcb ? 0 : CANVAS_FRAME_PX)
++    : null;
+   return (
+     <div
+       data-capture-canvas
+@@ -887,6 +944,13 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
+         paddingRight: `${CANVAS_FRAME_PX}px`,
+         paddingBottom: `${CANVAS_FRAME_PX}px`,
+         paddingLeft: `${CANVAS_FRAME_PX}px`,
++        // wave-53 L3 (item A) — a uniform root image stack paints HERE, over
++        // the colour: the shorthand is unset (React skips `undefined`) and the
++        // same colour rides `background-color` beneath the image longhands, so
++        // no style object ever mixes shorthand and longhand. Spread LAST and
++        // conditionally: without a framed plan no key is written at all.
++        ...(rootImageCss && !rootImageOnIcb
++          ? { background: undefined, backgroundColor: canvasBackground, ...rootImageCss } : {}),
+       }}
+     >
+       {/* wave-25 round 3 — THE INITIAL CONTAINING BLOCK.
+@@ -950,6 +1014,17 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
+           ...(canvasClipPath
+             ? { background: canvasBackground, clipPath: canvasClipPath }
+             : {}),
++          // wave-53 L3 (item A) — a non-uniform root image stack (and any
++          // stack under a root clip) paints on THIS box, the ref's viewport:
++          // the 16-px frame keeps the colour-layer value (padColorFor's
++          // non-uniform-ring fallback is white; the two agree on every
++          // carrier — none pairs a root colour with a non-uniform image).
++          // Under a clip the colour moves to `background-color`.
++          // Spread LAST and conditionally: no ICB plan writes no key.
++          ...(rootImageCss && rootImageOnIcb
++            ? { ...(canvasClipPath ? { background: undefined, backgroundColor: canvasBackground } : {}),
++                ...rootImageCss }
++            : {}),
+         }}
+       >
+         {/* wave-52 lane L2 (M1) — the BODY BOX's margin. When the body-root
+@@ -985,7 +1060,9 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
+             ))}
+           </div>
+         ) : (
+-          roots.map((root, i) => (
++          // wave-53 L3 (item A): the forest minus the canvas-owned image
++          // layers — the SAME array as `roots` for every plan-less document.
++          canvasRoots.map((root, i) => (
+             <RootErrorBoundary key={root.component.id || i} componentId={root.component.id}>
+               <ComponentRenderer node={root} />
+             </RootErrorBoundary>
+diff --git a/apps/web-harness/tests/ui/ComposedCanvasRootBackgroundImage.test.tsx b/apps/web-harness/tests/ui/ComposedCanvasRootBackgroundImage.test.tsx
+new file mode 100644
+index 0000000..b043882
+--- /dev/null
++++ b/apps/web-harness/tests/ui/ComposedCanvasRootBackgroundImage.test.tsx
+@@ -0,0 +1,136 @@
++// wave-53 lane L3 (item A) — the composed canvas paints the ROOT'S
++// background-IMAGE layers (css-backgrounds-3 §2.11.2), not only its colour.
++//
++// THE DEFECT THIS PINS. resolveCanvasBackground read the body-root's
++// BackgroundColor and discarded the BackgroundImage the same buildStyles call
++// computes, and the body-root node is a SIBLING of the flow content, so nobody
++// painted the image across the canvas. MEASURED on wave52-ship: css-display/
++// display-contents-root-background web f 0.534 (white where the ref is all
++// (0,128,0)); css-backgrounds/background-attachment-margin-root-001/-002 web
++// f 0.4511 / 0.339 (the gradients only inside the 258×300 root box at (66,66)).
++//
++// THE CONTRACT (shared with Compose ComposedCanvasRootBackgroundTest and the
++// SwiftUI WPTCaptureModeTests root-background pins):
++//   - a uniform-by-construction stack (1×1 PNG, repeat) paints the FRAMED outer
++//     surface (capture-frame chrome — the ref's padColorFor ring rule);
++//   - any other stack paints the ICB div only, tile origins per §3.4 (scroll →
++//     the root box = ICB + canvas-owned margin; fixed → the ICB corner), with
++//     attachment never passed through as `fixed`;
++//   - the body-root node renders WITHOUT the image layers (one owner);
++//   - containment (css-contain-2 §2) blocks it, exactly as for the colour;
++//   - colour-only bodies render the exact pre-wave-53 markup (no image key).
++//
++// Every component list is VERBATIM from tools/titan/runs/wave52-ship/sections/
++// <section>/per-test-ir/ (byte-identical to wave53-open).
++//
++// EXECUTED MUTATIONS (applied to ComposedCaptureGallery.tsx, this file run
++// alone, source restored byte-exact — sha256 in
++// tools/titan/results/wave53-canvas-root/_note.md):
++//   GW1 the colour-only read restored (rootImagePlan forced null) → target_framed* red.
++//   GW2 the strip dropped (canvasRoots = roots)                     → *_bodyRootLosesImage red.
++//   GW3 every stack painted framed (rootImageOnIcb = false)          → marginRoot001_icbOnly red.
++//   GW4 the containment gate dropped (contained passed as false)     → contained_* red.
++//   GW5 always emit `backgroundImage: 'none'` on the outer surface    → colourOnly_* red.
++
++import { describe, it, expect } from 'vitest';
++import { renderToStaticMarkup } from 'react-dom/server';
++import { ComposedCaptureGallery, resolveCanvasRootBackground } from '../../src/ui/ComposedCaptureGallery';
++import type { IRDocument } from '@style-converter/web/core/ir/IRModels';
++
++/** css-display/display-contents-root-background — both roots, verbatim. */
++const TARGET = [{"id":"wpt__css-display__display-contents-root-background__0-234","name":"wpt__css-display__display-contents-root-background__0","properties":[{"type":"Display","data":"CONTENTS"},{"type":"BackgroundImage","data":[{"url":"data:image/png,%89%50%4e%47%0d%0a%1a%0a%00%00%00%0d%49%48%44%52%00%00%00%01%00%00%00%01%01%03%00%00%00%25%db%56%ca%00%00%00%04%67%41%4d%41%00%00%af%c8%37%05%8a%e9%00%00%00%03%50%4c%54%45%00%80%00%9c%f9%a5%91%00%00%00%0a%49%44%41%54%78%da%63%60%00%00%00%02%00%01%e5%27%de%fc%00%00%00%19%74%45%58%74%53%6f%66%74%77%61%72%65%00%41%64%6f%62%65%20%49%6d%61%67%65%52%65%61%64%79%71%c9%65%3c%00%00%00%00%49%45%4e%44%ae%42%60%82","data":true}]}],"meta":{"role":"body-root"}},{"id":"wpt__css-display__display-contents-root-background__1-235","name":"wpt__css-display__display-contents-root-background__1","properties":[],"text":"Pass if the background is green.","meta":{"sourceTag":"p"}}];
++/** css-backgrounds/background-attachment-margin-root-001 — its one root, verbatim. */
++const MR001 = [{"id":"wpt__css-backgrounds__background-attachment-margin-root-001__0-091","name":"wpt__css-backgrounds__background-attachment-margin-root-001__0","properties":[{"type":"BackgroundImage","data":[{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":1,"b":0,"a":0.5},"original":{"r":0,"g":255,"b":0,"a":0.5}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":1,"a":0.5},"original":{"r":0,"g":0,"b":255,"a":0.5}},"position":null}]},{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null}]}]},{"type":"BackgroundAttachment","data":[{"type":"scroll"},{"type":"fixed"}]},{"type":"BackgroundSize","data":[{"w":{"px":100},"h":{"px":100}},{"w":{"px":100},"h":{"px":100}}]},{"type":"Height","data":{"type":"length","px":300}},{"type":"MarginTop","data":{"px":50}},{"type":"MarginRight","data":{"px":50}},{"type":"MarginBottom","data":{"px":50}},{"type":"MarginLeft","data":{"px":50}}],"meta":{"role":"body-root"}}];
++/** css-cascade/initial-background-color — all roots, verbatim (colour-only body). */
++const INITIAL_BG = [{"id":"wpt__css-cascade__initial-background-color__0-033","name":"wpt__css-cascade__initial-background-color__0","properties":[{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"}],"meta":{"role":"body-root"}},{"id":"wpt__css-cascade__initial-background-color__1-034","name":"wpt__css-cascade__initial-background-color__1","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}},{"type":"Left","data":{"px":0}},{"type":"Width","data":{"type":"percentage","value":100}},{"type":"Height","data":{"type":"percentage","value":100}},{"type":"BackgroundColor","data":{"original":"initial"}}]}];
++/** css-color/a98rgb-003 — all roots, verbatim (colour-only body). */
++const A98 = [{"id":"wpt__css-color__a98rgb-003__0-005","name":"wpt__css-color__a98rgb-003__0","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.5019607843137255,"g":0.5019607843137255,"b":0.5019607843137255},"original":"grey"}}],"meta":{"role":"body-root"}},{"id":"wpt__css-color__a98rgb-003__1-006","name":"wpt__css-color__a98rgb-003__1","properties":[],"text":"Test passes if you see a single square, and not two rectangles of different colors.","meta":{"sourceTag":"p","role":"ws-after"}},{"id":"wpt__css-color__a98rgb-003__2-007","name":"wpt__css-color__a98rgb-003__2","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.996078431372549,"g":0.996078431372549,"b":0.996078431372549},"original":{"r":254,"g":254,"b":254}}},{"type":"Width","data":{"type":"length","original":{"v":12,"u":"EM"}}},{"type":"Height","data":{"type":"length","original":{"v":6,"u":"EM"}}},{"type":"MarginBottom","data":{"px":0}}],"meta":{"role":"ws-after"}},{"id":"wpt__css-color__a98rgb-003__3-008","name":"wpt__css-color__a98rgb-003__3","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.9999300658875595,"g":1,"b":1},"original":{"type":"color","colorSpace":"a98-rgb","values":[1,1,1]}}},{"type":"Width","data":{"type":"length","original":{"v":12,"u":"EM"}}},{"type":"Height","data":{"type":"length","original":{"v":6,"u":"EM"}}},{"type":"MarginTop","data":{"px":0}}]}];
++/** css-contain/contain-body-bg-001 — all roots, verbatim (contained colour body). */
++const CONTAIN_BG = [{"id":"wpt__css-contain__contain-body-bg-001__0-003","name":"wpt__css-contain__contain-body-bg-001__0","properties":[{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"Width","data":{"type":"length","px":300}},{"type":"Height","data":{"type":"length","px":200}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"Contain","data":["LAYOUT"]}],"meta":{"role":"body-root","lang":"en"}},{"id":"contain-body-bg-001__0-004","name":"contain-body-bg-001__0","properties":[{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"Width","data":{"type":"length","px":300}},{"type":"Height","data":{"type":"length","px":200}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}}],"slot":{"parent":"wpt__css-contain__contain-body-bg-001__0-003"},"text":"Test passes if there is no red.","meta":{"sourceTag":"p","lang":"en"}}];
++/** css-masking/clip-path/clip-path-document-element — all roots, verbatim (root clip, colour body). */
++const CLIP_DOC = [{"id":"wpt__css-masking__clip-path__clip-path-document-element__0-047","name":"wpt__css-masking__clip-path__clip-path-document-element__0","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"ClipPath","data":{"type":"polygon","points":[{"x":{"px":50},"y":{"px":50}},{"x":{"px":100},"y":{"px":50}},{"x":{"px":100},"y":{"px":100}},{"x":{"px":150},"y":{"px":100}},{"x":{"px":150},"y":{"px":150}},{"x":{"px":50},"y":{"px":150}}]}}],"meta":{"role":"body-root"}},{"id":"wpt__css-masking__clip-path__clip-path-document-element__1-048","name":"wpt__css-masking__clip-path__clip-path-document-element__1","properties":[{"type":"Width","data":{"type":"length","px":500}},{"type":"Height","data":{"type":"length","px":500}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}}]}];
++
++/** A per-test document over a verbatim component list. */
++const doc = (components: unknown[]): IRDocument =>
++  ({ irVersion: 2, minReaderVersion: 2, components }) as unknown as IRDocument;
++/** Render one document through the real gallery (static markup). */
++const render = (d: IRDocument) => renderToStaticMarkup(<ComposedCaptureGallery document={d} />);
++/** The framed outer canvas div's inline style. */
++const outerStyleOf = (html: string) => /data-capture-canvas[^>]*?style="([^"]*)"/.exec(html)?.[1] ?? '';
++/** The ICB div's inline style. */
++const icbStyleOf = (html: string) => /data-capture-icb[^>]*?style="([^"]*)"/.exec(html)?.[1] ?? '';
++/** One component node's opening tag, by its data-component-id (its style, if any, lives here). */
++const nodeTagOf = (html: string, id: string) =>
++  new RegExp(`<[^>]*data-component-id="${id}"[^>]*>`).exec(html)?.[0] ?? '';
++/** That tag's inline style only (the ids themselves contain "background-attachment"). */
++const nodeStyleOf = (html: string, id: string) => /style="([^"]*)"/.exec(nodeTagOf(html, id))?.[1] ?? '';
++
++describe('ComposedTestCanvas — root background image (wave-53 L3 item A)', () => {
++  it('target_framedSurface_paintsTheDataUriOverTheColour', () => {
++    const outer = outerStyleOf(render(doc(TARGET)));
++    // The colour rides background-color (no shorthand), the image above it.
++    expect(outer).not.toMatch(/(^|;)background:/);
++    expect(outer).toContain('background-color:#FFFFFF');
++    expect(outer).toContain('background-image:url(&quot;data:image/png,%89%50%4e%47');
++    // Tile origin = the ICB corner inside the framed surface (16,16).
++    expect(outer).toContain('background-position:16px 16px');
++    expect(outer).toContain('background-attachment:scroll');
++    // …and the ICB div carries no image of its own.
++    expect(icbStyleOf(render(doc(TARGET)))).not.toContain('background-image');
++  });
++
++  it('target_bodyRootLosesImage', () => {
++    // §2.11.2 "not painted again": the `display: contents` node keeps Display only.
++    const html = render(doc(TARGET));
++    expect(nodeTagOf(html, TARGET[0].id)).not.toBe('');
++    expect(nodeStyleOf(html, TARGET[0].id)).not.toContain('background-image');
++  });
++
++  it('marginRoot001_icbOnly_frameKeepsTheColour', () => {
++    const html = render(doc(MR001));
++    // Non-uniform stack → the ICB div paints, origins per §3.4 (scroll 50,50; fixed 0,0).
++    const icb = icbStyleOf(html);
++    expect(icb).toContain('background-image:linear-gradient(180deg, rgba(0, 255, 0, 0.5), rgba(0, 0, 255, 0.5)), linear-gradient(180deg, rgba(0, 0, 0, 1), rgba(0, 0, 0, 1))');
++    expect(icb).toContain('background-position:50px 50px, 0px 0px');
++    expect(icb).toContain('background-attachment:scroll, scroll');
++    expect(icb).toContain('background-size:100px 100px, 100px 100px');
++    // The framed surface keeps today's colour shorthand and no image.
++    const outer = outerStyleOf(html);
++    expect(outer).toContain('background:#FFFFFF');
++    expect(outer).not.toContain('background-image');
++  });
++
++  it('marginRoot001_bodyRootLosesImage', () => {
++    // The sized 258×300 root box no longer paints its own (wrong-phase) tiles.
++    const html = render(doc(MR001));
++    expect(nodeTagOf(html, MR001[0].id)).not.toBe('');
++    // Its box keeps the 300-px height and nothing of the image stack.
++    expect(nodeStyleOf(html, MR001[0].id)).toContain('height:300px');
++    expect(nodeStyleOf(html, MR001[0].id)).not.toMatch(/background-(image|attachment|size)/);
++  });
++
++  it('contained_noPropagation_bodyKeepsItsImage', () => {
++    // The target + `contain: layout` → the canvas never paints it, the node does.
++    const contained = TARGET.map((c, i) => i === 0
++      ? { ...c, properties: [...c.properties, { type: 'Contain', data: ['LAYOUT'] }] } : c);
++    expect(resolveCanvasRootBackground(doc(contained))).toBeNull();
++    const html = render(doc(contained));
++    expect(outerStyleOf(html)).not.toContain('background-image');
++    expect(icbStyleOf(html)).not.toContain('background-image');
++    expect(nodeStyleOf(html, TARGET[0].id)).toContain('background-image');
++  });
++
++  it('colourOnly_noImageKeyAnywhere', () => {
++    // Colour-only, contained and root-clipped bodies: no plan, no image key on
++    // either canvas div — the pre-wave-53 surfaces exactly.
++    for (const comps of [INITIAL_BG, A98, CONTAIN_BG, CLIP_DOC]) {
++      expect(resolveCanvasRootBackground(doc(comps))).toBeNull();
++      const html = render(doc(comps));
++      expect(outerStyleOf(html)).not.toContain('background-image');
++      expect(icbStyleOf(html)).not.toContain('background-image');
++    }
++    // The two colour bodies keep the shorthand colour on the framed surface.
++    expect(outerStyleOf(render(doc(INITIAL_BG)))).toContain('background:rgba(0, 128, 0, 1)');
++    expect(outerStyleOf(render(doc(A98)))).toMatch(/(^|;)background:rgba\(128, 128, 128, 1\)/);
++  });
++});
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt
+new file mode 100644
+index 0000000..6cc7fe8
+--- /dev/null
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt
+@@ -0,0 +1,223 @@
++package com.styleconverter.runtime.background
++
++// wave-53 lane L3 (item A) — the ROOT's background-IMAGE layers propagate to
++// the CANVAS (css-backgrounds-3 §2.11.2). The Compose twin of the web runtime's
++// engine/background/RootBackgroundPropagation.ts and SwiftUI's
++// StyleEngine/background/RootBackgroundPropagation.swift: one rule, three
++// canvases. The composed canvas (ScreenshotCaptureScreen.ComposedCaptureCanvas)
++// propagated the body-root COLOUR only; a root image was painted by nobody
++// (wave52-ship: display-contents-root-background android f 0.5355,
++// background-attachment-margin-root-001/-002 android f 0.451 / 0.3389).
++//
++// The rule: §2.11.2 the canvas paints the root's image layers and the root
++// does not paint them again (withCanvasOwnedRootBackground); §3.4 a `fixed`
++// layer's tile origin is the viewport (ICB) corner, a `scroll`/`local` one the
++// root box (ICB + the canvas-owned root margin); F2 capture-frame chrome —
++// capture-browser-ref.mjs padColorFor (:728) fills the 16-px frame with the
++// ring colour only for a uniform ring, so only a stack uniform BY
++// CONSTRUCTION (every layer one sRGBA, repeating on both axes) may cover the
++// frame; any other stack leaves the frame at the colour-layer value.
++
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.draw.drawBehind
++import androidx.compose.ui.geometry.Offset
++import androidx.compose.ui.geometry.Size
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.unit.Dp
++import androidx.compose.ui.unit.dp
++import com.styleconverter.runtime.PropertyTracker
++import com.styleconverter.runtime.color.BackgroundPositionConfig
++import com.styleconverter.runtime.color.ColorApplier
++import com.styleconverter.runtime.color.ColorConfig
++import com.styleconverter.runtime.color.ColorExtractor
++import com.styleconverter.runtime.core.images.DataUri
++import com.styleconverter.runtime.core.ir.IRComponent
++import com.styleconverter.runtime.core.ir.IRProperty
++import kotlinx.serialization.json.JsonArray
++import kotlinx.serialization.json.JsonElement
++import kotlinx.serialization.json.JsonNull
++import kotlinx.serialization.json.JsonObject
++import kotlinx.serialization.json.JsonPrimitive
++import kotlinx.serialization.json.contentOrNull
++import kotlinx.serialization.json.doubleOrNull
++
++object RootBackgroundPropagation {
++
++    /** One image layer's §3.4 attachment keyword. */
++    enum class Attachment { SCROLL, FIXED, LOCAL }                         // the three §3.4 keywords
++
++    /** A layer's tile origin in px (== dp in the capture), relative to the ICB corner. */
++    data class LayerOrigin(val x: Float, val y: Float)                    // px right of / below the ICB corner
++
++    /** The propagation decision: per-layer attachments + origins, and the F2 uniformity. */
++    data class Plan(
++        val attachments: List<Attachment>,                                 // per image layer, source order
++        val origins: List<LayerOrigin>,                                    // per image layer, ICB-relative (§3.4)
++        val uniform: Boolean,                                              // F2: one colour by construction
++    )
++
++    /** The image-layer longhands the canvas takes over (the root never repaints them). */
++    val IMAGE_TYPES: Set<String> = setOf(
++        "BackgroundImage", "BackgroundSize", "BackgroundRepeat", "BackgroundAttachment",
++        "BackgroundPosition", "BackgroundPositionX", "BackgroundPositionY",
++        "BackgroundPositionInline", "BackgroundPositionBlock",
++        "BackgroundOrigin", "BackgroundClip", "BackgroundBlendMode",
++    )
++
++    /** Knobs the origin offset does not compose with — breadcrumbed, no corpus carrier. */
++    private val UNMODELLED = listOf("BackgroundPosition", "BackgroundPositionX", "BackgroundPositionY",
++        "BackgroundPositionInline", "BackgroundPositionBlock", "BackgroundOrigin", "BackgroundClip",
++        "BackgroundBlendMode")
++
++    /** The raw IR layer list of the LAST `type` declaration (scalar wrapped; absent → empty). */
++    private fun rawList(props: List<IRProperty>, type: String): List<JsonElement> =
++        when (val d = props.lastOrNull { it.type == type }?.data) {        // last declaration wins (cascade)
++            null, JsonNull -> emptyList()                                  // absent: the initial value applies
++            is JsonArray -> d                                              // the normal per-layer list
++            else -> listOf(d)                                              // a scalar: one layer
++        }
++
++    /** A `none` layer (bare string or `{type:"none"}`) paints nothing. */
++    private fun isNone(l: JsonElement): Boolean =
++        (l as? JsonPrimitive)?.contentOrNull == "none" || ((l as? JsonObject)?.get("type") as? JsonPrimitive)?.contentOrNull == "none"
++
++    /** The keyword of one entry: a bare string, or the `type` of an object. */
++    private fun keyword(e: JsonElement?): String? =
++        (e as? JsonPrimitive)?.contentOrNull ?: ((e as? JsonObject)?.get("type") as? JsonPrimitive)?.contentOrNull
++
++    /** Layer i's attachment (§2.3: shorter lists cycle; unknown → initial `scroll`). */
++    private fun attachmentAt(props: List<IRProperty>, i: Int): Attachment {
++        val list = rawList(props, "BackgroundAttachment")                 // `[{type:"scroll"},…]` on the wire
++        if (list.isEmpty()) return Attachment.SCROLL                       // initial value
++        return when (keyword(list[i % list.size])?.lowercase()) {          // §2.3 cyclic pairing
++            "fixed" -> Attachment.FIXED                                    // anchors to the viewport
++            "local" -> Attachment.LOCAL                                    // anchors like scroll here (no scroller)
++            else -> Attachment.SCROLL                                      // `scroll` and anything unknown
++        }
++    }
++
++    /** One stop's sRGBA key; null = no colour (hint/shape word), "?" = not static sRGB. */
++    private fun stopKey(stop: JsonElement): String? {
++        val c = (stop as? JsonObject)?.get("color") ?: return null         // a hint / shape word: no colour
++        if (c is JsonNull) return null                                     // an explicit colour-less stop
++        val s = (c as? JsonObject)?.get("srgb") as? JsonObject ?: return "?"   // currentColor / var(): unknown
++        val ch = listOf("r", "g", "b").map { (s[it] as? JsonPrimitive)?.doubleOrNull ?: return "?" }
++        return "${ch[0]},${ch[1]},${ch[2]},${(s["a"] as? JsonPrimitive)?.doubleOrNull ?: 1.0}"  // alpha defaults to 1
++    }
++
++    /** css-images-3 §3: every stop shares one sRGBA ⇒ the gradient paints one colour. */
++    private fun gradientIsUniform(o: JsonObject): Boolean {
++        val keys = (o["stops"] as? JsonArray ?: return false).mapNotNull(::stopKey)  // colour-less entries dropped
++        return keys.isNotEmpty() && keys.all { it != "?" && it == keys[0] }          // one static sRGBA
++    }
++
++    /** PNG (ISO 15948 §5.2/§11.2.2): signature, then IHDR width/height — true iff 1×1. */
++    fun dataPngIs1x1(url: String): Boolean {
++        if (!url.lowercase().let { it.startsWith("data:image/png,") || it.startsWith("data:image/png;") }) return false
++        val b = DataUri.decode(url) ?: return false                        // the runtime's RFC 2397 decoder
++        if (b.size < 24) return false                                      // no full IHDR
++        val sig = intArrayOf(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)   // the PNG signature
++        if (sig.indices.any { (b[it].toInt() and 0xff) != sig[it] }) return false
++        if (String(b, 12, 4, Charsets.US_ASCII) != "IHDR") return false   // the first chunk must be IHDR
++        fun be32(o: Int) = (0..3).fold(0L) { acc, k -> (acc shl 8) or (b[o + k].toLong() and 0xff) }  // big-endian
++        return be32(16) == 1L && be32(20) == 1L                            // width, height
++    }
++
++    /** One layer paints a single colour across its tile (F2's per-layer test). */
++    private fun layerIsUniform(l: JsonElement): Boolean {
++        if (isNone(l)) return true                                         // transparent everywhere
++        val o = l as? JsonObject ?: return false                           // bare URL string: unknown pixels
++        (o["url"] as? JsonPrimitive)?.contentOrNull?.let { return dataPngIs1x1(it) }   // a 1×1 raster tile
++        val type = (o["type"] as? JsonPrimitive)?.contentOrNull ?: return false
++        return type.endsWith("gradient") && gradientIsUniform(o)            // linear/radial/conic, plain or repeating
++    }
++
++    /** §3.7: one entry is `repeat` on both axes (string tokens or an {x,y} pair). */
++    private fun entryRepeatsBoth(e: JsonElement): Boolean {
++        fun rep(v: JsonElement?) = (v as? JsonPrimitive)?.contentOrNull?.lowercase() == "repeat"
++        // String shape: `repeat` / `repeat repeat` (any other keyword leaves a gap or a single tile).
++        (e as? JsonPrimitive)?.contentOrNull?.let { s -> return s.trim().split(Regex("\\s+")).all { it.lowercase() == "repeat" } }
++        val o = e as? JsonObject ?: return false                           // unknown shape: not uniform
++        return rep(o["x"]) && rep(o["y"])                                  // axis-pair shape
++    }
++
++    /** JVM-safe breadcrumb: PropertyTracker marks the type, android.util.Log is stubbed off-device. */
++    private fun breadcrumb(type: String, context: String) {
++        runCatching { PropertyTracker.logUnhandled(type, context) }       // marks first, then Log.w (stubbed on JVM)
++    }
++
++    /**
++     * The plan for one body-root's properties, or null when nothing propagates
++     * (no image layer, only `none`, containment — the caller's css-contain-2
++     * §2 gate — or a layer the colour extractor cannot paint). [marginTop] /
++     * [marginLeft] are the canvas-owned root margin in px.
++     */
++    fun plan(props: List<IRProperty>, marginTop: Float, marginLeft: Float, contained: Boolean): Plan? {
++        if (contained) return null                                         // off the propagation path
++        val layers = rawList(props, "BackgroundImage")                     // the raw per-layer list
++        if (layers.isEmpty() || layers.all(::isNone)) return null          // nothing to paint
++        // Index parity with the applier: a dropped layer would mis-pair every attachment.
++        if (ColorExtractor.extractBackgroundImages(JsonArray(layers)).size != layers.size) {
++            breadcrumb("BackgroundImage", "root canvas background: a layer the extractor cannot paint"); return null
++        }
++        UNMODELLED.filter { t -> props.any { it.type == t } }              // no corpus carrier pairs these
++            .forEach { breadcrumb(it, "root canvas background: positioning area not modelled") }
++        val attachments = layers.indices.map { attachmentAt(props, it) }
++        // §3.4: fixed → the viewport (ICB) corner; scroll/local → the root box's padding edge.
++        val origins = attachments.map { if (it == Attachment.FIXED) LayerOrigin(0f, 0f) else LayerOrigin(marginLeft, marginTop) }
++        // F2: every layer one colour AND repeating on both axes (no gaps) ⇒ the ring is uniform.
++        val uniform = layers.all(::layerIsUniform) && rawList(props, "BackgroundRepeat").all(::entryRepeatsBoth)
++        return Plan(attachments, origins, uniform)
++    }
++
++    /** §2.11.2 "not painted again": the forest with the body-root's image layers removed; identity without a plan. */
++    fun withCanvasOwnedRootBackground(roots: List<IRComponent>, plan: Plan?): List<IRComponent> {
++        if (plan == null) return roots                                     // nothing owned → the same list
++        // Only the synthetic html+body bag is rewritten; id/meta/children ride through.
++        return roots.map { r -> if (r.role != "body-root") r else r.copy(properties = r.properties.filterNot { it.type in IMAGE_TYPES }) }
++    }
++
++    /**
++     * One single-layer [ColorConfig] per image layer (source order), each with
++     * the §3.4 origin + [base] as its position offset — the existing applier
++     * then paints it. [base] = where the ICB corner sits in the painted box.
++     */
++    fun layerConfigs(props: List<IRProperty>, plan: Plan, base: Float): List<ColorConfig> {
++        val full = ColorExtractor.extractColorConfig(props.map { it.type to it.data })  // the engine's own reading
++        return full.backgroundImages.mapIndexed { i, image ->
++            val o = plan.origins[i]                                        // plan() pinned the index parity
++            ColorConfig(                                                   // no colour, no opacity: image only
++                backgroundImages = listOf(image),
++                // The §3.4 origin alone (an author position is breadcrumbed in plan(),
++                // exactly as the web and SwiftUI twins drop it).
++                backgroundPosition = BackgroundPositionConfig(xOffset = (o.x + base).dp, yOffset = (o.y + base).dp),
++                backgroundSize = full.backgroundSize,                      // the legacy single-value fallback
++                backgroundSizes = listOfNotNull(ColorApplier.layerValue(full.backgroundSizes, i)),     // §2.3 pairing
++                backgroundRepeat = full.backgroundRepeat,                  // the legacy single-value fallback
++                backgroundRepeats = listOfNotNull(ColorApplier.layerValue(full.backgroundRepeats, i)), // §2.3 pairing
++            )
++        }
++    }
++
++    /**
++     * The canvas-surface paint: the layers bottom-up over the framed surface
++     * (tile origins at the ICB corner = [frame]), and — for a non-uniform stack —
++     * the 16-px frame band repainted in [frameColor] above them (capture-frame
++     * chrome: padPngBuffer fills the frame with the pad colour). [Modifier] itself
++     * (identity under `then`) without a plan.
++     */
++    fun canvasModifier(props: List<IRProperty>, plan: Plan?, frame: Dp, frameColor: Color): Modifier {
++        if (plan == null) return Modifier                                  // identity: `then(Modifier)` is a no-op
++        // Compose chains paint later entries on top: the LAST source layer first.
++        var m: Modifier = Modifier
++        layerConfigs(props, plan, frame.value).asReversed().forEach { m = ColorApplier.applyColors(m, it) }
++        if (plan.uniform) return m                                         // F2: the stack may cover the frame
++        return m.drawBehind {                                              // drawn above the layers, below content
++            val f = frame.toPx(); val w = size.width; val h = size.height  // the frame band, in this box's px
++            drawRect(frameColor, Offset.Zero, Size(w, f))                       // top band
++            drawRect(frameColor, Offset(0f, h - f), Size(w, f))                 // bottom band
++            drawRect(frameColor, Offset(0f, f), Size(f, h - 2 * f))             // left band
++            drawRect(frameColor, Offset(w - f, f), Size(f, h - 2 * f))          // right band
++        }
++    }
++}
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift
+new file mode 100644
+index 0000000..ab734ca
+--- /dev/null
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift
+@@ -0,0 +1,218 @@
++//
++//  RootBackgroundPropagation.swift
++//  StyleEngine/background — wave-53 lane L3 (item A).
++//
++//  The ROOT's background-IMAGE layers propagate to the CANVAS
++//  (css-backgrounds-3 §2.11.2). SwiftUI twin of the web runtime's
++//  engine/background/RootBackgroundPropagation.ts and Compose's
++//  background/RootBackgroundPropagation.kt — one rule, three canvases. The
++//  composed canvas (ios-harness CaptureCanvas.ComposedCaptureCanvas)
++//  propagated the body-root COLOUR only, so a root image was painted by nobody
++//  (wave52-ship: display-contents-root-background ios f 0.5346,
++//  background-attachment-margin-root-001/-002 ios f 0.4509 / 0.3391).
++//
++//  The rule: §2.11.2 the canvas paints the root's image layers and the root
++//  does not paint them again (withCanvasOwnedRootBackground — it lives in the
++//  runtime because IRComponent's memberwise init is internal); §3.4 a `fixed`
++//  layer's tile origin is the viewport (ICB) corner, a `scroll`/`local` one
++//  the root box (ICB + the canvas-owned root margin); F2 capture-frame chrome
++//  — capture-browser-ref.mjs padColorFor (:728) fills the 16-px frame with the
++//  ring colour only for a uniform ring, so only a stack uniform BY
++//  CONSTRUCTION (every layer one sRGBA, repeating on both axes) may cover the
++//  frame (RootCanvasBackground pads any other stack in to the ICB).
++//
++
++import SwiftUI
++
++public enum RootBackgroundPropagation {
++
++    /// One image layer's §3.4 attachment keyword.
++    public enum Attachment: Equatable { case scroll, fixed, local }      // the three §3.4 keywords
++
++    /// A layer's tile origin in pt (== CSS px at scale 1), relative to the ICB corner.
++    public struct LayerOrigin: Equatable {
++        public let x: CGFloat                                    // right of the ICB corner
++        public let y: CGFloat                                    // below the ICB corner
++        /// Explicit public init — the synthesized memberwise one is internal.
++        public init(x: CGFloat, y: CGFloat) { self.x = x; self.y = y }
++    }
++
++    /// The propagation decision: per-layer attachments + origins, and F2 uniformity.
++    public struct Plan: Equatable {
++        public let attachments: [Attachment]                     // per image layer, source order
++        public let origins: [LayerOrigin]                        // per image layer, ICB-relative (§3.4)
++        public let uniform: Bool                                 // F2: one colour by construction
++        /// Explicit public init (tests and twins compare whole plans).
++        public init(attachments: [Attachment], origins: [LayerOrigin], uniform: Bool) {
++            self.attachments = attachments; self.origins = origins; self.uniform = uniform
++        }
++    }
++
++    /// The image-layer longhands the canvas takes over (the root never repaints them).
++    public static let imageTypes: Set<String> = [
++        "BackgroundImage", "BackgroundSize", "BackgroundRepeat", "BackgroundAttachment",
++        "BackgroundPosition", "BackgroundPositionX", "BackgroundPositionY",
++        "BackgroundPositionInline", "BackgroundPositionBlock",
++        "BackgroundOrigin", "BackgroundClip", "BackgroundBlendMode",
++    ]
++
++    /// Knobs the origin offset does not compose with — breadcrumbed, no corpus carrier.
++    private static let unmodelled = ["BackgroundPosition", "BackgroundPositionX", "BackgroundPositionY",
++        "BackgroundPositionInline", "BackgroundPositionBlock", "BackgroundOrigin", "BackgroundClip",
++        "BackgroundBlendMode"]
++
++    /// The raw IR list of the LAST `type` declaration (scalar wrapped; absent → empty).
++    private static func rawList(_ props: [IRProperty], _ type: String) -> [IRValue] {
++        guard let d = props.last(where: { $0.type == type })?.data else { return [] }
++        if case .null = d { return [] }                          // explicit null → nothing
++        return d.arrayValue ?? [d]                               // scalar wrap
++    }
++
++    /// The keyword of one entry: a bare string, or the `type` of an object.
++    private static func keyword(_ e: IRValue) -> String? { e.stringValue ?? e["type"]?.stringValue }
++
++    /// A `none` layer paints nothing.
++    private static func isNone(_ l: IRValue) -> Bool { keyword(l) == "none" && l["url"] == nil }
++
++    /// Layer i's attachment (§2.3: shorter lists cycle; unknown → initial `scroll`).
++    private static func attachmentAt(_ props: [IRProperty], _ i: Int) -> Attachment {
++        let list = rawList(props, "BackgroundAttachment")        // `[{type:"scroll"},…]` on the wire
++        guard !list.isEmpty else { return .scroll }              // initial value
++        switch keyword(list[i % list.count])?.lowercased() {     // §2.3 cyclic pairing
++        case "fixed": return .fixed                              // anchors to the viewport
++        case "local": return .local                              // anchors like scroll here (no scroller)
++        default: return .scroll                                  // `scroll` and anything unknown
++        }
++    }
++
++    /// One stop's sRGBA key: nil = no colour (hint/shape word), "?" = not static sRGB.
++    private static func stopKey(_ stop: IRValue) -> String? {
++        guard let c = stop["color"] else { return nil }          // colour-less entry
++        if case .null = c { return nil }                         // an explicit colour-less stop
++        guard let s = c["srgb"], let r = s["r"]?.doubleValue, let g = s["g"]?.doubleValue,
++              let b = s["b"]?.doubleValue else { return "?" }    // currentColor / var(): unknown
++        return "\(r),\(g),\(b),\(s["a"]?.doubleValue ?? 1)"      // alpha defaults to opaque
++    }
++
++    /// css-images-3 §3: every stop shares one sRGBA ⇒ the gradient paints one colour.
++    private static func gradientIsUniform(_ o: IRValue) -> Bool {
++        guard let stops = o["stops"]?.arrayValue else { return false }   // malformed → not uniform
++        let keys = stops.compactMap(stopKey)                     // colour-less entries dropped
++        return !keys.isEmpty && keys.allSatisfy { $0 != "?" && $0 == keys[0] }   // one static sRGBA
++    }
++
++    /// RFC 2397 payload bytes (base64 or percent-encoded), or nil.
++    private static func dataURIBytes(_ url: String) -> [UInt8]? {
++        guard url.lowercased().hasPrefix("data:"), let comma = url.firstIndex(of: ",") else { return nil }
++        let header = url[url.index(url.startIndex, offsetBy: 5)..<comma].lowercased()   // mediatype[;base64]
++        let body = String(url[url.index(after: comma)...])       // the payload
++        if header.hasSuffix(";base64") { return Data(base64Encoded: body).map { [UInt8]($0) } }   // bad base64 → nil
++        // Percent-encoding, byte by byte (a binary PNG is not valid UTF-8).
++        var out: [UInt8] = []; var i = body.utf8.startIndex; let u = body.utf8
++        while i < u.endIndex {                                   // %XX → one byte, anything else verbatim
++            if u[i] == UInt8(ascii: "%"), let a = u.index(i, offsetBy: 2, limitedBy: u.index(before: u.endIndex)),
++               let v = UInt8(String(decoding: u[u.index(after: i)...a], as: UTF8.self), radix: 16) {
++                out.append(v); i = u.index(after: a)
++            } else { out.append(u[i]); i = u.index(after: i) }   // a literal byte
++        }
++        return out                                               // the raw PNG bytes
++    }
++
++    /// PNG (ISO 15948 §5.2/§11.2.2): signature, then IHDR width/height — true iff 1×1.
++    public static func dataPngIs1x1(_ url: String) -> Bool {
++        let lower = url.lowercased()                             // the scheme/mediatype is case-insensitive
++        guard lower.hasPrefix("data:image/png,") || lower.hasPrefix("data:image/png;"),
++              let b = dataURIBytes(url), b.count >= 24 else { return false }   // PNG data URIs with a full IHDR
++        guard Array(b[0..<8]) == [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],   // the PNG signature
++              Array(b[12..<16]) == Array("IHDR".utf8) else { return false }       // the first chunk is IHDR
++        let be32 = { (o: Int) in b[o..<(o + 4)].reduce(UInt32(0)) { $0 << 8 | UInt32($1) } }   // big-endian
++        return be32(16) == 1 && be32(20) == 1                    // width, height
++    }
++
++    /// One layer paints a single colour across its tile (F2's per-layer test).
++    private static func layerIsUniform(_ l: IRValue) -> Bool {
++        if isNone(l) { return true }                             // transparent everywhere
++        if let url = l["url"]?.stringValue { return dataPngIs1x1(url) }   // a 1×1 raster tile
++        guard let t = l["type"]?.stringValue else { return false }   // a bare URL string: unknown pixels
++        return t.hasSuffix("gradient") && gradientIsUniform(l)   // linear/radial/conic, plain or repeating
++    }
++
++    /// §3.7: one entry is `repeat` on both axes (string tokens or an {x,y} pair).
++    private static func entryRepeatsBoth(_ e: IRValue) -> Bool {
++        if let s = e.stringValue {                               // `repeat` / `repeat repeat`
++            return s.split(whereSeparator: { $0.isWhitespace }).allSatisfy { $0.lowercased() == "repeat" }
++        }
++        // The axis-pair shape (any other keyword leaves a gap or a single tile).
++        return e["x"]?.stringValue?.lowercased() == "repeat" && e["y"]?.stringValue?.lowercased() == "repeat"
++    }
++
++    /// The plan, or nil when nothing propagates (no image layer, only `none`,
++    /// containment — the caller's css-contain-2 §2 gate — or a layer the
++    /// extractor cannot paint). `marginTop`/`marginLeft`: the canvas-owned root margin.
++    public static func plan(_ props: [IRProperty], marginTop: CGFloat, marginLeft: CGFloat,
++                            contained: Bool) -> Plan? {
++        if contained { return nil }                              // off the propagation path
++        let layers = rawList(props, "BackgroundImage")           // the raw per-layer list
++        guard !layers.isEmpty, !layers.allSatisfy(isNone) else { return nil }   // nothing to paint
++        // Index parity with the applier: a dropped layer would mis-pair every attachment.
++        guard BackgroundImageExtractor.extract(from: props)?.layers.count == layers.count else {
++            PropertyTracker.logOnce(key: "root-bg-parity", message: "root canvas background: a layer the extractor cannot paint — not propagated")
++            return nil
++        }
++        for t in unmodelled where props.contains(where: { $0.type == t }) {   // no corpus carrier pairs these
++            PropertyTracker.logOnce(key: "root-bg-\(t)", message: "root canvas background: \(t) not modelled (positioning area)")
++        }
++        let attachments = layers.indices.map { attachmentAt(props, $0) }
++        // §3.4: fixed → the viewport (ICB) corner; scroll/local → the root box's padding edge.
++        let origins = attachments.map { $0 == .fixed ? LayerOrigin(x: 0, y: 0) : LayerOrigin(x: marginLeft, y: marginTop) }
++        // F2: every layer one colour AND repeating on both axes (no gaps) ⇒ the ring is uniform.
++        let uniform = layers.allSatisfy(layerIsUniform) && rawList(props, "BackgroundRepeat").allSatisfy(entryRepeatsBoth)
++        return Plan(attachments: attachments, origins: origins, uniform: uniform)
++    }
++
++    /// §2.11.2 "not painted again": the body-root minus its image layers; identity without a plan.
++    public static func withCanvasOwnedRootBackground(_ roots: [IRComponent], _ plan: Plan?) -> [IRComponent] {
++        guard plan != nil else { return roots }                  // nothing owned → the same components
++        return roots.map { root in
++            guard root.meta?.role == "body-root" else { return root }   // only the html+body bag is rewritten
++            return IRComponent(id: root.id, name: root.name,
++                               properties: root.properties.filter { !imageTypes.contains($0.type) },
++                               selectors: root.selectors, media: root.media, children: root.children,
++                               slot: root.slot, text: root.text, pseudos: root.pseudos,
++                               meta: root.meta, variables: root.variables)
++        }
++    }
++}
++
++/// The canvas-surface paint for a plan: each layer through the runtime's own
++/// BackgroundImageApplier as a single-layer stack positioned at its §3.4
++/// origin, last source layer at the bottom. Uniform → the framed surface
++/// (origins offset by the frame); otherwise padded in to the ICB (origins as-is).
++public struct RootCanvasBackground: View {
++    let properties: [IRProperty]                                 // the UNSTRIPPED body-root bag
++    let plan: RootBackgroundPropagation.Plan                     // the propagation decision
++    let frame: CGFloat                                           // the capture frame (16)
++    /// Public init for the harness canvas.
++    public init(properties: [IRProperty], plan: RootBackgroundPropagation.Plan, frame: CGFloat) {
++        self.properties = properties; self.plan = plan; self.frame = frame
++    }
++    public var body: some View {
++        let image = BackgroundImageExtractor.extract(from: properties)?.layers ?? []   // the engine's own readings
++        let size = BackgroundSizeExtractor.extract(from: properties)?.layers ?? []
++        let rep = BackgroundRepeatExtractor.extract(from: properties)?.layers ?? []
++        let base = plan.uniform ? frame : 0                      // ICB corner inside the painted box
++        let n = min(image.count, plan.origins.count)             // plan() pinned the parity; never index past it
++        return ZStack(alignment: .topLeading) {
++            // ZStack paints later children on top: walk source order backwards.
++            ForEach(Array((0..<n).reversed()), id: \.self) { i in
++                Color.clear.engineBackgroundImage(               // the runtime's own image applier
++                    BackgroundImageConfig(layers: [image[i]]),   // one layer at a time: per-layer origins
++                    size: size.isEmpty ? nil : BackgroundSizeConfig(layers: [size[i % size.count]]),   // §2.3 pairing
++                    position: BackgroundPositionConfig(x: .px(Double(plan.origins[i].x + base)),
++                                                       y: .px(Double(plan.origins[i].y + base))),
++                    repeatCfg: rep.isEmpty ? nil : BackgroundRepeatConfig(layers: [rep[i % rep.count]]))   // §2.3
++            }
++        }
++        .padding(plan.uniform ? 0 : frame)                       // F2: non-uniform → the ICB only
++    }
++}
+diff --git a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/WPTCaptureModeTests.swift b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/WPTCaptureModeTests.swift
+index e88c278..0ef349d 100644
+--- a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/WPTCaptureModeTests.swift
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/WPTCaptureModeTests.swift
+@@ -593,4 +593,199 @@ final class WPTCaptureModeTests: XCTestCase {
+         XCTAssertEqual(WPTCanvas.icbExtent(canvasExtent: 900),
+                        900 - 2 * WPTCanvas.canvasFramePx)
+     }
++    // MARK: - wave-53 lane L3 (item A) — the ROOT's background IMAGE on the canvas
++    //
++    // css-backgrounds-3 §2.11.2: the composed canvas propagated the body-root
++    // COLOUR only (wave52-ship display-contents-root-background ios f 0.5346,
++    // background-attachment-margin-root-001/-002 ios f 0.4509 / 0.3391). These
++    // pin the runtime's RootBackgroundPropagation (plan, strip) AND its
++    // RootCanvasBackground paint by an ImageRenderer pixel pass mounted exactly
++    // as ComposedCaptureCanvas mounts it (`.background(…)` on the 390-wide
++    // surface, before the colour). Payloads VERBATIM from
++    // tools/titan/runs/wave52-ship/sections/<section>/per-test-ir/.
++    //
++    // EXECUTED MUTATIONS (RootBackgroundPropagation.swift, these tests run
++    // alone, source restored byte-exact — sha256 in
++    // tools/titan/results/wave53-canvas-root/_note.md):
++    //   SA1 plan() returns nil (colour-only read)        → testRootBgA1* red.
++    //   SA2 the strip returns `roots`                     → testRootBgA1TargetPlanAndStrip red.
++    //   SA3 `uniform` forced true                         → testRootBgA2MarginRoot001* red.
++    //   SA4 attachment ignored (every layer `.scroll`)    → testRootBgA2MarginRoot002* red.
++    //   SA5 dataPngIs1x1 true for any PNG url             → testRootBgA3* red.
++    //   SA6 the `contained` early return dropped          → testRootBgA4* red.
++
++    /// css-display/display-contents-root-background — both roots, verbatim.
++    private let rootBgTarget = """
++        {"id":"wpt__css-display__display-contents-root-background__0-234","name":"wpt__css-display__display-contents-root-background__0","properties":[{"type":"Display","data":"CONTENTS"},{"type":"BackgroundImage","data":[{"url":"data:image/png,%89%50%4e%47%0d%0a%1a%0a%00%00%00%0d%49%48%44%52%00%00%00%01%00%00%00%01%01%03%00%00%00%25%db%56%ca%00%00%00%04%67%41%4d%41%00%00%af%c8%37%05%8a%e9%00%00%00%03%50%4c%54%45%00%80%00%9c%f9%a5%91%00%00%00%0a%49%44%41%54%78%da%63%60%00%00%00%02%00%01%e5%27%de%fc%00%00%00%19%74%45%58%74%53%6f%66%74%77%61%72%65%00%41%64%6f%62%65%20%49%6d%61%67%65%52%65%61%64%79%71%c9%65%3c%00%00%00%00%49%45%4e%44%ae%42%60%82","data":true}]}],"meta":{"role":"body-root"}},
++        {"id":"wpt__css-display__display-contents-root-background__1-235","name":"wpt__css-display__display-contents-root-background__1","properties":[],"text":"Pass if the background is green.","meta":{"sourceTag":"p"}}
++        """
++    /// css-backgrounds/background-attachment-margin-root-001 — verbatim (`scroll, fixed`).
++    private let rootBgMR001 = """
++        {"id":"wpt__css-backgrounds__background-attachment-margin-root-001__0-091","name":"wpt__css-backgrounds__background-attachment-margin-root-001__0","properties":[{"type":"BackgroundImage","data":[{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":1,"b":0,"a":0.5},"original":{"r":0,"g":255,"b":0,"a":0.5}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":1,"a":0.5},"original":{"r":0,"g":0,"b":255,"a":0.5}},"position":null}]},{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null}]}]},{"type":"BackgroundAttachment","data":[{"type":"scroll"},{"type":"fixed"}]},{"type":"BackgroundSize","data":[{"w":{"px":100},"h":{"px":100}},{"w":{"px":100},"h":{"px":100}}]},{"type":"Height","data":{"type":"length","px":300}},{"type":"MarginTop","data":{"px":50}},{"type":"MarginRight","data":{"px":50}},{"type":"MarginBottom","data":{"px":50}},{"type":"MarginLeft","data":{"px":50}}],"meta":{"role":"body-root"}}
++        """
++    /// css-backgrounds/background-attachment-margin-root-002 — verbatim (`fixed, scroll`).
++    private let rootBgMR002 = """
++        {"id":"wpt__css-backgrounds__background-attachment-margin-root-002__0-092","name":"wpt__css-backgrounds__background-attachment-margin-root-002__0","properties":[{"type":"BackgroundImage","data":[{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":1,"b":0,"a":0.5},"original":{"r":0,"g":255,"b":0,"a":0.5}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":1,"a":0.5},"original":{"r":0,"g":0,"b":255,"a":0.5}},"position":null}]},{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null}]}]},{"type":"BackgroundAttachment","data":[{"type":"fixed"},{"type":"scroll"}]},{"type":"BackgroundSize","data":[{"w":{"px":100},"h":{"px":100}},{"w":{"px":100},"h":{"px":100}}]},{"type":"Height","data":{"type":"length","px":300}},{"type":"MarginTop","data":{"px":50}},{"type":"MarginRight","data":{"px":50}},{"type":"MarginBottom","data":{"px":50}},{"type":"MarginLeft","data":{"px":50}}],"meta":{"role":"body-root"}}
++        """
++    /// css-cascade/initial-background-color — verbatim (colour-only body).
++    private let rootBgInitial = """
++        {"id":"wpt__css-cascade__initial-background-color__0-033","name":"wpt__css-cascade__initial-background-color__0","properties":[{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"}],"meta":{"role":"body-root"}},
++        {"id":"wpt__css-cascade__initial-background-color__1-034","name":"wpt__css-cascade__initial-background-color__1","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}},{"type":"Left","data":{"px":0}},{"type":"Width","data":{"type":"percentage","value":100}},{"type":"Height","data":{"type":"percentage","value":100}},{"type":"BackgroundColor","data":{"original":"initial"}}]}
++        """
++    /// css-color/a98rgb-003 — verbatim (colour-only body).
++    private let rootBgA98 = """
++        {"id":"wpt__css-color__a98rgb-003__0-005","name":"wpt__css-color__a98rgb-003__0","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.5019607843137255,"g":0.5019607843137255,"b":0.5019607843137255},"original":"grey"}}],"meta":{"role":"body-root"}},
++        {"id":"wpt__css-color__a98rgb-003__1-006","name":"wpt__css-color__a98rgb-003__1","properties":[],"text":"Test passes if you see a single square, and not two rectangles of different colors.","meta":{"sourceTag":"p","role":"ws-after"}},
++        {"id":"wpt__css-color__a98rgb-003__2-007","name":"wpt__css-color__a98rgb-003__2","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.996078431372549,"g":0.996078431372549,"b":0.996078431372549},"original":{"r":254,"g":254,"b":254}}},{"type":"Width","data":{"type":"length","original":{"v":12,"u":"EM"}}},{"type":"Height","data":{"type":"length","original":{"v":6,"u":"EM"}}},{"type":"MarginBottom","data":{"px":0}}],"meta":{"role":"ws-after"}},
++        {"id":"wpt__css-color__a98rgb-003__3-008","name":"wpt__css-color__a98rgb-003__3","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.9999300658875595,"g":1,"b":1},"original":{"type":"color","colorSpace":"a98-rgb","values":[1,1,1]}}},{"type":"Width","data":{"type":"length","original":{"v":12,"u":"EM"}}},{"type":"Height","data":{"type":"length","original":{"v":6,"u":"EM"}}},{"type":"MarginTop","data":{"px":0}}]}
++        """
++    /// css-contain/contain-body-bg-001 — verbatim (contained colour body).
++    private let rootBgContain = """
++        {"id":"wpt__css-contain__contain-body-bg-001__0-003","name":"wpt__css-contain__contain-body-bg-001__0","properties":[{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"Width","data":{"type":"length","px":300}},{"type":"Height","data":{"type":"length","px":200}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"Contain","data":["LAYOUT"]}],"meta":{"role":"body-root","lang":"en"}},
++        {"id":"contain-body-bg-001__0-004","name":"contain-body-bg-001__0","properties":[{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"Width","data":{"type":"length","px":300}},{"type":"Height","data":{"type":"length","px":200}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}}],"slot":{"parent":"wpt__css-contain__contain-body-bg-001__0-003"},"text":"Test passes if there is no red.","meta":{"sourceTag":"p","lang":"en"}}
++        """
++
++    /// Decode a v2 document's components exactly as the harness does.
++    private func rootBgRoots(_ componentsJSON: String) throws -> [IRComponent] {
++        let json = "{\"irVersion\":2,\"minReaderVersion\":2,\"components\":[\(componentsJSON)]}"
++        return try JSONDecoder().decode(IRDocument.self, from: Data(json.utf8)).components
++    }
++
++    /// The harness's resolver, verbatim in shape (CaptureCanvas.rootImagePlan).
++    private func rootBgPlan(_ roots: [IRComponent]) -> RootBackgroundPropagation.Plan? {
++        guard let body = roots.first(where: { $0.meta?.role == "body-root" }) else { return nil }
++        let m = UABlockMargin.canvasBodyMargin(roots)
++        let contain = body.properties.first(where: { $0.type == "Contain" })?.data.arrayValue?.compactMap { $0.stringValue }
++        return RootBackgroundPropagation.plan(body.properties, marginTop: m.top, marginLeft: m.left,
++                                              contained: WPTCanvas.containmentBlocksPropagation(contain))
++    }
++
++    /// Render the canvas background exactly as ComposedCaptureCanvas mounts it
++    /// (390×600 surface, the image view behind the content, the white colour
++    /// behind it), scale 1; returns (width, RGBA bytes).
++    @MainActor
++    private func rootBgPixels(_ roots: [IRComponent], _ plan: RootBackgroundPropagation.Plan) throws -> (Int, [UInt8]) {
++        let body = try XCTUnwrap(roots.first(where: { $0.meta?.role == "body-root" }))
++        let view = Color.clear.frame(width: 390, height: 600)
++            .background(RootCanvasBackground(properties: body.properties, plan: plan, frame: WPTCanvas.canvasFramePx))
++            .background(Color.white)
++        let renderer = ImageRenderer(content: view)
++        renderer.scale = 1
++        let cg = try XCTUnwrap(renderer.cgImage, "ImageRenderer produced no image")
++        var buf = [UInt8](repeating: 0, count: cg.width * cg.height * 4)
++        let ctx = try XCTUnwrap(CGContext(data: &buf, width: cg.width, height: cg.height, bitsPerComponent: 8,
++                                          bytesPerRow: cg.width * 4, space: CGColorSpaceCreateDeviceRGB(),
++                                          bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
++        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: cg.width, height: cg.height))
++        XCTAssertEqual(cg.width, 390); XCTAssertEqual(cg.height, 600)
++        return (cg.width, buf)
++    }
++
++    /// One pixel (r, g, b) at (x, y) of a rendered buffer.
++    private func rootBgAt(_ px: (Int, [UInt8]), _ x: Int, _ y: Int) -> (Int, Int, Int) {
++        let i = (y * px.0 + x) * 4
++        return (Int(px.1[i]), Int(px.1[i + 1]), Int(px.1[i + 2]))
++    }
++
++    /// The 16-px frame's pixel coordinates on the 390×600 surface.
++    private func rootBgFrame() -> [(Int, Int)] {
++        var out: [(Int, Int)] = []
++        for y in 0..<600 { for x in 0..<390 where x < 16 || x >= 374 || y < 16 || y >= 584 { out.append((x, y)) } }
++        return out
++    }
++
++    func testRootBgA1TargetPlanAndStrip() throws {
++        let roots = try rootBgRoots(rootBgTarget)
++        // One scroll layer at the ICB corner, uniform (1×1 PNG, initial repeat).
++        XCTAssertEqual(rootBgPlan(roots), RootBackgroundPropagation.Plan(
++            attachments: [.scroll], origins: [.init(x: 0, y: 0)], uniform: true))
++        // §2.11.2 "not painted again": the body-root keeps Display only.
++        let out = RootBackgroundPropagation.withCanvasOwnedRootBackground(roots, rootBgPlan(roots))
++        XCTAssertEqual(out.first(where: { $0.meta?.role == "body-root" })?.properties.map(\.type), ["Display"])
++        XCTAssertEqual(out[1].id, roots[1].id)
++    }
++
++    @MainActor
++    func testRootBgA1TargetPaintsTheFramedSurfaceGreen() throws {
++        let roots = try rootBgRoots(rootBgTarget)
++        let px = try rootBgPixels(roots, try XCTUnwrap(rootBgPlan(roots)))
++        // The 1×1 (0,128,0) tile covers the WHOLE surface, frame included (F2).
++        let green = { (p: (Int, Int, Int)) in p.0 <= 8 && abs(p.1 - 128) <= 8 && p.2 <= 8 }
++        let frame = rootBgFrame()
++        XCTAssertEqual(frame.filter { green(self.rootBgAt(px, $0.0, $0.1)) }.count, frame.count)
++        XCTAssertTrue(green(rootBgAt(px, 195, 300)))
++    }
++
++    func testRootBgA2MarginRoot001PlanIsIcbOnly() throws {
++        // Layer 0 is a real green→blue ramp → not uniform; origins per §3.4.
++        XCTAssertEqual(rootBgPlan(try rootBgRoots(rootBgMR001)), RootBackgroundPropagation.Plan(
++            attachments: [.scroll, .fixed], origins: [.init(x: 50, y: 50), .init(x: 0, y: 0)], uniform: false))
++    }
++
++    /// Rows on the x=195 column where green jumps by > 60 (navy → green: a 100-px band restarts).
++    private func rootBgBandStarts(_ px: (Int, [UInt8])) -> [Int] {
++        (17..<584).filter { rootBgAt(px, 195, $0).1 - rootBgAt(px, 195, $0 - 1).1 > 60 }
++    }
++
++    @MainActor
++    func testRootBgA2MarginRoot001PixelsFrameWhiteBandAt66() throws {
++        let roots = try rootBgRoots(rootBgMR001)
++        let px = try rootBgPixels(roots, try XCTUnwrap(rootBgPlan(roots)))
++        // The frame keeps the colour (white); the ICB is tiled, phase = the root box (y66).
++        XCTAssertEqual(rootBgFrame().filter { self.rootBgAt(px, $0.0, $0.1) != (255, 255, 255) }.count, 0)
++        XCTAssertEqual(rootBgBandStarts(px), [66, 166, 266, 366, 466, 566])
++    }
++
++    @MainActor
++    func testRootBgA2MarginRoot002PixelsBandAtTheIcbCorner() throws {
++        let roots = try rootBgRoots(rootBgMR002)
++        let plan = try XCTUnwrap(rootBgPlan(roots))
++        XCTAssertEqual(plan.origins, [.init(x: 0, y: 0), .init(x: 50, y: 50)])
++        // `fixed` top layer → phase = the viewport (ICB) corner: bands restart at y16.
++        let px = try rootBgPixels(roots, plan)
++        let starts = rootBgBandStarts(px)
++        XCTAssertEqual(starts, [116, 216, 316, 416, 516])
++        XCTAssertGreaterThan(rootBgAt(px, 195, 16).1, 100)  // the first band opens green at the ICB top
++    }
++
++    func testRootBgA3IhdrUniformity() throws {
++        let body = try XCTUnwrap(try rootBgRoots(rootBgTarget).first)
++        let url = try XCTUnwrap(body.properties.first(where: { $0.type == "BackgroundImage" })?.data.arrayValue?.first?["url"]?.stringValue)
++        XCTAssertTrue(RootBackgroundPropagation.dataPngIs1x1(url))
++        // The SAME payload with IHDR width/height patched to 2 → not uniform.
++        let twoByTwo = url.replacingOccurrences(of: "%49%48%44%52%00%00%00%01%00%00%00%01",
++                                                with: "%49%48%44%52%00%00%00%02%00%00%00%02")
++        XCTAssertNotEqual(twoByTwo, url)
++        XCTAssertFalse(RootBackgroundPropagation.dataPngIs1x1(twoByTwo))
++        XCTAssertFalse(RootBackgroundPropagation.dataPngIs1x1("data:image/gif,%47%49%46%38%39%61%01%00%01%00"))
++    }
++
++    func testRootBgA4ContainedDoesNotPropagate() throws {
++        // The target + `contain: layout` → off the propagation path (css-contain-2 §2).
++        let json = rootBgTarget.replacingOccurrences(of: "{\"type\":\"Display\",\"data\":\"CONTENTS\"}",
++            with: "{\"type\":\"Display\",\"data\":\"CONTENTS\"},{\"type\":\"Contain\",\"data\":[\"LAYOUT\"]}")
++        XCTAssertNotEqual(json, rootBgTarget)
++        XCTAssertNil(rootBgPlan(try rootBgRoots(json)))
++    }
++
++    @MainActor
++    func testRootBgA5ColourOnlyBodiesAreIdentity() throws {
++        for doc in [rootBgInitial, rootBgA98, rootBgContain] {
++            let roots = try rootBgRoots(doc)
++            XCTAssertNil(rootBgPlan(roots))
++            // No plan → the strip hands back the same components.
++            let out = RootBackgroundPropagation.withCanvasOwnedRootBackground(roots, nil)
++            XCTAssertEqual(out.map(\.properties), roots.map(\.properties))
++        }
++        // And the harness's empty background slot is paint-neutral: the SAME
++        // bytes with and without `.background(<no plan>)`.
++        let none: RootCanvasBackground? = nil
++        let base = Color.clear.frame(width: 390, height: 600).background(Color.white)
++        let withSlot = Color.clear.frame(width: 390, height: 600).background(none).background(Color.white)
++        let a = ImageRenderer(content: base); a.scale = 1
++        let b = ImageRenderer(content: withSlot); b.scale = 1
++        let da = try XCTUnwrap(a.cgImage?.dataProvider?.data) as Data
++        let db = try XCTUnwrap(b.cgImage?.dataProvider?.data) as Data
++        XCTAssertEqual(da, db)
++    }
+ }
+diff --git a/runtimes/web/src/engine/background/RootBackgroundPropagation.ts b/runtimes/web/src/engine/background/RootBackgroundPropagation.ts
+new file mode 100644
+index 0000000..4618a0a
+--- /dev/null
++++ b/runtimes/web/src/engine/background/RootBackgroundPropagation.ts
+@@ -0,0 +1,211 @@
++// RootBackgroundPropagation.ts — wave-53 lane L3 (item A): the ROOT'S
++// background-IMAGE layers propagate to the CANVAS (css-backgrounds-3 §2.11.2).
++//
++// WHY: the three composed canvases propagated the body-root's COLOUR layer
++// only. A root `background-image` (css-display/display-contents-root-
++// background's 1×1 green PNG; css-backgrounds/background-attachment-margin-
++// root-001/-002's gradients) was painted by nobody across the canvas: the
++// body-root is a SIBLING of the flow content in the flat v2 forest, so its own
++// box (empty, or `display: contents`) covers nothing. MEASURED on wave52-ship:
++// all 9 cells f 0.339–0.5355. This file is the PURE rule; the Compose and
++// SwiftUI RootBackgroundPropagation twins implement the same decisions.
++//
++// The rule, per css-backgrounds-3:
++//   §2.11.2 the root's background becomes the canvas background, its painting
++//           area is the whole canvas, and the root does NOT paint it again
++//           (→ withRootBackgroundStripped);
++//   §3.4    a `fixed` layer is positioned relative to the VIEWPORT (the ICB),
++//           a `scroll`/`local` one relative to the root's own box — here the
++//           ICB plus the canvas-owned root margin (the merged html+body bag's
++//           concrete margin, resolveCanvasMargin and its twins);
++//   F2      the capture frame is CHROME: capture-browser-ref.mjs padColorFor
++//           (:728) fills the 16-px image-space frame with the ring colour only
++//           when the rendered ring is uniform, else with the white CANVAS_BG.
++//           A stack that is uniform BY CONSTRUCTION (every layer one sRGBA and
++//           repeating on both axes) may therefore paint the framed surface;
++//           any other stack paints the ICB only and the frame keeps today's
++//           colour-layer value.
++// The containment gate (css-contain-2 §2) is the caller's existing one —
++// passed in as `contained`, so colour and image can never disagree on it.
++
++import type { CSSProperties } from 'react';
++// The engine's own serialisers — the canvas paints byte-identical layer CSS
++// to what the body-root's box would have emitted (no re-implemented parser).
++import { extractBackgroundImage } from './BackgroundImageExtractor';
++import { applyBackgroundImage } from './BackgroundImageApplier';
++import { extractBackgroundSize } from './BackgroundSizeExtractor';
++import { applyBackgroundSize } from './BackgroundSizeApplier';
++import { extractBackgroundRepeat } from './BackgroundRepeatExtractor';
++import { applyBackgroundRepeat } from './BackgroundRepeatApplier';
++// No-silent-fallthrough breadcrumbs for the knobs this rule does not compose.
++import { logUnhandled } from '../PropertyTracker';
++
++/** Minimal IR property shape (decoupled from IRModels, like the extractors). */
++interface IRPropertyLike { type: string; data?: unknown }
++
++/** One image layer's §3.4 attachment keyword. */
++export type RootLayerAttachment = 'scroll' | 'fixed' | 'local';
++
++/** A layer's tile origin in CSS px, relative to the ICB (viewport) corner. */
++export interface RootLayerOrigin { x: number; y: number }
++
++/** The propagation decision for one document's body-root. */
++export interface RootBackgroundPlan {
++  attachments: RootLayerAttachment[];   // per image layer, source order (§2.3 cycling applied)
++  origins: RootLayerOrigin[];           // per image layer, ICB-relative (§3.4)
++  uniform: boolean;                     // F2: the stack paints one colour by construction
++}
++
++/** The image-layer longhands the canvas takes over (the root never repaints them). */
++export const ROOT_BACKGROUND_IMAGE_TYPES: ReadonlySet<string> = new Set([
++  'BackgroundImage', 'BackgroundSize', 'BackgroundRepeat', 'BackgroundAttachment',
++  'BackgroundPosition', 'BackgroundPositionX', 'BackgroundPositionY',
++  'BackgroundPositionInline', 'BackgroundPositionBlock',
++  'BackgroundOrigin', 'BackgroundClip', 'BackgroundBlendMode',
++]);
++
++/** Knobs this rule does not compose with the origin offset (no corpus carrier). */
++const UNMODELLED_TYPES = ['BackgroundPosition', 'BackgroundPositionX', 'BackgroundPositionY',
++  'BackgroundPositionInline', 'BackgroundPositionBlock', 'BackgroundOrigin', 'BackgroundClip',
++  'BackgroundBlendMode'];
++
++/** The raw IR `BackgroundImage` layer list (last declaration wins, like the extractor). */
++function imageLayers(props: IRPropertyLike[]): unknown[] {
++  const d = [...props].reverse().find((p) => p.type === 'BackgroundImage')?.data;   // last wins (cascade)
++  return Array.isArray(d) ? d : d === undefined || d === null ? [] : [d];   // scalar wrap
++}
++
++/** True for a `none` layer (bare string or `{type:'none'}`) — it paints nothing. */
++function isNoneLayer(l: unknown): boolean {
++  return l === 'none' || (typeof l === 'object' && l !== null && (l as { type?: unknown }).type === 'none');  // both shapes
++}
++
++/** Layer i's attachment from the raw `BackgroundAttachment` list (§2.3: lists cycle). */
++function attachmentAt(props: IRPropertyLike[], i: number): RootLayerAttachment {
++  const d = [...props].reverse().find((p) => p.type === 'BackgroundAttachment')?.data;   // `[{type:'scroll'},…]`
++  const list = Array.isArray(d) ? d : d === undefined ? [] : [d];         // scalar wrap
++  if (list.length === 0) return 'scroll';                                 // initial value
++  const e = list[i % list.length];                                        // cyclic pairing
++  const kw = typeof e === 'string' ? e : (e as { type?: unknown } | null)?.type;   // bare or wrapped keyword
++  const lc = typeof kw === 'string' ? kw.toLowerCase() : 'scroll';        // unknown → initial
++  return lc === 'fixed' || lc === 'local' ? lc : 'scroll';                // `local` anchors like scroll (no scroller)
++}
++
++/** One stop colour as a comparable sRGBA key, or null when it is not static sRGB. */
++function stopKey(stop: unknown): string | null | undefined {
++  const c = (stop as { color?: unknown } | null)?.color;                  // the stop's colour leaf
++  if (c === undefined || c === null) return undefined;                    // a hint / shape word: no colour
++  const s = (c as { srgb?: Record<string, unknown> }).srgb;               // the reader's normalized sRGB
++  if (!s || typeof s.r !== 'number') return null;                         // currentColor / var(): unknown
++  return `${s.r},${s.g},${s.b},${typeof s.a === 'number' ? s.a : 1}`;     // alpha defaults to opaque
++}
++
++/** css-images-3 §3: a gradient whose every stop shares one sRGBA paints that colour everywhere. */
++function gradientIsUniform(l: { stops?: unknown }): boolean {
++  if (!Array.isArray(l.stops)) return false;                              // malformed → not uniform
++  const keys = l.stops.map(stopKey).filter((k) => k !== undefined);       // drop colour-less entries
++  return keys.length > 0 && keys.every((k) => k !== null && k === keys[0]);   // one static sRGBA
++}
++
++/** Decode a `data:` URI's payload bytes (base64 or percent-encoded), or null. */
++function dataUriBytes(url: string): Uint8Array | null {
++  const comma = url.indexOf(',');                                         // RFC 2397: header,payload
++  if (!url.startsWith('data:') || comma < 0) return null;                 // not a data URI
++  const header = url.slice(5, comma); const body = url.slice(comma + 1);  // mediatype[;base64] , payload
++  try {                                                                   // atob throws on bad base64
++    if (/;base64$/i.test(header)) return Uint8Array.from(atob(body), (ch) => ch.charCodeAt(0));
++    // Percent-encoding: decode %XX per byte (a binary PNG is not valid UTF-8).
++    const out: number[] = [];                                             // the raw bytes
++    for (let i = 0; i < body.length; i++) {                               // %XX → one byte, else verbatim
++      if (body[i] === '%' && i + 2 < body.length) { out.push(parseInt(body.slice(i + 1, i + 3), 16)); i += 2; }
++      else out.push(body.charCodeAt(i) & 0xff);                         // a literal byte
++    }
++    return Uint8Array.from(out);                                          // the raw PNG bytes
++  } catch { return null; }                                                // bad base64 → unknown
++}
++
++/** PNG (ISO 15948 §5.2/§11.2.2): signature, then IHDR width/height — true iff 1×1. */
++export function dataPngIs1x1(url: string): boolean {
++  if (!/^data:image\/png[;,]/i.test(url)) return false;                   // PNG data URIs only
++  const b = dataUriBytes(url);                                            // RFC 2397 payload
++  if (!b || b.length < 24) return false;                                  // no full IHDR
++  const sig = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];          // the PNG signature
++  if (!sig.every((v, i) => b[i] === v)) return false;                     // not a PNG
++  if (String.fromCharCode(b[12], b[13], b[14], b[15]) !== 'IHDR') return false;   // first chunk = IHDR
++  const be32 = (o: number) => ((b[o] << 24) | (b[o + 1] << 16) | (b[o + 2] << 8) | b[o + 3]) >>> 0;  // big-endian
++  return be32(16) === 1 && be32(20) === 1;                                // width, height
++}
++
++/** One layer paints a single colour across its tile (F2's per-layer test). */
++function layerIsUniform(l: unknown): boolean {
++  if (isNoneLayer(l)) return true;                                        // transparent everywhere
++  if (typeof l !== 'object' || l === null) return false;                  // bare URL string: unknown pixels
++  const o = l as { type?: unknown; url?: unknown; stops?: unknown };                    // url layer or gradient layer
++  if (typeof o.url === 'string') return dataPngIs1x1(o.url);              // a 1×1 raster tile
++  return typeof o.type === 'string' && /gradient$/.test(o.type) && gradientIsUniform(o);   // plain or repeating
++}
++
++/** §3.7: one raw repeat entry is `repeat` on both axes (string tokens or an {x,y} pair). */
++function entryRepeatsBoth(e: unknown): boolean {
++  const isRepeat = (v: unknown) => typeof v === 'string' && v.toLowerCase() === 'repeat';   // one axis keyword
++  if (typeof e === 'string') return e.trim().split(/\s+/).every(isRepeat);  // 'repeat' / 'repeat repeat'
++  const o = e as { x?: unknown; y?: unknown } | null;                     // any other keyword: a gap or one tile
++  return !!o && typeof o === 'object' && isRepeat(o.x) && isRepeat(o.y);  // axis-pair shape
++}
++
++/** §3.7: every layer repeats on BOTH axes (absent leaf = initial `repeat`). */
++function repeatsBothAxes(props: IRPropertyLike[]): boolean {
++  const d = [...props].reverse().find((p) => p.type === 'BackgroundRepeat')?.data;   // e.g. ['no-repeat']
++  const list = Array.isArray(d) ? d : d === undefined ? [] : [d];         // scalar wrap
++  return list.every(entryRepeatsBoth);                                    // [] → initial repeat
++}
++
++/**
++ * The propagation plan for one body-root, or null when nothing propagates:
++ * no image layer, only `none` layers, or containment (`contained`, the
++ * caller's existing css-contain-2 §2 gate). `rootMargin` is the concrete
++ * root margin the canvas owns (top/left in CSS px).
++ */
++export function rootBackgroundPlan(
++  props: IRPropertyLike[], rootMargin: { top: number; left: number }, contained: boolean,
++): RootBackgroundPlan | null {
++  if (contained) return null;                                             // off the propagation path
++  const layers = imageLayers(props);                                      // the raw per-layer list
++  if (layers.length === 0 || layers.every(isNoneLayer)) return null;      // nothing to paint
++  // Breadcrumb every knob the origin offset does not compose with (no carrier).
++  for (const t of UNMODELLED_TYPES) {                                     // no corpus carrier pairs these
++    if (props.some((p) => p.type === t)) logUnhandled(t, 'root canvas background: positioning area not modelled');
++  }
++  const attachments = layers.map((_, i) => attachmentAt(props, i));       // §3.4 per layer
++  // §3.4: fixed → the viewport corner; scroll/local → the root box's padding edge.
++  const origins = attachments.map((a) => (a === 'fixed' ? { x: 0, y: 0 } : { x: rootMargin.left, y: rootMargin.top }));
++  // F2: every layer one colour AND repeating on both axes (no gaps) ⇒ the ring is uniform.
++  return { attachments, origins, uniform: layers.every(layerIsUniform) && repeatsBothAxes(props) };
++}
++
++/**
++ * The canvas-surface CSS for a plan. `base` is where the ICB corner sits
++ * inside the painted surface — 0 when painting the ICB div itself, the 16-px
++ * frame when painting the framed outer div. Attachment is always `scroll`: a verbatim
++ * `fixed` would anchor to the GALLERY page's viewport, not the test's (§3.4
++ * is realised through the per-layer origin instead).
++ */
++export function rootCanvasBackgroundStyle(
++  props: IRPropertyLike[], plan: RootBackgroundPlan, base: number,
++): CSSProperties {
++  const n = plan.origins.length;                                          // one entry per layer
++  return {
++    ...applyBackgroundImage(extractBackgroundImage(props as never)),      // the layers' own CSS
++    ...applyBackgroundSize(extractBackgroundSize(props as never)),        // §3.9 sizes, verbatim
++    ...applyBackgroundRepeat(extractBackgroundRepeat(props as never)),    // §3.7 repeats, verbatim
++    backgroundPosition: plan.origins.map((o) => `${o.x + base}px ${o.y + base}px`).join(', '),
++    backgroundOrigin: Array(n).fill('padding-box').join(', '),            // the surface's own corner
++    backgroundClip: Array(n).fill('border-box').join(', '),               // §2.11.2: the whole surface
++    backgroundAttachment: Array(n).fill('scroll').join(', '),             // never the gallery viewport
++  };
++}
++
++/** §2.11.2 "not painted again": the body-root's properties minus the image layers. */
++export function withRootBackgroundStripped<P extends IRPropertyLike>(props: P[]): P[] {
++  return props.filter((p) => !ROOT_BACKGROUND_IMAGE_TYPES.has(p.type));
++}
+diff --git a/runtimes/web/tests/background/RootBackgroundPropagation.test.ts b/runtimes/web/tests/background/RootBackgroundPropagation.test.ts
+new file mode 100644
+index 0000000..ec638c2
+--- /dev/null
++++ b/runtimes/web/tests/background/RootBackgroundPropagation.test.ts
+@@ -0,0 +1,106 @@
++// wave-53 lane L3 (item A) — pins for the PURE root-background propagation
++// rule (runtimes/web/src/engine/background/RootBackgroundPropagation.ts),
++// css-backgrounds-3 §2.11.2 / §3.4 + the capture-frame F2 rule.
++//
++// Every body-root bag is VERBATIM from tools/titan/runs/wave52-ship/sections/
++// <section>/per-test-ir/ (byte-identical to wave53-open). The harness wiring
++// (which surface paints, the forest strip, colour-only deep-equality) is pinned
++// separately in apps/web-harness/tests/ui/ComposedCanvasRootBackgroundImage.test.tsx.
++//
++// EXECUTED MUTATIONS (applied to RootBackgroundPropagation.ts, this file run
++// alone, source restored byte-exact — sha256 logged in
++// tools/titan/results/wave53-canvas-root/_note.md):
++//   RW1 every stack uniform (`uniform: true`)          → a2_marginRoot001 red.
++//   RW2 attachment ignored (every layer `scroll`)      → a2_marginRoot002 red.
++//   RW3 dataPngIs1x1 returns true for any PNG url      → a3_ihdr2x2 red.
++//   RW4 the `contained` gate dropped                   → a4_contained red.
++
++import { describe, it, expect } from 'vitest';
++import {
++  rootBackgroundPlan, rootCanvasBackgroundStyle, withRootBackgroundStripped, dataPngIs1x1,
++} from '../../src/engine/background/RootBackgroundPropagation';
++
++/** css-display/display-contents-root-background root 0 (`:root { display: contents; background-image: url(1x1-green.png) }`). */
++const BODY_TARGET = {"id":"wpt__css-display__display-contents-root-background__0-234","name":"wpt__css-display__display-contents-root-background__0","properties":[{"type":"Display","data":"CONTENTS"},{"type":"BackgroundImage","data":[{"url":"data:image/png,%89%50%4e%47%0d%0a%1a%0a%00%00%00%0d%49%48%44%52%00%00%00%01%00%00%00%01%01%03%00%00%00%25%db%56%ca%00%00%00%04%67%41%4d%41%00%00%af%c8%37%05%8a%e9%00%00%00%03%50%4c%54%45%00%80%00%9c%f9%a5%91%00%00%00%0a%49%44%41%54%78%da%63%60%00%00%00%02%00%01%e5%27%de%fc%00%00%00%19%74%45%58%74%53%6f%66%74%77%61%72%65%00%41%64%6f%62%65%20%49%6d%61%67%65%52%65%61%64%79%71%c9%65%3c%00%00%00%00%49%45%4e%44%ae%42%60%82","data":true}]}],"meta":{"role":"body-root"}};
++/** css-backgrounds/background-attachment-margin-root-001 root 0 (`scroll, fixed`). */
++const BODY_MR001 = {"id":"wpt__css-backgrounds__background-attachment-margin-root-001__0-091","name":"wpt__css-backgrounds__background-attachment-margin-root-001__0","properties":[{"type":"BackgroundImage","data":[{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":1,"b":0,"a":0.5},"original":{"r":0,"g":255,"b":0,"a":0.5}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":1,"a":0.5},"original":{"r":0,"g":0,"b":255,"a":0.5}},"position":null}]},{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null}]}]},{"type":"BackgroundAttachment","data":[{"type":"scroll"},{"type":"fixed"}]},{"type":"BackgroundSize","data":[{"w":{"px":100},"h":{"px":100}},{"w":{"px":100},"h":{"px":100}}]},{"type":"Height","data":{"type":"length","px":300}},{"type":"MarginTop","data":{"px":50}},{"type":"MarginRight","data":{"px":50}},{"type":"MarginBottom","data":{"px":50}},{"type":"MarginLeft","data":{"px":50}}],"meta":{"role":"body-root"}};
++/** css-backgrounds/background-attachment-margin-root-002 root 0 (`fixed, scroll`). */
++const BODY_MR002 = {"id":"wpt__css-backgrounds__background-attachment-margin-root-002__0-092","name":"wpt__css-backgrounds__background-attachment-margin-root-002__0","properties":[{"type":"BackgroundImage","data":[{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":1,"b":0,"a":0.5},"original":{"r":0,"g":255,"b":0,"a":0.5}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":1,"a":0.5},"original":{"r":0,"g":0,"b":255,"a":0.5}},"position":null}]},{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null}]}]},{"type":"BackgroundAttachment","data":[{"type":"fixed"},{"type":"scroll"}]},{"type":"BackgroundSize","data":[{"w":{"px":100},"h":{"px":100}},{"w":{"px":100},"h":{"px":100}}]},{"type":"Height","data":{"type":"length","px":300}},{"type":"MarginTop","data":{"px":50}},{"type":"MarginRight","data":{"px":50}},{"type":"MarginBottom","data":{"px":50}},{"type":"MarginLeft","data":{"px":50}}],"meta":{"role":"body-root"}};
++/** css-cascade/initial-background-color root 0 (colour only). */
++const BODY_INITIAL_BG = {"id":"wpt__css-cascade__initial-background-color__0-033","name":"wpt__css-cascade__initial-background-color__0","properties":[{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"}],"meta":{"role":"body-root"}};
++/** css-color/a98rgb-003 root 0 (colour only). */
++const BODY_A98 = {"id":"wpt__css-color__a98rgb-003__0-005","name":"wpt__css-color__a98rgb-003__0","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.5019607843137255,"g":0.5019607843137255,"b":0.5019607843137255},"original":"grey"}}],"meta":{"role":"body-root"}};
++
++/** The target's data-URI layer URL, read from the verbatim bag. */
++const TARGET_URL = (BODY_TARGET.properties[1].data as Array<{ url: string }>)[0].url;
++/** The canonical canvas-owned margins: none for the target, 50 px for the margin-root pair. */
++const NO_MARGIN = { top: 0, left: 0 };
++const M50 = { top: 50, left: 50 };
++
++describe('rootBackgroundPlan — css-backgrounds-3 §2.11.2 / §3.4', () => {
++  it('a1_target_oneUniformLayer_withThatUrl', () => {
++    // One `scroll` image layer, ICB-relative origin (0,0), uniform (1×1 PNG, repeat).
++    expect(rootBackgroundPlan(BODY_TARGET.properties, NO_MARGIN, false)).toEqual({
++      attachments: ['scroll'], origins: [{ x: 0, y: 0 }], uniform: true });
++    // The canvas paints exactly that URL (the engine's own url() serialiser).
++    const css = rootCanvasBackgroundStyle(BODY_TARGET.properties,
++      rootBackgroundPlan(BODY_TARGET.properties, NO_MARGIN, false)!, 16);
++    expect(css.backgroundImage).toBe(`url("${TARGET_URL}")`);
++    // Framed surface: the origin rides the 16-px frame.
++    expect(css.backgroundPosition).toBe('16px 16px');
++  });
++
++  it('a1_strip_removesTheImageKeys_keepsDisplay', () => {
++    // §2.11.2 "not painted again": the forest node keeps only Display.
++    expect(withRootBackgroundStripped(BODY_TARGET.properties).map((p) => p.type)).toEqual(['Display']);
++  });
++
++  it('a2_marginRoot001_notUniform_scrollAtRootBox_fixedAtIcb', () => {
++    // Layer 0 is a real green→blue ramp → not uniform → ICB-only (F2).
++    expect(rootBackgroundPlan(BODY_MR001.properties, M50, false)).toEqual({
++      attachments: ['scroll', 'fixed'], origins: [{ x: 50, y: 50 }, { x: 0, y: 0 }], uniform: false });
++  });
++
++  it('a2_marginRoot002_isTheMirror', () => {
++    // `fixed, scroll`: the top layer anchors at the viewport (ICB) corner.
++    expect(rootBackgroundPlan(BODY_MR002.properties, M50, false)?.origins)
++      .toEqual([{ x: 0, y: 0 }, { x: 50, y: 50 }]);
++  });
++
++  it('a2_style_neverPassesFixedThrough_andKeepsSizes', () => {
++    const plan = rootBackgroundPlan(BODY_MR001.properties, M50, false)!;
++    const css = rootCanvasBackgroundStyle(BODY_MR001.properties, plan, 0);
++    // A verbatim `fixed` would anchor to the gallery page's viewport.
++    expect(css.backgroundAttachment).toBe('scroll, scroll');
++    // ICB surface: the origins are the plan's own (base 0).
++    expect(css.backgroundPosition).toBe('50px 50px, 0px 0px');
++    expect(css.backgroundSize).toBe('100px 100px, 100px 100px');
++  });
++
++  it('a3_ihdr1x1_isUniform_ihdr2x2_isNot', () => {
++    expect(dataPngIs1x1(TARGET_URL)).toBe(true);
++    // The SAME payload with IHDR width/height patched to 2.
++    const twoByTwo = TARGET_URL.replace('%49%48%44%52%00%00%00%01%00%00%00%01', '%49%48%44%52%00%00%00%02%00%00%00%02');
++    expect(twoByTwo).not.toBe(TARGET_URL);
++    expect(dataPngIs1x1(twoByTwo)).toBe(false);
++    // …and the plan follows: a 2×2 tile is never stretched into the frame.
++    const props = BODY_TARGET.properties.map((p) => p.type === 'BackgroundImage'
++      ? { ...p, data: [{ url: twoByTwo, data: true }] } : p);
++    expect(rootBackgroundPlan(props, NO_MARGIN, false)?.uniform).toBe(false);
++    // A non-PNG data URI is never "uniform by construction".
++    expect(dataPngIs1x1('data:image/gif,%47%49%46%38%39%61%01%00%01%00')).toBe(false);
++  });
++
++  it('a4_contained_noPropagation', () => {
++    // css-contain-2 §2: the caller's containment gate takes the root off the path.
++    expect(rootBackgroundPlan([...BODY_TARGET.properties, { type: 'Contain', data: ['LAYOUT'] }], NO_MARGIN, true)).toBeNull();
++  });
++
++  it('a5_colourOnlyBodies_noImagePlan', () => {
++    // Colour handling is untouched: no image layer → no plan at all.
++    expect(rootBackgroundPlan(BODY_INITIAL_BG.properties, NO_MARGIN, false)).toBeNull();
++    expect(rootBackgroundPlan(BODY_A98.properties, NO_MARGIN, false)).toBeNull();
++    // A lone `none` layer paints nothing either.
++    expect(rootBackgroundPlan([{ type: 'BackgroundImage', data: ['none'] }], NO_MARGIN, false)).toBeNull();
++  });
++});

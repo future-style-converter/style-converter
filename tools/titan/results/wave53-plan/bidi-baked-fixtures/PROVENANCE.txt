@@ -1,0 +1,33 @@
+# tools/titan/results/wave53-plan/bidi-baked-fixtures/ — a frozen copy of the 17 extracted fixtures whose
+# `_wpt.bidiBaked` is true (plan-skeptic round 2, nit 12). rtl-marker-bake.padding-census.py reads THIS directory by
+# default: the live fixtures/wpt/ is gitignored and rewritten by every gate (wave53-open was rewriting it while the census
+# first ran), so a census over it answers for "whatever the last gate extracted", not for a named run.
+#
+# Copied 2026-10-07 ~03:15 CEST from fixtures/wpt/, while wave53-open was still running (it had extracted 26 of 30
+# sections). Which extraction wrote each file, by mtime against the run directories under tools/titan/runs/:
+#   wave53-open  css-anchor-position (01:13), css-backgrounds (01:16), css-counter-styles (01:27), css-text (01:58)  — 12 files
+#   wave52-ship  selectors (2026-10-06 01:06 = wave52-ship's selectors per-test IR, 01:06)                            —  4 files
+#   unidentified css-writing-modes (2026-10-06 01:49: after wave52-ship's fixture net at 01:27; no run directory has a
+#                css-writing-modes section at that time)                                                               —  1 file
+# The census answer does not depend on the unidentified file: its bake root carries no padding* key.
+# Per-test IR is byte-identical between wave52-ship and wave53-open in every section both had finished at planning time
+# (PLAN.md header), so the 12 + 4 files describe the same wire either way.
+#
+# <relative path> <sha1> <mtime of the source file> <bytes> <extracting run>
+css-anchor-position/anchor-center-safe-rtl.json 0ea434db6f403f9454b5bc7fbdabc8efe270d197 2026-10-07T01:13 9472 wave53-open
+css-backgrounds/background-attachment-local__attachment-local-positioning-3.json 5ed9e5470e9e3087afcac88877cd6301c7def6c1 2026-10-07T01:16 3498 wave53-open
+css-backgrounds/background-attachment-local__attachment-local-positioning-4.json 3e423ab887c5a1a717e8b849c8964f2185e7bc36 2026-10-07T01:16 3449 wave53-open
+css-counter-styles/arabic-indic__css3-counter-styles-101.json 853e658e2a2bbefeb5a88f794e50ec1d69bdb996 2026-10-07T01:27 16712 wave53-open
+css-counter-styles/arabic-indic__css3-counter-styles-102.json d4ec6ebfb59d016075c702225c22c5fec4b33538 2026-10-07T01:27 51987 wave53-open
+css-counter-styles/arabic-indic__css3-counter-styles-103.json b22dab1f573a09fcf6c3777c1c5be8878c82606d 2026-10-07T01:27 4683 wave53-open
+css-counter-styles/counter-suffix.json 6d4ae51bc39e0fd5d4f4e1285bb8056671279e2b 2026-10-07T01:27 13680 wave53-open
+css-text/bidi__bidi-lines-001.json 61d8a3ce6af688feb8703ebfc77023c2e66e4941 2026-10-07T01:58 9218 wave53-open
+css-text/bidi__bidi-lines-002.json 51daea969744ccf6b0bba7413c6d028f2f7de830 2026-10-07T01:58 9981 wave53-open
+css-text/bidi__bidi-tab-001.json 82153b4e1d0bfff378cfed91faa9d7284016e8a1 2026-10-07T01:58 14722 wave53-open
+css-text/boundary-shaping__boundary-shaping-009.json 235e5a1e0317a8c745619606c04b9a9de7954585 2026-10-07T01:58 20403 wave53-open
+css-text/hyphens__hyphenate-character-005.json 62b2c472e7cefe112e33a34556f407978f2071bc 2026-10-07T01:58 9901 wave53-open
+css-writing-modes/bidi-plaintext-br-001.json 8095e25e2705937ca0e0e34074a6e579cfe1ee2f 2026-10-06T01:49 14703 unidentified-2026-10-06T01:49
+selectors/dir-selector-change-003.json 261660c4709394b1353044f5a1cbce60efc39f25 2026-10-06T01:06 6845 wave52-ship
+selectors/dir-selector-change-004.json 57b15cc01cc348ee28b2c68177989cc7928f407d 2026-10-06T01:06 6897 wave52-ship
+selectors/dir-style-02a.json 2e32e283540f2b0490909c9fa5ac778213c87e2a 2026-10-06T01:06 29856 wave52-ship
+selectors/dir-style-03a.json f89da5cd152ee018caabbc6dc693ee61465b5c06 2026-10-06T01:06 2305 wave52-ship

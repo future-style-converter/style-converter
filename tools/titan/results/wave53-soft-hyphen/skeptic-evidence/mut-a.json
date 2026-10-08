@@ -1,0 +1,16 @@
+{
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt",
+ "sha256_before": "0915c0a221cbc284e0ce9e5cf9f3ec1986377cc0e7fac63fc4e9a2b14f9bd677",
+ "sha256_restored": "0915c0a221cbc284e0ce9e5cf9f3ec1986377cc0e7fac63fc4e9a2b14f9bd677",
+ "red_exit": 1,
+ "red_ran": 20,
+ "red_failing": [
+  "PreBreakPipelineTest.aMultiOpportunitySpacelessRunSplitsIntoFiveLines",
+  "PreBreakPipelineTest.aSpacelessSoftHyphenRunFiresWithTheTakenHyphen"
+ ],
+ "green_exit": 0,
+ "green_ran": 20,
+ "green_failing": [],
+ "mutation_old": "if (text.indexOf(' ') < 0 && text.indexOf('\\u00AD') < 0) return identity",
+ "mutation_new": "if (text.indexOf(' ') < 0) return identity"
+}

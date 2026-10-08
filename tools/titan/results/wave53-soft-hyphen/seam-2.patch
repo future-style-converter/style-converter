@@ -1,0 +1,22 @@
+# wave53 L2 (soft-hyphen) seam-2 — Compose runs-fold breadcrumb names droppedOutOfFlowMembers (PLAN §3 row 4, §9 D2).
+# Base: campaign/applier-campaign @ e330e255 — ComponentRenderer.kt byte-identical to dev cdb8a845 (sha256 e6c2a650ac435a58a8d6cd3412514e8e3bc545f9e0b4a4c4ba996ed946c54adb).
+# Needs, in the SAME commit: runtimes/compose/.../typography/inline/InlineRunFold.kt (Outcome.Folded.droppedOutOfFlowMembers) + InertOutOfFlowMember.kt.
+# Apply from the repo root: git apply tools/titan/results/wave53-soft-hyphen/seam-2.patch
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -3830,6 +3830,15 @@
+                                             (if (runFold.adoptedHyphens) ", member hyphens adopted" else "") +
+                                             (if (runFold.droppedEmptyMembers > 0)
+                                                 ", ${runFold.droppedEmptyMembers} empty member(s) dropped" else "") +
++                                            // Wave 53 (lane L2, F2) — a paint-inert OUT-OF-FLOW
++                                            // member (abspos/fixed with transparent ink —
++                                            // InertOutOfFlowMember) left the mounted tree: the
++                                            // count is named here so the removal is never
++                                            // silent (its unmodelled static position is the
++                                            // stated loss). 0 for every pre-wave-53 fold, so
++                                            // those breadcrumbs read byte-identically.
++                                            (if (runFold.droppedOutOfFlowMembers > 0)
++                                                ", ${runFold.droppedOutOfFlowMembers} out-of-flow member(s) dropped" else "") +
+                                             // Wave 47 (lane Z6) — the styled-span ring's
+                                             // breadcrumbs: how many member ranges carry
+                                             // attribution, and any STATED LOSS (border box

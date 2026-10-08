@@ -1,0 +1,500 @@
+{
+  "_wpt": {
+    "test": "css/css-writing-modes/bidi-plaintext-br-001.html",
+    "ref": "css/css-writing-modes/reference/bidi-plaintext-br-001-ref.html",
+    "bucket": "A",
+    "lossy": true,
+    "lossyReasons": [
+      "baked-bidi-visual-order"
+    ],
+    "specSection": "css-writing-modes",
+    "bidiBaked": true
+  },
+  "components": {
+    "bidi-plaintext-br-001__0": {
+      "properties": {
+        "font-family": "Arial",
+        "line-height": "1",
+        "width": "90.98px",
+        "border": "1px solid blue",
+        "unicode-bidi": "normal",
+        "height": "34px",
+        "box-sizing": "border-box",
+        "direction": "ltr",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ],
+      "children": {
+        "bidi-plaintext-br-001__0__0": {
+          "id": "bidi-plaintext-br-001__0__0",
+          "properties": {
+            "position": "absolute",
+            "left": "16.92px",
+            "top": "-1px",
+            "width": "72.07px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "אאאאאאאא"
+        },
+        "bidi-plaintext-br-001__0__1": {
+          "id": "bidi-plaintext-br-001__0__1",
+          "properties": {
+            "position": "absolute",
+            "left": "22.34px",
+            "top": "15px",
+            "width": "66.65px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "MMMMM"
+        }
+      }
+    },
+    "bidi-plaintext-br-001__1": {
+      "properties": {
+        "font-family": "Arial",
+        "line-height": "1",
+        "width": "90.98px",
+        "border": "1px solid blue",
+        "unicode-bidi": "normal",
+        "height": "34px",
+        "box-sizing": "border-box",
+        "direction": "ltr",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ],
+      "children": {
+        "bidi-plaintext-br-001__1__0": {
+          "id": "bidi-plaintext-br-001__1__0",
+          "properties": {
+            "position": "absolute",
+            "left": "0px",
+            "top": "-1px",
+            "width": "66.64px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "MMMMM"
+        },
+        "bidi-plaintext-br-001__1__1": {
+          "id": "bidi-plaintext-br-001__1__1",
+          "properties": {
+            "position": "absolute",
+            "left": "0px",
+            "top": "15px",
+            "width": "72.07px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "אאאאאאאא"
+        }
+      }
+    },
+    "bidi-plaintext-br-001__2": {
+      "properties": {
+        "font-family": "Arial",
+        "line-height": "1",
+        "width": "90.98px",
+        "border": "1px solid blue",
+        "unicode-bidi": "normal",
+        "height": "50px",
+        "box-sizing": "border-box",
+        "direction": "ltr",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "children": {
+        "bidi-plaintext-br-001__2__0": {
+          "id": "bidi-plaintext-br-001__2__0",
+          "properties": {
+            "width": "0px",
+            "height": "0px",
+            "display": "none"
+          },
+          "_role": "line-break",
+          "_tag": "br"
+        },
+        "bidi-plaintext-br-001__2__1": {
+          "id": "bidi-plaintext-br-001__2__1",
+          "properties": {
+            "position": "absolute",
+            "left": "0px",
+            "top": "-1px",
+            "width": "8.91px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "a"
+        },
+        "bidi-plaintext-br-001__2__2": {
+          "id": "bidi-plaintext-br-001__2__2",
+          "properties": {
+            "position": "absolute",
+            "left": "16.92px",
+            "top": "15px",
+            "width": "72.07px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "אאאאאאאא"
+        },
+        "bidi-plaintext-br-001__2__3": {
+          "id": "bidi-plaintext-br-001__2__3",
+          "properties": {
+            "position": "absolute",
+            "left": "22.34px",
+            "top": "31px",
+            "width": "66.65px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "MMMMM"
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ]
+    },
+    "bidi-plaintext-br-001__3": {
+      "properties": {
+        "font-family": "Arial",
+        "line-height": "1",
+        "width": "90.98px",
+        "border": "1px solid blue",
+        "unicode-bidi": "normal",
+        "height": "50px",
+        "box-sizing": "border-box",
+        "direction": "ltr",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "children": {
+        "bidi-plaintext-br-001__3__0": {
+          "id": "bidi-plaintext-br-001__3__0",
+          "properties": {
+            "width": "0px",
+            "height": "0px",
+            "display": "none"
+          },
+          "_role": "line-break",
+          "_tag": "br"
+        },
+        "bidi-plaintext-br-001__3__1": {
+          "id": "bidi-plaintext-br-001__3__1",
+          "properties": {
+            "position": "absolute",
+            "left": "0px",
+            "top": "-1px",
+            "width": "8.91px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "a"
+        },
+        "bidi-plaintext-br-001__3__2": {
+          "id": "bidi-plaintext-br-001__3__2",
+          "properties": {
+            "position": "absolute",
+            "left": "0px",
+            "top": "15px",
+            "width": "66.64px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "MMMMM"
+        },
+        "bidi-plaintext-br-001__3__3": {
+          "id": "bidi-plaintext-br-001__3__3",
+          "properties": {
+            "position": "absolute",
+            "left": "0px",
+            "top": "31px",
+            "width": "72.07px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "אאאאאאאא"
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ]
+    },
+    "bidi-plaintext-br-001__4": {
+      "properties": {
+        "font-family": "Arial",
+        "line-height": "1",
+        "width": "90.98px",
+        "border": "1px solid blue",
+        "unicode-bidi": "normal",
+        "height": "50px",
+        "box-sizing": "border-box",
+        "direction": "ltr",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "children": {
+        "bidi-plaintext-br-001__4__0": {
+          "id": "bidi-plaintext-br-001__4__0",
+          "properties": {
+            "width": "0px",
+            "height": "0px",
+            "display": "none"
+          },
+          "_role": "line-break",
+          "_tag": "br"
+        },
+        "bidi-plaintext-br-001__4__1": {
+          "id": "bidi-plaintext-br-001__4__1",
+          "properties": {
+            "position": "absolute",
+            "left": "79.97px",
+            "top": "-1px",
+            "width": "9.02px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "א"
+        },
+        "bidi-plaintext-br-001__4__2": {
+          "id": "bidi-plaintext-br-001__4__2",
+          "properties": {
+            "position": "absolute",
+            "left": "16.92px",
+            "top": "15px",
+            "width": "72.07px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "אאאאאאאא"
+        },
+        "bidi-plaintext-br-001__4__3": {
+          "id": "bidi-plaintext-br-001__4__3",
+          "properties": {
+            "position": "absolute",
+            "left": "22.34px",
+            "top": "31px",
+            "width": "66.65px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "MMMMM"
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ]
+    },
+    "bidi-plaintext-br-001__5": {
+      "properties": {
+        "font-family": "Arial",
+        "line-height": "1",
+        "width": "90.98px",
+        "border": "1px solid blue",
+        "unicode-bidi": "normal",
+        "height": "50px",
+        "box-sizing": "border-box",
+        "direction": "ltr",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "children": {
+        "bidi-plaintext-br-001__5__0": {
+          "id": "bidi-plaintext-br-001__5__0",
+          "properties": {
+            "width": "0px",
+            "height": "0px",
+            "display": "none"
+          },
+          "_role": "line-break",
+          "_tag": "br"
+        },
+        "bidi-plaintext-br-001__5__1": {
+          "id": "bidi-plaintext-br-001__5__1",
+          "properties": {
+            "position": "absolute",
+            "left": "79.97px",
+            "top": "-1px",
+            "width": "9.02px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "א"
+        },
+        "bidi-plaintext-br-001__5__2": {
+          "id": "bidi-plaintext-br-001__5__2",
+          "properties": {
+            "position": "absolute",
+            "left": "0px",
+            "top": "15px",
+            "width": "66.64px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "MMMMM"
+        },
+        "bidi-plaintext-br-001__5__3": {
+          "id": "bidi-plaintext-br-001__5__3",
+          "properties": {
+            "position": "absolute",
+            "left": "0px",
+            "top": "31px",
+            "width": "72.07px",
+            "height": "17px",
+            "line-height": "17px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Arial",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "אאאאאאאא"
+        }
+      },
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ]
+    }
+  }
+}

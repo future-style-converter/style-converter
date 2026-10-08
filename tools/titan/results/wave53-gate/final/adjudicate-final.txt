@@ -1,0 +1,54 @@
+record  wave53-open → wave53-final
+  prev  web 1229/1372  ios 1119/1362  android 1111/1362
+  cur   web 1232/1372  ios 1125/1362  android 1115/1362
+  gained 13  lost 0  newly-measured 0  unmeasured-now 0  movers 13
+
+ok   R1  lost 0; pre-registered 0; outside the list 0
+ok   R2  unmeasured-now 0 (unexpected 0), newly measured 0 (unexpected 0)
+ok   R3  missing sections 0, short columns 0
+
+predictions (gating ones enforced):
+    L1-lists-bakes  css-lists/counter-reset-reversed-nested.html web: predicted P 0.9506 → P >= 0.995 (HIGH, gating, floor 0.995) — measured P 1
+    L1-lists-bakes  css-lists/counter-reset-reversed-nested.html ios: predicted P 0.9508 → P >= 0.99 (MED-HIGH, gating, floor 0.99) — measured P 0.9989
+    L1-lists-bakes  css-lists/counter-reset-reversed-nested.html android: predicted P 0.9509 → P >= 0.99 (MED) — measured P 0.9852
+  ~ L1-lists-bakes  css-counter-styles/counter-suffix.html web: WITHDRAWN at wave53-probe (its unit was reverted — probeDecisions); held to must-not-move instead
+  ~ L1-lists-bakes  css-counter-styles/counter-suffix.html ios: WITHDRAWN at wave53-probe (its unit was reverted — probeDecisions); held to must-not-move instead
+  ~ L1-lists-bakes  css-counter-styles/counter-suffix.html android: WITHDRAWN at wave53-probe (its unit was reverted — probeDecisions); held to must-not-move instead
+  ~ L1-lists-bakes  css-text/bidi/bidi-lines-002.html android: WITHDRAWN at wave53-probe (its unit was reverted — probeDecisions); held to must-not-move instead
+  ~ L1-lists-bakes  css-text/bidi/bidi-lines-001.html android: WITHDRAWN at wave53-probe (its unit was reverted — probeDecisions); held to must-not-move instead
+    L2-soft-hyphen  css-text/hyphens/hyphens-span-001.html android: predicted P 0.9532 DEGENERATE → P ~0.994 (HIGH, gating, floor 0.99) — measured P 0.9937
+    L2-soft-hyphen  css-text/hyphens/hyphens-out-of-flow-001.html android: predicted P 0.9685 DEGENERATE → P ~0.994 (F1+F2; F1 alone ~0.975) (MED-HIGH, gating, floor 0.985) — measured P 0.9943
+    L2-soft-hyphen  css-text/hyphens/hyphens-out-of-flow-002.html android: predicted P 0.982 DEGENERATE → P ~0.994 (F2) (MED-HIGH, gating, floor 0.985) — measured P 0.9943
+    L2-soft-hyphen  css-text/hyphens/hyphens-span-001.html ios: predicted f 0.8652 → P ~0.99 (MED-HIGH, gating, floor 0.98) — measured P 0.9968
+    L2-soft-hyphen  css-text/hyphens/hyphens-out-of-flow-001.html ios: predicted f 0.8935 → P ~0.99 (MED) — measured P 0.9971
+    L2-soft-hyphen  css-text/hyphens/hyphenate-character-001.html android: predicted f 0.9136 → up (MED) — measured f 0.9301
+    L2-soft-hyphen  css-text/hyphens/hyphenate-character-003.html android: predicted f 0.9168 → up (MED) — measured f 0.9292
+    L2-soft-hyphen  css-text/hyphens/hyphenate-character-004.html android: predicted f 0.9041 → small (LOW) — measured unchanged (not in any list)
+    L2-soft-hyphen  css-text/hyphens/hyphenate-character-001.html ios: predicted f 0.9287 → small (LOW) — measured unchanged (not in any list)
+    L2-soft-hyphen  css-text/hyphens/hyphenate-character-003.html ios: predicted f 0.9337 → small (LOW) — measured unchanged (not in any list)
+    L2-soft-hyphen  css-text/hyphens/hyphenate-character-004.html ios: predicted f 0.9134 → small (LOW) — measured unchanged (not in any list)
+    L3-canvas-root  css-display/display-contents-root-background.html web: predicted f 0.534 → P (replay 1.0000) (HIGH, gating, floor 0.99) — measured P 1
+    L3-canvas-root  css-display/display-contents-root-background.html ios: predicted f 0.5346 → P (replay 0.9995) (HIGH, gating, floor 0.99) — measured P 0.9995
+    L3-canvas-root  css-display/display-contents-root-background.html android: predicted f 0.5355 → P (replay 0.9991) (HIGH, gating, floor 0.99) — measured P 0.9989
+    L3-canvas-root  css-backgrounds/background-attachment-margin-root-001.html web: predicted f 0.4511 → P (replay 0.9996) (MED) — measured P 1
+    L3-canvas-root  css-backgrounds/background-attachment-margin-root-001.html ios: predicted f 0.4509 → P (replay 0.9992) (MED) — measured P 0.9995
+    L3-canvas-root  css-backgrounds/background-attachment-margin-root-001.html android: predicted f 0.451 → P (replay 0.9997) (MED) — measured P 0.9996
+    L3-canvas-root  css-backgrounds/background-attachment-margin-root-002.html web: predicted f 0.339 → P (replay 0.9996) (MED) — measured P 1
+    L3-canvas-root  css-backgrounds/background-attachment-margin-root-002.html ios: predicted f 0.3391 → P (replay 0.9992) (MED-LOW) — measured P 0.9994
+    L3-canvas-root  css-backgrounds/background-attachment-margin-root-002.html android: predicted f 0.3389 → P (replay 0.9997) (MED-LOW) — measured P 0.9996
+    L3-canvas-root  CSS2/css21-errata/s-11-1-1b-006.html web: predicted P 0.9941 (wrong: square y66-85) → P >= 0.998, square y56-75 (HIGH (geometry) / MED (score), gating, floor 0.95) — measured P 1
+    L3-canvas-root  CSS2/css21-errata/s-11-1-1b-006.html ios: predicted P 0.9953 DEGENERATE → P ~0.998, square y56-75 (MED (geometry) / LOW (score)) — measured unchanged (not in any list)
+  ~ L3-canvas-root  CSS2/css21-errata/s-11-1-1b-006.html android: WITHDRAWN at wave53-probe (its unit was reverted — probeDecisions); held to must-not-move instead
+    L4-float-avoid  css-contain/contain-inline-size-bfc-floats-001.html ios: predicted P 0.9531 DEGENERATE → P ~0.998 (sim 0.9984) (HIGH, gating, floor 0.99) — measured P 0.9984
+    L4-float-avoid  css-contain/contain-inline-size-bfc-floats-001.html android: predicted P 0.9519 DEGENERATE → P ~0.997 (sim 0.9972) (HIGH, gating, floor 0.99) — measured P 0.9972
+    L4-float-avoid  css-contain/contain-inline-size-bfc-floats-002.html ios: predicted f 0.9322 → P ~0.998 (sim 0.9985) (HIGH, gating, floor 0.99) — measured P 0.9985
+    L4-float-avoid  css-contain/contain-inline-size-bfc-floats-002.html android: predicted f 0.9311 → P ~0.997 (sim 0.9974) (HIGH, gating, floor 0.99) — measured P 0.9974
+    L4-float-avoid  css-display/display-flow-root-002.html ios: predicted P 0.9734 DEGENERATE (unreviewed) → P ~1.000 (MED) — measured P 1
+    L4-float-avoid  css-display/display-flow-root-002.html android: predicted P 0.9734 DEGENERATE (unreviewed) → P ~1.000 (MED) — measured P 1
+  L5-harness-hygiene  ios-harness XCTest StyleConverterTestTests: 17/30 → 30/30 (not a corpus cell — read elsewhere)
+ok   R4  gating predictions 14, missed 0
+ok   R5  must-not-move cells 373, moved 0
+
+gained 13: web 3  ios 6  android 4
+
+ADJUDICATION: R1–R5 hold

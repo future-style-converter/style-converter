@@ -287,6 +287,60 @@ test('li-value-reversed-008: counter-set is applied AFTER counter-increment', ()
   assert.deepEqual(contents(components), ['"8"', '"9"']);
 });
 
+// ── wave-53 lane L1 (nested-list-extractor B): §4.4.2 step 4 after a STOP ──
+//
+// css-lists-3 §4.4.2: step 3.3 adds a counter-set's value and BREAKS the
+// loop; step 4 still adds the last non-zero incrementNegated. The pre-wave-53
+// walk skipped step 4 after a stop, which every earlier pin hid because each
+// of its setters (`<li value>`) also stepped the counter itself. MUTATIONS
+// (executed, tools/titan/results/wave53-lists-bakes/_note.md): dropping the
+// step-4 term turns BOTH pins below red; adding it unconditionally (ignoring
+// who stepped) turns the `<li value>` ANCHORS pin and li-value-reversed-013
+// above red.
+
+test('counter-reset-reversed-nested: a setter whose ::before steps prints 3. 2. 11. 9. 8. 1.', () => {
+  // The test's own tree as the fixed extractor emits it: `li {display:
+  // block}` (no list-item step), `li::before { counter-increment: foo -1;
+  // content: counter(foo) ". " }`, `.set { counter-set: foo 10 }` on the
+  // ELEMENT — so the step that precedes the set is a DIFFERENT box's.
+  const pb = { before: { properties: { 'counter-increment': 'foo -1', content: 'counter(foo) ". "' } } };
+  const li = (props = {}, extra = {}) => cmp({ display: 'block', ...props }, { _tag: 'li', _pseudo: structuredClone(pb), ...extra });
+  const components = {
+    ol: cmp({ 'counter-reset': 'reversed(foo)' }, { _tag: 'ol', children: {
+      three: li(),
+      two: li({}, { children: {
+        inner: cmp({ 'counter-reset': 'reversed(foo)' }, { _tag: 'ol', children: {
+          eleven: li(), nine: li({ 'counter-set': 'foo 10' }), eight: li(),
+        } }),
+      } }),
+      one: li(),
+    } }),
+  };
+  bakeCounters({ components });
+  // The reference (counter-reset-reversed-nested-ref.html) prints exactly these.
+  assert.deepEqual(contents(components),
+    ['"3" ". "', '"2" ". "', '"11" ". "', '"9" ". "', '"8" ". "', '"1" ". "']);
+});
+
+test('li-value-reversed-008b list 1: the last non-zero step BEFORE the set anchors it (10 8 6 5 3)', () => {
+  // `<ol reversed>` with `ol::before, li::before { content: counters(list-item,".") }`
+  // and items -2 / <div> -1 / -1 / (0; counter-set 5) / -2: num = 2+1+1+0 + 5
+  // + 1 (the <li>-1 before the set, a different box) = 10. Reference
+  // li-value-reversed-008-ref.html prints 10, 8, 6, 5, 3 (the div paints none).
+  const bag = () => before('counters(list-item,".")');
+  const components = {
+    ol: cmp({}, { _tag: 'ol', _attrs: { reversed: true }, _pseudo: bag(), children: {
+      a: cmp({ 'counter-increment': 'list-item -2' }, { _tag: 'li', _pseudo: bag() }),
+      d: cmp({ 'counter-increment': 'list-item -1' }, { _tag: 'div' }),
+      b: cmp({ 'counter-increment': 'list-item -1' }, { _tag: 'li', _pseudo: bag() }),
+      c: cmp({ 'counter-increment': 'list-item 0', 'counter-set': 'list-item 5' }, { _tag: 'li', _pseudo: bag() }),
+      e: cmp({ 'counter-increment': 'list-item -2' }, { _tag: 'li', _pseudo: bag() }),
+    } }),
+  };
+  bakeCounters({ components });
+  assert.deepEqual(contents(components), ['"10"', '"8"', '"6"', '"5"', '"3"']);
+});
+
 test('an <ol> with no reversed attribute is untouched by the reversed lane', () => {
   // The blast-radius guard: presence is the whole test, so an <ol> whose bag
   // carries no `reversed` key numbers forward exactly as before.
@@ -359,4 +413,26 @@ test('a counter STYLE name is case-sensitive: `Decimal` is not `decimal`', () =>
   const upper = mk('Decimal');
   assert.equal(bakeCounters({ components: upper }).status, 'refused');
   assert.deepEqual(contents(upper), ['counter(c, Decimal)']);
+});
+
+// Wave 53 fix pass (S1 S2 = L1 skeptic D4): the step-4 attribution key of a
+// PSEUDO setter (`"<index>::<pseudo>"`). No WPT reference exercises it, so the
+// expectation is the css-lists-3 §4.4.2 arithmetic, written out below.
+// MUTATION (executed, red → byte-exact restore → green; sha256 in
+// tools/titan/results/wave53-S1/_note.md "## Fix pass"): FX5 the pseudo key
+// collapsed to the node index (L1 skeptic SN3C) → 11, 10, 9 → red.
+test('§4.4.2 step 4: a ::before setter after its ELEMENT\'s own step takes that step as its term (12, 10, 9)', () => {
+  // a{inc −1} a::before; b{inc −1} b::before{counter-set: foo 10}; c{inc −1} c::before.
+  // Walk: a 1 → b 1 (= 2) → b::before sets 10 (= 12), stop; step 4 adds the last
+  // non-zero −increment (b's own 1 — a DIFFERENT box from b::before) = 13 ⇒ 12, 10, 9.
+  const bag = (props = {}) => ({ before: { properties: { ...props, content: 'counter(foo)' } } });
+  const components = {
+    ol: cmp({ 'counter-reset': 'reversed(foo)' }, { children: {
+      a: cmp({ 'counter-increment': 'foo -1' }, { _pseudo: bag() }),
+      b: cmp({ 'counter-increment': 'foo -1' }, { _pseudo: bag({ 'counter-set': 'foo 10' }) }),
+      c: cmp({ 'counter-increment': 'foo -1' }, { _pseudo: bag() }),
+    } }),
+  };
+  bakeCounters({ components });
+  assert.deepEqual(contents(components), ['"12"', '"10"', '"9"']);
 });

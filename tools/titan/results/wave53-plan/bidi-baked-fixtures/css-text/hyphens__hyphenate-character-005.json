@@ -1,0 +1,291 @@
+{
+  "_wpt": {
+    "test": "css/css-text/hyphens/hyphenate-character-005.html",
+    "ref": "css/css-text/hyphens/reference/hyphenate-character-005-ref.html",
+    "bucket": "A",
+    "lossy": true,
+    "lossyReasons": [
+      "inline-run-merged",
+      "baked-bidi-visual-order"
+    ],
+    "specSection": "css-text",
+    "bidiBaked": true
+  },
+  "components": {
+    "hyphens__hyphenate-character-005__0": {
+      "properties": {
+        "width": "358px",
+        "height": "60px",
+        "box-sizing": "border-box",
+        "direction": "ltr",
+        "unicode-bidi": "normal",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "_lossy": true,
+      "_lossyReasons": [
+        "inline-run-merged",
+        "baked-bidi-visual-order"
+      ],
+      "_tag": "p",
+      "children": {
+        "hyphens__hyphenate-character-005__0__0": {
+          "id": "hyphens__hyphenate-character-005__0__0",
+          "properties": {
+            "direction": "rtl",
+            "position": "absolute",
+            "left": "7.45px",
+            "top": "40px",
+            "width": "7.75px",
+            "height": "20px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "hyphens__hyphenate-character-005__0__0__0": {
+              "id": "hyphens__hyphenate-character-005__0__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "3.25px",
+                "height": "20px",
+                "line-height": "20px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 0)",
+                "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                "font-size": "16px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "ـ"
+            }
+          }
+        },
+        "hyphens__hyphenate-character-005__0__1": {
+          "id": "hyphens__hyphenate-character-005__0__1",
+          "properties": {
+            "position": "absolute",
+            "left": "0px",
+            "top": "0px",
+            "width": "336.13px",
+            "height": "20px",
+            "line-height": "20px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "Test passes if the word below is hyphenated"
+        },
+        "hyphens__hyphenate-character-005__0__2": {
+          "id": "hyphens__hyphenate-character-005__0__2",
+          "properties": {
+            "position": "absolute",
+            "left": "0px",
+            "top": "20px",
+            "width": "146.57px",
+            "height": "20px",
+            "line-height": "20px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "using a right-to-left"
+        },
+        "hyphens__hyphenate-character-005__0__3": {
+          "id": "hyphens__hyphenate-character-005__0__3",
+          "properties": {
+            "position": "absolute",
+            "left": "151.08px",
+            "top": "20px",
+            "width": "114.76px",
+            "height": "20px",
+            "line-height": "20px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+            "font-size": "16px",
+            "font-style": "italic",
+            "font-weight": "400"
+          },
+          "_text": "space+kashida"
+        },
+        "hyphens__hyphenate-character-005__0__4": {
+          "id": "hyphens__hyphenate-character-005__0__4",
+          "properties": {
+            "position": "absolute",
+            "left": "270.34px",
+            "top": "20px",
+            "width": "74.29px",
+            "height": "20px",
+            "line-height": "20px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "sequence"
+        },
+        "hyphens__hyphenate-character-005__0__5": {
+          "id": "hyphens__hyphenate-character-005__0__5",
+          "properties": {
+            "position": "absolute",
+            "left": "0px",
+            "top": "40px",
+            "width": "7.45px",
+            "height": "20px",
+            "line-height": "20px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "\""
+        },
+        "hyphens__hyphenate-character-005__0__6": {
+          "id": "hyphens__hyphenate-character-005__0__6",
+          "properties": {
+            "position": "absolute",
+            "left": "15.2px",
+            "top": "40px",
+            "width": "124.64px",
+            "height": "20px",
+            "line-height": "20px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "\",\nand shaping is"
+        },
+        "hyphens__hyphenate-character-005__0__7": {
+          "id": "hyphens__hyphenate-character-005__0__7",
+          "properties": {
+            "position": "absolute",
+            "left": "144.34px",
+            "top": "40px",
+            "width": "24.28px",
+            "height": "20px",
+            "line-height": "20px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+            "font-size": "16px",
+            "font-style": "italic",
+            "font-weight": "400"
+          },
+          "_text": "not"
+        },
+        "hyphens__hyphenate-character-005__0__8": {
+          "id": "hyphens__hyphenate-character-005__0__8",
+          "properties": {
+            "position": "absolute",
+            "left": "173.13px",
+            "top": "40px",
+            "width": "88.11px",
+            "height": "20px",
+            "line-height": "20px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "interrupted."
+        }
+      }
+    },
+    "hyphens__hyphenate-character-005__1": {
+      "properties": {
+        "font": "32px sans-serif",
+        "margin-left": "10ch",
+        "width": "53.39px",
+        "hyphenate-character": "\"\\00a0\\0640\"",
+        "direction": "ltr",
+        "height": "88px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "_lang": "ug",
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ],
+      "children": {
+        "hyphens__hyphenate-character-005__1__0": {
+          "id": "hyphens__hyphenate-character-005__1__0",
+          "properties": {
+            "position": "absolute",
+            "left": "17.14px",
+            "top": "1px",
+            "width": "36.25px",
+            "height": "37px",
+            "line-height": "37px",
+            "white-space": "pre",
+            "direction": "rtl",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "sans-serif",
+            "font-size": "32px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "قىل­"
+        },
+        "hyphens__hyphenate-character-005__1__1": {
+          "id": "hyphens__hyphenate-character-005__1__1",
+          "properties": {
+            "position": "absolute",
+            "left": "-52.38px",
+            "top": "45px",
+            "width": "105.77px",
+            "height": "37px",
+            "line-height": "37px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "sans-serif",
+            "font-size": "32px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "مىغانلىقى"
+        }
+      }
+    }
+  }
+}

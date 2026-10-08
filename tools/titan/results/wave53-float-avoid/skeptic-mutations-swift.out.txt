@@ -1,0 +1,29 @@
+swift M1: rc=65 tests=15 red=1 -> RED
+     testP5d_G7_FitContentWithoutContainment
+swift M2: rc=65 tests=15 red=4 -> RED
+     testP1_001FloatsAndTheBfcBesideFloat3
+     testP3_FlowRoot002ZeroWidthBfcAt250x100
+     testP4_HalfOpenBoundaryOn001
+     testP6_ReportedHeightsAreTheBfcBottoms
+swift M3: rc=65 tests=15 red=3 -> RED
+     testP1_001FloatsAndTheBfcBesideFloat3
+     testP3_FlowRoot002ZeroWidthBfcAt250x100
+     testP7_RightFloatsFromThe400pxContainerNotA358Proposal
+swift M4: rc=65 tests=15 red=2 -> RED
+     testP5d_G7_AutoWidth
+     testP5d_G7_FitContentWithoutContainment
+swift M5: rc=65 tests=15 red=1 -> RED
+     testP5d_G5_ClearOnTheBfc
+swift M7: rc=65 tests=15 red=1 -> RED
+     testP6_ReportedHeightsAreTheBfcBottoms
+swift M8: rc=65 tests=15 red=1 -> RED
+     testP7_RightFloatsFromThe400pxContainerNotA358Proposal
+swift M9: rc=65 tests=15 red=1 -> RED
+     testP5d_G8_ContainSizedBfcBackground
+swift M10: rc=65 tests=15 red=1 -> RED
+     testP5d_G2_NestedInANonBfcParent
+swift S2: rc=0 tests=15 red=0 -> GREEN (SURVIVOR)
+swift S3: rc=0 tests=15 red=0 -> GREEN (SURVIVOR)
+swift GREEN after restore: rc=0 tests=15 red=0 sha256 e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4 -> e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4
+
+[exited with code 0]

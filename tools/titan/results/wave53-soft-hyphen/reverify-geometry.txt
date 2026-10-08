@@ -1,0 +1,92 @@
+# tree /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf HEAD e330e255
+## 0. committed plan files (expect HEAD bytes = hunks NOT yet applied)
+EQ-HEAD 5a91900a9a7748c2dbe44fe4fc7c0d02ff3896dbe763cc43df9eee758708da81 soft-hyphen.geometry.py
+EQ-HEAD f42459a1317b878348348c32fa6e4b68616273623b37125df853a5af4633d2dd plan-build.py
+EQ-HEAD 80077c40ad5ef6b513a0737a9847f3e4c442202e4228e68c0c4ce75908240c2a expectations.json
+hunk-1 git apply --check OK
+hunk-2 git apply --check OK
+## 1. skeptic's own D1 checks, committed probe
+hyphens/hyphens-span-001 ref      boxes 9 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-span-001 web      boxes 9 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-span-001 ios      boxes 9 heights [26] line-ink [((25, 60), (25, 53))] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+hyphens/hyphens-span-001 android  boxes 9 heights [46] line-ink [((25, 76), (25, 31))] → GEOMETRY WRONG (box 1 line 1 ink x25-76 vs ref x25-61)
+hyphens/hyphens-out-of-flow-001 ref      boxes 7 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 web      boxes 7 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 ios      boxes 7 heights [26] line-ink [((25, 60), (25, 53))] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+hyphens/hyphens-out-of-flow-001 android  boxes 7 heights [46] line-ink [((25, 31), (25, 76)), ((25, 54), (25, 53)), ((25, 76), (25, 31))] → GEOMETRY WRONG (box 1 line 1 ink x25-76 vs ref x25-61)
+hyphens/hyphens-out-of-flow-002 ref      boxes 7 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-002 web      boxes 7 heights [26, 46] line-ink [((25, 61), (25, 53)), ((25, 84),)] → GEOMETRY WRONG (box 4 height 26 vs ref 46)
+hyphens/hyphens-out-of-flow-002 ios      boxes 7 heights [46] line-ink [((25, 60), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-002 android  boxes 7 heights [46] line-ink [((25, 31), (25, 76)), ((25, 54), (25, 53)), ((25, 76), (25, 31))] → GEOMETRY WRONG (box 1 line 1 ink x25-54 vs ref x25-61)
+exit=0
+anchor exit=0
+skeptic-geometry-anchor.py output byte-identical to skeptic-evidence/geometry-anchor.wave52-ship.txt
+sum<300 hyphens/hyphens-span-002 android  line1-ink [(25, 54), (25, 54), (25, 54), (25, 54), (25, 54), (25, 54), (25, 54)] → GEOMETRY WRONG (box 1 line 1 ink x25-54 vs ref x25-61)
+max<200 hyphens/hyphens-span-002 android  line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+## 2. mirror: committed plan files + hunk-1, refs/runs symlinked (geometry_common resolves ROOT from __file__)
+hunk-1 applied; sha256 711a5181a6bf581343457932d2ecf4bc0e922b903c2e7e42517b2dc613dab0bd
+### restated probe, wave52-ship
+hyphens/hyphens-span-002 ref      boxes 7 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-span-002 web      boxes 7 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-span-002 ios      boxes 7 heights [46] line-ink [((25, 61), (24, 53))] → GEOMETRY OK
+hyphens/hyphens-span-002 android  boxes 7 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-span-001 ref      boxes 9 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-span-001 web      boxes 9 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-span-001 ios      boxes 9 heights [26] line-ink [((25, 61), (24, 53))] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+hyphens/hyphens-span-001 android  boxes 9 heights [46] line-ink [((25, 77), (24, 32))] → GEOMETRY WRONG (box 1 line 1 ink x25-77 vs ref x25-61)
+hyphens/hyphens-out-of-flow-001 ref      boxes 7 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 web      boxes 7 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 ios      boxes 7 heights [26] line-ink [((25, 61), (24, 53))] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+hyphens/hyphens-out-of-flow-001 android  boxes 7 heights [46] line-ink [((25, 31), (25, 77)), ((25, 55), (25, 53)), ((25, 77), (24, 32))] → GEOMETRY WRONG (box 1 line 1 ink x25-77 vs ref x25-61)
+hyphens/hyphens-out-of-flow-002 ref      boxes 7 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-002 web      boxes 7 heights [26, 46] line-ink [((25, 61), (24, 54)), ((25, 84),)] → GEOMETRY WRONG (box 4 height 26 vs ref 46)
+hyphens/hyphens-out-of-flow-002 ios      boxes 7 heights [46] line-ink [((25, 61), (24, 53))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-002 android  boxes 7 heights [46] line-ink [((25, 31), (25, 77)), ((25, 55), (25, 53)), ((25, 61), (25, 53)), ((25, 77), (24, 32))] → GEOMETRY WRONG (box 3 line 1 ink x25-31 vs ref x25-61)
+exit=0
+byte-identical to geometry-restated.wave52-ship.txt
+### restated probe, wave53-open
+hyphens/hyphens-span-002 ref      boxes 7 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-span-002 web      boxes 7 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-span-002 ios      boxes 7 heights [46] line-ink [((25, 61), (24, 53))] → GEOMETRY OK
+hyphens/hyphens-span-002 android  boxes 7 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-span-001 ref      boxes 9 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-span-001 web      boxes 9 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-span-001 ios      boxes 9 heights [26] line-ink [((25, 61), (24, 53))] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+hyphens/hyphens-span-001 android  boxes 9 heights [46] line-ink [((25, 77), (24, 32))] → GEOMETRY WRONG (box 1 line 1 ink x25-77 vs ref x25-61)
+hyphens/hyphens-out-of-flow-001 ref      boxes 7 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 web      boxes 7 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 ios      boxes 7 heights [26] line-ink [((25, 61), (24, 53))] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+hyphens/hyphens-out-of-flow-001 android  boxes 7 heights [46] line-ink [((25, 31), (25, 77)), ((25, 55), (25, 53)), ((25, 77), (24, 32))] → GEOMETRY WRONG (box 1 line 1 ink x25-77 vs ref x25-61)
+hyphens/hyphens-out-of-flow-002 ref      boxes 7 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-002 web      boxes 7 heights [26, 46] line-ink [((25, 61), (24, 54)), ((25, 84),)] → GEOMETRY WRONG (box 4 height 26 vs ref 46)
+hyphens/hyphens-out-of-flow-002 ios      boxes 7 heights [46] line-ink [((25, 61), (24, 53))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-002 android  boxes 7 heights [46] line-ink [((25, 31), (25, 77)), ((25, 55), (25, 53)), ((25, 61), (25, 53)), ((25, 77), (24, 32))] → GEOMETRY WRONG (box 3 line 1 ink x25-31 vs ref x25-61)
+exit=0
+byte-identical to geometry-restated.wave53-open.txt
+## 3. executed probe mutations (mirror copy only)
+### RV-G1 ink() back to r+g+b < 300 — expect span-002 android WRONG, SELF-CHECK FAILED, exit 1
+mutated 08b4276195c3d94e707ea58630397a8f10a83105a31d0bf73f5e969034fc10bd
+exit=1
+hyphens/hyphens-span-002 android  boxes 7 heights [46] line-ink [((25, 54), (25, 53))] → GEOMETRY WRONG (box 1 line 1 ink x25-54 vs ref x25-61)
+SELF-CHECK FAILED (ANCHOR FAILED: hyphens/hyphens-span-002)
+restored 711a5181a6bf581343457932d2ecf4bc0e922b903c2e7e42517b2dc613dab0bd (before 711a5181a6bf581343457932d2ecf4bc0e922b903c2e7e42517b2dc613dab0bd)
+### RV-G2 RV-G1 + the anchor flag deleted — expect exit 0 (the self-check, not luck, makes RV-G1 red)
+mutated edd7e4ab82d7cc22b6e2a6ab7fb9cade0df0d4f768ffdbf13627a094319f74da
+exit=0
+hyphens/hyphens-span-002 android  boxes 7 heights [46] line-ink [((25, 54), (25, 53))] → GEOMETRY WRONG (box 1 line 1 ink x25-54 vs ref x25-61)
+restored 711a5181a6bf581343457932d2ecf4bc0e922b903c2e7e42517b2dc613dab0bd (before 711a5181a6bf581343457932d2ecf4bc0e922b903c2e7e42517b2dc613dab0bd)
+### RV-G3 unmutated probe on a run with no captures — expect anchor MISSING, SELF-CHECK FAILED, exit 1
+exit=1
+MISSING rows: 12
+SELF-CHECK FAILED (ANCHOR FAILED: hyphens/hyphens-span-002)
+green after restore, wave52-ship exit=0
+green after restore, wave53-open exit=0
+## 4. hunk-2: plan-build.py regeneration in a git-archive copy of tools/titan/results/wave53-plan
+unpatched regen exit=0
+unpatched regen: expectations.json byte-identical to HEAD
+unpatched regen: watchlist.txt byte-identical to HEAD
+both hunks applied
+patched regen exit=0
+patched plan-build.py regenerates the patched expectations.json byte-identically
+patched regen: watchlist.txt byte-identical to HEAD
+expectations.json changed lines: 14

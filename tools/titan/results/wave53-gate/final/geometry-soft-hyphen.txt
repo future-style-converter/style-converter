@@ -1,0 +1,16 @@
+hyphens/hyphens-span-002 ref      boxes 7 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-span-002 web      boxes 7 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-span-002 ios      boxes 7 heights [46] line-ink [((25, 61), (24, 53))] → GEOMETRY OK
+hyphens/hyphens-span-002 android  boxes 7 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-span-001 ref      boxes 9 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-span-001 web      boxes 9 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-span-001 ios      boxes 9 heights [46] line-ink [((25, 61), (24, 53))] → GEOMETRY OK
+hyphens/hyphens-span-001 android  boxes 9 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 ref      boxes 7 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 web      boxes 7 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 ios      boxes 7 heights [46] line-ink [((25, 61), (24, 53))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 android  boxes 7 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-002 ref      boxes 7 heights [46] line-ink [((25, 61), (24, 54))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-002 web      boxes 7 heights [26, 46] line-ink [((25, 61), (24, 54)), ((25, 84),)] → GEOMETRY WRONG (box 4 height 26 vs ref 46)
+hyphens/hyphens-out-of-flow-002 ios      boxes 7 heights [46] line-ink [((25, 61), (24, 53))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-002 android  boxes 7 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK

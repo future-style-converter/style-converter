@@ -1,0 +1,5 @@
+9df67ae3 tools/titan/extract-fixture.mjs <- tools/titan/results/wave53-lists-bakes/seam-1.patch : applied; patched=845a3d263a14369b commit=845a3d263a14369b MATCH
+205ab295 runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift <- tools/titan/results/wave53-soft-hyphen/seam-1.patch : applied; patched=524e31581a58fd9d commit=524e31581a58fd9d MATCH
+2c6ecea9 runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt <- tools/titan/results/wave53-soft-hyphen/seam-2.patch : applied; patched=d251ace7442ef6e6 commit=d251ace7442ef6e6 MATCH
+de54f458 runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt <- tools/titan/results/wave53-float-avoid/seam-1.patch : applied; patched=da2df0b4cca689ad commit=da2df0b4cca689ad MATCH
+6fcb3161 runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift <- tools/titan/results/wave53-float-avoid/seam-2.patch : applied; patched=905d1669d3856364 commit=905d1669d3856364 MATCH

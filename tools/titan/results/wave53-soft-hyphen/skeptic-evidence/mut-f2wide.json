@@ -1,0 +1,16 @@
+{
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InertOutOfFlowMember.kt",
+ "sha256_before": "3810bd8f261cf56332f5fcca17290e9be06e01200c02f5cf2affdcb26716aa52",
+ "sha256_restored": "3810bd8f261cf56332f5fcca17290e9be06e01200c02f5cf2affdcb26716aa52",
+ "red_exit": 1,
+ "red_ran": 42,
+ "red_failing": [
+  "InlineRunFoldTest.hypothetical-inline-alone-on-second-line - a VISIBLE abspos member still bails",
+  "InlineRunFoldTest.the inert predicate needs BOTH out-of-flow and transparent ink"
+ ],
+ "green_exit": 0,
+ "green_ran": 42,
+ "green_failing": [],
+ "mutation_old": "    fun admits(member: IRComponent): Boolean {",
+ "mutation_new": "    fun admits(member: IRComponent): Boolean {\n        if (member.properties.any { it.type == \"Position\" && ValueExtractors.extractKeyword(it.data)?.uppercase() in OUT_OF_FLOW_POSITIONS }) return true"
+}

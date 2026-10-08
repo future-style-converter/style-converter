@@ -1,0 +1,29 @@
+{
+ "label": "L3-B-web-tablebody",
+ "file": "apps/web-harness/src/ui/CanvasTableBody.ts",
+ "sha_before": "56df07d2bd2045ed125c4f674fecdeb67078a0ab4ba472808e3940fd83f0366a",
+ "sha_mutated": "37415cb90d03e881685402f4825382eed4adea7f16fe337067796a42af73a74d",
+ "sha_restored": "56df07d2bd2045ed125c4f674fecdeb67078a0ab4ba472808e3940fd83f0366a",
+ "restored_byte_exact": true,
+ "green_before_rc": 0,
+ "red_rc": 1,
+ "expected_pin_in_red": true,
+ "green_after_rc": 0,
+ "verdict": "RED->GREEN",
+ "green_before": [
+  "Tests  3 passed (3)"
+ ],
+ "red_lines": [
+  "❯ tests/ui/ComposedCanvasTableBody.test.tsx (3 tests | 2 failed) 36ms",
+  "× s006_wrapperIsATableBox_withTheBodysBorderSpacing 3ms",
+  "× s006_zeroMarginTableBody_stillGetsTheWrapper 21ms",
+  "Test Files  1 failed (1)",
+  "Tests  2 failed | 1 passed (3)",
+  "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯",
+  "AssertionError: expected null to deeply equal { display: 'table', …(1) }",
+  "AssertionError: the given combination of arguments (null and string) is invalid for this assertion. You can use an array, a map, an object, a set, a string, or a weakset instead of a string"
+ ],
+ "green_after": [
+  "Tests  3 passed (3)"
+ ]
+}

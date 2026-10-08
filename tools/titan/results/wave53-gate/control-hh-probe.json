@@ -1,0 +1,338 @@
+{
+ "pre": "wave53-open",
+ "post": "wave53-hh-probe",
+ "lane": "L5-harness-hygiene",
+ "sections": {
+  "css-cascade": {
+   "web": {
+    "compared": 43,
+    "identical": 43,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 43,
+    "identical": 43,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 43,
+    "identical": 43,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-counter-styles": {
+   "web": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-counter-styles__counter-suffix",
+      "px": 533,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-counter-styles__counter-suffix",
+      "px": 237,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-counter-styles__counter-suffix",
+      "px": 1383,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   }
+  },
+  "css-flexbox": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-text": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 40,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-text__bidi__bidi-lines-001",
+      "px": 8859,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__bidi__bidi-lines-002",
+      "px": 2929,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphenate-character-001",
+      "px": 3840,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphenate-character-003",
+      "px": 4219,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphenate-character-004",
+      "px": 748,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+      "px": 2041,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+      "px": 979,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-span-001",
+      "px": 3186,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   }
+  }
+ },
+ "totals": {
+  "web": {
+   "compared": 187,
+   "identical": 186,
+   "reencoded": 0,
+   "changed": 1,
+   "carriers": 0
+  },
+  "ios": {
+   "compared": 187,
+   "identical": 186,
+   "reencoded": 0,
+   "changed": 1,
+   "carriers": 0
+  },
+  "android": {
+   "compared": 187,
+   "identical": 178,
+   "reencoded": 0,
+   "changed": 9,
+   "carriers": 0
+  }
+ },
+ "leaks": [
+  {
+   "sec": "css-counter-styles",
+   "platform": "web",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "px": 533,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-counter-styles",
+   "platform": "ios",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "px": 237,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-counter-styles",
+   "platform": "android",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "px": 1383,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__bidi__bidi-lines-001",
+   "px": 8859,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__bidi__bidi-lines-002",
+   "px": 2929,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphenate-character-001",
+   "px": 3840,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphenate-character-003",
+   "px": 4219,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphenate-character-004",
+   "px": 748,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "px": 2041,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+   "px": 979,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphens-span-001",
+   "px": 3186,
+   "maxDelta": 255
+  }
+ ],
+ "wireLeaks": [
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-additive-symbols-setter-invalid"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-additive-symbols-setter"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-fallback-setter-invalid"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-fallback-setter"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-name-setter-invalid"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-name-setter"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-negative-setter-invalid"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-negative-setter"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-pad-setter-invalid"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-pad-setter"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter-invalid"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-range-setter-invalid"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-range-setter"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-symbols-setter-invalid"
+  },
+  {
+   "sec": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-lines-001"
+  },
+  {
+   "sec": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-lines-002"
+  }
+ ],
+ "wire": {
+  "compared": 187,
+  "changed": 18
+ }
+}

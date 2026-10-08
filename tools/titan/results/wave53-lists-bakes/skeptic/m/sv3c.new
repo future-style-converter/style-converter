@@ -1,0 +1,1 @@
+      for (const k of []) if (k.startsWith('padding-')) delete cmp.properties[k];

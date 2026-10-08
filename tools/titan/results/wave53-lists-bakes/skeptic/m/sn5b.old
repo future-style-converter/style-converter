@@ -1,0 +1,1 @@
+            _text = run.text + (component._text ?: ""),

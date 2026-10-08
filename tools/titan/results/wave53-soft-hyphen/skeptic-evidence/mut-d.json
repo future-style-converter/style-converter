@@ -1,0 +1,26 @@
+{
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/WordBreakOpportunities.kt",
+ "sha256_before": "5d0dc0528ad57607cc714a5d3ff55e3d410a94f47088aa3dfa71d953dc23e448",
+ "sha256_restored": "5d0dc0528ad57607cc714a5d3ff55e3d410a94f47088aa3dfa71d953dc23e448",
+ "red_exit": 1,
+ "red_ran": 52,
+ "red_failing": [
+  "GreedyLineBreakerTest.aSoftHyphenIsTakenAndPaintsTheHyphenCharacter",
+  "GreedyLineBreakerTest.clampHidesAtTheSoftHyphenOfBlockEllipsis028",
+  "GreedyLineBreakerTest.shySplitsAreGreedyAndAFittingResultStaysMinikinOwned",
+  "PreBreakPipelineTest.aMultiOpportunitySpacelessRunSplitsIntoFiveLines",
+  "PreBreakPipelineTest.aSpacelessSoftHyphenRunFiresWithTheTakenHyphen",
+  "PreBreakPipelineTest.composesWithTheSoftHyphenPolicy",
+  "PreBreakPipelineTest.firesWhenASoftHyphenBreakWasTaken",
+  "WordBreakOpportunitiesTest.aShyAfterALiteralHyphenCollapsesIntoIt",
+  "WordBreakOpportunitiesTest.softHyphensAreStrippedAndRecorded",
+  "WordBreakOpportunitiesTest.splitTakesTheLastOpportunityThatFits",
+  "WordBreakOpportunitiesTest.tailOpsAreRebased",
+  "WordBreakOpportunitiesTest.thePrefixCountsAgainstTheFit"
+ ],
+ "green_exit": 0,
+ "green_ran": 52,
+ "green_failing": [],
+ "mutation_old": "            if (ch == '\\u00AD') {",
+ "mutation_new": "            if (false && ch == '\\u00AD') {"
+}

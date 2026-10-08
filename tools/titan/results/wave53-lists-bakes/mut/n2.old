@@ -1,0 +1,1 @@
+      implicitCloseAt = findImpliedClose(innerHtml, tagOpenEnd + 1, tagName, autoCloseTriggers);

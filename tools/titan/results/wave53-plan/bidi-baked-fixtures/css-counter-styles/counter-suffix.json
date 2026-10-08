@@ -1,0 +1,439 @@
+{
+  "_wpt": {
+    "test": "css/css-counter-styles/counter-suffix.html",
+    "ref": "css/css-counter-styles/counter-suffix-ref.html",
+    "bucket": "A",
+    "lossy": true,
+    "lossyReasons": [
+      "em/rem",
+      "percentage",
+      "baked-bidi-visual-order",
+      "counter-style-unsupported"
+    ],
+    "specSection": "css-counter-styles",
+    "bidiBaked": true,
+    "counterStyleBaked": true
+  },
+  "components": {
+    "counter-suffix__0": {
+      "properties": {
+        "width": "10em"
+      },
+      "_lossy": true,
+      "_lossyReasons": [
+        "em/rem"
+      ],
+      "children": {
+        "counter-suffix__0__0": {
+          "id": "counter-suffix__0__0",
+          "properties": {
+            "margin": "0",
+            "padding": "0 3em",
+            "line-height": "150%",
+            "list-style-type": "decimal"
+          },
+          "_lossy": true,
+          "_lossyReasons": [
+            "em/rem",
+            "percentage"
+          ],
+          "_tag": "ol",
+          "children": {
+            "counter-suffix__0__0__0": {
+              "id": "counter-suffix__0__0__0",
+              "properties": {
+                "margin": "0",
+                "padding": "0",
+                "line-height": "150%"
+              },
+              "_lossy": true,
+              "_lossyReasons": [
+                "percentage"
+              ],
+              "_text": "foo",
+              "_tag": "li",
+              "_markerText": "1."
+            },
+            "counter-suffix__0__0__1": {
+              "id": "counter-suffix__0__0__1",
+              "properties": {
+                "margin": "0",
+                "padding": "0",
+                "line-height": "150%"
+              },
+              "_lossy": true,
+              "_lossyReasons": [
+                "percentage"
+              ],
+              "_text": "bar",
+              "_tag": "li",
+              "_markerText": "2."
+            }
+          },
+          "_role": "ws-after"
+        },
+        "counter-suffix__0__1": {
+          "id": "counter-suffix__0__1",
+          "properties": {
+            "margin": "0",
+            "padding": "0 3em",
+            "line-height": "150%",
+            "list-style-type": "hebrew"
+          },
+          "_lossy": true,
+          "_lossyReasons": [
+            "em/rem",
+            "percentage"
+          ],
+          "_tag": "ol",
+          "children": {
+            "counter-suffix__0__1__0": {
+              "id": "counter-suffix__0__1__0",
+              "properties": {
+                "margin": "0",
+                "padding": "0",
+                "line-height": "150%"
+              },
+              "_lossy": true,
+              "_lossyReasons": [
+                "percentage"
+              ],
+              "_text": "foo",
+              "_tag": "li",
+              "_markerText": "א."
+            },
+            "counter-suffix__0__1__1": {
+              "id": "counter-suffix__0__1__1",
+              "properties": {
+                "margin": "0",
+                "padding": "0",
+                "line-height": "150%"
+              },
+              "_lossy": true,
+              "_lossyReasons": [
+                "percentage"
+              ],
+              "_text": "bar",
+              "_tag": "li",
+              "_markerText": "ב."
+            }
+          },
+          "_role": "ws-after"
+        },
+        "counter-suffix__0__2": {
+          "id": "counter-suffix__0__2",
+          "properties": {
+            "margin": "0",
+            "padding": "0 3em",
+            "line-height": "150%",
+            "list-style-type": "cjk-decimal"
+          },
+          "_lossy": true,
+          "_lossyReasons": [
+            "em/rem",
+            "percentage"
+          ],
+          "_tag": "ol",
+          "children": {
+            "counter-suffix__0__2__0": {
+              "id": "counter-suffix__0__2__0",
+              "properties": {
+                "margin": "0",
+                "padding": "0",
+                "line-height": "150%"
+              },
+              "_lossy": true,
+              "_lossyReasons": [
+                "percentage"
+              ],
+              "_text": "foo",
+              "_tag": "li",
+              "_markerText": "一、"
+            },
+            "counter-suffix__0__2__1": {
+              "id": "counter-suffix__0__2__1",
+              "properties": {
+                "margin": "0",
+                "padding": "0",
+                "line-height": "150%"
+              },
+              "_lossy": true,
+              "_lossyReasons": [
+                "percentage"
+              ],
+              "_text": "bar",
+              "_tag": "li",
+              "_markerText": "二、"
+            }
+          },
+          "_role": "ws-after"
+        },
+        "counter-suffix__0__3": {
+          "id": "counter-suffix__0__3",
+          "properties": {
+            "margin": "0",
+            "padding": "0 3em",
+            "line-height": "150%",
+            "list-style-type": "korean-hangul-formal"
+          },
+          "_lossy": true,
+          "_lossyReasons": [
+            "em/rem",
+            "percentage"
+          ],
+          "_tag": "ol",
+          "children": {
+            "counter-suffix__0__3__0": {
+              "id": "counter-suffix__0__3__0",
+              "properties": {
+                "margin": "0",
+                "padding": "0",
+                "line-height": "150%"
+              },
+              "_lossy": true,
+              "_lossyReasons": [
+                "percentage"
+              ],
+              "_text": "foo",
+              "_tag": "li"
+            },
+            "counter-suffix__0__3__1": {
+              "id": "counter-suffix__0__3__1",
+              "properties": {
+                "margin": "0",
+                "padding": "0",
+                "line-height": "150%"
+              },
+              "_lossy": true,
+              "_lossyReasons": [
+                "percentage"
+              ],
+              "_text": "bar",
+              "_tag": "li"
+            }
+          },
+          "_role": "ws-after"
+        },
+        "counter-suffix__0__4": {
+          "id": "counter-suffix__0__4",
+          "properties": {
+            "margin": "0",
+            "padding": "0 3em",
+            "line-height": "150%",
+            "list-style-type": "decimal",
+            "direction": "ltr",
+            "width": "160px",
+            "height": "48px",
+            "box-sizing": "border-box",
+            "unicode-bidi": "normal",
+            "text-align": "left",
+            "position": "relative"
+          },
+          "_lossy": true,
+          "_lossyReasons": [
+            "em/rem",
+            "percentage",
+            "baked-bidi-visual-order"
+          ],
+          "_tag": "ol",
+          "children": {
+            "counter-suffix__0__4__0": {
+              "id": "counter-suffix__0__4__0",
+              "properties": {
+                "margin": "0",
+                "padding": "0",
+                "line-height": "150%",
+                "position": "absolute",
+                "left": "48px",
+                "top": "0px",
+                "width": "64px",
+                "height": "24px",
+                "box-sizing": "border-box"
+              },
+              "_lossy": true,
+              "_lossyReasons": [
+                "percentage"
+              ],
+              "_tag": "li",
+              "children": {
+                "counter-suffix__0__4__0__0": {
+                  "id": "counter-suffix__0__4__0__0",
+                  "properties": {
+                    "position": "absolute",
+                    "left": "39.36px",
+                    "top": "2px",
+                    "width": "24.64px",
+                    "height": "20px",
+                    "line-height": "20px",
+                    "white-space": "pre",
+                    "direction": "ltr",
+                    "text-align": "left",
+                    "color": "rgb(0, 0, 0)",
+                    "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                    "font-size": "16px",
+                    "font-style": "normal",
+                    "font-weight": "400"
+                  },
+                  "_text": "foo"
+                }
+              },
+              "_markerText": "1."
+            },
+            "counter-suffix__0__4__1": {
+              "id": "counter-suffix__0__4__1",
+              "properties": {
+                "margin": "0",
+                "padding": "0",
+                "line-height": "150%",
+                "position": "absolute",
+                "left": "48px",
+                "top": "24px",
+                "width": "64px",
+                "height": "24px",
+                "box-sizing": "border-box"
+              },
+              "_lossy": true,
+              "_lossyReasons": [
+                "percentage"
+              ],
+              "_tag": "li",
+              "children": {
+                "counter-suffix__0__4__1__0": {
+                  "id": "counter-suffix__0__4__1__0",
+                  "properties": {
+                    "position": "absolute",
+                    "left": "39.03px",
+                    "top": "2px",
+                    "width": "24.97px",
+                    "height": "20px",
+                    "line-height": "20px",
+                    "white-space": "pre",
+                    "direction": "ltr",
+                    "text-align": "left",
+                    "color": "rgb(0, 0, 0)",
+                    "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                    "font-size": "16px",
+                    "font-style": "normal",
+                    "font-weight": "400"
+                  },
+                  "_text": "bar"
+                }
+              },
+              "_markerText": "2."
+            }
+          },
+          "_role": "ws-after"
+        },
+        "counter-suffix__0__5": {
+          "id": "counter-suffix__0__5",
+          "properties": {
+            "margin": "0",
+            "padding": "0 3em",
+            "line-height": "150%",
+            "list-style-type": "hebrew",
+            "direction": "ltr",
+            "width": "160px",
+            "height": "48px",
+            "box-sizing": "border-box",
+            "unicode-bidi": "normal",
+            "text-align": "left",
+            "position": "relative"
+          },
+          "_lossy": true,
+          "_lossyReasons": [
+            "em/rem",
+            "percentage",
+            "baked-bidi-visual-order"
+          ],
+          "_tag": "ol",
+          "children": {
+            "counter-suffix__0__5__0": {
+              "id": "counter-suffix__0__5__0",
+              "properties": {
+                "margin": "0",
+                "padding": "0",
+                "line-height": "150%",
+                "position": "absolute",
+                "left": "48px",
+                "top": "0px",
+                "width": "64px",
+                "height": "24px",
+                "box-sizing": "border-box"
+              },
+              "_lossy": true,
+              "_lossyReasons": [
+                "percentage"
+              ],
+              "_tag": "li",
+              "children": {
+                "counter-suffix__0__5__0__0": {
+                  "id": "counter-suffix__0__5__0__0",
+                  "properties": {
+                    "position": "absolute",
+                    "left": "39.36px",
+                    "top": "2px",
+                    "width": "24.64px",
+                    "height": "20px",
+                    "line-height": "20px",
+                    "white-space": "pre",
+                    "direction": "ltr",
+                    "text-align": "left",
+                    "color": "rgb(0, 0, 0)",
+                    "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                    "font-size": "16px",
+                    "font-style": "normal",
+                    "font-weight": "400"
+                  },
+                  "_text": "foo"
+                }
+              },
+              "_markerText": "א."
+            },
+            "counter-suffix__0__5__1": {
+              "id": "counter-suffix__0__5__1",
+              "properties": {
+                "margin": "0",
+                "padding": "0",
+                "line-height": "150%",
+                "position": "absolute",
+                "left": "48px",
+                "top": "24px",
+                "width": "64px",
+                "height": "24px",
+                "box-sizing": "border-box"
+              },
+              "_lossy": true,
+              "_lossyReasons": [
+                "percentage"
+              ],
+              "_tag": "li",
+              "children": {
+                "counter-suffix__0__5__1__0": {
+                  "id": "counter-suffix__0__5__1__0",
+                  "properties": {
+                    "position": "absolute",
+                    "left": "39.03px",
+                    "top": "2px",
+                    "width": "24.97px",
+                    "height": "20px",
+                    "line-height": "20px",
+                    "white-space": "pre",
+                    "direction": "ltr",
+                    "text-align": "left",
+                    "color": "rgb(0, 0, 0)",
+                    "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                    "font-size": "16px",
+                    "font-style": "normal",
+                    "font-weight": "400"
+                  },
+                  "_text": "bar"
+                }
+              },
+              "_markerText": "ב."
+            }
+          }
+        }
+      }
+    }
+  }
+}

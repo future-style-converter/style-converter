@@ -1,0 +1,16 @@
+run wave52-ship (Catalyst, SwiftUI twin): 1435 documents, decode errors 0, root-image plans 3, forest changed 4
+  plan    wpt__css-backgrounds__background-attachment-margin-root-001.json uniform=false
+  plan    wpt__css-backgrounds__background-attachment-margin-root-002.json uniform=false
+  plan    wpt__css-display__display-contents-root-background.json uniform=true
+  changed wpt__CSS2__css21-errata__s-11-1-1b-006.json
+  changed wpt__css-backgrounds__background-attachment-margin-root-001.json
+  changed wpt__css-backgrounds__background-attachment-margin-root-002.json
+  changed wpt__css-display__display-contents-root-background.json
+run wave53-open (Catalyst, SwiftUI twin): 1435 documents, decode errors 0, root-image plans 3, forest changed 4
+  plan    wpt__css-backgrounds__background-attachment-margin-root-001.json uniform=false
+  plan    wpt__css-backgrounds__background-attachment-margin-root-002.json uniform=false
+  plan    wpt__css-display__display-contents-root-background.json uniform=true
+  changed wpt__CSS2__css21-errata__s-11-1-1b-006.json
+  changed wpt__css-backgrounds__background-attachment-margin-root-001.json
+  changed wpt__css-backgrounds__background-attachment-margin-root-002.json
+  changed wpt__css-display__display-contents-root-background.json

@@ -1,0 +1,380 @@
+{
+ "web-runtime": {
+  "cwd": "runtimes/web",
+  "cmd": "npx vitest run tests/background/RootBackgroundPropagation.test.ts",
+  "redMarker": "> {t}",
+  "mutations": [
+   {
+    "id": "RW1",
+    "file": "runtimes/web/src/engine/background/RootBackgroundPropagation.ts",
+    "old": "uniform: layers.every(layerIsUniform) && repeatsBothAxes(props) };",
+    "new": "uniform: true };",
+    "red": [
+     "a2_marginRoot001_notUniform_scrollAtRootBox_fixedAtIcb"
+    ]
+   },
+   {
+    "id": "RW2",
+    "file": "runtimes/web/src/engine/background/RootBackgroundPropagation.ts",
+    "old": "return lc === 'fixed' || lc === 'local' ? lc : 'scroll';",
+    "new": "return 'scroll';",
+    "red": [
+     "a2_marginRoot002_isTheMirror"
+    ]
+   },
+   {
+    "id": "RW3",
+    "file": "runtimes/web/src/engine/background/RootBackgroundPropagation.ts",
+    "old": "return be32(16) === 1 && be32(20) === 1;",
+    "new": "return true;",
+    "red": [
+     "a3_ihdr1x1_isUniform_ihdr2x2_isNot"
+    ]
+   },
+   {
+    "id": "RW4",
+    "file": "runtimes/web/src/engine/background/RootBackgroundPropagation.ts",
+    "old": "if (contained) return null;",
+    "new": "if (contained && false) return null;",
+    "red": [
+     "a4_contained_noPropagation"
+    ]
+   }
+  ]
+ },
+ "web-gallery": {
+  "cwd": "apps/web-harness",
+  "cmd": "npx vitest run tests/ui/ComposedCanvasRootBackgroundImage.test.tsx",
+  "redMarker": "> {t}",
+  "mutations": [
+   {
+    "id": "GW1",
+    "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+    "old": "const rootImagePlan = React.useMemo(() => resolveCanvasRootBackground(doc), [doc]);",
+    "new": "const rootImagePlan = React.useMemo(() => (doc ? null : resolveCanvasRootBackground(doc)), [doc]);",
+    "red": [
+     "target_framedSurface_paintsTheDataUriOverTheColour"
+    ]
+   },
+   {
+    "id": "GW2",
+    "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+    "old": "() => withCanvasOwnedRootBackground(roots, rootImagePlan), [roots, rootImagePlan]);",
+    "new": "() => roots, [roots, rootImagePlan]);",
+    "red": [
+     "target_bodyRootLosesImage",
+     "marginRoot001_bodyRootLosesImage"
+    ]
+   },
+   {
+    "id": "GW3",
+    "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+    "old": "const rootImageOnIcb = !!rootImagePlan && (!rootImagePlan.uniform || !!canvasClipPath);",
+    "new": "const rootImageOnIcb = false;",
+    "red": [
+     "marginRoot001_icbOnly_frameKeepsTheColour"
+    ]
+   },
+   {
+    "id": "GW4",
+    "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+    "old": "bodyRootHasContainment(bodyRoot)) : null;",
+    "new": "false) : null;",
+    "red": [
+     "contained_noPropagation_bodyKeepsItsImage"
+    ]
+   },
+   {
+    "id": "GW5",
+    "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+    "old": "? { background: undefined, backgroundColor: canvasBackground, ...rootImageCss } : {}),",
+    "new": "? { background: undefined, backgroundColor: canvasBackground, ...rootImageCss } : { backgroundImage: 'none' }),",
+    "red": [
+     "colourOnly_noImageKeyAnywhere"
+    ]
+   }
+  ]
+ },
+ "compose-A": {
+  "cwd": "apps/android-harness",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew :app:testDebugUnitTest --tests '*ComposedCanvasRootBackground*'",
+  "redMarker": "{t} FAILED",
+  "mutations": [
+   {
+    "id": "CA1",
+    "file": "apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt",
+    "old": "    return RootBackgroundPropagation.plan(bodyRoot.properties, margin.top.value, margin.left.value, contained)",
+    "new": "    return if (margin.top.value < -1e9f && contained) RootBackgroundPropagation.plan(bodyRoot.properties, margin.top.value, margin.left.value, contained) else null",
+    "red": [
+     "a1_target_oneUniformLayer_framedOrigin"
+    ]
+   },
+   {
+    "id": "CA2",
+    "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt",
+    "old": "        return roots.map { r -> if (r.role != \"body-root\") r else r.copy(properties = r.properties.filterNot { it.type in IMAGE_TYPES }) }",
+    "new": "        return roots",
+    "red": [
+     "a1_strip_bodyRootLosesTheImage"
+    ]
+   },
+   {
+    "id": "CA3",
+    "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt",
+    "old": "        return Plan(attachments, origins, uniform)",
+    "new": "        return Plan(attachments, origins, uniform || true)",
+    "red": [
+     "a2_marginRoot001_notUniform_scrollAtRootBox_fixedAtIcb"
+    ]
+   },
+   {
+    "id": "CA4",
+    "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt",
+    "old": "            \"fixed\" -> Attachment.FIXED",
+    "new": "            \"fixed\" -> Attachment.SCROLL",
+    "red": [
+     "a2_marginRoot002_isTheMirror"
+    ]
+   },
+   {
+    "id": "CA5",
+    "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt",
+    "old": "        return be32(16) == 1L && be32(20) == 1L",
+    "new": "        return be32(16) >= 0L",
+    "red": [
+     "a3_ihdr1x1_isUniform_ihdr2x2_isNot"
+    ]
+   },
+   {
+    "id": "CA6",
+    "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt",
+    "old": "        if (contained) return null",
+    "new": "        if (contained && props.isEmpty()) return null",
+    "red": [
+     "a4_contained_noPropagation_noStrip"
+    ]
+   }
+  ]
+ },
+ "swift-A": {
+  "cwd": ".",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/l3/dd -only-testing:StyleConverterRuntimeTests/WPTCaptureModeTests 2>&1",
+  "redMarker": "{t}]' failed",
+  "mutations": [
+   {
+    "id": "SA1",
+    "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift",
+    "old": "        if contained { return nil }                              // off the propagation path",
+    "new": "        if contained || !contained { return nil }",
+    "red": [
+     "testRootBgA1TargetPlanAndStrip",
+     "testRootBgA1TargetPaintsTheFramedSurfaceGreen"
+    ]
+   },
+   {
+    "id": "SA2",
+    "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift",
+    "old": "        guard plan != nil else { return roots }",
+    "new": "        guard plan == nil && plan != nil else { return roots }",
+    "red": [
+     "testRootBgA1TargetPlanAndStrip"
+    ]
+   },
+   {
+    "id": "SA3",
+    "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift",
+    "old": "        return Plan(attachments: attachments, origins: origins, uniform: uniform)",
+    "new": "        return Plan(attachments: attachments, origins: origins, uniform: uniform || true)",
+    "red": [
+     "testRootBgA2MarginRoot001PlanIsIcbOnly",
+     "testRootBgA2MarginRoot001PixelsFrameWhiteBandAt66"
+    ]
+   },
+   {
+    "id": "SA4",
+    "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift",
+    "old": "        case \"fixed\": return .fixed",
+    "new": "        case \"fixed\": return .scroll",
+    "red": [
+     "testRootBgA2MarginRoot002PixelsBandAtTheIcbCorner"
+    ]
+   },
+   {
+    "id": "SA5",
+    "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift",
+    "old": "        return be32(16) == 1 && be32(20) == 1                    // width, height",
+    "new": "        return be32(16) >= 0",
+    "red": [
+     "testRootBgA3IhdrUniformity"
+    ]
+   },
+   {
+    "id": "SA6",
+    "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift",
+    "old": "        if contained { return nil }                              // off the propagation path",
+    "new": "        if contained && props.isEmpty { return nil }",
+    "red": [
+     "testRootBgA4ContainedDoesNotPropagate"
+    ]
+   }
+  ]
+ },
+ "compose-B": {
+  "cwd": "apps/android-harness",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvasTableBody*'",
+  "redMarker": "{t} FAILED",
+  "mutations": [
+   {
+    "id": "BS",
+    "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+    "old": "        return roots.take(bodyIdx + 1) + table + after.filter(::isOutOfFlow)",
+    "new": "        return roots.take(bodyIdx) + body.copy(children = listOf(row)) + after.filter(::isOutOfFlow) + listOf(table).take(0)",
+    "red": [
+     "shape_bodyRootUnchanged_tableRowCells_abspos"
+    ]
+   },
+   {
+    "id": "BM1",
+    "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+    "old": "        if (displayOf(body) !in TABLE_BODY || paintsOwnEdges(body)) return roots",
+    "new": "        if (paintsOwnEdges(body)) return roots",
+    "red": [
+     "m1_identity_onNonTableBodies"
+    ]
+   },
+   {
+    "id": "BM2",
+    "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+    "old": "                cells += r.copy(properties = r.properties.filterNot { it.type in MARGIN_TYPES })  // \u00a78.3",
+    "new": "                cells += r  // \u00a78.3",
+    "red": [
+     "m2_cellLosesItsMargins"
+    ]
+   },
+   {
+    "id": "BM3",
+    "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+    "old": "        val run = after.filterNot(::isOutOfFlow)                           // the in-flow run",
+    "new": "        val run = after",
+    "red": [
+     "m3_absposStaysARoot_neverWrapped"
+    ]
+   },
+   {
+    "id": "BM4",
+    "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+    "old": "            } else pending += r",
+    "new": "            } else cells += r",
+    "red": [
+     "m4_nonCellRunIsWrappedInAnAnonymousCell"
+    ]
+   },
+   {
+    "id": "BM5",
+    "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+    "old": "+ body.properties.filter { it.type in TABLE_BOX_TYPES }",
+    "new": "+ body.properties.filter { false }",
+    "red": [
+     "m5_tableCarriesTheBodysBorderSpacing"
+    ]
+   },
+   {
+    "id": "BK",
+    "file": "apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt",
+    "old": "    return com.styleconverter.runtime.table.TableBodyForest.rewrite(owned)",
+    "new": "    return owned",
+    "red": [
+     "stack_zeroGapAboveTheSyntheticTable_tdIsNoRoot"
+    ]
+   }
+  ]
+ },
+ "swift-B": {
+  "cwd": ".",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/l3/dd -only-testing:StyleConverterRuntimeTests/TableBodyForestTests 2>&1",
+  "redMarker": "{t}]' failed",
+  "mutations": [
+   {
+    "id": "BS",
+    "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+    "old": "        return Array(roots[...bodyIdx]) + [table] + after.filter { ComponentRenderer.isOutOfFlow($0) }",
+    "new": "        return Array(roots[..<bodyIdx]) + [synthetic(body, \"\", body.properties, [row])] + after.filter { ComponentRenderer.isOutOfFlow($0) } + [table].prefix(0)",
+    "red": [
+     "testShapeBodyRootUnchangedTableRowCellsAbspos"
+    ]
+   },
+   {
+    "id": "BM1",
+    "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+    "old": "        guard let d = displayOf(body), tableBody.contains(d), !paintsOwnEdges(body) else { return roots }",
+    "new": "        guard !paintsOwnEdges(body) else { return roots }",
+    "red": [
+     "testM1IdentityOnNonTableBodies"
+    ]
+   },
+   {
+    "id": "BM2",
+    "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+    "old": "                cells.append(withProperties(r, r.properties.filter { !marginTypes.contains($0.type) }))  // \u00a78.3",
+    "new": "                cells.append(r)  // \u00a78.3",
+    "red": [
+     "testM2CellLosesItsMargins"
+    ]
+   },
+   {
+    "id": "BM3",
+    "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+    "old": "        let run = after.filter { !ComponentRenderer.isOutOfFlow($0) }          // the in-flow run",
+    "new": "        let run = after",
+    "red": [
+     "testM3AbsposStaysARootNeverWrapped"
+    ]
+   },
+   {
+    "id": "BM4",
+    "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+    "old": "            } else { pending.append(r) }",
+    "new": "            } else { cells.append(r) }",
+    "red": [
+     "testM4NonCellRunIsWrappedInAnAnonymousCell"
+    ]
+   },
+   {
+    "id": "BM5",
+    "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+    "old": "[display(\"TABLE\")] + body.properties.filter { tableBoxTypes.contains($0.type) }",
+    "new": "[display(\"TABLE\")] + body.properties.filter { _ in false }",
+    "red": [
+     "testM5TableCarriesTheBodysBorderSpacing"
+    ]
+   },
+   {
+    "id": "BK",
+    "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+    "old": "    public static func rewrite(_ roots: [IRComponent]) -> [IRComponent] {\n",
+    "new": "    public static func rewrite(_ roots: [IRComponent]) -> [IRComponent] { if roots.count >= 0 { return roots }\n",
+    "red": [
+     "testStackZeroGapAboveTheSyntheticTable",
+     "testRasterSquareAtTheReferenceRows"
+    ]
+   }
+  ]
+ },
+ "web-B": {
+  "cwd": "apps/web-harness",
+  "cmd": "npx vitest run tests/ui/ComposedCanvasTableBody.test.tsx",
+  "redMarker": "> {t}",
+  "mutations": [
+   {
+    "id": "BW1",
+    "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+    "old": "const canvasTableBody = React.useMemo(() => resolveCanvasTableBody(doc), [doc]);",
+    "new": "const canvasTableBody = React.useMemo(() => (doc ? null : resolveCanvasTableBody(doc)), [doc]);",
+    "red": [
+     "s006_wrapperIsATableBox_withTheBodysBorderSpacing",
+     "s006_zeroMarginTableBody_stillGetsTheWrapper"
+    ]
+   }
+  ]
+ }
+}

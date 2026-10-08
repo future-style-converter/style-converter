@@ -1,0 +1,12 @@
+display-contents-root-background ref      {'green': 0.9941, 'chrome': 1.0, 'text': (17, 36, 257, 50)} → GEOMETRY OK
+display-contents-root-background web      {'green': 0.9941, 'chrome': 1.0, 'text': (17, 36, 257, 50)} → GEOMETRY OK
+display-contents-root-background ios      {'green': 0.9945, 'chrome': 1.0, 'text': (17, 36, 257, 50)} → GEOMETRY OK
+display-contents-root-background android  {'green': 0.9946, 'chrome': 1.0, 'text': (18, 36, 257, 50)} → GEOMETRY OK
+background-attachment-margin-root-001 ref      {'painted': (16, 16, 373, 583), 'starts': [66, 166, 266, 366, 466, 566], 'frameDirty': 0} → GEOMETRY OK
+background-attachment-margin-root-001 web      {'painted': (16, 16, 373, 583), 'starts': [66, 166, 266, 366, 466, 566], 'frameDirty': 0} → GEOMETRY OK
+background-attachment-margin-root-001 ios      {'painted': (16, 16, 373, 583), 'starts': [66, 166, 266, 366, 466, 566], 'frameDirty': 0} → GEOMETRY OK
+background-attachment-margin-root-001 android  {'painted': (16, 16, 373, 583), 'starts': [66, 166, 266, 366, 466, 566], 'frameDirty': 0} → GEOMETRY OK
+background-attachment-margin-root-002 ref      {'painted': (16, 16, 373, 583), 'starts': [16, 116, 216, 316, 416, 516], 'frameDirty': 0} → GEOMETRY OK
+background-attachment-margin-root-002 web      {'painted': (16, 16, 373, 583), 'starts': [16, 116, 216, 316, 416, 516], 'frameDirty': 0} → GEOMETRY OK
+background-attachment-margin-root-002 ios      {'painted': (16, 16, 373, 583), 'starts': [16, 116, 216, 316, 416, 516], 'frameDirty': 0} → GEOMETRY OK
+background-attachment-margin-root-002 android  {'painted': (16, 16, 373, 583), 'starts': [16, 116, 216, 316, 416, 516], 'frameDirty': 0} → GEOMETRY OK

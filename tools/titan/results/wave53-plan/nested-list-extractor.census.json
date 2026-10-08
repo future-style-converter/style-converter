@@ -1,0 +1,339 @@
+{
+ "family": "nested-list-extractor",
+ "gateOfRecord": "wave52-ship (dev cdb8a845)",
+ "targets": [
+  {
+   "cell": "css-lists/counter-reset-reversed-nested.html web",
+   "wave51fix": "P 0.9506",
+   "wave52calib": "P 0.9506",
+   "wave52final": "P 0.9506",
+   "wave52ship": "P 0.9506"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-nested.html ios",
+   "wave51fix": "P 0.9551",
+   "wave52calib": "P 0.9551",
+   "wave52final": "f 0.9424",
+   "wave52ship": "P 0.9508"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-nested.html android",
+   "wave51fix": "P 0.9509",
+   "wave52calib": "P 0.9509",
+   "wave52final": "f 0.9425",
+   "wave52ship": "P 0.9509"
+  }
+ ],
+ "sourceCensus": {
+  "method": "1435 corpus tests (tools/titan/runs/wave52-ship/sections/*/tests.list), comments/script/style stripped, tag tokenizer: an <li>/<dd>/<dt> whose FIRST following trigger opener lies inside an <ol|ul|menu|dl|table> opened after it and still open (= the current AUTO_CLOSE_TRIGGERS first-match picks a nested item)",
+  "carriers": [
+   {
+    "test": "css/css-lists/counter-reset-reversed-nested.html",
+    "tag": "li",
+    "container": "ol",
+    "textBeforeNestedList": "Two"
+   }
+  ],
+  "withTextBefore": 1,
+  "withoutTextBefore": 0,
+  "ddDtCarriers": 0,
+  "crossCheck": "tests with >=2 list containers and an <li>: 27; nested-but-not-inside-li shapes (counter-list-item-2: <ol> as sibling of <li>; counter-list-item-3: <div><ol> inside <ol>) are NOT carriers — their <li> carry explicit </li> before the nested list"
+ },
+ "differentialExtraction": {
+  "method": "in-process extractFixture() of the unmodified tools/titan/extract-fixture.mjs + counter-bake.mjs vs scratch copies with (a) findImpliedClose at both trigger sites, (b) counter-bake setCounter §4.4.2 step-4 term; no --post-load/--bidi-bake/--vt-bake flags; JSON.stringify(fixture) compared",
+  "tests": 1435,
+  "extractorOnly": {
+   "changed": [
+    "css/css-lists/counter-reset-reversed-nested.html"
+   ]
+  },
+  "bakeOnly": {
+   "changed": [
+    "css/css-lists/counter-reset-reversed-nested.html"
+   ]
+  },
+  "both": {
+   "changed": [
+    "css/css-lists/counter-reset-reversed-nested.html"
+   ]
+  },
+  "bakedBeforeTextOnTarget": {
+   "today": "12. / 11. / 10. / 9. / 8. (One dropped, flat)",
+   "extractorOnly": "3. / 2. / 10. / 9. / 8. / 1.",
+   "bakeOnly": "13. / 12. / 11. / 9. / 8. (flat)",
+   "both": "3. / 2. / 11. / 9. / 8. / 1.",
+   "reference": "3 / 2 / 11 / 9 / 8 / 1"
+  }
+ },
+ "outOfCorpus": {
+  "li-value-reversed-*.html (37 non-ref tests, not gate cells)": {
+   "extractorOnly": [
+    "007a",
+    "007b",
+    "009a",
+    "009b"
+   ],
+   "bakeOnly": [
+    "008b",
+    "009b"
+   ],
+   "008b-check": "after the bake fix the four lists read 10/8/6/5/3, 10/7/5/4/-4, 3/5/7/9, -7/-4/-3/5 — the numbers in li-value-reversed-008-ref.html; the unfixed bake reads 9/7/5/5/3, 8/5/5/4/-4, 3/5/7/9, -3/0/1/5. (Both carry a counters() nesting prefix 3. / 3.99. / 3.99.9. on lists 2-4 — a separate sibling-reset question, untraced, out of scope.)"
+  }
+ },
+ "wireCensus": {
+  "method": "1435 wave52-ship per-test-ir documents",
+  "listContainerInsideLi": [
+   "wpt__css-lists__counter-reset-reversed-nested"
+  ],
+  "liInsideLi": [],
+  "metaRunsPlusBeforeText": [
+   "wpt__css-lists__counter-reset-reversed-nested"
+  ],
+  "metaRunsPlusPseudosAny": [
+   "wpt__css-lists__counter-reset-reversed-nested",
+   "wpt__css-display__display-contents-dynamic-before-after-001 (before bucket carries no _text)"
+  ]
+ },
+ "carrierSet": {
+  "web": [
+   "wpt__css-lists__counter-reset-reversed-nested"
+  ],
+  "ios": [
+   "wpt__css-lists__counter-reset-reversed-nested"
+  ],
+  "android": [
+   "wpt__css-lists__counter-reset-reversed-nested"
+  ],
+  "rule": "post-fix per-test IR: a component with meta.sourceTag in {ol,ul,menu,dir} or li whose slot-ancestor chain contains an li, OR a component carrying meta.runs and pseudos.before._text"
+ },
+ "mustNotMove": [
+  {
+   "cell": "css-display/display-contents-dynamic-before-after-001.html android",
+   "wave52ship": "P 0.9879"
+  },
+  {
+   "cell": "css-display/display-contents-dynamic-before-after-001.html ios",
+   "wave52ship": "P 0.9888"
+  },
+  {
+   "cell": "css-display/display-contents-dynamic-before-after-001.html web",
+   "wave52ship": "P 0.9898"
+  },
+  {
+   "cell": "css-lists/counter-list-item-2.html android",
+   "wave52ship": "P 0.9923"
+  },
+  {
+   "cell": "css-lists/counter-list-item-2.html ios",
+   "wave52ship": "P 0.9939"
+  },
+  {
+   "cell": "css-lists/counter-list-item-2.html web",
+   "wave52ship": "P 0.9972"
+  },
+  {
+   "cell": "css-lists/counter-list-item-3.html android",
+   "wave52ship": "P 0.9947"
+  },
+  {
+   "cell": "css-lists/counter-list-item-3.html ios",
+   "wave52ship": "P 0.9965"
+  },
+  {
+   "cell": "css-lists/counter-list-item-3.html web",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-list-item-slot-order.html android",
+   "wave52ship": "P 0.9523"
+  },
+  {
+   "cell": "css-lists/counter-list-item-slot-order.html ios",
+   "wave52ship": "P 0.9517"
+  },
+  {
+   "cell": "css-lists/counter-list-item-slot-order.html web",
+   "wave52ship": "P 0.9514"
+  },
+  {
+   "cell": "css-lists/counter-list-item.html android",
+   "wave52ship": "f 0.7307"
+  },
+  {
+   "cell": "css-lists/counter-list-item.html ios",
+   "wave52ship": "f 0.7864"
+  },
+  {
+   "cell": "css-lists/counter-list-item.html web",
+   "wave52ship": "P 0.9975"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-display-none.html android",
+   "wave52ship": "P 0.9971"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-display-none.html ios",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-display-none.html web",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-list-item-start.html android",
+   "wave52ship": "P 0.9982"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-list-item-start.html ios",
+   "wave52ship": "P 0.9991"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-list-item-start.html web",
+   "wave52ship": "f 0.938"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-list-item.html android",
+   "wave52ship": "P 0.9982"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-list-item.html ios",
+   "wave52ship": "P 0.9991"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-list-item.html web",
+   "wave52ship": "f 0.938"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-multiple.html android",
+   "wave52ship": "P 0.9969"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-multiple.html ios",
+   "wave52ship": "P 0.9999"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-multiple.html web",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-not-list-item-start.html android",
+   "wave52ship": "P 0.9982"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-not-list-item-start.html ios",
+   "wave52ship": "P 0.9991"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-not-list-item-start.html web",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-not-list-item.html android",
+   "wave52ship": "P 0.9966"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-not-list-item.html ios",
+   "wave52ship": "P 0.999"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-not-list-item.html web",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-pseudo-001.html android",
+   "wave52ship": "P 0.996"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-pseudo-001.html ios",
+   "wave52ship": "P 0.9999"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-pseudo-001.html web",
+   "wave52ship": "P 0.9867"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-pseudo-002.html android",
+   "wave52ship": "P 0.9997"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-pseudo-002.html ios",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-pseudo-002.html web",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-pseudo-003.html android",
+   "wave52ship": "P 0.9975"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-pseudo-003.html ios",
+   "wave52ship": "P 0.9999"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-pseudo-003.html web",
+   "wave52ship": "P 0.9936"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-siblings-001a.html android",
+   "wave52ship": "P 0.9992"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-siblings-001a.html ios",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-siblings-001a.html web",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-siblings-001b.html android",
+   "wave52ship": "P 0.9992"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-siblings-001b.html ios",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-siblings-001b.html web",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-siblings-002.html android",
+   "wave52ship": "P 0.9989"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-siblings-002.html ios",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-siblings-002.html web",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-siblings-003.html android",
+   "wave52ship": "P 0.9992"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-siblings-003.html ios",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-siblings-003.html web",
+   "wave52ship": "P 1"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-with-regular.html android",
+   "wave52ship": "P 0.9975"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-with-regular.html ios",
+   "wave52ship": "P 0.9993"
+  },
+  {
+   "cell": "css-lists/counter-reset-reversed-with-regular.html web",
+   "wave52ship": "P 1"
+  }
+ ]
+}

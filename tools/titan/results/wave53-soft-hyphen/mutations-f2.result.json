@@ -1,0 +1,54 @@
+[
+ {
+  "id": "M-F2-off",
+  "why": "remove the F2 arm (the pre-F2 fold)",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InlineRunFold.kt",
+  "sha256Before": "917d877dbab8e2190232ffa69402016a8f6870ac46cbafdc0b840356d3f02d6a",
+  "sha256Mutated": "b98c8e51094036015337c630cd2e5f88f936ac34fe20f91c6da2700986f6bc2c",
+  "sha256Restored": "917d877dbab8e2190232ffa69402016a8f6870ac46cbafdc0b840356d3f02d6a",
+  "red": {
+   "exit": 1,
+   "total": 42,
+   "failed": [
+    "InlineRunFoldTest.hyphens-out-of-flow-001 - the paint-inert abspos member drops and the word folds whole",
+    "InlineRunFoldTest.hyphens-out-of-flow-002 box 4 - the split highway folds to one dictionary word"
+   ],
+   "compileError": false,
+   "tail": ""
+  },
+  "green": {
+   "exit": 0,
+   "total": 42,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "verdict": "RED->GREEN"
+ },
+ {
+  "id": "M-F2-wide",
+  "why": "widen the predicate to any abspos/fixed member",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InertOutOfFlowMember.kt",
+  "sha256Before": "3810bd8f261cf56332f5fcca17290e9be06e01200c02f5cf2affdcb26716aa52",
+  "sha256Mutated": "f50be1564594b1e99a0ab780682b33ff167674dcd0dad763dd880d9bed923bf6",
+  "sha256Restored": "3810bd8f261cf56332f5fcca17290e9be06e01200c02f5cf2affdcb26716aa52",
+  "red": {
+   "exit": 1,
+   "total": 42,
+   "failed": [
+    "InlineRunFoldTest.hypothetical-inline-alone-on-second-line - a VISIBLE abspos member still bails",
+    "InlineRunFoldTest.the inert predicate needs BOTH out-of-flow and transparent ink"
+   ],
+   "compileError": false,
+   "tail": ""
+  },
+  "green": {
+   "exit": 0,
+   "total": 42,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "verdict": "RED->GREEN"
+ }
+]

@@ -59,18 +59,6 @@ enum PseudoTextFold {
                 key: "pseudotext-marker",
                 message: "[PseudoText] pseudos.marker is delegated to the list marker path — not folded")
         }
-        // `meta.runs` is AUTHORITATIVE over `text` (spec 03 §4.1): when a
-        // run plan resolves, the renderer drops the text slot entirely, so
-        // a fold into `text` would silently vanish. Refuse and name it.
-        if component.meta?.runs != nil {
-            // Only worth a log line when there was something to lose.
-            if pseudos["before"] != nil || pseudos["after"] != nil {
-                PropertyTracker.logOnce(
-                    key: "pseudotext-runs",
-                    message: "[PseudoText] component carries meta.runs — pseudo text not folded (runs own the content slot)")
-            }
-            return component
-        }
         // The em/% base for the pseudo's own `font-size`: css-values-4
         // §6.1.1 resolves it against the INHERITED size, and the pseudo's
         // parent IS the originating element — so the host's own declared
@@ -79,6 +67,13 @@ enum PseudoTextFold {
         // wave-43 corpus produces: contain-content-011's host is bare).
         let emBasePx = component.properties.last { $0.type == "FontSize" }
             .flatMap { ValueExtractors.extractPx($0.data) }.map(Double.init) ?? 16.0
+        // `meta.runs` is AUTHORITATIVE over `text` (spec 03 §4.1): when a run
+        // plan resolves, the renderer drops the text slot, so a fold into
+        // `text` alone would silently vanish. Wave-53 lane L1: the leading
+        // ::before still folds — into BOTH channels — see foldIntoRuns.
+        if let runs = component.meta?.runs {
+            return foldIntoRuns(component, pseudos: pseudos, runs: runs, emBasePx: emBasePx)
+        }
         // ── Wave-49 lane A2: the generated-BOX path claims FIRST ─────────
         // A bucket declaring a block-level box is not an inline run at all
         // (CSS 2.1 §12.1 generates it INSIDE the element as its first/last
@@ -176,6 +171,74 @@ enum PseudoTextFold {
                            text: resolvedText,
                            pseudos: component.pseudos,
                            meta: component.meta,
+                           variables: component.variables)
+    }
+
+    /// Wave-53 lane L1 (nested-list-extractor C) — the fold for a component
+    /// that carries `meta.runs`. CSS 2.1 §12.1 / css-pseudo-4 §4.1 make the
+    /// ::before box the element's FIRST inline content, and CSS 2.1 §9.2.1.1
+    /// puts it in the same anonymous block box as the leading text run —
+    /// ahead of a block child such as a nested `<ol>`. So when `runs[0]` is
+    /// a TEXT run, the ::before text is prefixed to BOTH `runs[0].text` and
+    /// `text`: which one paints depends on whether the renderer's run plan
+    /// engages or its leading label does, and both must carry the marker.
+    /// MEASURED target: wave52-ship css-lists/counter-reset-reversed-nested,
+    /// whose `Two` (`runs [{text:"Two "},{child:<ol>}]`, ::before `_text`
+    /// "11. ") painted NO marker here — this path's old blanket refusal.
+    /// Kept refusals, named: a child-first run list (no leading text run to
+    /// prefix), a box-claimed or styled ::before, and every ::after (it must
+    /// trail the run list's children, which a text prefix cannot express).
+    private static func foldIntoRuns(
+        _ component: IRComponent, pseudos: IRValue, runs: [IRRun], emBasePx: Double
+    ) -> IRComponent {
+        // ::after under a run plan stays the logged refusal it always was.
+        if pseudos["after"] != nil {
+            PropertyTracker.logOnce(
+                key: "pseudotext-runs",
+                message: "[PseudoText] component carries meta.runs — ::after not folded (runs own the content slot)")
+        }
+        // Nothing on the ::before side → identity.
+        guard let beforeBucket = pseudos["before"] else { return component }
+        // A child-first run list has no leading text run to prefix: refuse.
+        guard let lead = runs.first?.text else {
+            PropertyTracker.logOnce(
+                key: "pseudotext-runs-child-first",
+                message: "[PseudoText] meta.runs starts with a child — ::before not folded")
+            return component
+        }
+        // A block-level generated box is not an inline prefix; the box
+        // splice cannot host a run slot either, so it stays unrendered here.
+        if PseudoBoxBridge.claim(bucket: beforeBucket, role: "before",
+                                 hostRole: component.meta?.role) != nil {
+            PropertyTracker.logOnce(
+                key: "pseudotext-runs-box",
+                message: "[PseudoText] meta.runs carrier with a box-shaped ::before — not folded")
+            return component
+        }
+        // The bridge's own gates (and their named refusals) decide the text.
+        guard let run = PseudoTextBridge.inlineRun(
+            bucket: beforeBucket, role: "before", emBasePx: emBasePx) else { return component }
+        // Typed styling would restyle the WHOLE leading run: refuse, named.
+        guard run.styling.isEmpty else {
+            PropertyTracker.logOnce(
+                key: "pseudotext-styled-nonuniform-before",
+                message: "[PseudoText] ::before styling cannot apply — the fold is not the component's sole text run")
+            return component
+        }
+        // The fold: the ::before text leads the first run AND the text slot.
+        let folded = [IRRun(text: run.text + lead)] + runs.dropFirst()
+        // Field-for-field copy of meta with only `runs` rewritten.
+        let m = component.meta
+        let meta = IRMeta(sourceTag: m?.sourceTag, role: m?.role, attrs: m?.attrs,
+                          decorations: m?.decorations, markerText: m?.markerText,
+                          lang: m?.lang, runs: folded)
+        // `pseudos` is KEPT, as on the text-only path (consuming ≠ erasing).
+        return IRComponent(id: component.id, name: component.name,
+                           properties: component.properties,
+                           selectors: component.selectors, media: component.media,
+                           children: component.children, slot: component.slot,
+                           text: run.text + (component.text ?? ""),
+                           pseudos: component.pseudos, meta: meta,
                            variables: component.variables)
     }
 

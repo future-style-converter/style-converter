@@ -1,0 +1,5 @@
+run wave52-ship: 1435 documents rendered, 4 differ
+wpt__CSS2__css21-errata__s-11-1-1b-006
+wpt__css-backgrounds__background-attachment-margin-root-001
+wpt__css-backgrounds__background-attachment-margin-root-002
+wpt__css-display__display-contents-root-background

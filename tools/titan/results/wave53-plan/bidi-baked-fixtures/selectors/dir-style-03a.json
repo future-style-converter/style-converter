@@ -1,0 +1,81 @@
+{
+  "_wpt": {
+    "test": "css/selectors/dir-style-03a.html",
+    "ref": "css/selectors/dir-style-03-ref.html",
+    "bucket": "A",
+    "lossy": true,
+    "lossyReasons": [
+      "baked-bidi-visual-order"
+    ],
+    "specSection": "selectors",
+    "bidiBaked": true
+  },
+  "components": {
+    "dir-style-03a__0": {
+      "properties": {
+        "color": "lime",
+        "text-align": "left",
+        "direction": "ltr",
+        "width": "358px",
+        "height": "20px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "position": "relative"
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ],
+      "children": {
+        "dir-style-03a__0__0": {
+          "id": "dir-style-03a__0__0",
+          "properties": {
+            "position": "absolute",
+            "left": "4.61px",
+            "top": "0px",
+            "width": "133.88px",
+            "height": "20px",
+            "line-height": "20px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 255, 0)",
+            "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "This element is rtl"
+        },
+        "dir-style-03a__0__1": {
+          "id": "dir-style-03a__0__1",
+          "properties": {
+            "position": "absolute",
+            "left": "0px",
+            "top": "0px",
+            "width": "4.61px",
+            "height": "20px",
+            "line-height": "20px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 255, 0)",
+            "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "."
+        }
+      }
+    },
+    "dir-style-03a__1": {
+      "properties": {
+        "color": "blue",
+        "text-align": "left"
+      },
+      "_text": "This element has default direction."
+    }
+  }
+}

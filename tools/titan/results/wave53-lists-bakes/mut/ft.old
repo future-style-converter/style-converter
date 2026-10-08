@@ -1,0 +1,4 @@
+  } catch (err) {
+    // A text-less fact makes planMarker decline the item with `marker-not-baked`.
+    return Object.fromEntries(cands.map((c) => [c.key, { error: String(err?.message ?? err) }]));
+  }

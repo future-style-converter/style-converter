@@ -1,0 +1,6 @@
+== exp-pre
+css/css-lists/counter-reset-reversed-nested.html	7
+css/css-counter-styles/counter-suffix.html	19
+== exp-head
+css/css-lists/counter-reset-reversed-nested.html	8
+css/css-counter-styles/counter-suffix.html	19

@@ -1,0 +1,36 @@
+package com.styleconverter.runtime.layout
+
+// THROWAWAY skeptic probe (wave 53 L4 skeptic) — copied into runtimes/compose/src/test/…/layout/ for ONE focused
+// run, then deleted (the source of record is this .txt under tools/titan/results/wave53-float-avoid/). It executes
+// the real FloatAvoidPlan on derived edits of the VERBATIM wave52-ship 001 document read from disk.
+//  Q1 — gate hole: is a float with `position: absolute` (CSS 2.1 §9.7: float computes to none) admitted?
+//  Q2 — gate hole: is a float with `position: fixed` admitted?
+//  Q3 — the density pin the lane lacks: place() in device px at scale 2.75 must put float 1 at x = 200 * 2.75.
+import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.core.renderer.SlotComposer
+import java.io.File
+import org.junit.Test
+
+class SkepticL4ProbeTest {
+    private fun doc(): String {
+        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
+        val rel = "tools/titan/runs/wave52-ship/sections/css-contain/per-test-ir/wpt__css-contain__contain-inline-size-bfc-floats-001.json"
+        while (dir != null && !File(dir, rel).exists()) dir = dir.parentFile
+        return File(dir!!, rel).readText().trimEnd()
+    }
+    private fun root1(s: String) = SlotComposer.compose(IRDocumentDecoder.decode(s))[1]
+    private val float1 = """{"type":"Float","data":"RIGHT"},"""
+
+    @Test fun probe() {
+        val base = doc()
+        check(base.split(float1).size == 3) // floats 1 and 3 carry RIGHT; float 1 is the first
+        val abs = base.replaceFirst(float1, float1 + """{"type":"Position","data":"ABSOLUTE"},""")
+        val fix = base.replaceFirst(float1, float1 + """{"type":"Position","data":"FIXED"},""")
+        println("SKEPTIC Q1 position:absolute float admitted = ${FloatAvoidPlan.shape(root1(abs)) != null}")
+        println("SKEPTIC Q2 position:fixed float admitted = ${FloatAvoidPlan.shape(root1(fix)) != null}")
+        val s = FloatAvoidPlan.shape(root1(base))!!
+        val d = 2.75
+        val p = FloatAvoidPlan.place(s, s.floatWidthsPx.map { it * d }, s.floatHeightsPx.map { it * d }, 400.0 * d, 170.0 * d, d)
+        println("SKEPTIC Q3 scale=$d float1.x=${p.x[0]} (expect ${200.0 * d}) bfc=(${p.x[3]},${p.y[3]}) (expect (0.0,${200.0 * d})) w=${p.width}")
+    }
+}

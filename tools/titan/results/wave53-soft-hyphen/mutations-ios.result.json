@@ -1,0 +1,52 @@
+[
+ {
+  "id": "S-shy",
+  "why": "drop the U+00AD clause (the pre-wave-53 precondition)",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/wrapping/SoftHyphenPolicy.swift",
+  "sha256Before": "28a2f7f52842fe2ba602e5c5fc069a88cf642f08cbb73b5abe892636319d2ec3",
+  "sha256Mutated": "491976e314564cabf9af24a74e6e1abf84aebb393475da6cfecb445f9b845721",
+  "sha256Restored": "28a2f7f52842fe2ba602e5c5fc069a88cf642f08cbb73b5abe892636319d2ec3",
+  "red": {
+   "exit": 65,
+   "total": 32,
+   "failed": [
+    "testASpacelessSoftHyphenRunIsAdmitted"
+   ],
+   "compileError": false,
+   "tail": "phenPolicyTests testOverflowingLineWithASoftHyphenIsNotUnbreakable]' passed (0.000 seconds).\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testOverlongWordIsReportedAsOverflowing]' started.\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testOverlongWordIsReportedAsOverflowing]' passed (0.000 seconds).\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testRunWithoutSoftHyphenIsIdentityUnderNone]' started.\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testRunWithoutSoftHyphenIsIdentityUnderNone]' passed (0.000 seconds).\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testThePreWave53ClausesAreUnchanged]' started.\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testThePreWave53ClausesAreUnchanged]' passed (0.001 seconds).\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testUnknownAndNilKeywordsDoNotSuppress]' started.\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testUnknownAndNilKeywordsDoNotSuppress]' passed (0.000 seconds).\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testZeroWidthSpaceSurvivesNone]' started.\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testZeroWidthSpaceSurvivesNone]' passed (0.000 seconds).\nTest Suite 'SoftHyphenPolicyTests' failed at 2026-10-07 05:53:15.682.\n\t Executed 19 tests, with 1 failure (0 unexpected) in 0.939 (1.023) seconds\nTest Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-07 05:53:15.682.\n\t Executed 32 tests, with 1 failure (0 unexpected) in 1.066 (1.257) seconds\nTest Suite 'Selected tests' failed at 2026-10-07 05:53:15.810.\n\t Executed 32 tests, with 1 failure (0 unexpected) in 1.066 (1.385) seconds\nResolve Package Graph\n\n2026-10-07 05:53:20.573 xcodebuild[18665:769304] [MT] IDETestOperationsObserverDebug: 6.989 elapsed -- Testing started completed.\n2026-10-07 05:53:20.573 xcodebuild[18665:769304] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start\n2026-10-07 05:53:20.573 xcodebuild[18665:769304] [MT] IDETestOperationsObserverDebug: 6.989 sec, +6.989 sec -- end\n\nTest session results, code coverage, and logs:\n\t/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/dd-l2/Logs/Test/Test-StyleConverterRuntime-2026.10.07_05-52-56-+0200.xcresult\n\nFailing tests:\n\tSoftHyphenPolicyTests.testASpacelessSoftHyphenRunIsAdmitted()\n\n** TEST FAILED **\n\nTesting started\n"
+  },
+  "green": {
+   "exit": 0,
+   "total": 32,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "verdict": "RED->GREEN"
+ },
+ {
+  "id": "S-d3",
+  "why": "drop the D3 horizontal-only gate",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/wrapping/SoftHyphenPolicy.swift",
+  "sha256Before": "28a2f7f52842fe2ba602e5c5fc069a88cf642f08cbb73b5abe892636319d2ec3",
+  "sha256Mutated": "e63ac9837d90a5777164094863fd6475cb1cb6b967dd17f9d9063ac5d451d594",
+  "sha256Restored": "28a2f7f52842fe2ba602e5c5fc069a88cf642f08cbb73b5abe892636319d2ec3",
+  "red": {
+   "exit": 65,
+   "total": 32,
+   "failed": [
+    "testAVerticalSpacelessSoftHyphenRunIsRefused"
+   ],
+   "compileError": false,
+   "tail": "icyTests testOverflowingLineWithASoftHyphenIsNotUnbreakable]' passed (0.000 seconds).\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testOverlongWordIsReportedAsOverflowing]' started.\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testOverlongWordIsReportedAsOverflowing]' passed (0.000 seconds).\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testRunWithoutSoftHyphenIsIdentityUnderNone]' started.\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testRunWithoutSoftHyphenIsIdentityUnderNone]' passed (0.000 seconds).\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testThePreWave53ClausesAreUnchanged]' started.\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testThePreWave53ClausesAreUnchanged]' passed (0.001 seconds).\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testUnknownAndNilKeywordsDoNotSuppress]' started.\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testUnknownAndNilKeywordsDoNotSuppress]' passed (0.000 seconds).\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testZeroWidthSpaceSurvivesNone]' started.\nTest Case '-[StyleConverterRuntimeTests.SoftHyphenPolicyTests testZeroWidthSpaceSurvivesNone]' passed (0.000 seconds).\nTest Suite 'SoftHyphenPolicyTests' failed at 2026-10-07 05:55:06.225.\n\t Executed 19 tests, with 1 failure (0 unexpected) in 1.186 (1.189) seconds\nTest Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-07 05:55:06.225.\n\t Executed 32 tests, with 1 failure (0 unexpected) in 1.342 (1.350) seconds\nTest Suite 'Selected tests' failed at 2026-10-07 05:55:06.225.\n\t Executed 32 tests, with 1 failure (0 unexpected) in 1.342 (1.351) seconds\n2026-10-07 05:55:11.671 xcodebuild[28720:793450] [MT] IDETestOperationsObserverDebug: 7.828 elapsed -- Testing started completed.\n2026-10-07 05:55:11.671 xcodebuild[28720:793450] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start\n2026-10-07 05:55:11.671 xcodebuild[28720:793450] [MT] IDETestOperationsObserverDebug: 7.828 sec, +7.828 sec -- end\n\nTest session results, code coverage, and logs:\n\t/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/dd-l2/Logs/Test/Test-StyleConverterRuntime-2026.10.07_05-54-50-+0200.xcresult\n\nFailing tests:\n\tSoftHyphenPolicyTests.testAVerticalSpacelessSoftHyphenRunIsRefused()\n\n** TEST FAILED **\n\nResolve Package Graph\n\nTesting started\n"
+  },
+  "green": {
+   "exit": 0,
+   "total": 32,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "verdict": "RED->GREEN"
+ }
+]

@@ -1,0 +1,739 @@
+[
+ {
+  "id": "web-runtime:RW1",
+  "file": "runtimes/web/src/engine/background/RootBackgroundPropagation.ts",
+  "old": "uniform: layers.every(layerIsUniform) && repeatsBothAxes(props) };",
+  "new": "uniform: true };",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/background/RootBackgroundPropagation.test.ts",
+  "cwd": "runtimes/web",
+  "tests": [
+   "a2_marginRoot001_notUniform_scrollAtRootBox_fixedAtIcb"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "web-runtime:RW2",
+  "file": "runtimes/web/src/engine/background/RootBackgroundPropagation.ts",
+  "old": "return lc === 'fixed' || lc === 'local' ? lc : 'scroll';",
+  "new": "return 'scroll';",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/background/RootBackgroundPropagation.test.ts",
+  "cwd": "runtimes/web",
+  "tests": [
+   "a2_marginRoot002_isTheMirror"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "web-runtime:RW3",
+  "file": "runtimes/web/src/engine/background/RootBackgroundPropagation.ts",
+  "old": "return be32(16) === 1 && be32(20) === 1;",
+  "new": "return true;",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/background/RootBackgroundPropagation.test.ts",
+  "cwd": "runtimes/web",
+  "tests": [
+   "a3_ihdr1x1_isUniform_ihdr2x2_isNot"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "web-runtime:RW4",
+  "file": "runtimes/web/src/engine/background/RootBackgroundPropagation.ts",
+  "old": "if (contained) return null;",
+  "new": "if (contained && false) return null;",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/background/RootBackgroundPropagation.test.ts",
+  "cwd": "runtimes/web",
+  "tests": [
+   "a4_contained_noPropagation"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "web-gallery:GW1",
+  "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+  "old": "const rootImagePlan = React.useMemo(() => resolveCanvasRootBackground(doc), [doc]);",
+  "new": "const rootImagePlan = React.useMemo(() => (doc ? null : resolveCanvasRootBackground(doc)), [doc]);",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/ui/ComposedCanvasRootBackgroundImage.test.tsx",
+  "cwd": "apps/web-harness",
+  "tests": [
+   "target_framedSurface_paintsTheDataUriOverTheColour"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "web-gallery:GW2",
+  "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+  "old": "() => withCanvasOwnedRootBackground(roots, rootImagePlan), [roots, rootImagePlan]);",
+  "new": "() => roots, [roots, rootImagePlan]);",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/ui/ComposedCanvasRootBackgroundImage.test.tsx",
+  "cwd": "apps/web-harness",
+  "tests": [
+   "target_bodyRootLosesImage",
+   "marginRoot001_bodyRootLosesImage"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "web-gallery:GW3",
+  "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+  "old": "const rootImageOnIcb = !!rootImagePlan && (!rootImagePlan.uniform || !!canvasClipPath);",
+  "new": "const rootImageOnIcb = false;",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/ui/ComposedCanvasRootBackgroundImage.test.tsx",
+  "cwd": "apps/web-harness",
+  "tests": [
+   "marginRoot001_icbOnly_frameKeepsTheColour"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "web-gallery:GW4",
+  "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+  "old": "bodyRootHasContainment(bodyRoot)) : null;",
+  "new": "false) : null;",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/ui/ComposedCanvasRootBackgroundImage.test.tsx",
+  "cwd": "apps/web-harness",
+  "tests": [
+   "contained_noPropagation_bodyKeepsItsImage"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "web-gallery:GW5",
+  "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+  "old": "? { background: undefined, backgroundColor: canvasBackground, ...rootImageCss } : {}),",
+  "new": "? { background: undefined, backgroundColor: canvasBackground, ...rootImageCss } : { backgroundImage: 'none' }),",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/ui/ComposedCanvasRootBackgroundImage.test.tsx",
+  "cwd": "apps/web-harness",
+  "tests": [
+   "colourOnly_noImageKeyAnywhere"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "compose-A:CA1",
+  "file": "apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt",
+  "old": "    return RootBackgroundPropagation.plan(bodyRoot.properties, margin.top.value, margin.left.value, contained)",
+  "new": "    return if (margin.top.value < -1e9f && contained) RootBackgroundPropagation.plan(bodyRoot.properties, margin.top.value, margin.left.value, contained) else null",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew :app:testDebugUnitTest --tests '*ComposedCanvasRootBackground*'",
+  "cwd": "apps/android-harness",
+  "tests": [
+   "a1_target_oneUniformLayer_framedOrigin"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "compose-A:CA2",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt",
+  "old": "        return roots.map { r -> if (r.role != \"body-root\") r else r.copy(properties = r.properties.filterNot { it.type in IMAGE_TYPES }) }",
+  "new": "        return roots",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew :app:testDebugUnitTest --tests '*ComposedCanvasRootBackground*'",
+  "cwd": "apps/android-harness",
+  "tests": [
+   "a1_strip_bodyRootLosesTheImage"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "compose-A:CA3",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt",
+  "old": "        return Plan(attachments, origins, uniform)",
+  "new": "        return Plan(attachments, origins, uniform || true)",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew :app:testDebugUnitTest --tests '*ComposedCanvasRootBackground*'",
+  "cwd": "apps/android-harness",
+  "tests": [
+   "a2_marginRoot001_notUniform_scrollAtRootBox_fixedAtIcb"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "compose-A:CA4",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt",
+  "old": "            \"fixed\" -> Attachment.FIXED",
+  "new": "            \"fixed\" -> Attachment.SCROLL",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew :app:testDebugUnitTest --tests '*ComposedCanvasRootBackground*'",
+  "cwd": "apps/android-harness",
+  "tests": [
+   "a2_marginRoot002_isTheMirror"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "compose-A:CA5",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt",
+  "old": "        return be32(16) == 1L && be32(20) == 1L",
+  "new": "        return be32(16) >= 0L",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew :app:testDebugUnitTest --tests '*ComposedCanvasRootBackground*'",
+  "cwd": "apps/android-harness",
+  "tests": [
+   "a3_ihdr1x1_isUniform_ihdr2x2_isNot"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "compose-A:CA6",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt",
+  "old": "        if (contained) return null",
+  "new": "        if (contained && props.isEmpty()) return null",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew :app:testDebugUnitTest --tests '*ComposedCanvasRootBackground*'",
+  "cwd": "apps/android-harness",
+  "tests": [
+   "a4_contained_noPropagation_noStrip"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "swift-A:SA1",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift",
+  "old": "        if contained { return nil }                              // off the propagation path",
+  "new": "        if contained || !contained { return nil }",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/WPTCaptureModeTests 2>&1",
+  "cwd": ".",
+  "tests": [
+   "testRootBgA1TargetPlanAndStrip",
+   "testRootBgA1TargetPaintsTheFramedSurfaceGreen"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "swift-A:SA2",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift",
+  "old": "        guard plan != nil else { return roots }",
+  "new": "        guard plan == nil && plan != nil else { return roots }",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/WPTCaptureModeTests 2>&1",
+  "cwd": ".",
+  "tests": [
+   "testRootBgA1TargetPlanAndStrip"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "swift-A:SA3",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift",
+  "old": "        return Plan(attachments: attachments, origins: origins, uniform: uniform)",
+  "new": "        return Plan(attachments: attachments, origins: origins, uniform: uniform || true)",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/WPTCaptureModeTests 2>&1",
+  "cwd": ".",
+  "tests": [
+   "testRootBgA2MarginRoot001PlanIsIcbOnly",
+   "testRootBgA2MarginRoot001PixelsFrameWhiteBandAt66"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "swift-A:SA4",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift",
+  "old": "        case \"fixed\": return .fixed",
+  "new": "        case \"fixed\": return .scroll",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/WPTCaptureModeTests 2>&1",
+  "cwd": ".",
+  "tests": [
+   "testRootBgA2MarginRoot002PixelsBandAtTheIcbCorner"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "swift-A:SA5",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift",
+  "old": "        return be32(16) == 1 && be32(20) == 1                    // width, height",
+  "new": "        return be32(16) >= 0",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/WPTCaptureModeTests 2>&1",
+  "cwd": ".",
+  "tests": [
+   "testRootBgA3IhdrUniformity"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "swift-A:SA6",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift",
+  "old": "        if contained { return nil }                              // off the propagation path",
+  "new": "        if contained && props.isEmpty { return nil }",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/WPTCaptureModeTests 2>&1",
+  "cwd": ".",
+  "tests": [
+   "testRootBgA4ContainedDoesNotPropagate"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "compose-B:BS",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+  "old": "        return roots.take(bodyIdx + 1) + table + after.filter(::isOutOfFlow)",
+  "new": "        return roots.take(bodyIdx) + body.copy(children = listOf(row)) + after.filter(::isOutOfFlow) + listOf(table).take(0)",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvasTableBody*'",
+  "cwd": "apps/android-harness",
+  "tests": [
+   "shape_bodyRootUnchanged_tableRowCells_abspos"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "compose-B:BM1",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+  "old": "        if (displayOf(body) !in TABLE_BODY || paintsOwnEdges(body)) return roots",
+  "new": "        if (paintsOwnEdges(body)) return roots",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvasTableBody*'",
+  "cwd": "apps/android-harness",
+  "tests": [
+   "m1_identity_onNonTableBodies"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "compose-B:BM2",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+  "old": "                cells += r.copy(properties = r.properties.filterNot { it.type in MARGIN_TYPES })  // \u00a78.3",
+  "new": "                cells += r  // \u00a78.3",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvasTableBody*'",
+  "cwd": "apps/android-harness",
+  "tests": [
+   "m2_cellLosesItsMargins"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "compose-B:BM3",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+  "old": "        val run = after.filterNot(::isOutOfFlow)                           // the in-flow run",
+  "new": "        val run = after",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvasTableBody*'",
+  "cwd": "apps/android-harness",
+  "tests": [
+   "m3_absposStaysARoot_neverWrapped"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "compose-B:BM4",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+  "old": "            } else pending += r",
+  "new": "            } else cells += r",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvasTableBody*'",
+  "cwd": "apps/android-harness",
+  "tests": [
+   "m4_nonCellRunIsWrappedInAnAnonymousCell"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "compose-B:BM5",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+  "old": "+ body.properties.filter { it.type in TABLE_BOX_TYPES }",
+  "new": "+ body.properties.filter { false }",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvasTableBody*'",
+  "cwd": "apps/android-harness",
+  "tests": [
+   "m5_tableCarriesTheBodysBorderSpacing"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "compose-B:BK",
+  "file": "apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt",
+  "old": "    return com.styleconverter.runtime.table.TableBodyForest.rewrite(owned)",
+  "new": "    return owned",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvasTableBody*'",
+  "cwd": "apps/android-harness",
+  "tests": [
+   "stack_zeroGapAboveTheSyntheticTable_tdIsNoRoot"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "swift-B:BS",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+  "old": "        return Array(roots[...bodyIdx]) + [table] + after.filter { ComponentRenderer.isOutOfFlow($0) }",
+  "new": "        return Array(roots[..<bodyIdx]) + [synthetic(body, \"\", body.properties, [row])] + after.filter { ComponentRenderer.isOutOfFlow($0) } + [table].prefix(0)",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/TableBodyForestTests 2>&1",
+  "cwd": ".",
+  "tests": [
+   "testShapeBodyRootUnchangedTableRowCellsAbspos"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "swift-B:BM1",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+  "old": "        guard let d = displayOf(body), tableBody.contains(d), !paintsOwnEdges(body) else { return roots }",
+  "new": "        guard !paintsOwnEdges(body) else { return roots }",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/TableBodyForestTests 2>&1",
+  "cwd": ".",
+  "tests": [
+   "testM1IdentityOnNonTableBodies"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "swift-B:BM2",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+  "old": "                cells.append(withProperties(r, r.properties.filter { !marginTypes.contains($0.type) }))  // \u00a78.3",
+  "new": "                cells.append(r)  // \u00a78.3",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/TableBodyForestTests 2>&1",
+  "cwd": ".",
+  "tests": [
+   "testM2CellLosesItsMargins"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "swift-B:BM3",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+  "old": "        let run = after.filter { !ComponentRenderer.isOutOfFlow($0) }          // the in-flow run",
+  "new": "        let run = after",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/TableBodyForestTests 2>&1",
+  "cwd": ".",
+  "tests": [
+   "testM3AbsposStaysARootNeverWrapped"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "swift-B:BM4",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+  "old": "            } else { pending.append(r) }",
+  "new": "            } else { cells.append(r) }",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/TableBodyForestTests 2>&1",
+  "cwd": ".",
+  "tests": [
+   "testM4NonCellRunIsWrappedInAnAnonymousCell"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "swift-B:BM5",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+  "old": "[display(\"TABLE\")] + body.properties.filter { tableBoxTypes.contains($0.type) }",
+  "new": "[display(\"TABLE\")] + body.properties.filter { _ in false }",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/TableBodyForestTests 2>&1",
+  "cwd": ".",
+  "tests": [
+   "testM5TableCarriesTheBodysBorderSpacing"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "swift-B:BK",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+  "old": "    public static func rewrite(_ roots: [IRComponent]) -> [IRComponent] {\n",
+  "new": "    public static func rewrite(_ roots: [IRComponent]) -> [IRComponent] { if roots.count >= 0 { return roots }\n",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/TableBodyForestTests 2>&1",
+  "cwd": ".",
+  "tests": [
+   "testStackZeroGapAboveTheSyntheticTable",
+   "testRasterSquareAtTheReferenceRows"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "web-B:BW1",
+  "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+  "old": "const canvasTableBody = React.useMemo(() => resolveCanvasTableBody(doc), [doc]);",
+  "new": "const canvasTableBody = React.useMemo(() => (doc ? null : resolveCanvasTableBody(doc)), [doc]);",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/ui/ComposedCanvasTableBody.test.tsx",
+  "cwd": "apps/web-harness",
+  "tests": [
+   "s006_wrapperIsATableBox_withTheBodysBorderSpacing",
+   "s006_zeroMarginTableBody_stillGetsTheWrapper"
+  ],
+  "expect": "red"
+ },
+ {
+  "id": "XW1",
+  "label": "XW1 framed base 0",
+  "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+  "old": "rootImageOnIcb ? 0 : CANVAS_FRAME_PX)",
+  "new": "0)",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/ui/ComposedCanvasRootBackgroundImage.test.tsx tests/ui/ComposedCanvasTableBody.test.tsx tests/ui/ComposedCanvasMargin.test.tsx",
+  "cwd": "apps/web-harness",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XW2",
+  "label": "XW2 attachment verbatim",
+  "file": "runtimes/web/src/engine/background/RootBackgroundPropagation.ts",
+  "old": "backgroundAttachment: Array(n).fill('scroll').join(', '),",
+  "new": "backgroundAttachment: plan.attachments.join(', '),",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/background/RootBackgroundPropagation.test.ts",
+  "cwd": "runtimes/web",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XW2b",
+  "label": "XW2b attachment verbatim (gallery pins)",
+  "file": "runtimes/web/src/engine/background/RootBackgroundPropagation.ts",
+  "old": "backgroundAttachment: Array(n).fill('scroll').join(', '),",
+  "new": "backgroundAttachment: plan.attachments.join(', '),",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/ui/ComposedCanvasRootBackgroundImage.test.tsx tests/ui/ComposedCanvasTableBody.test.tsx tests/ui/ComposedCanvasMargin.test.tsx",
+  "cwd": "apps/web-harness",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XW3",
+  "label": "XW3 TABLE_CELL body is a table",
+  "file": "apps/web-harness/src/ui/CanvasTableBody.ts",
+  "old": "TABLE: 'table', INLINE_TABLE: 'inline-table',",
+  "new": "TABLE: 'table', INLINE_TABLE: 'inline-table', TABLE_CELL: 'table',",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/ui/ComposedCanvasRootBackgroundImage.test.tsx tests/ui/ComposedCanvasTableBody.test.tsx tests/ui/ComposedCanvasMargin.test.tsx",
+  "cwd": "apps/web-harness",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XW5",
+  "label": "XW5 wrapper display flow-root",
+  "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+  "old": "display: canvasTableBody ? canvasTableBody.display : 'flow-root',",
+  "new": "display: 'flow-root',",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/ui/ComposedCanvasRootBackgroundImage.test.tsx tests/ui/ComposedCanvasTableBody.test.tsx tests/ui/ComposedCanvasMargin.test.tsx",
+  "cwd": "apps/web-harness",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XW6",
+  "label": "XW6 no-wrapper branch unstripped",
+  "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+  "old": "canvasRoots.map((root, i) => (",
+  "new": "roots.map((root, i) => (",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/ui/ComposedCanvasRootBackgroundImage.test.tsx tests/ui/ComposedCanvasTableBody.test.tsx tests/ui/ComposedCanvasMargin.test.tsx",
+  "cwd": "apps/web-harness",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XW7",
+  "label": "XW7 clip branch ignored",
+  "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+  "old": "(!rootImagePlan.uniform || !!canvasClipPath)",
+  "new": "(!rootImagePlan.uniform)",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/ui/ComposedCanvasRootBackgroundImage.test.tsx tests/ui/ComposedCanvasTableBody.test.tsx tests/ui/ComposedCanvasMargin.test.tsx",
+  "cwd": "apps/web-harness",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XW9",
+  "label": "XW9 repeat gate dropped",
+  "file": "runtimes/web/src/engine/background/RootBackgroundPropagation.ts",
+  "old": "return list.every(entryRepeatsBoth);",
+  "new": "return true;",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/background/RootBackgroundPropagation.test.ts",
+  "cwd": "runtimes/web",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XW10",
+  "label": "XW10 gradient always uniform",
+  "file": "runtimes/web/src/engine/background/RootBackgroundPropagation.ts",
+  "old": "return keys.length > 0 && keys.every((k) => k !== null && k === keys[0]);",
+  "new": "return true;",
+  "kind": "vitest",
+  "cmd": "npx vitest run tests/background/RootBackgroundPropagation.test.ts",
+  "cwd": "runtimes/web",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XC1",
+  "label": "XC1 frame overpaint dropped",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt",
+  "old": "if (plan.uniform) return m ",
+  "new": "return m ",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*WptCanvas*' --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvas*'",
+  "cwd": "apps/android-harness",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XC2",
+  "label": "XC2 canvas base 0",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt",
+  "old": "layerConfigs(props, plan, frame.value).asReversed()",
+  "new": "layerConfigs(props, plan, 0f).asReversed()",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*WptCanvas*' --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvas*'",
+  "cwd": "apps/android-harness",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XC3",
+  "label": "XC3 layer order not reversed",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt",
+  "old": "layerConfigs(props, plan, frame.value).asReversed().forEach",
+  "new": "layerConfigs(props, plan, frame.value).forEach",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*WptCanvas*' --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvas*'",
+  "cwd": "apps/android-harness",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XC4",
+  "label": "XC4 android call site removed",
+  "file": "apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt",
+  "old": "            .then(rootImageModifier)\n",
+  "new": "\n",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*WptCanvas*' --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvas*'",
+  "cwd": "apps/android-harness",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XC5",
+  "label": "XC5 paintsOwnEdges bail dropped",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+  "old": "            !isZeroPx(p.data)  ",
+  "new": "            false && !isZeroPx(p.data)  ",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*WptCanvas*' --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvas*'",
+  "cwd": "apps/android-harness",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XC6",
+  "label": "XC6 proper-non-cell bail dropped",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+  "old": "run.any { displayOf(it) in PROPER_NON_CELL }",
+  "new": "false",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*WptCanvas*' --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvas*'",
+  "cwd": "apps/android-harness",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XC7",
+  "label": "XC7 repeat gate dropped",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt",
+  "old": "&& rawList(props, \"BackgroundRepeat\").all(::entryRepeatsBoth)",
+  "new": "",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*WptCanvas*' --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvas*'",
+  "cwd": "apps/android-harness",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XC8",
+  "label": "XC8 gradient always uniform",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt",
+  "old": "return keys.isNotEmpty() && keys.all { it != \"?\" && it == keys[0] }",
+  "new": "return true",
+  "kind": "gradle",
+  "cmd": "export JAVA_HOME=$(/usr/libexec/java_home -v 21); ./gradlew --continue :runtime:testDebugUnitTest --tests '*WptCanvas*' --tests '*TableBodyForest*' :app:testDebugUnitTest --tests '*ComposedCanvas*'",
+  "cwd": "apps/android-harness",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XS1",
+  "label": "XS1 non-uniform not padded",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift",
+  "old": ".padding(plan.uniform ? 0 : frame)",
+  "new": ".padding(0)",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/WPTCaptureModeTests -only-testing:StyleConverterRuntimeTests/TableBodyForestTests 2>&1",
+  "cwd": ".",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XS3",
+  "label": "XS3 layer order not reversed",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift",
+  "old": "ForEach(Array((0..<n).reversed()), id: \\.self)",
+  "new": "ForEach(Array(0..<n), id: \\.self)",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/WPTCaptureModeTests -only-testing:StyleConverterRuntimeTests/TableBodyForestTests 2>&1",
+  "cwd": ".",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XS4",
+  "label": "XS4 paintsOwnEdges bail dropped",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+  "old": "                && !isZeroPx(p.data)",
+  "new": "                && false",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/WPTCaptureModeTests -only-testing:StyleConverterRuntimeTests/TableBodyForestTests 2>&1",
+  "cwd": ".",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XS5",
+  "label": "XS5 proper-non-cell bail dropped",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift",
+  "old": "!run.contains(where: { properNonCell.contains(displayOf($0) ?? \"\") })",
+  "new": "true",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/WPTCaptureModeTests -only-testing:StyleConverterRuntimeTests/TableBodyForestTests 2>&1",
+  "cwd": ".",
+  "tests": [],
+  "expect": "probe"
+ },
+ {
+  "id": "XS6",
+  "label": "XS6 repeat gate dropped",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift",
+  "old": "&& rawList(props, \"BackgroundRepeat\").allSatisfy(entryRepeatsBoth)",
+  "new": "",
+  "kind": "xcode",
+  "cmd": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath {DD} -only-testing:StyleConverterRuntimeTests/WPTCaptureModeTests -only-testing:StyleConverterRuntimeTests/TableBodyForestTests 2>&1",
+  "cwd": ".",
+  "tests": [],
+  "expect": "probe"
+ }
+]

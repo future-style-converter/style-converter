@@ -1,0 +1,136 @@
+{
+ "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/FloatAvoidPlan.swift",
+ "sha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4",
+ "runs": [
+  {
+   "mutation": "M1",
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP5d_G7_FitContentWithoutContainment"
+   ],
+   "errors": [
+    ", 300.0], floatHeightsPx: [100.0, 100.0, 100.0], bfcInlineSizePx: 0.0, containerWidthPx: Optional(400.0), containerIsBfc: false)\" - admitted wpt__css-contain__contain-inline-size-bfc-floats-001__1-101"
+   ],
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M2",
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP1_001FloatsAndTheBfcBesideFloat3",
+    "testP3_FlowRoot002ZeroWidthBfcAt250x100",
+    "testP4_HalfOpenBoundaryOn001",
+    "testP6_ReportedHeightsAreTheBfcBottoms"
+   ],
+   "errors": [
+    "1_001FloatsAndTheBfcBesideFloat3] : XCTAssertEqual failed: (\"[[200.0, 0.0], [0.0, 100.0], [100.0, 200.0], [0.0, 300.0]]\") is not equal to (\"[[200.0, 0.0], [0.0, 100.0], [100.0, 200.0], [0.0, 200.0]]\")",
+    ".FloatAvoidPlanTests testP3_FlowRoot002ZeroWidthBfcAt250x100] : XCTAssertEqual failed: (\"[[150.0, 0.0], [0.0, 100.0], [250.0, 200.0]]\") is not equal to (\"[[150.0, 0.0], [0.0, 100.0], [250.0, 100.0]]\")",
+    "untimeTests/FloatAvoidPlanTests.swift:79: error: -[StyleConverterRuntimeTests.FloatAvoidPlanTests testP4_HalfOpenBoundaryOn001] : XCTAssertEqual failed: (\"[0.0, 300.0]\") is not equal to (\"[0.0, 0.0]\")",
+    "timeTests/FloatAvoidPlanTests.swift:80: error: -[StyleConverterRuntimeTests.FloatAvoidPlanTests testP4_HalfOpenBoundaryOn001] : XCTAssertEqual failed: (\"[0.0, 300.0]\") is not equal to (\"[0.0, 200.0]\")",
+    "RuntimeTests/FloatAvoidPlanTests.swift:110: error: -[StyleConverterRuntimeTests.FloatAvoidPlanTests testP6_ReportedHeightsAreTheBfcBottoms] : XCTAssertEqual failed: (\"470.0\") is not equal to (\"370.0\")",
+    "RuntimeTests/FloatAvoidPlanTests.swift:112: error: -[StyleConverterRuntimeTests.FloatAvoidPlanTests testP6_ReportedHeightsAreTheBfcBottoms] : XCTAssertEqual failed: (\"400.0\") is not equal to (\"300.0\")"
+   ],
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M3",
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP1_001FloatsAndTheBfcBesideFloat3",
+    "testP3_FlowRoot002ZeroWidthBfcAt250x100",
+    "testP7_RightFloatsFromThe400pxContainerNotA358Proposal"
+   ],
+   "errors": [
+    "estP1_001FloatsAndTheBfcBesideFloat3] : XCTAssertEqual failed: (\"[[0.0, 0.0], [0.0, 100.0], [0.0, 200.0], [0.0, 200.0]]\") is not equal to (\"[[200.0, 0.0], [0.0, 100.0], [100.0, 200.0], [0.0, 200.0]]\")",
+    "ts.FloatAvoidPlanTests testP3_FlowRoot002ZeroWidthBfcAt250x100] : XCTAssertEqual failed: (\"[[0.0, 0.0], [0.0, 100.0], [250.0, 100.0]]\") is not equal to (\"[[150.0, 0.0], [0.0, 100.0], [250.0, 100.0]]\")",
+    "loatAvoidPlanTests.swift:116: error: -[StyleConverterRuntimeTests.FloatAvoidPlanTests testP7_RightFloatsFromThe400pxContainerNotA358Proposal] : XCTAssertEqual failed: (\"0.0\") is not equal to (\"200.0\")",
+    "loatAvoidPlanTests.swift:117: error: -[StyleConverterRuntimeTests.FloatAvoidPlanTests testP7_RightFloatsFromThe400pxContainerNotA358Proposal] : XCTAssertEqual failed: (\"0.0\") is not equal to (\"150.0\")"
+   ],
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M4",
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP5d_G7_AutoWidth",
+    "testP5d_G7_FitContentWithoutContainment"
+   ],
+   "errors": [
+    ", 300.0], floatHeightsPx: [100.0, 100.0, 100.0], bfcInlineSizePx: 0.0, containerWidthPx: Optional(400.0), containerIsBfc: false)\" - admitted wpt__css-contain__contain-inline-size-bfc-floats-001__1-101",
+    ", 300.0], floatHeightsPx: [100.0, 100.0, 100.0], bfcInlineSizePx: 0.0, containerWidthPx: Optional(400.0), containerIsBfc: false)\" - admitted wpt__css-contain__contain-inline-size-bfc-floats-001__1-101"
+   ],
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M5",
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP5d_G5_ClearOnTheBfc"
+   ],
+   "errors": [
+    ", 300.0], floatHeightsPx: [100.0, 100.0, 100.0], bfcInlineSizePx: 0.0, containerWidthPx: Optional(400.0), containerIsBfc: false)\" - admitted wpt__css-contain__contain-inline-size-bfc-floats-001__1-101"
+   ],
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M7",
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP6_ReportedHeightsAreTheBfcBottoms"
+   ],
+   "errors": [
+    "rRuntimeTests/FloatAvoidPlanTests.swift:111: error: -[StyleConverterRuntimeTests.FloatAvoidPlanTests testP6_ReportedHeightsAreTheBfcBottoms] : XCTAssertEqual failed: (\"300.0\") is not equal to (\"20.0\")"
+   ],
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M8",
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP7_RightFloatsFromThe400pxContainerNotA358Proposal"
+   ],
+   "errors": [
+    "atAvoidPlanTests.swift:116: error: -[StyleConverterRuntimeTests.FloatAvoidPlanTests testP7_RightFloatsFromThe400pxContainerNotA358Proposal] : XCTAssertEqual failed: (\"158.0\") is not equal to (\"200.0\")",
+    "atAvoidPlanTests.swift:117: error: -[StyleConverterRuntimeTests.FloatAvoidPlanTests testP7_RightFloatsFromThe400pxContainerNotA358Proposal] : XCTAssertEqual failed: (\"108.0\") is not equal to (\"150.0\")"
+   ],
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M9",
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP5d_G8_ContainSizedBfcBackground"
+   ],
+   "errors": [
+    ", 300.0], floatHeightsPx: [100.0, 100.0, 100.0], bfcInlineSizePx: 0.0, containerWidthPx: Optional(400.0), containerIsBfc: false)\" - admitted wpt__css-contain__contain-inline-size-bfc-floats-001__1-101"
+   ],
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M10",
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP5d_G2_NestedInANonBfcParent"
+   ],
+   "errors": [
+    ", 300.0], floatHeightsPx: [100.0, 100.0, 100.0], bfcInlineSizePx: 0.0, containerWidthPx: Optional(400.0), containerIsBfc: false)\" - admitted wpt__css-contain__contain-inline-size-bfc-floats-001__1-101"
+   ],
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  }
+ ],
+ "green": {
+  "rc": 0,
+  "tests": 15,
+  "red": [],
+  "sha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+ }
+}

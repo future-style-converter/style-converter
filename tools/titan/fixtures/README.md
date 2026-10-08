@@ -28,15 +28,21 @@ Rules:
   carriers). The envelope (`irVersion`, `minReaderVersion`, `fontFaces`) is
   unchanged.
 
-Consumers (each loads by a repo-root-relative path, no build-system
-resource wiring):
+Consumers. Each loads by a repo-root-relative path with no build-system
+resource wiring — except the ios-harness XCTest bundle, which runs inside
+the iOS simulator, a process refused any read of the host checkout under
+`~/Documents` (NSCocoaErrorDomain 257 on 2026-10-06). Its two documents are
+therefore listed in `apps/ios-harness/project.yml` (test target `sources:`
+with `buildPhase: resources`) and read through `Bundle(for:)` (wave 53,
+harness-hygiene T1-a). Keep those `project.yml` paths in step with any
+re-vendoring here:
 
 | fixture | pin |
 |---|---|
 | `per-test-ir/wave49-final/css-ui/wpt__css-ui__appearance-auto-001.json` | `runtimes/swiftui/Tests/…/InlineAtomFlowTests.swift` (fix-3 fold guard + 4/4/7/1 row partition) |
 | `per-test-ir/wave49-final/css-grid/wpt__css-grid__abspos__descendant-static-position-002.json` | `runtimes/swiftui/Tests/…/FloatRowPackingTests.swift` (the wave-20 fix-6 RTL double-mirror pin). Its stem carries the WPT `abspos/` subdirectory, which the wave-20 spelling (`wpt__css-grid__descendant-static-position-002`) did not — that rename is why finding A8#3 recorded the document as unrecoverable. |
-| `per-test-ir/wave49-final/css-cascade/wpt__css-cascade__scope-pseudo-element.json` | `apps/android-harness/app/src/test/…/ComposedRootInlineFlowTest.kt` and `apps/ios-harness/StyleConverterTestTests/ComposedRootInlineFlowTests.swift` (B8 pass-preservation) |
-| `per-test-ir/wave49-final/CSS2/wpt__CSS2__abspos__static-inside-inline-block.json` | `apps/ios-harness/StyleConverterTestTests/ComposedRootInlineFlowTests.swift` (the wave-34 target document) |
+| `per-test-ir/wave49-final/css-cascade/wpt__css-cascade__scope-pseudo-element.json` | `apps/android-harness/app/src/test/…/ComposedRootInlineFlowTest.kt` and `apps/ios-harness/StyleConverterTestTests/ComposedRootInlineFlowTests.swift` (B8 pass-preservation; the iOS read is a bundle resource via `project.yml`) |
+| `per-test-ir/wave49-final/CSS2/wpt__CSS2__abspos__static-inside-inline-block.json` | `apps/ios-harness/StyleConverterTestTests/ComposedRootInlineFlowTests.swift` (the wave-34 target document; a bundle resource via `project.yml`) |
 | `per-test-ir/wave49-final/css-multicol/*.json` (9 files: the 7 spanner+abspos tests the wave49-final section flags, plus 2 non-prone controls) | `tools/visual/capture-divergence.test.mjs` |
 | `combined-ir/css-text.wave49-final.12-doc-subset.json` | `tools/titan/split-combined-ir.test.mjs` (face scoping) |
 

@@ -1,0 +1,13 @@
+{
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InertOutOfFlowMember.kt",
+ "sha256_before": "3810bd8f261cf56332f5fcca17290e9be06e01200c02f5cf2affdcb26716aa52",
+ "sha256_restored": "3810bd8f261cf56332f5fcca17290e9be06e01200c02f5cf2affdcb26716aa52",
+ "red_exit": 0,
+ "red_ran": 42,
+ "red_failing": [],
+ "green_exit": 0,
+ "green_ran": 42,
+ "green_failing": [],
+ "mutation_old": "        if (!member.children.isNullOrEmpty() || !member.runs.isNullOrEmpty() ||\n            !member.decorations.isNullOrEmpty()\n        ) return false",
+ "mutation_new": ""
+}

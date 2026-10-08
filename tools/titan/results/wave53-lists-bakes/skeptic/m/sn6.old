@@ -1,0 +1,1 @@
+        implicitClose = findImpliedClose(html, tagOpenEnd + 1, tagName, triggers);

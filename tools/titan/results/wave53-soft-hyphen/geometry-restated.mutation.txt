@@ -1,0 +1,23 @@
+# mutation G-ink: the restated probe's ink() reverted to the old rule (r+g+b < 300) — expected: ANCHOR FAILED, exit 1
+# sha256 before 711a5181a6bf581343457932d2ecf4bc0e922b903c2e7e42517b2dc613dab0bd
+# sha256 mutated 08b4276195c3d94e707ea58630397a8f10a83105a31d0bf73f5e969034fc10bd
+hyphens/hyphens-span-002 ref      boxes 7 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-span-002 web      boxes 7 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-span-002 ios      boxes 7 heights [46] line-ink [((25, 60), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-span-002 android  boxes 7 heights [46] line-ink [((25, 54), (25, 53))] → GEOMETRY WRONG (box 1 line 1 ink x25-54 vs ref x25-61)
+hyphens/hyphens-span-001 ref      boxes 9 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-span-001 web      boxes 9 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-span-001 ios      boxes 9 heights [26] line-ink [((25, 60), (25, 53))] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+hyphens/hyphens-span-001 android  boxes 9 heights [46] line-ink [((25, 76), (25, 31))] → GEOMETRY WRONG (box 1 line 1 ink x25-76 vs ref x25-61)
+hyphens/hyphens-out-of-flow-001 ref      boxes 7 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 web      boxes 7 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 ios      boxes 7 heights [26] line-ink [((25, 60), (25, 53))] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+hyphens/hyphens-out-of-flow-001 android  boxes 7 heights [46] line-ink [((25, 31), (25, 76)), ((25, 54), (25, 53)), ((25, 76), (25, 31))] → GEOMETRY WRONG (box 1 line 1 ink x25-76 vs ref x25-61)
+hyphens/hyphens-out-of-flow-002 ref      boxes 7 heights [46] line-ink [((25, 61), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-002 web      boxes 7 heights [26, 46] line-ink [((25, 61), (25, 53)), ((25, 84),)] → GEOMETRY WRONG (box 4 height 26 vs ref 46)
+hyphens/hyphens-out-of-flow-002 ios      boxes 7 heights [46] line-ink [((25, 60), (25, 53))] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-002 android  boxes 7 heights [46] line-ink [((25, 31), (25, 76)), ((25, 54), (25, 53)), ((25, 76), (25, 31))] → GEOMETRY WRONG (box 1 line 1 ink x25-54 vs ref x25-61)
+SELF-CHECK FAILED (ANCHOR FAILED: hyphens/hyphens-span-002)
+exit=1
+# sha256 restored 711a5181a6bf581343457932d2ecf4bc0e922b903c2e7e42517b2dc613dab0bd
+# restored run (wave52-ship) exit=0

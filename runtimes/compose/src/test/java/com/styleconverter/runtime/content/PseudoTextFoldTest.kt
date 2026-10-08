@@ -248,6 +248,73 @@ class PseudoTextFoldTest {
         assertFalse(folded.afterFolded)
     }
 
+    // ── Wave 53 (lane L1, nested-list-extractor D): ::before into runs ──
+
+    /**
+     * N5 — css-lists/counter-reset-reversed-nested.html's `Two`: the
+     * wave52-ship per-test IR `pseudos` VERBATIM (tools/titan/runs/wave52-ship/
+     * sections/css-lists/per-test-ir/wpt__css-lists__counter-reset-reversed-
+     * nested.json, sha256 e1dd5c58…) with the two strings the fixed extractor +
+     * counter bake produce substituted (`"11"` → `"2"`, `_text` "11. " → "2. ";
+     * tools/titan/extract-fixture-implied-close.test.mjs N1 pins them).
+     */
+    private val nestedTwoBefore = pseudos(
+        """{"before": {"properties": {"counter-increment": "foo -1", "content": "\"2\" \". \""}, "_text": "2. ", "_lossy": true, "_lossyReasons": ["generated-content-baked"]}}"""
+    )
+
+    @Test
+    fun `N5 a run-plan li folds its before into the leading run and drops the wrapper`() {
+        // CSS 2.1 §12.1 / §9.2.1.1: the ::before is the first inline content,
+        // in the anonymous block with "Two", AHEAD of the nested block <ol>.
+        val two = IRComponent(
+            id = "counter-reset-reversed-nested__0__1-383", name = "counter-reset-reversed-nested__0__1",
+            properties = listOf(IRProperty("Display", Json.parseToJsonElement("\"BLOCK\""))),
+            _text = "Two", _tag = "li", pseudos = nestedTwoBefore,
+            runs = listOf(IRRun(text = "Two "), IRRun(child = "counter-reset-reversed-nested__0__1__0")),
+        )
+        val folded = PseudoTextFold.resolve(two)
+        // The ::after channel is untouched (there is none here).
+        assertFalse(folded.afterFolded)
+        // Both paint channels lead with the marker; the child entry stays second.
+        assertEquals("2. Two ", folded.component.runs!![0].text)
+        assertEquals("counter-reset-reversed-nested__0__1__0", folded.component.runs!![1].child)
+        assertEquals("2. Two", folded.component._text)
+        // `before` left the copy's pseudos (the map itself stays non-null)…
+        assertNotNull(folded.component.pseudos)
+        assertNull(folded.component.pseudos!!["before"])
+        // …so the Row { before, content } wrapper is never built for it.
+        // MUTATION (executed, tools/titan/results/wave53-lists-bakes/_note.md):
+        // keeping `before` in the copy turns this red (double paint).
+        val cfg = PseudoBucketExtractor.extractBeforeAfterConfig(
+            folded.component.pseudos, folded.component.role, afterFolded = folded.afterFolded
+        )
+        assertNull(cfg?.before)
+    }
+
+    @Test
+    fun `N5 control the runs carrier whose before has no baked text is the same instance`() {
+        // display-contents-dynamic-before-after-001 __1__3, wave52-ship
+        // per-test IR verbatim: the corpus's only other runs+pseudos component.
+        val c = IRComponent(
+            id = "display-contents-dynamic-before-after-001__1__3-052",
+            name = "display-contents-dynamic-before-after-001__1__3", _text = "S",
+            pseudos = pseudos("""{"before": {"properties": {"color": "green", "display": "contents", "border": "1px solid red"}}}"""),
+            runs = listOf(IRRun(text = "S"), IRRun(child = "display-contents-dynamic-before-after-001__1__3__0")),
+        )
+        val folded = PseudoTextFold.resolve(c)
+        assertSame(c, folded.component)
+        assertFalse(folded.afterFolded)
+    }
+
+    @Test
+    fun `a child-first run list keeps its before for the wrapper`() {
+        // No leading text run to prefix: the pre-wave-53 behaviour, named.
+        val c = host(listItemAfter, text = "a", runs = listOf(IRRun(child = "k"), IRRun(text = "a")))
+        val folded = PseudoTextFold.resolve(c)
+        assertSame(c, folded.component)
+        assertFalse(folded.afterFolded)
+    }
+
     // ── The double-render guard ─────────────────────────────────────────
 
     @Test

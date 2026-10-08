@@ -158,6 +158,11 @@ object InlineRunFold {
              *  order. Empty for every pre-wave-47 shape — the seam then
              *  renders byte-identically to wave 45. */
             val spans: List<Span> = emptyList(),
+            /** Wave 53 (lane L2, F2): PAINT-INERT OUT-OF-FLOW members
+             *  dropped (abspos/fixed, transparent ink — see
+             *  [InertOutOfFlowMember]); the seam names the count. 0 for
+             *  every pre-wave-53 shape. */
+            val droppedOutOfFlowMembers: Int = 0,
         ) : Outcome
 
         /** Unsupported shape — caller keeps the stacked fallback and logs. */
@@ -317,6 +322,9 @@ object InlineRunFold {
         val sb = StringBuilder()
         // PAINT-INERT empty members dropped (reported, never silent).
         var dropped = 0
+        // Wave 53 (lane L2, F2) — paint-inert OUT-OF-FLOW members dropped
+        // (reported through Folded.droppedOutOfFlowMembers, never silent).
+        var droppedOutOfFlow = 0
         // Wave 45 (lane X2) — PAINTED empty members, in marker order.
         val atoms = mutableListOf<Atom>()
         // The member-adopted Hyphens declaration (first one wins; a second
@@ -449,6 +457,14 @@ object InlineRunFold {
                     } else {
                         dropped++
                     }
+                } else if (tag in TEXT_MEMBER_TAGS && InertOutOfFlowMember.admits(child)) {
+                    // Wave 53 (lane L2, F2) — an abspos/fixed member with
+                    // transparent ink is out of flow (CSS 2.1 §9.3.1) and
+                    // paints nothing: it contributes no glyphs and no break
+                    // opportunity to this paragraph (css-text-3 §5.1), so it
+                    // is DROPPED and counted, never mounted (predicate +
+                    // stated loss: InertOutOfFlowMember's banner).
+                    droppedOutOfFlow++
                 } else {
                     // ── Wave 47 (lane Z6) — the GLYPH member arm ────────
                     // The styled tag ring (the wave-44 no-UA-ink trio plus
@@ -552,7 +568,8 @@ object InlineRunFold {
         val properties = adopted?.let { hostProperties + it } ?: hostProperties
         // The faithful fold (atoms in marker order — see Atom's contract;
         // spans in wire order — see Span's contract).
-        return Outcome.Folded(merged, properties, adopted != null, dropped, atoms, spans)
+        return Outcome.Folded(merged, properties, adopted != null, dropped, atoms, spans,
+            droppedOutOfFlowMembers = droppedOutOfFlow)
     }
 
     /** The nested-flatten verdict (wave 48, lane W4). [NoNestedGlyphs]

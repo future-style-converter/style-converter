@@ -1,0 +1,8 @@
+counter-reset-reversed-nested ref      y36-47:x57-117 y56-67:x57-105 y76-87:x97-166 y96-107:x97-147 y116-130:x97-151 y136-147:x57-101 → GEOMETRY OK
+counter-reset-reversed-nested web      y36-47:x57-117 y56-67:x57-105 y76-87:x97-166 y96-107:x97-147 y116-130:x97-151 y136-147:x57-101 → GEOMETRY OK
+counter-reset-reversed-nested ios      y36-47:x57-117 y56-67:x57-105 y76-87:x97-165 y96-107:x97-147 y116-130:x97-151 y136-147:x57-100 → GEOMETRY OK
+counter-reset-reversed-nested android  y37-47:x57-116 y56-67:x57-105 y77-87:x98-170 y96-107:x97-147 y116-130:x97-150 y136-147:x58-103 → GEOMETRY OK
+counter-suffix ref      y214-225:x104-144 y238-249:x104-144 y262-273:x104-145 y286-297:x104-144 → GEOMETRY OK
+counter-suffix web      y214-225:x47-126 y238-249:x47-127 y262-273:x46-126 y286-297:x47-127 → GEOMETRY WRONG (rtl row 1 left x47 vs ref x104)
+counter-suffix ios      y214-225:x103-126 y238-249:x104-126 y262-273:x103-126 y286-297:x104-126 → GEOMETRY WRONG (rtl row 1 right x126 vs ref x144)
+counter-suffix android  y214-225:x152-174 y239-249:x152-174 y262-273:x152-174 y287-297:x152-174 → GEOMETRY WRONG (rtl row 1 left x152 vs ref x104)

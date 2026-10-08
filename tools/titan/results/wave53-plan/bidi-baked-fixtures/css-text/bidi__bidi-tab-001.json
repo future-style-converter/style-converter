@@ -1,0 +1,506 @@
+{
+  "_wpt": {
+    "test": "css/css-text/bidi/bidi-tab-001.html",
+    "ref": "css/css-text/bidi/reference/bidi-tab-001-ref.html",
+    "bucket": "A",
+    "lossy": true,
+    "lossyReasons": [
+      "baked-bidi-visual-order"
+    ],
+    "specSection": "css-text",
+    "bidiBaked": true
+  },
+  "components": {
+    "bidi__bidi-tab-001__0": {
+      "properties": {},
+      "_text": "The test passes if the two boxes are identical.",
+      "_tag": "p"
+    },
+    "bidi__bidi-tab-001__1": {
+      "properties": {
+        "font-family": "monospace",
+        "font-size": "20px",
+        "line-height": "1",
+        "white-space": "pre",
+        "width": "120.41px",
+        "background": "blue",
+        "color": "blue",
+        "direction": "ltr",
+        "height": "20px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "children": {
+        "bidi__bidi-tab-001__1__0": {
+          "id": "bidi__bidi-tab-001__1__0",
+          "properties": {
+            "background": "yellow",
+            "direction": "ltr",
+            "position": "absolute",
+            "left": "0px",
+            "top": "-2px",
+            "width": "108.38px",
+            "height": "24px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "bidi__bidi-tab-001__1__0__0": {
+              "id": "bidi__bidi-tab-001__1__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "96.33px",
+                "top": "0px",
+                "width": "12.05px",
+                "height": "24px",
+                "line-height": "24px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 255)",
+                "font-family": "monospace",
+                "font-size": "20px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "0"
+            }
+          }
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ]
+    },
+    "bidi__bidi-tab-001__2": {
+      "properties": {
+        "font-family": "monospace",
+        "font-size": "20px",
+        "line-height": "1",
+        "white-space": "pre",
+        "width": "120.41px",
+        "background": "blue",
+        "color": "blue",
+        "direction": "ltr",
+        "height": "20px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "children": {
+        "bidi__bidi-tab-001__2__0": {
+          "id": "bidi__bidi-tab-001__2__0",
+          "properties": {
+            "background": "yellow",
+            "direction": "rtl",
+            "position": "absolute",
+            "left": "12.03px",
+            "top": "-2px",
+            "width": "108.38px",
+            "height": "24px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "bidi__bidi-tab-001__2__0__0": {
+              "id": "bidi__bidi-tab-001__2__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "12.05px",
+                "height": "24px",
+                "line-height": "24px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 255)",
+                "font-family": "monospace",
+                "font-size": "20px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "0"
+            }
+          }
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ]
+    },
+    "bidi__bidi-tab-001__3": {
+      "properties": {
+        "font-family": "monospace",
+        "font-size": "20px",
+        "line-height": "1",
+        "white-space": "pre",
+        "width": "120.41px",
+        "background": "blue",
+        "color": "blue",
+        "direction": "ltr",
+        "height": "20px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "children": {
+        "bidi__bidi-tab-001__3__0": {
+          "id": "bidi__bidi-tab-001__3__0",
+          "properties": {
+            "background": "yellow",
+            "direction": "rtl",
+            "position": "absolute",
+            "left": "0px",
+            "top": "-2px",
+            "width": "108.38px",
+            "height": "24px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "bidi__bidi-tab-001__3__0__0": {
+              "id": "bidi__bidi-tab-001__3__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "96.33px",
+                "top": "0px",
+                "width": "12.05px",
+                "height": "24px",
+                "line-height": "24px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 255)",
+                "font-family": "monospace",
+                "font-size": "20px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "0"
+            }
+          }
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ]
+    },
+    "bidi__bidi-tab-001__4": {
+      "properties": {
+        "font-family": "monospace",
+        "font-size": "20px",
+        "line-height": "1",
+        "white-space": "pre",
+        "width": "120.41px",
+        "background": "blue",
+        "color": "blue",
+        "direction": "ltr",
+        "height": "20px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "children": {
+        "bidi__bidi-tab-001__4__0": {
+          "id": "bidi__bidi-tab-001__4__0",
+          "properties": {
+            "background": "yellow",
+            "direction": "ltr",
+            "position": "absolute",
+            "left": "12.03px",
+            "top": "-2px",
+            "width": "108.38px",
+            "height": "24px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "bidi__bidi-tab-001__4__0__0": {
+              "id": "bidi__bidi-tab-001__4__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "12.05px",
+                "height": "24px",
+                "line-height": "24px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 255)",
+                "font-family": "monospace",
+                "font-size": "20px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "0"
+            }
+          }
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ]
+    },
+    "bidi__bidi-tab-001__5": {
+      "properties": {
+        "width": "0px",
+        "height": "20px"
+      },
+      "_role": "line-break",
+      "_tag": "br"
+    },
+    "bidi__bidi-tab-001__6": {
+      "properties": {
+        "font-family": "monospace",
+        "font-size": "20px",
+        "line-height": "1",
+        "white-space": "pre",
+        "width": "120.41px",
+        "background": "blue",
+        "color": "blue",
+        "direction": "ltr",
+        "height": "20px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "children": {
+        "bidi__bidi-tab-001__6__0": {
+          "id": "bidi__bidi-tab-001__6__0",
+          "properties": {
+            "background": "yellow",
+            "direction": "ltr",
+            "position": "absolute",
+            "left": "0px",
+            "top": "-2px",
+            "width": "108.38px",
+            "height": "24px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "bidi__bidi-tab-001__6__0__0": {
+              "id": "bidi__bidi-tab-001__6__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "96.33px",
+                "top": "0px",
+                "width": "12.05px",
+                "height": "24px",
+                "line-height": "24px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 255)",
+                "font-family": "monospace",
+                "font-size": "20px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "0"
+            }
+          }
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ]
+    },
+    "bidi__bidi-tab-001__7": {
+      "properties": {
+        "font-family": "monospace",
+        "font-size": "20px",
+        "line-height": "1",
+        "white-space": "pre",
+        "width": "120.41px",
+        "background": "blue",
+        "color": "blue",
+        "direction": "ltr",
+        "height": "20px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "children": {
+        "bidi__bidi-tab-001__7__0": {
+          "id": "bidi__bidi-tab-001__7__0",
+          "properties": {
+            "background": "yellow",
+            "direction": "rtl",
+            "position": "absolute",
+            "left": "12.03px",
+            "top": "-2px",
+            "width": "108.38px",
+            "height": "24px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "bidi__bidi-tab-001__7__0__0": {
+              "id": "bidi__bidi-tab-001__7__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "12.05px",
+                "height": "24px",
+                "line-height": "24px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 255)",
+                "font-family": "monospace",
+                "font-size": "20px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "0"
+            }
+          }
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ]
+    },
+    "bidi__bidi-tab-001__8": {
+      "properties": {
+        "font-family": "monospace",
+        "font-size": "20px",
+        "line-height": "1",
+        "white-space": "pre",
+        "width": "120.41px",
+        "background": "blue",
+        "color": "blue",
+        "direction": "ltr",
+        "height": "20px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "children": {
+        "bidi__bidi-tab-001__8__0": {
+          "id": "bidi__bidi-tab-001__8__0",
+          "properties": {
+            "background": "yellow",
+            "position": "absolute",
+            "left": "0px",
+            "top": "-2px",
+            "width": "108.38px",
+            "height": "24px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "bidi__bidi-tab-001__8__0__0": {
+              "id": "bidi__bidi-tab-001__8__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "96.33px",
+                "top": "0px",
+                "width": "12.05px",
+                "height": "24px",
+                "line-height": "24px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 255)",
+                "font-family": "monospace",
+                "font-size": "20px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "0"
+            }
+          }
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ]
+    },
+    "bidi__bidi-tab-001__9": {
+      "properties": {
+        "font-family": "monospace",
+        "font-size": "20px",
+        "line-height": "1",
+        "white-space": "pre",
+        "width": "120.41px",
+        "background": "blue",
+        "color": "blue",
+        "direction": "ltr",
+        "height": "20px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "text-align": "left",
+        "position": "relative"
+      },
+      "children": {
+        "bidi__bidi-tab-001__9__0": {
+          "id": "bidi__bidi-tab-001__9__0",
+          "properties": {
+            "background": "yellow",
+            "direction": "rtl",
+            "position": "absolute",
+            "left": "12.03px",
+            "top": "-2px",
+            "width": "108.38px",
+            "height": "24px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "bidi__bidi-tab-001__9__0__0": {
+              "id": "bidi__bidi-tab-001__9__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "12.05px",
+                "height": "24px",
+                "line-height": "24px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 255)",
+                "font-family": "monospace",
+                "font-size": "20px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "0"
+            }
+          }
+        }
+      },
+      "_lossy": true,
+      "_lossyReasons": [
+        "baked-bidi-visual-order"
+      ]
+    }
+  }
+}

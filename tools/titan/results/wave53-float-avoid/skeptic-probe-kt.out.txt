@@ -1,0 +1,6 @@
+SKEPTIC Q1 position:absolute float admitted = true
+SKEPTIC Q2 position:fixed float admitted = true
+SKEPTIC Q3 scale=2.75 float1.x=550.0 (expect 550.0) bfc=(0.0,550.0) (expect (0.0,550.0)) w=1100.0
+under S1:
+SKEPTIC Q3 scale=2.75 float1.x=-150.0 (expect 550.0) bfc=(0.0,825.0) (expect (0.0,550.0)) w=400.0
+FloatAvoidPlan.kt sha256 fb440ee49aee27361bd417079006bdf0a09a5fcc22413dad8d4657a71c0d47d7 -> fb440ee49aee27361bd417079006bdf0a09a5fcc22413dad8d4657a71c0d47d7; probe test removed: ls: runtimes/compose/src/test/java/com/styleconverter/runtime/layout/SkepticL4ProbeTest.kt: No such file or directory

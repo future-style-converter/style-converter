@@ -1,0 +1,64 @@
+sum<300 hyphens/hyphens-span-002 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<300 hyphens/hyphens-span-002 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<300 hyphens/hyphens-span-002 ios      line1-ink [(25, 60), (25, 60), (25, 60), (25, 60), (25, 60), (25, 60), (25, 60)] → GEOMETRY OK
+sum<300 hyphens/hyphens-span-002 android  line1-ink [(25, 54), (25, 54), (25, 54), (25, 54), (25, 54), (25, 54), (25, 54)] → GEOMETRY WRONG (box 1 line 1 ink x25-54 vs ref x25-61)
+sum<300 hyphens/hyphens-span-001 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<300 hyphens/hyphens-span-001 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<300 hyphens/hyphens-span-001 ios      line1-ink [(25, 60), (25, 60), (25, 60), (25, 60), (25, 60), (25, 60), (25, 60), (25, 60), (25, 60)] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+sum<300 hyphens/hyphens-span-001 android  line1-ink [(25, 76), (25, 76), (25, 76), (25, 76), (25, 76), (25, 76), (25, 76), (25, 76), (25, 76)] → GEOMETRY WRONG (box 1 line 1 ink x25-76 vs ref x25-61)
+sum<300 hyphens/hyphens-out-of-flow-001 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<300 hyphens/hyphens-out-of-flow-001 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<300 hyphens/hyphens-out-of-flow-001 ios      line1-ink [(25, 60), (25, 60), (25, 60), (25, 60), (25, 60), (25, 60), (25, 60)] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+sum<300 hyphens/hyphens-out-of-flow-001 android  line1-ink [(25, 76), (25, 76), (25, 31), (25, 54), (25, 54), (25, 76), (25, 76)] → GEOMETRY WRONG (box 1 line 1 ink x25-76 vs ref x25-61)
+sum<300 hyphens/hyphens-out-of-flow-002 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<300 hyphens/hyphens-out-of-flow-002 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 84), (25, 84), (25, 61), (25, 61)] → GEOMETRY WRONG (box 4 height 26 vs ref 46)
+sum<300 hyphens/hyphens-out-of-flow-002 ios      line1-ink [(25, 60), (25, 60), (25, 60), (25, 60), (25, 60), (25, 60), (25, 60)] → GEOMETRY OK
+sum<300 hyphens/hyphens-out-of-flow-002 android  line1-ink [(25, 54), (25, 54), (25, 31), (25, 54), (25, 54), (25, 76), (25, 54)] → GEOMETRY WRONG (box 1 line 1 ink x25-54 vs ref x25-61)
+sum<450 hyphens/hyphens-span-002 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<450 hyphens/hyphens-span-002 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<450 hyphens/hyphens-span-002 ios      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<450 hyphens/hyphens-span-002 android  line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<450 hyphens/hyphens-span-001 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<450 hyphens/hyphens-span-001 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<450 hyphens/hyphens-span-001 ios      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+sum<450 hyphens/hyphens-span-001 android  line1-ink [(25, 76), (25, 76), (25, 76), (25, 76), (25, 76), (25, 76), (25, 76), (25, 76), (25, 76)] → GEOMETRY WRONG (box 1 line 1 ink x25-76 vs ref x25-61)
+sum<450 hyphens/hyphens-out-of-flow-001 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<450 hyphens/hyphens-out-of-flow-001 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<450 hyphens/hyphens-out-of-flow-001 ios      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+sum<450 hyphens/hyphens-out-of-flow-001 android  line1-ink [(25, 76), (25, 76), (25, 31), (25, 54), (25, 54), (25, 76), (25, 76)] → GEOMETRY WRONG (box 1 line 1 ink x25-76 vs ref x25-61)
+sum<450 hyphens/hyphens-out-of-flow-002 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<450 hyphens/hyphens-out-of-flow-002 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 84), (25, 84), (25, 61), (25, 61)] → GEOMETRY WRONG (box 4 height 26 vs ref 46)
+sum<450 hyphens/hyphens-out-of-flow-002 ios      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<450 hyphens/hyphens-out-of-flow-002 android  line1-ink [(25, 61), (25, 61), (25, 31), (25, 54), (25, 54), (25, 76), (25, 61)] → GEOMETRY WRONG (box 3 line 1 ink x25-31 vs ref x25-61)
+sum<600 hyphens/hyphens-span-002 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<600 hyphens/hyphens-span-002 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<600 hyphens/hyphens-span-002 ios      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<600 hyphens/hyphens-span-002 android  line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<600 hyphens/hyphens-span-001 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<600 hyphens/hyphens-span-001 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<600 hyphens/hyphens-span-001 ios      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+sum<600 hyphens/hyphens-span-001 android  line1-ink [(25, 77), (25, 77), (25, 77), (25, 77), (25, 77), (25, 77), (25, 77), (25, 77), (25, 77)] → GEOMETRY WRONG (box 1 line 1 ink x25-77 vs ref x25-61)
+sum<600 hyphens/hyphens-out-of-flow-001 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<600 hyphens/hyphens-out-of-flow-001 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<600 hyphens/hyphens-out-of-flow-001 ios      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+sum<600 hyphens/hyphens-out-of-flow-001 android  line1-ink [(25, 77), (25, 77), (25, 31), (25, 55), (25, 55), (25, 77), (25, 77)] → GEOMETRY WRONG (box 1 line 1 ink x25-77 vs ref x25-61)
+sum<600 hyphens/hyphens-out-of-flow-002 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<600 hyphens/hyphens-out-of-flow-002 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 84), (25, 84), (25, 61), (25, 61)] → GEOMETRY WRONG (box 4 height 26 vs ref 46)
+sum<600 hyphens/hyphens-out-of-flow-002 ios      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+sum<600 hyphens/hyphens-out-of-flow-002 android  line1-ink [(25, 61), (25, 61), (25, 31), (25, 55), (25, 55), (25, 77), (25, 61)] → GEOMETRY WRONG (box 3 line 1 ink x25-31 vs ref x25-61)
+max<200 hyphens/hyphens-span-002 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+max<200 hyphens/hyphens-span-002 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+max<200 hyphens/hyphens-span-002 ios      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+max<200 hyphens/hyphens-span-002 android  line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+max<200 hyphens/hyphens-span-001 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+max<200 hyphens/hyphens-span-001 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+max<200 hyphens/hyphens-span-001 ios      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+max<200 hyphens/hyphens-span-001 android  line1-ink [(25, 77), (25, 77), (25, 77), (25, 77), (25, 77), (25, 77), (25, 77), (25, 77), (25, 77)] → GEOMETRY WRONG (box 1 line 1 ink x25-77 vs ref x25-61)
+max<200 hyphens/hyphens-out-of-flow-001 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+max<200 hyphens/hyphens-out-of-flow-001 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+max<200 hyphens/hyphens-out-of-flow-001 ios      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY WRONG (box 1 height 26 vs ref 46)
+max<200 hyphens/hyphens-out-of-flow-001 android  line1-ink [(25, 77), (25, 77), (25, 31), (25, 55), (25, 55), (25, 77), (25, 77)] → GEOMETRY WRONG (box 1 line 1 ink x25-77 vs ref x25-61)
+max<200 hyphens/hyphens-out-of-flow-002 ref      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+max<200 hyphens/hyphens-out-of-flow-002 web      line1-ink [(25, 61), (25, 61), (25, 61), (25, 84), (25, 84), (25, 61), (25, 61)] → GEOMETRY WRONG (box 4 height 26 vs ref 46)
+max<200 hyphens/hyphens-out-of-flow-002 ios      line1-ink [(25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61), (25, 61)] → GEOMETRY OK
+max<200 hyphens/hyphens-out-of-flow-002 android  line1-ink [(25, 61), (25, 61), (25, 31), (25, 55), (25, 55), (25, 77), (25, 61)] → GEOMETRY WRONG (box 3 line 1 ink x25-31 vs ref x25-61)

@@ -14,51 +14,30 @@ this file is incomplete.
 
 Corpus history and per-wave findings live in `docs/STATUS.md` (one dated
 paragraph per wave) and `tools/titan/results/corpus-v*.json` (one snapshot
-per wave, `_note` carries the full story). Current: **corpus-v6.18**
-(wave 52, device gate of record `wave52-ship` on a quiet host, commit
-aaf676c5, 2026-10-05 — web 1229/1372 89.6%, iOS 1119/1362 82.2%, Android
-1111/1362 81.6%; per cell against wave51-fix **102 gained, 8 lost, 0 newly
-measured, 21 unmeasured-now** (295 movers ≥ 0.005) — the 8 lost are exactly
-the eight instrument-only cells the calibration run pre-registered, the 21
-unmeasured are the 19 `absence-only` stamps (queue 0(n)) plus the two
-`armenian/css3-counter-styles-008` natives (2(c¹)); the 102 split into 13
-instrument-only and 89 render (web 18 · iOS 35 · Android 36), and against
-the calibration run `wave52-calib` (the opening captures re-scored under
-the re-frozen refs) the render lanes score **89 gained / 0 lost**; every
-flipped cell was looked at against its reference — 91 gains FAITHFUL, **11
-DEGENERATE** (obligation 0(b)), all 8 losses HONEST_FAIL
-(`tools/titan/results/wave52-gate/cell-review.json`); `node
-tools/titan/score-gate.mjs wave51-fix wave52-ship`; snapshot
-`tools/titan/results/corpus-v6-18.json`; record
-`tools/titan/results/wave52-gate/_note.md`). The wave-52 OPENING gate
-(`wave52-open`, the unmodified wave-51 tree) came first and scored **0
-gained / 0 lost / 0 movers over 4117 cells** against wave51-fix — the third
-consecutive deterministic gate. **The first closing attempt (`wave52-final`,
-commit 308d11f0) STOPPED the ship**: five lost cells outside the
-pre-registered eight (`css-lists/counter-reset-reversed-nested` ios/android,
-`css-text/hyphens/hyphens-manual-011` / `-012` / `-manual-inline-011`
-android). Both causes were older defects the lanes exposed — Android `ch`
-measured as a hinted, ceiled rasteriser number, and both natives drawing a
-marker on an `<li>` that is not a list item — fixed at the root in aaf676c5
-(1(e), 2(f)), proven by three section probes with a byte-identity control,
-then the full gate re-run (Operational recipes, "Probe, then ship"). The
-previous snapshot, **corpus-v6.17** (wave 51, `wave51-fix`, 2026-09-15 —
-web 1215/1379, iOS 1089/1369, Android 1080/1369; 3 gained / 0 lost / 0
-movers against wave50-final), is what v6.18 attributes against. All deltas
-attribute against the most recent snapshot, never across the PR-#126
-instrument change.
-**The retrospective (2026-09-04) and wave 50 ran their lanes with no device
-gate**: the retro's 17 gate attempts (2026-09-05 → 09-07) all failed on one
-cause — no memory headroom on the host (15 GB used, load 13–25 with the
-user's browsers open: adb-server wedges, installs that reported success with
-no package, feeder timeouts, 20-min vite re-optimisation) — so wave 50's
-predictions were corpus simulations, JVM / Catalyst pins and PNG replays,
-never renders, until `wave50-final` measured the retro's and wave 50's
-changes at once (obligation #1). That is why the gate is tracked code:
-`tools/titan/gate-driver.sh` refuses a host that cannot hold it with a
-reasoned exit 2 ("Gate on a quiet host" below; the retro's nine harness
-defects are fixed there), and waves 51 and 52 both opened AND closed on a
-device gate.
+per wave, `_note` carries the full story). Current: **corpus-v6.19**
+(wave 53, device gate of record `wave53-final` on a quiet host, tree
+77fe41e8, 2026-10-07 — web 1232/1372 89.8%, iOS 1125/1362 82.6%, Android
+1115/1362 81.9%; per cell against `wave53-open` **13 gained, 0 lost, 0 newly
+measured, 0 unmeasured-now** (13 movers ≥ 0.005; 365/365 must-not-move cells
+within 0.002; adjudicator R1–R5 hold; union control 0 leaks) — every flipped
+cell was looked at against its reference: 13 gains FAITHFUL, 11 movers
+FAITHFUL, 2 movers still failing and pre-registered degenerate-by-construction
+(`tools/titan/results/wave53-gate/final/cell-review.json`); `node
+tools/titan/score-gate.mjs wave53-open wave53-final --watch
+tools/titan/results/wave53-plan/watchlist.txt --movers 0.005`; snapshot
+`tools/titan/results/corpus-v6-19.json`; record
+`tools/titan/results/wave53-gate/_note.md`). `wave53-open` is corpus-v6.18's
+tree re-measured on the host's new macOS 27.0.1 / Xcode 27.0 stack: **0
+gained / 0 lost / 0 movers / 0 newly measured / 0 unmeasured-now over 4096
+cells** against `wave52-ship`, fixture net exit 0 ×9 — the fourth
+consecutive deterministic opening gate. **The probe (`wave53-probe`, 20
+sections) reverted two units under pre-registered rules** before the closing
+gate: L3's Compose table-body fixup (probeGatedRevert: a 40-px square) and
+L1's RTL-marker bake (geometry row `counter-suffix android` WRONG while SSIM
+rose 0.9547 → 0.9793 — the markers on the wrong rows). The previous
+snapshot's story (wave 52: 102 gained / 8 lost against wave51-fix, the ship
+that stopped itself once) is in `docs/STATUS.md` and corpus-v6-18.json's
+`_note`.
 
 This revision is the **wave-52 refill** (twelve builder lanes L1–L12 from
 `tools/titan/results/wave52-plan/PLAN.md`, 35 seam patches applied in one
@@ -246,84 +225,95 @@ run (`wave50-final`, obligation #1).
   (`tools/titan/results/wave52-gate/adjudication.txt`) were two older
   defects, fixed at the root in aaf676c5 (queue 1(e), 2(f)).
 
-## Next-wave obligations (wave 53 opens with these)
+## Next-wave obligations (wave 54 opens with these)
 
-0. **Wave 52 shipped as one wave** (twelve lanes, 35 seam patches, the
-   closing-gate fixes aaf676c5 and the harness-hygiene commits 308d11f0 /
-   20acb531), measured by the gate of record `wave52-ship` → corpus-v6.18
-   (header). Its own opening obligation is DISCHARGED: `wave52-open` scored
-   0 gained / 0 lost / 0 movers / 0 newly measured / 0 unmeasured over 4117
-   cells against wave51-fix, fixture net exit 0 ×8
-   (`tools/titan/results/wave52-gate/_note.md`). **Wave 53 opens, as always,
-   with the FULL gate on a quiet host** — `tools/titan/gate-driver.sh
-   wave53-open`, scored `node tools/titan/score-gate.mjs wave52-ship
-   wave53-open --watch tools/titan/results/wave52-plan/watchlist.txt` — and
-   it must print **0 gained / 0 lost / 0 movers / 0 newly measured / 0
-   unmeasured-now** against wave52-ship (pipeline determinism, as
-   `wave52-open` did against wave51-fix) and fixture net exit 0 on all 9
-   gate fixtures. The first divergence is the first item of wave 53. Then,
-   in this order:
-   (a) **The three device A/B read-outs — RUN (2026-10-05 23:28 → 23:58 UTC),
-   each exclude arm built, hashed (`build-hashes.txt`: installed `base.apk`
-   sha1 / `.app` digest MATCH the built one, all three) and restored**
-   (`tools/titan/results/wave52-gate/device-ab.sh <arm>`; include arm
-   `wave52-ship`; read-outs `tools/titan/results/wave52-gate/ab-t5.txt`,
-   `ab-ma.txt`, `ab-f1.txt`). What wave 53 inherits from them:
-   `t5` (L6 T5, the outside-marker hang; 254 ios/android cells of
-   css-lists / css-counter-styles / css-pseudo): the hang is what flipped
-   `counter-suffix` ios f 0.9285 → P 0.9802 and android f 0.9030 → P 0.9547
-   (both DEGENERATE — the RTL lists still have no marker, 2(c⁴)); 20 more
-   cells moved, 18 up (`change-list-style-type-001` ios +0.084 / android
-   +0.075, `first-line-and-marker` ±0.029, `counter-list-item` ×2, …) and 2
-   down (`first-letter-exclude-inline-marker` ios −0.006 / android −0.009,
-   both already failing); P → f 0. Compose seam-1 now has device proof.
-   `ma` (L8 M-A, the Inter measuring face; 288 cells of css-text /
-   css-text-decor / css-writing-modes): M-A is what flipped
-   `hyphens-auto-last-word-001` ios f 0.9032 → P 0.9991 and, with the
-   closing `ch` fix in both arms, `hyphens-punctuation-001` android f 0.938 →
-   P 0.9981, `hyphens-out-of-flow-001` / `-002` android f 0.9218 / 0.9291 →
-   P 0.9685 / 0.982 and `hyphens-span-001` android f 0.9166 → P 0.9532 (the
-   last three DEGENERATE, 4(g)); it costs `hyphens-manual-inline-012`
-   android −0.010 (P 0.9903 → 0.9803) and `ch-units-vrl-003` / `-004`
-   −0.003 on both natives (P either way; the `ch-units-vrl` flips come from
-   M-B, present in both arms); `text-decoration-inset-004` and
-   `bidi-lines-001` / `-002` did not move at |Δ| ≥ 0.002; P → f 0.
-   `f1` (L9 F1, the hanging-punctuation fold; 96 css-text cells): F1 is
-   confined to its one carrier — 94 cells identical at |Δ| < 0.002 — and
-   is what moved `hanging-punctuation-inline-001` ios P 0.9756 → P 0.9555
-   and android f 0.9495 → f 0.9452; no flip either way. DECISION
-   (orchestrator, deviating from the lane's "apply drop-F1 if the arm
-   confirms the drop"): F1 is KEPT — it is the CSS-correct fold (kinsoku
-   wrap, inherited colour) and the cell passes on iOS with it; a score drop
-   with no flip does not outrank picture-correctness in this campaign.
-   `drop-F1.patch` stays in the lane dir as the reversible arm; the iOS cell
-   is now a THIN pass (0.9555) on the wave-53 watch list, and the real fix
-   is hanging punctuation itself (css-text-3 §8.3), queue 4(f). Still owed
-   and NOT among the three: L9 F2's A/B (queue 4(c)) — no exclude arm exists.
-   (b) **Ten DEGENERATE gains and one wrong picture that passes —
-   first-lane material.** Each passes in `wave52-ship` and its picture does
-   not earn it (`tools/titan/results/wave52-gate/cell-review.json` — every
-   DEGENERATE label had a second, adversarial reader or, for
-   `s-11-1-1b-006` android, the measured geometry of its overturned iOS
-   twin): `anchor-position-multicol-007` android,
-   `contain-inline-size-bfc-floats-001` ios + android, `s-11-1-1b-006` ios +
-   android (queue 0(l″)); `counter-suffix` ios + android (2(c⁴));
-   `hyphens-out-of-flow-001` / `-002`, `hyphens-span-001` android (4(g)).
-   (The eleventh DEGENERATE gain, `filter-effects/backdrop-filter-basic-blur`
-   ios, is RING-FENCED — reported only, in 0(l′); never a target.) Plus
-   `css-lists/counter-reset-reversed-nested` ×3, passing at 0.9506–0.9509 with a wrong list (2(f)). None of these is
-   counted as a fix in any sentence of this file.
-   (c) **The eight instrument-only honest fails** — the eight lost cells of
-   v6.18, every one HONEST_FAIL against the re-rendered reference (no suspect
-   ref): `css-display/display-contents-root-background` ×3 (0(ac)),
-   `css-view-transitions/column-span-during-transition-doesnt-skip` ×3
-   (0(ad)), `css-gaps/flex/flex-gap-decorations-033` ios + android (7(e¹)).
-   (d) **Decide L6's deferred `requires-script-mutation` tags** for the
-   seven valid cssom setter tests ("Instrument decisions pending") — apply
-   as its own instrument change with a full extract + capture run, or Park.
-   (e) Seed `fixtures/combinations/all-then-color.json`'s baselines (gate-only
-   since wave 52) with `UPDATE_BASELINE=1` only after LOOKING at its
-   captures (queue 0(m)).
+0. **Wave 53 shipped as one wave** (five lanes, 13 seam hunks, 11 unit
+   commits + the S1 fix pass 568fd5be + two probe reverts d773ff6a /
+   b0edb788), measured by the gate of record `wave53-final` → corpus-v6.19
+   (header). Its opening obligation is DISCHARGED: `wave53-open` scored 0
+   gained / 0 lost / 0 movers / 0 newly measured / 0 unmeasured-now over 4096
+   cells against wave52-ship on the new macOS 27.0.1 / Xcode 27.0 host,
+   fixture net exit 0 ×9 (`tools/titan/results/wave53-gate/_note.md`).
+   **Wave 54 opens, as always, with the FULL gate on a quiet host** —
+   `tools/titan/gate-driver.sh wave54-open` (two launches:
+   `--skip-fixture-net`, then `rm -f /tmp/titan-device-pool/provisioned-*`
+   and `--skip-corpus`; `timeout: 7200000` each), scored `node
+   tools/titan/score-gate.mjs wave53-final wave54-open --watch
+   tools/titan/results/wave53-plan/watchlist.txt` — and it must print **0
+   gained / 0 lost / 0 movers / 0 newly measured / 0 unmeasured-now** against
+   wave53-final and fixture net exit 0 on all 9 gate fixtures (all-then-color
+   now has committed baselines, so it can go stale). Check `sysctl
+   vm.swapusage` as well as load before launching: the booted iOS 26
+   simulator holds ~4 GB and css-view-transitions runs 8–30 min under swap.
+   Then, in this order:
+   (a) **The two units the wave-53 probe reverted are first-lane material,
+   each with its picture in the record** (`wave53-gate/probe/`,
+   `wave53-gate/_note.md` "Probe"): (1) L1 U2 — the RTL `::marker` bake
+   (`bidi-marker-bake.mjs`, removed from the tree with the revert; the lane
+   dir `tools/titan/results/wave53-lists-bakes/` keeps `marker-probe.mjs`, the
+   CDP probe output and the window records). On Android the baked marker
+   runs land one row LATE ("foo" bare, "bar ·", "foo ·", "bar .א", a lone
+   "ב."; `tools/titan/runs/wave53-probe/sections/css-counter-styles/
+   android-screenshots/wpt__css-counter-styles__counter-suffix.png`) while iOS
+   and web were picture-correct — a y-origin / run-ordering defect in how
+   Compose places positioned runs, NOT in the bake's measurement. Rule for the
+   re-do: a one-section DEVICE probe of the lane tree, read with
+   `lists-bakes.geometry.py`, BEFORE the closing gate (the lane's replay,
+   composited onto the web picture, predicted 0.9900 and the device gave a
+   wrong picture at 0.9793). Hunk P (padding kept on a bidi-bake root) is to
+   be pre-registered as its OWN unit: it alone replayed 0.9815 on
+   counter-suffix android and carried `bidi-lines-001` android f 0.8934 → P
+   0.9629 and `-002` +0.028, all withdrawn with the revert. (2) L3 B-android —
+   the Compose anonymous table forest for a `display: table` body draws an
+   extra EMPTY cell beside the black square (`s-11-1-1b-006` android square
+   x24–63 vs ref x24–43; `wave53-probe … android P 0.9906`, from 0.9944;
+   picture in `probe/` and `wave53-canvas-root/_note.md`); the web and iOS
+   halves of the same forest are right (006 web P 1, iOS 0.9992), so the
+   defect is in the Compose fixup's cell emission. Its unit patch
+   (`wave53-canvas-root/unit-B-android.patch`) is the starting point.
+   (b) **Still-degenerate and still-failing cells the wave touched**, none
+   counted as fixes: `counter-suffix` ios P 0.9802 / android P 0.9547 (the RTL
+   rows have no marker — 2(c⁴), unchanged since wave 52); `s-11-1-1b-006`
+   android P 0.9944 (square 5 px high, 0(l″)); `hyphenate-character-001` /
+   `-003` android f 0.9301 / 0.9292 (the breaks are right now, the glyph is a
+   hyphen where the reference paints none / a bullet — Compose does not
+   honour `hyphenate-character`; `-004` android f 0.905 and all three iOS
+   cells unchanged); `anchor-position-multicol-007` android P 0.9519
+   (red-ink pass, untouched this wave).
+   (c) **Pre-existing, found by the geometry probe, not ours**:
+   `css-text/hyphens/hyphens-out-of-flow-002` **web** f 0.9411, identical on
+   wave52-ship, wave53-open, wave53-probe and wave53-final —
+   `soft-hyphen.geometry.py` prints "box 4 height 26 vs ref 46": the WEB
+   runtime collapses the fourth box (the one with the out-of-flow member) to
+   one line. The natives render it right (0.9943 / 0.9971). A web-runtime
+   lane item with a geometry oracle already written.
+   (d) **The size-rule exceptions the S1 fix pass recorded** (PLAN §0 ≤ 200
+   lines of new logic): `apps/web-harness/src/ui/ComposedCaptureGallery.tsx`
+   +95, `apps/android-harness/…/ScreenshotCaptureScreen.kt` +72,
+   `apps/ios-harness/…/CaptureCanvas.swift` +42 (canvas-local A/B helpers on
+   probe-gated call sites), `tools/titan/bidi-bake.mjs` +91 (disclosed by L1),
+   `PseudoTextFold.swift` 291 / `.kt` 269, `tools/visual/smoke.sh` still over
+   300 after `build_fixtures` moved to `smoke-fixtures.sh`, and the generated
+   FloatAvoidPlan pin files over 200 (`tools/titan/results/wave53-S1/_note.md`
+   "## Fix pass" S7). Split when a lane next owns each file.
+   (e) **all-then-color's baselines are NOT seeded — the label-chrome tripwire
+   refused them.** Seeded on 2026-10-07 (`UPDATE_BASELINE=1 ./test-all.sh
+   fixtures/combinations/all-then-color.json`, 18 PNGs, the fixture net then
+   ran green against them) and WITHDRAWN before the ship:
+   `tools/visual/label-chrome-tripwire.test.mjs` went red on
+   `001_ATC_PropsThenAll_InGreenParent`, `003_ATC_InitialUnderRedParent` and
+   `005_ATC_DirectionSurvives` — "437/437 glyph px are ground" on Android,
+   iOS AND web: those three canvases carry NO harness label at all (the
+   contact-sheet look had seen the missing labels and not acted on them —
+   the tripwire did). Cause to trace (harness, all three platforms alike):
+   the fixture's `all` reset on those components reaches the capture-frame
+   label chrome (`HarnessLabelChrome.swift`, `ScreenshotCaptureScreen.kt`
+   `harnessLabelRects`, `LabelChrome.tsx` — docs/DYNAMIC_CAPTURE.md "Harness
+   label chrome"), where `000_ATC_AllThenProps` (also an `all` reset) keeps
+   its label. Fix the chrome's isolation from the component's cascade, THEN
+   seed; until then the fixture stays gate-only (gate + 12 oracle checks,
+   exit 0 at `wave53-final`).
+
 1. **The wave-50 gate RAN (run `wave50-final`, 2026-09-14 21:14 → 22:44 UTC,
    quiet host, `tools/titan/gate-driver.sh`): 30/30 sections, every column
    48/48/48 on the first attempt; `score-gate.mjs` wave49-final →
@@ -1386,6 +1376,7 @@ platform; they are not folded into a rendering wave.
    `ImageRenderer`, unexecuted at lane time, ran at the closing gate
    (overrun-right 208 → 0 above); they still have no raster pin.
    (l″) **Three tests (five cells) the composed-canvas changes flipped pass
+   **Wave 53:** `s-11-1-1b-006` iOS FIXED (L3 B-ios, `wave53-final … ios P 0.9992`, square at y56–75) and web picture-corrected (P 0.9941 → 1); android attempted (L3 B-android) and REVERTED at the probe (extra empty cell, obligation 0(a)(2)) — still P 0.9944 DEGENERATE. `contain-inline-size-bfc-floats-001` ios + android FIXED (L4, `wave53-final … ios P 0.9984 / android P 0.9972`, orange bar at y288–307 beside the float; `-002` f → P 0.9985 / 0.9974 with it). `anchor-position-multicol-007` android untouched (P 0.9519, red-ink pass).
    DEGENERATE in `wave52-ship` — wrong pictures the scorer lets through** (each looked at
    against the reference by two readers; `s-11-1-1b-006` android carries its
    overturned iOS twin's measured geometry —
@@ -1587,6 +1578,7 @@ platform; they are not folded into a rendering wave.
    Nothing blocks moving it (the harnesses already import the runtimes);
    the checksum pins and `HarnessLabelChrome*` tests move with it.
    (ac) **`css-display/display-contents-root-background` ×3 — an honest
+   **Wave 53 — FIXED on all three (L3 A, add9de84):** `wave53-final … web P 1 / ios P 0.9995 / android P 0.9989` (`RootBackgroundPropagation` + `RootBackgroundUniformity` twins, css-backgrounds-3 §2.11.2; `canvas-root.geometry.py` green 0.994, chrome 1.0). The same mechanism flipped `background-attachment-margin-root-001` / `-002` ×3 (f 0.34–0.45 → P ≥ 0.9994). History below.
    failure the wave-52 reference re-freeze exposed (a new defect, not a
    regression).** `wave52-open … P 1.0000 / 0.9994 / 0.9988` (web / ios /
    android) → `wave52-calib css-display/display-contents-root-background web
@@ -1961,6 +1953,7 @@ platform; they are not folded into a rendering wave.
    `KoreanHangulFormal.swift` TWIN DIVERGENCE banner still says Compose
    answers `1.` — re-true it. The missing RTL markers stay (c⁴).
    (c⁴) **RTL markers are BLOCKED UPSTREAM — do not fix them in the
+   **Wave 53 — attempted upstream (L1 U2, a8ffd1c6) and REVERTED at the probe (b0edb788):** the bake was picture-correct on iOS and web but put the markers one row late on Android (`wave53-probe … counter-suffix android P 0.9793`, GEOMETRY WRONG); obligation 0(a)(1) carries the re-do rule (device probe + geometry gate first; hunk P as its own unit). The cells stand at `wave53-final … ios P 0.9802 / android P 0.9547`, both DEGENERATE.
    runtime.** Executed repro (Catalyst): for the verbatim
    `counter-suffix__0__4__0` `<li>`, `ComponentRenderer.isOutOfFlow(li)` is
    true, out-of-flow children go to `overlayChildren` / `positionedChildren`,
@@ -2070,6 +2063,7 @@ platform; they are not folded into a rendering wave.
    on a broken contract (N4); uncommented runs in `counter-style-author.mjs` /
    `counter-style-descriptors.mjs` (N6); file sizes in 9(m).
    (f) **`css-lists/counter-reset-reversed-nested` ×3 passes with a WRONG
+   **Wave 53 — FIXED on all three (L1 U1, 9df67ae3):** `wave53-final … web P 1 / ios P 0.9989 / android P 0.9852`, the list 3 / 2 / 11 / 9 / 8 / 1 as the reference (`lists-bakes.geometry.py` OK ×3; `wave53-gate/final/cell-review.json`). The extractor defect WAS the optional-end-tag rule: `findImpliedClose` (HTML §13.2.6.4.7) now closes an `<li>` only at a sibling in the same list scope. History below.
    picture on all three platforms** (`wave52-ship … web P 0.9506` / ios P
    0.9508 / android P 0.9509; obligation 0(b)). The test (`li { display:
    block }`, `li::before` counters, `ol { counter-reset: reversed(foo) }`)
@@ -2395,6 +2389,7 @@ platform; they are not folded into a rendering wave.
    even when `HyphenateCharacter` is on the wire); the `GreedyLineBreaker`
    split is in 9(m).
    (g) **A soft hyphen in a run with NO space is never taken on Android —
+   **Wave 53 — FIXED on Android (L2 F1 + F2, 205ab295 / 2c6ecea9):** `wave53-final … hyphens-span-001 android P 0.9937 / hyphens-out-of-flow-001 android P 0.9943 / -002 android P 0.9943`, every box "high-/way" (`soft-hyphen.geometry.py` OK; was "highwa/y", "h/ighway", "high/way"); the iOS pair flipped too (`hyphens-span-001` ios f 0.8652 → P 0.9968, `-out-of-flow-001` ios f 0.8935 → P 0.9971). Residue: `hyphenate-character-001` / `-003` android still f (0.9301 / 0.9292 — right breaks, hyphen glyph where the ref paints none / a bullet) and `hyphens-out-of-flow-002` WEB f 0.9411, a pre-existing web-runtime defect (obligation 0(c)). History below.
    three DEGENERATE passes** (obligation 0(b);
    `tools/titan/results/wave52-gate/cell-review.json`). F5's pre-break
    declines a run without a space (`PreBreakPipeline.preBreak`: `if
@@ -3722,60 +3717,6 @@ platform; they are not folded into a rendering wave.
   harness target while
   other lanes' seams were transiently applied; Debug builds succeed
   (`tools/titan/results/wave52-composed-canvas/_note.md` §6).
-- **The ios-harness XCTest scheme runs again, and 13 of its 30 tests fail on
-  a file-permission error** (2026-10-06, after the host moved to macOS 27.0.1
-  + Xcode 27.0 — under Xcode 26.6 the scheme could not run at all: "iOS 26.5
-  is not installed", exit 70). `xcodebuild test -scheme StyleConverterTestTests
-  -destination 'platform=iOS Simulator,id=<booted>'`: 17 pass; the 13
-  failures are every test that reads a repo file from inside the simulator
-  process via `#filePath` hops — `ComposedCanvasIcbClipTests` (7, the
-  `CaptureCanvas.swift` source pins), `ComposedCanvasPaddingTests` (4),
-  `ComposedRootInlineFlowTests` (2, two per-test IR JSONs) — each with
-  `NSCocoaErrorDomain Code=257 "… couldn't be opened because you don't have
-  permission to view it"` on a path under `~/Documents/Projects/…`. The
-  runtime's own Catalyst suite reads the same files the same way and passes
-  2147/2147 on the same host (an Xcode-hosted process), so this is the
-  simulator process being denied `~/Documents` (macOS privacy protection for
-  the Documents folder), not the tests' logic. Fix direction, code-side and
-  host-independent: bundle the files those tests read as resources of the
-  test target (xcodegen `project.yml`, `resources:`) and read them through
-  `Bundle(for:)` instead of the source tree — the pattern the runtime's
-  ConformanceTests will need too if the suite ever runs in a simulator. Host
-  workaround: grant the Simulator access to Documents (System Settings ›
-  Privacy & Security › Files and Folders). Until one lands the suite's
-  honest count is 17 passing / 13 environment-blocked, not 30.
-- **`tools/visual/smoke.sh` still hardcodes port 3000 in its web tiers**
-  (Tier 5 interaction states, Tier 11 a11y audit): `start_vite` runs `npm run
-  dev` (`apps/web-harness/vite.config.ts` `server.port: 3000`) and polls
-  `http://localhost:3000/`, and `tools/visual/interaction-states.mjs` /
-  `a11y-audit.mjs` default `WEB_PORT` to `'3000'`; smoke neither sources
-  `tools/visual/web-port-guard.sh` nor exports `WEB_PORT`. On 2026-10-05 a
-  developer's unrelated server on :3000 made Tier 5/11 fail with that
-  server's 404s. A false red, not destructive: smoke kills only its own
-  process group, and the capture scripts never kill a foreign listener
-  (Operational recipes, port guard). Fix: thread the chosen port through the
-  smoke tiers — pick a free one (`wpg_free_port`, or honour `WEB_PORT`),
-  start vite on it, poll it, export `WEB_PORT` to both tiers.
-- **Two host-wide stops remain in the gate path.** The emulator and
-  test-browser half is FIXED (commit 20acb531): `tools/titan/gate-driver.sh`'s
-  `stop_our_processes`, `reprovision_android` and teardown go through
-  `tools/titan/own-processes.sh` (`kill_own_emulators` — only the pids
-  `provision-devices.sh` recorded in `emulator-pids`, and only while their
-  command line is still an emulator; `kill_own_test_browsers` — only
-  Chrome-for-Testing whose working directory is inside this checkout),
-  pinned by `tools/titan/own-processes.test.mjs` with real throwaway
-  processes, and exercised on device by `wave52-probe` / `-probe2` /
-  `-probe3` (provisioning, 17 sections, teardown) and the gate of record
-  `wave52-ship`. RESIDUAL: (1) `stop_our_processes` still runs `./gradlew
-  --stop` in both build roots, which stops every Gradle daemon of that
-  Gradle version for the user — another checkout's build included; (2) on
-  an `adb devices` timeout `section-runner.sh` (`_android_candidates`, inside
-  the gate) and `provision-devices.sh` (`_adb_devices`) run `kill-server`
-  then `pkill -9 -x adb` — every adb process on the host, other sessions'
-  clients included, not just the wedged shared server (fix direction,
-  untested: kill only the server's listener on tcp:5037 when `kill-server`
-  times out; for Gradle, stop only daemons whose working directory is this
-  checkout, or none and let the quiet-host check report them).
 - **`BackgroundImageURLTests.testPercentEncodedDataURIDecodes` is
   load-sensitive** (`runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundImageURLTests.swift`):
   it asserts cache IDENTITY (`BackgroundURLImageResolver.image(for: uri) ===
@@ -4183,3 +4124,45 @@ platform; they are not folded into a rendering wave.
   absolute (lch 150 = 100%, oklch 0.4 = 100%). The web typed-original
   re-emission and the converter's percentage scaling are a COUPLED pair
   — reverting either half alone regresses gradient-powerless-hue-oklch.
+
+### Wave 53 lessons (2026-10-07; records under `tools/titan/results/wave53-gate/`)
+
+- **The wire control has a "renumbered" class.** The extractor numbers a
+  section's components with ONE running counter (`<name>-NNN`, `tests.list`
+  order), so a carrier that gains components renumbers the ids of every later
+  document in the section (U1: +1 over 10 css-lists documents; the reverted
+  U2: +6 over 15 cssom documents). `wave53-gate/control-check.mjs` admits a
+  byte-different document as "renumbered" only when it is identical once the
+  id counter is stripped from `id` / `slot.parent`, every id shifted by the
+  same amount, and that amount equals the running component-count delta of
+  the content-changed documents before it — the explaining carrier is printed
+  per row; anything else is a leak. A census of a bake's wire radius must
+  therefore say "N content-changed + its id shadow".
+- **An upstream bake that positions runs needs a device probe before the
+  gate.** L1's replay composited the measured marker boxes onto the WEB
+  picture and predicted counter-suffix android 0.9900; the device gave 0.9793
+  with every marker on the wrong row. A replay never runs the native text
+  layout; a score cannot see a wrong picture that keeps the ink; the
+  pre-registered geometry row did. Rule: one-section `gate-driver.sh <id>
+  --sections <sec>` of the lane tree + the family's `*.geometry.py` before
+  the closing gate; never label a native cell "picture-correct" from a replay.
+- **A hygiene probe on the shared tree measures the union.** `wave53-hh-probe`
+  was planned as L5's own control and ran with every lane's unseamed edits in
+  the tree; read with the union carrier set it HELD, read per lane it failed
+  on the other lanes' carriers. Either run such a probe before the other lanes
+  edit, or pre-register that it is read with the union set.
+- **Same-host web capture is byte-deterministic; cross-host it is not.** On
+  this host two runs minutes apart gave 186/187 and 1430/1435 web captures
+  byte-identical (the rest real carriers); across the macOS 26 → 27 change
+  every one of 236 sampled web captures differed in PIXELS (glyph AA, ≤ 0.0001
+  in score). Controls are same-host pairs; the "re-encoded" class stays unused.
+- **The installed-build hash is read right after provisioning, not during the
+  fixture net**: `BASELINE=1 ./test-all.sh --gate-set` rebuilds and reinstalls
+  the iOS harness per fixture, so a read mid-net can find the built .app
+  missing (recorded and re-read in `wave53-gate/build-hashes.txt`).
+- **`smoke.sh` builds the Tier-5/11 fixture JSONs itself** (`smoke-fixtures.sh`,
+  idempotent): `apps/web-harness/public/fixtures/<Name>.json` is gitignored
+  converter output and a fresh worktree has none — before wave 53 both tiers
+  failed every probe with `fixture-ready-timeout` on a fresh tree, even with
+  vite on the right port.
+

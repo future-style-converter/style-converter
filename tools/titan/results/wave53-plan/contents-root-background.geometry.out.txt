@@ -1,0 +1,19 @@
+target web      framed-surface 1.0000  icb-only(frame white) 0.8795
+target ios      framed-surface 0.9995  icb-only(frame white) 0.8790
+target android  framed-surface 0.9991  icb-only(frame white) 0.8787
+background-attachment-margin-root-001
+  spec origin, framed surface 0.8785
+  origin 50px off spec (001: ICB origin for its scroll layer; 002: root-box origin for its fixed layer), framed surface 0.5099
+  origin 50px off spec, ICB-only (frame white) 0.6328
+  shipped web 0.4511
+  shipped ios 0.4509
+  shipped android 0.4510
+background-attachment-margin-root-002
+  spec origin, framed surface 0.8693
+  origin 50px off spec (001: ICB origin for its scroll layer; 002: root-box origin for its fixed layer), framed surface 0.5182
+  origin 50px off spec, ICB-only (frame white) 0.6327
+  shipped web 0.3390
+  shipped ios 0.3391
+  shipped android 0.3389
+background-attachment-margin-root-001 full fix (own-platform tiles, ICB-only, white frame): web 0.9996  ios 0.9992  android 0.9997
+background-attachment-margin-root-002 full fix (own-platform tiles, ICB-only, white frame): web 0.9996  ios 0.9992  android 0.9997

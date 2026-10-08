@@ -1,0 +1,309 @@
+{
+  "_wpt": {
+    "test": "css/css-text/bidi/bidi-lines-002.html",
+    "ref": "css/css-text/bidi/reference/bidi-lines-002-ref.html",
+    "bucket": "A",
+    "lossy": true,
+    "lossyReasons": [
+      "em/rem",
+      "baked-bidi-visual-order"
+    ],
+    "specSection": "css-text",
+    "bidiBaked": true
+  },
+  "components": {
+    "bidi__bidi-lines-002__0": {
+      "properties": {},
+      "_text": "This test passes if within the box below, the two blue “!” are on the left, and the three orange ones are on the right.",
+      "_tag": "p"
+    },
+    "bidi__bidi-lines-002__1": {
+      "properties": {
+        "direction": "ltr",
+        "unicode-bidi": "normal",
+        "text-align": "left",
+        "font-size": "2em",
+        "width": "346.19px",
+        "border": "solid",
+        "padding": "0 0.5ch",
+        "height": "206px",
+        "box-sizing": "border-box",
+        "position": "relative"
+      },
+      "_lossy": true,
+      "_lossyReasons": [
+        "em/rem",
+        "baked-bidi-visual-order"
+      ],
+      "children": {
+        "bidi__bidi-lines-002__1__0": {
+          "id": "bidi__bidi-lines-002__1__0",
+          "properties": {
+            "color": "orange",
+            "position": "absolute",
+            "left": "10.09px",
+            "top": "0px",
+            "width": "9.2px",
+            "height": "39px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "bidi__bidi-lines-002__1__0__0": {
+              "id": "bidi__bidi-lines-002__1__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "9.2px",
+                "height": "39px",
+                "line-height": "39px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(255, 165, 0)",
+                "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                "font-size": "32px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "!"
+            }
+          }
+        },
+        "bidi__bidi-lines-002__1__1": {
+          "id": "bidi__bidi-lines-002__1__1",
+          "properties": {
+            "width": "0px",
+            "height": "0px",
+            "display": "none"
+          },
+          "_role": "line-break",
+          "_tag": "br"
+        },
+        "bidi__bidi-lines-002__1__2": {
+          "id": "bidi__bidi-lines-002__1__2",
+          "properties": {
+            "color": "blue",
+            "position": "absolute",
+            "left": "10.09px",
+            "top": "40px",
+            "width": "9.2px",
+            "height": "39px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "_role": "ws-after",
+          "children": {
+            "bidi__bidi-lines-002__1__2__0": {
+              "id": "bidi__bidi-lines-002__1__2__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "9.2px",
+                "height": "39px",
+                "line-height": "39px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 255)",
+                "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                "font-size": "32px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "!"
+            }
+          }
+        },
+        "bidi__bidi-lines-002__1__3": {
+          "id": "bidi__bidi-lines-002__1__3",
+          "properties": {
+            "width": "0px",
+            "height": "0px",
+            "display": "none"
+          },
+          "_role": "line-break",
+          "_tag": "br"
+        },
+        "bidi__bidi-lines-002__1__4": {
+          "id": "bidi__bidi-lines-002__1__4",
+          "properties": {
+            "color": "blue",
+            "position": "absolute",
+            "left": "10.09px",
+            "top": "80px",
+            "width": "9.2px",
+            "height": "39px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "bidi__bidi-lines-002__1__4__0": {
+              "id": "bidi__bidi-lines-002__1__4__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "9.2px",
+                "height": "39px",
+                "line-height": "39px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 255)",
+                "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                "font-size": "32px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "!"
+            }
+          }
+        },
+        "bidi__bidi-lines-002__1__5": {
+          "id": "bidi__bidi-lines-002__1__5",
+          "properties": {
+            "width": "0px",
+            "height": "0px",
+            "display": "none"
+          },
+          "_role": "line-break",
+          "_tag": "br"
+        },
+        "bidi__bidi-lines-002__1__6": {
+          "id": "bidi__bidi-lines-002__1__6",
+          "properties": {
+            "color": "orange",
+            "position": "absolute",
+            "left": "320.89px",
+            "top": "120px",
+            "width": "9.2px",
+            "height": "39px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "_role": "ws-after",
+          "children": {
+            "bidi__bidi-lines-002__1__6__0": {
+              "id": "bidi__bidi-lines-002__1__6__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "9.2px",
+                "height": "39px",
+                "line-height": "39px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(255, 165, 0)",
+                "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                "font-size": "32px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "!"
+            }
+          }
+        },
+        "bidi__bidi-lines-002__1__7": {
+          "id": "bidi__bidi-lines-002__1__7",
+          "properties": {
+            "width": "0px",
+            "height": "0px",
+            "display": "none"
+          },
+          "_role": "line-break",
+          "_tag": "br"
+        },
+        "bidi__bidi-lines-002__1__8": {
+          "id": "bidi__bidi-lines-002__1__8",
+          "properties": {
+            "color": "orange",
+            "position": "absolute",
+            "left": "10.09px",
+            "top": "160px",
+            "width": "9.2px",
+            "height": "39px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "bidi__bidi-lines-002__1__8__0": {
+              "id": "bidi__bidi-lines-002__1__8__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "9.2px",
+                "height": "39px",
+                "line-height": "39px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(255, 165, 0)",
+                "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                "font-size": "32px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "!"
+            }
+          }
+        },
+        "bidi__bidi-lines-002__1__9": {
+          "id": "bidi__bidi-lines-002__1__9",
+          "properties": {
+            "width": "0px",
+            "height": "0px",
+            "display": "none"
+          },
+          "_role": "line-break",
+          "_tag": "br"
+        },
+        "bidi__bidi-lines-002__1__10": {
+          "id": "bidi__bidi-lines-002__1__10",
+          "properties": {
+            "position": "absolute",
+            "left": "28.3px",
+            "top": "40px",
+            "width": "77.12px",
+            "height": "39px",
+            "line-height": "39px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+            "font-size": "32px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "Hello"
+        },
+        "bidi__bidi-lines-002__1__11": {
+          "id": "bidi__bidi-lines-002__1__11",
+          "properties": {
+            "position": "absolute",
+            "left": "256.53px",
+            "top": "120px",
+            "width": "55.36px",
+            "height": "39px",
+            "line-height": "39px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+            "font-size": "32px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "سلام"
+        }
+      }
+    }
+  }
+}

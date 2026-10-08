@@ -3660,6 +3660,38 @@ object ComponentRenderer {
                     }
                     }
                 }
+                // Wave 53 (lane L4) — CSS 2.1 §9.5 float AVOIDANCE, tried FIRST:
+                // k px floats then ONE in-flow BFC root (FloatAvoidPlan's
+                // gate G2–G8; G1 = this capture local). The floats place by
+                // §9.5.1 and the BFC goes beside them instead of below the
+                // stacked floats (contain-inline-size-bfc-floats-001/-002,
+                // display-flow-root-002). Mutually exclusive with the float
+                // runs below by G5; an active §9.5.2 scope owns its floats,
+                // so a container inside one keeps the frozen loop.
+                val floatAvoidShape =
+                    if (LocalWptCaptureMode.current &&
+                        com.styleconverter.runtime.layout.LocalFloatClearancePlan.current
+                            ?.scopeIds?.contains(component.id) != true
+                    ) com.styleconverter.runtime.layout.FloatAvoidPlan.shape(component)
+                    else null
+                if (floatAvoidShape != null) {
+                    com.styleconverter.runtime.layout.FloatAvoidLayout(floatAvoidShape, component.id) {
+                        component.children.forEachIndexed { index, child ->
+                            if (index < floatAvoidShape.sides.size) {
+                                // Floats: the adapter owns placement, so the
+                                // right-float TopEnd wrapper must not align
+                                // them a second time (the right-run precedent).
+                                CompositionLocalProvider(LocalSelfAlignmentHandled provides true) {
+                                    RenderComponent(child)
+                                }
+                            } else {
+                                // The BFC keeps the exact per-child path.
+                                renderBlockChild(index, child)
+                            }
+                        }
+                    }
+                    return
+                }
                 // Wave-19 lane FLOAT — CSS 2.1 §9.5 float row packing,
                 // composed-WPT capture ONLY (pin P8): consecutive
                 // left-floating block siblings pack side-by-side instead
@@ -3830,6 +3862,15 @@ object ComponentRenderer {
                                             (if (runFold.adoptedHyphens) ", member hyphens adopted" else "") +
                                             (if (runFold.droppedEmptyMembers > 0)
                                                 ", ${runFold.droppedEmptyMembers} empty member(s) dropped" else "") +
+                                            // Wave 53 (lane L2, F2) — a paint-inert OUT-OF-FLOW
+                                            // member (abspos/fixed with transparent ink —
+                                            // InertOutOfFlowMember) left the mounted tree: the
+                                            // count is named here so the removal is never
+                                            // silent (its unmodelled static position is the
+                                            // stated loss). 0 for every pre-wave-53 fold, so
+                                            // those breadcrumbs read byte-identically.
+                                            (if (runFold.droppedOutOfFlowMembers > 0)
+                                                ", ${runFold.droppedOutOfFlowMembers} out-of-flow member(s) dropped" else "") +
                                             // Wave 47 (lane Z6) — the styled-span ring's
                                             // breadcrumbs: how many member ranges carry
                                             // attribution, and any STATED LOSS (border box

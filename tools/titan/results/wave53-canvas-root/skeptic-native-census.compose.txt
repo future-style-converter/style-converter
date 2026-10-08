@@ -1,0 +1,20 @@
+run wave52-ship (skeptic JVM census): 1435 docs, decode errors 0, body-roots with a BackgroundImage 3, plans 3, forest changed 4, non-identity canvas modifiers 2
+  plan wpt__css-backgrounds__background-attachment-margin-root-001.json uniform=false origins=[LayerOrigin(x=50.0, y=50.0), LayerOrigin(x=0.0, y=0.0)]
+  plan wpt__css-backgrounds__background-attachment-margin-root-002.json uniform=false origins=[LayerOrigin(x=0.0, y=0.0), LayerOrigin(x=50.0, y=50.0)]
+  plan wpt__css-display__display-contents-root-background.json uniform=true origins=[LayerOrigin(x=0.0, y=0.0)]
+  changed wpt__CSS2__css21-errata__s-11-1-1b-006.json
+  changed wpt__css-backgrounds__background-attachment-margin-root-001.json
+  changed wpt__css-backgrounds__background-attachment-margin-root-002.json
+  changed wpt__css-display__display-contents-root-background.json
+  modifier wpt__css-backgrounds__background-attachment-margin-root-001.json
+  modifier wpt__css-backgrounds__background-attachment-margin-root-002.json
+run wave53-open (skeptic JVM census): 1435 docs, decode errors 0, body-roots with a BackgroundImage 3, plans 3, forest changed 4, non-identity canvas modifiers 2
+  plan wpt__css-backgrounds__background-attachment-margin-root-001.json uniform=false origins=[LayerOrigin(x=50.0, y=50.0), LayerOrigin(x=0.0, y=0.0)]
+  plan wpt__css-backgrounds__background-attachment-margin-root-002.json uniform=false origins=[LayerOrigin(x=0.0, y=0.0), LayerOrigin(x=50.0, y=50.0)]
+  plan wpt__css-display__display-contents-root-background.json uniform=true origins=[LayerOrigin(x=0.0, y=0.0)]
+  changed wpt__CSS2__css21-errata__s-11-1-1b-006.json
+  changed wpt__css-backgrounds__background-attachment-margin-root-001.json
+  changed wpt__css-backgrounds__background-attachment-margin-root-002.json
+  changed wpt__css-display__display-contents-root-background.json
+  modifier wpt__css-backgrounds__background-attachment-margin-root-001.json
+  modifier wpt__css-backgrounds__background-attachment-margin-root-002.json

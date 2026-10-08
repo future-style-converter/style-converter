@@ -1,0 +1,12 @@
+contain-inline-size-bfc-floats-001 ref      {'orange': (16, 288, 215, 307), 'outline': None, 'blueRuns': 4} → GEOMETRY OK
+contain-inline-size-bfc-floats-001 web      {'orange': (16, 288, 215, 307), 'outline': None, 'blueRuns': 4} → GEOMETRY OK
+contain-inline-size-bfc-floats-001 ios      {'orange': (16, 288, 215, 307), 'outline': None, 'blueRuns': 4} → GEOMETRY OK
+contain-inline-size-bfc-floats-001 android  {'orange': (16, 288, 215, 307), 'outline': None, 'blueRuns': 4} → GEOMETRY OK
+contain-inline-size-bfc-floats-002 ref      {'orange': (16, 88, 315, 107), 'outline': None, 'blueRuns': 4} → GEOMETRY OK
+contain-inline-size-bfc-floats-002 web      {'orange': (16, 88, 315, 107), 'outline': None, 'blueRuns': 4} → GEOMETRY OK
+contain-inline-size-bfc-floats-002 ios      {'orange': (16, 88, 315, 107), 'outline': None, 'blueRuns': 4} → GEOMETRY OK
+contain-inline-size-bfc-floats-002 android  {'orange': (16, 88, 315, 107), 'outline': None, 'blueRuns': 4} → GEOMETRY OK
+display-flow-root-002 ref      {'orange': None, 'outline': (265, 115, 266, 316), 'blueRuns': 2} → GEOMETRY OK
+display-flow-root-002 web      {'orange': None, 'outline': (265, 115, 266, 316), 'blueRuns': 2} → GEOMETRY OK
+display-flow-root-002 ios      {'orange': None, 'outline': (265, 115, 266, 316), 'blueRuns': 2} → GEOMETRY OK
+display-flow-root-002 android  {'orange': None, 'outline': (265, 115, 266, 316), 'blueRuns': 2} → GEOMETRY OK

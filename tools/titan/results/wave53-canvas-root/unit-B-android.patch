@@ -1,0 +1,376 @@
+# wave-53 lane L3 · canvas-root — revert unit B-android (PLAN.md §4 step 6, §6 rule 6)
+# base: campaign/applier-campaign e330e255 + the preceding L3 units (A → B-web → B-ios → B-android)
+# apply: git apply tools/titan/results/wave53-canvas-root/unit-B-android.patch
+diff --git a/apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt b/apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt
+index 5ca7a59..e48e40c 100644
+--- a/apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt
++++ b/apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt
+@@ -1547,13 +1547,15 @@ internal fun withCanvasOwnedBodyMargin(roots: List<IRComponent>, margin: CanvasM
+ }
+ 
+ /**
+- * wave-53 lane L3 — the forest rewrite the composed canvas adds AFTER the
++ * wave-53 lane L3 — the two forest rewrites the composed canvas adds AFTER the
+  * wave-52 M1 margin strip + T6 hoisted-UA-margin map (the composable applies
+  * those first, verbatim, then calls this). Each is identity for a document it
+- * does not concern, so 1432 of the 1435 documents come back unchanged:
++ * does not concern, so 1431 of the 1435 documents come back unchanged:
+  *  - item A: the body-root loses the image layers the canvas paints;
++ *  - item B: a table body's in-flow run becomes one synthetic table (runtime
++ *    TableBodyForest, CSS 2.1 §17.2.1 rule 2 + §8.3).
+  * Commutes with T6 (that map touches canvas-hoisted roots only; neither step
+- * here touches one). One function so ComposedCanvasRootBackgroundTest pins the
++ * here touches one). One function so ComposedCanvasTableBodyTest pins the
+  * REAL chain the Column stacks.
+  */
+ internal fun composedCanvasRoots(
+@@ -1562,7 +1564,8 @@ internal fun composedCanvasRoots(
+ ): List<IRComponent> {
+     // Item A: the body-root minus the image layers the canvas owns.
+     val owned = RootBackgroundPropagation.withCanvasOwnedRootBackground(roots, rootImagePlan)
+-    return owned
++    // Item B: a table body's in-flow run as one synthetic table (identity otherwise).
++    return com.styleconverter.runtime.table.TableBodyForest.rewrite(owned)
+ }
+ 
+ /**
+@@ -1757,6 +1760,9 @@ private fun ComposedCaptureCanvas(
+     // wave-53 L3 (item A) rides the same rewrite: the body-root composes
+     // WITHOUT the image layers the canvas now owns (§2.11.2 "not painted
+     // again") — the same list instance whenever there is no plan.
++    // wave-53 L3 (item B) rides it too: a `display: table` body's in-flow
++    // run becomes ONE synthetic table (CSS 2.1 §17.2.1 rule 2) — see
++    // composedCanvasRoots, the whole rewrite as one testable function.
+     @Suppress("NAME_SHADOWING")
+     val roots = androidx.compose.runtime.remember(roots, canvasMargin, rootImagePlan) {
+         composedCanvasRoots(
+diff --git a/apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/ComposedCanvasTableBodyTest.kt b/apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/ComposedCanvasTableBodyTest.kt
+new file mode 100644
+index 0000000..0f46839
+--- /dev/null
++++ b/apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/ComposedCanvasTableBodyTest.kt
+@@ -0,0 +1,62 @@
++package com.styleconverter.test.screenshot
++
++import com.styleconverter.runtime.core.ir.IRComponent
++import com.styleconverter.runtime.layout.position.CanvasRootHoist
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++/**
++ * wave-53 lane L3 (item B) — the STACK consequence of the table-body rewrite,
++ * through the REAL composed-canvas chain ([composedCanvasRoots] → the pure
++ * [composedRootStackPlan] / [collapsedRootStackGapsPx] fold the Column spends).
++ *
++ * THE DEFECT: on wave52-ship CSS2/css21-errata/s-11-1-1b-006 the composed
++ * Column stacked the caption div (1-142, `margin-bottom: 10px`) and the td
++ * (2-143) as separate roots: a 10-px gap above the td, then its own −15
++ * margin-top as an offset — square at image rows 51-70, ref 56-75 (android
++ * P 0.9944, DEGENERATE). With the body laid out as a table (CSS 2.1 §17.2.1
++ * rule 2) the div's margin lives INSIDE the anonymous cell and the td's
++ * margin does not apply (§8.3), so nothing stands between the canvas-owned
++ * body margin and the table: 0 gap above it.
++ *
++ * Payload VERBATIM from tools/titan/runs/wave52-ship/sections/CSS2/per-test-ir/.
++ *
++ * EXECUTED MUTATION (ScreenshotCaptureScreen.kt, this class run alone, source
++ * restored byte-exact — sha256 in tools/titan/results/wave53-canvas-root/_note.md):
++ *   BK  composedCanvasRoots skips TableBodyForest (`return owned`) → the
++ *       caption div stays in the stack, the 10-px gap is back → red.
++ */
++class ComposedCanvasTableBodyTest {
++
++    /** Decode + slot-compose a v2 document exactly as the harness does. */
++    private fun rootsOf(componentsJson: String): List<IRComponent> =
++        com.styleconverter.runtime.core.renderer.SlotComposer.compose(
++            com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(
++                """{"irVersion":2,"minReaderVersion":2,"components":[$componentsJson]}"""))
++
++    /** CSS2/css21-errata/s-11-1-1b-006 — all four roots, verbatim. */
++    private val s006 = """
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__0-141","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__0","properties":[{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"},{"type":"Display","data":"TABLE"},{"type":"BorderSpacing","data":{"type":"single","px":0}},{"type":"MarginTop","data":{"px":40}},{"type":"MarginRight","data":{"px":8}},{"type":"MarginBottom","data":{"px":8}},{"type":"MarginLeft","data":{"px":8}}],"meta":{"role":"body-root"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__1-142","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__1","properties":[{"type":"Generic","data":{"propertyName":"display","rawValue":"caption","_unmapped":true}},{"type":"MarginBottom","data":{"px":10}}],"meta":{"role":"ws-after"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__2-143","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__2","properties":[{"type":"Display","data":"TABLE_CELL"},{"type":"Width","data":{"type":"length","px":20}},{"type":"Height","data":{"type":"length","px":20}},{"type":"MarginTop","data":{"px":-15}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}}],"meta":{"role":"ws-after"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__3-144","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__3","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}},{"type":"Left","data":{"px":8}}],"text":"Test passes if there is a black square below.","meta":{"sourceTag":"p"}}
++    """.trimIndent()
++
++    @Test
++    fun stack_zeroGapAboveTheSyntheticTable_tdIsNoRoot() {
++        val raw = rootsOf(s006)
++        // The chain the composable stacks, with the margin it resolves (40/8/8/8).
++        val roots = composedCanvasRoots(withCanvasOwnedBodyMargin(raw, resolveComposedCanvasMargin(raw))
++            .map(::withUaBlockMarginOnHoistedRoot), resolveComposedCanvasRootBackground(raw))
++        // The td is no longer a root: it lives in the synthetic table's row.
++        assertTrue(roots.none { it.id == raw[2].id })
++        val tableIdx = roots.indexOfFirst { it.id == raw[0].id + "#table" }
++        assertEquals(1, tableIdx)
++        // The fold the Column spends: no gap above the table (nor above the body-root).
++        val hostActive = CanvasRootHoist.hostActivates(roots)
++        val gaps = collapsedRootStackGapsPx(roots.map { composedRootStackPlan(it, hostActive) })
++        assertEquals(0f, gaps[0], 0f)
++        assertEquals(0f, gaps[tableIdx], 0f)
++    }
++}
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt
+new file mode 100644
+index 0000000..fee53a0
+--- /dev/null
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt
+@@ -0,0 +1,115 @@
++package com.styleconverter.runtime.table
++
++// wave-53 lane L3 (item B) — a `display: table` BODY forms a table on the
++// composed canvas (CSS 2.1 §17.2.1 rule 2). Twin of SwiftUI
++// StyleEngine/table/TableBodyForest.swift; the web harness lets Chrome do the
++// same fixup (apps/web-harness/src/ui/CanvasTableBody.ts).
++//
++// WHY: the extractor emits html+body as ONE synthetic `body-root` whose element
++// children are SIBLING ROOTS (extract-fixture.mjs slots them under the body
++// only when it declares a height), so `Display TABLE` on the body-root applied
++// to an EMPTY box and its children stacked as blocks. MEASURED on wave52-ship
++// CSS2/css21-errata/s-11-1-1b-006 android P 0.9944 (DEGENERATE): the td's
++// square at image rows 51-70 (a 10-px caption-div gap, then the td's own −15
++// margin-top) where the reference — Chrome laying the body out as a table —
++// has 56-75.
++//
++// The rewrite: the run of in-flow roots after the body-root becomes one
++// synthetic TABLE (carrying the body's BorderSpacing / BorderCollapse) → one
++// TABLE_ROW → cells, by §17.2.1 rule 2 ("generate missing child wrappers"):
++// each run of consecutive non-cell roots goes into ONE anonymous TABLE_CELL,
++// and cell roots pass through without their Margin* (CSS 2.1 §8.3: margins do
++// not apply to table-internal boxes). Out-of-flow roots stay roots in place
++// (they are hoisted to the ICB anyway). The body-root itself is untouched —
++// every canvas resolver (colour, padding, margin) reads it.
++
++import com.styleconverter.runtime.core.ir.IRComponent
++import com.styleconverter.runtime.core.ir.IRProperty
++import com.styleconverter.runtime.layout.position.CanvasRootHoist
++import kotlinx.serialization.json.JsonElement
++import kotlinx.serialization.json.JsonObject
++import kotlinx.serialization.json.JsonPrimitive
++import kotlinx.serialization.json.contentOrNull
++import kotlinx.serialization.json.doubleOrNull
++
++object TableBodyForest {
++
++    /** The body displays that make the body a table box (css-display-3 §2.3). */
++    private val TABLE_BODY = setOf("TABLE", "INLINE_TABLE")
++
++    /** Proper table children other than cells (§17.2.1): a run holding one bails. */
++    private val PROPER_NON_CELL = setOf("TABLE_ROW", "TABLE_ROW_GROUP", "TABLE_HEADER_GROUP",
++        "TABLE_FOOTER_GROUP", "TABLE_CAPTION", "TABLE_COLUMN", "TABLE_COLUMN_GROUP")
++
++    /** The margin longhands §8.3 says do not apply to a table cell. */
++    private val MARGIN_TYPES = setOf("MarginTop", "MarginRight", "MarginBottom", "MarginLeft",
++        "MarginBlockStart", "MarginBlockEnd", "MarginInlineStart", "MarginInlineEnd")
++
++    /** The body's table-box properties the synthetic table inherits (§17.6). */
++    private val TABLE_BOX_TYPES = setOf("BorderSpacing", "BorderCollapse")
++
++    /** A component's LAST declared `Display` enum leaf, uppercased (null when absent). */
++    private fun displayOf(c: IRComponent): String? =
++        (c.properties.lastOrNull { it.type == "Display" }?.data as? JsonPrimitive)?.contentOrNull?.uppercase()  // cascade: last wins
++
++    /** Out of flow at the root: hoisted to the ICB, or an RC1 static-position abspos (no ancestors). */
++    private fun isOutOfFlow(c: IRComponent): Boolean =
++        CanvasRootHoist.shouldHoistToCanvasRoot(c.properties, hasPositionedAncestor = false) ||   // fixed / inset abspos
++            CanvasRootHoist.rendersInFlowAsStaticPosition(c.properties, hasPositionedAncestor = false)  // RC1 abspos
++
++    /** A length leaf that is a concrete 0 px (`{px:0}` or the wrapped `{original:{px:0}}`). */
++    private fun isZeroPx(d: JsonElement): Boolean {
++        val o = d as? JsonObject ?: return false                            // keywords (thin/medium/auto): not zero
++        val px = (o["px"] as? JsonPrimitive)?.doubleOrNull                  // `{px:N}`
++            ?: ((o["original"] as? JsonObject)?.get("px") as? JsonPrimitive)?.doubleOrNull  // `{original:{px:N}}`
++        return px == 0.0                                                    // em / % / calc: not a known zero
++    }
++
++    /** The body declares a non-zero padding or border width: it paints its own box, so bail. */
++    private fun paintsOwnEdges(body: IRComponent): Boolean = body.properties.any { p ->
++        (p.type.startsWith("Padding") || (p.type.startsWith("Border") && p.type.endsWith("Width"))) &&
++            !isZeroPx(p.data)                                               // 0 carriers: bail, never guess
++    }
++
++    /** A synthetic component: id/name derived from the body's, children attached. */
++    private fun synthetic(body: IRComponent, suffix: String, props: List<IRProperty>, kids: List<IRComponent>) =
++        IRComponent(id = body.id + suffix, name = body.name + suffix, properties = props, children = kids)  // no role/slot
++
++    /** One `Display` enum leaf, the shape the converter emits (`{"type":"Display","data":"TABLE"}`). */
++    private fun display(value: String) = IRProperty("Display", JsonPrimitive(value))   // read by DisplayExtractor
++
++    /**
++     * The rewritten forest, or [roots] itself (the SAME instance) when the
++     * body-root is not a table, paints its own edges, has no in-flow run after
++     * it, or that run already holds a proper non-cell table child.
++     */
++    fun rewrite(roots: List<IRComponent>): List<IRComponent> {
++        val bodyIdx = roots.indexOfFirst { it.role == "body-root" }       // one body per document
++        if (bodyIdx < 0) return roots                                       // no body bag at all
++        val body = roots[bodyIdx]
++        if (displayOf(body) !in TABLE_BODY || paintsOwnEdges(body)) return roots   // the trigger + edge bail
++        val after = roots.drop(bodyIdx + 1)                                // the body's (sibling) children
++        val run = after.filterNot(::isOutOfFlow)                           // the in-flow run
++        if (run.isEmpty() || run.any { displayOf(it) in PROPER_NON_CELL }) return roots   // 0 carriers: bail
++        // §17.2.1 rule 2: consecutive non-cells share ONE anonymous cell; cells pass through.
++        val cells = mutableListOf<IRComponent>()                            // the row's children, in order
++        val pending = mutableListOf<IRComponent>()                          // the open run of non-cells
++        fun flush() {                                                       // close the open anonymous cell
++            if (pending.isEmpty()) return                                   // nothing open
++            cells += synthetic(body, "#cell${cells.size}", listOf(display("TABLE_CELL")), pending.toList())
++            pending.clear()                                                 // the next non-cell opens a new one
++        }
++        for (r in run) {
++            if (displayOf(r) == "TABLE_CELL") {                             // a proper cell
++                flush()                                                     // ends any open anonymous cell
++                cells += r.copy(properties = r.properties.filterNot { it.type in MARGIN_TYPES })  // §8.3
++            } else pending += r                                             // joins the open anonymous cell
++        }
++        flush()                                                             // close the trailing run
++        val row = synthetic(body, "#row", listOf(display("TABLE_ROW")), cells)   // rule 2's anonymous row
++        val tableProps = listOf(display("TABLE")) + body.properties.filter { it.type in TABLE_BOX_TYPES }
++        val table = synthetic(body, "#table", tableProps, listOf(row))     // the body's table box
++        // The table takes the run's first position; out-of-flow roots keep their order after it.
++        return roots.take(bodyIdx + 1) + table + after.filter(::isOutOfFlow)
++    }
++}
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/table/TableBodyForestTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/table/TableBodyForestTest.kt
+new file mode 100644
+index 0000000..24455ad
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/table/TableBodyForestTest.kt
+@@ -0,0 +1,135 @@
++package com.styleconverter.runtime.table
++
++import com.styleconverter.runtime.core.ir.IRComponent
++import kotlinx.serialization.json.JsonPrimitive
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertSame
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++/**
++ * wave-53 lane L3 (item B) — pins for [TableBodyForest], the composed canvas's
++ * `display: table` BODY rewrite (CSS 2.1 §17.2.1 rule 2, §8.3), on the VERBATIM
++ * wave52-ship per-test IR (decoded + slot-composed exactly as the harness does).
++ * The Swift twin is TableBodyForestTests; the stack consequence (0 gap above
++ * the synthetic table) is pinned in the harness's ComposedCanvasTableBodyTest.
++ *
++ * WHY: s-11-1-1b-006's body children are sibling ROOTS, so `Display TABLE`
++ * applied to an empty box (wave52-ship android P 0.9944, DEGENERATE: the
++ * square at rows 51-70, ref 56-75).
++ *
++ * EXECUTED MUTATIONS (TableBodyForest.kt, this class run alone, source
++ * restored byte-exact — sha256 in tools/titan/results/wave53-canvas-root/_note.md):
++ *   BS  the run re-parented under the body-root (no fresh TABLE root) → shape red.
++ *   BM1 the `Display ∈ {TABLE, INLINE_TABLE}` trigger dropped       → m1 red (a98rgb-003 —
++ *       005 and 001 are identity even without it: 005's only other box is
++ *       slotted under the body, 001 has no body-root).
++ *   BM2 the §8.3 Margin* strip skipped                               → m2 red.
++ *   BM3 the out-of-flow filter dropped                               → m3 red.
++ *   BM4 a non-cell root placed straight into the row                 → m4 red.
++ *   BM5 BorderSpacing not copied onto the synthetic table            → m5 red.
++ */
++class TableBodyForestTest {
++
++    /** Decode + slot-compose a v2 document exactly as the harness does. */
++    private fun rootsOf(componentsJson: String): List<IRComponent> =
++        com.styleconverter.runtime.core.renderer.SlotComposer.compose(
++            com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(
++                """{"irVersion":2,"minReaderVersion":2,"components":[$componentsJson]}"""))
++
++    /** CSS2/css21-errata/s-11-1-1b-006 — all four roots, verbatim (`body { display: table }`). */
++    private val s006 = """
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__0-141","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__0","properties":[{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"},{"type":"Display","data":"TABLE"},{"type":"BorderSpacing","data":{"type":"single","px":0}},{"type":"MarginTop","data":{"px":40}},{"type":"MarginRight","data":{"px":8}},{"type":"MarginBottom","data":{"px":8}},{"type":"MarginLeft","data":{"px":8}}],"meta":{"role":"body-root"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__1-142","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__1","properties":[{"type":"Generic","data":{"propertyName":"display","rawValue":"caption","_unmapped":true}},{"type":"MarginBottom","data":{"px":10}}],"meta":{"role":"ws-after"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__2-143","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__2","properties":[{"type":"Display","data":"TABLE_CELL"},{"type":"Width","data":{"type":"length","px":20}},{"type":"Height","data":{"type":"length","px":20}},{"type":"MarginTop","data":{"px":-15}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}}],"meta":{"role":"ws-after"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__3-144","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__3","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}},{"type":"Left","data":{"px":8}}],"text":"Test passes if there is a black square below.","meta":{"sourceTag":"p"}}
++    """.trimIndent()
++
++    /** CSS2/css21-errata/s-11-1-1b-005 — verbatim (`display: table-cell` body). */
++    private val s005 = """
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-005__0-139","name":"wpt__CSS2__css21-errata__s-11-1-1b-005__0","properties":[{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"},{"type":"Display","data":"TABLE_CELL"},{"type":"BorderSpacing","data":{"type":"single","px":0}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":-15}},{"type":"MarginRight","data":{"px":8}},{"type":"MarginBottom","data":{"px":8}},{"type":"MarginLeft","data":{"px":8}},{"type":"Width","data":{"type":"length","px":20}},{"type":"Height","data":{"type":"length","px":20}}],"meta":{"role":"body-root"}},
++        {"id":"css21-errata__s-11-1-1b-005__0-140","name":"css21-errata__s-11-1-1b-005__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}}],"slot":{"parent":"wpt__css2__css21-errata__s-11-1-1b-005__0-139"},"text":"Test passes if there is a black square below.","meta":{"sourceTag":"p"}}
++    """.trimIndent()
++
++    /** CSS2/css21-errata/s-11-1-1b-001 — verbatim (a real <table>, no body-root). */
++    private val s001 = """
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-001__0-117","name":"wpt__CSS2__css21-errata__s-11-1-1b-001__0","properties":[],"text":"Test passes if there is a black square below.","meta":{"sourceTag":"p","role":"ws-after"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-001__1-118","name":"wpt__CSS2__css21-errata__s-11-1-1b-001__1","properties":[{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"},{"type":"BorderSpacing","data":{"type":"single","px":0}}],"meta":{"sourceTag":"table"}},
++        {"id":"css21-errata__s-11-1-1b-001__1__0-119","name":"css21-errata__s-11-1-1b-001__1__0","properties":[{"type":"MarginBottom","data":{"px":10}}],"slot":{"parent":"wpt__css2__css21-errata__s-11-1-1b-001__1-118"},"meta":{"sourceTag":"caption","role":"ws-after"}},
++        {"id":"css21-errata__s-11-1-1b-001__1__1-120","name":"css21-errata__s-11-1-1b-001__1__1","properties":[],"slot":{"parent":"wpt__css2__css21-errata__s-11-1-1b-001__1-118"},"meta":{"sourceTag":"tr"}},
++        {"id":"css21-errata__s-11-1-1b-001__1__1__0-121","name":"css21-errata__s-11-1-1b-001__1__1__0","properties":[{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}}],"slot":{"parent":"css21-errata__s-11-1-1b-001__1__1-120"},"meta":{"sourceTag":"td"}},
++        {"id":"css21-errata__s-11-1-1b-001__1__1__0__0-122","name":"css21-errata__s-11-1-1b-001__1__1__0__0","properties":[{"type":"Width","data":{"type":"length","px":20}},{"type":"Height","data":{"type":"length","px":25}},{"type":"BorderTopWidth","data":{"px":10}},{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"MarginTop","data":{"px":-15}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}}],"slot":{"parent":"css21-errata__s-11-1-1b-001__1__1__0-121"}}
++    """.trimIndent()
++
++    /** css-color/a98rgb-003 — verbatim (a colour-only body-root followed by in-flow roots). */
++    private val a98 = """
++        {"id":"wpt__css-color__a98rgb-003__0-005","name":"wpt__css-color__a98rgb-003__0","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.5019607843137255,"g":0.5019607843137255,"b":0.5019607843137255},"original":"grey"}}],"meta":{"role":"body-root"}},
++        {"id":"wpt__css-color__a98rgb-003__1-006","name":"wpt__css-color__a98rgb-003__1","properties":[],"text":"Test passes if you see a single square, and not two rectangles of different colors.","meta":{"sourceTag":"p","role":"ws-after"}},
++        {"id":"wpt__css-color__a98rgb-003__2-007","name":"wpt__css-color__a98rgb-003__2","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.996078431372549,"g":0.996078431372549,"b":0.996078431372549},"original":{"r":254,"g":254,"b":254}}},{"type":"Width","data":{"type":"length","original":{"v":12,"u":"EM"}}},{"type":"Height","data":{"type":"length","original":{"v":6,"u":"EM"}}},{"type":"MarginBottom","data":{"px":0}}],"meta":{"role":"ws-after"}},
++        {"id":"wpt__css-color__a98rgb-003__3-008","name":"wpt__css-color__a98rgb-003__3","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.9999300658875595,"g":1,"b":1},"original":{"type":"color","colorSpace":"a98-rgb","values":[1,1,1]}}},{"type":"Width","data":{"type":"length","original":{"v":12,"u":"EM"}}},{"type":"Height","data":{"type":"length","original":{"v":6,"u":"EM"}}},{"type":"MarginTop","data":{"px":0}}]}
++    """.trimIndent()
++
++    /** A component's Display enum leaf. */
++    private fun displayOf(c: IRComponent) = (c.properties.lastOrNull { it.type == "Display" }?.data as? JsonPrimitive)?.content
++
++    @Test
++    fun shape_bodyRootUnchanged_tableRowCells_abspos() {
++        val roots = rootsOf(s006)
++        val out = TableBodyForest.rewrite(roots)
++        assertEquals(3, out.size)
++        // [body-root unchanged, TABLE#table → ROW → [CELL{1-142}, 2-143], 3-144 unchanged]
++        assertSame(roots[0], out[0])
++        val table = out[1]
++        assertEquals(roots[0].id + "#table", table.id)
++        assertEquals("TABLE", displayOf(table))
++        val row = table.children!!.single()
++        assertEquals("TABLE_ROW", displayOf(row))
++        assertEquals(listOf(roots[0].id + "#cell0", roots[2].id), row.children!!.map { it.id })
++        assertEquals(listOf(roots[1]), row.children!![0].children)
++        assertSame(roots[3], out[2])
++    }
++
++    @Test
++    fun m1_identity_onNonTableBodies() {
++        // No trigger → the SAME instance (005: table-cell body; 001: no body-root;
++        // a98rgb-003: a plain colour body followed by in-flow roots).
++        for (doc in listOf(s005, s001, a98)) {
++            val roots = rootsOf(doc)
++            assertSame(roots, TableBodyForest.rewrite(roots))
++        }
++    }
++
++    @Test
++    fun m2_cellLosesItsMargins() {
++        // CSS 2.1 §8.3: margin-top does not apply to a table cell.
++        val td = TableBodyForest.rewrite(rootsOf(s006))[1].children!!.single().children!![1]
++        assertFalse(td.properties.any { it.type.startsWith("Margin") })
++        // …and keeps everything else (its 20×20 size and black fill).
++        assertEquals(listOf("Display", "Width", "Height", "BackgroundColor"), td.properties.map { it.type })
++    }
++
++    @Test
++    fun m3_absposStaysARoot_neverWrapped() {
++        val roots = rootsOf(s006)
++        val out = TableBodyForest.rewrite(roots)
++        assertSame(roots[3], out[2])
++        // Exactly two cells: the anonymous one and the td — the abspos <p> is in neither.
++        val cells = out[1].children!!.single().children!!
++        assertEquals(2, cells.size)
++        assertTrue(cells.none { c -> c.id == roots[3].id || c.children.orEmpty().any { it.id == roots[3].id } })
++    }
++
++    @Test
++    fun m4_nonCellRunIsWrappedInAnAnonymousCell() {
++        val first = TableBodyForest.rewrite(rootsOf(s006))[1].children!!.single().children!![0]
++        assertEquals("TABLE_CELL", displayOf(first))
++    }
++
++    @Test
++    fun m5_tableCarriesTheBodysBorderSpacing() {
++        val table = TableBodyForest.rewrite(rootsOf(s006))[1]
++        assertEquals("""{"type":"single","px":0}""",
++            table.properties.single { it.type == "BorderSpacing" }.data.toString())
++    }
++}

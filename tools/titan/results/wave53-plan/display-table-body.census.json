@@ -1,0 +1,150 @@
+{
+ "_what": "wave-53 display-table-body wire census over wave52-ship per-test IR",
+ "documents": 1435,
+ "bodyRootDisplay": {
+  "None": {
+   "n": 259,
+   "docs": "(omitted)"
+  },
+  "NONE": {
+   "n": 14,
+   "docs": [
+    "wpt__css-view-transitions__3d-transform-incoming",
+    "wpt__css-view-transitions__3d-transform-outgoing",
+    "wpt__css-view-transitions__content-visibility-auto-shared-element",
+    "wpt__css-view-transitions__css-tags-paint-order-with-entry",
+    "wpt__css-view-transitions__css-tags-paint-order",
+    "wpt__css-view-transitions__css-tags-shared-element",
+    "wpt__css-view-transitions__element-is-grouping-during-animation",
+    "wpt__css-view-transitions__fractional-box-new",
+    "wpt__css-view-transitions__fractional-box-old",
+    "wpt__css-view-transitions__fractional-box-with-overflow-children-new",
+    "wpt__css-view-transitions__fractional-box-with-overflow-children-old",
+    "wpt__css-view-transitions__fractional-box-with-shadow-new",
+    "wpt__css-view-transitions__fractional-box-with-shadow-old",
+    "wpt__css-view-transitions__fragmented-at-start-ignored"
+   ]
+  },
+  "CONTENTS": {
+   "n": 3,
+   "docs": [
+    "wpt__css-display__display-contents-root-background",
+    "wpt__css-display__display-contents-sharing-001",
+    "wpt__css-display__display-contents-text-only-001"
+   ]
+  },
+  "INLINE": {
+   "n": 2,
+   "docs": [
+    "wpt__css-anchor-position__anchor-center-safe-rtl",
+    "wpt__css-writing-modes__direction-propagation-body-contain-root"
+   ]
+  },
+  "FLEX": {
+   "n": 2,
+   "docs": [
+    "wpt__css-position__position-absolute-root-element-flex",
+    "wpt__css-position__position-fixed-root-element-flex"
+   ]
+  },
+  "GRID": {
+   "n": 2,
+   "docs": [
+    "wpt__css-position__position-absolute-root-element-grid",
+    "wpt__css-position__position-fixed-root-element-grid"
+   ]
+  },
+  "TABLE_CELL": {
+   "n": 1,
+   "docs": [
+    "wpt__CSS2__css21-errata__s-11-1-1b-005"
+   ]
+  },
+  "TABLE": {
+   "n": 1,
+   "docs": [
+    "wpt__CSS2__css21-errata__s-11-1-1b-006"
+   ]
+  }
+ },
+ "tableInternalRoots": [
+  {
+   "doc": "wpt__CSS2__css21-errata__s-11-1-1b-005",
+   "id": "wpt__css2__css21-errata__s-11-1-1b-005__0-139",
+   "display": "TABLE_CELL",
+   "role": "body-root"
+  },
+  {
+   "doc": "wpt__CSS2__css21-errata__s-11-1-1b-006",
+   "id": "wpt__css2__css21-errata__s-11-1-1b-006__2-143",
+   "display": "TABLE_CELL",
+   "role": "ws-after"
+  },
+  {
+   "doc": "wpt__css-position__position-absolute-dynamic-static-position-table-cell",
+   "id": "wpt__css-position__position-absolute-dynamic-static-position-table-cell__1-097",
+   "display": "TABLE_CELL",
+   "role": null
+  },
+  {
+   "doc": "wpt__css-tables__baseline-vertical",
+   "id": "wpt__css-tables__baseline-vertical__2-083",
+   "display": null,
+   "role": null
+  }
+ ],
+ "nonzeroMarginOnTableInternalBox": [
+  {
+   "doc": "wpt__CSS2__css21-errata__s-11-1-1b-005",
+   "id": "wpt__css2__css21-errata__s-11-1-1b-005__0-139",
+   "display": "TABLE_CELL",
+   "root": true,
+   "role": "body-root",
+   "margins": [
+    {
+     "MarginTop": {
+      "px": -15
+     }
+    },
+    {
+     "MarginRight": {
+      "px": 8
+     }
+    },
+    {
+     "MarginBottom": {
+      "px": 8
+     }
+    },
+    {
+     "MarginLeft": {
+      "px": 8
+     }
+    }
+   ]
+  },
+  {
+   "doc": "wpt__CSS2__css21-errata__s-11-1-1b-006",
+   "id": "wpt__css2__css21-errata__s-11-1-1b-006__2-143",
+   "display": "TABLE_CELL",
+   "root": true,
+   "role": "ws-after",
+   "margins": [
+    {
+     "MarginTop": {
+      "px": -15
+     }
+    }
+   ]
+  }
+ ],
+ "carrierPredicate": "a per-test IR doc whose meta.role=='body-root' component's last Display is TABLE or INLINE_TABLE",
+ "carriers": [
+  "wpt__CSS2__css21-errata__s-11-1-1b-006"
+ ],
+ "carrierCells": [
+  "wpt__CSS2__css21-errata__s-11-1-1b-006|web",
+  "wpt__CSS2__css21-errata__s-11-1-1b-006|ios",
+  "wpt__CSS2__css21-errata__s-11-1-1b-006|android"
+ ]
+}

@@ -1,0 +1,1 @@
+      cdpBox: cdp[it.key]?.box ?? null, textModelled: !cdp[it.key]?.text && it.text !== null });

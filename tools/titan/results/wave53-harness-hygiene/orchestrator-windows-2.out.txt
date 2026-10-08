@@ -1,0 +1,54 @@
+# L5 harness-hygiene — orchestrator windows 3 and 5 (2026-10-07, device idle, shared tree with every lane's unseamed edits)
+
+## Window 3 — smoke.sh end to end against a REAL foreign listener on :3000
+
+The developer's own API server (pid 87017, node) held :3000 throughout — the real case the guard exists for.
+
+Attempt 1 (13:05 UTC, tree as the lane left it):
+  [web-port-guard] port 3000 is held by pid 87017 (…/node --require …) — not this checkout's vite, not touching it
+  [smoke-port] port 3000 is in use by another program — using 3400 for this smoke
+  vite ready on :3400 (VITE v8.2.0, --strictPort)                             ← T4's port move WORKS
+  Tier 5:  ✓ 0 captured · 90 failed · 0 skipped   — every row "fixture-ready-timeout"
+  Tier 11: 0/15 fixtures scored · 15 errored       — every row "fixture-ready-timeout"
+  /tmp/smoke-vite.log: 90+ × "[vite] (client) [console.error] Load error: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON"
+  Diagnosis: the probes open /?fixture=<Name> and the page fetches apps/web-harness/public/fixtures/<Name>.json —
+  gitignored converter output (`npm run build-fixtures`, the pre-flight contract at the top of interaction-states.mjs).
+  This fresh worktree had none; vite's SPA fallback answered index.html for the missing JSON, the page never set
+  data-fixture-ready, every probe timed out. smoke.sh has never run build-fixtures (HEAD and the lane's tree alike):
+  a pre-existing gap, NOT a T4 regression — T4 got vite up on the right port and the probes reached it.
+
+Fix (L5 ownership, tools/visual/smoke.sh): new `build_fixtures` step before the vite lifecycle — JDK 21 picked the way
+  test-all.sh does, `npm run build-fixtures` (idempotent on mtime; ~5 min on a fresh tree, ~1 s after), summary line
+  recorded; a failed build skips vite and both tiers with a named reason instead of 105 timeout rows. Header updated.
+  First build on this tree: 15 built · 0 skipped · 0 failed (JVM converter, --no-daemon, ~4 min).
+
+Attempt 2 (13:3x UTC, `bash tools/visual/smoke.sh --quick`):
+  [smoke] fixtures: 0 built · 15 skipped · 0 failed · 15 total available      ← idempotent skip
+  [web-port-guard] port 3000 is held by pid 87017 … — not this checkout's vite, not touching it
+  [smoke-port] port 3000 is in use by another program — using 3400 for this smoke
+  [smoke] vite ready (1s)
+  Tier 5:  ✓ 90 captured · 0 failed · 0 skipped (15 components × 6 states web side)
+  Tier 11: 15/15 fixtures scored on color-contrast · 15 clean · 0 failing · 0 errored
+  [smoke] stopping vite (pgid=19735)                                           ← our own vite only; pid 87017 untouched (lsof after: still LISTEN)
+  smoke rc=1 — from the doc-staleness step alone (test-count drift of the uncommitted lane tests; restamped after the
+  single-writer sweep), not from the tiers.
+  Mutation record for the new step: attempt 1 IS the step-absent state on this very tree (0/90, 0/15); with the step, 90/90
+  and 15/15. Pins touching smoke's port logic re-run green: smoke-port.test.mjs + web-port-guard.test.mjs (12/12).
+
+## Window 5 — `wave53-hh-probe` (11:15 → 11:29 UTC)
+
+  gate-driver.sh wave53-hh-probe --sections css-cascade,css-counter-styles,css-flexbox,css-text --skip-fixture-net
+  host after stopping our processes: load1=3.70 free+inactive=3410MB; kill_own_gradle_daemons roots=[this tree] (T2's path)
+  css-cascade OK attempt=1 43/43/43 · css-counter-styles OK 48/48/48 · css-flexbox OK 48/48/48 · css-text OK 48/48/48
+  DEVIATION: the tree carried every lane's unseamed edits (L1–L5), not L5's alone — the probe measured same-host
+  determinism plus the union of the lanes' pre-seam radii.
+  control-check.mjs wave53-open wave53-hh-probe (union carriers, tools/titan/results/wave53-gate/control-hh-probe-union.json):
+    web 187 compared · 186 identical · 0 re-encoded · 1 changed (carrier)      ← web is BYTE-deterministic run-to-run on this host
+    ios 187 · 186 · 0 · 1 (carrier)
+    android 187 · 178 · 0 · 9 (all carriers)
+    wire 187 · 3 content-changed (carriers) · 15 renumbered (cssom shadow of counter-suffix +6; see PLAN §10 item 6) · 0 leaks
+    CONTROL HOLDS
+  Per-lane: --lane L5-harness-hygiene (empty carrier set) FAILS with 11 capture + 3 wire leaks = L1+L2's carriers
+  (control-hh-probe-L5.json) — the expected reading of a shared-tree probe; L5's own prediction (no capture or wire change
+  from its scripts) is not separable here and is re-read at the closing gate's control instead.
+  The brief's "kill nothing foreign" neutrality: the driver's own-processes path ran; pid 87017 (:3000) untouched.

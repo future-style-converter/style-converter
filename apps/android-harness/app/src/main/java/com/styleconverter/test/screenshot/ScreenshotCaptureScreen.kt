@@ -78,6 +78,10 @@ import com.styleconverter.runtime.core.renderer.composedCanvasBackground
 import com.styleconverter.runtime.core.renderer.containmentBlocksCanvasPropagation
 import com.styleconverter.runtime.core.renderer.captureCanvasBackground
 import com.styleconverter.runtime.core.types.ValueExtractors
+// wave-53 lane L3 (item A) — the root's background-IMAGE layers propagate to
+// the canvas (css-backgrounds-3 §2.11.2): the pure plan, the forest strip and
+// the surface paint live in the runtime; this canvas only wires them.
+import com.styleconverter.runtime.background.RootBackgroundPropagation
 // wave-26 lane BF-A — the two-pass backdrop-filter render. The composed WPT
 // canvas is the only backdrop root the runtime can render honestly (a
 // controlled tree we can paint twice), so the host hook lives here: arm the
@@ -1347,6 +1351,24 @@ private fun containKeywords(data: JsonElement): List<String>? = when (data) {
 }
 
 /**
+ * wave-53 lane L3 (item A) — the root background-IMAGE plan, or null (no
+ * body-root / no image layer / contained — the SAME css-contain-2 §2 gate as
+ * the colour above). A scroll layer's tile origin is the root box: the ICB
+ * plus the margin this canvas owns ([resolveComposedCanvasMargin]). Rule and
+ * pins: runtime RootBackgroundPropagation + ComposedCanvasRootBackgroundTest.
+ */
+internal fun resolveComposedCanvasRootBackground(roots: List<IRComponent>): RootBackgroundPropagation.Plan? {
+    // One body per document, the same lookup as the colour resolver.
+    val bodyRoot = roots.firstOrNull { it.role == "body-root" } ?: return null
+    // The concrete margin sides the canvas owns (ZERO for a table-internal body).
+    val margin = resolveComposedCanvasMargin(roots)
+    // The colour's containment gate, read through the same local keyword reader.
+    val contained = containmentBlocksCanvasPropagation(
+        bodyRoot.properties.firstOrNull { it.type == "Contain" }?.data?.let { containKeywords(it) })
+    return RootBackgroundPropagation.plan(bodyRoot.properties, margin.top.value, margin.left.value, contained)
+}
+
+/**
  * wave-24 B-RC5 — the composed canvas's per-side pad, in dp. The native twin
  * of the web harness's `resolveCanvasPadding` and iOS's
  * `ComposedCaptureCanvas.resolvedPadding`.
@@ -1522,6 +1544,25 @@ internal fun withCanvasOwnedBodyMargin(roots: List<IRComponent>, margin: CanvasM
         // so every id-keyed channel (hoist band suppression …) is unchanged.
         root.copy(properties = root.properties.filterNot { it.type in owned })
     }
+}
+
+/**
+ * wave-53 lane L3 — the forest rewrite the composed canvas adds AFTER the
+ * wave-52 M1 margin strip + T6 hoisted-UA-margin map (the composable applies
+ * those first, verbatim, then calls this). Each is identity for a document it
+ * does not concern, so 1432 of the 1435 documents come back unchanged:
+ *  - item A: the body-root loses the image layers the canvas paints;
+ * Commutes with T6 (that map touches canvas-hoisted roots only; neither step
+ * here touches one). One function so ComposedCanvasRootBackgroundTest pins the
+ * REAL chain the Column stacks.
+ */
+internal fun composedCanvasRoots(
+    roots: List<IRComponent>,
+    rootImagePlan: RootBackgroundPropagation.Plan?,
+): List<IRComponent> {
+    // Item A: the body-root minus the image layers the canvas owns.
+    val owned = RootBackgroundPropagation.withCanvasOwnedRootBackground(roots, rootImagePlan)
+    return owned
 }
 
 /**
@@ -1701,9 +1742,25 @@ private fun ComposedCaptureCanvas(
     // a UA-margin tag and no declared block margin gets its UA margin as two
     // declared longhands (withUaBlockMarginOnHoistedRoot — CSS 2.1 §9.3.2,
     // `top` offsets the margin edge); identity for every other root.
+    // wave-53 lane L3 (item A) — the root's background-IMAGE plan (null for
+    // 1432 of 1435 documents) and its surface paint, both read from the
+    // UNSTRIPPED roots: the canvas paints the layers the body-root then loses
+    // below. `Modifier` itself (identity under `then`) without a plan.
+    val rootImagePlan = androidx.compose.runtime.remember(roots) {
+        resolveComposedCanvasRootBackground(roots)
+    }
+    val rootImageModifier = androidx.compose.runtime.remember(roots, canvasBackground) {
+        RootBackgroundPropagation.canvasModifier(
+            roots.firstOrNull { it.role == "body-root" }?.properties.orEmpty(),
+            rootImagePlan, CaptureCanvasFrame, canvasBackground)
+    }
+    // wave-53 L3 (item A) rides the same rewrite: the body-root composes
+    // WITHOUT the image layers the canvas now owns (§2.11.2 "not painted
+    // again") — the same list instance whenever there is no plan.
     @Suppress("NAME_SHADOWING")
-    val roots = androidx.compose.runtime.remember(roots, canvasMargin) {
-        withCanvasOwnedBodyMargin(roots, canvasMargin).map(::withUaBlockMarginOnHoistedRoot)
+    val roots = androidx.compose.runtime.remember(roots, canvasMargin, rootImagePlan) {
+        composedCanvasRoots(
+            withCanvasOwnedBodyMargin(roots, canvasMargin).map(::withUaBlockMarginOnHoistedRoot), rootImagePlan)
     }
     // FIX 1 (UA default margins) — TITAN Round 4b — per-root effective UA
     // block margins, still the source of the HORIZONTAL blockquote/figure
@@ -1840,6 +1897,13 @@ private fun ComposedCaptureCanvas(
                     }
                     ?: Modifier.background(canvasBackground)
             )
+            // wave-53 lane L3 (item A) — the root's image layers, painted ON
+            // the propagated colour and UNDER every root (and inside a root
+            // clip, which the chain above applies first). A uniform stack
+            // covers the framed surface; any other stack gets the frame band
+            // repainted in the colour (capture-frame chrome, padColorFor).
+            // Identity (`then(Modifier)`) for every document without a plan.
+            .then(rootImageModifier)
             // wave-52 lane L2 (Fix A) — THE HORIZONTAL VIEWPORT CROP. The
             // browser-ref is RENDERED in a 358-px viewport and padded in
             // image space (capture-browser-ref.mjs REF_RENDER_WIDTH /

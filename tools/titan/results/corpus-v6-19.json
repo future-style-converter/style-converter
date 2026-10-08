@@ -1,0 +1,520 @@
+{
+  "_snapshot": "corpus-v6.19",
+  "_note": "Wave 53 (2026-10-06 → 2026-10-07) — verification-first on the new toolchain, five lanes, two pre-registered reverts at the probe: corpus-v6.19.\n\nHEADLINE. Run wave53-final (tools/titan/gate-driver.sh, quiet host, tree 77fe41e8, 2026-10-07 14:58 → 16:41 UTC for the 30 sections, then the fixture net): 30/30 sections, every column 48/48/48 (css-cascade 43/43/43) on the first attempt; fixture net exit 0 on all 9 gate fixtures (all-then-color ran against baselines seeded that day — 18 comparisons, no regressions, 12 oracle checks, 0 violations — which were then WITHDRAWN before the ship: the label-chrome tripwire found three of its six canvases without the harness label on any platform; the fixture stays gate-only and the chrome defect is queued). Per cell against wave53-open (= corpus-v6.18's content, re-measured on macOS 27.0.1 / Xcode 27.0 with 0 gained / 0 lost / 0 movers / 0 newly measured / 0 unmeasured-now over 4096 cells): web 1229/1372 → 1232/1372, iOS 1119/1362 → 1125/1362, Android 1111/1362 → 1115/1362 — gained 13 (web 3 · iOS 6 · Android 4), lost 0, movers 13 (|Δ| ≥ 0.005), newly measured 0, unmeasured-now 0; 365/365 must-not-move cells within 0.002; adjudicate.mjs R1–R5 hold; the union control holds (web 1430/1435 captures byte-identical, iOS 1425, Android 1422 — every change a named carrier; wire 1 content-changed carrier + 10 id-renumbered documents, 0 leaks). Every one of the 26 flipped or moved cells was looked at against the re-frozen reference (tools/titan/results/wave53-gate/final/cell-review.json): all 13 gains FAITHFUL, 11 movers FAITHFUL (eight of them DEGENERATE → faithful), 2 movers still failing (hyphenate-character-001/-003 android — pre-registered degenerate-by-construction).\n\nTHE OPENING GATE WAS THE FIRST MEASUREMENT (wave53-open, 2026-10-06 23:06 → 2026-10-07 03:26 UTC): the host had moved to macOS 27.0.1 / Xcode 27.0 / iOS 26 simulator runtimes, so the wave opened by re-measuring corpus-v6.18's tree. 0 gained / 0 lost / 0 movers / 0 newly measured / 0 unmeasured-now over 4096 cells, fixture net exit 0 ×9; iOS and Android captures byte-identical to wave52-ship, the per-test IR byte-identical, web captures pixel-changed in small glyph-AA deltas on every one of 236 sampled (the OS text rasterizer, not layout; 22 scored web cells moved by ±0.0001). css-view-transitions needed --resume twice under memory pressure (the booted iOS 26 simulator holds ~4 GB; the host swapped while the 1-minute load stayed near 1) and then ran in 8.5 minutes on a fresh browser. Lesson kept: on this host check swap as well as load before a gate, and compare captures by decoded pixels only on cross-host pairs — on the same host web capture is byte-deterministic run-to-run (186/187 and 1430/1435 identical here).\n\nWHAT THE LANES DID (five lanes on the shared tree, disjoint ownership, five seam patches = 13 seam hunks, landed as 11 unit commits in a pre-registered order by land-units.sh): L1 lists-bakes — U1: the extractor keeps a nested <ol> inside an <li> (findImpliedClose, HTML §13.2.6.4.7), counter-bake walks it, both PseudoTextFold twins keep the leading text → counter-reset-reversed-nested web P 0.9506 → 1, iOS 0.9508 → 0.9989, Android 0.9509 → 0.9852, the list now 3 / 2 / 11 / 9 / 8 / 1 as the reference; U2 (RTL markers baked upstream) REVERTED at the probe, below. L2 soft-hyphen — a space-less run carrying U+00AD is a soft-wrap opportunity on both natives (PreBreakPipeline admits it; SoftHyphenPolicy.admitsPreBreak gates the iOS pre-break) and a paint-inert out-of-flow member inside a word no longer splits the fold → hyphens-span-001 iOS f 0.8652 → P 0.9968, hyphens-out-of-flow-001 iOS f 0.8935 → P 0.9971, hyphens-span-001 / -out-of-flow-001 / -002 Android DEGENERATE 0.9532 / 0.9685 / 0.982 → faithful 0.9937 / 0.9943 / 0.9943 (\"high-/way\" in every box). L3 canvas-root — a display: contents root's background-image layers reach the canvas on all three platforms (RootBackgroundPropagation + RootBackgroundUniformity; css-backgrounds-3 §2.11.2) → display-contents-root-background ×3 f 0.53 → P 1 / 0.9995 / 0.9989 and background-attachment-margin-root-001 / -002 ×3 f 0.34–0.45 → P ≥ 0.9994; the display: table body gets Chrome's CSS 2.1 §17.2.1 anonymous-cell fixup on the web and SwiftUI canvases (s-11-1-1b-006 web P 0.9941 → 1, iOS 0.9953 → 0.9992, the square at y56–75) — the Compose half REVERTED at the probe. L4 float-avoid — a flow-root beside floats takes the gap the floats leave (FloatAvoidPlan / FloatAvoidLayout on both natives; CSS 2.1 §9.5 + §9.7, css-contain inline-size) → contain-inline-size-bfc-floats-002 iOS / Android f 0.93 → P 0.9985 / 0.9974, bfc-floats-001 and display-flow-root-002 DEGENERATE → faithful (0.9984 / 0.9972; 1 / 1). L5 harness-hygiene — the gate path stops only its own Gradle daemons and adb server (own-processes.sh kill_own_gradle_daemons / kill_wedged_adb_server replace ./gradlew --stop ×2 and pkill -9 -x adb ×2), smoke.sh follows the port guard (vite --strictPort on 3400–3499 when :3000 is foreign) AND builds the Tier-5/11 fixture JSONs it had never built (a fresh worktree failed 90 + 15 probes on fixture-ready-timeout), and the ios-harness XCTest reads its files as bundle resources (project.yml copyFiles) — 30/30 under Xcode 27 (was 17/30 + 13 simulator-blocked).\n\nTHE PROBE REVERTED TWO UNITS, BOTH UNDER PRE-REGISTERED RULES (wave53-probe, 20 sections, 2026-10-07 13:42 → 14:39 UTC; tools/titan/results/wave53-gate/probe/). L3 B-android: the pre-declared probeGatedRevert row — s-11-1-1b-006 android drew a 40-px square (an extra empty cell in the Compose anonymous table forest) and moved −0.0038. L1 U2: the geometryGating row counter-suffix android printed GEOMETRY WRONG (rtl row 1 right x126 vs ref x144) while SSIM ROSE 0.9547 → 0.9793 — the Android picture had the baked RTL markers on the wrong rows (\"foo\" bare, \"bar ·\", \"foo ·\", \"bar .א\", a lone \"ב.\"); iOS and web were right, but M never lands without P and P alone was never pre-registered, so the unit went and its hunk-P gains (bidi-lines-001 android f 0.8934 → P 0.9629, -002 +0.028) with it. The lane's web-composited replay had predicted 0.9900 on Android: a replay never runs the native text layout, and a score cannot see a wrong picture that keeps the ink — the geometry probe can. Both decisions were pre-registered for the closing gate (expectations.json probeDecisions: predictions withdrawn from R4, cells held to must-not-move, carriers withdrawn in the control — and shown to fail on the probe tree itself).\n\nWHAT THE INSTRUMENTS LEARNED. The wire control gained a \"renumbered\" class: the extractor numbers a section's components with one running counter, so a carrier that gains components renumbers every later document's ids (U1: +1 over 10 css-lists documents; U2 had +6 over 15 cssom documents) — control-check.mjs admits the class only when the uniform shift equals the running component-count delta of the content-changed documents before it in tests.list order. The S1 skeptic found L3-A not independently revertible (its revert order B-android → B-ios → B-web → A and an A-only patch were pre-registered; not needed) and the L1 wire radius under-reported (fixed in the generator). The hh-probe measured the shared tree with every lane's unseamed edits rather than L5's alone (deviation recorded; the union control held).\n\nPREDICTION RECORD. 17 gating floors measured, 17 met (counter-suffix ×3 and 006 android withdrawn by the reverts); L2 and L4 landed exactly as predicted; L3 three of four units; L1 one of two. Pre-existing, found and queued, not ours: hyphens-out-of-flow-002 web f 0.9411 unchanged since wave52-ship (box 4 at 26 px — the web runtime).\n\nSUITES on the shipped tree: converter 551 · web runtime 1369 · web-harness 330 · compose 3428 · android-harness 168 · swiftui 2192 · tooling 2291 (2287 pass, 4 env-gated skips) · ios-harness XCTest 30/30 on the simulator · IR conformance valid on all four codebases. Full record: tools/titan/results/wave53-gate/_note.md (opening gate, hh-probe, probe, closing gate, every flipped cell), plan and seam registry under tools/titan/results/wave53-plan/, lanes under tools/titan/results/wave53-*/, S1 under wave53-S1/.",
+  "artifact": "tools/titan/runs/wave53-final (gitignored)",
+  "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+  "devSha": "cdb8a845+wave53 (tree c4cadd1f)",
+  "date": "2026-10-07",
+  "bucket": "A",
+  "passThreshold": 0.95,
+  "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence + coverage-RATIO (max/min>2) + colorDivergent-with-dE>=2.3 + extraction-wall exclusion + post-load/structure re-admission (corpus-v5.0 gate) + ref-unachievable exclusion (v5.4) + per-platform native-font-parity exclusion (v5.5) + harness-overhaul gate contract (exits 3/4/5/6; pixelmatch 0.02+AA; fuzzy in WPT-native units) + per-cell absence-only exclusion (v6.18, wave 52 L12 Decision A: a PASS against a reference with ink under the presence floor is undiscriminating and leaves the denominator — inject-wpt-block.mjs isAbsenceOnly / applyAbsenceOnlyGate; a FAIL there is still a measurement and stays)",
+  "sampling": "30 sections x 48 bucket-A tests (depth-48)",
+  "canvasBoundary": "white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin (v6.18, wave 52 L12: the canvas background sits on :where(html) only, and the UA body margin is applied when the test declares a body margin and the reference does not; 23 references re-rendered, 1412 cloned byte-identical)",
+  "totals": {
+    "web": {
+      "passing": 1232,
+      "measured": 1372
+    },
+    "ios": {
+      "passing": 1125,
+      "measured": 1362
+    },
+    "android": {
+      "passing": 1115,
+      "measured": 1362
+    }
+  },
+  "sections": {
+    "CSS2": {
+      "web": {
+        "passing": 44,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 47
+      },
+      "android": {
+        "passing": 41,
+        "measured": 47
+      }
+    },
+    "css-anchor-position": {
+      "web": {
+        "passing": 30,
+        "measured": 32
+      },
+      "ios": {
+        "passing": 24,
+        "measured": 32
+      },
+      "android": {
+        "passing": 27,
+        "measured": 32
+      }
+    },
+    "css-backgrounds": {
+      "web": {
+        "passing": 26,
+        "measured": 29
+      },
+      "ios": {
+        "passing": 26,
+        "measured": 29
+      },
+      "android": {
+        "passing": 26,
+        "measured": 29
+      }
+    },
+    "css-break": {
+      "web": {
+        "passing": 37,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 29,
+        "measured": 48
+      },
+      "android": {
+        "passing": 31,
+        "measured": 48
+      }
+    },
+    "css-cascade": {
+      "web": {
+        "passing": 36,
+        "measured": 41
+      },
+      "ios": {
+        "passing": 35,
+        "measured": 41
+      },
+      "android": {
+        "passing": 36,
+        "measured": 41
+      }
+    },
+    "css-color": {
+      "web": {
+        "passing": 43,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 43,
+        "measured": 48
+      },
+      "android": {
+        "passing": 44,
+        "measured": 48
+      }
+    },
+    "css-contain": {
+      "web": {
+        "passing": 48,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 48
+      },
+      "android": {
+        "passing": 39,
+        "measured": 48
+      }
+    },
+    "css-counter-styles": {
+      "web": {
+        "passing": 40,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 28,
+        "measured": 37
+      },
+      "android": {
+        "passing": 28,
+        "measured": 37
+      }
+    },
+    "css-display": {
+      "web": {
+        "passing": 45,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 47
+      },
+      "android": {
+        "passing": 41,
+        "measured": 47
+      }
+    },
+    "css-flexbox": {
+      "web": {
+        "passing": 46,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 45,
+        "measured": 47
+      },
+      "android": {
+        "passing": 45,
+        "measured": 47
+      }
+    },
+    "css-gaps": {
+      "web": {
+        "passing": 48,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 46,
+        "measured": 48
+      },
+      "android": {
+        "passing": 46,
+        "measured": 48
+      }
+    },
+    "css-grid": {
+      "web": {
+        "passing": 48,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 47,
+        "measured": 48
+      },
+      "android": {
+        "passing": 47,
+        "measured": 48
+      }
+    },
+    "css-images": {
+      "web": {
+        "passing": 43,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 35,
+        "measured": 47
+      },
+      "android": {
+        "passing": 35,
+        "measured": 47
+      }
+    },
+    "css-lists": {
+      "web": {
+        "passing": 42,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 48
+      },
+      "android": {
+        "passing": 41,
+        "measured": 48
+      }
+    },
+    "css-masking": {
+      "web": {
+        "passing": 41,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 47
+      },
+      "android": {
+        "passing": 40,
+        "measured": 47
+      }
+    },
+    "css-multicol": {
+      "web": {
+        "passing": 45,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 48
+      },
+      "android": {
+        "passing": 43,
+        "measured": 48
+      }
+    },
+    "css-overflow": {
+      "web": {
+        "passing": 46,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 47,
+        "measured": 47
+      },
+      "android": {
+        "passing": 46,
+        "measured": 47
+      }
+    },
+    "css-position": {
+      "web": {
+        "passing": 36,
+        "measured": 41
+      },
+      "ios": {
+        "passing": 33,
+        "measured": 41
+      },
+      "android": {
+        "passing": 33,
+        "measured": 41
+      }
+    },
+    "css-pseudo": {
+      "web": {
+        "passing": 33,
+        "measured": 42
+      },
+      "ios": {
+        "passing": 32,
+        "measured": 42
+      },
+      "android": {
+        "passing": 31,
+        "measured": 42
+      }
+    },
+    "css-sizing": {
+      "web": {
+        "passing": 47,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 44,
+        "measured": 48
+      },
+      "android": {
+        "passing": 45,
+        "measured": 48
+      }
+    },
+    "css-tables": {
+      "web": {
+        "passing": 44,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 36,
+        "measured": 47
+      },
+      "android": {
+        "passing": 37,
+        "measured": 47
+      }
+    },
+    "css-text": {
+      "web": {
+        "passing": 35,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 36,
+        "measured": 48
+      },
+      "android": {
+        "passing": 34,
+        "measured": 48
+      }
+    },
+    "css-text-decor": {
+      "web": {
+        "passing": 42,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 31,
+        "measured": 48
+      },
+      "android": {
+        "passing": 29,
+        "measured": 48
+      }
+    },
+    "css-transforms": {
+      "web": {
+        "passing": 46,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 46,
+        "measured": 47
+      },
+      "android": {
+        "passing": 43,
+        "measured": 47
+      }
+    },
+    "css-ui": {
+      "web": {
+        "passing": 42,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 42,
+        "measured": 48
+      },
+      "android": {
+        "passing": 41,
+        "measured": 48
+      }
+    },
+    "css-values": {
+      "web": {
+        "passing": 44,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 40,
+        "measured": 48
+      },
+      "android": {
+        "passing": 40,
+        "measured": 48
+      }
+    },
+    "css-view-transitions": {
+      "web": {
+        "passing": 32,
+        "measured": 45
+      },
+      "ios": {
+        "passing": 27,
+        "measured": 46
+      },
+      "android": {
+        "passing": 29,
+        "measured": 46
+      }
+    },
+    "css-writing-modes": {
+      "web": {
+        "passing": 36,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 30,
+        "measured": 48
+      },
+      "android": {
+        "passing": 27,
+        "measured": 48
+      }
+    },
+    "filter-effects": {
+      "web": {
+        "passing": 41,
+        "measured": 46
+      },
+      "ios": {
+        "passing": 36,
+        "measured": 46
+      },
+      "android": {
+        "passing": 32,
+        "measured": 46
+      }
+    },
+    "selectors": {
+      "web": {
+        "passing": 46,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 48
+      },
+      "android": {
+        "passing": 38,
+        "measured": 48
+      }
+    }
+  },
+  "perCellDiff": {
+    "against": "wave53-open (= wave52-ship content on the macOS 27 / Xcode 27 host; corpus-v6.18 numbers exactly)",
+    "scorer": "node tools/titan/score-gate.mjs wave53-open wave53-final --watch tools/titan/results/wave53-plan/watchlist.txt --movers 0.005",
+    "gained": 13,
+    "lost": 0,
+    "newlyMeasured": 0,
+    "unmeasuredNow": 0,
+    "movers": 13,
+    "gainedCells": [
+      "css-backgrounds/css/css-backgrounds/background-attachment-margin-root-001.html android 0.451 -> 0.9996",
+      "css-backgrounds/css/css-backgrounds/background-attachment-margin-root-001.html ios 0.4509 -> 0.9995",
+      "css-backgrounds/css/css-backgrounds/background-attachment-margin-root-001.html web 0.4511 -> 1",
+      "css-backgrounds/css/css-backgrounds/background-attachment-margin-root-002.html android 0.3389 -> 0.9996",
+      "css-backgrounds/css/css-backgrounds/background-attachment-margin-root-002.html ios 0.3391 -> 0.9994",
+      "css-backgrounds/css/css-backgrounds/background-attachment-margin-root-002.html web 0.339 -> 1",
+      "css-contain/css/css-contain/contain-inline-size-bfc-floats-002.html android 0.9311 -> 0.9974",
+      "css-contain/css/css-contain/contain-inline-size-bfc-floats-002.html ios 0.9322 -> 0.9985",
+      "css-display/css/css-display/display-contents-root-background.html android 0.5355 -> 0.9989",
+      "css-display/css/css-display/display-contents-root-background.html ios 0.5346 -> 0.9995",
+      "css-display/css/css-display/display-contents-root-background.html web 0.5341 -> 1",
+      "css-text/css/css-text/hyphens/hyphens-out-of-flow-001.html ios 0.8935 -> 0.9971",
+      "css-text/css/css-text/hyphens/hyphens-span-001.html ios 0.8652 -> 0.9968"
+    ],
+    "lostCells": [],
+    "newlyMeasuredCells": [],
+    "unmeasuredNowCells": [],
+    "moverCells": [
+      "css-contain/css/css-contain/contain-inline-size-bfc-floats-001.html android 0.9519 -> 0.9972 (+0.0453)",
+      "css-contain/css/css-contain/contain-inline-size-bfc-floats-001.html ios 0.9531 -> 0.9984 (+0.0453)",
+      "css-display/css/css-display/display-flow-root-002.html android 0.9734 -> 1 (+0.0266)",
+      "css-display/css/css-display/display-flow-root-002.html ios 0.9734 -> 1 (+0.0266)",
+      "css-lists/css/css-lists/counter-reset-reversed-nested.html android 0.9509 -> 0.9852 (+0.0343)",
+      "css-lists/css/css-lists/counter-reset-reversed-nested.html ios 0.9508 -> 0.9989 (+0.0481)",
+      "css-lists/css/css-lists/counter-reset-reversed-nested.html web 0.9506 -> 1 (+0.0494)",
+      "css-text/css/css-text/hyphens/hyphenate-character-001.html android 0.9136 -> 0.9301 (+0.0165)",
+      "css-text/css/css-text/hyphens/hyphenate-character-003.html android 0.9168 -> 0.9292 (+0.0124)",
+      "css-text/css/css-text/hyphens/hyphens-out-of-flow-001.html android 0.9685 -> 0.9943 (+0.0258)",
+      "css-text/css/css-text/hyphens/hyphens-out-of-flow-002.html android 0.982 -> 0.9943 (+0.0123)",
+      "css-text/css/css-text/hyphens/hyphens-span-001.html android 0.9532 -> 0.9937 (+0.0405)",
+      "CSS2/css/CSS2/css21-errata/s-11-1-1b-006.html web 0.9941 -> 1 (+0.0059)"
+    ],
+    "degenerateGains": [],
+    "probeReverts": [
+      "L3-B-android (276757ea → d773ff6a): CSS2/css21-errata/s-11-1-1b-006 android — probeGatedRevert, 40-px square",
+      "L1-U2 (a8ffd1c6 → b0edb788): counter-suffix android GEOMETRY WRONG (markers on the wrong rows) — rule 4; bidi-lines-001/-002 android gains withdrawn with it"
+    ]
+  },
+  "installedBuilds": [
+    {
+      "launch": "wave53-final corpus launch (30 sections; tree 77fe41e8 = fix pass + two probe reverts + seeded all-then-color baselines) — 2026-10-07T15:02:08Z — HEAD 77fe41e8",
+      "android": "android  serial=emulator-5554  built app-debug.apk sha1=7375a610014d1f5bb4923e1ee1ef9c85a5f29d49  installed base.apk sha1=7375a610014d1f5bb4923e1ee1ef9c85a5f29d49",
+      "androidMatch": "android  MATCH",
+      "ios": "ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=62d5b2b9f7e6b15eba6c57bbd2666c06496ca67b  installed .app digest=62d5b2b9f7e6b15eba6c57bbd2666c06496ca67b",
+      "iosMatch": "ios      MATCH"
+    },
+    {
+      "launch": "wave53-final fixture-net launch (--skip-corpus; same tree 77fe41e8) — 2026-10-07T16:46:32Z — HEAD 77fe41e8",
+      "android": "android  serial=emulator-5554  built app-debug.apk sha1=7375a610014d1f5bb4923e1ee1ef9c85a5f29d49  installed base.apk sha1=7375a610014d1f5bb4923e1ee1ef9c85a5f29d49",
+      "androidMatch": "android  MATCH",
+      "ios": "ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=MISSING  installed .app digest=62d5b2b9f7e6b15eba6c57bbd2666c06496ca67b",
+      "iosMatch": "ios      MISMATCH"
+    },
+    {
+      "launch": "wave53-final fixture-net launch, second read (--skip-corpus; same tree 77fe41e8) — 2026-10-07T16:47:17Z — HEAD 77fe41e8",
+      "android": "android  serial=emulator-5554  built app-debug.apk sha1=e1c5fa1c57a97c2bbf4e69305a9210ed16512170  installed base.apk sha1=e1c5fa1c57a97c2bbf4e69305a9210ed16512170",
+      "androidMatch": "android  MATCH",
+      "ios": "ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=9d23766e3f3590a0e00330acda6dc992405d9deb  installed .app digest=9d23766e3f3590a0e00330acda6dc992405d9deb",
+      "iosMatch": "ios      MATCH"
+    }
+  ],
+  "reproduce": "tools/titan/gate-driver.sh wave53-final --skip-fixture-net, then rm -f /tmp/titan-device-pool/provisioned-* and tools/titan/gate-driver.sh wave53-final --skip-corpus; score with the perCellDiff.scorer line; adjudicate with node tools/titan/results/wave53-gate/adjudicate.mjs <score.json>"
+}

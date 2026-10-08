@@ -1,0 +1,362 @@
+{
+ "pre": "wave53-open",
+ "post": "wave53-hh-probe",
+ "lane": "L1-lists-bakes",
+ "sections": {
+  "css-cascade": {
+   "web": {
+    "compared": 43,
+    "identical": 43,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 43,
+    "identical": 43,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 43,
+    "identical": 43,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-counter-styles": {
+   "web": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-counter-styles__counter-suffix",
+      "px": 533,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": [
+     "wpt__css-counter-styles__counter-suffix"
+    ]
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-counter-styles__counter-suffix",
+      "px": 237,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": [
+     "wpt__css-counter-styles__counter-suffix"
+    ]
+   },
+   "android": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-counter-styles__counter-suffix",
+      "px": 1383,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": [
+     "wpt__css-counter-styles__counter-suffix"
+    ]
+   }
+  },
+  "css-flexbox": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-text": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 40,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-text__bidi__bidi-lines-001",
+      "px": 8859,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__bidi__bidi-lines-002",
+      "px": 2929,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphenate-character-001",
+      "px": 3840,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphenate-character-003",
+      "px": 4219,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphenate-character-004",
+      "px": 748,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+      "px": 2041,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+      "px": 979,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-span-001",
+      "px": 3186,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": [
+     "wpt__css-text__bidi__bidi-lines-001",
+     "wpt__css-text__bidi__bidi-lines-002"
+    ]
+   }
+  }
+ },
+ "totals": {
+  "web": {
+   "compared": 187,
+   "identical": 186,
+   "reencoded": 0,
+   "changed": 1,
+   "carriers": 1
+  },
+  "ios": {
+   "compared": 187,
+   "identical": 186,
+   "reencoded": 0,
+   "changed": 1,
+   "carriers": 1
+  },
+  "android": {
+   "compared": 187,
+   "identical": 178,
+   "reencoded": 0,
+   "changed": 9,
+   "carriers": 3
+  }
+ },
+ "leaks": [
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphenate-character-001",
+   "px": 3840,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphenate-character-003",
+   "px": 4219,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphenate-character-004",
+   "px": 748,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "px": 2041,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+   "px": 979,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphens-span-001",
+   "px": 3186,
+   "maxDelta": 255
+  }
+ ],
+ "wireLeaks": [],
+ "wireRenumbered": [
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-additive-symbols-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-additive-symbols-setter",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-fallback-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-fallback-setter",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-name-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-name-setter",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-negative-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-negative-setter",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-pad-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-pad-setter",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-range-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-range-setter",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-symbols-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6"
+   ]
+  }
+ ],
+ "wire": {
+  "compared": 187,
+  "changed": 3,
+  "renumbered": 15
+ }
+}

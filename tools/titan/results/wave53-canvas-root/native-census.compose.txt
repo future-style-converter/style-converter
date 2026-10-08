@@ -1,0 +1,16 @@
+run wave52-ship (JVM, Compose twin): 1435 documents, decode errors 0, root-image plans 3, forest changed 4
+  plan    wpt__css-backgrounds__background-attachment-margin-root-001 uniform=false
+  plan    wpt__css-backgrounds__background-attachment-margin-root-002 uniform=false
+  plan    wpt__css-display__display-contents-root-background uniform=true
+  changed wpt__CSS2__css21-errata__s-11-1-1b-006
+  changed wpt__css-backgrounds__background-attachment-margin-root-001
+  changed wpt__css-backgrounds__background-attachment-margin-root-002
+  changed wpt__css-display__display-contents-root-background
+run wave53-open (JVM, Compose twin): 1435 documents, decode errors 0, root-image plans 3, forest changed 4
+  plan    wpt__css-backgrounds__background-attachment-margin-root-001 uniform=false
+  plan    wpt__css-backgrounds__background-attachment-margin-root-002 uniform=false
+  plan    wpt__css-display__display-contents-root-background uniform=true
+  changed wpt__CSS2__css21-errata__s-11-1-1b-006
+  changed wpt__css-backgrounds__background-attachment-margin-root-001
+  changed wpt__css-backgrounds__background-attachment-margin-root-002
+  changed wpt__css-display__display-contents-root-background

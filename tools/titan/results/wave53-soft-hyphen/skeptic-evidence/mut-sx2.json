@@ -1,0 +1,13 @@
+{
+ "file": "runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift",
+ "sha256_before": "524e31581a58fd9d5faeb08c9477e857cc15a67bbe73bc134c46adc287ee5cea",
+ "sha256_restored": "524e31581a58fd9d5faeb08c9477e857cc15a67bbe73bc134c46adc287ee5cea",
+ "red_exit": 0,
+ "red_ran": 89,
+ "red_failing": [],
+ "green_exit": 0,
+ "green_ran": 89,
+ "green_failing": [],
+ "mutation_old": "                // hyphens-vertical-001's own VERTICAL_RL leaf is the case.\n                horizontalWritingMode: WritingModeExtractor.extract(from: resolvedProperties)?.isVertical != true",
+ "mutation_new": "                // hyphens-vertical-001's own VERTICAL_RL leaf is the case.\n                horizontalWritingMode: true"
+}

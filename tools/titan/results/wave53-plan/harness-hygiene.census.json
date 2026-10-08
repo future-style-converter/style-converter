@@ -1,0 +1,290 @@
+{
+ "family": "harness-hygiene",
+ "wave": 53,
+ "written": "2026-10-07",
+ "tree": "cdb8a845 (dev tip = wave52-ship content)",
+ "xcresult": {
+  "path": "~/Library/Developer/Xcode/DerivedData/StyleConverterTest-eihztfbwsdqyigdsngghqrkntnew/Logs/Test/Test-StyleConverterTestTests-2026.10.06_22-22-58-+0200.xcresult",
+  "read_with": "xcrun xcresulttool get test-results summary --path <xcresult>",
+  "environment": "StyleConverterTestTests · Built with macOS 27.0.1",
+  "device": "iPhone 17 Pro iOS Simulator 26.0.1",
+  "passed": 17,
+  "failed": 13,
+  "failures_by_cause": {
+   "257": 9,
+   "stale_assertion": 4
+  },
+  "failures": [
+   {
+    "test": "ComposedCanvasIcbClipTests/testBothOverlayHalvesAreInsideTheClip()",
+    "cause": "NSCocoaErrorDomain 257 (NSPOSIXErrorDomain 1 Operation not permitted)",
+    "detail": "apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift"
+   },
+   {
+    "test": "ComposedCanvasIcbClipTests/testClipPrecedesTheCanvasBackground()",
+    "cause": "NSCocoaErrorDomain 257 (NSPOSIXErrorDomain 1 Operation not permitted)",
+    "detail": "apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift"
+   },
+   {
+    "test": "ComposedCanvasIcbClipTests/testClipShapeIsAppliedExactlyOnceWithTheFrame()",
+    "cause": "NSCocoaErrorDomain 257 (NSPOSIXErrorDomain 1 Operation not permitted)",
+    "detail": "apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift"
+   },
+   {
+    "test": "ComposedCanvasIcbClipTests/testFlowStackIsInsideTheClip()",
+    "cause": "NSCocoaErrorDomain 257 (NSPOSIXErrorDomain 1 Operation not permitted)",
+    "detail": "apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift"
+   },
+   {
+    "test": "ComposedCanvasIcbClipTests/testRc1LiftIsGatedByTheWholeListRule()",
+    "cause": "NSCocoaErrorDomain 257 (NSPOSIXErrorDomain 1 Operation not permitted)",
+    "detail": "apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift"
+   },
+   {
+    "test": "ComposedCanvasIcbClipTests/testRc1StaticPositionRootPaintsAboveTheFlow()",
+    "cause": "NSCocoaErrorDomain 257 (NSPOSIXErrorDomain 1 Operation not permitted)",
+    "detail": "apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift"
+   },
+   {
+    "test": "ComposedCanvasIcbClipTests/testSplitReadsTheOneOwnerBodyMargin()",
+    "cause": "NSCocoaErrorDomain 257 (NSPOSIXErrorDomain 1 Operation not permitted)",
+    "detail": "apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift"
+   },
+   {
+    "test": "ComposedCanvasPaddingTests/testNegativePadClampsToZero()",
+    "cause": "XCTAssertEqual (stale wave-24 contract)",
+    "detail": "XCTAssertEqual failed: (\"16.0\") is not equal to (\"0.0\")"
+   },
+   {
+    "test": "ComposedCanvasPaddingTests/testPhysicalSidesMapToLeadingTrailingCorrectly()",
+    "cause": "XCTAssertEqual (stale wave-24 contract)",
+    "detail": "XCTAssertEqual failed: (\"20.0\") is not equal to (\"4.0\")"
+   },
+   {
+    "test": "ComposedCanvasPaddingTests/testUndeclaredSidesKeepTheDefault()",
+    "cause": "XCTAssertEqual (stale wave-24 contract)",
+    "detail": "XCTAssertEqual failed: (\"56.0\") is not equal to (\"40.0\")"
+   },
+   {
+    "test": "ComposedCanvasPaddingTests/testZeroedBodyPadLandsOnEverySide()",
+    "cause": "XCTAssertEqual (stale wave-24 contract)",
+    "detail": "XCTAssertEqual failed: (\"16.0\") is not equal to (\"0.0\")"
+   },
+   {
+    "test": "ComposedRootInlineFlowTests/testScopePseudoElementKeepsItsPassingRootRun()",
+    "cause": "NSCocoaErrorDomain 257 (NSPOSIXErrorDomain 1 Operation not permitted)",
+    "detail": "tools/titan/fixtures/per-test-ir/wave49-final/css-cascade/wpt__css-cascade__scope-pseudo-element.json"
+   },
+   {
+    "test": "ComposedRootInlineFlowTests/testTargetDocumentsThreeInlineBlockRootsAreAtomsAndPackAsOneRun()",
+    "cause": "NSCocoaErrorDomain 257 (NSPOSIXErrorDomain 1 Operation not permitted)",
+    "detail": "tools/titan/fixtures/per-test-ir/wave49-final/CSS2/wpt__CSS2__abspos__static-inside-inline-block.json"
+   }
+  ]
+ },
+ "ios_harness_test_files": {
+  "ComposedCanvasIcbClipTests.swift": {
+   "tests": 7,
+   "readsRepoFromDisk": true
+  },
+  "ComposedCanvasPaddingTests.swift": {
+   "tests": 8,
+   "readsRepoFromDisk": false
+  },
+  "ComposedRootInlineFlowTests.swift": {
+   "tests": 3,
+   "readsRepoFromDisk": true
+  },
+  "InboxModeTests.swift": {
+   "tests": 7,
+   "readsRepoFromDisk": false
+  },
+  "OutOfFlowAnchorTests.swift": {
+   "tests": 5,
+   "readsRepoFromDisk": false
+  }
+ },
+ "runtime_swiftui_filePath": {
+  "files_using_filePath": 30,
+  "files_reading_repo_from_disk": [
+   "AbsposStaticOffsetSeamWiringTests.swift",
+   "BackdropContractParityTests.swift",
+   "BackgroundImageURLTests.swift",
+   "ChUnitInlineAxisTests.swift",
+   "ConformanceTests.swift",
+   "DynamicStylingTests.swift",
+   "EasingReferenceTests.swift",
+   "FloatRowPackingTests.swift",
+   "IRDecodeSeamTests.swift",
+   "InlineAtomFlowTests.swift",
+   "MulticolDiscardThreadingTests.swift",
+   "MulticolFloatStripSeamTests.swift",
+   "SkepticDecorWireSeamTests.swift",
+   "TableColumnWidthsTests.swift",
+   "UprightChOrangeRasterTests.swift",
+   "UprightColTableRasterTests.swift",
+   "VerticalBlockFlowSeamWiringTests.swift"
+  ],
+  "files_using_filePath_only_as_assert_location": [
+   "AbsposCbUsedHeightTests.swift",
+   "BackgroundTileMathTests.swift",
+   "CrossFadeMathTests.swift",
+   "EmptyFlexContainerTests.swift",
+   "FlexWrapStretchTests.swift",
+   "FlowLayoutDistributionTests.swift",
+   "GapDecorationBandsTests.swift",
+   "GradientStopResolverTests.swift",
+   "GridContentDistributionTests.swift",
+   "InlineSpanRingTests.swift",
+   "ReplacedBoxSizingConstraintTests.swift",
+   "StaticColorMixTests.swift",
+   "TransformOriginKeywordTests.swift"
+  ],
+  "reader_classes": {
+   "AbsposStaticOffsetSeamWiringTests.swift": [
+    "runtime-source-scan"
+   ],
+   "BackdropContractParityTests.swift": [
+    "other"
+   ],
+   "BackgroundImageURLTests.swift": [
+    "fixture"
+   ],
+   "ChUnitInlineAxisTests.swift": [
+    "harness-font"
+   ],
+   "ConformanceTests.swift": [
+    "schema-golden"
+   ],
+   "DynamicStylingTests.swift": [
+    "schema-golden"
+   ],
+   "EasingReferenceTests.swift": [
+    "schema-golden",
+    "schema-golden"
+   ],
+   "FloatRowPackingTests.swift": [
+    "per-test-ir"
+   ],
+   "IRDecodeSeamTests.swift": [
+    "per-test-ir",
+    "gate-run-dir"
+   ],
+   "InlineAtomFlowTests.swift": [
+    "per-test-ir"
+   ],
+   "MulticolDiscardThreadingTests.swift": [
+    "runtime-source-scan"
+   ],
+   "MulticolFloatStripSeamTests.swift": [
+    "runtime-source-scan"
+   ],
+   "SkepticDecorWireSeamTests.swift": [
+    "schema-golden"
+   ],
+   "TableColumnWidthsTests.swift": [
+    "harness-font"
+   ],
+   "UprightChOrangeRasterTests.swift": [
+    "harness-font"
+   ],
+   "UprightColTableRasterTests.swift": [
+    "harness-font"
+   ],
+   "VerticalBlockFlowSeamWiringTests.swift": [
+    "runtime-source-scan"
+   ]
+  },
+  "note": "pass under Mac Catalyst (Xcode-hosted macOS process, 2147/2147 on 2026-10-06); not changed by this lane"
+ },
+ "kill_sites": [
+  {
+   "site": "tools/titan/gate-driver.sh:138",
+   "code": "(cd \"$PROJECT_ROOT\" && ./gradlew --stop -q ...)",
+   "scope": "every Gradle 9.6.1 daemon of the user",
+   "in_gate_path": true,
+   "lane": "FIX"
+  },
+  {
+   "site": "tools/titan/gate-driver.sh:139",
+   "code": "(cd \"$PROJECT_ROOT/apps/android-harness\" && ./gradlew --stop -q ...)",
+   "scope": "same version (both wrappers pin gradle-9.6.1) - redundant with :138",
+   "in_gate_path": true,
+   "lane": "FIX"
+  },
+  {
+   "site": "tools/titan/section-runner.sh:641 (_android_candidates)",
+   "code": "kill-server; pkill -9 -x adb",
+   "scope": "every process named adb on the host (server + every session's clients); runs on any adb-devices timeout, and pkill runs even when kill-server succeeded",
+   "in_gate_path": true,
+   "lane": "FIX"
+  },
+  {
+   "site": "tools/titan/provision-devices.sh:127 (_adb_devices)",
+   "code": "kill-server; pkill -9 -x adb",
+   "scope": "same",
+   "in_gate_path": true,
+   "lane": "FIX"
+  },
+  {
+   "site": "tools/titan/gate-driver.sh:162 (start_adb_detached, every provision + reprovision)",
+   "code": "adb kill-server (unconditional)",
+   "scope": "the shared per-user adb server on tcp:5037 - severs every session's adb clients at every gate start",
+   "in_gate_path": true,
+   "lane": "OPTIONAL (e) - not in BACKLOG; record at minimum"
+  },
+  {
+   "site": "tools/titan/provision-devices.sh:166",
+   "code": "pkill -f 'qemu-system'",
+   "scope": "every emulator",
+   "in_gate_path": false,
+   "lane": "OUT - --restart-fleet, operator-requested only (BACKLOG standing constraint)"
+  },
+  {
+   "site": "tools/titan/feed-android.mjs:142",
+   "code": "adb kill-server on a devices timeout",
+   "scope": "server-scoped, adb-native, timeout-only",
+   "in_gate_path": true,
+   "lane": "OUT - consistent with the rule"
+  }
+ ],
+ "gradle_daemon_measurement": {
+  "live_daemon_pid": 15020,
+  "cmdline_tag": "GradleDaemon 9.6.1",
+  "cwd": "/Users/dranak/.gradle/daemon/9.6.1",
+  "consequence": "own-processes.sh _op_cwd_in_checkout can never match a Gradle daemon; the BACKLOG direction \"stop only daemons whose working directory is this checkout\" degenerates to \"stop none\"",
+  "attribution_source": "~/.gradle/daemon/<ver>/daemon-<pid>.out.log: one \"Received command: Build{id=..., currentDir=<dir>\" line per build served",
+  "example": "daemon-15020.out.log: 8 currentDir=.../trusting-bohr-bd6fbf/apps/android-harness lines (this gate's provisioning build, 01:07)"
+ },
+ "adb_server_measurement": {
+  "listener": "tcp:5037",
+  "pid": 15373,
+  "cmdline": "adb -L tcp:5037 fork-server server --reply-fd 4",
+  "adb_named_processes_at_read": 1
+ },
+ "adb_timeout_branch_firings": {
+  "method": "grep -rl \"adb devices timed out\" tools/titan/runs/<run>",
+  "wave51-fix": 0,
+  "wave52-open": 0,
+  "wave52-calib": 0,
+  "wave52-ship": 0,
+  "wave53-open (partial, live)": 0
+ },
+ "smoke_port_3000_sites": [
+  "tools/visual/smoke.sh:60 log \"starting vite on :3000\"",
+  "tools/visual/smoke.sh:70 npm run dev (vite.config.ts server.port 3000, no strictPort)",
+  "tools/visual/smoke.sh:78 curl http://localhost:3000/",
+  "tools/visual/interaction-states.mjs:29 WEB_PORT default 3000",
+  "tools/visual/a11y-audit.mjs:39 WEB_PORT default 3000"
+ ],
+ "corpus_carriers": [],
+ "corpus_carriers_reason": "no edit reaches a capture: the XCTest change is test-target-only (the gate builds -target StyleConverterTest: provision-devices.sh:102-107, test-all.sh); gradle/adb stops run before captures or only on an adb timeout (0 firings in 5 runs); smoke.sh is not in the gate path",
+ "must_not_move_cells_pinned_by_the_unblocked_xctests": [
+  "CSS2/abspos/static-inside-inline-block ios P 0.9974 (wave51-fix P 0.9974)",
+  "css-cascade/scope-pseudo-element ios f 0.9668 (wave51-fix f 0.9643)",
+  "css-flexbox/align-items-007 ios P 0.9974 (wave51-fix f 0.9974)",
+  "css-gaps/flex/flex-gap-decorations-027 ios P 0.9997 (wave51-fix f 0.903)",
+  "css-masking/clip-path/clip-path-circle-007 ios P 0.9993 (wave51-fix P 0.9993)"
+ ],
+ "wave52_ship_totals": "web 1229/1372 ios 1119/1362 android 1111/1362 (score-ship.txt)"
+}

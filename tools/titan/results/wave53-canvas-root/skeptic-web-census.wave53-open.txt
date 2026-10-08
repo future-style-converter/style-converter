@@ -1,0 +1,10 @@
+run wave53-open: 1435 canvases (combined docs), 4 differ, 0 present on one side only
+  differ CSS2/wpt__CSS2__css21-errata__s-11-1-1b-006
+  differ css-backgrounds/wpt__css-backgrounds__background-attachment-margin-root-001
+  differ css-backgrounds/wpt__css-backgrounds__background-attachment-margin-root-002
+  differ css-display/wpt__css-display__display-contents-root-background
+per-test docs 1435: root-image plans 3, table bodies 1
+  plan wpt__css-backgrounds__background-attachment-margin-root-001.json uniform=false origins=[{"x":50,"y":50},{"x":0,"y":0}]
+  plan wpt__css-backgrounds__background-attachment-margin-root-002.json uniform=false origins=[{"x":0,"y":0},{"x":50,"y":50}]
+  plan wpt__css-display__display-contents-root-background.json uniform=true origins=[{"x":0,"y":0}]
+  table wpt__CSS2__css21-errata__s-11-1-1b-006.json {"display":"table","borderSpacing":"0px"}

@@ -1,0 +1,30 @@
+apply-in-order A: ok
+apply-in-order B-web: ok
+apply-in-order B-ios: ok
+apply-in-order B-android: ok
+  == b98e80ee33db68fd apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt
+  == 8c68ed9344c34466 apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/ComposedCanvasRootBackgroundTest.kt
+  == d42ce7891e20c7e7 apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/ComposedCanvasTableBodyTest.kt
+  == 606a2de14003827a apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift
+  == 56df07d2bd2045ed apps/web-harness/src/ui/CanvasTableBody.ts
+  == 87ac9ca4f30471e5 apps/web-harness/src/ui/ComposedCaptureGallery.tsx
+  == d5b39a9e515d0f31 apps/web-harness/tests/ui/ComposedCanvasRootBackgroundImage.test.tsx
+  == 13992141e66e93ea apps/web-harness/tests/ui/ComposedCanvasTableBody.test.tsx
+  == 540a3a7cd3d4ab6d runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt
+  == b497661eed98eeab runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt
+  == 6542923eb32a3d84 runtimes/compose/src/test/java/com/styleconverter/runtime/table/TableBodyForestTest.kt
+  == 987a2d5201b4cce5 runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/background/RootBackgroundPropagation.swift
+  == b429f9597e986fb1 runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/table/TableBodyForest.swift
+  == 160a14c99537335b runtimes/swiftui/Tests/StyleConverterRuntimeTests/TableBodyForestTests.swift
+  == fddfcfd76b7c3785 runtimes/swiftui/Tests/StyleConverterRuntimeTests/WPTCaptureModeTests.swift
+  == 59ec2cbab8ca9772 runtimes/web/src/engine/background/RootBackgroundPropagation.ts
+  == 5f3f91f344673bcf runtimes/web/tests/background/RootBackgroundPropagation.test.ts
+A alone on HEAD: ok
+B-web alone on the A state: ok
+B-web reverse-applies alone on the final tree: ok
+B-ios alone on the A state: ok
+B-ios reverse-applies alone on the final tree: ok
+B-android alone on the A state: ok
+B-android reverse-applies alone on the final tree: ok
+item-B symbols in unit A: 0
+verdict: PASS

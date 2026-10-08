@@ -1,0 +1,19 @@
+L3 (A must come out without its B units?):
+  revert [add9de84] -> CONFLICT at add9de84 in: ScreenshotCaptureScreen.kt CaptureCanvas.swift ComposedCaptureGallery.tsx 
+  revert [276757ea add9de84] -> CONFLICT at add9de84 in: CaptureCanvas.swift ComposedCaptureGallery.tsx 
+  revert [276757ea 06c41979 add9de84] -> CONFLICT at add9de84 in: ComposedCaptureGallery.tsx 
+  revert [276757ea 06c41979 adfb3fe8 add9de84] -> clean
+  revert [06c41979] -> clean
+  revert [276757ea] -> clean
+  revert [adfb3fe8] -> clean
+every other unit alone on HEAD:
+  revert [54c8460f] -> clean
+  revert [9df67ae3] -> clean
+  revert [a8ffd1c6] -> clean
+  revert [205ab295] -> clean
+  revert [2c6ecea9] -> clean
+  revert [de54f458] -> clean
+  revert [6fcb3161] -> clean
+plan rule-6 orders (later commit first):
+  revert [2c6ecea9 205ab295] -> clean
+  revert [a8ffd1c6 9df67ae3] -> clean

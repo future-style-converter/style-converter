@@ -1,0 +1,13 @@
+{
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InlineRunFold.kt",
+ "sha256_before": "917d877dbab8e2190232ffa69402016a8f6870ac46cbafdc0b840356d3f02d6a",
+ "sha256_restored": "917d877dbab8e2190232ffa69402016a8f6870ac46cbafdc0b840356d3f02d6a",
+ "red_exit": 0,
+ "red_ran": 42,
+ "red_failing": [],
+ "green_exit": 0,
+ "green_ran": 42,
+ "green_failing": [],
+ "mutation_old": "} else if (tag in TEXT_MEMBER_TAGS && InertOutOfFlowMember.admits(child)) {",
+ "mutation_new": "} else if (InertOutOfFlowMember.admits(child)) {"
+}

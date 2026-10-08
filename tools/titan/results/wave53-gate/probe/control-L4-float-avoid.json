@@ -1,0 +1,1129 @@
+{
+ "pre": "wave53-open",
+ "post": "wave53-probe",
+ "lane": "L4-float-avoid",
+ "sections": {
+  "CSS2": {
+   "web": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__CSS2__css21-errata__s-11-1-1b-006",
+      "px": 400,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__CSS2__css21-errata__s-11-1-1b-006",
+      "px": 200,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__CSS2__css21-errata__s-11-1-1b-006",
+      "px": 780,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   }
+  },
+  "css-anchor-position": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-anchor-position__anchor-center-safe-rtl",
+      "px": 5993,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   }
+  },
+  "css-backgrounds": {
+   "web": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-backgrounds__background-attachment-margin-root-001",
+      "px": 125944,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-backgrounds__background-attachment-margin-root-002",
+      "px": 203344,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-backgrounds__background-attachment-margin-root-001",
+      "px": 172757,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-backgrounds__background-attachment-margin-root-002",
+      "px": 203344,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-backgrounds__background-attachment-margin-root-001",
+      "px": 125944,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-backgrounds__background-attachment-margin-root-002",
+      "px": 203344,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   }
+  },
+  "css-cascade": {
+   "web": {
+    "compared": 43,
+    "identical": 43,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 43,
+    "identical": 43,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 43,
+    "identical": 43,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-color": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-contain": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-contain__contain-inline-size-bfc-floats-001",
+      "px": 8000,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-contain__contain-inline-size-bfc-floats-002",
+      "px": 12000,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": [
+     "wpt__css-contain__contain-inline-size-bfc-floats-001",
+     "wpt__css-contain__contain-inline-size-bfc-floats-002"
+    ]
+   },
+   "android": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-contain__contain-inline-size-bfc-floats-001",
+      "px": 8000,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-contain__contain-inline-size-bfc-floats-002",
+      "px": 12000,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": [
+     "wpt__css-contain__contain-inline-size-bfc-floats-001",
+     "wpt__css-contain__contain-inline-size-bfc-floats-002"
+    ]
+   }
+  },
+  "css-counter-styles": {
+   "web": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-counter-styles__counter-suffix",
+      "px": 533,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-counter-styles__counter-suffix",
+      "px": 237,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-counter-styles__counter-suffix",
+      "px": 1383,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   }
+  },
+  "css-display": {
+   "web": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-display__display-contents-root-background",
+      "px": 233620,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-display__display-contents-root-background",
+      "px": 233853,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-display__display-flow-root-002",
+      "px": 606,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": [
+     "wpt__css-display__display-flow-root-002"
+    ]
+   },
+   "android": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-display__display-contents-root-background",
+      "px": 233837,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-display__display-flow-root-002",
+      "px": 606,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": [
+     "wpt__css-display__display-flow-root-002"
+    ]
+   }
+  },
+  "css-flexbox": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-grid": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-images": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-lists": {
+   "web": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-lists__counter-reset-reversed-nested",
+      "px": 3350,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-lists__counter-reset-reversed-nested",
+      "px": 3175,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-lists__counter-reset-reversed-nested",
+      "px": 3113,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   }
+  },
+  "css-masking": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-position": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-pseudo": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-tables": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-text": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+      "px": 9016,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-span-001",
+      "px": 11484,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 40,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-text__bidi__bidi-lines-001",
+      "px": 8859,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__bidi__bidi-lines-002",
+      "px": 2929,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphenate-character-001",
+      "px": 3840,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphenate-character-003",
+      "px": 4219,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphenate-character-004",
+      "px": 748,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+      "px": 2041,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+      "px": 979,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-span-001",
+      "px": 3186,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   }
+  },
+  "css-writing-modes": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "filter-effects": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "selectors": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  }
+ },
+ "totals": {
+  "web": {
+   "compared": 955,
+   "identical": 949,
+   "reencoded": 0,
+   "changed": 6,
+   "carriers": 0
+  },
+  "ios": {
+   "compared": 955,
+   "identical": 944,
+   "reencoded": 0,
+   "changed": 11,
+   "carriers": 3
+  },
+  "android": {
+   "compared": 955,
+   "identical": 937,
+   "reencoded": 0,
+   "changed": 18,
+   "carriers": 3
+  }
+ },
+ "leaks": [
+  {
+   "sec": "CSS2",
+   "platform": "web",
+   "stem": "wpt__CSS2__css21-errata__s-11-1-1b-006",
+   "px": 400,
+   "maxDelta": 255
+  },
+  {
+   "sec": "CSS2",
+   "platform": "ios",
+   "stem": "wpt__CSS2__css21-errata__s-11-1-1b-006",
+   "px": 200,
+   "maxDelta": 255
+  },
+  {
+   "sec": "CSS2",
+   "platform": "android",
+   "stem": "wpt__CSS2__css21-errata__s-11-1-1b-006",
+   "px": 780,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-anchor-position",
+   "platform": "android",
+   "stem": "wpt__css-anchor-position__anchor-center-safe-rtl",
+   "px": 5993,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-backgrounds",
+   "platform": "web",
+   "stem": "wpt__css-backgrounds__background-attachment-margin-root-001",
+   "px": 125944,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-backgrounds",
+   "platform": "web",
+   "stem": "wpt__css-backgrounds__background-attachment-margin-root-002",
+   "px": 203344,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-backgrounds",
+   "platform": "ios",
+   "stem": "wpt__css-backgrounds__background-attachment-margin-root-001",
+   "px": 172757,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-backgrounds",
+   "platform": "ios",
+   "stem": "wpt__css-backgrounds__background-attachment-margin-root-002",
+   "px": 203344,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-backgrounds",
+   "platform": "android",
+   "stem": "wpt__css-backgrounds__background-attachment-margin-root-001",
+   "px": 125944,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-backgrounds",
+   "platform": "android",
+   "stem": "wpt__css-backgrounds__background-attachment-margin-root-002",
+   "px": 203344,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-counter-styles",
+   "platform": "web",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "px": 533,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-counter-styles",
+   "platform": "ios",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "px": 237,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-counter-styles",
+   "platform": "android",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "px": 1383,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-display",
+   "platform": "web",
+   "stem": "wpt__css-display__display-contents-root-background",
+   "px": 233620,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-display",
+   "platform": "ios",
+   "stem": "wpt__css-display__display-contents-root-background",
+   "px": 233853,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-display",
+   "platform": "android",
+   "stem": "wpt__css-display__display-contents-root-background",
+   "px": 233837,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-lists",
+   "platform": "web",
+   "stem": "wpt__css-lists__counter-reset-reversed-nested",
+   "px": 3350,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-lists",
+   "platform": "ios",
+   "stem": "wpt__css-lists__counter-reset-reversed-nested",
+   "px": 3175,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-lists",
+   "platform": "android",
+   "stem": "wpt__css-lists__counter-reset-reversed-nested",
+   "px": 3113,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "ios",
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "px": 9016,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "ios",
+   "stem": "wpt__css-text__hyphens__hyphens-span-001",
+   "px": 11484,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__bidi__bidi-lines-001",
+   "px": 8859,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__bidi__bidi-lines-002",
+   "px": 2929,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphenate-character-001",
+   "px": 3840,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphenate-character-003",
+   "px": 4219,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphenate-character-004",
+   "px": 748,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "px": 2041,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+   "px": 979,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphens-span-001",
+   "px": 3186,
+   "maxDelta": 255
+  }
+ ],
+ "wireLeaks": [
+  {
+   "sec": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-center-safe-rtl"
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix"
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-nested"
+  },
+  {
+   "sec": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-lines-001"
+  },
+  {
+   "sec": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-lines-002"
+  }
+ ],
+ "wireRenumbered": [
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-additive-symbols-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-additive-symbols-setter",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-fallback-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-fallback-setter",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-name-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-name-setter",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-negative-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-negative-setter",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-pad-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-pad-setter",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-range-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-range-setter",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__cssom__cssom-symbols-setter-invalid",
+   "shift": 6,
+   "explainedBy": [
+    "wpt__css-counter-styles__counter-suffix +6 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-not-list-item-start",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-not-list-item",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-pseudo-001",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-pseudo-002",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-pseudo-003",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-siblings-001a",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-siblings-001b",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-siblings-002",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-siblings-003",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-with-regular",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)"
+   ]
+  }
+ ],
+ "wire": {
+  "compared": 955,
+  "changed": 5,
+  "renumbered": 25
+ }
+}

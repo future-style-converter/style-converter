@@ -1,0 +1,1 @@
+    (hasStrongLtrCodepoint(r.text) || hasStrongRtlLetter(r.text) || true ? [r] : splitWeakRun(r, chars)));

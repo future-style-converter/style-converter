@@ -2631,17 +2631,75 @@ a look — 11 of 102 gains are degenerate. Gate record and every artifact:
 `tools/titan/results/wave52-gate/`; open items: `docs/BACKLOG.md`.
 
 
+**Wave 53 (2026-10-06 → 10-07) — verification-first on a new toolchain,
+five lanes, two pre-registered reverts.** corpus-v6.19
+(`tools/titan/results/corpus-v6-19.json`): web 1232/1372 89.8%, iOS
+1125/1362 82.6%, Android 1115/1362 81.9% (corpus-v6.18: 1229 · 1119 · 1111);
+**13 cells gained, 0 lost, 0 newly measured, 0 unmeasured-now** against
+`wave53-open` over 4096 scored cells (`wave53-final`, tree 77fe41e8; 13
+movers ≥ 0.005, 365/365 must-not-move cells within 0.002, the adjudicator's
+R1–R5 hold, the union control holds with 0 leaks). The wave opened by
+re-measuring the shipped tree on the host's new macOS 27.0.1 / Xcode 27.0 /
+iOS 26 stack: `wave53-open` = 0 gained / 0 lost / 0 movers / 0 newly
+measured / 0 unmeasured-now against `wave52-ship` and fixture net exit 0 ×9
+— native captures and the per-test IR byte-identical, web captures
+pixel-changed by small glyph-AA deltas (the OS rasterizer), 22 cells moved
+by ±0.0001. Then five lanes on the shared tree (disjoint ownership, 13 seam
+hunks, 11 unit commits landed in a pre-registered order): L1 — the extractor
+keeps a nested `<ol>` inside an `<li>` and counter-bake walks it
+(`counter-reset-reversed-nested` ×3 P 0.95 → 1 / 0.9989 / 0.9852, the list
+now 3 / 2 / 11 / 9 / 8 / 1 as the reference); L2 — a space-less run carrying
+U+00AD is a soft-wrap opportunity on both natives and an out-of-flow member
+inside a word no longer splits the fold (`hyphens-span-001` /
+`hyphens-out-of-flow-001` iOS f → P 0.9968 / 0.9971; the three Android
+hyphens cells DEGENERATE → faithful, "high-/way" in every box); L3 — a
+`display: contents` root's background-image layers reach the canvas on all
+three platforms (`display-contents-root-background` ×3 f 0.53 → P ≥ 0.9989,
+`background-attachment-margin-root-001` / `-002` ×3 f 0.34–0.45 → P ≥
+0.9994) and the `display: table` body gets the CSS 2.1 §17.2.1 anonymous-cell
+fixup on the web and SwiftUI canvases (`s-11-1-1b-006` web P 0.9941 → 1, iOS
+→ 0.9992, square at y56–75); L4 — a flow-root beside floats takes the gap
+the floats leave on both natives (`contain-inline-size-bfc-floats-002` f →
+P 0.9985 / 0.9974; `-001` and `display-flow-root-002` DEGENERATE →
+faithful); L5 — the gate path stops only its own Gradle daemons and adb
+server, `smoke.sh` follows the port guard and builds the Tier-5/11 fixture
+JSONs it had never built, and the ios-harness XCTest reads its files as
+bundle resources (30/30 under Xcode 27, was 17/30). **The probe reverted two
+units under the plan's own rules** (`wave53-probe`, 20 sections): L3's
+Compose table-body fixup (its pre-declared probe row: a 40-px square — an
+extra empty cell) and L1's RTL-marker bake (the geometry row
+`counter-suffix android` printed WRONG — the baked markers on the wrong rows
+in the picture — while SSIM rose 0.9547 → 0.9793; the unit's bidi-lines
+gains went with it). Both decisions were pre-registered for the closing
+gate (predictions withdrawn, cells held to must-not-move, carriers
+withdrawn) and shown to fail on the probe tree itself. Every flipped or
+moved cell was looked at: 13 gains FAITHFUL, 11 movers FAITHFUL, 2 movers
+still failing as pre-registered (`hyphenate-character-001` / `-003`
+android: right breaks, wrong hyphen glyph). Fixture net exit 0 on all 9 gate fixtures. The all-then-color baselines seeded for that net were WITHDRAWN before the ship: the label-chrome tripwire (`tools/visual/label-chrome-tripwire.test.mjs`) found three of its six canvases without the harness label on ANY platform — a capture-frame defect the fixture exposes (its `all` reset reaches the chrome), so the fixture stays gate-only and the finding is queued. Suites on
+the shipped tree: converter 551 · web runtime 1369 · web-harness 330 ·
+compose 3428 · android-harness 168 · swiftui 2192 · tooling 2291 ·
+ios-harness XCTest 30/30 · IR conformance valid. Lessons that outlive the
+wave: a replay composited onto the web picture cannot predict native row
+assignment — an upstream bake that positions runs needs a device probe
+with a geometry gate before the closing gate; a section-wide component-id
+counter gives every bake a wire shadow over the rest of its section
+(the control now names it as "renumbered"); a hygiene probe on a shared tree
+measures the union of the lanes, and is read with the union carrier set.
+Gate record and every artifact: `tools/titan/results/wave53-gate/`; open
+items: `docs/BACKLOG.md`.
+
+
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 551 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1361 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3393 |
-| android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 159 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2147 |
-| web-harness (vitest) | `npm -w apps/web-harness run test` | 321 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 2266 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1369 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3428 |
+| android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 168 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2192 |
+| web-harness (vitest) | `npm -w apps/web-harness run test` | 330 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 2291 |
 | ios-harness app (XCTest — needs a simulator, so it is outside the device-less sweep) | `(cd apps/ios-harness && xcodebuild test -project StyleConverterTest.xcodeproj -scheme StyleConverterTestTests -destination 'platform=iOS Simulator,name=<a booted device>')` | 30 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 

@@ -1,0 +1,2 @@
+# FloatAvoidPlanTest (JVM) run 2026-10-07T04:16:19.173Z tests 15 failures 0
+FloatAvoid census: 1435 documents, 10712 components, 3 admitted: [wpt__css-contain__contain-inline-size-bfc-floats-001.json#wpt__css-contain__contain-inline-size-bfc-floats-001__1-101, wpt__css-contain__contain-inline-size-bfc-floats-002.json#wpt__css-contain__contain-inline-size-bfc-floats-002__1-109, wpt__css-display__display-flow-root-002.json#wpt__css-display__display-flow-root-002__0-291]

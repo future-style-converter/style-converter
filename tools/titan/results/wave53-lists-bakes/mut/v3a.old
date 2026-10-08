@@ -1,0 +1,1 @@
+  if (paddingIsSpent(el)) props.padding = '0';

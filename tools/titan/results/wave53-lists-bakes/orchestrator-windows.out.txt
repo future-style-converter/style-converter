@@ -1,0 +1,42 @@
+=== L1 window 1: CDP ::marker probe (U2 in the working tree)
+marker-probe rc=0
+PASS baked — 2 roots, 10 runs
+counter-suffix__0__4__0 {"margin":"0","padding":"0","line-height":"150%","position":"absolute","left":"48px","top":"0px","width":"64px","height":"24px","box-sizing":"border-box","list-style-type":"non
+PASS counter-suffix__0__4__0 list-style-type none
+PASS counter-suffix__0__4__0 no marker-* stamp (measured, not modelled)
+PASS counter-suffix__0__4__0 marker runs [".","1"]
+counter-suffix__0__4__1 {"margin":"0","padding":"0","line-height":"150%","position":"absolute","left":"48px","top":"24px","width":"64px","height":"24px","box-sizing":"border-box","list-style-type":"no
+PASS counter-suffix__0__4__1 list-style-type none
+PASS counter-suffix__0__4__1 no marker-* stamp (measured, not modelled)
+PASS counter-suffix__0__4__1 marker runs [".","2"]
+counter-suffix__0__5__0 {"margin":"0","padding":"0","line-height":"150%","position":"absolute","left":"48px","top":"0px","width":"64px","height":"24px","box-sizing":"border-box","list-style-type":"non
+PASS counter-suffix__0__5__0 list-style-type none
+PASS counter-suffix__0__5__0 no marker-* stamp (measured, not modelled)
+PASS counter-suffix__0__5__0 marker runs ["א."]
+counter-suffix__0__5__1 {"margin":"0","padding":"0","line-height":"150%","position":"absolute","left":"48px","top":"24px","width":"64px","height":"24px","box-sizing":"border-box","list-style-type":"no
+PASS counter-suffix__0__5__1 list-style-type none
+PASS counter-suffix__0__5__1 no marker-* stamp (measured, not modelled)
+PASS counter-suffix__0__5__1 marker runs ["ב."]
+snapshot marker {"hostTag":"li","hostRect":{"x":48,"y":0,"width":64,"height":24},"box":{"x":29.03125,"y":0,"width":18.96875,"height":24},"text":"1. "}
+snapshot marker {"hostTag":"li","hostRect":{"x":48,"y":24,"width":64,"height":24},"box":{"x":29.03125,"y":24,"width":18.96875,"height":24},"text":"2. "}
+snapshot marker {"hostTag":"li","hostRect":{"x":48,"y":48,"width":64,"height":24},"box":{"x":29.078125,"y":48,"width":18.921875,"height":24},"text":"א. "}
+snapshot marker {"hostTag":"li","hostRect":{"x":48,"y":72,"width":64,"height":24},"box":{"x":30.390625,"y":72,"width":17.609375,"height":24},"text":"ב. "}
+snapshot marker {"hostTag":"li","hostRect":{"x":48,"y":96,"width":64,"height":24},"box":{"x":15.359375,"y":96,"width":32.640625,"height":24},"text":"一、"}
+snapshot marker {"hostTag":"li","hostRect":{"x":48,"y":120,"width":64,"height":24},"box":{"x":15.359375,"y":120,"width":32.640625,"height":24},"text":"二、"}
+snapshot marker {"hostTag":"li","hostRect":{"x":48,"y":144,"width":64,"height":24},"box":{"x":25.5625,"y":144,"width":22.4375,"height":24},"text":"일, "}
+
+=== L1 window 3: converter hop on counter-suffix (gate flags)
+extracted css/css-counter-styles/counter-suffix.html → fixtures/wpt/css-counter-styles/counter-suffix.json (+ ref) [bidi-bake: baked — 2 roots, 10 runs] [counter-bake: baked — 6 markers, 2 declined]
+build-combined-fixture: 1 tests → 1 components (missing fixtures: 0, font faces: 0) → fixtures/wpt/_l1-cs.json
+li total 12 | ListStyleType NONE 4 | with markerText 6 | none AND markerText 0
+FontVariantNumeric present: true
+components with meta.runs 0 | total components 29
+
+=== L1 window 4: replay with the measured box
+  File "/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave53-plan/rtl-marker-bake.replay.py", line
+    OUT = sys.argv[1]
+IndexError: list index out of range
+  path: 'undefined/web-M.png'
+}
+
+Node.js v22.21.0

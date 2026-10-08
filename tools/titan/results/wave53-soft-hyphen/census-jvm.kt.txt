@@ -1,0 +1,80 @@
+// tools/titan/results/wave53-soft-hyphen/census-jvm.kt.txt — wave 53 lane L2's JVM CENSUS (a probe, kept as text).
+//
+// Appended TEMPORARILY to runtimes/compose/src/test/.../typography/inline/InlineRunFoldTest.kt (an L2-owned file) by
+// run-census.py, run once per arm (`--tests '*SoftHyphenCensusProbe'`), then removed (both touched files restored
+// byte-exact, sha256-checked). It decodes EVERY per-test IR document of the run through the PRODUCTION decoder +
+// SlotComposer and prints:
+//   FOLD — every `meta.runs` host whose plan resolves (InlineRunPlan.resolve → InlineRunFold.fold, the host's OWN
+//          property list as hostProperties — the seam passes the inheritance-merged list; the F2 arm's predicate reads
+//          only the member, so the F2-on/F2-off DIFF is insensitive to that): outcome + reason/text + dropped count;
+//   SHY  — every string a Compose text label can receive (a leaf's own text, each run piece, each Folded merge) that
+//          holds U+00AD and no U+0020, with the run's own Hyphens / WhiteSpace / WritingMode and lang;
+//   PRE  — PreBreakPipeline.preBreak on each SHY string with the call site's gates as the wire states them:
+//          white-space pre/nowrap → softWrapAllowed false; a vertical writing mode → wrapWidthPx -1 (the width latch
+//          is horizontal-only); `hyphens: auto` + lang → dictionaryHyphenation; the box's own `Width` in CH × a
+//          uniform 19.2 px monospace advance (exact for the monospace carriers, an approximation for the
+//          proportional `highway` boxes — the DECISION, fire vs identity, is what is censused, not the pixels).
+// Output: tools/titan/results/wave53-soft-hyphen/census-jvm.out.txt (renamed per arm by run-census.py).
+class SoftHyphenCensusProbe {
+    @org.junit.Test
+    fun census() {
+        val anchor = "runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt"
+        var dir: java.io.File? = java.io.File(System.getProperty("user.dir") ?: ".").absoluteFile
+        while (dir != null && !java.io.File(dir, anchor).exists()) dir = dir.parentFile
+        val root = requireNotNull(dir)
+        val run = "wave52-ship"
+        val docs = java.io.File(root, "tools/titan/runs/$run/sections").listFiles()!!.sortedBy { it.name }
+            .flatMap { s -> (java.io.File(s, "per-test-ir").listFiles() ?: emptyArray()).filter { it.name.endsWith(".json") }.sortedBy { it.name } }
+        val out = StringBuilder()
+        var nDocs = 0; var nHosts = 0; var nFolded = 0; var nShy = 0; var nFired = 0
+        fun kw(c: IRComponent, t: String) = c.properties.firstOrNull { it.type == t }?.data?.toString() ?: "-"
+        val chWidth = Regex("\"v\":([0-9.]+),\"u\":\"CH\"")
+        for (f in docs) {
+            nDocs++
+            val stem = f.name.removeSuffix(".json")
+            val roots = SlotComposer.compose(IRDocumentDecoder.decode(f.readText()))
+            fun shy(c: IRComponent, where: String, s: String?) {
+                if (s == null || s.indexOf('­') < 0 || s.indexOf(' ') >= 0) return
+                nShy++
+                val shown = s.replace("­", "<SHY>")
+                out.append("SHY\t$stem\t${c.id}\t$where\t$shown\thyphens=${kw(c, "Hyphens")}\tws=${kw(c, "WhiteSpace")}\twm=${kw(c, "WritingMode")}\tlang=${c.lang}\n")
+                val ws = kw(c, "WhiteSpace")
+                val vertical = kw(c, "WritingMode").contains("VERTICAL")
+                val ch = c.properties.firstOrNull { it.type == "Width" }?.data?.toString()
+                    ?.let { chWidth.find(it)?.groupValues?.get(1)?.toFloat() }
+                val wrap = if (vertical || ch == null) -1f else ch * 19.2f
+                val hyphens = c.properties.firstOrNull { it.type == "Hyphens" }?.data?.toString()?.trim('"')
+                val r = com.styleconverter.runtime.typography.wrapping.PreBreakPipeline.preBreak(
+                    text = s, wrapWidthPx = wrap, enabled = true,
+                    softWrapAllowed = !(ws.contains("PRE") || ws.contains("NOWRAP")),
+                    allowMidWordBreak = false,
+                    preservesSpaces = ws.contains("PRE_WRAP") || ws.contains("BREAK_SPACES"),
+                    dictionaryHyphenation = com.styleconverter.runtime.typography.wrapping.AutoHyphenation.engaged(hyphens, c.lang),
+                    measure = { it.length * 19.2f })
+                if (r.fired) nFired++
+                val verdict = if (r.fired) "FIRED ${r.text.replace("\n", "|")}" else if (r.text === s) "identity" else "UNFIRED-COPY"
+                out.append("PRE\t$stem\t${c.id}\t$where\t$shown\twrap=$wrap\t$verdict\n")
+            }
+            fun walk(c: IRComponent) {
+                if (c.runs.isNullOrEmpty()) shy(c, "leaf", c._text)
+                else c.runs!!.forEach { shy(c, "run", it.text) }
+                val plan = InlineRunPlan.resolve(c.runs, c.children)
+                if (plan != null) {
+                    nHosts++
+                    when (val o = InlineRunFold.fold(plan.entries, c.children!!, c.properties, c.lang)) {
+                        is InlineRunFold.Outcome.Folded -> {
+                            nFolded++
+                            out.append("FOLD\t$stem\t${c.id}\tFolded\t${o.text.replace("­", "<SHY>").replace("\n", "<BR>")}\toof=${o.droppedOutOfFlowMembers}\n")
+                            shy(c, "folded", o.text)
+                        }
+                        is InlineRunFold.Outcome.Bailed -> out.append("FOLD\t$stem\t${c.id}\tBailed\t${o.reason}\n")
+                    }
+                }
+                c.children?.forEach { walk(it) }
+            }
+            roots.forEach { walk(it) }
+        }
+        out.insert(0, "# run $run docs $nDocs runsHostsWithPlan $nHosts folded $nFolded shyStrings $nShy preBreakFired $nFired\n")
+        java.io.File(root, "tools/titan/results/wave53-soft-hyphen/census-jvm.out.txt").writeText(out.toString())
+    }
+}
