@@ -5003,12 +5003,12 @@ private struct PlaceholderLabel: View {
                 },
                 // The UA hyphen §5.3 leaves undefined: U+2010, which is what
                 // Chromium paints and therefore what the frozen refs carry.
-                // css-text-4 §6.3 `hyphenate-character` would override it,
-                // but HyphenateCharacterApplier is still an identity
-                // contribution (the keyword never reaches TextConfig), so
-                // routing it is a separate, wire-side change — deliberately
-                // NOT smuggled in here.
-                hyphenChar: AutoHyphenation.defaultHyphenCharacter,
+                // Wave 54 (lane L3, U2-ios): css-text-4 §6.3 `hyphenate-
+                // character` overrides it — the author's string (`""` included)
+                // rides TextConfig (HyphenateCharacterApplier → StyleBuilder)
+                // and enters the fold, where its width decides the breaks.
+                // nil (`auto` / undeclared) keeps U+2010: byte-identical.
+                hyphenChar: textConfig.hyphenateCharacter ?? AutoHyphenation.defaultHyphenCharacter,
                 // Wave 52 (lane L9, F4) — the drawn-marker clamp: keep
                 // lines 1…N, the marker baked onto line N after hiding
                 // trailing words until it fits (alone if nothing does).
@@ -5025,7 +5025,11 @@ private struct PlaceholderLabel: View {
             // the box). Probe for it with the same measurer.
             let overlong = GreedyLineBreaker.hasUnbreakableOverflowingLine(
                 lines, maxWidth: avail,
-                dictionaryHyphenation: hyphenLocale != nil, measure: measure)
+                dictionaryHyphenation: hyphenLocale != nil,
+                // Wave 54 (lane L3, U2-ios): a line overflowing only by the hyphen
+                // string its own break painted has no opportunity left (css-text-3
+                // §5.5, SpentHyphen) — so TextKit must not re-wrap `tial/-/`.
+                spentHyphen: textConfig.hyphenateCharacter, measure: measure)
             return (lines.joined(separator: "\n"), true, overlong)
         }()
         // The rendered string — identical to the pre-wave-30 `displayText`.

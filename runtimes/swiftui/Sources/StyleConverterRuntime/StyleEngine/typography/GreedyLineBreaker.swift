@@ -482,14 +482,22 @@ enum GreedyLineBreaker {
     /// letters to hyphenate keep the claim — the digit runs in
     /// css-text/hyphens-punctuation-001 are the measured case. Byte-
     /// parallel with the Kotlin twin's identically named parameter.
+    ///
+    /// Wave 54 (lane L3, U2-ios) — `spentHyphen`, the run's css-text-4 §6.3
+    /// `hyphenate-character` string: a line that overflows only by the hyphen
+    /// its own taken break painted (`tial/-/` in 6.5ch) has no opportunity
+    /// LEFT — css-text-3 §5.5, the break is spent — so the opportunity test
+    /// reads the line minus that trailing string (SpentHyphen). The measure
+    /// still reads the whole line (that ink is real). nil = wave-53 behaviour.
     static func hasUnbreakableOverflowingLine(_ lines: [String],
                                               maxWidth: CGFloat,
                                               tolerance: CGFloat = 0.5,
                                               dictionaryHyphenation: Bool = false,
+                                              spentHyphen: String? = nil,
                                               measure: (String) -> CGFloat) -> Bool {
         lines.contains {
             measure($0) > maxWidth + tolerance
-                && !DecorationOps.hasSoftWrapOpportunity($0)
+                && !DecorationOps.hasSoftWrapOpportunity(SpentHyphen.opportunityText($0, spentHyphen: spentHyphen))
                 && !(dictionaryHyphenation && AutoHyphenation.hasDictionaryOpportunity($0))
         }
     }
