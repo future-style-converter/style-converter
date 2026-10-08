@@ -1,0 +1,259 @@
+resolved+committed 839 · missing 216 · exists-but-not-committed 42
+MISSING    rtl-marker-bake _note.md PositionedParentFlowSlot.kt:74-76
+MISSING    rtl-marker-bake _note.md ComponentRenderer.kt
+MISSING    rtl-marker-bake _note.md ComponentRenderer.kt
+MISSING    rtl-marker-bake _note.md ComponentRenderer.swift
+MISSING    rtl-marker-bake _note.md .json
+MISSING    rtl-marker-bake _note.md .out.txt
+MISSING    rtl-marker-bake _note.md marker-probe.out.txt
+MISSING    rtl-marker-bake _note.md .out.txt
+MISSING    rtl-marker-bake _note.md .result.json
+MISSING    rtl-marker-bake _note.md .wave53-final.out.txt
+MISSING    rtl-marker-bake _note.md .out.txt
+MISSING    rtl-marker-bake _note.md .out.txt
+MISSING    rtl-marker-bake skeptic.md cells.mjs
+MISSING    rtl-marker-bake skeptic.md lists-bakes.geometry.py
+MISSING    rtl-marker-bake skeptic.md .txt
+MISSING    table-body-cell _note.md table/TableBodyForest.kt
+MISSING    table-body-cell _note.md TableBodyForestTest.kt
+MISSING    table-body-cell _note.md ScreenshotCaptureScreen.kt
+MISSING    table-body-cell _note.md ComposedCanvasTableBodyTest.kt
+MISSING    table-body-cell _note.md table/TableCellHug.kt
+MISSING    table-body-cell _note.md table/TableApplier.kt
+MISSING    table-body-cell _note.md .json
+MISSING    table-body-cell _note.md display-table-body.geometry.py
+MISSING    table-body-cell _note.md tools/titan/runs/wave54-pre/sections/CSS2/android-screenshots/wpt__CSS2__css21-errata__s-11-1-1b-006.png
+MISSING    table-body-cell skeptic.md TableBodyForest.kt
+MISSING    table-body-cell skeptic.md ScreenshotCaptureScreen.kt
+MISSING    table-body-cell skeptic.md ComposedCanvasTableBodyTest.kt
+MISSING    table-body-cell skeptic.md ComposedCanvasTableBodyTest.kt
+MISSING    table-body-cell skeptic.md .json
+MISSING    table-body-cell skeptic.md .json
+MISSING    table-body-cell skeptic.md cells.mjs
+MISSING    table-body-cell skeptic.md TableCellHug.kt
+MISSING    hyphenate-character _note.md /-/
+MISSING    hyphenate-character _note.md /-/
+MISSING    hyphenate-character _note.md StyleBuilder.swift
+MISSING    hyphenate-character _note.md PreBreakPipeline.kt
+MISSING    hyphenate-character _note.md GreedyLineBreakerTests.swift
+MISSING    hyphenate-character _note.md PreBreakPipelineTest.kt
+MISSING    hyphenate-character _note.md ComponentRenderer.kt
+MISSING    hyphenate-character _note.md .swift
+MISSING    hyphenate-character _note.md ComponentRenderer.kt
+MISSING    hyphenate-character _note.md ComponentRenderer.swift
+MISSING    hyphenate-character _note.md UAElementFontRuleTest.kt
+MISSING    hyphenate-character _note.md /-/
+MISSING    hyphenate-character _note.md __ref.json
+MISSING    hyphenate-character _note.md HyphenateCharacterExtractorTest.kt
+MISSING    hyphenate-character _note.md /-/
+MISSING    hyphenate-character _note.md tial/-/
+MISSING    hyphenate-character _note.md /-/
+MISSING    hyphenate-character _note.md /-/
+MISSING    hyphenate-character _note.md /-/
+MISSING    hyphenate-character _note.md tial/-/
+MISSING    hyphenate-character _note.md phen/-/
+MISSING    hyphenate-character _note.md HyphenateCharacterExtractor.ts:17-24
+MISSING    hyphenate-character _note.md .wave53-final.out.txt
+MISSING    hyphenate-character _note.md .wave53-final.out.txt
+MISSING    hyphenate-character _note.md .out.txt
+MISSING    hyphenate-character _note.md .json
+MISSING    hyphenate-character _note.md .selftest.out.txt
+MISSING    hyphenate-character _note.md ComponentRenderer.kt
+MISSING    hyphenate-character _note.md ComponentRenderer.swift
+MISSING    hyphenate-character _note.md GreedyLineBreaker.swift
+MISSING    hyphenate-character skeptic.md .staged
+MISSING    hyphenate-character skeptic.md /-/
+MISSING    hyphenate-character skeptic.md ir-v2.schema.json
+MISSING    hyphenate-character skeptic.md cells.mjs
+MISSING    hyphenate-character skeptic.md InheritedText.swift:77
+MISSING    hyphenate-character skeptic.md ComponentRenderer.kt:214
+MISSING    hyphenate-character skeptic.md a/-/
+MISSING    hyphenate-character skeptic.md GreedyLineBreakerTests.swift
+MISSING    oof-layout _note.md CanvasRootHoist.kt
+MISSING    oof-layout _note.md FixedHoist.swift:115-124
+MISSING    oof-layout _note.md CanvasRootHoist.kt:231-232
+MISSING    oof-layout _note.md FixedHoist.swift:115-124
+MISSING    oof-layout _note.md ComponentRenderer.kt
+MISSING    oof-layout _note.md ComponentRenderer.kt:1934
+MISSING    oof-layout _note.md GapDecorationGeometry.kt:65
+MISSING    oof-layout _note.md GapDecorationGeometry.swift:33
+MISSING    oof-layout _note.md GapDecorationLines.kt:144
+MISSING    oof-layout _note.md GapDecorationSegments.kt:169
+MISSING    oof-layout _note.md GapDecorationLines.swift:42
+MISSING    oof-layout _note.md GapDecorationSegments.swift:143
+MISSING    oof-layout _note.md ComponentRenderer.kt:1934
+MISSING    oof-layout _note.md control-check.mjs
+MISSING    oof-layout _note.md OutOfFlowContainingBlock.kt
+MISSING    oof-layout _note.md OutOfFlowContainingBlock.swift
+MISSING    oof-layout _note.md CanvasRootHoist.kt
+MISSING    oof-layout _note.md FixedHoist.swift
+MISSING    oof-layout _note.md FixedHoist.swift
+MISSING    oof-layout _note.md CanvasRootHoist.kt
+MISSING    oof-layout _note.md ContainingBlockBands.kt
+MISSING    oof-layout _note.md ComponentRenderer.kt
+MISSING    oof-layout _note.md GapDecorationLines.kt
+MISSING    oof-layout _note.md GapDecorationSegments.kt
+MISSING    oof-layout _note.md GapDecorationGeometry.kt
+MISSING    oof-layout _note.md GapDecorationLines.swift
+MISSING    oof-layout _note.md -Segments.swift
+MISSING    oof-layout _note.md -Geometry.swift
+MISSING    oof-layout _note.md tools/titan/runs/wave54-lock/ComponentRenderer.kt
+MISSING    oof-layout _note.md ChildContainingBlockSeamWiringTest.kt
+MISSING    oof-layout _note.md -score.mjs
+MISSING    oof-layout _note.md FixedHoist.swift:359-361
+MISSING    oof-layout _note.md FixedHoist.swift
+MISSING    oof-layout _note.md control-check.mjs
+MISSING    oof-layout _note.md OutOfFlowContainingBlockTest.kt:163
+MISSING    oof-layout _note.md OutOfFlowContainingBlockTests.swift:148-149
+MISSING    oof-layout _note.md per-test-ir/wpt__css-contain__contain-content-011.json
+MISSING    oof-layout _note.md ComponentRenderer.kt
+MISSING    oof-layout _note.md ComponentRenderer.kt
+MISSING    oof-layout skeptic.md cells.mjs
+MISSING    oof-layout skeptic.md GapDecorationLines.kt:165
+MISSING    oof-layout skeptic.md GapDecorationLines.swift:118
+MISSING    oof-layout skeptic.md FixedHoist.swift:359-361
+MISSING    ua-heading-face _note.md UAElementFontRule.swift
+MISSING    ua-heading-face _note.md ComponentRenderer.kt
+MISSING    ua-heading-face _note.md UAElementFontRuleTest.kt
+MISSING    ua-heading-face _note.md UAHeadingFoldGate.kt
+MISSING    ua-heading-face _note.md UAHeadingFoldGateTest.kt
+MISSING    ua-heading-face _note.md UAHeadingFaceReplay.kt
+MISSING    ua-heading-face _note.md UAHeadingFaceWire.kt
+MISSING    ua-heading-face _note.md UAHeadingFoldGate.swift
+MISSING    ua-heading-face _note.md UAHeadingFoldGateTests.swift
+MISSING    ua-heading-face _note.md UAElementFontRule.kt
+MISSING    ua-heading-face _note.md UAElementFontRuleTest.kt
+MISSING    ua-heading-face _note.md UAHeadingFoldGate.kt
+MISSING    ua-heading-face _note.md UAHeadingFoldGateTest.kt
+MISSING    ua-heading-face _note.md UAHeadingFaceReplay.kt
+MISSING    ua-heading-face _note.md UAHeadingFaceWire.kt
+MISSING    ua-heading-face _note.md UAElementFontRuleTests.swift
+MISSING    ua-heading-face _note.md seam-2.patch
+MISSING    ua-heading-face _note.md ComponentRenderer.kt
+MISSING    ua-heading-face _note.md seam-2.patch
+MISSING    ua-heading-face _note.md ComponentRenderer.swift
+MISSING    ua-heading-face _note.md .kt
+MISSING    ua-heading-face _note.md UAElementFontRule.kt
+MISSING    ua-heading-face _note.md UAElementFontRuleTest.kt
+MISSING    ua-heading-face _note.md UAElementFontRule.swift
+MISSING    ua-heading-face _note.md .red.log
+MISSING    ua-heading-face _note.md .green.log
+MISSING    ua-heading-face _note.md UAElementFontRuleTest.kt
+MISSING    ua-heading-face _note.md .wave54-open.out.txt
+MISSING    ua-heading-face _note.md seam-2.patch
+MISSING    ua-heading-face _note.md watchlist-check.mjs
+MISSING    ua-heading-face _note.md .swift
+MISSING    ua-heading-face _note.md UABlockMargin.swift
+MISSING    ua-heading-face _note.md UABlockChildMargin.swift
+MISSING    ua-heading-face _note.md UAHeadingFaceReplay.kt
+MISSING    ua-heading-face _note.md UAHeadingFaceWire.kt
+MISSING    ua-heading-face _note.md UAElementFontRuleTest.kt
+MISSING    ua-heading-face _note.md UAElementFontRule.kt
+MISSING    ua-heading-face _note.md UAElementFontRule.swift
+MISSING    ua-heading-face _note.md UAElementFontRule.swift
+MISSING    ua-heading-face _note.md seam-2.patch
+MISSING    ua-heading-face _note.md .kt
+MISSING    ua-heading-face _note.md UAElementFontRuleTest.kt
+MISSING    ua-heading-face _note.md UAHeadingFoldGate.kt
+MISSING    ua-heading-face skeptic.md cells.mjs
+MISSING    ua-heading-face skeptic.md UAHeadingFaceWire.kt
+MISSING    ua-heading-face skeptic.md UaBlockMarginFontBasis.kt
+MISSING    web-tail _note.md ComponentRenderer.tsx
+MISSING    web-tail _note.md ComposedCaptureGallery.tsx
+MISSING    web-tail _note.md ComponentRenderer.tsx
+MISSING    web-tail _note.md ComposedCaptureGallery.tsx
+MISSING    web-tail _note.md step0-harness-markup.json
+MISSING    web-tail _note.md control-check.mjs
+MISSING    web-tail _note.md tools/titan/runs/wave54-lock/ComponentRenderer.tsx
+MISSING    web-tail _note.md tests/ui/ComposedRootSeparator.test.ts
+MISSING    web-tail _note.md ComposedRootSeparatorWire.test.tsx
+MISSING    web-tail _note.md InertOutOfFlowWordJoin.test.tsx
+MISSING    web-tail _note.md /M/
+MISSING    web-tail _note.md tests/renderer/
+MISSING    web-tail _note.md ComposedRootSeparator.ts
+MISSING    web-tail _note.md apps/web-harness/src/ui/ComposedRootSeparator.test.ts
+MISSING    web-tail _note.md InertOutOfFlowWordJoin.ts
+MISSING    web-tail _note.md tests/renderer/
+MISSING    web-tail _note.md .out.txt
+MISSING    web-tail skeptic.md cells.mjs
+MISSING    web-tail skeptic.md ComponentRenderer.tsx
+MISSING    web-tail skeptic.md cells.mjs
+MISSING    web-tail skeptic.md -score.mjs
+MISSING    web-tail skeptic.md wave54-lock/
+MISSING    web-tail skeptic.md NodeRenderer.ts:339
+MISSING    web-tail skeptic.md NodeRenderer.test.tsx
+MISSING    web-tail skeptic.md InlineRuns.ts:170
+MISSING    web-tail skeptic.md ComponentRenderer.kt:3872
+MISSING    web-tail skeptic.md ComposedRootSeparator.ts:25
+MISSING    web-tail skeptic.md ComposedRootSeparator.ts
+MISSING    web-tail skeptic.md tests/ui/ComposedRootSeparator.test.ts
+MISSING    web-tail skeptic.md ComponentRenderer.tsx
+MISSING    web-tail skeptic.md ComposedCaptureGallery.tsx
+MISSING    web-tail skeptic.md tests/ui/ComposedRootSeparatorWire.test.tsx
+MISSING    label-chrome _note.md tools/visual/baseline/Android__000_ATC_AllThenProps.png
+MISSING    label-chrome _note.md iOS__000_ATC_AllThenProps.png
+MISSING    label-chrome _note.md web__000_ATC_AllThenProps.png
+MISSING    label-chrome _note.md tools/visual/baseline/Android__001_ATC_PropsThenAll_InGreenParent.png
+MISSING    label-chrome _note.md web__001_ATC_PropsThenAll_InGreenParent.png
+MISSING    label-chrome _note.md tools/visual/baseline/Android__002_reset.png
+MISSING    label-chrome _note.md iOS__002_reset.png
+MISSING    label-chrome _note.md web__002_reset.png
+MISSING    label-chrome _note.md tools/visual/baseline/Android__003_ATC_InitialUnderRedParent.png
+MISSING    label-chrome _note.md web__003_ATC_InitialUnderRedParent.png
+MISSING    label-chrome _note.md tools/visual/baseline/Android__004_span.png
+MISSING    label-chrome _note.md iOS__004_span.png
+MISSING    label-chrome _note.md web__004_span.png
+MISSING    label-chrome _note.md tools/visual/baseline/Android__005_ATC_DirectionSurvives.png
+MISSING    label-chrome _note.md web__005_ATC_DirectionSurvives.png
+MISSING    label-chrome _note.md control-check.mjs
+MISSING    label-chrome _note.md .replay.out.txt
+MISSING    label-chrome _note.md CssParsing.kt:59
+MISSING    label-chrome skeptic.md cells.mjs
+MISSING    label-chrome skeptic.md ComponentRenderer.kt/.swift
+MISSING    label-chrome skeptic.md .replay.out.txt
+MISSING    label-chrome skeptic.md tools/visual/baseline/iOS__001_ATC_PropsThenAll_InGreenParent.png
+MISSING    label-chrome skeptic.md iOS__003_ATC_InitialUnderRedParent.png
+MISSING    label-chrome skeptic.md iOS__005_ATC_DirectionSurvives.png
+MISSING    label-chrome skeptic.md ScreenshotCaptureScreen.kt
+UNCOMMITTED rtl-marker-bake _note.md mutations.log tools/titan/results/wave54-rtl-marker-bake/mutations.log
+UNCOMMITTED rtl-marker-bake _note.md tools/titan/runs/ tools/titan/runs/ (dir)
+UNCOMMITTED rtl-marker-bake _note.md mutations.log tools/titan/results/wave54-rtl-marker-bake/mutations.log
+UNCOMMITTED rtl-marker-bake skeptic.md runs/wave54-lock/ tools/titan/runs/wave54-lock/ (dir)
+UNCOMMITTED rtl-marker-bake skeptic.md mutations.log tools/titan/results/wave54-rtl-marker-bake/mutations.log
+UNCOMMITTED hyphenate-character _note.md mutations.log tools/titan/results/wave54-hyphenate-character/mutations.log
+UNCOMMITTED hyphenate-character _note.md seam-verify.log tools/titan/results/wave54-hyphenate-character/seam-verify.log
+UNCOMMITTED hyphenate-character _note.md seam-verify.log tools/titan/results/wave54-hyphenate-character/seam-verify.log
+UNCOMMITTED hyphenate-character _note.md seam-verify.log tools/titan/results/wave54-hyphenate-character/seam-verify.log
+UNCOMMITTED hyphenate-character _note.md seam-verify.log tools/titan/results/wave54-hyphenate-character/seam-verify.log
+UNCOMMITTED hyphenate-character _note.md seam-verify.log tools/titan/results/wave54-hyphenate-character/seam-verify.log
+UNCOMMITTED hyphenate-character _note.md tools/titan/runs/wave54-lock/ tools/titan/runs/wave54-lock/ (dir)
+UNCOMMITTED hyphenate-character _note.md fixtures/wpt/ fixtures/wpt/ (dir)
+UNCOMMITTED hyphenate-character _note.md tools/titan/runs/wave53-final/sections/css-text/per-test-ir/ tools/titan/runs/wave53-final/sections/css-text/per-test-ir/ (dir)
+UNCOMMITTED hyphenate-character _note.md mutations.log tools/titan/results/wave54-hyphenate-character/mutations.log
+UNCOMMITTED hyphenate-character _note.md mutations.log tools/titan/results/wave54-hyphenate-character/mutations.log
+UNCOMMITTED hyphenate-character _note.md seam-verify.log tools/titan/results/wave54-hyphenate-character/seam-verify.log
+UNCOMMITTED hyphenate-character _note.md tools/titan/wpt-buckets.json tools/titan/wpt-buckets.json
+UNCOMMITTED hyphenate-character _note.md mutations.log tools/titan/results/wave54-hyphenate-character/mutations.log
+UNCOMMITTED hyphenate-character _note.md seam-verify.log tools/titan/results/wave54-hyphenate-character/seam-verify.log
+UNCOMMITTED hyphenate-character skeptic.md skeptic/sk-mutations.log tools/titan/results/wave54-hyphenate-character/skeptic/sk-mutations.log
+UNCOMMITTED hyphenate-character skeptic.md skeptic/sk-seam.log tools/titan/results/wave54-hyphenate-character/skeptic/sk-seam.log
+UNCOMMITTED hyphenate-character skeptic.md skeptic/sk-u3-pins.log tools/titan/results/wave54-hyphenate-character/skeptic/sk-u3-pins.log
+UNCOMMITTED hyphenate-character skeptic.md tools/titan/runs/wave54-lock/ tools/titan/runs/wave54-lock/ (dir)
+UNCOMMITTED oof-layout _note.md runtimes/compose/build/cbb-census.now.txt runtimes/compose/build/cbb-census.now.txt
+UNCOMMITTED oof-layout _note.md tools/titan/runs/wave54-lock/ tools/titan/runs/wave54-lock/ (dir)
+UNCOMMITTED oof-layout _note.md fix/runs/standalone.log tools/titan/results/wave54-oof-layout/fix/runs/standalone.log
+UNCOMMITTED oof-layout _note.md tools/wpt/css/css-contain/contain-content-011.html tools/wpt/css/css-contain/contain-content-011.html
+UNCOMMITTED oof-layout _note.md tools/titan/runs/wave53-final/sections/css-contain/per-test-ir/wpt__css-contain__contain-content-011.json tools/titan/runs/wave53-final/sections/css-contain/per-test-ir/wpt__css-contain__contain-content-011.json
+UNCOMMITTED oof-layout _note.md runtimes/compose/build/ runtimes/compose/build/ (dir)
+UNCOMMITTED oof-layout _note.md reverify/runs/standalone.log tools/titan/results/wave54-oof-layout/reverify/runs/standalone.log
+UNCOMMITTED oof-layout _note.md tools/titan/runs/wave54-lock/ tools/titan/runs/wave54-lock/ (dir)
+UNCOMMITTED oof-layout skeptic.md tools/titan/runs/wave54-lock/ tools/titan/runs/wave54-lock/ (dir)
+UNCOMMITTED ua-heading-face _note.md fix/runs/catalyst-UAElementFontRuleTests.final.log tools/titan/results/wave54-ua-heading-face/fix/runs/catalyst-UAElementFontRuleTests.final.log
+UNCOMMITTED ua-heading-face _note.md tools/titan/runs/wave54-lock/ tools/titan/runs/wave54-lock/ (dir)
+UNCOMMITTED ua-heading-face skeptic.md jvm-baseline.log tools/titan/results/wave54-ua-heading-face/skeptic/jvm-baseline.log
+UNCOMMITTED web-tail _note.md verify-seam1.log tools/titan/results/wave54-web-tail/verify-seam1.log
+UNCOMMITTED web-tail _note.md verify-rs-mutations.log tools/titan/results/wave54-web-tail/verify-rs-mutations.log
+UNCOMMITTED web-tail _note.md verify-landed-R.log tools/titan/results/wave54-web-tail/verify-landed-R.log
+UNCOMMITTED web-tail _note.md verify-w1-mutations.log tools/titan/results/wave54-web-tail/verify-w1-mutations.log
+UNCOMMITTED web-tail _note.md branchH-not-landed/verify-branchH.log tools/titan/results/wave54-web-tail/branchH-not-landed/verify-branchH.log
+UNCOMMITTED web-tail skeptic.md out/tmpOutput.json out/tmpOutput.json

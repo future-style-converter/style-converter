@@ -1,0 +1,1 @@
+{ hyphensAuto: styles.hyphens === 'auto' }

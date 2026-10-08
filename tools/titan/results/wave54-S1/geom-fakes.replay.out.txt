@@ -1,0 +1,30 @@
+--- fake ctl (rtl-marker-bake.geometry.py)
+[M] counter-suffix ref      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 → GEOMETRY OK
+[M] counter-suffix web      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 → GEOMETRY OK
+[M] counter-suffix ios      text y214-225:x103-126 y238-249:x104-126 y262-273:x103-126 y286-297:x104-126 → GEOMETRY OK
+[M] counter-suffix android  text y214-225:x104-126 y239-249:x104-126 y262-273:x104-126 y287-297:x104-126 → GEOMETRY WRONG (rtl row 1 no marker ink on text row y214-225 (marker ink y244-245 below the line))
+--- fake ctl (lists-bakes.geometry.py)
+counter-suffix ref      y214-225:x104-144 y238-249:x104-144 y262-273:x104-145 y286-297:x104-144 → GEOMETRY OK
+counter-suffix web      y214-225:x104-144 y238-249:x104-144 y262-273:x104-145 y286-297:x104-144 → GEOMETRY OK
+counter-suffix ios      y214-225:x103-141 y238-249:x104-145 y262-273:x103-145 y286-297:x104-144 → GEOMETRY OK
+counter-suffix android  y214-225:x104-126 y239-249:x104-134 y262-273:x104-134 y285-297:x104-145 → GEOMETRY WRONG (rtl row 1 right x126 vs ref x144)
+--- fake nodot (rtl-marker-bake.geometry.py)
+[M] counter-suffix ref      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 → GEOMETRY OK
+[M] counter-suffix web      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 → GEOMETRY OK
+[M] counter-suffix ios      text y214-225:x103-126 y238-249:x104-126 y262-273:x103-126 y286-297:x104-126 → GEOMETRY WRONG (rtl row 1 marker ink x138-141 narrower than 5 px (a glyph run missing))
+[M] counter-suffix android  text y214-225:x104-126 y239-249:x104-126 y262-273:x104-126 y287-297:x104-126 → GEOMETRY WRONG (rtl row 1 no marker ink on text row y214-225 (marker ink y244-245 below the line))
+--- fake nodot (lists-bakes.geometry.py)
+counter-suffix ref      y214-225:x104-144 y238-249:x104-144 y262-273:x104-145 y286-297:x104-144 → GEOMETRY OK
+counter-suffix web      y214-225:x104-144 y238-249:x104-144 y262-273:x104-145 y286-297:x104-144 → GEOMETRY OK
+counter-suffix ios      y214-225:x103-141 y238-249:x104-145 y262-273:x103-145 y286-297:x104-144 → GEOMETRY OK
+counter-suffix android  y214-225:x104-126 y239-249:x104-134 y262-273:x104-134 y285-297:x104-145 → GEOMETRY WRONG (rtl row 1 right x126 vs ref x144)
+--- fake nodigit (rtl-marker-bake.geometry.py)
+[M] counter-suffix ref      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 → GEOMETRY OK
+[M] counter-suffix web      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 → GEOMETRY WRONG (rtl row 1 marker ink x134-134 narrower than 5 px (a glyph run missing))
+[M] counter-suffix ios      text y214-225:x103-126 y238-249:x104-126 y262-273:x103-126 y286-297:x104-126 → GEOMETRY WRONG (rtl row 1 marker ink x134-134 narrower than 5 px (a glyph run missing))
+[M] counter-suffix android  text y214-225:x104-126 y239-249:x104-126 y262-273:x104-126 y287-297:x104-126 → GEOMETRY WRONG (rtl row 1 no marker ink on text row y214-225 (marker ink y244-245 below the line))
+--- fake nodigit (lists-bakes.geometry.py)
+counter-suffix ref      y214-225:x104-144 y238-249:x104-144 y262-273:x104-145 y286-297:x104-144 → GEOMETRY OK
+counter-suffix web      y214-225:x104-134 y238-249:x104-134 y262-273:x104-145 y286-297:x104-144 → GEOMETRY WRONG (rtl row 1 right x134 vs ref x144)
+counter-suffix ios      y214-225:x103-134 y238-249:x104-134 y262-273:x103-145 y286-297:x104-144 → GEOMETRY WRONG (rtl row 1 right x134 vs ref x144)
+counter-suffix android  y214-225:x104-126 y239-249:x104-134 y262-273:x104-134 y285-297:x104-145 → GEOMETRY WRONG (rtl row 1 right x126 vs ref x144)

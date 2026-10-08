@@ -1,0 +1,356 @@
+===== L7-MUT-1
+--- mutated run tail
+# pass 147
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 314.193833
+--- restored run tail
+# pass 148
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 312.942375
+--- failing lines (mutated)
+not ok 8 - exempt mutation: the label drawn ×3 is red on (iv) ×3; drawn on one platform only, (iv) on that one
+  error: |-
+  name: 'AssertionError'
+===== L7-MUT-3
+--- mutated run tail
+# pass 146
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 321.267959
+--- restored run tail
+# pass 148
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 313.377417
+--- failing lines (mutated)
+not ok 11 - manifest mutations: a leaf, an empty _text, a kind mismatch, a missing node, a stale / partial entry are red
+  error: |-
+  name: 'AssertionError'
+not ok 14 - hint (d): a label absent ×3 names the container / text-root candidates — and the stem stays red
+  error: |-
+  name: 'AssertionError'
+===== L1-P-3
+--- mutated run tail
+# pass 68
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 183.932792
+--- restored run tail
+# pass 69
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 173.185333
+--- failing lines (mutated)
+not ok 55 - V3b unit P: VERBATIM zero-padding roots (dir-style-02a ×6, dir-selector-change-003/-004) stay deep-equal AND in order
+  error: |-
+  name: 'AssertionError'
+# Subtest: V4 unit M′ × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake); root runs never stamped
+ok 61 - V4 unit M′ × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake); root runs never stamped
+===== L1-M-12
+--- mutated run tail
+# pass 65
+# fail 4
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 176.34625
+--- restored run tail
+# pass 69
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 171.894541
+--- failing lines (mutated)
+not ok 57 - V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item
+  error: |-
+  name: 'AssertionError'
+not ok 59 - V6 unit M′: every marker run is owned by its ENCLOSING ROOT at the measured root-relative geometry
+  error: |-
+  name: 'AssertionError'
+not ok 60 - V7 unit M′: no item box owns more runs than it has text runs (the Compose stack-shape guard)
+  error: '0.4.0 owns 3 runs > 1 text runs'
+  name: 'AssertionError'
+# Subtest: V4 unit M′ × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake); root runs never stamped
+not ok 61 - V4 unit M′ × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake); root runs never stamped
+  error: |-
+===== L3-U3-a
+--- mutated run tail
+# pass 4
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 46.886291
+--- restored run tail
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 45.487542
+--- failing lines (mutated)
+not ok 1 - U3: hyphenate-character-001 — a br that ENDS a text line is 0, only the blank lines keep a line box
+  error: |-
+  name: 'AssertionError'
+not ok 2 - U3: revert-val-001 — every br follows its text line, so all seven are 0
+  error: |-
+  name: 'AssertionError'
+not ok 5 - U3: collapsible white space between children is no content — the blank br keeps its line box
+  error: |-
+  name: 'AssertionError'
+===== L3-U3b-a
+--- mutated run tail
+# pass 6
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 46.2475
+--- restored run tail
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 44.785208
+--- failing lines (mutated)
+not ok 7 - U3b negative: an ANCESTOR's line-height does not resize a br (baseline-007 40px, baseline-002 2em)
+  error: |-
+  name: 'AssertionError'
+===== L6-RS-m2
+--- mutated run tail
+    124|     expect(imgGaps(html)).toBe(0);
+       |                           ^
+    125|   });
+    126|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+--- restored run tail
+   Start at  00:01:40
+   Duration  1.60s (transform 1.99s, setup 0ms, import 2.48s, tests 318ms, environment 0ms)
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vite.config.ts:146:27). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+--- failing lines (mutated)
+ ❯ tests/ui/ComposedRootSeparator.test.ts (7 tests | 1 failed) 13ms
+     × table_andInlineTable_wrapperDeclines_evenWhenThePredicateSeparates 3ms
+ ❯ tests/ui/ComposedRootSeparatorWire.test.tsx (7 tests | 1 failed) 312ms
+     × tableBody_wrapperDeclines_inTheRealGallery 10ms
+ Test Files  2 failed (2)
+      Tests  2 failed | 12 passed (14)
+AssertionError: expected [ …(5) ] to deeply equal [ …(3) ]
+AssertionError: expected 19 to be +0 // Object.is equality
+===== L6-W1-m4
+--- mutated run tail
+    105|     expect(p?.entries).toEqual([{ kind: 'text', text: 'high' }, { kind…
+       |                        ^
+    106|     expect(p?.joinedOutOfFlowMembers).toBe(0);
+    107|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+--- restored run tail
+
+
+ Test Files  12 passed (12)
+      Tests  138 passed (138)
+   Start at  00:01:45
+   Duration  2.53s (transform 13.69s, setup 0ms, import 18.97s, tests 427ms, environment 597ms)
+--- failing lines (mutated)
+ ❯ tests/renderer/InertOutOfFlowWordJoin.test.tsx (10 tests | 1 failed) 61ms
+     × (d) -001 box 4 (hyphens: manual) is unchanged — the U+00AD point lives inside the text 13ms
+ Test Files  1 failed | 11 passed (12)
+      Tests  1 failed | 137 passed (138)
+AssertionError: expected [ { kind: 'text', …(1) }, …(1) ] to deeply equal [ Array(3) ]
+===== L6-SK6-w7-skeptic-D1
+--- mutated run tail
+
+
+ Test Files  94 passed (94)
+      Tests  1379 passed (1379)
+   Start at  00:01:48
+   Duration  4.30s (transform 15.08s, setup 0ms, import 28.30s, tests 1.05s, environment 882ms)
+--- restored run tail
+
+
+ Test Files  94 passed (94)
+      Tests  1379 passed (1379)
+   Start at  00:01:53
+   Duration  4.28s (transform 15.78s, setup 0ms, import 28.56s, tests 1.01s, environment 1.11s)
+--- failing lines (mutated)
+
+===== L2-T1
+--- mutated run tail
+> There were failing tests. See the report at: file:///private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/s1/exp/runtimes/compose/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 7s
+--- restored run tail
+
+--- failing lines (mutated)
+145 tests completed, 2 failed
+FAILURE: Build failed with an exception.
+Execution failed for task ':runtime:testDebugUnitTest'.
+BUILD FAILED in 7s
+===== L2-X3-skeptic-S1
+--- mutated run tail
+
+--- restored run tail
+
+--- failing lines (mutated)
+
+===== L4-M-a
+--- mutated run tail
+> There were failing tests. See the report at: file:///private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/s1/exp/runtimes/compose/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 6s
+--- restored run tail
+
+--- failing lines (mutated)
+145 tests completed, 6 failed
+FAILURE: Build failed with an exception.
+Execution failed for task ':runtime:testDebugUnitTest'.
+BUILD FAILED in 6s
+===== L2-X3-skeptic-S1-rerun
+--- mutated run tail
+xml TableBodyForestTest tests=7 failures=0 errors=0
+  xml TableCellHugSeamWiringTest tests=2 failures=0 errors=0
+  xml TableCellHugTest tests=8 failures=0 errors=0
+  fresh-xml tests executed: 17
+--- restored run tail
+xml TableBodyForestTest tests=7 failures=0 errors=0
+  xml TableCellHugSeamWiringTest tests=2 failures=0 errors=0
+  xml TableCellHugTest tests=8 failures=0 errors=0
+  fresh-xml tests executed: 17
+--- failing lines (mutated)
+
+===== L4-M-gap1
+--- mutated run tail
+> There were failing tests. See the report at: file:///private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/s1/exp/runtimes/compose/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 5s
+--- restored run tail
+  xml GapDecorationExtractorTest tests=7 failures=0 errors=0
+  xml GapDecorationLinesTest tests=6 failures=0 errors=0
+  xml GapDecorationSegmentsTest tests=12 failures=0 errors=0
+  xml GapDecorationWptPinsTest tests=4 failures=0 errors=0
+  xml SkepticGapDecorationProbeTest tests=7 failures=0 errors=0
+  fresh-xml tests executed: 47
+--- failing lines (mutated)
+47 tests completed, 2 failed
+FAILURE: Build failed with an exception.
+Execution failed for task ':runtime:testDebugUnitTest'.
+BUILD FAILED in 5s
+===== L5-G2
+--- mutated run tail
+> There were failing tests. See the report at: file:///private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/s1/exp/runtimes/compose/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 5s
+--- restored run tail
+xml UAElementFontRuleSeamWiringTest tests=2 failures=0 errors=0
+  xml UAElementFontRuleTest tests=10 failures=0 errors=0
+  fresh-xml tests executed: 12
+--- failing lines (mutated)
+12 tests completed, 3 failed
+FAILURE: Build failed with an exception.
+Execution failed for task ':runtime:testDebugUnitTest'.
+BUILD FAILED in 5s
+===== L5-M2
+--- mutated run tail
+> There were failing tests. See the report at: file:///private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/s1/exp/runtimes/compose/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 5s
+--- restored run tail
+xml UAElementFontRuleSeamWiringTest tests=2 failures=0 errors=0
+  xml UAElementFontRuleTest tests=10 failures=0 errors=0
+  fresh-xml tests executed: 12
+--- failing lines (mutated)
+12 tests completed, 1 failed
+FAILURE: Build failed with an exception.
+Execution failed for task ':runtime:testDebugUnitTest'.
+BUILD FAILED in 5s
+===== L3-U1-a
+--- mutated run tail
+> There were failing tests. See the report at: file:///private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/s1/exp/converter/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 15s
+--- restored run tail
+
+--- failing lines (mutated)
+11 tests completed, 4 failed
+FAILURE: Build failed with an exception.
+Execution failed for task ':converter:test'.
+BUILD FAILED in 15s
+===== L4-S-Ma
+--- mutated run tail
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1PositionedEstablisherWithholdsTheClaim]' failed (0.173 seconds).
+/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/s1/exp/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:155: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers] : XCTAssertEqual failed: ("["wpt__CSS2__abspos__static-fixed-inside-abspos.json", "wpt__css-position__position-fixed-scroll-nested-fixed.json", "wpt__css-position__position-relative-003.json", "wpt__filter-effects__backdrop-filter-containing-block.json"]") is not equal to ("["wpt__CSS2__abspos__static-fixed-inside-abspos.json", "wpt__css-position__change-insets-inside-strict-containment-nested.json", "wpt__css-position__position-fixed-scroll-nested-fixed.json", "wpt__css-position__position-relative-003.json", "wpt__css-position__position-relative-004.json", "wpt__filter-effects__backdrop-filter-containing-block.json"]")
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers]' failed (3.739 seconds).
+	 Executed 8 tests, with 6 failures (0 unexpected) in 4.119 (4.120) seconds
+	 Executed 62 tests, with 8 failures (0 unexpected) in 6.156 (7.192) seconds
+	 Executed 62 tests, with 8 failures (0 unexpected) in 6.156 (7.193) seconds
+--- restored run tail
+Executed 16 tests, with 0 failures (0 unexpected) in 1.061 (1.592) seconds
+	 Executed 19 tests, with 0 failures (0 unexpected) in 0.246 (0.681) seconds
+	 Executed 19 tests, with 0 failures (0 unexpected) in 0.433 (0.436) seconds
+	 Executed 8 tests, with 0 failures (0 unexpected) in 4.226 (4.421) seconds
+	 Executed 62 tests, with 0 failures (0 unexpected) in 5.966 (7.131) seconds
+	 Executed 62 tests, with 0 failures (0 unexpected) in 5.966 (7.132) seconds
+--- failing lines (mutated)
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish]' failed (0.204 seconds).
+/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/s1/exp/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:73: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1PositionedEstablisherWithholdsTheClaim] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1PositionedEstablisherWithholdsTheClaim]' failed (0.173 seconds).
+/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/s1/exp/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:155: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers] : XCTAssertEqual failed: ("["wpt__CSS2__abspos__static-fixed-inside-abspos.json", "wpt__css-position__position-fixed-scroll-nested-fixed.json", "wpt__css-position__position-relative-003.json", "wpt__filter-effects__backdrop-filter-containing-block.json"]") is not equal to ("["wpt__CSS2__abspos__static-fixed-inside-abspos.json", "wpt__css-position__change-insets-inside-strict-containment-nested.json", "wpt__css-position__position-fixed-scroll-nested-fixed.json", "wpt__css-position__position-relative-003.json", "wpt__css-position__position-relative-004.json", "wpt__filter-effects__backdrop-filter-containing-block.json"]")
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers]' failed (3.739 seconds).
+===== L3-U2I-a
+--- mutated run tail
+/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/s1/exp/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:276: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testSpentHyphenStripsOneTrailingOccurrenceOnly] : XCTAssertEqual failed: ("a/-//-/") is not equal to ("a/-/")
+Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testSpentHyphenStripsOneTrailingOccurrenceOnly]' failed (0.168 seconds).
+	 Executed 19 tests, with 3 failures (0 unexpected) in 0.355 (0.558) seconds
+	 Executed 8 tests, with 0 failures (0 unexpected) in 4.593 (4.595) seconds
+	 Executed 62 tests, with 3 failures (0 unexpected) in 6.196 (7.402) seconds
+	 Executed 62 tests, with 3 failures (0 unexpected) in 6.196 (7.402) seconds
+--- restored run tail
+Executed 16 tests, with 0 failures (0 unexpected) in 0.831 (1.093) seconds
+	 Executed 19 tests, with 0 failures (0 unexpected) in 0.016 (0.199) seconds
+	 Executed 19 tests, with 0 failures (0 unexpected) in 0.013 (0.180) seconds
+	 Executed 8 tests, with 0 failures (0 unexpected) in 4.276 (4.359) seconds
+	 Executed 62 tests, with 0 failures (0 unexpected) in 5.136 (5.832) seconds
+	 Executed 62 tests, with 0 failures (0 unexpected) in 5.136 (5.833) seconds
+--- failing lines (mutated)
+Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testALineOverflowingOnlyByItsSpentHyphenIsUnbreakable]' failed (0.002 seconds).
+/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/s1/exp/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:275: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testSpentHyphenStripsOneTrailingOccurrenceOnly] : XCTAssertEqual failed: ("tial/-/") is not equal to ("tial")
+/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/s1/exp/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:276: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testSpentHyphenStripsOneTrailingOccurrenceOnly] : XCTAssertEqual failed: ("a/-//-/") is not equal to ("a/-/")
+Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testSpentHyphenStripsOneTrailingOccurrenceOnly]' failed (0.168 seconds).

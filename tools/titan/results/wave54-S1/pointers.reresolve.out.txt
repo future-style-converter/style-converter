@@ -1,0 +1,122 @@
+RESOLVED-REPO-WIDE hyphenate-character _note.md ComponentRenderer.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+RESOLVED-REPO-WIDE hyphenate-character _note.md ComponentRenderer.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+RESOLVED-REPO-WIDE hyphenate-character _note.md GreedyLineBreaker.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift
+RESOLVED-REPO-WIDE hyphenate-character _note.md GreedyLineBreakerTests.swift -> runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift
+RESOLVED-REPO-WIDE hyphenate-character _note.md HyphenateCharacterExtractor.ts -> runtimes/web/src/engine/typography/HyphenateCharacterExtractor.ts
+RESOLVED-REPO-WIDE hyphenate-character _note.md HyphenateCharacterExtractorTest.kt -> runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/HyphenateCharacterExtractorTest.kt
+RESOLVED-REPO-WIDE hyphenate-character _note.md PreBreakPipeline.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt
+RESOLVED-REPO-WIDE hyphenate-character _note.md PreBreakPipelineTest.kt -> runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipelineTest.kt
+RESOLVED-REPO-WIDE hyphenate-character _note.md StyleBuilder.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/StyleBuilder.swift
+RESOLVED-REPO-WIDE hyphenate-character _note.md UAElementFontRuleTest.kt -> runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt
+RESOLVED-REPO-WIDE hyphenate-character skeptic.md ComponentRenderer.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+RESOLVED-REPO-WIDE hyphenate-character skeptic.md GreedyLineBreakerTests.swift -> runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift
+RESOLVED-REPO-WIDE hyphenate-character skeptic.md InheritedText.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/InheritedText.swift
+RESOLVED-REPO-WIDE hyphenate-character skeptic.md cells.mjs -> tools/titan/results/wave50-S6/cells.mjs
+RESOLVED-REPO-WIDE hyphenate-character skeptic.md ir-v2.schema.json -> schema/ir-v2.schema.json
+RESOLVED-REPO-WIDE label-chrome _note.md CssParsing.kt -> converter/src/main/kotlin/app/parsing/css/CssParsing.kt
+RESOLVED-REPO-WIDE label-chrome _note.md control-check.mjs -> tools/titan/results/wave52-gate/control-check.mjs
+RESOLVED-REPO-WIDE label-chrome _note.md iOS__000_ATC_AllThenProps.png -> tools/titan/results/wave54-plan/label-chrome-all-reset.seeded-77fe41e8/iOS__000_ATC_AllThenProps.png
+RESOLVED-REPO-WIDE label-chrome _note.md iOS__002_reset.png -> tools/titan/results/wave54-plan/label-chrome-all-reset.seeded-77fe41e8/iOS__002_reset.png
+RESOLVED-REPO-WIDE label-chrome _note.md iOS__004_span.png -> tools/titan/results/wave54-plan/label-chrome-all-reset.seeded-77fe41e8/iOS__004_span.png
+RESOLVED-REPO-WIDE label-chrome _note.md web__000_ATC_AllThenProps.png -> tools/titan/results/wave54-plan/label-chrome-all-reset.seeded-77fe41e8/web__000_ATC_AllThenProps.png
+RESOLVED-REPO-WIDE label-chrome _note.md web__001_ATC_PropsThenAll_InGreenParent.png -> tools/titan/results/wave54-plan/label-chrome-all-reset.seeded-77fe41e8/web__001_ATC_PropsThenAll_InGreenParent.png
+RESOLVED-REPO-WIDE label-chrome _note.md web__002_reset.png -> tools/titan/results/wave54-plan/label-chrome-all-reset.seeded-77fe41e8/web__002_reset.png
+RESOLVED-REPO-WIDE label-chrome _note.md web__003_ATC_InitialUnderRedParent.png -> tools/titan/results/wave54-plan/label-chrome-all-reset.seeded-77fe41e8/web__003_ATC_InitialUnderRedParent.png
+RESOLVED-REPO-WIDE label-chrome _note.md web__004_span.png -> tools/titan/results/wave54-plan/label-chrome-all-reset.seeded-77fe41e8/web__004_span.png
+RESOLVED-REPO-WIDE label-chrome _note.md web__005_ATC_DirectionSurvives.png -> tools/titan/results/wave54-plan/label-chrome-all-reset.seeded-77fe41e8/web__005_ATC_DirectionSurvives.png
+RESOLVED-REPO-WIDE label-chrome skeptic.md ScreenshotCaptureScreen.kt -> apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt
+RESOLVED-REPO-WIDE label-chrome skeptic.md cells.mjs -> tools/titan/results/wave50-S6/cells.mjs
+RESOLVED-REPO-WIDE label-chrome skeptic.md iOS__003_ATC_InitialUnderRedParent.png -> tools/titan/results/wave54-plan/label-chrome-all-reset.seeded-77fe41e8/iOS__003_ATC_InitialUnderRedParent.png
+RESOLVED-REPO-WIDE label-chrome skeptic.md iOS__005_ATC_DirectionSurvives.png -> tools/titan/results/wave54-plan/label-chrome-all-reset.seeded-77fe41e8/iOS__005_ATC_DirectionSurvives.png
+RESOLVED-REPO-WIDE oof-layout _note.md CanvasRootHoist.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/CanvasRootHoist.kt
+RESOLVED-REPO-WIDE oof-layout _note.md ChildContainingBlockSeamWiringTest.kt -> runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/ChildContainingBlockSeamWiringTest.kt
+RESOLVED-REPO-WIDE oof-layout _note.md ComponentRenderer.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+RESOLVED-REPO-WIDE oof-layout _note.md ContainingBlockBands.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt
+RESOLVED-REPO-WIDE oof-layout _note.md FixedHoist.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/FixedHoist.swift
+RESOLVED-REPO-WIDE oof-layout _note.md GapDecorationGeometry.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/columns/GapDecorationGeometry.kt
+RESOLVED-REPO-WIDE oof-layout _note.md GapDecorationGeometry.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/GapDecorationGeometry.swift
+RESOLVED-REPO-WIDE oof-layout _note.md GapDecorationLines.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/columns/GapDecorationLines.kt
+RESOLVED-REPO-WIDE oof-layout _note.md GapDecorationLines.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/GapDecorationLines.swift
+RESOLVED-REPO-WIDE oof-layout _note.md GapDecorationSegments.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/columns/GapDecorationSegments.kt
+RESOLVED-REPO-WIDE oof-layout _note.md GapDecorationSegments.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/GapDecorationSegments.swift
+RESOLVED-REPO-WIDE oof-layout _note.md OutOfFlowContainingBlock.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt
+RESOLVED-REPO-WIDE oof-layout _note.md OutOfFlowContainingBlock.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift
+RESOLVED-REPO-WIDE oof-layout _note.md OutOfFlowContainingBlockTest.kt -> runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlockTest.kt
+RESOLVED-REPO-WIDE oof-layout _note.md OutOfFlowContainingBlockTests.swift -> runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift
+RESOLVED-REPO-WIDE oof-layout _note.md control-check.mjs -> tools/titan/results/wave52-gate/control-check.mjs
+RESOLVED-REPO-WIDE oof-layout _note.md per-test-ir/wpt__css-contain__contain-content-011.json -> tools/titan/results/wave54-gate/wl3-diff/pre/css-contain/per-test-ir/wpt__css-contain__contain-content-011.json
+RESOLVED-REPO-WIDE oof-layout skeptic.md FixedHoist.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/FixedHoist.swift
+RESOLVED-REPO-WIDE oof-layout skeptic.md GapDecorationLines.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/columns/GapDecorationLines.kt
+RESOLVED-REPO-WIDE oof-layout skeptic.md GapDecorationLines.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/GapDecorationLines.swift
+RESOLVED-REPO-WIDE oof-layout skeptic.md cells.mjs -> tools/titan/results/wave50-S6/cells.mjs
+RESOLVED-REPO-WIDE rtl-marker-bake _note.md ComponentRenderer.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+RESOLVED-REPO-WIDE rtl-marker-bake _note.md ComponentRenderer.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+RESOLVED-REPO-WIDE rtl-marker-bake _note.md PositionedParentFlowSlot.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt
+RESOLVED-REPO-WIDE rtl-marker-bake _note.md marker-probe.out.txt -> tools/titan/results/wave53-lists-bakes/marker-probe.out.txt
+RESOLVED-REPO-WIDE rtl-marker-bake skeptic.md cells.mjs -> tools/titan/results/wave50-S6/cells.mjs
+RESOLVED-REPO-WIDE rtl-marker-bake skeptic.md lists-bakes.geometry.py -> tools/titan/results/wave53-plan/lists-bakes.geometry.py
+RESOLVED-REPO-WIDE table-body-cell _note.md ComposedCanvasTableBodyTest.kt -> apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/ComposedCanvasTableBodyTest.kt
+RESOLVED-REPO-WIDE table-body-cell _note.md ScreenshotCaptureScreen.kt -> apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt
+RESOLVED-REPO-WIDE table-body-cell _note.md TableBodyForestTest.kt -> runtimes/compose/src/test/java/com/styleconverter/runtime/table/TableBodyForestTest.kt
+RESOLVED-REPO-WIDE table-body-cell _note.md display-table-body.geometry.py -> tools/titan/results/wave53-plan/display-table-body.geometry.py
+RESOLVED-REPO-WIDE table-body-cell _note.md table/TableApplier.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt
+RESOLVED-REPO-WIDE table-body-cell _note.md table/TableBodyForest.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt
+RESOLVED-REPO-WIDE table-body-cell _note.md table/TableCellHug.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt
+RESOLVED-REPO-WIDE table-body-cell skeptic.md ComposedCanvasTableBodyTest.kt -> apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/ComposedCanvasTableBodyTest.kt
+RESOLVED-REPO-WIDE table-body-cell skeptic.md ScreenshotCaptureScreen.kt -> apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt
+RESOLVED-REPO-WIDE table-body-cell skeptic.md TableBodyForest.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt
+RESOLVED-REPO-WIDE table-body-cell skeptic.md TableCellHug.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt
+RESOLVED-REPO-WIDE table-body-cell skeptic.md cells.mjs -> tools/titan/results/wave50-S6/cells.mjs
+RESOLVED-REPO-WIDE ua-heading-face _note.md ComponentRenderer.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+RESOLVED-REPO-WIDE ua-heading-face _note.md ComponentRenderer.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+RESOLVED-REPO-WIDE ua-heading-face _note.md UABlockChildMargin.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/spacing/UABlockChildMargin.swift
+RESOLVED-REPO-WIDE ua-heading-face _note.md UABlockMargin.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/spacing/UABlockMargin.swift
+RESOLVED-REPO-WIDE ua-heading-face _note.md UAElementFontRule.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt
+RESOLVED-REPO-WIDE ua-heading-face _note.md UAElementFontRule.swift -> runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAElementFontRule.swift
+RESOLVED-REPO-WIDE ua-heading-face _note.md UAElementFontRuleTest.kt -> runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt
+RESOLVED-REPO-WIDE ua-heading-face _note.md UAElementFontRuleTests.swift -> runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAElementFontRuleTests.swift
+RESOLVED-REPO-WIDE ua-heading-face _note.md seam-2.patch -> tools/titan/results/wave52-all-reset-postload-colour/seam-2.patch
+RESOLVED-REPO-WIDE ua-heading-face _note.md watchlist-check.mjs -> tools/titan/results/wave52-plan/watchlist-check.mjs
+RESOLVED-REPO-WIDE ua-heading-face skeptic.md UaBlockMarginFontBasis.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/spacing/UaBlockMarginFontBasis.kt
+RESOLVED-REPO-WIDE ua-heading-face skeptic.md cells.mjs -> tools/titan/results/wave50-S6/cells.mjs
+RESOLVED-REPO-WIDE web-tail _note.md ComponentRenderer.tsx -> apps/web-harness/src/sdui/ComponentRenderer.tsx
+RESOLVED-REPO-WIDE web-tail _note.md ComposedCaptureGallery.tsx -> apps/web-harness/src/ui/ComposedCaptureGallery.tsx
+RESOLVED-REPO-WIDE web-tail _note.md ComposedRootSeparator.ts -> apps/web-harness/src/ui/ComposedRootSeparator.ts
+RESOLVED-REPO-WIDE web-tail _note.md ComposedRootSeparatorWire.test.tsx -> apps/web-harness/tests/ui/ComposedRootSeparatorWire.test.tsx
+RESOLVED-REPO-WIDE web-tail _note.md InertOutOfFlowWordJoin.test.tsx -> runtimes/web/tests/renderer/InertOutOfFlowWordJoin.test.tsx
+RESOLVED-REPO-WIDE web-tail _note.md InertOutOfFlowWordJoin.ts -> runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts
+RESOLVED-REPO-WIDE web-tail _note.md control-check.mjs -> tools/titan/results/wave52-gate/control-check.mjs
+RESOLVED-REPO-WIDE web-tail _note.md tests/ui/ComposedRootSeparator.test.ts -> apps/web-harness/tests/ui/ComposedRootSeparator.test.ts
+RESOLVED-REPO-WIDE web-tail skeptic.md ComponentRenderer.kt -> runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+RESOLVED-REPO-WIDE web-tail skeptic.md ComponentRenderer.tsx -> apps/web-harness/src/sdui/ComponentRenderer.tsx
+RESOLVED-REPO-WIDE web-tail skeptic.md ComposedCaptureGallery.tsx -> apps/web-harness/src/ui/ComposedCaptureGallery.tsx
+RESOLVED-REPO-WIDE web-tail skeptic.md ComposedRootSeparator.ts -> apps/web-harness/src/ui/ComposedRootSeparator.ts
+RESOLVED-REPO-WIDE web-tail skeptic.md InlineRuns.ts -> runtimes/web/src/renderer/InlineRuns.ts
+RESOLVED-REPO-WIDE web-tail skeptic.md NodeRenderer.test.tsx -> runtimes/web/tests/renderer/NodeRenderer.test.tsx
+RESOLVED-REPO-WIDE web-tail skeptic.md NodeRenderer.ts -> runtimes/web/src/renderer/NodeRenderer.ts
+RESOLVED-REPO-WIDE web-tail skeptic.md cells.mjs -> tools/titan/results/wave50-S6/cells.mjs
+RESOLVED-REPO-WIDE web-tail skeptic.md tests/ui/ComposedRootSeparator.test.ts -> apps/web-harness/tests/ui/ComposedRootSeparator.test.ts
+RESOLVED-REPO-WIDE web-tail skeptic.md tests/ui/ComposedRootSeparatorWire.test.tsx -> apps/web-harness/tests/ui/ComposedRootSeparatorWire.test.tsx
+STILL-MISSING hyphenate-character _note.md __ref.json
+STILL-MISSING label-chrome _note.md tools/visual/baseline/Android__000_ATC_AllThenProps.png
+STILL-MISSING label-chrome _note.md tools/visual/baseline/Android__001_ATC_PropsThenAll_InGreenParent.png
+STILL-MISSING label-chrome _note.md tools/visual/baseline/Android__002_reset.png
+STILL-MISSING label-chrome _note.md tools/visual/baseline/Android__003_ATC_InitialUnderRedParent.png
+STILL-MISSING label-chrome _note.md tools/visual/baseline/Android__004_span.png
+STILL-MISSING label-chrome _note.md tools/visual/baseline/Android__005_ATC_DirectionSurvives.png
+STILL-MISSING label-chrome skeptic.md ComponentRenderer.kt/.swift
+STILL-MISSING label-chrome skeptic.md tools/visual/baseline/iOS__001_ATC_PropsThenAll_InGreenParent.png
+STILL-MISSING oof-layout _note.md tools/titan/runs/wave54-lock/ComponentRenderer.kt
+STILL-MISSING table-body-cell _note.md tools/titan/runs/wave54-pre/sections/CSS2/android-screenshots/wpt__CSS2__css21-errata__s-11-1-1b-006.png
+STILL-MISSING ua-heading-face _note.md UAHeadingFaceReplay.kt
+STILL-MISSING ua-heading-face _note.md UAHeadingFaceWire.kt
+STILL-MISSING ua-heading-face _note.md UAHeadingFoldGate.kt
+STILL-MISSING ua-heading-face _note.md UAHeadingFoldGate.swift
+STILL-MISSING ua-heading-face _note.md UAHeadingFoldGateTest.kt
+STILL-MISSING ua-heading-face _note.md UAHeadingFoldGateTests.swift
+STILL-MISSING ua-heading-face skeptic.md UAHeadingFaceWire.kt
+STILL-MISSING web-tail _note.md apps/web-harness/src/ui/ComposedRootSeparator.test.ts
+STILL-MISSING web-tail _note.md step0-harness-markup.json
+STILL-MISSING web-tail _note.md tests/renderer/
+STILL-MISSING web-tail _note.md tools/titan/runs/wave54-lock/ComponentRenderer.tsx
+STILL-MISSING web-tail skeptic.md wave54-lock/

@@ -1,0 +1,118 @@
+documents 1435 · bidiBaked 17
+L2/TB-android                                android mine   1 plan   1 EQUAL
+L3/U3                                        web     (wire-only model; captures follow the wire + per-platform pixel replay, not re-derived)
+L3/U3                                        ios     (wire-only model; captures follow the wire + per-platform pixel replay, not re-derived)
+L3/U3                                        android (wire-only model; captures follow the wire + per-platform pixel replay, not re-derived)
+L3/U3                                        wire    mine   4 plan  18 DIFF
+      only-plan  wpt__css-cascade__revert-layer-006
+      only-plan  wpt__css-cascade__revert-val-001
+      only-plan  wpt__css-cascade__revert-val-002
+      only-plan  wpt__css-masking__clip-path__clip-path-filter-order
+      only-plan  wpt__css-multicol__balance-grid-container
+      only-plan  wpt__css-multicol__column-height-009
+      only-plan  wpt__css-overflow__line-clamp__block-ellipsis-002
+      only-plan  wpt__css-overflow__line-clamp__block-ellipsis-004
+      only-plan  wpt__css-overflow__line-clamp__block-ellipsis-005
+      only-plan  wpt__css-overflow__line-clamp__block-ellipsis-006
+      only-plan  wpt__filter-effects__backdrop-filter-clip-rect
+      only-plan  wpt__filter-effects__backdrop-filter-edge-clipping
+      only-plan  wpt__filter-effects__backdrop-filter-paint-order
+      only-plan  wpt__filter-effects__backdrop-filter-plus-filter
+L3/U3b                                       web     (wire-only model; captures follow the wire + per-platform pixel replay, not re-derived)
+L3/U3b                                       ios     (wire-only model; captures follow the wire + per-platform pixel replay, not re-derived)
+L3/U3b                                       android (wire-only model; captures follow the wire + per-platform pixel replay, not re-derived)
+L3/U3b                                       wire    mine   4 plan   4 EQUAL
+L4/CBB-android                               android mine  13 plan  14 DIFF
+      only-plan  wpt__css-gaps__flex__flex-gap-decorations-006
+L4/GAP-android                               android mine   1 plan   1 EQUAL
+L4/GAP-ios                                   ios     mine   1 plan   1 EQUAL
+L4/OOF-android                               android mine   9 plan   9 EQUAL
+L4/OOF-ios                                   ios     mine   6 plan   6 EQUAL
+L5/U1-android                                android mine  10 plan   7 DIFF
+      only-mine  wpt__css-text-decor__text-decoration-inset-005
+      only-mine  wpt__css-text-decor__text-decoration-inset-006
+      only-mine  wpt__css-text-decor__text-decoration-subelements-002
+L5/sub-sup-only                              android mine   5 (no unit of that name: model-only set)
+L6/RS                                        web     mine  27 plan  27 EQUAL
+L6/W1                                        web     mine   1 plan   1 EQUAL
+
+[L3] U3 brs 12 in 4 docs; U3b brs 12 in 4 docs; base-replay mismatches 66
+[L3]   base replay != wire: ('wpt__css-cascade__revert-layer-006', 'revert-layer-006__1__0__1-058', 0, 20)
+[L3]   base replay != wire: ('wpt__css-cascade__revert-layer-006', 'revert-layer-006__1__0__2-059', 0, 20)
+[L3]   base replay != wire: ('wpt__css-cascade__revert-layer-006', 'revert-layer-006__1__0__3-060', 0, 20)
+[L3]   base replay != wire: ('wpt__css-cascade__revert-layer-006', 'revert-layer-006__1__0__4-061', 0, 20)
+[L3]   base replay != wire: ('wpt__css-cascade__revert-layer-006', 'revert-layer-006__1__0__5-062', 0, 20)
+[L3]   base replay != wire: ('wpt__css-cascade__revert-layer-006', 'revert-layer-006__1__0__6-063', 0, 20)
+[L3]   base replay != wire: ('wpt__css-cascade__revert-val-001', 'revert-val-001__1__0__1-082', 0, 20)
+[L3]   base replay != wire: ('wpt__css-cascade__revert-val-001', 'revert-val-001__1__0__2-083', 0, 20)
+[L3]   base replay != wire: ('wpt__css-cascade__revert-val-001', 'revert-val-001__1__0__3-084', 0, 20)
+[L3]   base replay != wire: ('wpt__css-cascade__revert-val-001', 'revert-val-001__1__0__4-085', 0, 20)
+[L3]   base replay != wire: ('wpt__css-cascade__revert-val-001', 'revert-val-001__1__0__5-086', 0, 20)
+[L3]   base replay != wire: ('wpt__css-cascade__revert-val-001', 'revert-val-001__1__0__6-087', 0, 20)
+[L4] OOF(b) wpt__CSS2__abspos__static-fixed-inside-abspos abspos__static-fixed-inside-abspos__1__0__0-018 FIXED no inset
+[L4] OOF(a) wpt__css-contain__contain-content-003 contain-content-003__1__0-046 ABSOLUTE under establisher wpt__css-contain__contain-content-003__1-045
+[L4] OOF(a) wpt__css-contain__contain-content-003 contain-content-003__1__1-047 ABSOLUTE under establisher wpt__css-contain__contain-content-003__1-045
+[L4] OOF(a) wpt__css-contain__contain-content-004 contain-content-004__1__1__1__1-057 ABSOLUTE under establisher contain-content-004__1__1__1-055
+[L4] OOF(a) wpt__css-contain__contain-content-011 contain-content-011__1__0-061 ABSOLUTE under establisher wpt__css-contain__contain-content-011__2-060
+[L4] OOF(a) wpt__css-contain__contain-content-011 contain-content-011__1__1-062 ABSOLUTE under establisher wpt__css-contain__contain-content-011__2-060
+[L4] OOF(a) wpt__css-position__change-insets-inside-strict-containment-nested change-insets-inside-strict-containment-nested__1__0-012 FIXED under establisher wpt__css-position__change-insets-inside-strict-containment-nested__1-011
+[L4] OOF(a) wpt__css-position__change-insets-inside-strict-containment-nested change-insets-inside-strict-containment-nested__1__0__0__0-014 FIXED under establisher change-insets-inside-strict-containment-nested__1__0__0-013
+[L4] OOF(b) wpt__css-position__position-fixed-scroll-nested-fixed wpt__css-position__position-fixed-scroll-nested-fixed__0-185 FIXED no inset
+[L4] OOF(b) wpt__css-position__position-fixed-scroll-nested-fixed position-fixed-scroll-nested-fixed__0__0-186 FIXED no inset
+[L4] OOF(b) wpt__css-position__position-relative-003 position-relative-003__1__0__0__0-201 FIXED no inset
+[L4] OOF(a) wpt__css-position__position-relative-004 position-relative-004__1__0__0__0-206 FIXED under establisher wpt__css-position__position-relative-004__1-203
+[L4] OOF(a) wpt__filter-effects__backdrop-filter-containing-block backdrop-filter-containing-block__1__0-089 FIXED under establisher wpt__filter-effects__backdrop-filter-containing-block__1-088
+[L4] OOF(a) wpt__filter-effects__backdrop-filter-containing-block backdrop-filter-containing-block__1__1-090 ABSOLUTE under establisher wpt__filter-effects__backdrop-filter-containing-block__1-088
+[L4] CBB wpt__css-flexbox__abspos__abspos-autopos-htb-ltr wpt__css-flexbox__abspos__abspos-autopos-htb-ltr__1-002 -> abspos__abspos-autopos-htb-ltr__1__0-003
+[L4] CBB wpt__css-flexbox__abspos__abspos-autopos-htb-rtl wpt__css-flexbox__abspos__abspos-autopos-htb-rtl__1-005 -> abspos__abspos-autopos-htb-rtl__1__0-006
+[L4] CBB wpt__css-flexbox__abspos__abspos-autopos-vlr-ltr wpt__css-flexbox__abspos__abspos-autopos-vlr-ltr__1-008 -> abspos__abspos-autopos-vlr-ltr__1__0-009
+[L4] CBB wpt__css-flexbox__abspos__abspos-autopos-vlr-rtl wpt__css-flexbox__abspos__abspos-autopos-vlr-rtl__1-011 -> abspos__abspos-autopos-vlr-rtl__1__0-012
+[L4] CBB wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr__1-014 -> abspos__abspos-autopos-vrl-ltr__1__0-015
+[L4] CBB wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl__1-017 -> abspos__abspos-autopos-vrl-rtl__1__0-018
+[L4] CBB wpt__css-position__position-absolute-semi-replaced-stretch-button wpt__css-position__position-absolute-semi-replaced-stretch-button__0-135 -> position-absolute-semi-replaced-stretch-button__0__0-136
+[L4] CBB wpt__css-position__position-absolute-semi-replaced-stretch-input wpt__css-position__position-absolute-semi-replaced-stretch-input__0-137 -> position-absolute-semi-replaced-stretch-input__0__0-138
+[L4] CBB wpt__css-position__position-absolute-semi-replaced-stretch-other wpt__css-position__position-absolute-semi-replaced-stretch-other__0-155 -> position-absolute-semi-replaced-stretch-other__0__0-156
+[L4] CBB wpt__filter-effects__backdrop-filter-nested-border-radius-clip-2 wpt__filter-effects__backdrop-filter-nested-border-radius-clip-2__0-167 -> backdrop-filter-nested-border-radius-clip-2__0__0__1-170
+[L4] CBB wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3 wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3__0-171 -> backdrop-filter-nested-border-radius-clip-3__0__0__0__1-175
+[L4] CBB wpt__filter-effects__backdrop-filter-nested-border-radius-clip-4 wpt__filter-effects__backdrop-filter-nested-border-radius-clip-4__0-176 -> backdrop-filter-nested-border-radius-clip-4__0__0__0__1-180
+[L4] CBB wpt__filter-effects__backdrop-filter-nested-border-radius-clip wpt__filter-effects__backdrop-filter-nested-border-radius-clip__0-181 -> backdrop-filter-nested-border-radius-clip__0__0__1-184
+[L4] GAP candidate wpt__css-gaps__flex__flex-gap-decorations-033 wpt__css-gaps__flex__flex-gap-decorations-033__1-242 jc=None ac=None
+[L4] GAP candidate wpt__css-gaps__flex__flex-gap-decorations-040 wpt__css-gaps__flex__flex-gap-decorations-040__1-290 jc=SPACE_BETWEEN ac=None
+[L4] GAP candidate wpt__css-gaps__flex__flex-gap-decorations-041 wpt__css-gaps__flex__flex-gap-decorations-041__1-301 jc=SPACE_AROUND ac=None
+[L4] GAP candidate wpt__css-gaps__flex__flex-gap-decorations-042 wpt__css-gaps__flex__flex-gap-decorations-042__1-312 jc=SPACE_EVENLY ac=None
+[L4] GAP candidate wpt__css-gaps__flex__flex-gap-decorations-043 wpt__css-gaps__flex__flex-gap-decorations-043__1-323 jc=SPACE_BETWEEN ac=None
+[L4] GAP candidate wpt__css-gaps__flex__flex-gap-decorations-045 wpt__css-gaps__flex__flex-gap-decorations-045__1-345 jc=SPACE_BETWEEN ac=STRETCH
+[L4] GAP candidate wpt__css-gaps__flex__flex-gap-decorations-047 wpt__css-gaps__flex__flex-gap-decorations-047__1-364 jc=None ac=SPACE_BETWEEN
+[L4] GAP candidate wpt__css-gaps__flex__flex-gap-decorations-048 wpt__css-gaps__flex__flex-gap-decorations-048__1-372 jc=None ac=SPACE_AROUND
+[L4] GAP candidate wpt__css-gaps__flex__flex-gap-decorations-049 wpt__css-gaps__flex__flex-gap-decorations-049__1-380 jc=None ac=SPACE_EVENLY
+[L4] GAP candidate wpt__css-gaps__flex__flex-gap-decorations-050 wpt__css-gaps__flex__flex-gap-decorations-050__1-388 jc=SPACE_BETWEEN ac=None
+[L5] wpt__css-break__block-in-inline-015-print block-in-inline-015-print__0__0-190 h1 leaf
+[L5] wpt__css-break__block-in-inline-015-print block-in-inline-015-print__2__0-194 h1 leaf
+[L5] wpt__css-break__block-in-inline-015-print block-in-inline-015-print__4__0-198 h1 leaf
+[L5] wpt__css-break__block-in-inline-015-print block-in-inline-015-print__6__0-202 h1 leaf
+[L5] wpt__css-lists__counter-list-item wpt__css-lists__counter-list-item__0-278 h2 leaf
+[L5] wpt__css-lists__counter-reset-increment-overflow-underflow counter-reset-increment-overflow-underflow__0__0-330 h3 leaf
+[L5] wpt__css-lists__counter-reset-increment-overflow-underflow counter-reset-increment-overflow-underflow__0__1-331 h3 leaf
+[L5] wpt__css-lists__counter-reset-increment-overflow-underflow counter-reset-increment-overflow-underflow__0__2-332 h3 leaf
+[L5] wpt__css-lists__counter-reset-increment-overflow-underflow counter-reset-increment-overflow-underflow__1__0-334 h3 leaf
+[L5] wpt__css-lists__counter-reset-increment-overflow-underflow counter-reset-increment-overflow-underflow__1__1-335 h3 leaf
+[L5] wpt__css-lists__counter-reset-increment-overflow-underflow counter-reset-increment-overflow-underflow__1__2-336 h3 leaf
+[L5] wpt__css-text-decor__text-decoration-color wpt__css-text-decor__text-decoration-color__0-021 h3 leaf
+[L5] wpt__css-text-decor__text-decoration-color text-decoration-color__9__0__0-032 sub
+[L5] wpt__css-text-decor__text-decoration-color text-decoration-color__9__0__1-033 sup
+[L5] wpt__css-text-decor__text-decoration-inset-005 text-decoration-inset-005__1__0__0__0-071 sup
+[L5] wpt__css-text-decor__text-decoration-inset-005 text-decoration-inset-005__1__0__0__1-072 sub
+[L5] wpt__css-text-decor__text-decoration-inset-006 text-decoration-inset-006__1__0__0__0-078 sup
+[L5] wpt__css-text-decor__text-decoration-inset-006 text-decoration-inset-006__1__0__0__1-079 sub
+[L5] wpt__css-text-decor__text-decoration-subelements-002 text-decoration-subelements-002__1__0__0__0__0-257 sup
+[L5] wpt__css-text-decor__text-decoration-subelements-002 text-decoration-subelements-002__1__1__0__0__0-261 sup
+[L5] wpt__css-text-decor__text-decoration-subelements-002 text-decoration-subelements-002__1__1__0__0__1-262 sup
+[L5] wpt__css-text-decor__text-decoration-subelements-002 text-decoration-subelements-002__1__1__0__0__2-263 sup
+[L5] wpt__css-text-decor__text-decoration-subelements-003 text-decoration-subelements-003__1__0__0-267 sup
+[L5] wpt__filter-effects__backdrop-filter-border-radius-change wpt__filter-effects__backdrop-filter-border-radius-change__0-026 h1 leaf
+[L5] wpt__filter-effects__backdrop-filter-border-radius-change wpt__filter-effects__backdrop-filter-border-radius-change__2-028 h1 leaf
+[L5] wpt__filter-effects__backdrop-filter-corner-shape-change wpt__filter-effects__backdrop-filter-corner-shape-change__0-091 h1 leaf
+[L5] wpt__filter-effects__backdrop-filter-corner-shape-change wpt__filter-effects__backdrop-filter-corner-shape-change__2-093 h1 leaf
+[L6] RS separators 73 in 27 docs
+[L6] W1 joins 4 in 1 docs
+[L7] docs carrying an All property: 11

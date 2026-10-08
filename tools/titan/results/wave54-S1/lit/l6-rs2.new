@@ -1,0 +1,1 @@
+const declined = false && typeof container.display === 'string' && TABLE_BOX_DISPLAYS.has(container.display);

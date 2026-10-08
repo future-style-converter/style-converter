@@ -1,0 +1,24 @@
+css-anchor-position/wpt__css-anchor-position__anchor-center-safe-rtl.json: 14->14 components · Padding*->0 x8
+css-cascade/wpt__css-cascade__revert-layer-006.json: 10->10 components · br Height 20->0 x6
+css-cascade/wpt__css-cascade__revert-val-001.json: 10->10 components · br Height 20->0 x6
+css-cascade/wpt__css-cascade__revert-val-002.json: 10->10 components · br Height 20->0 x6
+css-counter-styles/wpt__css-counter-styles__counter-suffix.json: 23->29 components · Padding*->0 x4; OTHER ListStyleType: null -> "none" x4; -meta.markerText x4; +component markerRun x6
+css-masking/wpt__css-masking__clip-path__clip-path-filter-order.json: 5->5 components · br Height 20->0 x1
+css-multicol/wpt__css-multicol__balance-grid-container.json: 15->15 components · br Height 20->0 x2
+css-multicol/wpt__css-multicol__column-height-009.json: 19->19 components · br Height 20->0 x15
+css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-002.json: 4->4 components · br Height 20->0 x2
+css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-004.json: 5->5 components · br Height 20->0 x1
+css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-005.json: 5->5 components · br Height 20->0 x1
+css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-006.json: 5->5 components · br Height 20->0 x1
+css-text/wpt__css-text__bidi__bidi-lines-001.json: 13->13 components · Padding*->0 x2
+css-text/wpt__css-text__bidi__bidi-lines-002.json: 19->19 components · Padding*->0 x2
+css-text/wpt__css-text__hyphens__hyphenate-character-001.json: 8->8 components · br Height 20->19.2 x3; br Height 20->0 x2; Generic: {"propertyName": "hyphenate-character",  -> null x1; HyphenateCharacter: null -> {"type": "string", "value": ""} x1
+css-text/wpt__css-text__hyphens__hyphenate-character-002.json: 8->8 components · br Height 20->19.2 x3; br Height 20->0 x2; Generic: {"propertyName": "hyphenate-character",  -> null x1; HyphenateCharacter: null -> {"type": "string", "value": ""} x1
+css-text/wpt__css-text__hyphens__hyphenate-character-003.json: 8->8 components · br Height 20->19.2 x3; br Height 20->0 x2; HyphenateCharacter: {"type": "string", "value": "\\2022"} -> {"type": "string", "value": "•"} x1
+css-text/wpt__css-text__hyphens__hyphenate-character-004.json: 8->8 components · br Height 20->19.2 x3; br Height 20->0 x2
+css-text/wpt__css-text__hyphens__hyphenate-character-005.json: 14->14 components · HyphenateCharacter: {"type": "string", "value": "\\00a0\\064 -> {"type": "string", "value": " ـ"} x1
+filter-effects/wpt__filter-effects__backdrop-filter-clip-rect.json: 9->9 components · br Height 20->0 x2
+filter-effects/wpt__filter-effects__backdrop-filter-edge-clipping.json: 12->12 components · br Height 20->0 x1
+filter-effects/wpt__filter-effects__backdrop-filter-paint-order.json: 8->8 components · br Height 20->0 x1
+filter-effects/wpt__filter-effects__backdrop-filter-plus-filter.json: 6->6 components · br Height 20->0 x1
+unclassified changes: 4

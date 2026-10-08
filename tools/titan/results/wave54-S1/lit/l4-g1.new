@@ -1,0 +1,2 @@
+                val gap = GapInterval(a.end, b.start)
+                if (!gap.isEmpty) gaps.add(gap)
