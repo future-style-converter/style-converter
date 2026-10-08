@@ -1,0 +1,1 @@
+{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css-color__color-001__0-097","name":"wpt__css-color__color-001__0","properties":[{"type":"Color","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}}],"text":"Test passes if this text is green","meta":{"sourceTag":"p"}}]}

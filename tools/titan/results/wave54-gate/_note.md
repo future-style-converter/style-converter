@@ -48,3 +48,24 @@ with every capture and wire document byte-identical.** The reading of the net la
   attribution differs). The instrument is calibrated both ways before any lane lands.
 - **No divergence from `wave53-final`, so PLAN.md §10 needs no restated prediction**; it records that reading.
 
+## Landing and the single-writer sweep (2026-10-08)
+
+- **Landed** (`wave54-plan/land-units.sh`, rehearsed first in a throwaway worktree): base 1cde1f48 → 18 commits — the lane
+  records (fcf9fa9e), then 17 revert units in PLAN §4's order: L7 U1 · L1 P, M′ · L2 TB-android (+kt seam-1) · L6 RS (+tsx
+  seam-1), W1 · L5 U1-android (+kt seam-1; GO-SMALL, U2-ios held) · L4 OOF-android, OOF-ios, CBB-android (+kt seam-1),
+  GAP-android, GAP-ios · L3 U1, U2-android (+kt seam-1), U2-ios (+swift seam-2), U3 (+seam-3), U3b (+seam-3b). HEAD d64d4c6e.
+  L1's patch replay reproduced the lane's three files byte-exact. Working tree clean after landing.
+- **Pre-landing windows**: [W-L6] step 0 → BRANCH R (V1 26 / V3 46 / V5 46, V6 boxes 4/5 = 26); [W1] marker probe ALL PASS;
+  [W2] converter hop ALL PASS (23 → 29); [W2b] css-counter-styles 32 identical · 15 renumbered · 1 content-changed, selectors
+  48 identical, css-anchor-position only anchor-center-safe-rtl (`wave54-rtl-marker-bake/orchestrator-windows.out.txt`).
+- **Sweep** (`sweep-landed.txt`, tree d64d4c6e, 21:06 → 21:11 UTC): tooling **2329** (2325 pass, 4 env-gated skips) ·
+  conformance valid · web **1379** · web-harness **344** · converter **562** · compose **3491** · android-harness **169**
+  (task executed) · swiftui **2212** · ios-harness **30/30** on the simulator. Doc tables restamped; `doc-staleness-check.sh`
+  exit 0.
+- **[W-L3]** the gate-flag wire differential (30 sections, pre 1cde1f48 vs post d64d4c6e, worktrees with the gitignored
+  inputs symlinked): first attempt mis-invoked with a relative out dir (the script `cd`s into each tree) — re-run with an
+  absolute one; result below. Noted for the lane's script: it prints `exit 0` with 30 one-sided sections, which should be a
+  failure.
+
+WL3_PLACEHOLDER
+

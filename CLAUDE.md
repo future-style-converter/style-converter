@@ -287,13 +287,13 @@ Gradle commands need JDK 21):
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 551 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1369 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3428 |
-| android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 168 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2192 |
-| web-harness (vitest) | `npm -w apps/web-harness run test` | 330 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 2291 |
+| converter (Kotlin) | `./gradlew :converter:test` | 562 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1379 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3491 |
+| android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 169 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2212 |
+| web-harness (vitest) | `npm -w apps/web-harness run test` | 344 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 2329 |
 | ios-harness app (XCTest — needs a simulator, so it is outside the device-less sweep) | `(cd apps/ios-harness && xcodebuild test -project StyleConverterTest.xcodeproj -scheme StyleConverterTestTests -destination 'platform=iOS Simulator,name=<a booted device>')` | 30 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
@@ -344,14 +344,14 @@ Three different numbers, all true — do not conflate them:
   type — it does NOT mean a dedicated applier renders the property natively.
   Some registered appliers are intentional no-op + TODO where no mobile
   analogue exists (speech/, regions/, print/, …).
-- **Real-applier floor: Android 15 / 558 · iOS 70 / 558 · Web 516 / 558**.
+- **Real-applier floor: Android 16 / 558 · iOS 70 / 558 · Web 516 / 558**.
   The stricter per-property bar — a dedicated `<Name>Applier.<ext>` file
   exists — is far lower on mobile (`coverage-audit.mjs` prints it as the
   `real:` line, alongside `registered:`). Caveat: `real` under-counts
   grouped appliers — files like Compose `LayoutApplier.kt`, iOS
   `FlexboxApplier.swift`, or web `PaddingApplier.ts` render many
   properties from one file whose basename matches at most one IR name, so
-  the raw dedicated-applier file counts (Android 44 · iOS 94 · Web 520)
+  the raw dedicated-applier file counts (Android 45 · iOS 94 · Web 520)
   sit above this per-property floor.
 - **Verified rendering coverage: 91/550 (~17%)**. Only 91 properties pass
   the strict bar — SSIM ≥ 0.95 on every value variant on every platform
