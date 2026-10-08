@@ -165,7 +165,8 @@ object GapDecorationSegments {
         val out = mutableListOf<GapSegment>()
         for (i in 0 until lines.size - 1) {
             val gap = GapInterval(lines[i].cross.end, lines[i + 1].cross.start)
-            if (gap.isEmpty) continue
+            // Touching lines (zero gap) still position a rule (wave 54, L4).
+            if (!gap.isPositionable) continue
             val band = GapIntervals.band(gap, spec.effectiveWidthPx)
             val cuts = if (spec.breakMode == GapRuleBreak.INTERSECTION) {
                 lines[i].mainGaps + lines[i + 1].mainGaps
