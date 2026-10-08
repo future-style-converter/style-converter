@@ -1,0 +1,27 @@
+{
+  "_comment": [
+    "Label-EXEMPT baseline stems for tools/visual/label-chrome-tripwire.test.mjs (checker: tools/visual/label-chrome-check.mjs).",
+    "docs/DYNAMIC_CAPTURE.md §5 'When': the harness label is drawn exactly once per capture IFF the composed capture root has zero composed children AND no non-empty text (and the run is not WPT / TITAN-inbox / composed). Containers and text-bearing roots get NO label, on all three platforms.",
+    "The tripwire derives the expected glyph set P from the PNG file name, so without this list it demands a label on every committed stem: the first container / text-root captures ever offered to tools/visual/baseline/ (fixtures/combinations/all-then-color.json, wave 53 seeding 77fe41e8) went red (i) on all three platforms although the pictures are what the contract asks for (tools/titan/results/wave54-plan/label-chrome-all-reset.md §0, §2).",
+    "Each entry is VERIFIED structurally by the tripwire, independent of every pixel and every runtime: the named fixture must declare >= 1 node of the stem's component name (any depth), every such node must be a container (non-empty `children`) or a text root (non-empty `_text`) matching `why`, and the stem must have a committed triplet once the fixture has any committed baseline (test-all.sh _gate_fixture_has_baselines). A leaf listed here is red: a childless textless root IS labelled.",
+    "A verified exempt stem is checked with P = empty (band rows 0..15 byte-identical across platforms when they are ground on all three) plus clause (iv): the name's would-be label must NOT be fully drawn on any platform.",
+    "Never infer an entry from the pixels (a label lost on all three platforms by a predicate regression would pass) or from (index, name) matching (000_Sizing_Fixed is a leaf in visual-test.json and a text root in visual-test-controls.json). Add an entry only with the fixture node in hand; the tripwire prints a HINT line naming candidates when a stem's label is absent on all three."
+  ],
+  "exempt": {
+    "001_ATC_PropsThenAll_InGreenParent": {
+      "fixture": "fixtures/combinations/all-then-color.json",
+      "why": "container",
+      "_comment": "The 160x60 green parent holding the `all: revert` child `reset`; the root itself declares no `all`. Its child, captured standalone as 002_reset, IS labelled."
+    },
+    "003_ATC_InitialUnderRedParent": {
+      "fixture": "fixtures/combinations/all-then-color.json",
+      "why": "container",
+      "_comment": "The 200x60 blue parent holding the `all: initial` child `span`; the root itself declares no `all`. Its child, captured standalone as 004_span, IS labelled."
+    },
+    "005_ATC_DirectionSurvives": {
+      "fixture": "fixtures/combinations/all-then-color.json",
+      "why": "text",
+      "_comment": "The one text row: `_text` \"123\" (rtl digits at the inline-start edge). A text-bearing root gets no label whatever its `all` declaration."
+    }
+  }
+}
