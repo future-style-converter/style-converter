@@ -1,0 +1,20 @@
+== wave54-open (opening gate of wave 54: dev 7cce3b22 = wave-53 squash; same macOS 27.0.1 / Xcode 27.0 host) — 2026-10-08T13:16:05Z — HEAD 7cce3b22
+android  serial=emulator-5554  built app-debug.apk sha1=c8b17a69d729217358e7ce5a4d5b6b2151ddc3e1  installed base.apk sha1=c8b17a69d729217358e7ce5a4d5b6b2151ddc3e1
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=62d5b2b9f7e6b15eba6c57bbd2666c06496ca67b  installed .app digest=62d5b2b9f7e6b15eba6c57bbd2666c06496ca67b
+ios      MATCH
+
+== wave54-open fixture-net launch (--skip-corpus; same tree 7cce3b22) — 2026-10-08T14:35:53Z — HEAD 7cce3b22
+android  serial=emulator-5554  built app-debug.apk sha1=c8b17a69d729217358e7ce5a4d5b6b2151ddc3e1  installed base.apk sha1=c8b17a69d729217358e7ce5a4d5b6b2151ddc3e1
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=MISSING  installed .app digest=62d5b2b9f7e6b15eba6c57bbd2666c06496ca67b
+ios      MISMATCH
+# ^ read 14:35:4x UTC, seconds after `provision rc=0`: `BASELINE=1 ./test-all.sh --gate-set` had ALREADY started rebuilding the iOS harness .app for its first fixture (the provision build is replaced within seconds — the "read right after provisioning" rule is a race on the net launch). The installed digest 62d5b2b9… is the wave-53 corpus launch's build of the same sources (the only Swift change since, U2's comment, was reverted). Re-read after the net's first fixture below.
+
+== wave54-open fixture-net launch, second read (after the net's first fixture rebuilt and reinstalled the iOS harness) — 2026-10-08T14:53:07Z — HEAD 7cce3b22
+android  serial=emulator-5554  built app-debug.apk sha1=c8b17a69d729217358e7ce5a4d5b6b2151ddc3e1  installed base.apk sha1=MISSING
+android  MISMATCH
+# ^ the second read fired on `fixture net rc=` — AFTER the driver had torn the emulator down, so the installed side is vacuous (the first read above had Android MATCH while the emulator was up). The iOS second read MATCHES, and its digest equals the wave-53 corpus launch's: the harness .app build is deterministic for these sources.
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=62d5b2b9f7e6b15eba6c57bbd2666c06496ca67b  installed .app digest=62d5b2b9f7e6b15eba6c57bbd2666c06496ca67b
+ios      MATCH
+
