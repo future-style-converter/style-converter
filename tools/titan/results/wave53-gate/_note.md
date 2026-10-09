@@ -236,3 +236,8 @@ label: a harness defect, queued (BACKLOG obligation 0(e)). The net's all-then-co
 12 oracle checks, 0 violations) stands as a measurement of that run; the committed tree keeps the fixture gate-only, as
 at `wave53-open`. No capture or score of `wave53-final` is affected.
 
+*Correction (wave 54, L7 label-chrome): the premise above was wrong — the `all` reset never reaches the chrome on any platform. The three
+canvases are containers / a text root, which the capture contract (`docs/DYNAMIC_CAPTURE.md` §5) labels with NO chrome; the tripwire's
+oracle lacked that clause (and the glyph counts were 437 / 369 / 293, one per stem name, not "437/437 for all three"). Fixed in the
+tooling and the baselines seeded in wave 54 (`tools/titan/results/wave54-label-chrome/_note.md`).*
+

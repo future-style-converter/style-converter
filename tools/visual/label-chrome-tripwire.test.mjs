@@ -34,12 +34,12 @@
 //
 // NEGATIVE CONTROL (proof of teeth), executed 2026-09-16 on campaign/wave51-labels HEAD
 // 8c4ad393 — the PRE-refresh baselines, label still INSIDE the box at its content-box
-// origin: 130/130 stem tests red, every one on (i) (111 stems in band-identical mode,
+// origin: 130/136 stem tests red, every one on (i) (111 stems in band-identical mode,
 // 19 in glyph-mask mode = the design's 19-stem band-paint list; 6 of those 19 — 024,
 // 027, 032, 037, 082, 098 — also red on (iii), the under-glyph paint differing ×3).
 // Run: 136 tests, 6 pass (geometry + synthetic controls), 130 fail. This file goes
 // green ONLY after the PR's UPDATE_BASELINE refresh relocates the label into the band
-// on all 390 PNGs — until then it is the PR's own red gate, by design. The synthetic
+// on all 408 PNGs — until then it is the PR's own red gate, by design. The synthetic
 // tests prove the SAME checker passes a correct triplet and fails each named mutation.
 // WAVE-54 CONTROL (lane L7, U1): on the 18 all-then-color PNGs of 77fe41e8 (withdrawn
 // at the wave-53 ship) the pre-(iv) rule is red (i) on 001/003/005 ×3 (437/369/293 glyph
