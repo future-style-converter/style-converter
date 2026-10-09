@@ -81,7 +81,10 @@
 //     OWNED BY ITS ENCLOSING ROOT — bidi-marker-bake.mjs reads Chromium's
 //     marker string/box/glyphs, and the item gets `list-style-type: none`;
 //     anything it cannot honour is stamped `marker-not-baked` on the item,
-//     never dropped silently.
+//     never dropped silently — including a paint effect (opacity, transform,
+//     filter, clip-path, overflow, visibility, text-shadow) on the item or a
+//     box between it and the root, which a root-owned run would escape
+//     (bidi-marker-paint.mjs; wave-54 S1 should-fix S6).
 //
 // ACTIVATION (opt-in, same shape as the wave-16 post-load mode):
 //   BIDI_BAKE=1 node tools/titan/extract-fixture.mjs <paths>...
@@ -136,7 +139,10 @@ import { fixtureStem } from './safe-name.mjs';
 // Wave-54 L1 unit M′: a list item's ::marker inside a bake root, baked as
 // positioned runs (that module's banner: the walker sees text nodes only, so
 // the marker's direction-dependent SIDE used to be dropped silently).
-import { collectMarkerFacts, planMarker } from './bidi-marker-bake.mjs';
+import { collectMarkerFacts, planMarker, MARKER_STAMPS } from './bidi-marker-bake.mjs';
+// Wave-54 S1 S6: the paint-effect decline of that marker bake (its banner: a
+// root-owned run escapes the item's opacity / transform / clip / visibility…).
+import { markerPaintLoss } from './bidi-marker-paint.mjs';
 // The browser-ref rendering contract: same launch flags, same 358-wide
 // UNPADDED white canvas, same embedded Inter faces + line-height pin.
 // Geometry must be measured under the environment the ref PNGs and the
@@ -934,7 +940,11 @@ export function planBidiBake(walk) {
     const k = e.path.join('.');
     if (isRootPath(e.path) || e.rectCount === 0 || e.tag === 'br') continue;
     const rootPath = rootKeys.find((rp) => isDescendantPath(rp, e.path));
-    const m = planMarker(walk.markers?.[k], originOf.get(rootPath.join('.')), runsByPath.get(k)?.[0]);
+    let m = planMarker(walk.markers?.[k], originOf.get(rootPath.join('.')), runsByPath.get(k)?.[0]);   // `let`: S6 may decline it
+    // S1 S6: a PLANNED marker (runs) whose item→root chain carries a paint
+    // effect would lose it under the root (css-lists-3 §3.1: the marker is the
+    // item's) — declined instead, item unchanged + `marker-not-baked`.
+    if (m?.runs && markerPaintLoss(walk.markers[k], walk.elements, e.path, rootPath)) m = { lossy: [MARKER_STAMPS.notBaked] };
     if (m) markers.set(k, { ...m, rootPath });
   }
 

@@ -949,15 +949,21 @@ import {
   planMarker, parseSnapshotMarkers, matchMarkers, collectMarkerFacts, MARKER_PROBE_EPS, MARKER_STAMPS,
 } from './bidi-marker-bake.mjs';
 import { bakeCounterStyles } from './counter-style-bake.mjs';
+import { MARKER_PAINT_INITIAL, markerPaintLoss, readMarkerPaintChains } from './bidi-marker-paint.mjs';
 
 // The computed ::marker style: the li's font + the UA tabular-nums (css-lists-3 Appendix A).
 const MARKER_STYLE = { ...CS_STYLE, fontVariantNumeric: 'tabular-nums' };
+// S1 S6: the item→<body> paint chain readMarkerPaintChains attaches (::marker,
+// li, ol, div#wrapper). counter-suffix declares no paint effect anywhere — its
+// source, the UA sheet and the canvas frame set none, and its per-test IR
+// carries none (lane note, "S1 fix pass") — so every entry reads initial.
+const CS_CHAIN = () => ['::marker', 'li', 'ol', 'div'].map((tag) => ({ tag, ...MARKER_PAINT_INITIAL }));
 // The probe's answer for one RTL item: logical chars, rects relative to the span
 // (RTL visual order: the suffix space leftmost, at the li's border edge).
 const rtlProbe = (glyph, gw, { cdp = true, y = 192 } = {}) => {
   const w = +(4.48 + 4.42 + gw).toFixed(2);
   return { direction: 'rtl', position: 'outside', type: 'x', image: false, contentStart: 48, contentEnd: 112,
-    style: MARKER_STYLE, text: `${glyph}. `, textModelled: false,
+    style: MARKER_STYLE, text: `${glyph}. `, textModelled: false, paintChain: CS_CHAIN(),
     cdpBox: cdp ? { x: 112, y, width: w, height: 24 } : null,
     glyphs: { width: w, chars: [
       { c: glyph, rects: [{ x: 8.9, y: 0, w: gw, h: 20 }] },
@@ -1023,7 +1029,7 @@ test('V2 unit M′: a ROOT list item (arabic-indic-101 shape) gets no marker run
 // offsets that reproduce those runs. Glyph tops are 0: planMarker subtracts
 // the span's own first top (VF3), so they cannot move a run.
 const cdpFacts = (type, text, boxW, y, glyphs) => ({ direction: 'rtl', position: 'outside', type, image: false,
-  contentStart: 48, contentEnd: 112, style: MARKER_STYLE, text, textModelled: false,
+  contentStart: 48, contentEnd: 112, style: MARKER_STYLE, text, textModelled: false, paintChain: CS_CHAIN(),
   cdpBox: { x: 112, y, width: boxW, height: 24 },
   glyphs: { width: +boxW.toFixed(2), chars: glyphs.map(([c, x, w]) => ({ c, rects: [{ x, y: 0, w, h: 20 }] })) } });
 const CS_MARKERS_CDP = {
@@ -1244,4 +1250,153 @@ test('VF3 unit M′: marker glyph tops drop the probe span\'s half-leading (a ta
   // Same tops as the text run (root-top 192 + 2) with or without the leading.
   assert.deepEqual(tops(planMarker(shifted(0), { x: 0, y: 192 }, first)), ['2px', '2px']);
   assert.deepEqual(tops(planMarker(shifted(14), { x: 0, y: 192 }, first)), ['2px', '2px']);
+});
+
+// ── 11. Wave 54 S1 should-fix S6 — the marker bake's PAINT-EFFECT decline ───
+//
+// bidi-marker-paint.mjs: the marker is the ITEM's (css-lists-3 §3.1), so a
+// root-owned marker run escapes every paint effect of the item, its ::marker
+// and each box below the root (opacity, transform, filter, clip-path,
+// overflow, and the inherited visibility / text-shadow the run does not
+// restate). Such an item is DECLINED — unchanged, stamped `marker-not-baked`;
+// the root's own effects still reach the runs and are not read. MUTATIONS
+// (executed, red → byte-exact restore → green, sha256): the lane note's
+// "S1 fix pass" (tools/titan/results/wave54-rtl-marker-bake/s1-fix/).
+
+// Depth-first component count (the fixture's id-keyed children maps).
+const countCmps = (n) => Object.values(n.children ?? n.components ?? {}).reduce((a, c) => a + 1 + countCmps(c), 0);
+// The clean plan's box at `p`, and one fact set with a single chain entry overridden.
+const boxAt = (plan, p) => plan.boxes.find((b) => b.path.join('.') === p);
+const withPaint = (key, at, over) => { const m = structuredClone(CS_MARKERS_CDP); Object.assign(m[key].paintChain[at], over); return m; };
+
+test('S6-1 paint decline: verbatim counter-suffix — an item with opacity .5 is DECLINED + stamped, the other three still bake', () => {
+  // Item 0.4.0 as Chromium would compute `li { opacity: .5 }`: the li entry
+  // only — opacity is not inherited, so its ::marker still reads 1.
+  const { bail, plan } = planBidiBake(counterSuffixWalk(withPaint('0.4.0', 1, { opacity: '0.5' })));
+  assert.equal(bail, null);
+  // The declined item keeps its own marker (no `none`) and carries the stamp.
+  assert.equal(boxAt(plan, '0.4.0').props['list-style-type'], undefined);
+  assert.deepEqual(boxAt(plan, '0.4.0').lossy, [MARKER_STAMPS.notBaked]);
+  // The decimal root keeps only item 0.4.1's two runs, on its row (top 26).
+  assert.deepEqual(runsOf(plan, '0.4').map((r) => [r.text, r.props.top]), [['.', '26px'], ['2', '26px']]);
+  // The three clean items are untouched by the decline: deep-equal to the clean plan.
+  const clean = planBidiBake(counterSuffixWalk(CS_MARKERS_CDP)).plan;
+  for (const p of ['0.4.1', '0.5.0', '0.5.1']) assert.deepEqual(boxAt(plan, p), boxAt(clean, p), p);
+  assert.deepEqual(runsOf(plan, '0.5'), runsOf(clean, '0.5'));
+  assert.deepEqual(plan.roots, clean.roots);
+  // The wire, on the VERBATIM frozen fixture: +4 components (the clean bake's
+  // +6 less the declined item's '.' and '1'); the item keeps its properties
+  // byte-for-byte and gains `_lossy` + `marker-not-baked`.
+  const fx = frozen(...CS_FIXTURE);
+  const n0 = countCmps(fx), before = structuredClone(findCmp(fx, 'counter-suffix__0__4__0').properties);
+  applyBidiBakePlan(fx, 'counter-suffix', { roots: plan.roots, boxes: plan.boxes, hides: [],
+    runs: plan.runs.filter((r) => !['foo', 'bar'].includes(r.text)) });
+  assert.equal(countCmps(fx), n0 + 4);
+  const item = findCmp(fx, 'counter-suffix__0__4__0');
+  assert.deepEqual(Object.keys(item.properties).filter((k) => k.startsWith('list-style')), Object.keys(before).filter((k) => k.startsWith('list-style')));
+  assert.equal(item._lossy, true);
+  assert.ok(item._lossyReasons.includes(MARKER_STAMPS.notBaked), item._lossyReasons.join());
+  assert.deepEqual(Object.keys(findCmp(fx, 'counter-suffix__0__4').children),
+    ['counter-suffix__0__4__0', 'counter-suffix__0__4__1', 'counter-suffix__0__4__2', 'counter-suffix__0__4__3']);
+  // Chromium's own counter-suffix chain is clean: no item there is declined.
+  for (const p of ITEMS) assert.equal(boxAt(clean, p).lossy, undefined, p);
+});
+
+test('S6-2 paint decline: each read effect on the item or its ::marker declines; the ROOT\'s own does not', () => {
+  // A non-initial computed spelling per key (CSSOM serialisations).
+  const effects = { opacity: '0.5', transform: 'matrix(1, 0, 0, 1, 5, 0)', filter: 'blur(1px)', clipPath: 'inset(0px)',
+    overflowX: 'hidden', overflowY: 'clip', visibility: 'hidden', textShadow: 'rgb(0, 0, 0) 1px 1px 0px' };
+  // Every key the reader reads is exercised here (a dropped key fails this line).
+  assert.deepEqual(Object.keys(effects), Object.keys(MARKER_PAINT_INITIAL));
+  const els = counterSuffixWalk().elements, item = [0, 4, 0], root = [0, 4];
+  assert.equal(markerPaintLoss(CS_MARKERS_CDP['0.4.0'], els, item, root), null);
+  for (const [k, v] of Object.entries(effects)) {
+    for (const at of [0, 1]) {                            // 0 = the ::marker pseudo, 1 = the li
+      const m = withPaint('0.4.0', at, { [k]: v });
+      assert.equal(markerPaintLoss(m['0.4.0'], els, item, root), `${k} ${v} on <${at ? 'li' : '::marker'}>`);
+      // planBidiBake declines exactly that item, stamped, and plans none of its runs.
+      const { plan } = planBidiBake(counterSuffixWalk(m));
+      assert.deepEqual(boxAt(plan, '0.4.0').lossy, [MARKER_STAMPS.notBaked], `${k} at ${at}`);
+      assert.equal(runsOf(plan, '0.4').length, 2, `${k} at ${at}`);
+    }
+  }
+  // The ROOT (`ol`, entry 2) and its ancestor (`div`, entry 3) paint over
+  // root-owned runs too, so their effects cost the marker nothing: not read.
+  for (const at of [2, 3]) {
+    const m = withPaint('0.4.0', at, { opacity: '0.5', overflowX: 'hidden' });
+    assert.equal(markerPaintLoss(m['0.4.0'], els, item, root), null, `entry ${at}`);
+    assert.equal(boxAt(planBidiBake(counterSuffixWalk(m)).plan, '0.4.0').lossy, undefined, `entry ${at}`);
+  }
+});
+
+test('S6-3 paint decline: a box BETWEEN the item and its root is read; the root is not', () => {
+  // ol (root, 0.4) > div (0.4.0) > li (0.4.0.0): the chain ::marker, li, div, ol, div#wrapper.
+  const els = [el([0], {}), el([0, 4], { tag: 'ol' }), el([0, 4, 0], { tag: 'div' }), el([0, 4, 0, 0], { tag: 'li' })];
+  const chain = (over) => ['::marker', 'li', 'div', 'ol', 'div'].map((tag, i) => ({ tag, ...MARKER_PAINT_INITIAL, ...(over[i] ?? {}) }));
+  const loss = (over) => markerPaintLoss({ paintChain: chain(over) }, els, [0, 4, 0, 0], [0, 4]);
+  assert.equal(loss({}), null);
+  assert.equal(loss({ 2: { transform: 'matrix(1, 0, 0, 1, 0, 9)' } }), 'transform matrix(1, 0, 0, 1, 0, 9) on <div>');
+  assert.equal(loss({ 2: { overflowY: 'hidden' } }), 'overflowY hidden on <div>');
+  // Entry 3 is the root: its own effect still reaches the root-owned runs.
+  assert.equal(loss({ 3: { filter: 'blur(2px)' } }), null);
+});
+
+test('S6-4 paint decline: an unmeasured, failed, short or misaligned chain DECLINES — never a silent "clean"', () => {
+  const els = counterSuffixWalk().elements, item = [0, 4, 0], root = [0, 4];
+  const f = CS_MARKERS_CDP['0.4.0'];
+  const loss = (paintChain) => markerPaintLoss({ ...f, paintChain }, els, item, root);
+  assert.equal(loss(undefined), 'paint chain unmeasured');
+  assert.equal(loss({ error: 'page gone' }), 'paint chain unmeasured (page gone)');
+  assert.equal(loss(CS_CHAIN().slice(0, 1)), 'paint chain misaligned at 1: <none> for <li>');
+  assert.equal(loss(CS_CHAIN().map((e, i) => (i === 1 ? { ...e, tag: 'p' } : e))), 'paint chain misaligned at 1: <p> for <li>');
+  // A key the browser does not expose reads null: unmeasured, so a loss.
+  assert.equal(loss(CS_CHAIN().map((e, i) => (i === 1 ? { ...e, opacity: null, textShadow: null } : e))), 'opacity null on <li>');
+  // Through planBidiBake: the item is declined + stamped, the others bake as before.
+  const m = structuredClone(CS_MARKERS_CDP);
+  delete m['0.5.1'].paintChain;
+  const { plan } = planBidiBake(counterSuffixWalk(m));
+  assert.deepEqual(boxAt(plan, '0.5.1').lossy, [MARKER_STAMPS.notBaked]);
+  assert.deepEqual(runsOf(plan, '0.5').map((r) => r.text), ['א.']);
+  assert.equal(runsOf(plan, '0.4').length, 4);
+});
+
+test('S6-5 paint chain read: collectMarkerFacts attaches the REAL in-page chain — ::marker first, item → below <body>; a fault declines', async () => {
+  // A tiny DOM, body > div > ol > li, the li at item 0.4.0's walked rect;
+  // getComputedStyle answers per node (the pseudo distinguishable).
+  const saved = ['document', 'getComputedStyle'].map((k) => [k, Object.getOwnPropertyDescriptor(globalThis, k)]);
+  const body = { tagName: 'BODY', parentElement: null };
+  const div = { tagName: 'DIV', parentElement: body };
+  const ol = { tagName: 'OL', parentElement: div };
+  const li = { tagName: 'LI', parentElement: ol, getBoundingClientRect: () => ({ left: 48, top: 192, width: 64, height: 24, right: 112 }) };
+  const styles = new Map([[li, { opacity: '0.25' }], [ol, { filter: 'blur(1px)' }], [div, {}], [body, { opacity: '0' }]]);
+  globalThis.document = { body, getElementsByTagName: (t) => (t === 'li' ? [li] : []) };
+  globalThis.getComputedStyle = (n, pseudo) => ({ ...MARKER_PAINT_INITIAL, ...(pseudo ? { textShadow: 'marker' } : styles.get(n)) });
+  try {
+    let evals = 0;
+    const page = { createCDPSession: async () => ({ send: async () => ({ strings: [], documents: [] }), detach: async () => {} }),
+      evaluate: async (fn, arg) => { evals++; return fn(arg); } };
+    const facts = await collectMarkerFacts(page, counterSuffixWalk().elements);
+    // The probe + the chain read: two page round-trips, no more.
+    assert.equal(evals, 2);
+    // The re-found item gets its chain: the pseudo, then li → ol → div; <body> excluded.
+    const want = [['::marker', { textShadow: 'marker' }], ['li', { opacity: '0.25' }], ['ol', { filter: 'blur(1px)' }], ['div', {}]];
+    assert.deepEqual(facts['0.4.0'].paintChain, want.map(([tag, o]) => ({ tag, ...MARKER_PAINT_INITIAL, ...o })));
+    // Items the probe could not re-find stay exactly the probe's error fact.
+    for (const p of ['0.4.1', '0.5.0', '0.5.1']) assert.deepEqual(facts[p], { error: 'list item not re-found by rect' }, p);
+    // markerPaintLoss reads it in chain order: the pseudo's text-shadow (entry 0) is the first loss.
+    assert.equal(markerPaintLoss(facts['0.4.0'], counterSuffixWalk().elements, [0, 4, 0], [0, 4]), 'textShadow marker on <::marker>');
+    // A fault in the chain read leaves `{ error }` on the measured fact — declined, never thrown.
+    const faulty = { evaluate: async () => { throw new Error('chain gone'); } };
+    const f2 = await readMarkerPaintChains(faulty, { '0.4.0': { text: '1. ' }, x: { error: 'e' } },
+      [{ key: '0.4.0', tag: 'li', rect: {} }, { key: 'x', tag: 'li', rect: {} }]);
+    assert.deepEqual(f2, { '0.4.0': { text: '1. ', paintChain: { error: 'chain gone' } }, x: { error: 'e' } });
+    assert.equal(markerPaintLoss(f2['0.4.0'], [], [0, 4, 0], [0, 4]), 'paint chain unmeasured (chain gone)');
+    // Nothing measured → no page round-trip at all.
+    let calls = 0;
+    await readMarkerPaintChains({ evaluate: async () => { calls++; } }, { y: { error: 'e' } }, [{ key: 'y', tag: 'li', rect: {} }]);
+    assert.equal(calls, 0);
+  } finally {
+    // Restore both globals exactly (node has neither).
+    for (const [k, d] of saved) if (d) Object.defineProperty(globalThis, k, d); else delete globalThis[k];
+  }
 });

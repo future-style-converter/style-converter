@@ -26,14 +26,15 @@
 // (`marker-box-modelled`; a box missing the advance by > EPS takes it too,
 // `marker-probe-mismatch`); no CDP string → the counter-style bake's on a CLONE,
 // ". " suffix space restored (`marker-text-modelled`). An image marker, no first-
-// line run, a marker font unlike the first line's or an item not re-found by its
-// rect leaves it as it was, stamped `marker-not-baked`.
+// line run, a font unlike that run's, an item not re-found by rect or a paint
+// effect below the root (bidi-marker-paint.mjs) → unchanged, `marker-not-baked`.
 
 // The bidi bake's own run machinery — one definition of a run, never a copy.
 import { groupCharRuns, runProperties, hasStrongLtrCodepoint, hasStrongRtlLetter, RUN_ADJACENCY_EPS } from './bidi-bake.mjs';
-// The string fallback (the counter-style bake, on a clone) and the shared path ⇄ component map.
+// The string fallback (the counter-style bake, on a clone), the shared path ⇄ component map and the S6 paint chain.
 import { bakeCounterStyles } from './counter-style-bake.mjs';
 import { componentAtPath } from './post-load-extract.mjs';
+import { readMarkerPaintChains } from './bidi-marker-paint.mjs';
 
 // The probe self-check tolerance (CSS px, probe advance vs Chromium's box width) and
 // the `_lossyReasons` stamps this module may put on a list-item box.
@@ -145,7 +146,7 @@ export async function collectMarkerFacts(page, elements, { fixture = null, html 
     // The CDP half joins the in-page half (an error fact stays text-less: declined); `textModelled` records the fallback.
     for (const it of items.filter((i) => facts[i.key] && !facts[i.key].error)) Object.assign(facts[it.key], { text: it.text,
       cdpBox: cdp[it.key]?.box ?? null, textModelled: !cdp[it.key]?.text && it.text !== null });
-    return facts;
+    return await readMarkerPaintChains(page, facts, items);   // + each measured item's paint chain (S1 S6, bidi-marker-paint.mjs)
   } catch (err) {
     // A text-less fact makes planMarker decline the item with `marker-not-baked`.
     return Object.fromEntries(cands.map((c) => [c.key, { error: String(err?.message ?? err) }]));
