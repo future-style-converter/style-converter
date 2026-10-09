@@ -78,3 +78,31 @@ plus the 18 U3 documents, four of them the same hyphenate-character files). The 
 byte-identical. **R4b holds on the landed tree before any device run; no bisection needed.** (The lane's static differential
 without the bake flags had predicted the same 19 for L3 — the flags did not widen the radius.)
 
+## Stage 1 — `wave54-pre` (2026-10-09 07:11 → 07:25 UTC; CSS2, css-counter-styles, css-tables, css-text; tree 9d7f4250)
+
+Host after stopping our processes: load1 4.92, free+inactive 4318 MB. Installed builds MATCH (`build-hashes.txt`). **4 / 4 sections
+OK on attempt 1, every column full.** Read-out in `stage1/` (the pre-registered order: base first, Δ = pre − open):
+
+- `score-gate --movers 0` → `probe-readout.mjs --stage1`: **rule 1 fired 0 · rule 2 fired 0 · rule 3 fired 0 · leak signals 0**
+  over 548 compared cells (525 non-carrier cells read, 205 of them must-not-move lines, none moved); 17 rows of other lanes
+  recorded for stage 2. At the record threshold: gained 11 · lost 0 · movers 9 in the four sections.
+- Controls (union carriers, probed sections): web 185/192 identical + 7 carriers · iOS 186 + 6 · Android 183 + 9 · wire 8
+  content-changed carriers + 15 renumbered · **0 leaks — HOLDS**.
+- **S6 instrument check** (pre-registered in §10 item 6): the css-counter-styles per-test IR is byte-identical to the [W-L3]
+  post tree 48/48 and counter-suffix carries no `marker-not-baked` stamp — the paint-chain reader did not decline anything,
+  so the [M] rows below measure M′, not the instrument.
+- **Geometry gate (L1, L2)**: 21 keys — PASS 18 · FAIL 0 · UNMEASURED 3 (the css-lists controls, not in these sections) ·
+  gating 9 / 9 PASS. `[M] counter-suffix web / ios / android` PASS on `rtl-marker-bake.geometry.py` and on
+  `lists-bakes.geometry.py` (with the x134 ±2 marker-left rule from the S1 fix pass); `[P] bidi-lines-001 / -002 android` PASS;
+  `006 android` PASS on both table-body probes (square rows 56–75, x24–43, no stray ink).
+- **Cells**: counter-suffix android P 0.9547 → **P 0.989** (predicted ≈0.989 with M′; the wave-53 attempt gave 0.9793 with the
+  markers on the wrong rows), ios 0.9802 → **0.9873**, web 0.9818 → **1**; bidi-lines-001 android f 0.8934 → **P 0.9629**,
+  bidi-lines-002 android 0.9534 → **0.9818**; s-11-1-1b-006 android P 0.9944 → **P 0.9983**.
+- **Pictures, looked at** (`tools/titan/runs/wave54-pre/sections/…`): counter-suffix reads `foo .1 / bar .2 / foo .א / bar .ב` on
+  Android, iOS and web — the root-owned marker runs land on their own rows on Compose this time (the Column no longer sizes
+  them; the plan's §2 L1 mechanism held); iOS rows 3–4 still show the Hebrew period before the letter (the pre-registered
+  "stays DEGENERATE rows 3–4"). The Android errata square is a single black square with no second cell.
+
+**Decisions (expectations `stage1Decision`): P KEPT · M′ KEPT · TB-android KEPT. No `REVERTED` entry; `plan-build.py` unchanged.**
+Stage 2 (`wave54-probe`, 26 sections) follows on the same tree.
+
