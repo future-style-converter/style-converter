@@ -113,8 +113,9 @@ Read-out in `stage2/` (score, ab-diff, probe-readout, controls, geometry, predic
 gained 31 · lost 0 · movers 58 · 0 downward movers · controls HOLD with 0 leaks (wire 23 + 15) · S6 instrument check holds.
 Rules: rule 3 fired on two L3 iOS rows (restated — PLAN §10 item 7 ¶2); rule 4 fired on CBB-android's gating geometry row
 (**reverted**, `8deddc19` — ¶1); one geometry control mis-registered on a base picture (restated — ¶3). Pictures looked at for
-the three decisions: `stage2/sheets-gained/gained-03.png` rows 2 / 6, `gained-05.png` row 6, `stage2/sheets-movers/movers-02.png`
-row 5. After regeneration the geometry gate reads the probe as gating 30 / 30 PASS · control 112 / 112 PASS, and
+the three decisions: `stage2/sheets-gained/gained-03.png` rows 2 / 6, `gained-05.png` row 6, and for the restated control
+`stage2/sheets-movers/movers-02.png` row 5 — which is the WEB cell of block-ellipsis-002; the android cell (Δ +0.0012) has no
+sheet row and its three-line picture is the geometry read, `stage2/geometry-all.txt` line 48 (corrected at ship time). After regeneration the geometry gate reads the probe as gating 30 / 30 PASS · control 112 / 112 PASS, and
 `probe-readout.mjs` fires no revert rule and reports 11 leak signals = CBB-android's withdrawn carriers on the probe tree
 (`stage2/probe-readout.restated.txt`; the proof that the amended rules fail on the tree that had the unit). The remaining 13 review sheets are read at the closing gate.
 Next: [W-L7] seeding on this tree, the single-writer sweep, the closing gate `wave54-final`.
@@ -139,7 +140,9 @@ changed between 206d71d9 and ef20c977).
 `score-final.txt`, `geometry-final.json` / `.out.txt`, `adjudicate-final.txt`, `control-final-union.*`, `final/`):
 - **Score** wave54-open → wave54-final: web 1232/1372 → **1243/1372**, iOS 1125/1362 → **1131/1362**, Android 1115/1362 →
   **1128/1362** — **gained 30** (web 11 · iOS 6 · Android 13), **lost 0**, newly measured 0, unmeasured-now 0, **movers 51** at
-  |Δ| ≥ 0.005 (none downward); the `--movers 0` record lists 4066 cells with any Δ (the natives' 1–2 px font drift class).
+  |Δ| ≥ 0.005 (none downward); the `--movers 0` record carries every scored cell (4066 same-verdict rows, Δ 0 included) — only
+  **56 cells moved at all**: the 51 at ≥ 0.005 and 5 below it, every one a carrier, one of them negative
+  (`baseline-with-orthogonal-flow-001 web` −0.0004).
 - **Geometry gate** rc 0: 185 keys — gating **30 / 30 PASS**, control **112 / 112 PASS**, report 27 / 36 (the 9 FAILs are the
   pre-registered "expected WRONG until the target is fixed" rows: `compose-wpt-content-box-cb` abspos-autopos-htb/vlr/vrl-rtl
   android, `ua-heading-face` text-decoration-inset-005/-006/-014 ios + android), withdrawn 7 (CBB-android's keys, FAIL: the unit
@@ -180,8 +183,9 @@ changed between 206d71d9 and ef20c977).
 android MATCH on the same apk as the corpus launch, ios "built .app digest=MISSING" — the pre-registered race exactly (`test-all.sh`
 had already rebuilt the .app; the installed digest is the corpus launch's `38ea8fdc…`); annotated in `build-hashes.txt`, the
 record of value stays the corpus launch's block. Result: **exit 0 on all 9 gate fixtures** (`tools/titan/runs/wave54-final/gate-driver/fixture-net.log`): visual-test "no regressions vs
-baseline (327 platform-comparisons ran)", filter-sepia-amounts exit 0, the six gate-only combination fixtures exit 0 with 0 oracle
-violations (24 checks · 2 waived / 12 / 12 / 12 / 9 / 15), and **all-then-color against its committed baselines for the first time
+baseline (327 platform-comparisons ran)", filter-sepia-amounts exit 0 against its baselines (24 oracle checks · 2 waived), the six
+gate-only fixtures exit 0 — composition-test on the cross-platform gate alone (96 pairs, 4 known divergences, 0 unexpected; it prints
+no oracle line) and the five combinations with 0 oracle violations (12 / 12 / 12 / 9 / 15 checks) — and **all-then-color against its committed baselines for the first time
 at a closing gate: "no regressions vs baseline (18 platform-comparisons ran)", 12 oracle checks, 0 violations** — obligation 0(e)
 discharged on device.
 

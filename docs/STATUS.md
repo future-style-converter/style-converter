@@ -2675,7 +2675,7 @@ gate (predictions withdrawn, cells held to must-not-move, carriers
 withdrawn) and shown to fail on the probe tree itself. Every flipped or
 moved cell was looked at: 13 gains FAITHFUL, 11 movers FAITHFUL, 2 movers
 still failing as pre-registered (`hyphenate-character-001` / `-003`
-android: right breaks, wrong hyphen glyph). Fixture net exit 0 on all 9 gate fixtures. The all-then-color baselines seeded for that net were WITHDRAWN before the ship: the label-chrome tripwire (`tools/visual/label-chrome-tripwire.test.mjs`) found three of its six canvases without the harness label on ANY platform (437 / 369 / 293 glyph px ground, one count per stem name). Wave 54 (L7) traced the cause to the ORACLE, not the chrome: the three canvases are containers / a text root, which the capture contract (`docs/DYNAMIC_CAPTURE.md` §5) labels with NO chrome; the `all` reset never reaches the chrome on any platform. The tripwire learned the contract's "iff" and the baselines were seeded in wave 54, so the fixture stays gate-only and the finding is queued. Suites on
+android: right breaks, wrong hyphen glyph). Fixture net exit 0 on all 9 gate fixtures. The all-then-color baselines seeded for that net were WITHDRAWN before the ship: the label-chrome tripwire (`tools/visual/label-chrome-tripwire.test.mjs`) found three of its six canvases without the harness label on ANY platform (437 / 369 / 293 glyph px ground, one count per stem name). Wave 54 (L7) traced the cause to the ORACLE, not the chrome: the three canvases are containers / a text root, which the capture contract (`docs/DYNAMIC_CAPTURE.md` §5) labels with NO chrome; the `all` reset never reaches the chrome on any platform. The tripwire learned the contract's "iff" and the baselines were seeded in wave 54 (c941633e); the wave-54 closing gate compared the fixture against them. Suites on
 the shipped tree: converter 551 · web runtime 1369 · web-harness 330 ·
 compose 3428 · android-harness 168 · swiftui 2192 · tooling 2291 ·
 ios-harness XCTest 30/30 · IR conformance valid. Lessons that outlive the
@@ -2687,6 +2687,188 @@ counter gives every bake a wire shadow over the rest of its section
 measures the union of the lanes, and is read with the union carrier set.
 Gate record and every artifact: `tools/titan/results/wave53-gate/`; open
 items: `docs/BACKLOG.md`.
+
+**Wave 54 (2026-10-08 → 10-09) — seven lanes, probe-then-ship in two stages,
+one geometry revert, three A/B arms.** corpus-v6.20
+(`tools/titan/results/corpus-v6-20.json`): web 1243/1372 90.6%, iOS
+1131/1362 83.0%, Android 1128/1362 82.8% (corpus-v6.19: 1232 · 1125 · 1115);
+**30 cells gained (web 11 · iOS 6 · Android 13), 0 lost, 0 newly measured, 0
+unmeasured-now** against `wave54-open` over 4096 scored cells
+(`wave54-final`, tree ef20c977, 30/30 sections on attempt 1 — css-cascade
+43/43/43, every other section 48/48/48; 51 movers ≥ 0.005, none downward;
+669/669 must-not-move cells unmoved, 27 gating predictions missed 0, the
+adjudicator's R1–R5 hold, the union control holds with 0 leaks). The wave
+opened on an unchanged host: `wave54-open` = 0 gained / 0 lost / 0 movers
+(none even at |Δ| ≥ 0.00005) / 0 newly measured / 0 unmeasured-now against
+`wave53-final`, every capture on all three platforms and every wire document
+byte-identical (1435/1435 each), fixture net exit 0 ×9. Then seven lanes on
+the shared tree (17 revert units and 8 seam hunks landed in PLAN §4's
+pre-registered order, a combined-tree skeptic's fix pass on four of them,
+L7's seed after the probe): L1 — the bidi bake emits a padded bake root with
+`padding: 0`, so Compose, which anchors absolute runs at the content box,
+stops shifting every baked run by the padding (P, CSS 2.1 §10.1), and RTL
+list markers are baked as runs owned by the bake ROOT, so on Compose they
+take the root's absolute mount instead of the `<li>`'s Column cursor (M′:
+`counter-suffix` android P 0.9547 → 0.989, web 0.9818 → 1, iOS 0.9802 →
+0.9873, "foo .1 / bar .2 / foo .א / bar .ב" as the reference where wave 53's
+item-owned runs landed one run height (20 px) low; `bidi-lines-001`
+android f 0.8934 → P 0.9629); L2 — the anonymous table forest of a
+`display: table` body paints
+no fabricated cell stroke on Compose and each cell hugs its column's
+max-intrinsic width (TB-android, CSS 2.1 §17.2.1 / §17.5.2: `s-11-1-1b-006`
+android P 0.9944 → 0.9983, one square at x24–43 rows 56–75 where wave 53's
+reverted fixup drew an extra empty cell); L3 — `hyphenate-character` on
+three platforms: the reader keeps `""` and decodes css-syntax-3 escapes (U1,
+a value change inside the existing string variant, no freeze event),
+Compose's pre-break fold and SwiftUI's line breaker paint the declared
+string (U2-android / U2-ios; SwiftUI also stops re-wrapping a line that
+overflows only by its own hyphen), the extractor's `<br>` that ends an
+interleaved text line is 0 px, not a 20-px blank line (U3, 54 brs in 18
+documents, CSS 2.1 §9.5), and a line-start `<br>` takes its host's declared
+line box (U3b, §10.8) — eight hyphenate-character gains (`-001` web / iOS /
+Android f 0.935 / 0.9287 / 0.9301 → P 0.985 / 0.9611 / 0.9802, `-003` f
+0.8812 / 0.9337 / 0.9292 → P 0.9825 / 0.957 / 0.9792, `-004` web / Android f
+0.9249 / 0.905 → P 0.9832 / 0.9774), each retired from
+degenerateByConstruction by adjudicate R6 on "→ GEOMETRY OK", while U3's
+blank-line removal flipped `clip-path-filter-order` ×3 (f 0.8586 / 0.8578 /
+0.8406 → P 1 / 0.9978 / 0.9548), `balance-grid-container` web (f 0.9207 →
+P 1) and `backdrop-filter-clip-rect` / `-edge-clipping` / `-paint-order`
+android (f 0.9315 / 0.929 / 0.929 → P 0.9559 / 0.9533 / 0.9533) and lifted
+the four `block-ellipsis` web cells (P 0.9735–0.9868 → 0.998–1); L4 — a pure
+containing-block rule table (contain layout / paint / strict / content, a
+non-empty filter or backdrop-filter, will-change of those) OR-ed into the
+hoist's one choke point on Compose (`CanvasRootHoist`) and SwiftUI
+(`FixedHoist`), a fixed box hoisting to the canvas only with an inset
+(OOF-android / OOF-ios, CSS Positioned Layout 3 §3.1: `contain-content-003`
+android f 0.9405 → P 0.9967, `backdrop-filter-containing-block` iOS /
+Android f 0.7955 / 0.7506 → P 0.9987 / 0.9977, and eight passing cells
+DEGENERATE → faithful, the red square beside or under the green one gone —
+`position-relative-003` / `-004` and
+`change-insets-inside-strict-containment-nested` iOS / Android P 0.9594 /
+0.9589 → 0.9974 / 0.9967, `static-fixed-inside-abspos` P 0.9841 / 0.9835 →
+0.9974 / 0.9967), and a zero-extent flex gap keeps its position so its
+column-rule segments paint (GAP-android / GAP-ios, css-gaps-1:
+`flex-gap-decorations-033` iOS / Android f 0.94 → P 0.9993 / 1); L5 — the UA
+heading face on Compose, the twin of the Swift rule (`UAElementFontRule`:
+h1…h6 and sub / sup applied before `DynamicValueResolver`, so `em` / `ch`
+resolve against the UA face; GO-SMALL, U2-ios held:
+`block-in-inline-015-print` android f 0.9489 → P 0.9986); L6 — the web
+runtime moves a paint-inert out-of-flow member that splits a word under
+`hyphens: auto` after the re-joined word (W1, css-text-3 §5.1:
+`hyphens-out-of-flow-002` web f 0.9411 → P 1, every box "high-/way") and the
+web harness's composed canvas puts one collapsed space between the
+inline-level roots the extractor stamped `ws-after` (RS, CSS Text 3 §4.1:
+`box-sizing-007` / `-008` / `-022` web f 0.9036 / 0.8943 / 0.9442 → P 0.9854
+/ 0.9741 / 0.9725, thirteen more box-sizing web cells P 0.9538–0.9713 →
+0.9725–0.9843, two boxes side by side where the open capture had one wide
+box); L7 — the label-chrome tripwire learns the capture contract's "iff"
+(`docs/DYNAMIC_CAPTURE.md` §5: containers and text roots carry no harness
+label; a structurally verified exempt manifest,
+`tools/visual/label-chrome-exempt.json`) and the all-then-color fixture's 18
+baselines are seeded, byte-identical to the wave-53 capture (390 → 408
+baselines, tripwire 154/154). **Probe-then-ship in two stages.** Stage 1
+(`wave54-pre`: CSS2, css-counter-styles, css-tables, css-text) measured the
+three units that re-do wave 53's reverts — P, M′, TB-android — first: rules
+1–3 fired 0, 0 leaks, gating geometry 9/9 PASS, all three KEPT. Stage 2
+(`wave54-probe`, 26 sections: 31 gained, 0 lost, 0 downward movers) took
+three decisions with their pictures looked at (PLAN §10 item 7):
+**CBB-android REVERTED under rule 4** (8deddc19) — content-box out-of-flow
+percentages sized against the content band (CSS 2.1 §10.2) improved
+`backdrop-filter-nested-border-radius-clip-3` android (f 0.9574 at open, P
+0.9668 at the probe) but its gating row printed GEOMETRY WRONG, green
+(36,36,215,115) vs ref (36,36,235,135), so the pass would have been exactly
+the degenerate one the geometry gate exists to refuse; L3's two iOS floors
+RESTATED, the units kept (rule 3 fired on `hyphenate-character-001` / `-003`
+iOS at P 0.9611 / 0.957 vs a 0.965 floor — replay magnitudes missed by ~0.02
+on faithful pictures; re-gated on P with GEOMETRY OK, a 0.95 floor and
+must-not-fall vs the probe, which the closing gate held to four decimals);
+and the `block-ellipsis-002` android control, pinned on the base picture's
+wrong line, restated to the measured one. The closing gate's instruments:
+geometry gating 30/30 PASS, control 112/112 PASS, report 27/36 (the 9 FAILs
+pre-registered "expected WRONG until the target is fixed"), CBB-android's 7
+withdrawn keys FAIL as they must; probe-readout rules 1–3 fired 0, leak
+signals 0; control web 1395/1435 identical + 40 carriers, iOS 1416 + 19,
+Android 1404 + 31, wire 23 content-changed + 15 renumbered, 0 outside the
+carriers; the probe → final differential is exactly the eight CBB-android
+carriers back toward base (nested-clip-3 android P 0.9668 → f 0.9574 the
+taken-back flip) and nothing else; red-square census PASSING red 156 (web 22
+/ iOS 62 / Android 72) over 86 tests and FAILING red 59, from wave53-final's
+164 / 62; installed builds MATCH on both platforms at the corpus launch, the
+iOS .app digest byte-identical to the probe's (no Swift change since). Every
+gained and moved cell was looked at, then an adversarial second reader
+re-read 29 of them (`final/cell-review.json`): gains **FAITHFUL 26 ·
+DEGENERATE 4**, all four pre-registered and not counted as earned
+(`scope-pseudo-element` web f 0.9353 → P 0.9629, bullets for the `::marker`
+"M" and the B/Foo wrap; `contain-content-011` android f 0.9284 → P 0.9849,
+"25" for "17"; `position-absolute-semi-replaced-stretch-other` web f 0.941 →
+P 0.9965, "abel"; `hyphenate-character-002` iOS f 0.9261 → P 0.9534,
+TextKit's emergency breaks); movers **FAITHFUL 36** (the review's eight
+DEGENERATE → faithful among them are the L4 cells, a floor: `expectations.json`
+also registered the thirteen box-sizing web movers and `-stretch-input` web
+DEGENERATE at open), **DEGENERATE 4** (pre-registered: `counter-suffix`
+android rows 5–6 and iOS rows 3–6, `block-ellipsis-002` iOS P 0.9813 →
+0.9928, `bidi-lines-002` android P 0.9534 → 0.9818), **HONEST_FAIL 11**
+(still f, none moved down; four Android ones now carry the bold UA heading:
+`counter-list-item` 0.7307 → 0.785, `text-decoration-color` 0.6164 → 0.672,
+`backdrop-filter-border-radius-change` 0.5977 → 0.6397,
+`-corner-shape-change` 0.4904 → 0.5296). The readers agreed on 28 of 29; the
+one disagreement, `hyphenate-character-004` iOS f 0.9134 → 0.9477, is a
+FAITHFUL picture under a failing score (every break and "/-/" string as the
+ref; the iOS monospace U+002D glyph is narrower) and a prediction MISS (the
+plan said P ≈0.979). Reader corrections folded into the review:
+`counter-list-item` android fails on spacing, not numbering;
+`bidi-lines-001` android's open rows were already right (its faults were
+horizontal); `box-sizing-022` web has no width residue;
+`backdrop-filter-clip-rect` android carries a 416-px red-under-blue
+paint-order residual outside the test's condition; `clip-path-filter-order`
+android's pass does not exercise the clip / filter order (the gain was the
+text block). **Three pre-registered A/B arms**, one section each, read
+arm-first so Δ = final − arm is the dropped unit's share (`final/ab-*.txt`):
+drop-W1 — 1 of 48 css-text web cells differs, `hyphens-out-of-flow-002` web
+f 0.9411 → P 1 is W1's alone; drop-M′ — 3 of 122 differ, the three
+`counter-suffix` cells (web P 0.9818 → 1, iOS 0.9802 → 0.9873, Android
+0.9815 → 0.989: the Android arm value is the plan's "≈0.9815 with P alone"
+exactly); drop-U3b — 12 of 144 differ, all hyphenate-character: U3b earns
+`-004` android f 0.9456 → P 0.9774, ~+0.02 on web / Android `-001` /
+`-003` and +0.03 on `-004` web (P 0.9534 → 0.9832), and costs every iOS cell
+0.016–0.027 (`-001` 0.9778 → 0.9611, `-003` 0.9758 → 0.957, `-002` 0.9692 →
+0.9534, `-004` P 0.9742 → f 0.9477) — the gate's one hyphenate-character
+prediction miss is U3b's, its iOS pictures still faithful with lines 1–2 px
+up. Every arm printed built == installed MATCH on both platforms, but the
+runner appended its records on the arm branch and the tree restore discarded
+them; `build-hashes.txt` carries a RECONSTRUCTED block that says what
+survived. Recovering it showed the apk sha1 is not build-reproducible (the
+same Compose sources gave 3e6173df… and 62384c7e…): built == installed MATCH
+is the evidence, apk sha1 equality across launches is not a check, and the
+iOS .app digest (38ea8fdc… on both probes, the gate and all three arms) is
+reproducible. Fixture net exit 0 on all 9 gate fixtures: visual-test "no
+regressions vs baseline (327 platform-comparisons ran)",
+filter-sepia-amounts against its baselines (24 comparisons; oracle 24
+checks, 2 waived, 0 violations), composition-test through the cross-platform
+gate (96 pairs, 4 known divergences, 0 unexpected), the five gate-only
+combination fixtures with 0 oracle violations (12 / 12 / 12 / 9 / 15
+checks), and **all-then-color against its committed baselines for the first
+time at a closing gate** — "no regressions vs baseline (18
+platform-comparisons ran)", 12 oracle checks, 0 violations: the BACKLOG
+obligation 0(e) discharged on device. The net launch's installed-build read
+showed the pre-registered race (Android MATCH on the same apk; the iOS built
+digest MISSING because test-all had already rebuilt the .app) and is
+annotated; the record of value is the corpus launch's block. Suites on the
+gate tree (the sweep on 2d068100): converter 562 · web runtime 1381 ·
+web-harness 344 · compose 3486 · android-harness 169 (re-run with
+`--rerun-tasks`) · swiftui 2212 · tooling 2340 (2336 pass, 4 env-gated
+skips) · ios-harness XCTest 30/30 · IR conformance valid. Lessons that
+outlive the wave: a floor on a geometry-gated row is the pass threshold, not
+a replay magnitude — the geometry row is the picture-correctness gate, and
+rule 3 read literally would have reverted the units behind two
+picture-correct flips; a probe decision that reverts a unit withdraws its
+carriers into must-not-move, so the re-read of the probe that still had the
+unit fails on them (CBB-android's 11 leak signals) and the closing gate
+reads 0 there; on an unchanged host the pipeline is byte-deterministic on
+all three platforms, not only web; an A/B runner that switches branches
+writes its records after the tree is restored; the apk sha1 is not
+build-reproducible, the iOS .app digest is. Gate record and every artifact:
+`tools/titan/results/wave54-gate/`; open items: `docs/BACKLOG.md`.
 
 
 ## Test suites
