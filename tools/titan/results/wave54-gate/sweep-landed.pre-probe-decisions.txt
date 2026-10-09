@@ -1,0 +1,15 @@
+# Wave 54 single-writer full sweep — tree 075059e8 (campaign/applier-campaign), started 2026-10-09T07:04:34Z
+# suite | rc | count line (as the tool prints it) | wall
+tooling            | rc=0 | # pass 2330 # fail 0  | 18s
+conformance        | rc=0 | IR conformance: all documents valid (v1 goldens + v2 goldens) | 4s
+web-runtime        | rc=0 |       Tests  1381 passed (1381) | 6s
+web-harness        | rc=0 |       Tests  344 passed (344) | 8s
+converter          | rc=0 | testcases=562 BUILD SUCCESSFUL in 26s | 26s
+compose            | rc=0 | testcases=3492 BUILD SUCCESSFUL in 29s | 30s
+android-app        | rc=0 | testcases=169 BUILD SUCCESSFUL in 930ms | 1s
+swiftui            | rc=0 | 	 Executed 2212 tests, with 0 failures (0 unexpected) in 45.623 (70.177) seconds | 137s
+ios-harness        | rc=0 | 	 Executed 30 tests, with 0 failures (0 unexpected) in 0.058 (0.068) seconds | 76s
+# finished 2026-10-09T07:09:40Z
+# tooling: # tests 2334 · # pass 2330 · # skipped 4 (env-gated); android-app task executed; raw logs in the session scratchpad (not kept)
+android-app rerun    | rc=0 | testcases=169 failures=0 BUILD SUCCESSFUL in 14s | 15s
+# addendum: android-app re-run with --rerun-tasks because sweep 2's pass was UP-TO-DATE (no :app source changed since sweep 1)
