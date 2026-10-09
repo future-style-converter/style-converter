@@ -11,3 +11,5 @@ swiftui            | rc=0 | 	 Executed 2212 tests, with 0 failures (0 unexpected
 ios-harness        | rc=0 | 	 Executed 30 tests, with 0 failures (0 unexpected) in 0.058 (0.068) seconds | 76s
 # finished 2026-10-09T07:09:40Z
 # tooling: # tests 2334 · # pass 2330 · # skipped 4 (env-gated); android-app task executed; raw logs in the session scratchpad (not kept)
+android-app rerun    | rc=0 | testcases=169 failures=0 BUILD SUCCESSFUL in 14s | 15s
+# addendum: android-app re-run with --rerun-tasks because sweep 2's pass was UP-TO-DATE (no :app source changed since sweep 1)
