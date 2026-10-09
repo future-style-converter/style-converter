@@ -106,3 +106,15 @@ OK on attempt 1, every column full.** Read-out in `stage1/` (the pre-registered 
 **Decisions (expectations `stage1Decision`): P KEPT · M′ KEPT · TB-android KEPT. No `REVERTED` entry; `plan-build.py` unchanged.**
 Stage 2 (`wave54-probe`, 26 sections) follows on the same tree.
 
+## Stage 2 — `wave54-probe` (2026-10-09 07:27 → 08:4x UTC; 26 sections; tree 206d71d9)
+
+Host after stopping our processes: load1 5.41, free+inactive 2937 MB. Installed builds MATCH. **26 / 26 sections OK on attempt 1.**
+Read-out in `stage2/` (score, ab-diff, probe-readout, controls, geometry, prediction cells, review sheets, red-square census):
+gained 31 · lost 0 · movers 58 · 0 downward movers · controls HOLD with 0 leaks (wire 23 + 15) · S6 instrument check holds.
+Rules: rule 3 fired on two L3 iOS rows (restated — PLAN §10 item 7 ¶2); rule 4 fired on CBB-android's gating geometry row
+(**reverted**, `8deddc19` — ¶1); one geometry control mis-registered on a base picture (restated — ¶3). Pictures looked at for
+the three decisions: `stage2/sheets-gained/gained-03.png` rows 2 / 6, `gained-05.png` row 6, `stage2/sheets-movers/movers-02.png`
+row 5. After regeneration the geometry gate reads the probe as gating 30 / 30 PASS · control 112 / 112 PASS, and
+`probe-readout.mjs` fires nothing (`stage2/probe-readout.restated.txt`). The remaining 13 review sheets are read at the closing gate.
+Next: [W-L7] seeding on this tree, the single-writer sweep, the closing gate `wave54-final`.
+

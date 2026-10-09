@@ -1830,3 +1830,45 @@ The fix pass (four scoped lanes + a verifier, `wave54-S1/fix/`) took the should-
    mix-blend-mode in the paint-effect decline (same class, 0 carriers); the two test files over 200 lines; `wl3-wire-differential.sh`
    always exits 0 (a nit — the set equality was checked programmatically).
 
+### §10 item 7 — stage 2 `wave54-probe` read-out and decisions (orchestrator, 2026-10-09)
+
+`wave54-probe` (26 sections, 07:27 → 08:4x UTC, tree 206d71d9): **26 / 26 OK on attempt 1**; installed builds MATCH. Read-out in
+`wave54-gate/stage2/` (base first everywhere): **gained 31 · lost 0 · movers 58 (0.005) · unmeasured-now 569 (the 4 unprobed
+sections)**; ab-diff: 92 cells differ, **0 downward**; controls HOLD (web 1203/1243 identical + 40 carriers · iOS 1224 + 19 ·
+Android 1199 + 44 · wire 23 content-changed carriers + 15 renumbered · 0 leaks); the S6 instrument check holds (48/48 identical,
+no stamp). `probe-readout.mjs`: rule 1 fired 0 · rule 2 fired 0 · **rule 3 fired 2** (below); leak signals 0. `geometry-gate.py`:
+185 keys — **gating 36 PASS / 1 FAIL**, control 111 PASS / 1 FAIL, report 27 / 9 (the GO-SMALL inset rows and the autopos-rtl rows,
+expected WRONG). Three decisions, each with its picture looked at:
+
+1. **CBB-android REVERTED (rule 4; `8deddc19` reverts `5b333c8a`).** Its gating row `backdrop-filter-nested-border-radius-clip-3
+   android` printed GEOMETRY WRONG: green (36,36,215,115) vs ref (36,36,235,135). The base was (36,36,195,95) with 4360 px of fail
+   ink — so the unit IMPROVED the picture (no inverted region, 160×60 → 180×80) but a 20-px source remains on both axes; its
+   P 0.9668 (≥ the 0.96 floor) would have been exactly the degenerate pass the geometry gate exists to refuse (gained-05 row 6).
+   Taken back with it: nested-clip-2 android P 0.9689 → 1, the six abspos-autopos android movers (P either way), the three
+   semi-replaced-stretch android up-or-stay rows (f either way). `REVERTED` in `plan-build.py` withdraws its 14 predictions and
+   7 geometry keys and its 14 Android capture carriers; the closing control treats a change on them as a leak. Residue for the
+   BACKLOG: the remaining 20 px (the nested clip's second border band is the suspect) with the probe picture as evidence.
+2. **L3's two iOS floors RESTATED, the units KEPT.** Rule 3 fired on `hyphenate-character-001 ios` (P 0.9611 vs floor 0.965) and
+   `-003 ios` (P 0.957 vs 0.965) — both MED-HIGH rows whose GATING geometry keys PASS (`groups 5 4 3 3` = ref) and whose pictures
+   are faithful (gained-03 rows 2 / 6: 001 breaks with no hyphen glyph, 003 with bullets, exactly as the reference). The ≈0.979 /
+   ≈0.977 magnitudes (GBd − 0.006) were misses of ~0.02 — TextKit's monospace glyph rendering against Chromium's, not the layout.
+   Reading rule 3 literally would revert U3b, then U3, then U2-ios (rule 6) and take two picture-correct flips with them; the plan
+   itself (§2 L3, plan-skeptic R2-S1) says that cascade contradicts the lane's contract. Decision against the letter, recorded here:
+   `RESTATE` re-gates both rows on **P with GEOMETRY OK and a 0.95 floor**, and the closing gate holds them must-not-fall
+   (≥ probe − 0.002). The lesson joins the BACKLOG: a MED-HIGH floor derived from a replay is a magnitude estimate; the geometry
+   row is the picture-correctness gate — floors on geometry-gated rows should be the pass threshold.
+3. **`block-ellipsis-002 android` control restated.** The plan had pinned the BASE picture's line (`GEOMETRY WRONG (2 bands vs ref
+   3)`) as a "must stay" control although the capture is a registered U3 carrier; U3 removed the stray blank line and the Android
+   picture now has the reference's three lines (movers-02 row 5: `Line 1 / Line 2 / Line 3…`), band 3's right edge x67 vs ref x77
+   being the Android "…" glyph width. P 0.9884 → 0.9896. The control's line is restated to the measured one; not a regression.
+   (A control pinned on a wrong picture is a plan defect the three skeptic rounds did not catch — BACKLOG lesson.)
+
+Everything else held as pre-registered: U3b's probe-decided rows PASS (kept); L5 U1-android `block-in-inline-015-print android`
+f 0.9489 → P 0.9986 (geometry OK); L6 RS `box-sizing-007/-008/-022` web f → P 0.9854 / 0.9741 / 0.9725 and
+`semi-replaced-stretch-other` web f 0.941 → P 0.9965 (labelled degenerate for "abel"); L6 W1 `hyphens-out-of-flow-002` web f → P 1;
+L4 OOF `contain-content-003 / -011` android f → P 0.9967 / 0.9849 (011 degenerate-even-if-pass: the "25"), the three fixed-position
+cells, `backdrop-filter-containing-block` ios / android f 0.80 / 0.75 → P 0.9987 / 0.9977; L4 GAP `flex-gap-decorations-033` ios /
+android f 0.94 → P 0.9993 / 1; L3 `clip-path-filter-order` ×3, `balance-grid-container` web, the four `block-ellipsis` web rows,
+`hyphenate-character-001/-003/-004` web + android, `-004 ios` f → f 0.9477 (undirected). With the restated expectations the
+geometry gate reads the probe as **gating 30 / 30 PASS, control 112 / 112 PASS**, and `probe-readout.mjs` fires no rule.
+

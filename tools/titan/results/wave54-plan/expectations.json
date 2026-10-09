@@ -1071,10 +1071,10 @@
     {
      "cell": "css-text/hyphens/hyphenate-character-001.html ios",
      "from": "f 0.9287",
-     "to": "P ≈0.979 (GBd 0.9852 − 0.006)",
+     "to": "P with GEOMETRY OK (measured P 0.9611 at wave54-probe; the ≈0.979 magnitude was a miss)",
      "kind": "flip; faithful only with U1+U2-ios+U3 on the tree AND hyphenate-character.geometry.py OK on the row",
      "confidence": "MED-HIGH",
-     "floor": 0.965,
+     "floor": 0.95,
      "gating": true,
      "geometry": "GEOMETRY OK",
      "units": [
@@ -1088,15 +1088,16 @@
       "U1",
       "U2-ios",
       "U3"
-     ]
+     ],
+     "restated": "PLAN §10 item 7 (rule 3 fired at 0.965; geometry PASS; picture faithful)"
     },
     {
      "cell": "css-text/hyphens/hyphenate-character-003.html ios",
      "from": "f 0.9337",
-     "to": "P ≈0.977 (GBd 0.9831 − 0.006)",
+     "to": "P with GEOMETRY OK (measured P 0.957 at wave54-probe; the ≈0.977 magnitude was a miss)",
      "kind": "flip; faithful only with U1+U2-ios+U3 AND geometry OK (U3 alone = 0.9566 with hyphens for bullets: DEGENERATE)",
      "confidence": "MED-HIGH",
-     "floor": 0.965,
+     "floor": 0.95,
      "gating": true,
      "geometry": "GEOMETRY OK",
      "units": [
@@ -1110,7 +1111,8 @@
       "U1",
       "U2-ios",
       "U3"
-     ]
+     ],
+     "restated": "PLAN §10 item 7 (rule 3 fired at 0.965; geometry PASS; picture faithful)"
     },
     {
      "cell": "css-text/hyphens/hyphenate-character-004.html ios",
@@ -2057,7 +2059,7 @@
       "block-ellipsis-005 web": "GEOMETRY OK",
       "block-ellipsis-006 web": "GEOMETRY OK",
       "block-ellipsis-002 ios": "GEOMETRY WRONG (4 bands vs ref 3)",
-      "block-ellipsis-002 android": "GEOMETRY WRONG (2 bands vs ref 3)",
+      "block-ellipsis-002 android": "GEOMETRY WRONG (band right edge x67 vs ref x77 (y59))",
       "block-ellipsis-004 ios": "GEOMETRY WRONG (3 bands vs ref 2)",
       "block-ellipsis-005 ios": "GEOMETRY WRONG (3 bands vs ref 2)",
       "block-ellipsis-006 ios": "GEOMETRY WRONG (3 bands vs ref 2)",
@@ -2553,8 +2555,8 @@
      "to": "P ≈0.99 (iOS twin of the same geometry 0.9921)",
      "kind": "flip",
      "confidence": "MED-HIGH",
-     "floor": 0.96,
-     "gating": true,
+     "floor": null,
+     "gating": false,
      "geometry": "GEOMETRY OK",
      "units": [
       "CBB-android"
@@ -2562,7 +2564,16 @@
      "direction": "up-or-stay",
      "requires": [
       "CBB-android"
-     ]
+     ],
+     "demotedFrom": {
+      "gating": true,
+      "floor": 0.96,
+      "direction": "up-or-stay",
+      "unit": "CBB-android",
+      "run": "wave54-probe",
+      "rule": "4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass",
+      "withdrawn": true
+     }
     },
     {
      "cell": "filter-effects/backdrop-filter-nested-border-radius-clip.html android",
@@ -2570,8 +2581,8 @@
      "to": "P ≈0.99 (iOS twin 0.9936 / 0.9998 / 0.9981)",
      "kind": "short box -> faithful",
      "confidence": "MED-HIGH",
-     "floor": 0.98,
-     "gating": true,
+     "floor": null,
+     "gating": false,
      "geometry": "GEOMETRY OK",
      "units": [
       "CBB-android"
@@ -2579,7 +2590,16 @@
      "direction": "up-or-stay",
      "requires": [
       "CBB-android"
-     ]
+     ],
+     "demotedFrom": {
+      "gating": true,
+      "floor": 0.98,
+      "direction": "up-or-stay",
+      "unit": "CBB-android",
+      "run": "wave54-probe",
+      "rule": "4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass",
+      "withdrawn": true
+     }
     },
     {
      "cell": "filter-effects/backdrop-filter-nested-border-radius-clip-2.html android",
@@ -2587,8 +2607,8 @@
      "to": "P ≈0.99 (iOS twin 0.9936 / 0.9998 / 0.9981)",
      "kind": "short box -> faithful",
      "confidence": "MED-HIGH",
-     "floor": 0.98,
-     "gating": true,
+     "floor": null,
+     "gating": false,
      "geometry": "GEOMETRY OK",
      "units": [
       "CBB-android"
@@ -2596,7 +2616,16 @@
      "direction": "up-or-stay",
      "requires": [
       "CBB-android"
-     ]
+     ],
+     "demotedFrom": {
+      "gating": true,
+      "floor": 0.98,
+      "direction": "up-or-stay",
+      "unit": "CBB-android",
+      "run": "wave54-probe",
+      "rule": "4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass",
+      "withdrawn": true
+     }
     },
     {
      "cell": "filter-effects/backdrop-filter-nested-border-radius-clip-4.html android",
@@ -2604,8 +2633,8 @@
      "to": "P ≈0.99 (iOS twin 0.9936 / 0.9998 / 0.9981)",
      "kind": "short box -> faithful",
      "confidence": "MED-HIGH",
-     "floor": 0.98,
-     "gating": true,
+     "floor": null,
+     "gating": false,
      "geometry": "GEOMETRY OK",
      "units": [
       "CBB-android"
@@ -2613,7 +2642,16 @@
      "direction": "up-or-stay",
      "requires": [
       "CBB-android"
-     ]
+     ],
+     "demotedFrom": {
+      "gating": true,
+      "floor": 0.98,
+      "direction": "up-or-stay",
+      "unit": "CBB-android",
+      "run": "wave54-probe",
+      "rule": "4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass",
+      "withdrawn": true
+     }
     },
     {
      "cell": "css-flexbox/abspos/abspos-autopos-htb-ltr.html android",
@@ -2621,8 +2659,8 @@
      "to": "P 0.9967 (sim: green repainted 100x100)",
      "kind": "degenerate->faithful",
      "confidence": "HIGH",
-     "floor": 0.995,
-     "gating": true,
+     "floor": null,
+     "gating": false,
      "geometry": "GEOMETRY OK",
      "units": [
       "CBB-android"
@@ -2630,7 +2668,16 @@
      "direction": "up-or-stay",
      "requires": [
       "CBB-android"
-     ]
+     ],
+     "demotedFrom": {
+      "gating": true,
+      "floor": 0.995,
+      "direction": "up-or-stay",
+      "unit": "CBB-android",
+      "run": "wave54-probe",
+      "rule": "4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass",
+      "withdrawn": true
+     }
     },
     {
      "cell": "css-flexbox/abspos/abspos-autopos-vlr-ltr.html android",
@@ -2638,8 +2685,8 @@
      "to": "P 0.9967 (sim: green repainted 100x100)",
      "kind": "degenerate->faithful",
      "confidence": "HIGH",
-     "floor": 0.995,
-     "gating": true,
+     "floor": null,
+     "gating": false,
      "geometry": "GEOMETRY OK",
      "units": [
       "CBB-android"
@@ -2647,7 +2694,16 @@
      "direction": "up-or-stay",
      "requires": [
       "CBB-android"
-     ]
+     ],
+     "demotedFrom": {
+      "gating": true,
+      "floor": 0.995,
+      "direction": "up-or-stay",
+      "unit": "CBB-android",
+      "run": "wave54-probe",
+      "rule": "4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass",
+      "withdrawn": true
+     }
     },
     {
      "cell": "css-flexbox/abspos/abspos-autopos-vrl-ltr.html android",
@@ -2655,8 +2711,8 @@
      "to": "P 0.9967 (sim: green repainted 100x100)",
      "kind": "degenerate->faithful",
      "confidence": "HIGH",
-     "floor": 0.995,
-     "gating": true,
+     "floor": null,
+     "gating": false,
      "geometry": "GEOMETRY OK",
      "units": [
       "CBB-android"
@@ -2664,7 +2720,16 @@
      "direction": "up-or-stay",
      "requires": [
       "CBB-android"
-     ]
+     ],
+     "demotedFrom": {
+      "gating": true,
+      "floor": 0.995,
+      "direction": "up-or-stay",
+      "unit": "CBB-android",
+      "run": "wave54-probe",
+      "rule": "4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass",
+      "withdrawn": true
+     }
     },
     {
      "cell": "css-flexbox/abspos/abspos-autopos-htb-rtl.html android",
@@ -2681,7 +2746,16 @@
      "direction": "up-or-stay",
      "requires": [
       "CBB-android"
-     ]
+     ],
+     "demotedFrom": {
+      "gating": false,
+      "floor": null,
+      "direction": "up-or-stay",
+      "unit": "CBB-android",
+      "run": "wave54-probe",
+      "rule": "4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass",
+      "withdrawn": true
+     }
     },
     {
      "cell": "css-flexbox/abspos/abspos-autopos-vlr-rtl.html android",
@@ -2698,7 +2772,16 @@
      "direction": "up-or-stay",
      "requires": [
       "CBB-android"
-     ]
+     ],
+     "demotedFrom": {
+      "gating": false,
+      "floor": null,
+      "direction": "up-or-stay",
+      "unit": "CBB-android",
+      "run": "wave54-probe",
+      "rule": "4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass",
+      "withdrawn": true
+     }
     },
     {
      "cell": "css-flexbox/abspos/abspos-autopos-vrl-rtl.html android",
@@ -2715,7 +2798,16 @@
      "direction": "up-or-stay",
      "requires": [
       "CBB-android"
-     ]
+     ],
+     "demotedFrom": {
+      "gating": false,
+      "floor": null,
+      "direction": "up-or-stay",
+      "unit": "CBB-android",
+      "run": "wave54-probe",
+      "rule": "4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass",
+      "withdrawn": true
+     }
     },
     {
      "cell": "css-gaps/flex/flex-gap-decorations-006.html android",
@@ -2733,7 +2825,16 @@
      "requires": [
       "CBB-android"
      ],
-     "directionWhy": "a side reader of the corrected containing block; no replay"
+     "directionWhy": "a side reader of the corrected containing block; no replay",
+     "demotedFrom": {
+      "gating": false,
+      "floor": null,
+      "direction": "undirected",
+      "unit": "CBB-android",
+      "run": "wave54-probe",
+      "rule": "4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass",
+      "withdrawn": true
+     }
     },
     {
      "cell": "css-position/position-absolute-semi-replaced-stretch-button.html android",
@@ -2750,7 +2851,16 @@
      "direction": "up-or-stay",
      "requires": [
       "CBB-android"
-     ]
+     ],
+     "demotedFrom": {
+      "gating": false,
+      "floor": null,
+      "direction": "up-or-stay",
+      "unit": "CBB-android",
+      "run": "wave54-probe",
+      "rule": "4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass",
+      "withdrawn": true
+     }
     },
     {
      "cell": "css-position/position-absolute-semi-replaced-stretch-input.html android",
@@ -2767,7 +2877,16 @@
      "direction": "up-or-stay",
      "requires": [
       "CBB-android"
-     ]
+     ],
+     "demotedFrom": {
+      "gating": false,
+      "floor": null,
+      "direction": "up-or-stay",
+      "unit": "CBB-android",
+      "run": "wave54-probe",
+      "rule": "4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass",
+      "withdrawn": true
+     }
     },
     {
      "cell": "css-position/position-absolute-semi-replaced-stretch-other.html android",
@@ -2784,7 +2903,16 @@
      "direction": "up-or-stay",
      "requires": [
       "CBB-android"
-     ]
+     ],
+     "demotedFrom": {
+      "gating": false,
+      "floor": null,
+      "direction": "up-or-stay",
+      "unit": "CBB-android",
+      "run": "wave54-probe",
+      "rule": "4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass",
+      "withdrawn": true
+     }
     },
     {
      "cell": "css-gaps/flex/flex-gap-decorations-033.html ios",
@@ -3154,22 +3282,23 @@
       "backdrop-filter-nested-border-radius-clip-4 ios": "GEOMETRY OK",
       "backdrop-filter-nested-border-radius-clip-4 android": "GEOMETRY OK"
      },
-     "gating": {
-      "abspos/abspos-autopos-htb-ltr android": "CBB-android",
-      "abspos/abspos-autopos-vlr-ltr android": "CBB-android",
-      "abspos/abspos-autopos-vrl-ltr android": "CBB-android",
-      "backdrop-filter-nested-border-radius-clip android": "CBB-android",
-      "backdrop-filter-nested-border-radius-clip-2 android": "CBB-android",
-      "backdrop-filter-nested-border-radius-clip-3 android": "CBB-android",
-      "backdrop-filter-nested-border-radius-clip-4 android": "CBB-android"
-     },
+     "gating": {},
      "report": [
       "abspos/abspos-autopos-htb-rtl android",
       "abspos/abspos-autopos-vlr-rtl android",
       "abspos/abspos-autopos-vrl-rtl android"
      ],
      "note": "the three iOS *-rtl rows keep their own 10-px iOS offset (queue-scout-layout §3; not this lane): their expected line is today's WRONG verdict, verbatim",
-     "onWave53Final": "Android 10/10 WRONG; ref + web 20/20 OK; iOS 7 OK + the 3 rtl rows WRONG"
+     "onWave53Final": "Android 10/10 WRONG; ref + web 20/20 OK; iOS 7 OK + the 3 rtl rows WRONG",
+     "withdrawn": {
+      "abspos/abspos-autopos-htb-ltr android": "was gating -> CBB-android; unit CBB-android reverted at wave54-probe (rule 4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass)",
+      "abspos/abspos-autopos-vlr-ltr android": "was gating -> CBB-android; unit CBB-android reverted at wave54-probe (rule 4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass)",
+      "abspos/abspos-autopos-vrl-ltr android": "was gating -> CBB-android; unit CBB-android reverted at wave54-probe (rule 4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass)",
+      "backdrop-filter-nested-border-radius-clip android": "was gating -> CBB-android; unit CBB-android reverted at wave54-probe (rule 4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass)",
+      "backdrop-filter-nested-border-radius-clip-2 android": "was gating -> CBB-android; unit CBB-android reverted at wave54-probe (rule 4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass)",
+      "backdrop-filter-nested-border-radius-clip-3 android": "was gating -> CBB-android; unit CBB-android reverted at wave54-probe (rule 4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass)",
+      "backdrop-filter-nested-border-radius-clip-4 android": "was gating -> CBB-android; unit CBB-android reverted at wave54-probe (rule 4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass)"
+     }
     },
     {
      "cmd": "python3 tools/titan/results/wave54-plan/flex-zero-gap-rules.geometry.py <run>",
@@ -4658,5 +4787,82 @@
    }
   ],
   "rule": "a cell is counted picture-correct at the closing gate ONLY when its key prints \"→ GEOMETRY OK\" on the closing run (geometry-gate.py); a pass whose key is not OK stays DEGENERATE and is not counted"
+ },
+ "probeDecisions": {
+  "reverted": [
+   {
+    "lane": "L4-oof-layout",
+    "unit": "CBB-android",
+    "run": "wave54-probe",
+    "commit": "5b333c8a",
+    "revertCommit": "8deddc19",
+    "rule": "4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref (36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, 160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass",
+    "withdrawnPredictions": [
+     "filter-effects/backdrop-filter-nested-border-radius-clip-3.html android",
+     "filter-effects/backdrop-filter-nested-border-radius-clip.html android",
+     "filter-effects/backdrop-filter-nested-border-radius-clip-2.html android",
+     "filter-effects/backdrop-filter-nested-border-radius-clip-4.html android",
+     "css-flexbox/abspos/abspos-autopos-htb-ltr.html android",
+     "css-flexbox/abspos/abspos-autopos-vlr-ltr.html android",
+     "css-flexbox/abspos/abspos-autopos-vrl-ltr.html android",
+     "css-flexbox/abspos/abspos-autopos-htb-rtl.html android",
+     "css-flexbox/abspos/abspos-autopos-vlr-rtl.html android",
+     "css-flexbox/abspos/abspos-autopos-vrl-rtl.html android",
+     "css-gaps/flex/flex-gap-decorations-006.html android",
+     "css-position/position-absolute-semi-replaced-stretch-button.html android",
+     "css-position/position-absolute-semi-replaced-stretch-input.html android",
+     "css-position/position-absolute-semi-replaced-stretch-other.html android"
+    ],
+    "mustNotMoveAfter": [
+     "filter-effects/backdrop-filter-nested-border-radius-clip-3.html android",
+     "filter-effects/backdrop-filter-nested-border-radius-clip.html android",
+     "filter-effects/backdrop-filter-nested-border-radius-clip-2.html android",
+     "filter-effects/backdrop-filter-nested-border-radius-clip-4.html android",
+     "css-flexbox/abspos/abspos-autopos-htb-ltr.html android",
+     "css-flexbox/abspos/abspos-autopos-vlr-ltr.html android",
+     "css-flexbox/abspos/abspos-autopos-vrl-ltr.html android",
+     "css-flexbox/abspos/abspos-autopos-htb-rtl.html android",
+     "css-flexbox/abspos/abspos-autopos-vlr-rtl.html android",
+     "css-flexbox/abspos/abspos-autopos-vrl-rtl.html android",
+     "css-gaps/flex/flex-gap-decorations-006.html android",
+     "css-position/position-absolute-semi-replaced-stretch-button.html android",
+     "css-position/position-absolute-semi-replaced-stretch-input.html android",
+     "css-position/position-absolute-semi-replaced-stretch-other.html android"
+    ],
+    "demotedPredictions": [],
+    "withdrawnGeometryKeys": [
+     "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-htb-ltr android",
+     "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vlr-ltr android",
+     "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vrl-ltr android",
+     "compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip android",
+     "compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-2 android",
+     "compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-3 android",
+     "compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-4 android"
+    ],
+    "carriersWithdrawn": {
+     "captures": {
+      "web": [],
+      "ios": [],
+      "android": [
+       "wpt__css-flexbox__abspos__abspos-autopos-htb-ltr",
+       "wpt__css-flexbox__abspos__abspos-autopos-htb-rtl",
+       "wpt__css-flexbox__abspos__abspos-autopos-vlr-ltr",
+       "wpt__css-flexbox__abspos__abspos-autopos-vlr-rtl",
+       "wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr",
+       "wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl",
+       "wpt__css-gaps__flex__flex-gap-decorations-006",
+       "wpt__css-position__position-absolute-semi-replaced-stretch-button",
+       "wpt__css-position__position-absolute-semi-replaced-stretch-input",
+       "wpt__css-position__position-absolute-semi-replaced-stretch-other",
+       "wpt__filter-effects__backdrop-filter-nested-border-radius-clip",
+       "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-2",
+       "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3",
+       "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-4"
+      ]
+     },
+     "wire": []
+    }
+   }
+  ]
  }
 }

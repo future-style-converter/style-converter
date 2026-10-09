@@ -362,7 +362,11 @@ L3 = {
     # and -002 ios keeps 4 bands vs 3 after U3: replay B, fix-r1/post-S3.block-ellipsis-fakes.out.txt).
     {'cmd': 'python3 tools/titan/results/wave54-plan/block-ellipsis-br.geometry.py <run>',
      'expect': {f'block-ellipsis-00{n} web': GEO_OK for n in (2, 4, 5, 6)}
-               | {'block-ellipsis-002 ios': 'GEOMETRY WRONG (4 bands vs ref 3)', 'block-ellipsis-002 android': 'GEOMETRY WRONG (2 bands vs ref 3)'}
+               # wave54-probe (PLAN §10 item 7): the android control's recorded line was the BASE picture (2 bands); U3 (a registered
+               # carrier of this capture) removed the stray blank line and the picture now has the ref's 3 bands — band 3's right
+               # edge x67 vs ref x77 is the "…" glyph width on Android. Restated to the measured line (the control had pinned a
+               # wrong picture as "must not change", which the plan-skeptic rounds did not catch); the cell is P 0.9884 → 0.9896.
+               | {'block-ellipsis-002 ios': 'GEOMETRY WRONG (4 bands vs ref 3)', 'block-ellipsis-002 android': 'GEOMETRY WRONG (band right edge x67 vs ref x77 (y59))'}
                | {f'block-ellipsis-00{n} ios': 'GEOMETRY WRONG (3 bands vs ref 2)' for n in (4, 5, 6)}
                | {f'block-ellipsis-00{n} android': 'GEOMETRY WRONG (band bottom y72 vs ref y86 (top y40))' for n in (4, 5, 6)},
      'gating': {f'block-ellipsis-00{n} web': 'U3' for n in (2, 4, 5, 6)},
@@ -813,8 +817,23 @@ for name, lane in lanes.items():
 #   REVERTED = [{'lane': 'L1-rtl-marker-bake', 'unit': 'Mprime', 'run': 'wave54-pre', 'commit': '<sha>',
 #                'revertCommit': '<sha>', 'rule': '4: [M] android GEOMETRY WRONG (…)'}]
 #   RESTATE  = {'css-counter-styles/counter-suffix.html android': {'to': 'P ≈0.9815 (P alone)', 'why': 'PLAN §10 item n'}}
-REVERTED = []
-RESTATE = {}
+# ── wave54-probe decisions (orchestrator, 2026-10-09; PLAN §10 item 7; pictures looked at in wave54-gate/stage2/sheets-*) ──
+REVERTED = [
+  {'lane': 'L4-oof-layout', 'unit': 'CBB-android', 'run': 'wave54-probe', 'commit': '5b333c8a', 'revertCommit': '8deddc19',
+   'rule': ('4: geometryGating backdrop-filter-nested-border-radius-clip-3 android GEOMETRY WRONG — green (36,36,215,115) vs ref '
+            '(36,36,235,135); the base was (36,36,195,95) with 4360 fail-ink px, so the unit improved the picture (no fail ink, '
+            '160x60 -> 180x80) but a 20-px source remains on both axes; its P 0.9668 (>= floor 0.96) would be a degenerate pass')},
+]
+RESTATE = {
+  # L3 skeptic R2-S1 foresaw this cascade: rule 3 fired on the two MED-HIGH iOS rows (0.9611 / 0.957 vs floor 0.965) while their
+  # GATING geometry rows PASS (groups 5 4 3 3 = ref) and the pictures are faithful (gained-03 rows 2 / 6: no hyphen glyph on 001,
+  # bullets on 003). The floor was a magnitude estimate (GBd 0.9852 − 0.006) that missed by ~0.02 — TextKit's monospace glyph
+  # rendering, not the layout. Restated: the row gates on P with its geometry key OK and a 0.95 floor (the pass threshold), and
+  # the two cells are must-not-fall (≥ probe − 0.002) at the closing gate. A revert here would take a picture-correct flip and
+  # cascade U3b → U3 → U2-ios (rule 6) — the plan's own text (§2 L3, R2-S1) says that reading contradicts the lane's contract.
+  'css-text/hyphens/hyphenate-character-001.html ios': {'to': 'P with GEOMETRY OK (measured P 0.9611 at wave54-probe; the ≈0.979 magnitude was a miss)', 'floor': 0.95, 'gating': True, 'why': 'PLAN §10 item 7 (rule 3 fired at 0.965; geometry PASS; picture faithful)'},
+  'css-text/hyphens/hyphenate-character-003.html ios': {'to': 'P with GEOMETRY OK (measured P 0.957 at wave54-probe; the ≈0.977 magnitude was a miss)', 'floor': 0.95, 'gating': True, 'why': 'PLAN §10 item 7 (rule 3 fired at 0.965; geometry PASS; picture faithful)'},
+}
 if _REVERTED_FILE:
     REVERTED = json.load(open(_REVERTED_FILE))
 if _RESTATE_FILE:

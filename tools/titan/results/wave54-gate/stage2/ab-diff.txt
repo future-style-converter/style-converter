@@ -1,0 +1,98 @@
+section css-color: absent from wave54-probe — not compared
+section css-grid: absent from wave54-probe — not compared
+section css-sizing: absent from wave54-probe — not compared
+section css-view-transitions: absent from wave54-probe — not compared
+A/B  exclude=wave54-open  include=wave54-probe  sections=CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-color,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-grid,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-pseudo,css-sizing,css-tables,css-text,css-text-decor,css-transforms,css-ui,css-values,css-view-transitions,css-writing-modes,filter-effects,selectors  platforms=web,ios,android
+compared 3527 cells: 92 differ (flip, or |Δ| ≥ 0.002), 3435 within threshold
+  flip f→P     android  f 0.7506  → P 0.9977  Δ+0.2471  css/filter-effects/backdrop-filter-containing-block.html
+  flip f→P     ios      f 0.7955  → P 0.9987  Δ+0.2032  css/filter-effects/backdrop-filter-containing-block.html
+  flip f→P     web      f 0.8586  → P 1       Δ+0.1414  css/css-masking/clip-path/clip-path-filter-order.html
+  flip f→P     ios      f 0.8578  → P 0.9978  Δ+0.14  css/css-masking/clip-path/clip-path-filter-order.html
+  flip f→P     android  f 0.8406  → P 0.9548  Δ+0.1142  css/css-masking/clip-path/clip-path-filter-order.html
+  flip f→P     web      f 0.8812  → P 0.9825  Δ+0.1013  css/css-text/hyphens/hyphenate-character-003.html
+  flip f→P     web      f 0.9036  → P 0.9854  Δ+0.0818  css/css-ui/box-sizing-007.html
+  flip f→P     web      f 0.8943  → P 0.9741  Δ+0.0798  css/css-ui/box-sizing-008.html
+  flip f→P     web      f 0.9207  → P 1       Δ+0.0793  css/css-multicol/balance-grid-container.html
+  flip f→P     android  f 0.905   → P 0.9774  Δ+0.0724  css/css-text/hyphens/hyphenate-character-004.html
+  flip f→P     android  f 0.8934  → P 0.9629  Δ+0.0695  css/css-text/bidi/bidi-lines-001.html
+  flip f→P     android  f 0.94    → P 1       Δ+0.06  css/css-gaps/flex/flex-gap-decorations-033.html
+  flip f→P     ios      f 0.94    → P 0.9993  Δ+0.0593  css/css-gaps/flex/flex-gap-decorations-033.html
+  flip f→P     web      f 0.9411  → P 1       Δ+0.0589  css/css-text/hyphens/hyphens-out-of-flow-002.html
+  flip f→P     web      f 0.9249  → P 0.9832  Δ+0.0583  css/css-text/hyphens/hyphenate-character-004.html
+  flip f→P     android  f 0.9284  → P 0.9849  Δ+0.0565  css/css-contain/contain-content-011.html
+  flip f→P     android  f 0.9405  → P 0.9967  Δ+0.0562  css/css-contain/contain-content-003.html
+  flip f→P     web      f 0.941   → P 0.9965  Δ+0.0555  css/css-position/position-absolute-semi-replaced-stretch-other.html
+  flip f→P     android  f 0.9301  → P 0.9802  Δ+0.0501  css/css-text/hyphens/hyphenate-character-001.html
+  flip f→P     web      f 0.935   → P 0.985   Δ+0.05  css/css-text/hyphens/hyphenate-character-001.html
+  flip f→P     android  f 0.9292  → P 0.9792  Δ+0.05  css/css-text/hyphens/hyphenate-character-003.html
+  flip f→P     android  f 0.9489  → P 0.9986  Δ+0.0497  css/css-break/block-in-inline-015-print.html
+  flip f→P     ios      f 0.9287  → P 0.9611  Δ+0.0324  css/css-text/hyphens/hyphenate-character-001.html
+  flip f→P     web      f 0.9442  → P 0.9725  Δ+0.0283  css/css-ui/box-sizing-022.html
+  flip f→P     web      f 0.9353  → P 0.9629  Δ+0.0276  css/css-cascade/scope-pseudo-element.html
+  flip f→P     ios      f 0.9261  → P 0.9534  Δ+0.0273  css/css-text/hyphens/hyphenate-character-002.html
+  flip f→P     android  f 0.9315  → P 0.9559  Δ+0.0244  css/filter-effects/backdrop-filter-clip-rect.html
+  flip f→P     android  f 0.929   → P 0.9533  Δ+0.0243  css/filter-effects/backdrop-filter-edge-clipping.html
+  flip f→P     android  f 0.929   → P 0.9533  Δ+0.0243  css/filter-effects/backdrop-filter-paint-order.html
+  flip f→P     ios      f 0.9337  → P 0.957   Δ+0.0233  css/css-text/hyphens/hyphenate-character-003.html
+  flip f→P     android  f 0.9574  → P 0.9668  Δ+0.0094  css/filter-effects/backdrop-filter-nested-border-radius-clip-3.html
+  mover        android  f 0.742   → f 0.848   Δ+0.106  css/css-multicol/column-height-009.html
+  mover        ios      f 0.8072  → f 0.8804  Δ+0.0732  css/css-multicol/column-height-009.html
+  mover        android  f 0.6164  → f 0.672   Δ+0.0556  css/css-text-decor/text-decoration-color.html
+  mover        android  f 0.7307  → f 0.785   Δ+0.0543  css/css-lists/counter-list-item.html
+  mover        android  f 0.4117  → f 0.4555  Δ+0.0438  css/css-position/position-absolute-semi-replaced-stretch-input.html
+  mover        android  f 0.5977  → f 0.6397  Δ+0.042  css/filter-effects/backdrop-filter-border-radius-change.html
+  mover        web      P 0.959   → P 1       Δ+0.041  css/filter-effects/backdrop-filter-clip-rect.html
+  mover        web      P 0.9595  → P 1       Δ+0.0405  css/filter-effects/backdrop-filter-edge-clipping.html
+  mover        web      P 0.9595  → P 1       Δ+0.0405  css/filter-effects/backdrop-filter-paint-order.html
+  mover        web      P 0.9596  → P 1       Δ+0.0404  css/css-position/position-absolute-semi-replaced-stretch-input.html
+  mover        ios      P 0.956   → P 0.9961  Δ+0.0401  css/filter-effects/backdrop-filter-clip-rect.html
+  mover        ios      P 0.9578  → P 0.9975  Δ+0.0397  css/filter-effects/backdrop-filter-edge-clipping.html
+  mover        ios      P 0.9578  → P 0.9975  Δ+0.0397  css/filter-effects/backdrop-filter-paint-order.html
+  mover        android  f 0.4904  → f 0.5296  Δ+0.0392  css/filter-effects/backdrop-filter-corner-shape-change.html
+  mover        ios      P 0.9594  → P 0.9974  Δ+0.038  css/css-position/change-insets-inside-strict-containment-nested.html
+  mover        ios      P 0.9594  → P 0.9974  Δ+0.038  css/css-position/position-relative-003.html
+  mover        ios      P 0.9594  → P 0.9974  Δ+0.038  css/css-position/position-relative-004.html
+  mover        android  P 0.9589  → P 0.9967  Δ+0.0378  css/css-position/change-insets-inside-strict-containment-nested.html
+  mover        android  P 0.9589  → P 0.9967  Δ+0.0378  css/css-position/position-relative-003.html
+  mover        android  P 0.9589  → P 0.9967  Δ+0.0378  css/css-position/position-relative-004.html
+  mover        android  P 0.9649  → P 1       Δ+0.0351  css/filter-effects/backdrop-filter-nested-border-radius-clip.html
+  mover        android  P 0.9547  → P 0.989   Δ+0.0343  css/css-counter-styles/counter-suffix.html
+  mover        ios      f 0.9134  → f 0.9477  Δ+0.0343  css/css-text/hyphens/hyphenate-character-004.html
+  mover        android  P 0.9689  → P 1       Δ+0.0311  css/filter-effects/backdrop-filter-nested-border-radius-clip-2.html
+  mover        android  P 0.9534  → P 0.9818  Δ+0.0284  css/css-text/bidi/bidi-lines-002.html
+  mover        android  f 0.4396  → f 0.4679  Δ+0.0283  css/css-position/position-absolute-semi-replaced-stretch-other.html
+  mover        web      f 0.8827  → f 0.9092  Δ+0.0265  css/css-multicol/column-height-009.html
+  mover        web      P 0.9735  → P 0.9981  Δ+0.0246  css/css-overflow/line-clamp/block-ellipsis-005.html
+  mover        web      P 0.9735  → P 0.9981  Δ+0.0246  css/css-overflow/line-clamp/block-ellipsis-006.html
+  mover        web      P 0.9599  → P 0.9843  Δ+0.0244  css/css-ui/box-sizing-020.html
+  mover        web      P 0.9599  → P 0.9843  Δ+0.0244  css/css-ui/box-sizing-021.html
+  mover        web      P 0.9599  → P 0.9843  Δ+0.0244  css/css-ui/box-sizing-024.html
+  mover        web      P 0.9599  → P 0.9843  Δ+0.0244  css/css-ui/box-sizing-025.html
+  mover        web      P 0.9737  → P 0.998   Δ+0.0243  css/css-overflow/line-clamp/block-ellipsis-004.html
+  mover        android  P 0.977   → P 0.9999  Δ+0.0229  css/filter-effects/backdrop-filter-nested-border-radius-clip-4.html
+  mover        web      P 0.9803  → P 0.999   Δ+0.0187  css/CSS2/abspos/static-inside-inline-block.html
+  mover        web      P 0.9538  → P 0.9725  Δ+0.0187  css/css-ui/box-sizing-013.html
+  mover        web      P 0.9818  → P 1       Δ+0.0182  css/css-counter-styles/counter-suffix.html
+  mover        web      f 0.92    → f 0.9344  Δ+0.0144  css/css-text/hyphens/hyphenate-character-002.html
+  mover        ios      P 0.9841  → P 0.9974  Δ+0.0133  css/CSS2/abspos/static-fixed-inside-abspos.html
+  mover        android  P 0.9835  → P 0.9967  Δ+0.0132  css/CSS2/abspos/static-fixed-inside-abspos.html
+  mover        web      P 0.9868  → P 1       Δ+0.0132  css/css-overflow/line-clamp/block-ellipsis-002.html
+  mover        web      P 0.9713  → P 0.9843  Δ+0.013  css/css-ui/box-sizing-010.html
+  mover        web      P 0.9713  → P 0.9843  Δ+0.013  css/css-ui/box-sizing-011.html
+  mover        web      P 0.9713  → P 0.9843  Δ+0.013  css/css-ui/box-sizing-014.html
+  mover        web      P 0.9713  → P 0.9843  Δ+0.013  css/css-ui/box-sizing-015.html
+  mover        web      P 0.9713  → P 0.9843  Δ+0.013  css/css-ui/box-sizing-016.html
+  mover        web      P 0.9713  → P 0.9843  Δ+0.013  css/css-ui/box-sizing-017.html
+  mover        web      P 0.9713  → P 0.9843  Δ+0.013  css/css-ui/box-sizing-018.html
+  mover        web      P 0.9713  → P 0.9843  Δ+0.013  css/css-ui/box-sizing-019.html
+  mover        web      P 0.9873  → P 1       Δ+0.0127  css/css-ui/appearance-auto-input-non-widget-001.html
+  mover        ios      f 0.862   → f 0.8735  Δ+0.0115  css/css-multicol/balance-grid-container.html
+  mover        ios      P 0.9813  → P 0.9928  Δ+0.0115  css/css-overflow/line-clamp/block-ellipsis-002.html
+  mover        android  f 0.9739  → f 0.9843  Δ+0.0104  css/css-position/position-absolute-semi-replaced-stretch-button.html
+  mover        android  P 0.9869  → P 0.9966  Δ+0.0097  css/css-flexbox/abspos/abspos-autopos-htb-rtl.html
+  mover        android  f 0.9084  → f 0.916   Δ+0.0076  css/css-text-decor/text-decoration-subelements-003.html
+  mover        ios      P 0.9802  → P 0.9873  Δ+0.0071  css/css-counter-styles/counter-suffix.html
+  mover        web      P 0.9939  → P 1       Δ+0.0061  css/css-values/attr-style-sharing-1.html
+  mover        android  f 0.8286  → f 0.8332  Δ+0.0046  css/css-contain/contain-content-004.html
+  mover        android  P 0.9944  → P 0.9983  Δ+0.0039  css/CSS2/css21-errata/s-11-1-1b-006.html
+  mover        android  f 0.9223  → f 0.9249  Δ+0.0026  css/css-text/hyphens/hyphenate-character-002.html
