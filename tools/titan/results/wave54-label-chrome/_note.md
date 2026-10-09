@@ -72,11 +72,11 @@ part of U1's revertible code — commit them with the lane records, not inside U
 Commit holds exactly these 18 PNGs (the names of `label-chrome-all-reset.seeded-77fe41e8/`; PLAN's
 `__00{0..5}_*.png` glob also matches 66 committed baselines of other fixtures — skeptic N3 — so these are listed):
 - `tools/visual/baseline/Android__000_ATC_AllThenProps.png`, `iOS__000_ATC_AllThenProps.png`, `web__000_ATC_AllThenProps.png`
-- `tools/visual/baseline/Android__001_ATC_PropsThenAll_InGreenParent.png`, `iOS__001_…`, `web__001_ATC_PropsThenAll_InGreenParent.png`
+- `tools/visual/baseline/Android__001_ATC_PropsThenAll_InGreenParent.png`, `iOS__001_ATC_PropsThenAll_InGreenParent.png`, `web__001_ATC_PropsThenAll_InGreenParent.png`
 - `tools/visual/baseline/Android__002_reset.png`, `iOS__002_reset.png`, `web__002_reset.png`
-- `tools/visual/baseline/Android__003_ATC_InitialUnderRedParent.png`, `iOS__003_…`, `web__003_ATC_InitialUnderRedParent.png`
+- `tools/visual/baseline/Android__003_ATC_InitialUnderRedParent.png`, `iOS__003_ATC_InitialUnderRedParent.png`, `web__003_ATC_InitialUnderRedParent.png`
 - `tools/visual/baseline/Android__004_span.png`, `iOS__004_span.png`, `web__004_span.png`
-- `tools/visual/baseline/Android__005_ATC_DirectionSurvives.png`, `iOS__005_…`, `web__005_ATC_DirectionSurvives.png`
+- `tools/visual/baseline/Android__005_ATC_DirectionSurvives.png`, `iOS__005_ATC_DirectionSurvives.png`, `web__005_ATC_DirectionSurvives.png`
 
 plus the orchestrator's doc lines (§7 hand-offs). No U1 file. Seeding is NOT done by this lane (window request [W-L7]).
 
@@ -174,7 +174,10 @@ read can fail. `geometry-gate.py wave53-final --base wave53-open --lanes L7 --se
 - **`hunk-for-orchestrator-1.patch`** (docs, for the U2-seed commit; base db6e8aa0, `docs/DYNAMIC_CAPTURE.md` sha256
   `4258766a…fdc57`, anchor §5 tripwire paragraph :297-303; `git apply --check` clean): describes the exempt manifest,
   `pending`, clause (iv), the HINT and the two rejected inference routes, and corrects the stale "(iii) P-mask bytes agree
-  within ±1" sentence (`checkTriplet` never asserts it).
+  within ±1" sentence (`checkTriplet` never asserts it). **Applied at the wave54-S1 fix pass** (S1 should-fix 9 / skeptic
+  S5: it is seed-independent, so it lands with U1 whatever the seeding decides), with skeptic N1's phrase corrected
+  ("returned in the verdict object (`underPaintSpread`)", not "counted for the verdict line"); it carried no count / seed
+  line. Record: `tools/titan/results/wave54-S1/fix/`.
 - **Tooling count** (doc-staleness derives it live, `doc-staleness-check.sh:85`): this file's tests **+12 at U1**
   (136 → 148) and **+6 at U2-seed** (→ 154). The README / CLAUDE.md / STATUS suite tables are restamped by the
   orchestrator at the §4 step-5 sweep (and again after the seeding if the sweep precedes it).

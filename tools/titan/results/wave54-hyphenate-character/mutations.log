@@ -1,0 +1,528 @@
+=== U1-a drop the hex-escape decoding (CssStringParser.consumeEscape)  (2026-10-08 19:12:03)
+file: converter/src/main/kotlin/app/parsing/css/properties/primitiveParsers/CssStringParser.kt
+sha256 before:  0e5f09c74d110e9ad5b012a6412b8e5e5318b1b642a3d9ae1d4d0fb77afb5110
+sha256 mutated: af42bd377882ffffd01bf59edf098516bed2f4ca59febb8c6b0c85884b342db6
+sha256 restored: 0e5f09c74d110e9ad5b012a6412b8e5e5318b1b642a3d9ae1d4d0fb77afb5110  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> > Task :converter:test FAILED
+  red> HyphenateCharacterPropertyParserTest > pin 4 one whitespace after a hex escape is consumed() FAILED
+  red> HyphenateCharacterPropertyParserTest > escape replacement rules follow css-syntax-3 4_3_7() FAILED
+  red> HyphenateCharacterPropertyParserTest > pin 2 a hex escape is decoded() FAILED
+  red> HyphenateCharacterPropertyParserTest > pin 3 two escapes back to back decode in order() FAILED
+  red> 11 tests completed, 4 failed
+  red> FAILURE: Build failed with an exception.
+  red> Execution failed for task ':converter:test'.
+  red> BUILD FAILED in 2s
+restored run exit=0  (GREEN)
+  green> BUILD SUCCESSFUL in 1s
+=== U1-b restore isEmpty -> null on the decoded path (HyphenateCharacterPropertyParser)  (2026-10-08 19:12:11)
+file: converter/src/main/kotlin/app/parsing/css/properties/longhands/typography/HyphenateCharacterPropertyParser.kt
+sha256 before:  18e9acb9e1649d06426fe3d3650b462f40d4100fe4efd601af87fb64ec1f238a
+sha256 mutated: 1dd1dff6b9e825aad399c500d1fc96443ad3853c7c25712ed4d6bbdacb77f98f
+sha256 restored: 18e9acb9e1649d06426fe3d3650b462f40d4100fe4efd601af87fb64ec1f238a  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> > Task :converter:test FAILED
+  red> HyphenateCharacterPropertyParserTest > pin 1 the empty string is kept as String empty() FAILED
+  red> HyphenateCharacterPropertyParserTest > end to end an empty string is no longer a Generic passthrough() FAILED
+  red> HyphenateCharacterPropertyParserTest > the wire carries the decoded value inside the existing string variant() FAILED
+  red> 11 tests completed, 3 failed
+  red> FAILURE: Build failed with an exception.
+  red> Execution failed for task ':converter:test'.
+  red> BUILD FAILED in 1s
+restored run exit=0  (GREEN)
+  green> BUILD SUCCESSFUL in 1s
+=== U1-b (re-run on the final commented parser) restore isEmpty -> null on the decoded path  (2026-10-08 19:12:33)
+file: converter/src/main/kotlin/app/parsing/css/properties/longhands/typography/HyphenateCharacterPropertyParser.kt
+sha256 before:  82d5befa80100ea0264335a3dcfe3dc7d000505f9c9a094bf58b45328aee7fed
+sha256 mutated: 055471da16d18be80d10567be1894176987b38bed39ba1b41a18572f1aeb287b
+sha256 restored: 82d5befa80100ea0264335a3dcfe3dc7d000505f9c9a094bf58b45328aee7fed  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> > Task :converter:test FAILED
+  red> HyphenateCharacterPropertyParserTest > pin 1 the empty string is kept as String empty() FAILED
+  red> HyphenateCharacterPropertyParserTest > end to end an empty string is no longer a Generic passthrough() FAILED
+  red> HyphenateCharacterPropertyParserTest > the wire carries the decoded value inside the existing string variant() FAILED
+  red> 11 tests completed, 3 failed
+  red> FAILURE: Build failed with an exception.
+  red> Execution failed for task ':converter:test'.
+  red> BUILD FAILED in 2s
+restored run exit=0  (GREEN)
+  green> BUILD SUCCESSFUL in 1s
+=== U2A-a SoftHyphenCuts.took answers by the wave-52 count  (2026-10-08 19:21:29)
+file: runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCuts.kt
+sha256 before:  c4bd1fd86adc9345c0fae472b082b9c2a6db14d389b75b708d4d51172e8a70a8
+sha256 mutated: e360b377fac93baf92af66814c0526e144d04b1f9a01087f371132e1923ce238
+sha256 restored: c4bd1fd86adc9345c0fae472b082b9c2a6db14d389b75b708d4d51172e8a70a8  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> > Task :runtime:testDebugUnitTest FAILED
+  red> PreBreakPipelineTest > anEmptyHyphenateCharacterStillFiresAtTheTakenCuts FAILED
+  red>     java.lang.AssertionError at PreBreakPipelineTest.kt:405
+  red> PreBreakPipelineTest > theHyphenStringsWidthDecidesTheBreaks FAILED
+  red>     org.junit.ComparisonFailure at PreBreakPipelineTest.kt:414
+  red> 32 tests completed, 2 failed
+  red> FAILURE: Build failed with an exception.
+  red> Execution failed for task ':runtime:testDebugUnitTest'.
+  red> BUILD FAILED in 4s
+restored run exit=0  (GREEN)
+  green> BUILD SUCCESSFUL in 1s
+=== U2A-b PreBreakPipeline drops hyphenChar from the fold  (2026-10-08 19:21:40)
+file: runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt
+sha256 before:  18bafc7bb18a0bee96f8723678c5996b03ab49e5e4456eeea8d7e84f3d4a5304
+sha256 mutated: 1d2cc7326ef55183ec5a0b102da6ecadea60e63a747b61957c3c9ed3f1692f76
+sha256 restored: 18bafc7bb18a0bee96f8723678c5996b03ab49e5e4456eeea8d7e84f3d4a5304  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> > Task :runtime:testDebugUnitTest FAILED
+  red> PreBreakPipelineTest > aMultiCharacterHyphenateCharacterOverflowsLikeTheRef FAILED
+  red>     java.lang.AssertionError at PreBreakPipelineTest.kt:431
+  red> PreBreakPipelineTest > anEmptyHyphenateCharacterStillFiresAtTheTakenCuts FAILED
+  red>     java.lang.AssertionError at PreBreakPipelineTest.kt:405
+  red> PreBreakPipelineTest > theHyphenStringsWidthDecidesTheBreaks FAILED
+  red>     org.junit.ComparisonFailure at PreBreakPipelineTest.kt:414
+  red> PreBreakPipelineTest > aBulletHyphenateCharacterIsPaintedAtEveryCut FAILED
+  red>     java.lang.AssertionError at PreBreakPipelineTest.kt:422
+  red> 32 tests completed, 4 failed
+  red> FAILURE: Build failed with an exception.
+  red> Execution failed for task ':runtime:testDebugUnitTest'.
+restored run exit=0  (GREEN)
+  green> BUILD SUCCESSFUL in 2s
+=== U2A-c HyphenateCharacterExtractor lower-cases the string  (2026-10-08 19:21:44)
+file: runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/HyphenateCharacterExtractor.kt
+sha256 before:  968d957fb9656965c36708e60feb2c527c25843de0669547052e6801c5cb2e31
+sha256 mutated: bed289186a57449527342fd5433e9e2b73dcdaac877eb487e941ad39130ea2ef
+sha256 restored: 968d957fb9656965c36708e60feb2c527c25843de0669547052e6801c5cb2e31  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> > Task :runtime:testDebugUnitTest FAILED
+  red> HyphenateCharacterExtractorTest > theStringIsNeverCaseFoldedNorReadAsAKeyword FAILED
+  red>     org.junit.ComparisonFailure at HyphenateCharacterExtractorTest.kt:77
+  red> 32 tests completed, 1 failed
+  red> FAILURE: Build failed with an exception.
+  red> Execution failed for task ':runtime:testDebugUnitTest'.
+  red> BUILD FAILED in 1s
+restored run exit=0  (GREEN)
+  green> BUILD SUCCESSFUL in 1s
+=== U2A-d HyphenateCharacterExtractor keyword path (value read before type)  (2026-10-08 19:21:49)
+file: runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/HyphenateCharacterExtractor.kt
+sha256 before:  968d957fb9656965c36708e60feb2c527c25843de0669547052e6801c5cb2e31
+sha256 mutated: 8d6e96082d428557e1815ec29d690dbf1c6fca6d3f7e0edcd54cdbc587a87337
+sha256 restored: 968d957fb9656965c36708e60feb2c527c25843de0669547052e6801c5cb2e31  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> > Task :runtime:testDebugUnitTest FAILED
+  red> HyphenateCharacterExtractorTest > theEmptyStringIsAValueNotAnAbsence FAILED
+  red>     java.lang.AssertionError at HyphenateCharacterExtractorTest.kt:59
+  red> HyphenateCharacterExtractorTest > theStringIsNeverCaseFoldedNorReadAsAKeyword FAILED
+  red>     org.junit.ComparisonFailure at HyphenateCharacterExtractorTest.kt:77
+  red> HyphenateCharacterExtractorTest > aDictionaryRunKeepsTheStringAndAnUnreadablePayloadFallsBackToAuto FAILED
+  red>     org.junit.ComparisonFailure at HyphenateCharacterExtractorTest.kt:97
+  red> HyphenateCharacterExtractorTest > theVerbatim004WireReachesThePreBreakAsSlashHyphenSlash FAILED
+  red>     org.junit.ComparisonFailure at HyphenateCharacterExtractorTest.kt:51
+  red> 32 tests completed, 4 failed
+  red> FAILURE: Build failed with an exception.
+  red> Execution failed for task ':runtime:testDebugUnitTest'.
+restored run exit=0  (GREEN)
+  green> BUILD SUCCESSFUL in 2s
+=== U2A-e SoftHyphenCuts walk misses a taken hyphenation op (equivalence pin)  (2026-10-08 19:22:00)
+file: runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCuts.kt
+sha256 before:  c4bd1fd86adc9345c0fae472b082b9c2a6db14d389b75b708d4d51172e8a70a8
+sha256 mutated: 3c85f70762f4e9f4517ff0bdb2e51d2016268a5f4b0f792e3aa15a020c8fd372
+sha256 restored: c4bd1fd86adc9345c0fae472b082b9c2a6db14d389b75b708d4d51172e8a70a8  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> > Task :runtime:testDebugUnitTest FAILED
+  red> PreBreakPipelineTest > aMultiCharacterHyphenateCharacterOverflowsLikeTheRef FAILED
+  red>     java.lang.AssertionError at PreBreakPipelineTest.kt:431
+  red> PreBreakPipelineTest > firesWhenASoftHyphenBreakWasTaken FAILED
+  red>     java.lang.AssertionError at PreBreakPipelineTest.kt:208
+  red> PreBreakPipelineTest > anEmptyHyphenateCharacterStillFiresAtTheTakenCuts FAILED
+  red>     java.lang.AssertionError at PreBreakPipelineTest.kt:405
+  red> PreBreakPipelineTest > theHyphenStringsWidthDecidesTheBreaks FAILED
+  red>     org.junit.ComparisonFailure at PreBreakPipelineTest.kt:414
+  red> PreBreakPipelineTest > composesWithTheSoftHyphenPolicy FAILED
+  red>     java.lang.AssertionError at PreBreakPipelineTest.kt:179
+  red> PreBreakPipelineTest > aBulletHyphenateCharacterIsPaintedAtEveryCut FAILED
+restored run exit=0  (GREEN)
+  green> BUILD SUCCESSFUL in 1s
+U2A-e detail: theWalkAgrees… listed above when red (re-run 19:22:10, restored c4bd1fd86adc9345c0fae472b082b9c2a6db14d389b75b708d4d51172e8a70a8)
+=== U2I-a SpentHyphen drops the strip  (2026-10-08 19:35:42)
+file: runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/wrapping/SpentHyphen.swift
+sha256 before:  629d6e8b9dc03f0b7122fc9f2cea6b04b346bc8ceed400c6ee3fc50c6d998edb
+sha256 mutated: 7bac9b09f793990d2174e2a0323469c9c591e17808faf09d170de9eb7f319d99
+sha256 restored: 629d6e8b9dc03f0b7122fc9f2cea6b04b346bc8ceed400c6ee3fc50c6d998edb  BYTE-EXACT
+mutated run exit=65  (RED)
+  red> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:263: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testALineOverflowingOnlyByItsSpentHyphenIsUnbreakable] : XCTAssertTrue failed
+  red> Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testALineOverflowingOnlyByItsSpentHyphenIsUnbreakable]' failed (1.489 seconds).
+  red> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:275: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testSpentHyphenStripsOneTrailingOccurrenceOnly] : XCTAssertEqual failed: ("tial/-/") is not equal to ("tial")
+  red> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:276: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testSpentHyphenStripsOneTrailingOccurrenceOnly] : XCTAssertEqual failed: ("a/-//-/") is not equal to ("a/-/")
+  red> Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testSpentHyphenStripsOneTrailingOccurrenceOnly]' failed (0.002 seconds).
+  red> Test Suite 'GreedyLineBreakerTests' failed at 2026-10-08 19:34:09.816.
+  red> 	 Executed 19 tests, with 3 failures (0 unexpected) in 1.654 (1.870) seconds
+  red> 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.040 (0.161) seconds
+  red> Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-08 19:34:09.977.
+  red> 	 Executed 29 tests, with 3 failures (0 unexpected) in 1.694 (2.032) seconds
+  red> Test Suite 'Selected tests' failed at 2026-10-08 19:34:09.978.
+  red> 	 Executed 29 tests, with 3 failures (0 unexpected) in 1.694 (2.032) seconds
+restored run exit=0  (GREEN)
+  green> 	 Executed 19 tests, with 0 failures (0 unexpected) in 0.105 (0.139) seconds
+  green> 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.102 (0.103) seconds
+  green> 	 Executed 29 tests, with 0 failures (0 unexpected) in 0.206 (0.339) seconds
+  green> 	 Executed 29 tests, with 0 failures (0 unexpected) in 0.206 (0.339) seconds
+=== U2I-b HyphenateCharacterExtractor lower-cases the string  (2026-10-08 19:38:13)
+file: runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/wrapping/HyphenateCharacterExtractor.swift
+sha256 before:  8a0ba398da67358eb3b2965dfb4da83217ead6513f73042bea43fd863f563958
+sha256 mutated: 9182e60dca9aa4e653383d6671d4631680847bef2c37ddb21f919d08176d3177
+sha256 restored: 8a0ba398da67358eb3b2965dfb4da83217ead6513f73042bea43fd863f563958  BYTE-EXACT
+mutated run exit=65  (RED)
+  red> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:291: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testTheExtractorReadsTheObjectShapeVerbatim] : XCTAssertEqual failed: ("Optional("abc")") is not equal to ("Optional("AbC")")
+  red> Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testTheExtractorReadsTheObjectShapeVerbatim]' failed (1.549 seconds).
+  red> Test Suite 'GreedyLineBreakerTests' failed at 2026-10-08 19:37:01.975.
+  red> 	 Executed 19 tests, with 1 failure (0 unexpected) in 1.572 (1.783) seconds
+  red> 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.107 (0.109) seconds
+  red> Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-08 19:37:02.085.
+  red> 	 Executed 29 tests, with 1 failure (0 unexpected) in 1.679 (1.892) seconds
+  red> Test Suite 'Selected tests' failed at 2026-10-08 19:37:02.085.
+  red> 	 Executed 29 tests, with 1 failure (0 unexpected) in 1.679 (1.893) seconds
+  red> ** TEST FAILED **
+restored run exit=0  (GREEN)
+  green> 	 Executed 19 tests, with 0 failures (0 unexpected) in 0.014 (0.195) seconds
+  green> 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.093 (0.095) seconds
+  green> 	 Executed 29 tests, with 0 failures (0 unexpected) in 0.107 (0.291) seconds
+  green> 	 Executed 29 tests, with 0 failures (0 unexpected) in 0.107 (0.292) seconds
+=== U2I-c HyphenateCharacterExtractor keyword path (value read before type)  (2026-10-08 19:40:35)
+file: runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/wrapping/HyphenateCharacterExtractor.swift
+sha256 before:  8a0ba398da67358eb3b2965dfb4da83217ead6513f73042bea43fd863f563958
+sha256 mutated: 64dcdc7b0041b52d1491c594919ea416c4e30af32ea0473fe07c0fae6f97f672
+sha256 restored: 8a0ba398da67358eb3b2965dfb4da83217ead6513f73042bea43fd863f563958  BYTE-EXACT
+mutated run exit=65  (RED)
+  red> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:289: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testTheExtractorReadsTheObjectShapeVerbatim] : XCTAssertEqual failed: ("nil") is not equal to ("Optional("/-/")")
+  red> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:290: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testTheExtractorReadsTheObjectShapeVerbatim] : XCTAssertEqual failed: ("Optional(StyleConverterRuntime.HyphenateCharacterConfig(value: nil))") is not equal to ("Optional(StyleConverterRuntime.HyphenateCharacterConfig(value: Optional("")))")
+  red> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:291: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testTheExtractorReadsTheObjectShapeVerbatim] : XCTAssertEqual failed: ("nil") is not equal to ("Optional("AbC")")
+  red> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:292: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testTheExtractorReadsTheObjectShapeVerbatim] : XCTAssertEqual failed: ("nil") is not equal to ("Optional("auto")")
+  red> Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testTheExtractorReadsTheObjectShapeVerbatim]' failed (1.113 seconds).
+  red> Test Suite 'GreedyLineBreakerTests' failed at 2026-10-08 19:39:15.150.
+  red> 	 Executed 19 tests, with 4 failures (0 unexpected) in 1.204 (1.222) seconds
+  red> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TypographyTests.swift:30: error: -[StyleConverterRuntimeTests.TypographyTests testWrappingChecks] : failed - HyphenateCharacter: {string -}
+  red> Test Case '-[StyleConverterRuntimeTests.TypographyTests testWrappingChecks]' failed (0.002 seconds).
+  red> Test Suite 'TypographyTests' failed at 2026-10-08 19:39:15.251.
+  red> 	 Executed 10 tests, with 1 failure (0 unexpected) in 0.099 (0.101) seconds
+  red> Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-08 19:39:15.251.
+restored run exit=0  (GREEN)
+  green> 	 Executed 19 tests, with 0 failures (0 unexpected) in 0.022 (0.177) seconds
+  green> 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.273 (0.275) seconds
+  green> 	 Executed 29 tests, with 0 failures (0 unexpected) in 0.295 (0.453) seconds
+  green> 	 Executed 29 tests, with 0 failures (0 unexpected) in 0.295 (0.453) seconds
+=== U3-a drop the re-arm (seam-3 applied)  (2026-10-08 19:45:54)
+file: tools/titan/extract-fixture.mjs
+sha256 before:  2461e45e7e10d92052b469d0dd7d80d0fa2be1be677e33e2064e4d75d6bb7206
+sha256 mutated: ac1a89e1263f0d932d1f276cb4e50611094d3786a24d1e457a1828d17b9568cb
+sha256 restored: 2461e45e7e10d92052b469d0dd7d80d0fa2be1be677e33e2064e4d75d6bb7206  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> not ok 1 - U3: hyphenate-character-001 — a br that ENDS a text line is 0, only the blank lines keep a line box
+  red>   failureType: 'testCodeFailure'
+  red>     + actual - expected
+  red>   name: 'AssertionError'
+  red>   expected:
+  red> not ok 2 - U3: revert-val-001 — every br follows its text line, so all seven are 0
+  red>   failureType: 'testCodeFailure'
+  red>     + actual - expected
+  red>   name: 'AssertionError'
+  red>   expected:
+  red> not ok 5 - U3: collapsible white space between children is no content — the blank br keeps its line box
+  red>   failureType: 'testCodeFailure'
+restored run exit=0  (GREEN)
+  green> # pass 5
+  green> # fail 0
+=== U3-b count white-space-only runs as content (seam-3 applied)  (2026-10-08 19:45:54)
+file: tools/titan/extract-fixture.mjs
+sha256 before:  2461e45e7e10d92052b469d0dd7d80d0fa2be1be677e33e2064e4d75d6bb7206
+sha256 mutated: e9f9919a3c946788fadde7af41a4ce2fc7882fdbb88a5dcb93f3140e76b1a018
+sha256 restored: 2461e45e7e10d92052b469d0dd7d80d0fa2be1be677e33e2064e4d75d6bb7206  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> not ok 5 - U3: collapsible white space between children is no content — the blank br keeps its line box
+  red>   failureType: 'testCodeFailure'
+  red>     + actual - expected
+  red>   name: 'AssertionError'
+  red>   expected:
+  red> # pass 4
+  red> # fail 1
+restored run exit=0  (GREEN)
+  green> # pass 5
+  green> # fail 0
+=== U3b-a the inherited reading: an ancestor's line box (seam-3+3b applied)  (2026-10-08 19:46:40)
+file: tools/titan/extract-fixture.mjs
+sha256 before:  6ab6f2b8ee7bc2e53cad7e164e454c0aa7fa9465b3fd468c868931c78ee3d1bd
+sha256 mutated: 9419fda61e1c10a3156d9bf7f514a98651075622b3678e924c7092847f6b600e
+sha256 restored: 6ab6f2b8ee7bc2e53cad7e164e454c0aa7fa9465b3fd468c868931c78ee3d1bd  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> not ok 7 - U3b negative: an ANCESTOR's line-height does not resize a br (baseline-007 40px, baseline-002 2em)
+  red>   failureType: 'testCodeFailure'
+  red>     + actual - expected
+  red>   name: 'AssertionError'
+  red>   expected:
+  red> # pass 6
+  red> # fail 1
+restored run exit=0  (GREEN)
+  green> # pass 7
+  green> # fail 0
+=== U3b-b drop the host line box from the br rule (seam-3+3b applied)  (2026-10-08 19:46:40)
+file: tools/titan/extract-fixture.mjs
+sha256 before:  6ab6f2b8ee7bc2e53cad7e164e454c0aa7fa9465b3fd468c868931c78ee3d1bd
+sha256 mutated: 4360a65cb94e0accf996494fcaee142ba6a6770980e7b5ae6b7d3179a44ef474
+sha256 restored: 6ab6f2b8ee7bc2e53cad7e164e454c0aa7fa9465b3fd468c868931c78ee3d1bd  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> not ok 1 - U3: hyphenate-character-001 — a br that ENDS a text line is 0, only the blank lines keep a line box
+  red>   failureType: 'testCodeFailure'
+  red>     + actual - expected
+  red>   name: 'AssertionError'
+  red>   expected:
+  red> # pass 6
+  red> # fail 1
+restored run exit=0  (GREEN)
+  green> # pass 7
+  green> # fail 0
+=== U2I-a (re-run on the final comment wording) SpentHyphen drops the strip  (2026-10-08 19:56:15)
+file: runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/wrapping/SpentHyphen.swift
+sha256 before:  6cfed34fbcde115f0aa315311e9f14d193063480c987bb54c8c77a3612167891
+sha256 mutated: ea43e48d5b1a6aa3c9e92ca4cc6be605d9845f17d8793b49072e31eeda11ac7c
+sha256 restored: 6cfed34fbcde115f0aa315311e9f14d193063480c987bb54c8c77a3612167891  BYTE-EXACT
+mutated run exit=65  (RED)
+  red> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:263: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testALineOverflowingOnlyByItsSpentHyphenIsUnbreakable] : XCTAssertTrue failed
+  red> Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testALineOverflowingOnlyByItsSpentHyphenIsUnbreakable]' failed (1.173 seconds).
+  red> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:275: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testSpentHyphenStripsOneTrailingOccurrenceOnly] : XCTAssertEqual failed: ("tial/-/") is not equal to ("tial")
+  red> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:276: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testSpentHyphenStripsOneTrailingOccurrenceOnly] : XCTAssertEqual failed: ("a/-//-/") is not equal to ("a/-/")
+  red> Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testSpentHyphenStripsOneTrailingOccurrenceOnly]' failed (0.002 seconds).
+  red> Test Suite 'GreedyLineBreakerTests' failed at 2026-10-08 19:54:45.145.
+  red> 	 Executed 19 tests, with 3 failures (0 unexpected) in 1.185 (1.504) seconds
+  red> 	 Executed 20 tests, with 0 failures (0 unexpected) in 0.011 (0.226) seconds
+  red> 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.043 (0.186) seconds
+  red> Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-08 19:54:45.558.
+  red> 	 Executed 49 tests, with 3 failures (0 unexpected) in 1.240 (1.917) seconds
+  red> Test Suite 'Selected tests' failed at 2026-10-08 19:54:45.558.
+restored run exit=0  (GREEN)
+  green> 	 Executed 19 tests, with 0 failures (0 unexpected) in 0.112 (0.213) seconds
+  green> 	 Executed 20 tests, with 0 failures (0 unexpected) in 0.089 (0.093) seconds
+  green> 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.167 (0.169) seconds
+  green> 	 Executed 49 tests, with 0 failures (0 unexpected) in 0.368 (0.556) seconds
+=== U2A-a (re-run on the final file, escape literal) SoftHyphenCuts.took answers by the wave-52 count  (2026-10-08 20:55:33)
+file: runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCuts.kt
+sha256 before:  d5cd45df0130558c5f7faa75ed6064c5649bd83b0ded704199883ca641b5a49a
+sha256 mutated: 765bac7bfb82a33e2284ddd28c821baf18a44f3e6cc62be0288ccdc734fddb3b
+sha256 restored: d5cd45df0130558c5f7faa75ed6064c5649bd83b0ded704199883ca641b5a49a  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> PreBreakPipelineTest > anEmptyHyphenateCharacterStillFiresAtTheTakenCuts FAILED
+  red>     java.lang.AssertionError at PreBreakPipelineTest.kt:405
+  red> PreBreakPipelineTest > theHyphenStringsWidthDecidesTheBreaks FAILED
+  red>     org.junit.ComparisonFailure at PreBreakPipelineTest.kt:414
+  red> 32 tests completed, 2 failed
+  red> > Task :runtime:testDebugUnitTest FAILED
+  red> FAILURE: Build failed with an exception.
+  red> Execution failed for task ':runtime:testDebugUnitTest'.
+  red> BUILD FAILED in 22s
+restored run exit=0  (GREEN)
+  green> BUILD SUCCESSFUL in 9s
+=== U2A-e (re-run on the final file) the walk misses a taken hyphenation op (equivalence pin)  (2026-10-08 20:56:45)
+file: runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCuts.kt
+sha256 before:  d5cd45df0130558c5f7faa75ed6064c5649bd83b0ded704199883ca641b5a49a
+sha256 mutated: 61a5b65b806717b26658418c65fcc8896110b9f5de624dd3f7f6077d9b34f7bd
+sha256 restored: d5cd45df0130558c5f7faa75ed6064c5649bd83b0ded704199883ca641b5a49a  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> > Task :runtime:bundleLibCompileToJarDebug FAILED
+  red> > Task :runtime:bundleLibRuntimeToJarDebug FAILED
+  red> 1: Task failed with an exception.
+  red> Execution failed for task ':runtime:bundleLibCompileToJarDebug' (registered by plugin 'com.android.internal.library').
+  red> 2: Task failed with an exception.
+  red> Execution failed for task ':runtime:bundleLibRuntimeToJarDebug' (registered by plugin 'com.android.internal.library').
+  red> BUILD FAILED in 23s
+restored run exit=1  (STILL RED)
+  green> BUILD FAILED in 20s
+NOTE: the U2A-e re-run block above (20:56:45) is VOID — both its runs failed in :runtime:bundleLib*ToJarDebug (a concurrent lane's Gradle on the shared :runtime build dir), no test executed; the suite was re-run green at 20:58 and U2A-e repeated below.
+=== U2A-e (re-run on the final file, retry) the walk misses a taken hyphenation op (equivalence pin)  (2026-10-08 20:58:01)
+file: runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCuts.kt
+sha256 before:  d5cd45df0130558c5f7faa75ed6064c5649bd83b0ded704199883ca641b5a49a
+sha256 mutated: 61a5b65b806717b26658418c65fcc8896110b9f5de624dd3f7f6077d9b34f7bd
+sha256 restored: d5cd45df0130558c5f7faa75ed6064c5649bd83b0ded704199883ca641b5a49a  BYTE-EXACT
+mutated run exit=0  (GREEN — MUTATION SURVIVED)
+restored run exit=0  (GREEN)
+  green> BUILD SUCCESSFUL in 2s
+=== U2A-e (final file; gradle-focused.sh --rerun + fresh-XML check) the walk misses a taken hyphenation op (equivalence pin)  (2026-10-08 20:59:23)
+file: runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCuts.kt
+sha256 before:  d5cd45df0130558c5f7faa75ed6064c5649bd83b0ded704199883ca641b5a49a
+sha256 mutated: 61a5b65b806717b26658418c65fcc8896110b9f5de624dd3f7f6077d9b34f7bd
+sha256 restored: d5cd45df0130558c5f7faa75ed6064c5649bd83b0ded704199883ca641b5a49a  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> > Task :runtime:testDebugUnitTest FAILED
+  red> PreBreakPipelineTest > aMultiCharacterHyphenateCharacterOverflowsLikeTheRef FAILED
+  red> PreBreakPipelineTest > firesWhenASoftHyphenBreakWasTaken FAILED
+  red> PreBreakPipelineTest > anEmptyHyphenateCharacterStillFiresAtTheTakenCuts FAILED
+  red> PreBreakPipelineTest > theHyphenStringsWidthDecidesTheBreaks FAILED
+  red> PreBreakPipelineTest > composesWithTheSoftHyphenPolicy FAILED
+  red> PreBreakPipelineTest > aBulletHyphenateCharacterIsPaintedAtEveryCut FAILED
+  red> PreBreakPipelineTest > theWalkAgreesWithTheWave52CountOnEveryCorpusRun FAILED
+  red> PreBreakPipelineTest > aMultiOpportunitySpacelessRunSplitsIntoFiveLines FAILED
+  red> PreBreakPipelineTest > aSpacelessSoftHyphenRunFiresWithTheTakenHyphen FAILED
+  red> 32 tests completed, 9 failed
+  red> BUILD FAILED in 4s
+restored run exit=0  (GREEN)
+  green> BUILD SUCCESSFUL in 4s
+  green>   junit PreBreakPipelineTest: tests=26 skipped=0 failures=0 errors=0
+  green>   junit HyphenateCharacterExtractorTest: tests=6 skipped=0 failures=0 errors=0
+NOTE: the 20:58:01 'U2A-e (retry)' block is VOID too — its mutated run executed NO test (Gradle left :runtime:testDebugUnitTest UP-TO-DATE / restored it, the shared build dir having been rebuilt by a concurrent lane's daemon; gradle-focused.sh then proved a plain run writes no fresh JUnit XML). From 20:59 every Compose mutation runs through gradle-focused.sh (--rerun on the test task + a fresh-XML check, exit 3 when no test ran); the 20:59:23 U2A-e block is the record of value. The 19:21-19:22 U2A-a…e blocks and 20:55:33 U2A-a are valid as RED (failing test names printed = tests executed on the mutated code); their GREEN halves are superseded by the fresh-XML green runs recorded in _note.md.
+=== U2A-b (final files; gradle-focused.sh --rerun + fresh-XML) PreBreakPipeline drops hyphenChar from the fold  (2026-10-08 21:46:31)
+file: runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt
+sha256 before:  18bafc7bb18a0bee96f8723678c5996b03ab49e5e4456eeea8d7e84f3d4a5304
+sha256 mutated: 1d2cc7326ef55183ec5a0b102da6ecadea60e63a747b61957c3c9ed3f1692f76
+sha256 restored: 18bafc7bb18a0bee96f8723678c5996b03ab49e5e4456eeea8d7e84f3d4a5304  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> > Task :runtime:testDebugUnitTest FAILED
+  red> PreBreakPipelineTest > aMultiCharacterHyphenateCharacterOverflowsLikeTheRef FAILED
+  red> PreBreakPipelineTest > anEmptyHyphenateCharacterStillFiresAtTheTakenCuts FAILED
+  red> PreBreakPipelineTest > theHyphenStringsWidthDecidesTheBreaks FAILED
+  red> PreBreakPipelineTest > aBulletHyphenateCharacterIsPaintedAtEveryCut FAILED
+  red> 32 tests completed, 4 failed
+  red> BUILD FAILED in 3s
+  red>   junit PreBreakPipelineTest: tests=26 skipped=0 failures=4 errors=0
+  red>   junit HyphenateCharacterExtractorTest: tests=6 skipped=0 failures=0 errors=0
+restored run exit=0  (GREEN)
+  green> BUILD SUCCESSFUL in 2s
+  green>   junit PreBreakPipelineTest: tests=26 skipped=0 failures=0 errors=0
+  green>   junit HyphenateCharacterExtractorTest: tests=6 skipped=0 failures=0 errors=0
+=== U2A-c (final files; gradle-focused.sh) HyphenateCharacterExtractor lower-cases the string  (2026-10-08 21:46:43)
+file: runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/HyphenateCharacterExtractor.kt
+sha256 before:  968d957fb9656965c36708e60feb2c527c25843de0669547052e6801c5cb2e31
+sha256 mutated: bed289186a57449527342fd5433e9e2b73dcdaac877eb487e941ad39130ea2ef
+sha256 restored: 968d957fb9656965c36708e60feb2c527c25843de0669547052e6801c5cb2e31  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> > Task :runtime:testDebugUnitTest FAILED
+  red> HyphenateCharacterExtractorTest > theStringIsNeverCaseFoldedNorReadAsAKeyword FAILED
+  red> 32 tests completed, 1 failed
+  red> BUILD FAILED in 1s
+  red>   junit PreBreakPipelineTest: tests=26 skipped=0 failures=0 errors=0
+  red>   junit HyphenateCharacterExtractorTest: tests=6 skipped=0 failures=1 errors=0
+restored run exit=0  (GREEN)
+  green> BUILD SUCCESSFUL in 2s
+  green>   junit PreBreakPipelineTest: tests=26 skipped=0 failures=0 errors=0
+  green>   junit HyphenateCharacterExtractorTest: tests=6 skipped=0 failures=0 errors=0
+=== U2A-d (final files; gradle-focused.sh) HyphenateCharacterExtractor keyword path (value read before type)  (2026-10-08 21:46:46)
+file: runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/HyphenateCharacterExtractor.kt
+sha256 before:  968d957fb9656965c36708e60feb2c527c25843de0669547052e6801c5cb2e31
+sha256 mutated: 8d6e96082d428557e1815ec29d690dbf1c6fca6d3f7e0edcd54cdbc587a87337
+sha256 restored: 968d957fb9656965c36708e60feb2c527c25843de0669547052e6801c5cb2e31  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> > Task :runtime:testDebugUnitTest FAILED
+  red> HyphenateCharacterExtractorTest > theEmptyStringIsAValueNotAnAbsence FAILED
+  red> HyphenateCharacterExtractorTest > theStringIsNeverCaseFoldedNorReadAsAKeyword FAILED
+  red> HyphenateCharacterExtractorTest > aDictionaryRunKeepsTheStringAndAnUnreadablePayloadFallsBackToAuto FAILED
+  red> HyphenateCharacterExtractorTest > theVerbatim004WireReachesThePreBreakAsSlashHyphenSlash FAILED
+  red> 32 tests completed, 4 failed
+  red> BUILD FAILED in 1s
+  red>   junit PreBreakPipelineTest: tests=26 skipped=0 failures=0 errors=0
+  red>   junit HyphenateCharacterExtractorTest: tests=6 skipped=0 failures=4 errors=0
+restored run exit=0  (GREEN)
+  green> BUILD SUCCESSFUL in 1s
+  green>   junit PreBreakPipelineTest: tests=26 skipped=0 failures=0 errors=0
+  green>   junit HyphenateCharacterExtractorTest: tests=6 skipped=0 failures=0 errors=0
+=== U2A-a (final file; gradle-focused.sh) SoftHyphenCuts.took answers by the wave-52 count  (2026-10-08 21:46:57)
+file: runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCuts.kt
+sha256 before:  d5cd45df0130558c5f7faa75ed6064c5649bd83b0ded704199883ca641b5a49a
+sha256 mutated: 765bac7bfb82a33e2284ddd28c821baf18a44f3e6cc62be0288ccdc734fddb3b
+sha256 restored: d5cd45df0130558c5f7faa75ed6064c5649bd83b0ded704199883ca641b5a49a  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> > Task :runtime:testDebugUnitTest FAILED
+  red> PreBreakPipelineTest > anEmptyHyphenateCharacterStillFiresAtTheTakenCuts FAILED
+  red> PreBreakPipelineTest > theHyphenStringsWidthDecidesTheBreaks FAILED
+  red> 32 tests completed, 2 failed
+  red> BUILD FAILED in 1s
+  red>   junit PreBreakPipelineTest: tests=26 skipped=0 failures=2 errors=0
+  red>   junit HyphenateCharacterExtractorTest: tests=6 skipped=0 failures=0 errors=0
+restored run exit=0  (GREEN)
+  green> BUILD SUCCESSFUL in 1s
+  green>   junit PreBreakPipelineTest: tests=26 skipped=0 failures=0 errors=0
+  green>   junit HyphenateCharacterExtractorTest: tests=6 skipped=0 failures=0 errors=0
+=== U2I-d StyleBuilder drops the TextConfig mirror (new end-to-end pin in testTheApplierCarriesTheStringOntoTheAggregate)  (2026-10-08 21:57:02)
+file: runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/StyleBuilder.swift
+sha256 before:  0a97eff223e4e49f2c67522e70ae722fce1fd4e4efa7dd07a0d3462ac0ea79cb
+sha256 mutated: 1b1c43a1493fb9da2881dfa4c4805e50a00e2e4cd44c12eb5f1bf46c76a5c091
+sha256 restored: 0a97eff223e4e49f2c67522e70ae722fce1fd4e4efa7dd07a0d3462ac0ea79cb  BYTE-EXACT
+mutated run exit=65  (RED)
+  red> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:311: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testTheApplierCarriesTheStringOntoTheAggregate] : XCTAssertEqual failed: ("nil") is not equal to ("Optional("/-/")")
+  red> Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testTheApplierCarriesTheStringOntoTheAggregate]' failed (1.052 seconds).
+  red> Test Suite 'GreedyLineBreakerTests' failed at 2026-10-08 21:55:49.139.
+  red> 	 Executed 19 tests, with 1 failure (0 unexpected) in 1.065 (1.334) seconds
+  red> 	 Executed 20 tests, with 0 failures (0 unexpected) in 0.019 (0.174) seconds
+  red> 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.205 (0.303) seconds
+  red> Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-08 21:55:49.616.
+  red> 	 Executed 49 tests, with 1 failure (0 unexpected) in 1.289 (1.812) seconds
+  red> Test Suite 'Selected tests' failed at 2026-10-08 21:55:49.617.
+  red> 	 Executed 49 tests, with 1 failure (0 unexpected) in 1.289 (1.812) seconds
+  red> ** TEST FAILED **
+restored run exit=0  (GREEN)
+  green> 	 Executed 19 tests, with 0 failures (0 unexpected) in 0.026 (0.302) seconds
+  green> 	 Executed 20 tests, with 0 failures (0 unexpected) in 0.010 (0.248) seconds
+  green> 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.332 (0.334) seconds
+  green> 	 Executed 49 tests, with 0 failures (0 unexpected) in 0.368 (0.886) seconds
+  green> 	 Executed 49 tests, with 0 failures (0 unexpected) in 0.368 (0.887) seconds
+=== U3-a drop the re-arm (seam-3 applied)  (2026-10-08 21:59:45)
+file: tools/titan/extract-fixture.mjs
+sha256 before:  2461e45e7e10d92052b469d0dd7d80d0fa2be1be677e33e2064e4d75d6bb7206
+sha256 mutated: ac1a89e1263f0d932d1f276cb4e50611094d3786a24d1e457a1828d17b9568cb
+sha256 restored: 2461e45e7e10d92052b469d0dd7d80d0fa2be1be677e33e2064e4d75d6bb7206  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> not ok 1 - U3: hyphenate-character-001 — a br that ENDS a text line is 0, only the blank lines keep a line box
+  red>   failureType: 'testCodeFailure'
+  red>     + actual - expected
+  red>   name: 'AssertionError'
+  red>   expected:
+  red> not ok 2 - U3: revert-val-001 — every br follows its text line, so all seven are 0
+  red>   failureType: 'testCodeFailure'
+  red>     + actual - expected
+  red>   name: 'AssertionError'
+  red>   expected:
+  red> not ok 5 - U3: collapsible white space between children is no content — the blank br keeps its line box
+  red>   failureType: 'testCodeFailure'
+restored run exit=0  (GREEN)
+  green> # pass 5
+  green> # fail 0
+=== U3-b count white-space-only runs as content (seam-3 applied)  (2026-10-08 21:59:46)
+file: tools/titan/extract-fixture.mjs
+sha256 before:  2461e45e7e10d92052b469d0dd7d80d0fa2be1be677e33e2064e4d75d6bb7206
+sha256 mutated: e9f9919a3c946788fadde7af41a4ce2fc7882fdbb88a5dcb93f3140e76b1a018
+sha256 restored: 2461e45e7e10d92052b469d0dd7d80d0fa2be1be677e33e2064e4d75d6bb7206  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> not ok 5 - U3: collapsible white space between children is no content — the blank br keeps its line box
+  red>   failureType: 'testCodeFailure'
+  red>     + actual - expected
+  red>   name: 'AssertionError'
+  red>   expected:
+  red> # pass 4
+  red> # fail 1
+restored run exit=0  (GREEN)
+  green> # pass 5
+  green> # fail 0
+=== U3b-a the inherited reading: an ancestor's line box (seam-3+3b applied)  (2026-10-08 21:59:46)
+file: tools/titan/extract-fixture.mjs
+sha256 before:  6ab6f2b8ee7bc2e53cad7e164e454c0aa7fa9465b3fd468c868931c78ee3d1bd
+sha256 mutated: 9419fda61e1c10a3156d9bf7f514a98651075622b3678e924c7092847f6b600e
+sha256 restored: 6ab6f2b8ee7bc2e53cad7e164e454c0aa7fa9465b3fd468c868931c78ee3d1bd  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> not ok 7 - U3b negative: an ANCESTOR's line-height does not resize a br (baseline-007 40px, baseline-002 2em)
+  red>   failureType: 'testCodeFailure'
+  red>     + actual - expected
+  red>   name: 'AssertionError'
+  red>   expected:
+  red> # pass 6
+  red> # fail 1
+restored run exit=0  (GREEN)
+  green> # pass 7
+  green> # fail 0
+=== U3b-b drop the host line box from the br rule (seam-3+3b applied)  (2026-10-08 21:59:47)
+file: tools/titan/extract-fixture.mjs
+sha256 before:  6ab6f2b8ee7bc2e53cad7e164e454c0aa7fa9465b3fd468c868931c78ee3d1bd
+sha256 mutated: 4360a65cb94e0accf996494fcaee142ba6a6770980e7b5ae6b7d3179a44ef474
+sha256 restored: 6ab6f2b8ee7bc2e53cad7e164e454c0aa7fa9465b3fd468c868931c78ee3d1bd  BYTE-EXACT
+mutated run exit=1  (RED)
+  red> not ok 1 - U3: hyphenate-character-001 — a br that ENDS a text line is 0, only the blank lines keep a line box
+  red>   failureType: 'testCodeFailure'
+  red>     + actual - expected
+  red>   name: 'AssertionError'
+  red>   expected:
+  red> # pass 6
+  red> # fail 1
+restored run exit=0  (GREEN)
+  green> # pass 7
+  green> # fail 0

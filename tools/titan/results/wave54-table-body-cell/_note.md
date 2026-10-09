@@ -228,3 +228,59 @@ reaching the call (role lost before the TABLE arm); a square still at x 44-63 po
 TREES: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
 
 STATUS: COMPLETE
+
+## S1 fix pass (wave-54 S1 fix lane table-body-cell, 2026-10-09; tree 4f3853d7, uncommitted — the orchestrator commits)
+
+Scope: S1 should-fix **S5** ("L2 D2 quantity unpinned") and the L2 skeptic's nit 2 (the vacuous `.then(cellModifier)`
+order assertion), from `tools/titan/results/wave54-S1/_note.md`. Owned files: `TableCellHug.kt` (unchanged) and
+`TableCellHugTest.kt` (changed).
+
+### What changed (`runtimes/compose/src/test/java/com/styleconverter/runtime/table/TableCellHugTest.kt`, 186 → 200 lines)
+
+| item | change |
+|---|---|
+| S5 | new pin `hugColumnSource_enabledBranchReadsMaxContent_neverMin`. It takes the `fun Modifier.hugColumn(` body from `TableCellHug.kt`, bounded at the next `fun ` or EOF, so the KDoc that names `widthAtMaxIntrinsic` cannot answer. It then checks three things. (a) The enabled branch (after `else with(IntrinsicChannel) {`) calls `this@hugColumn.widthAtMaxIntrinsic(`. (b) `refusalContext = TableCellHug.CELL_HUG_REFUSAL` follows that call. (c) The function names neither `widthAtMinIntrinsic` nor `IntrinsicSize.Min`. The quantity is CSS 2.1 §17.5.2.2: in auto layout with room available, each column gets its MAX-content width |
+| nit 2 | `applierSource_…` now bounds `cell` at the next `fun ` (that is `TableHeaderCell`), so a later composable's `.fillMaxHeight()` (`TableApplier.kt:666`) can no longer satisfy `hug < fill`. It also asserts that all three links are present (`minOf(then, hug, fill) >= 0`) before checking the order `then < hug < fill`. Before the fix, an absent `.then(cellModifier)` gave `-1 < hug`, which passed vacuously |
+| helpers | the `applier` lazy val is replaced by `tableSource(name)`, using the same walk-up to the repo root, and by `funBody(src, start)`. `funBody` asserts that `start` is present, so a renamed function goes red instead of crashing on `substring(-1)` |
+| header | the EXECUTED MUTATIONS list gains the S1-fix line (X3, X6 / X7) |
+
+sha256:
+- `TableCellHugTest.kt`: `1afa7686e022b50a…` → `ea5e7a9448b5a298…`.
+- `TableCellHug.kt`: `fac6c37431056468…`, unchanged.
+- `TableApplier.kt`: `0d58a4633762893c…`, unchanged. It was mutated only transiently and restored byte-exact.
+
+### Executed mutations
+
+Command: `python3 tools/titan/results/wave54-table-body-cell/s1fix-mutate.py <phase> <ids…>`. The script makes one exact-substring edit per mutation and asserts that the edit is unique. It runs `./gradlew :runtime:testDebugUnitTest --rerun --tests …TableCellHugTest --tests …TableBodyForestTest` with JDK 21, after deleting only those two classes' XML, so every count is fresh XML. It restores the original bytes in a `finally` block and re-hashes them. Full output: `s1fix-mutations.out.txt`.
+
+| id | mutation | BEFORE (pins as landed, test sha `1afa7686…`) | AFTER (test sha `ea5e7a94…`) | restored |
+|---|---|---|---|---|
+| X3 (S1's survivor = L2 skeptic X3) | `TableCellHug.kt` `this@hugColumn.widthAtMaxIntrinsic(` → `…widthAtMinIntrinsic(` | **survived** (rc 0, 15 tests, 0 red) | **RED**: `hugColumnSource_…` — "the enabled hug does not read max-content" | `fac6c374…` → `fac6c374…` byte-exact |
+| X6 (L2 skeptic X6, nit 2) | `TableApplier.kt` drops `.then(cellModifier)` | **survived** (rc 0, 15 / 0) | **RED**: `applierSource_…` — "TableCell lacks a link: then=-1 hug=2582 fill=2657" | `0d58a463…` byte-exact |
+| X7 (new: the bound) | `TableApplier.kt` drops TableCell's `.fillMaxHeight()` | **survived** (rc 0, 15 / 0). The unbounded `cell` found `TableApplier.kt:666` | **RED**: `applierSource_…` — "TableCell lacks a link: then=2431 hug=2618 fill=-1" | `0d58a463…` byte-exact |
+| X8 (new: clause c alone) | keeps the max read and chains `.widthAtMinIntrinsic(…)` after it | — | **RED**: "hugColumn reads min-content" | `fac6c374…` byte-exact |
+| X9 (new: clause b alone) | `refusalContext = TableCellHug.CELL_HUG_REFUSAL,` → `refusalContext = "",` | — | **RED**: "the read is not tagged CELL_HUG_REFUSAL" | `fac6c374…` byte-exact |
+
+Each mutation turned exactly one test red, the intended one. No mutation compiled with errors (`errs []` on every row).
+
+### Focused suites (executed)
+
+Classes: `TableCellHugTest` and `TableBodyForestTest`.
+
+| run | result | output |
+|---|---|---|
+| before the fix | GREEN, rc 0, 15 tests, 0 red | `== before` block |
+| after the fix | GREEN, rc 0, **16** tests, 0 red | `after-final` and `clauses` GREEN rows |
+
+The 16 are 15 + the new pin, and the last GREEN came after every restore.
+
+### Not done / limits
+
+- **Source pins only.** They pin which call the code makes, not the pixels. The Compose layout (the intrinsic inside the
+  `Row`) still does not execute on the JVM. Per CSS, 006's two cells have equal min- and max-content: an empty
+  anonymous cell, and a td with `width: 20px`. By that reading, which is NOT executed, the device gate would not tell
+  X3 apart on this corpus document either. That is why the pin is a source pin.
+- I did not run `TableCellHugSeamWiringTest` or the full Compose suite (single-writer rule). The orchestrator's sweep is
+  the count of record.
+
+S1-FIX STATUS: COMPLETE

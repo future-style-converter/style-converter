@@ -1,0 +1,32 @@
+> Task :runtime:preBuild UP-TO-DATE
+> Task :runtime:preDebugBuild UP-TO-DATE
+> Task :runtime:generateDebugResources UP-TO-DATE
+> Task :runtime:packageDebugResources UP-TO-DATE
+> Task :runtime:processDebugNavigationResources UP-TO-DATE
+> Task :runtime:parseDebugLocalResources UP-TO-DATE
+> Task :runtime:generateDebugRFile UP-TO-DATE
+> Task :runtime:compileDebugKotlin UP-TO-DATE
+> Task :runtime:javaPreCompileDebug UP-TO-DATE
+> Task :runtime:compileDebugJavaWithJavac NO-SOURCE
+> Task :runtime:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :runtime:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :runtime:preDebugUnitTestBuild UP-TO-DATE
+> Task :runtime:generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :runtime:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :runtime:processDebugJavaRes UP-TO-DATE
+
+> Task :runtime:compileDebugUnitTestKotlin
+w: file:///private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/ex-RV/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt:259:101 Unnecessary non-null assertion (!!) on a non-null receiver of type 'List<IRComponent>'.
+w: file:///private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/ex-RV/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt:260:106 Unnecessary non-null assertion (!!) on a non-null receiver of type 'List<IRComponent>'.
+w: file:///private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/ex-RV/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt:262:118 Unnecessary non-null assertion (!!) on a non-null receiver of type 'List<IRComponent>'.
+w: file:///private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/ex-RV/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt:265:13 'when' is exhaustive so 'else' is redundant here.
+
+> Task :runtime:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :runtime:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :runtime:testDebugUnitTest
+
+[Incubating] Problems report is available at: file:///private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/ex-RV/apps/android-harness/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 2s
+15 actionable tasks: 2 executed, 13 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html

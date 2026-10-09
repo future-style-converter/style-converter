@@ -1,0 +1,12 @@
+== lock taken 2026-10-08 19:29:11; patch /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-web-tail/seam-1.patch
+== sha256 before
+cc39ab6e98342c493b2404a4d9a52d1fba997063b2d42b2edc89cea7809a4d8e  apps/web-harness/src/sdui/ComponentRenderer.tsx
+87ac9ca4f30471e59dd954883f41a5f4a6c851ad2f868082e797bac3becb47b9  apps/web-harness/src/ui/ComposedCaptureGallery.tsx
+== applied; running: cd apps/web-harness && CENSUS_RUN=wave53-final npx vitest run --config ../../tools/titan/results/wave54-web-tail/vitest.census.config.mts rs-pairs 2>&1 | grep -E 'Tests |rs-pairs|Error'
+      Tests  1 passed (1)
+== command exit 0
+== sha256 after restore
+cc39ab6e98342c493b2404a4d9a52d1fba997063b2d42b2edc89cea7809a4d8e  apps/web-harness/src/sdui/ComponentRenderer.tsx
+87ac9ca4f30471e59dd954883f41a5f4a6c851ad2f868082e797bac3becb47b9  apps/web-harness/src/ui/ComposedCaptureGallery.tsx
+removed apps/web-harness/tests/ui/ComposedRootSeparatorWire.test.tsx
+== lock released 2026-10-08 19:29:15

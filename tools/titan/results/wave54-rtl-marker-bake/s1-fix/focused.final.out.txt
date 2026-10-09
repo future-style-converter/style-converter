@@ -1,0 +1,13 @@
+== node --test tools/titan/bidi-bake.test.mjs
+# tests 74
+# pass 74
+# fail 0
+# skipped 0
+== node --test tools/titan/wpt-white-canvas.test.mjs (source-scans bidi-bake.mjs)
+# tests 21
+# pass 21
+# fail 0
+== node --test tools/titan/extract-fixture.test.mjs (imports the bake gate)
+# tests 483
+# pass 483
+# fail 0

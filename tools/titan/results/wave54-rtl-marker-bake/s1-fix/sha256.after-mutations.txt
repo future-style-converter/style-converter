@@ -1,0 +1,4 @@
+9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f  tools/titan/bidi-marker-paint.mjs
+c8e530bd3d3aeee615f8b7b01c2e456eef9fb485ff2d0f27c41e3a3a167c47ac  tools/titan/bidi-marker-bake.mjs
+4d9e5359b3d5bae962019e77163c7e906a75acd42e34128cbe6bb807fde9fe0d  tools/titan/bidi-bake.mjs
+f9fae71253af3dee173eaf9e2658605fb35e64479016b261ec2a7d926c248289  tools/titan/bidi-bake.test.mjs

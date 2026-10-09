@@ -1,0 +1,1 @@
+The patched ComponentRenderer.kt copy (518 KB) was removed at the wave-54 S1 fix pass (nit N1 / L2 skeptic nit 4): regenerate it byte-identically (sha256 eaf9111e…) with `python3 tools/titan/results/wave54-table-body-cell/seam1-hunk.py <ComponentRenderer.kt at db6e8aa0> <out>`; record: tools/titan/results/wave54-S1/fix/seam1-regen.out.txt.

@@ -1131,7 +1131,7 @@ for every stem, and has no clause for the contract's "iff".
 | `apps/web-harness/src/sdui/ComponentRenderer.tsx` | `:1099-1154` (the WWS branch is :1108-1153) lift the WWS branch of `renderChildSeparator` into an exported pure `wsAfterSeparator(prev, next, container)`, called by `HARNESS_OPTIONS` | L6 · RS | `wave54-web-tail/seam-1.patch` | child-level DOM byte-identical (call-equivalence pin) |
 | | `:991` `renderText`: a bare string for the pieces of a host whose runs carry a mid-word inert out-of-flow member | L6 · W1 | `wave54-web-tail/seam-2.patch` | **branch H only** (step 0); under R / H2 there is no seam-2 |
 | `tools/titan/extract-fixture.mjs` | `buildNode` children loop (`:11706` region): re-arm `childLineCtx.hasInline` on interleaved non-whitespace `{text}` | L3 · U3 | `wave54-hyphenate-character/seam-3.patch` | the child-scope twin of `:11727-11733`; the only lane on this seam |
-| | the br-height rule (`:11457-11459`): a line-start br in a host declaring `line-height` gets that line box | L3 · U3b | `wave54-hyphenate-character/seam-3b.patch` | a SEPARATE patch so U3b reverts alone |
+| | three anchors (wave54-S1 nit N3 / should-fix 7; the patch header names the same three): the new exported helper `brHostLineBoxPx` after `rootPropsWithFontShorthand` (`:10142`); the br-height rule `const brHeight = …` (`:11457-11459`): a line-start br in a host declaring `line-height` gets that line box; the `childLineCtx` seed (`:11706`) gains `hostLineBox`, a line inside U3's registered region that U3's hunk does not touch (both patch orders apply) | L3 · U3b | `wave54-hyphenate-character/seam-3b.patch` | a SEPARATE patch so U3b reverts alone |
 
 **Totals.**
 - Registered patches: 9, plus seam-2 if step 0 says H.
@@ -1619,6 +1619,59 @@ today's value. **The closing gate runs only on a tree whose probes hold.**
    order and the missing floor reader at stage 2) and its should-fix items are applied by a second fix pass BEFORE stage 1 is
    read; the builders start on the committed plan in parallel, since no lane's ownership, units or briefs change under them.**
    Probe decisions go in `plan-build.py` `REVERTED` and are recorded here with their run, rule and picture.
+6. **The lanes' plan-side hand-offs (commit `25cbd1c2`, 2026-10-08, before landing) are restated here**, because that
+   commit changed only `plan-build.py` and its generated files, and the prose of §1-§6 still carries the older numbers.
+   The machine checks (`geometry-gate.py`, `adjudicate.mjs`, the watchlist) read `expectations.json` and were right all
+   along; **where the prose above and this item disagree, this item and `expectations.json` win.**
+   - **L4 CBB-android +3 captures:** the L4 builder's behavioural census found three px-inset stretch documents the static
+     predicate missed: `css-position/position-absolute-semi-replaced-stretch-{button,input,other}` android (mover, MED,
+     stays f; replay 0.9843 / 0.4555 / 0.4677). CBB-android's captures are 14 (§2 L4 said 11: the 10 cbborder carriers +
+     `flex-gap-decorations-006`). L4 has 29 prediction rows (§2 said 26) and android carriers 24 (was 21).
+   - **`contain-content-011` android** stays gating (floor 0.97 + the geometry key on the green square) and is listed in
+     `stayDegenerateEvenIfPass`: every platform paints "25" where the test needs "17", so a P is never a fix.
+   - **L5 is GO-SMALL:** U1-android only (leaf headings and rendered sub / sup; `UAElementFontRule.headingStandsDown`,
+     not `UAHeadingFoldGate.standsDown`). **U2-ios is HELD**: its seam-2 and `UAHeadingFoldGate.{kt,swift}` are parked
+     as `.txt` / `.patch` files in `wave54-ua-heading-face/held/`. The six `text-decoration-inset-005/-006/-014` ios /
+     android rows are withdrawn from the targets and are must-not-move. L5 carriers are **web 0 · iOS 0 · Android 7**
+     (§2 said android 10 / iOS 3).
+   - **`hyphenate-character-002` ×3** (web, iOS, Android) are in `stayDegenerateEvenIfPass` (L3 skeptic S1).
+   - **Totals now** (`plan-build.out.txt`):
+     - union capture carriers **web 44 · iOS 24 · Android 51** (the preamble's planning-time execution 2, §6 R4 and the
+       round-1 / round-2 tallies say iOS 27); wire carriers **23** (unchanged);
+     - **18 revert units** (the preamble, §1 and §4 say 19);
+     - **776 watch lines** (the preamble says 775); must-not-move **655** cells (R7 says 651);
+     - gating predictions with numeric floors **34**, geometry keys **185** (gating 37 · report 36 · control 112):
+       unchanged.
+   - **The ceiling** (§1, §6 "Expected totals"): the HIGH / MED-HIGH line is unchanged (web 1236 · iOS 1128 · Android
+     1121). The MED / MED-LOW increment is web +5 · iOS +3 · Android +1 (it was +5 / +6 / +4; the six withdrawn inset
+     rows were iOS 3 and Android 3), so the ceiling is **web 1241 · iOS 1131 · Android 1122** (was 1241 / 1134 / 1125).
+     The web LOW tally moving 0 → 1 in `plan-build.out.txt` is `hyphenate-character-002` web's new `kind` text, which now
+     contains a "P"; LOW rows are never counted.
+   - **§3 is stale on L5 and on the totals:** the L5 U1-android row wraps with `standsDown = headingStandsDown(…)`; the
+     L5 U2-ios `.swift` row is HELD and has no hunk. **8 patches landed** (L5 seam-2 HELD; W1 took branch R, so L6 has
+     no seam-2). `.swift` has 1 registered row (L3's, which lands as two diff hunks at :5011 / :5026).
+   - **The DEGENERATE list:** §1 says "Four passing cells stay DEGENERATE". After `25cbd1c2` there are 8. After item 7
+     there are **10**.
+7. **The wave54-S1 fix pass (2026-10-09, after landing, before stage 1)** made three plan changes: two instruments
+   and one registry row. Record: `tools/titan/results/wave54-S1/fix/_note.md`.
+   - **[M] geometry teeth (S1 should-fix 1).** Both [M] gating probes now require each RTL row's marker ink to START at
+     the ref's '.', x133 ±2: `rtl-marker-bake.geometry.py` and `wave53-plan/lists-bakes.geometry.py`. Before this, the
+     L1 skeptic's nodot fake (the '.' runs whitened) printed `GEOMETRY OK` on web (both probes) and on iOS (lists-bakes).
+     It now prints WRONG on all of them.
+     - The ref still prints OK, and so do wave53-probe web and iOS.
+     - Every recorded invocation prints byte-identical lines (wave52-ship, wave53-open, wave53-probe, wave53-final).
+     - `geometry-gate.py wave53-final --base wave53-open --self-test` still HOLDS.
+     - Disabling either new check turns the fake claim red, and the restore is byte-exact.
+   - **L6 honesty labels (S1 should-fix 8, L6 skeptic D4).** Two rows are added to `stayDegenerateEvenIfPass`, and their
+     `kind` text names the residue:
+     - `css-position/position-absolute-semi-replaced-stretch-other` web: the label paints "abel" where the ref paints
+       "label";
+     - `css-cascade/scope-pseudo-element` web: the B/Foo wrap defect remains.
+
+     A new `plan-build.py` assertion keeps the list and the rows in agreement. Every list entry must name a prediction
+     row, and every row whose `kind` says "DEGENERATE even if P" must be listed. It is mutation-proven red in both
+     directions. On regeneration, `watchlist.txt` and `plan-build.out.txt` are byte-stable.
+   - **§3's U3b row** now names the patch's three anchors.
 
 ## Fix pass (round 1)
 
@@ -1743,3 +1796,37 @@ The geometry JSONs are kept (≈76 kB each). They regenerate with `python3 …/f
 - **R3-N3** (`control-check.mjs`: an "absent before" capture is printed LEAK but not pushed to `leaks`, and a capture present before and missing after is never iterated). This is a logic change to a calibrated check: the four `controlCalibrations` must re-run with it. The skeptic finds both cases unreachable given R3's column counts. It is left to the orchestrator, with that re-run.
 - **R3-N7** (commit the plan artefacts while seven lanes write on this tree) is the orchestrator's call; this pass must not commit.
 - R2-N2, R2-N4, R2-N5 and R2-N6 stay open as at round 2.
+
+### §10 item 6 — the S1 combined-tree skeptic and its fix pass (orchestrator, 2026-10-09, before stage 1)
+
+S1 (`wave54-S1/_note.md`): MIXED, 0 must-fix, 9 should-fix, 9 nits; the seam replay 14/14 files equal, every census replayed with no
+under-reported radius, 839 pointers resolve, 115/115 prediction "from" values equal `wave54-open`, the [W-L3] set equality confirmed.
+The fix pass (four scoped lanes + a verifier, `wave54-S1/fix/`) took the should-fix items that bear on the probes or the record:
+
+1. **The [M] gating probes could pass a counter-suffix capture missing the "." run** — both `rtl-marker-bake.geometry.py` and
+   `wave53-plan/lists-bakes.geometry.py` now also require each RTL row's marker-ink LEFT edge at the ref's x134 ±2 (the dark-core
+   read; the antialiased edge is x133 — the verifier measured ref x134 ×4 and iOS cores 134/134/135/134, so the centre is 134, giving
+   iOS row 3 one pixel of headroom rather than none). Fakes: no-dot WRONG on both probes, control and ref OK; `geometry-gate.py
+   --self-test` HOLDS.
+2. **An instrument check pre-registered for stage 1**: M′'s new paint-chain reader (`bidi-marker-paint.mjs`, item 4) first runs
+   live at `wave54-pre`. Before any [M] key is read, the stage-1 css-counter-styles per-test IR must be byte-identical to the
+   [W-L3] post tree (`tools/titan/runs/wave54-wl3-diff/post/css-counter-styles/per-test-ir/`) and counter-suffix must carry no
+   `marker-not-baked` stamp; if it does, an [M] FAIL is attributed to the instrument, not to M′ (bisect S6 first).
+3. **L6 W1**: the production gate `{ hyphensAuto: styles.hyphens === 'auto' }` is pinned on the verbatim hyphens-out-of-flow-001 box
+   4 (mutation `hyphensAuto: true` → red); the `joinedOutOfFlowMembers` count is emitted as a breadcrumb beside resolveRuns' rule-5
+   warn (pinned). **L2 TB-android**: the D2 quantity is pinned at source (widthAtMaxIntrinsic, never Min; `.then(cellModifier)`
+   order non-vacuous). **L1 M′**: re-parenting a marker to the bake root now DECLINES (stamp `marker-not-baked`) an item whose
+   item→root chain carries a non-initial paint effect (opacity, transform, filter, clip-path, overflow, visibility, text-shadow;
+   `tools/titan/bidi-marker-paint.mjs`, ≤ 200 lines, pinned with a mutation); counter-suffix's four RTL items carry none, so the
+   corpus behaviour is unchanged (the lane's static check; [W-L3] is the executed proof on the pre-fix tree, item 2 re-proves it
+   at stage 1). **Records**: the 72+ gitignored `*.log` evidence files of the lane dirs are force-added; the 518 KB seam copy under
+   `wave54-table-body-cell/seam1-files/` is removed (regenerable); the L7 note's three elided iOS PNG names written in full;
+   `docs/DYNAMIC_CAPTURE.md` §5 describes the exempt manifest and clause (iv). Two L6 rows join `stayDegenerateEvenIfPass`
+   (semi-replaced-stretch-other web: "abel"; scope-pseudo-element web: the B/Foo wrap) and §3's U3b row names its three anchors.
+4. **Commit procedure (the verifier's must-fix)**: the pass touches four landed units, so it lands as ONE COMMIT PER UNIT —
+   `Mprime-S1`, `W1-S1`, `RS-S1`, `TB-android-S1` — then the plan/docs/records commit. **A revert of one of those units reverts
+   its `-S1` commit first** (revertOrder per unit: [X-S1, X]); the four `-S1` commits are code-only and each reverts alone.
+5. Not taken (queued in BACKLOG at the ship): the remaining lane-skeptic nits and untested branches S1 lists; mask-image /
+   mix-blend-mode in the paint-effect decline (same class, 0 carriers); the two test files over 200 lines; `wl3-wire-differential.sh`
+   always exits 0 (a nit — the set equality was checked programmatically).
+

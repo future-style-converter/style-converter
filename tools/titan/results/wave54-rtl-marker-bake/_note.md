@@ -150,7 +150,7 @@ Pins (in `tools/titan/bidi-bake.test.mjs`):
   analytic facts).
 
 Every mutation executed by `mutate.py` (red → in-memory byte-exact restore, sha256 verified → green), full log
-`mutations.log`, JSON `mutations-*.result.json`. **29/29 OK.** (sha256 prefixes: before → mutated → restored.)
+`mutations.log`, JSON `mutations-*.result.json`. **30/30 OK** (P×7 at the P state + P×7 at final + M-1..15 + M-4b; the four result JSONs, every `verdict` OK; corrected at the wave54-S1 fix pass, nit N5 — it said 29/29). (sha256 prefixes: before → mutated → restored.)
 
 | mutation | state | file sha256 | red run | red tests | restored |
 |---|---|---|---|---|---|
@@ -276,7 +276,7 @@ itself does (`fixtures/wpt/<section>/<stem>.json` of the tests extracted; W2's o
 
 ## 9. Size disclosures (BACKLOG 0(d), PLAN §9 D8)
 
-- `tools/titan/bidi-bake.mjs` 1172 → 1273 (+101 / −4; wave 53 was +95 / −4 → 1259): call sites + `paddingIsSpent` only; the
+- `tools/titan/bidi-bake.mjs` 1172 → 1273 (+105 / −4 by `git diff --numstat 1cde1f48 d64d4c6e`, net +101 — corrected at the wave54-S1 fix pass, nit N5; wave 53 was +95 / −4 → 1259): call sites + `paddingIsSpent` only; the
   extra lines are comments. Every new function except `paddingIsSpent` lives in `bidi-marker-bake.mjs` (199 lines).
 - `tools/titan/bidi-bake.test.mjs` 758 → 1247 (+489): the pins must live in an owned file; split by unit via the patches.
 - `probe`/`Probe` grep of the owned diff: only domain words (the in-page marker probe span, `MARKER_PROBE_EPS`,
@@ -298,3 +298,112 @@ TREES: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusti
 the two `git archive` exports `make-units.sh` builds are throwaway, not worktrees)
 
 STATUS: COMPLETE
+
+## S1 fix pass (wave54-S1 should-fix S6, the L1 skeptic's should-fix 1): the marker bake's PAINT-EFFECT decline
+
+**The defect** (S1 `_note.md` S6). Unit M′ moves an item's marker runs to the enclosing bake ROOT. A marker is the
+item's (css-lists-3 §3.1; css-pseudo-4 §4, so it inherits from the item). So under the root the runs escaped the item's
+and every between-box's opacity / transform / filter / clip-path / overflow clip, and the inherited visibility /
+text-shadow that `runProperties` does not restate. Nothing declined, stamped or TODO'd it.
+
+**The fix** (no commit; the orchestrator commits after the verifier):
+- **NEW `tools/titan/bidi-marker-paint.mjs` (159 lines).**
+  - `MARKER_PAINT_INITIAL`: the 8 read keys (`opacity transform filter clipPath overflowX overflowY visibility textShadow`)
+    mapped to their initial computed spellings.
+  - In-page `inPageMarkerPaintChain`: re-finds the item by tag + rect, the same way the probe does. It reads the
+    `::marker` pseudo first, then the item and each DOM ancestor up to (not including) `<body>`.
+  - `readMarkerPaintChains(page, facts, items)`: attaches `paintChain` to every MEASURED fact and never throws. A fault
+    gives `{ error }`.
+  - Pure `markerPaintLoss(f, elements, itemPath, rootPath)` returns the first loss as a reason string, or null. It reads
+    the pseudo, the item and each box strictly BETWEEN the item and the root, never the root itself (the root's effects
+    still reach root-owned runs). Each entry's tag is checked against the walk record at that path prefix. An unmeasured,
+    failed, short or misaligned chain declines too.
+  - The banner holds the why and the spec anchors. It ends with a TODO: `mask-image` / `mix-blend-mode` are the same
+    class but are NOT read. Their computed spellings could not be confirmed without Chromium, and a key Chromium does not
+    expose would decline every marker.
+- **`bidi-marker-bake.mjs` (199 → 200).** `collectMarkerFacts` returns `await readMarkerPaintChains(page, facts, items)`.
+  That is the CDP side, so the reads come right after the probe. The banner's decline list names the paint effect.
+- **`bidi-bake.mjs` (1273 → 1283, +13 / −3, call site + banner only).** In `planBidiBake` a PLANNED marker (`m.runs`)
+  whose chain has a loss becomes `{ lossy: [MARKER_STAMPS.notBaked] }`. The item is left as it was: no
+  `list-style-type: none`, none of its runs, and `_lossy` + `marker-not-baked` on the wire. The line
+  `if (m) markers.set(k, { ...m, rootPath });` is unchanged byte for byte, so the earlier M-6 anchor still applies.
+- **`bidi-bake.test.mjs` (+157 / −2).**
+  - `CS_CHAIN` (all-initial `::marker, li, ol, div`) goes into the `rtlProbe` / `cdpFacts` fact helpers: Chromium's
+    counter-suffix chain.
+  - With it all 69 earlier pins stay green unchanged, including V1 / V4 (the real counter-style bake) / V5 / V6 deep-equals.
+    So **the landed corpus behaviour is unchanged**.
+  - New §11 pins, S6-1 … S6-5 (69 → **74** tests, +5 tooling tests for the doc restamp):
+    - **S6-1:** the verbatim counter-suffix plan, plus the frozen-fixture wire, with item 0.4.0 at `opacity: 0.5`. Result:
+      declined + stamped, the root keeps only 0.4.1's `.`/`2`, +4 components rather than +6, and the other three items
+      deep-equal the clean plan.
+    - **S6-2:** each of the 8 keys on the li AND on its `::marker` declines. The ROOT's / wrapper's own effect does not.
+    - **S6-3:** a `div` between item and root is read; the root is not.
+    - **S6-4:** unmeasured, error, short, misaligned and null-key chains all decline.
+    - **S6-5:** the REAL in-page reader through `collectMarkerFacts` on a fake DOM. It takes 2 evaluates, reads pseudo
+      first, item → ol → div, and leaves `<body>` out. Error facts stay byte-identical. A chain fault gives `{ error }`,
+      which is declined, and no-measured-facts makes no round-trip.
+
+**Corpus radius** (`s1-fix/paint-radius.py`, output `paint-radius.out.txt`). It reads the [W-L3] pre / post trees and
+looks at every list item the bidi bake boxed, under a root carrying rootProperties' four keys:
+```
+pre:  1435 docs · 4 bidi-baked li boxes in 1 docs {'wpt__css-counter-styles__counter-suffix.json': 4} · 0 with a paint effect on the item→root chain
+post: 1435 docs · 4 bidi-baked li boxes in 1 docs {'wpt__css-counter-styles__counter-suffix.json': 4} · 0 with a paint effect on the item→root chain
+sanity: paint-effect IR types present on the post wire: {'ClipPath': 52, 'Filter': 10, 'MaskImage': 4, 'MixBlendMode': 2, 'Opacity': 76, 'OverflowX': 1997, 'OverflowY': 2005, 'TextShadow': 2, 'Transform': 138, 'Visibility': 5}
+```
+The 4 RTL items of counter-suffix (`__0__4__0/1`, `__0__5__0/1`, chain = the li alone) carry none of these effects. The
+`sanity` line shows the type names are live, so "clean" is not a misspelling.
+
+Three static sources agree:
+- the test source sets only margin / padding / line-height / list-style-type / width (`tools/wpt/css/css-counter-styles/counter-suffix.html`);
+- the canvas frame (`capture-browser-ref.mjs canvasFrameCss`) styles only html / body;
+- Chromium source, read via WebFetch (not run): `style_adjuster.cc` `AdjustStyleForMarker` sets only display,
+  white-space and margins, and `html.css` sets none of the 8 keys on li / ol / div.
+
+**Mutations** (`s1-fix/mutate.py` = the lane's runner with ROOT one level up and its log as `mutations-S6.out.txt`, since
+`*.log` is gitignored, S1 S2; spec `mutations-S6.json`; result `mutations-S6.result.json`):
+```
+OK S6-m1 (REQUIRED) the decline is disabled at planBidiBake's call site: red # pass 71 # fail 3 [S6-1, S6-2, S6-4] | restored # pass 74 # fail 0 byte-exact=True
+OK S6-m2 the chain bound reaches the ROOT (its own effects judged):    red # pass 72 # fail 2 [S6-2, S6-3]       | restored # pass 74 # fail 0 byte-exact=True
+OK S6-m3 a box BETWEEN item and root is not read (item only):           red # pass 73 # fail 1 [S6-3]             | restored # pass 74 # fail 0 byte-exact=True
+OK S6-m4 an unmeasured chain reads as clean:                            red # pass 72 # fail 2 [S6-4, S6-5]       | restored # pass 74 # fail 0 byte-exact=True
+OK S6-m5 the tag alignment check is dropped:                            red # pass 73 # fail 1 [S6-4]             | restored # pass 74 # fail 0 byte-exact=True
+OK S6-m6 opacity is not judged:                                         red # pass 71 # fail 3 [S6-1, S6-2, S6-4] | restored # pass 74 # fail 0 byte-exact=True
+OK S6-m7 text-shadow is dropped from the read set:                      red # pass 72 # fail 2 [S6-2, S6-5]       | restored # pass 74 # fail 0 byte-exact=True
+OK S6-m8 the in-page reader skips the ::marker pseudo:                  red # pass 73 # fail 1 [S6-5]             | restored # pass 74 # fail 0 byte-exact=True
+OK S6-m9 collectMarkerFacts stops attaching the chain:                  red # pass 73 # fail 1 [S6-5]             | restored # pass 74 # fail 0 byte-exact=True
+OK S6-m10 the in-page walk does not stop below <body>:                  red # pass 73 # fail 1 [S6-5]             | restored # pass 74 # fail 0 byte-exact=True
+BYTE-IDENTICAL: all four files before == after the mutation run
+```
+sha256 before = after (`sha256.before-mutations.txt` = `sha256.after-mutations.txt`):
+
+| file | sha256 |
+|---|---|
+| bidi-marker-paint | `9a7850a3…` |
+| bidi-marker-bake | `c8e530bd…` |
+| bidi-bake | `4d9e5359…` |
+| bidi-bake.test | `f9fae712…` |
+
+All 32 earlier L1 / S1 mutation anchors (M-1…15, M-4b, P-1…7 ×2, S1 `lit/l1-m12`, `l1-p3`) still match exactly once on
+the fixed files (`old-anchors.out.txt`: 0 bad), so the recorded mutations stay replayable.
+
+**Focused suites** (`focused.final.out.txt`):
+
+| suite | result | why it was run |
+|---|---|---|
+| `bidi-bake.test.mjs` | 74 / 74, 0 skipped (V4 ran) | the owned suite |
+| `wpt-white-canvas.test.mjs` | 21 / 21 | it source-scans bidi-bake.mjs |
+| `extract-fixture.test.mjs` | 483 / 483 | it imports the bake gate |
+
+`comments.py` (S1's heuristic, same regexes, over this pass's added lines) finds 1 uncommented line. It is the
+continuation of `near`'s condition, which sits under the two-line comment describing all four terms. "engine" appears in
+no added line.
+
+**Note counts (S1 N5).** The plan fixer already corrected both lines: §4 reads "30/30 OK" and §9 reads "+105 / −4 …
+net +101". I did not edit them. After this pass, §9's "1172 → 1273" is superseded by **1283** (this pass +13 / −3, shown
+above).
+
+**Could NOT verify:** no Chromium run. Whether the live probe really reads all-initial values on counter-suffix (the
+static evidence above says it does) shows only at the next bake / gate. If it did not, counter-suffix's 4 markers would
+come out DECLINED and stamped (the pre-M′ wire plus `marker-not-baked`), never silently wrong.
+
+STATUS (S1 fix pass): COMPLETE

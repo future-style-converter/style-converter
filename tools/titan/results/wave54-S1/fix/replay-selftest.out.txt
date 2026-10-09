@@ -1,0 +1,1 @@
+self-test (inline m_check over rtl-marker-bake.replay.py outputs): android-P → GEOMETRY WRONG (rtl row 1 no marker ink on text row y214-225); android-Mp-dev → GEOMETRY OK; android-Mp-ref → GEOMETRY OK

@@ -172,13 +172,17 @@ L1 = {
                 '[M] counter-suffix web': 'Mprime', '[M] counter-suffix ios': 'Mprime', '[M] counter-suffix android': 'Mprime'},
      'report': [],
      'onWave53Final': '[P] android rows WRONG (x33 / x35); [M] web/ios WRONG (no marker ink on text row y214-225), android WRONG (rtl text rows 0/4 in x95-128); every ref row OK; exit 0',
-     'onWave53Probe': '[P] all OK; [M] web/ios OK, android WRONG (rtl row 1 no marker ink on text row y214-225 (marker ink y244-245 below the line)) — the reverted unit\'s defect, named'},
+     'onWave53Probe': '[P] all OK; [M] web/ios OK, android WRONG (rtl row 1 no marker ink on text row y214-225 (marker ink y244-245 below the line)) — the reverted unit\'s defect, named',
+     # wave54-S1 should-fix 1: the probe's [M] rule could not see a missing '.' marker run (the right edge and the width hold).
+     'teeth': 'wave54-S1 fix: each RTL row\'s marker-ink LEFT edge must sit at the ref\'s x133 ±2; the L1 skeptic\'s nodot fake (the \'.\' runs whitened) prints WRONG on web (iOS was already WRONG by width); mutation-proven (wave54-S1/fix/)'},
     {'cmd': 'python3 tools/titan/results/wave53-plan/lists-bakes.geometry.py <run> <base>',
      'expect': {f'counter-suffix {p}': GEO_OK for p in PLATS} | {f'counter-reset-reversed-nested {p}': GEO_OK for p in PLATS},
      'contains': {f'counter-suffix {p}': 'rows 0-207 identical to <base>' for p in PLATS},
      'gating': {f'counter-suffix {p}': 'Mprime' for p in ('web', 'android')},
      'report': ['counter-suffix ios'],
-     'onWave53Final': 'counter-suffix x3 WRONG (web left x47; ios right x126; android left x152); counter-reset-reversed-nested x3 OK (wave-53 U1, a control now)'},
+     'onWave53Final': 'counter-suffix x3 WRONG (web left x47; ios right x126; android left x152); counter-reset-reversed-nested x3 OK (wave-53 U1, a control now)',
+     # wave54-S1 should-fix 1: the same left-edge rule, so the second [M] gating probe cannot pass a capture missing the '.'.
+     'teeth': 'wave54-S1 fix: each RTL row\'s marker-ink LEFT edge must sit at the ref\'s x133 ±2; the nodot fake prints WRONG on web and iOS (both OK before); mutation-proven (wave54-S1/fix/)'},
   ],
   'revertUnits': {
     'P': {'commit': 'tools/titan/bidi-bake.mjs hunk P (paddingIsSpent + rootProperties(rect, position, el) + applyBidiBakePlan padding-* delete; the b0edb788^ fix-pass state) + pins V3 / V3b / content-box + overflow guards',
@@ -605,13 +609,15 @@ L6 = {
     pred(f'{BS["07"]} web', 'f 0.9036', 'P 0.985 (simulated separator 0.9852)', 'flip (bold <strong> residue: the corpus inline-run-merged convention)', 'HIGH', 0.975, True, ['RS'], GEO_OK),
     pred(f'{BS["08"]} web', 'f 0.8943', 'P 0.974 (0.9736)', 'flip', 'HIGH', 0.965, True, ['RS'], GEO_OK),
     pred(f'{BS["22"]} web', 'f 0.9442', 'P 0.970 (0.9704)', 'flip', 'MED-HIGH', 0.96, True, ['RS'], GEO_OK),
-    pred(f'{SRO} web', 'f 0.941', 'P 0.967 (0.9667)', 'flip (the space moves the next abspos box\'s static position, as in the ref)', 'MED', None, False, ['RS'], GEO_OK),
+    # wave54-S1 should-fix 8 (L6 skeptic D4): the label paints "abel" ("l" under the green border), not RS's; a P is DEGENERATE.
+    pred(f'{SRO} web', 'f 0.941', 'P 0.967 (0.9667)', 'flip (the space moves the next abspos box\'s static position, as in the ref) — DEGENERATE even if P: the label paints "abel" where the ref paints "label"; stayDegenerateEvenIfPass', 'MED', None, False, ['RS'], GEO_OK),
   ] + [pred(f'{BS[n]} web', 'P 0.9713 DEGENERATE', '≈0.982 (simulated 0.9822)', 'degenerate->faithful (atoms packed)', 'MED', None, False, ['RS'], GEO_OK)
        for n in ('10', '11', '14', '15', '16', '17', '18', '19')]
     + [pred(f'{BS[n]} web', 'P 0.9599 DEGENERATE', '≈0.982 (simulated 0.9822)', 'degenerate->faithful', 'MED', None, False, ['RS'], GEO_OK) for n in ('20', '21', '24', '25')]
     + [pred(f'{BS["13"]} web', 'P 0.9538 DEGENERATE', '≈0.970 (simulated 0.9704)', 'degenerate->faithful', 'MED', None, False, ['RS'], GEO_OK),
        pred(f'{SRI} web', 'P 0.9596 DEGENERATE', '≈0.966 (simulated 0.9664)', 'degenerate->faithful', 'MED', None, False, ['RS'], GEO_OK),
-       pred(f'{T("css-cascade", "scope-pseudo-element")} web', 'f 0.9353', 'up (box lefts to x16/123/229; its B/Foo wrap defect remains)', 'mover', 'LOW', None, False, ['RS']),
+       # wave54-S1 should-fix 8 (L6 skeptic D4 / L6 note): RS moves only the box lefts; the contents stay wrong (B/Foo wrap).
+       pred(f'{T("css-cascade", "scope-pseudo-element")} web', 'f 0.9353', 'up (box lefts to x16/123/229; its B/Foo wrap defect remains)', 'mover — DEGENERATE even if P: the B/Foo wrap defect remains; stayDegenerateEvenIfPass', 'LOW', None, False, ['RS']),
        pred(f'{T("css-display", "display-flow-root-list-item-001")} web', 'f 0.8003', 'mover', 'mover', 'LOW', None, False, ['RS'], direction='undirected',
             directionWhy='in the RS 27-document radius; not simulated')]
     # The at-risk passes (RS census): predicted to stay or rise; a prediction row each so revert rule 2 (delta <= -0.002) fires.
@@ -1053,7 +1059,11 @@ expectations = {
                                # breaks tati/on, izat/ion; Android: Minikin paints visible hyphens (the logged wall). A pass here is never a fix.
                                f'{HC[2]} web (Chromium en dictionary: im-/ple-/men-/tation, groups [4,4,4,3] vs ref [5,4,3,3])',
                                f'{HC[2]} ios (TextKit emergency breaks tati/on, izat/ion)',
-                               f'{HC[2]} android (Minikin paints its own dictionary hyphen)'],
+                               f'{HC[2]} android (Minikin paints its own dictionary hyphen)',
+                               # wave54-S1 should-fix 8 (L6 skeptic D4): RS fixes only the separator geometry of these two web pictures;
+                               # the residue the test also checks is not RS's, so a P on either is DEGENERATE until that residue is fixed.
+                               f'{SRO} web (the label paints "abel" where the ref paints "label": its "l" lies under the green border; RS moves only the static position)',
+                               f'{T("css-cascade", "scope-pseudo-element")} web (the B/Foo wrap defect remains; RS moves only the box lefts x118/220 -> x123/229)'],
   'recordedWall': ['css-anchor-position/anchor-position-multicol-007.html android'],
   'ringFenced': 'filter-effects/backdrop-filter-basic-blur — report only, never a target, never carved out (not a carrier of any lane; L4 OOF claims its leaf boxes inertly, L3 U3 does not reach it)',
   'lanes': lanes,
@@ -1112,6 +1122,14 @@ assert all(_rcp[0]['expect'][f'{k} {p}'] == _rc['lineEndsWith'].lstrip('→ ') f
 _pd = probe_decisions()                     # None at planning: no unit has been reverted yet
 if _pd:
     expectations['probeDecisions'] = _pd
+# wave54-S1 should-fix 8 (L6 skeptic D4 was a row whose residue no list carried): the honesty list and the rows agree.
+# Each stayDegenerateEvenIfPass entry is "<cell> (<why>)" and names a prediction row; each row whose kind says
+# "DEGENERATE even if P" is in the list — so a label written on one side only stops the build. Checked AFTER
+# probe_decisions(): a withdrawn row stays in `predictions` (demotedFrom) and a RESTATE `kind` is read as restated.
+_sd = {x.split(' (', 1)[0] for x in expectations['stayDegenerateEvenIfPass']}
+assert _sd <= set(_pcells), f'stayDegenerateEvenIfPass names a cell with no prediction row: {sorted(_sd - set(_pcells))}'
+_kd = {c for c, p_ in _pcells.items() if 'DEGENERATE even if P' in p_['kind']}
+assert _kd <= _sd, f'a prediction kind says DEGENERATE even if P but stayDegenerateEvenIfPass omits it: {sorted(_kd - _sd)}'
 json.dump(expectations, open(os.path.join(OUT, 'expectations.json'), 'w'), indent=1, ensure_ascii=False)
 
 # ── watchlist.txt ─────────────────────────────────────────────────────────────────────────────────────────────────────

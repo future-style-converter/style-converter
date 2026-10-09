@@ -1,0 +1,10 @@
+13c13
+< [M] counter-suffix web      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 → GEOMETRY OK
+---
+> [M] counter-suffix web      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 → GEOMETRY WRONG (rtl row 1 marker left x138 vs ref x133±2 (the "." run missing or moved))
+18,19c18,19
+< counter-suffix web      y214-225:x104-144 y238-249:x104-144 y262-273:x104-145 y286-297:x104-144 → GEOMETRY OK
+< counter-suffix ios      y214-225:x103-141 y238-249:x104-145 y262-273:x103-145 y286-297:x104-144 → GEOMETRY OK
+---
+> counter-suffix web      y214-225:x104-144 y238-249:x104-144 y262-273:x104-145 y286-297:x104-144 → GEOMETRY WRONG (rtl row 1 marker left x138 vs ref x133±2 (the "." run missing or moved))
+> counter-suffix ios      y214-225:x103-141 y238-249:x104-145 y262-273:x103-145 y286-297:x104-144 → GEOMETRY WRONG (rtl row 1 marker left x138 vs ref x133±2 (the "." run missing or moved))

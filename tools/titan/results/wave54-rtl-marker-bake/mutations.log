@@ -1,0 +1,301 @@
+### P-1 remove the `padding: 0` line (rootProperties) [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   f266b46bb9ec32091d497391085bddfeb7f761aa7ac9ed9e4e572134fc27a09c
+- sha256 mutated  05f9992f712c69c62f17ff74b219a087f1f03f546203896495b3a0ab2f1e323e
+- sha256 restored f266b46bb9ec32091d497391085bddfeb7f761aa7ac9ed9e4e572134fc27a09c (byte-exact)
+- mutated run:  # pass 54 # fail 2
+    red: not ok - V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position
+    red: not ok - V3 unit P: verbatim bidi-lines-002 root (`0 0.5ch`) with its 5 hidden <br>
+- restored run: # pass 56 # fail 0
+
+### P-2 drop the content-box guard [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   f266b46bb9ec32091d497391085bddfeb7f761aa7ac9ed9e4e572134fc27a09c
+- sha256 mutated  e8c00dacf0123b8464baa32cf7fb8ddeaaa56218091dc1f96bf0f0f8d1ebfefd
+- sha256 restored f266b46bb9ec32091d497391085bddfeb7f761aa7ac9ed9e4e572134fc27a09c (byte-exact)
+- mutated run:  # pass 55 # fail 1
+    red: not ok - V3 unit P: a padding that paints (content-box clip / origin) is NOT spent
+- restored run: # pass 56 # fail 0
+
+### P-3 drop the NON-zero guard (any padding array counts) [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   f266b46bb9ec32091d497391085bddfeb7f761aa7ac9ed9e4e572134fc27a09c
+- sha256 mutated  068ab7c3bd9c61a53ea4d7ec27a262c26484a0b7777052125daa859fe80b4d09
+- sha256 restored f266b46bb9ec32091d497391085bddfeb7f761aa7ac9ed9e4e572134fc27a09c (byte-exact)
+- mutated run:  # pass 55 # fail 1
+    red: not ok - V3b unit P: VERBATIM zero-padding roots (dir-style-02a ×6, dir-selector-change-003/-004) stay deep-equal AND in order
+- restored run: # pass 56 # fail 0
+
+### P-4 drop the overflow guard [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   f266b46bb9ec32091d497391085bddfeb7f761aa7ac9ed9e4e572134fc27a09c
+- sha256 mutated  a1b726a6588e333b6f15b30b5dd05cfc3be64f3ba03c04f2e3276e7688fb4128
+- sha256 restored f266b46bb9ec32091d497391085bddfeb7f761aa7ac9ed9e4e572134fc27a09c (byte-exact)
+- mutated run:  # pass 55 # fail 1
+    red: not ok - V3 unit P: a clipping / scrolling root keeps its padding (the overflow guard)
+- restored run: # pass 56 # fail 0
+
+### P-5 drop the padding-* longhand delete loop (applyBidiBakePlan) [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   f266b46bb9ec32091d497391085bddfeb7f761aa7ac9ed9e4e572134fc27a09c
+- sha256 mutated  9427a70d54545aa9107efd9179957b1af79f815da30d728a8cae82edc80d9a7f
+- sha256 restored f266b46bb9ec32091d497391085bddfeb7f761aa7ac9ed9e4e572134fc27a09c (byte-exact)
+- mutated run:  # pass 55 # fail 1
+    red: not ok - V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position
+- restored run: # pass 56 # fail 0
+
+### P-6 planBidiBake stops passing the walk record (the pre-P call) [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   f266b46bb9ec32091d497391085bddfeb7f761aa7ac9ed9e4e572134fc27a09c
+- sha256 mutated  141d40caf20d4d0bc9ff2fb5daeb64bb654a2ea09d3d95ab7470ddc59afaeaf7
+- sha256 restored f266b46bb9ec32091d497391085bddfeb7f761aa7ac9ed9e4e572134fc27a09c (byte-exact)
+- mutated run:  # pass 54 # fail 2
+    red: not ok - V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position
+    red: not ok - V3 unit P: verbatim bidi-lines-002 root (`0 0.5ch`) with its 5 hidden <br>
+- restored run: # pass 56 # fail 0
+
+### P-7 the walker stops recording the resolved padding [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   f266b46bb9ec32091d497391085bddfeb7f761aa7ac9ed9e4e572134fc27a09c
+- sha256 mutated  35806d734bdeb55602dae5d94687a796b73fc9ff52782564c00fa86717b55773
+- sha256 restored f266b46bb9ec32091d497391085bddfeb7f761aa7ac9ed9e4e572134fc27a09c (byte-exact)
+- mutated run:  # pass 55 # fail 1
+    red: not ok - unit P wiring: the in-page walker records the resolved padding and both guards' inputs
+- restored run: # pass 56 # fail 0
+
+### M-1 (V1 m1) planMarker drops `list-style-type: none` on the item [OK]
+- file: tools/titan/bidi-marker-bake.mjs
+- sha256 before   4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea
+- sha256 mutated  6bbbefa883277e5c1482cf49a98d1bac90c1a4de3f38db4f0e9edbd41c91741f
+- sha256 restored 4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea (byte-exact)
+- mutated run:  # pass 66 # fail 3
+    red: not ok - V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item
+    red: not ok - V6 unit M′: every marker run is owned by its ENCLOSING ROOT at the measured root-relative geometry
+    red: not ok - V4 unit M′ × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake); root runs never stamped
+- restored run: # pass 69 # fail 0
+
+### M-2 (V1 m2) the analytic RTL edge hangs the marker LEFT (li.left − w) [OK]
+- file: tools/titan/bidi-marker-bake.mjs
+- sha256 before   4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea
+- sha256 mutated  8e4892f56ddf99d3dee37b8719b2acf3743e86cd4f5bbb3bf9d0100d2e22817d
+- sha256 restored 4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea (byte-exact)
+- mutated run:  # pass 67 # fail 2
+    red: not ok - V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item
+    red: not ok - V5 unit M′: a > EPS probe mismatch is MARKER-scoped — analytic edge + stamp, never a whole-test bail
+- restored run: # pass 69 # fail 0
+
+### M-3 (V1 m3) no per-grapheme split of a no-strong-letter run [OK]
+- file: tools/titan/bidi-marker-bake.mjs
+- sha256 before   4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea
+- sha256 mutated  55b12ed75f5b5c2a55628bfd1aaaf6d9d4cdddcded7069a6d0471c80b19620e4
+- sha256 restored 4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea (byte-exact)
+- mutated run:  # pass 65 # fail 4
+    red: not ok - V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item
+    red: not ok - V6 unit M′: every marker run is owned by its ENCLOSING ROOT at the measured root-relative geometry
+    red: not ok - V4 unit M′ × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake); root runs never stamped
+    red: not ok - VF3 unit M′: marker glyph tops drop the probe span's half-leading (a tall body line-height)
+- restored run: # pass 69 # fail 0
+
+### M-4 (V2) a ROOT list item is planned a marker too [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3
+- sha256 mutated  c7d69cdece6fddf3546ea2d2408b37e0750dcbdf05b3c3c4ab7ef3521f4df4dc
+- sha256 restored 98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3 (byte-exact)
+- mutated run:  # pass 56 # fail 13
+    red: not ok - planBidiBake: the happy path — root, box, run, hide
+    red: not ok - planBidiBake: <br> inside a root is hidden even when it HAS a box
+    red: not ok - planBidiBake: a direction-ambiguous run bails the whole test
+    red: not ok - planBidiBake: the run budget is enforced
+    red: not ok - V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position
+    red: not ok - V3 unit P: verbatim bidi-lines-002 root (`0 0.5ch`) with its 5 hidden <br>
+    red: not ok - V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item
+    red: not ok - V2 unit M′: a ROOT list item (arabic-indic-101 shape) gets no marker run
+    red: not ok - V6 unit M′: every marker run is owned by its ENCLOSING ROOT at the measured root-relative geometry
+    red: not ok - V7 unit M′: no item box owns more runs than it has text runs (the Compose stack-shape guard)
+    red: not ok - V4 unit M′ × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake); root runs never stamped
+    red: not ok - V5 unit M′: a > EPS probe mismatch is MARKER-scoped — analytic edge + stamp, never a whole-test bail
+    red: not ok - VF1 unit M′: an item the in-page probe cannot re-find by its rect is DECLINED and stamped, never skipped
+- restored run: # pass 69 # fail 0
+
+### M-5 (V5 a) the probe self-check is deleted (a mismatching CDP box is used) [OK]
+- file: tools/titan/bidi-marker-bake.mjs
+- sha256 before   4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea
+- sha256 mutated  5adeec1df5445014aff510ebdf29eb7127918d6ab0bf40ba853b3e9a7420e850
+- sha256 restored 4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea (byte-exact)
+- mutated run:  # pass 68 # fail 1
+    red: not ok - V5 unit M′: a > EPS probe mismatch is MARKER-scoped — analytic edge + stamp, never a whole-test bail
+- restored run: # pass 69 # fail 0
+
+### M-6 (V5 b) a probe mismatch becomes a whole-test bail [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3
+- sha256 mutated  ea6cb4cb40fc29aad78ce3843331bba5ce53f169a2288f5c7d42d04c073d9633
+- sha256 restored 98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3 (byte-exact)
+- mutated run:  # pass 68 # fail 1
+    red: not ok - V5 unit M′: a > EPS probe mismatch is MARKER-scoped — analytic edge + stamp, never a whole-test bail
+- restored run: # pass 69 # fail 0
+
+### M-7 (VF) collectMarkerFacts rethrows a page fault [OK]
+- file: tools/titan/bidi-marker-bake.mjs
+- sha256 before   4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea
+- sha256 mutated  cd7e7c570299fa6a56836aa24619dc4f7a42b271007f0cb64bf576d255eebd57
+- sha256 restored 4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea (byte-exact)
+- mutated run:  # pass 68 # fail 1
+    red: not ok - VF unit M′: collectMarkerFacts — list-free → {} with no CDP call; a page fault declines items, never throws
+- restored run: # pass 69 # fail 0
+
+### M-8 (FX1) an item not re-found by rect is skipped silently [OK]
+- file: tools/titan/bidi-marker-bake.mjs
+- sha256 before   4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea
+- sha256 mutated  d7719302abe0cbef0c26f4e09bbdde4945cb3442939472b89a24591902462b8b
+- sha256 restored 4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea (byte-exact)
+- mutated run:  # pass 68 # fail 1
+    red: not ok - VF1 unit M′: an item the in-page probe cannot re-find by its rect is DECLINED and stamped, never skipped
+- restored run: # pass 69 # fail 0
+
+### M-9 (FX2) the error-fact filter is dropped from the CDP merge [OK]
+- file: tools/titan/bidi-marker-bake.mjs
+- sha256 before   4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea
+- sha256 mutated  aca20c7c8da414c89e2a75f00563e949df2b268044a65427d14855bfbdd5d0ce
+- sha256 restored 4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea (byte-exact)
+- mutated run:  # pass 68 # fail 1
+    red: not ok - VF1 unit M′: an item the in-page probe cannot re-find by its rect is DECLINED and stamped, never skipped
+- restored run: # pass 69 # fail 0
+
+### M-10 (FX3) applyBidiBakePlan's box `_lossyReasons` merge is deleted [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3
+- sha256 mutated  013d6e59effb0e7db83690f1014a193912bbd40b3c44d7481e1d003790621833
+- sha256 restored 98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3 (byte-exact)
+- mutated run:  # pass 68 # fail 1
+    red: not ok - VF2 unit M′: a box's marker stamps reach the FIXTURE component (_lossy + _lossyReasons, merged once)
+- restored run: # pass 69 # fail 0
+
+### M-11 (FX4) the half-leading term `- q0` is dropped [OK]
+- file: tools/titan/bidi-marker-bake.mjs
+- sha256 before   4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea
+- sha256 mutated  8c6ef4281866238fa0bbd48af5d7019b70e3b04570e7bd56fb8aeb98ff0483ab
+- sha256 restored 4ded3874bba89a8868454cd0d1da11b768ec3e7c3bda805bce2baa1d2a56fbea (byte-exact)
+- mutated run:  # pass 68 # fail 1
+    red: not ok - VF3 unit M′: marker glyph tops drop the probe span's half-leading (a tall body line-height)
+- restored run: # pass 69 # fail 0
+
+### M-12 (V6 owner) the marker runs are owned by the `<li>` again (wave-53 shape; = V7's 'push the runs to the box') [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3
+- sha256 mutated  a9aed43aa60725acb943e3ff3e93ca01b044883d5a4148b8c9f8c60e4033f861
+- sha256 restored 98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3 (byte-exact)
+- mutated run:  # pass 65 # fail 4
+    red: not ok - V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item
+    red: not ok - V6 unit M′: every marker run is owned by its ENCLOSING ROOT at the measured root-relative geometry
+    red: not ok - V7 unit M′: no item box owns more runs than it has text runs (the Compose stack-shape guard)
+    red: not ok - V4 unit M′ × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake); root runs never stamped
+- restored run: # pass 69 # fail 0
+
+### M-13 (V6 origin) the marker runs are measured from the `<li>`'s padding box again [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3
+- sha256 mutated  e73b4d960ef8f742346e30d7811261114721b5a2667f9889ad7562ed5cf0aa1a
+- sha256 restored 98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3 (byte-exact)
+- mutated run:  # pass 67 # fail 2
+    red: not ok - V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item
+    red: not ok - V6 unit M′: every marker run is owned by its ENCLOSING ROOT at the measured root-relative geometry
+- restored run: # pass 69 # fail 0
+
+### M-14 (V7) the marker runs are ALSO pushed to the item box (root copy kept) [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3
+- sha256 mutated  cd16f690fbf80db785e9c5154af615bc6d242382900ce6f777d1184937405982
+- sha256 restored 98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3 (byte-exact)
+- mutated run:  # pass 65 # fail 4
+    red: not ok - V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item
+    red: not ok - V6 unit M′: every marker run is owned by its ENCLOSING ROOT at the measured root-relative geometry
+    red: not ok - V7 unit M′: no item box owns more runs than it has text runs (the Compose stack-shape guard)
+    red: not ok - V4 unit M′ × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake); root runs never stamped
+- restored run: # pass 69 # fail 0
+
+### M-15 (wiring) the marker facts are collected BEFORE the mapping check [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3
+- sha256 mutated  7d741fcbaff78ef829d250d7f4d6fb6702a88127c60ccb069b9342b0962a42dc
+- sha256 restored 98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3 (byte-exact)
+- mutated run:  # pass 68 # fail 1
+    red: not ok - unit M′ wiring: the marker facts are read AFTER the walk and the mapping check
+- restored run: # pass 69 # fail 0
+
+### M-4b (V2, no crash) a ROOT list item is planned a marker, owned and measured by itself [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3
+- sha256 mutated  aa4e357dd9f4dd284ac519bdb6a48f8c5869405323e7fe9711fd3627f3247faa
+- sha256 restored 98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3 (byte-exact)
+- mutated run:  # pass 68 # fail 1
+    red: not ok - V2 unit M′: a ROOT list item (arabic-indic-101 shape) gets no marker run
+- restored run: # pass 69 # fail 0
+
+### P-1 remove the `padding: 0` line (rootProperties) [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3
+- sha256 mutated  fe4cbe361a9622c57a19995b6fad7b328db37f0f3ba9d7f08d5c31e4a9068a5e
+- sha256 restored 98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3 (byte-exact)
+- mutated run:  # pass 66 # fail 3
+    red: not ok - V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position
+    red: not ok - V3 unit P: verbatim bidi-lines-002 root (`0 0.5ch`) with its 5 hidden <br>
+    red: not ok - V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item
+- restored run: # pass 69 # fail 0
+
+### P-2 drop the content-box guard [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3
+- sha256 mutated  474464c4bd40ec8361683945934cd35c75f54343c8a5e8e3cff51f6b30d232a1
+- sha256 restored 98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3 (byte-exact)
+- mutated run:  # pass 68 # fail 1
+    red: not ok - V3 unit P: a padding that paints (content-box clip / origin) is NOT spent
+- restored run: # pass 69 # fail 0
+
+### P-3 drop the NON-zero guard (any padding array counts) [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3
+- sha256 mutated  98324f590c12a044895063d303faabbfd561607f0095f7a5f2ed8bd026302b18
+- sha256 restored 98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3 (byte-exact)
+- mutated run:  # pass 68 # fail 1
+    red: not ok - V3b unit P: VERBATIM zero-padding roots (dir-style-02a ×6, dir-selector-change-003/-004) stay deep-equal AND in order
+- restored run: # pass 69 # fail 0
+
+### P-4 drop the overflow guard [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3
+- sha256 mutated  f5f4ecbd9a9cafd9e6ce66ff81c5106ad7c8a77e6a03e6f5f62077da6d180c22
+- sha256 restored 98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3 (byte-exact)
+- mutated run:  # pass 68 # fail 1
+    red: not ok - V3 unit P: a clipping / scrolling root keeps its padding (the overflow guard)
+- restored run: # pass 69 # fail 0
+
+### P-5 drop the padding-* longhand delete loop (applyBidiBakePlan) [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3
+- sha256 mutated  b13b0e3143633f87b8da638c259e21cfb77b56ecfbc2d528938261abff344169
+- sha256 restored 98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3 (byte-exact)
+- mutated run:  # pass 68 # fail 1
+    red: not ok - V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position
+- restored run: # pass 69 # fail 0
+
+### P-6 planBidiBake stops passing the walk record (the pre-P call) [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3
+- sha256 mutated  99081590017c4f4553bf5d8d6f59f432d6f05a4c3adbbef8f4d0f9053e66e1ee
+- sha256 restored 98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3 (byte-exact)
+- mutated run:  # pass 66 # fail 3
+    red: not ok - V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position
+    red: not ok - V3 unit P: verbatim bidi-lines-002 root (`0 0.5ch`) with its 5 hidden <br>
+    red: not ok - V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item
+- restored run: # pass 69 # fail 0
+
+### P-7 the walker stops recording the resolved padding [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3
+- sha256 mutated  ff75ad86faf8e6ee8790442728e1aceda4a36539787068ceec81f6471b8766cc
+- sha256 restored 98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3 (byte-exact)
+- mutated run:  # pass 68 # fail 1
+    red: not ok - unit P wiring: the in-page walker records the resolved padding and both guards' inputs
+- restored run: # pass 69 # fail 0
+

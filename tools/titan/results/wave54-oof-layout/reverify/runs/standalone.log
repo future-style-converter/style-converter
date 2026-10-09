@@ -1,0 +1,8 @@
+2026-10-08T20:45:11Z installed-oofandroid-revert moved aside census-swift.base.txt sha256=f7aabc60cbc70dde435ca3f6c2cfb52d408f9ca53f2145b4cd6429e9cb45800c
+2026-10-08T20:46:14Z installed-oofandroid-revert restored census-swift.base.txt before=f7aabc60cbc70dde435ca3f6c2cfb52d408f9ca53f2145b4cd6429e9cb45800c after=f7aabc60cbc70dde435ca3f6c2cfb52d408f9ca53f2145b4cd6429e9cb45800c OK
+2026-10-08T20:46:22Z patched-oofandroid-revert moved aside census-compose.base.txt sha256=6f94b3eb1b33009e8df3d35b2812a979900704a37a876b42a5449020e86ba9c5
+2026-10-08T20:47:25Z patched-oofandroid-revert restored census-compose.base.txt before=6f94b3eb1b33009e8df3d35b2812a979900704a37a876b42a5449020e86ba9c5 after=6f94b3eb1b33009e8df3d35b2812a979900704a37a876b42a5449020e86ba9c5 OK
+2026-10-08T20:47:33Z patched-oofios-revert moved aside census-swift.base.txt sha256=f7aabc60cbc70dde435ca3f6c2cfb52d408f9ca53f2145b4cd6429e9cb45800c
+2026-10-08T20:47:35Z patched-oofios-revert restored census-swift.base.txt before=f7aabc60cbc70dde435ca3f6c2cfb52d408f9ca53f2145b4cd6429e9cb45800c after=f7aabc60cbc70dde435ca3f6c2cfb52d408f9ca53f2145b4cd6429e9cb45800c OK
+2026-10-08T20:48:02Z control-compose-own-base moved aside census-compose.base.txt sha256=6f94b3eb1b33009e8df3d35b2812a979900704a37a876b42a5449020e86ba9c5
+2026-10-08T20:48:04Z control-compose-own-base restored census-compose.base.txt before=6f94b3eb1b33009e8df3d35b2812a979900704a37a876b42a5449020e86ba9c5 after=6f94b3eb1b33009e8df3d35b2812a979900704a37a876b42a5449020e86ba9c5 OK

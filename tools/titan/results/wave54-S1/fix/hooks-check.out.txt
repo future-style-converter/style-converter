@@ -1,0 +1,7 @@
+fix-r2/hooks/a.reverted.json: HEAD rc 0 · fixed rc 0 · stdout equal True -> SAME
+fix-r2/hooks/u1.reverted.json: HEAD rc 0 · fixed rc 0 · stdout equal True -> SAME
+fix-r2/hooks/u2ios.reverted.json: HEAD rc 0 · fixed rc 0 · stdout equal True -> SAME
+fix-r2/hooks/u3b.reverted.json: HEAD rc 0 · fixed rc 0 · stdout equal True -> SAME
+fix-r2/hooks/w1.reverted.json: HEAD rc 0 · fixed rc 0 · stdout equal True -> SAME
+fix-r3/hooks/abc.reverted.json: HEAD rc 0 · fixed rc 0 · stdout equal True -> SAME
+fix-r3/hooks/u2ios.reverted.json: HEAD rc 0 · fixed rc 0 · stdout equal True -> SAME

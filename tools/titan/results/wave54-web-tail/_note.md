@@ -399,3 +399,67 @@ per PLAN §6:
 TREES: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf (no export tree; no Gradle run by this lane)
 
 STATUS: COMPLETE
+
+## S1 fix pass (wave-54 S1 fix lane web-tail, 2026-10-09; tree 4f3853d7, uncommitted — the orchestrator commits)
+
+Scope: S1 should-fix **S3** and **S4**, and nit **N4** (`tools/titan/results/wave54-S1/_note.md`). Executed records are in
+`s1-fix/` as `.out.txt` / `.json`, because `.gitignore:21 *.log` would drop `.log` files (S1 S2).
+
+### What changed
+
+| item | file | change |
+|---|---|---|
+| S3 (= L6 skeptic D1) | `runtimes/web/tests/renderer/InertOutOfFlowWordJoin.test.tsx` | new pin **(h)**: renders through `NodeRenderer`, the production gate at `NodeRenderer.ts:339`. Inputs: -001 box 4 verbatim (`hyphens: manual`), then -002 box 4 with its host's `Hyphens` set to `NONE`, then removed (initial value `manual`, css-text-3 §5.4). Each must stay split: `>high<span…>abspos</span>­way<` / `…</span>way<` |
+| S4 (= L6 skeptic D2) | `runtimes/web/src/renderer/InlineRuns.ts` | `resolveRuns` emits ONE `[InlineRuns] component "<id>": N paint-inert out-of-flow member(s) moved…` `console.warn` when `join.joined > 0`. This is the same channel as the rule-5 dangling-key warn, and the web twin of Compose's fold breadcrumb `", N out-of-flow member(s) dropped"` (`ComponentRenderer.kt:3909`). 0 joined stays silent. The `RunsPlacement.joinedOutOfFlowMembers` doc comment now says it |
+| S4 | `runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts` | banner "STATED LOSSES (never silent: …)" now names the warn as well as the count (comment only) |
+| S4 pin | same test file | new pin **(i)**: a `console.warn` spy, filtered to `[InlineRuns]`. Box 7 (word edge) and -001 box 4 (manual) → no breadcrumb; box 4 → exactly one, naming the host id and `1`. A file-level `beforeEach` mutes `console.warn` and `afterEach` restores it, so the other W1 tests stay quiet now that box 4 warns |
+| N4 | `apps/web-harness/src/ui/ComposedRootSeparator.ts:25` | "The engine entry point" → "The runtime entry point" |
+
+- `NodeRenderer.ts` is **unchanged** (sha256 `69dd160f…afae8b7b` before = after). It is 432 lines, and the breadcrumb lives in
+  `InlineRuns.ts` so that it does not grow.
+- Sizes after the fix: `InlineRuns.ts` 171 → 183, `InertOutOfFlowWordJoin.ts` 187 → 188, the test file 170 → 200 (at the
+  limit, not over it).
+- The DOC001_BOX4 literal (-001 box 4, host `__4-275` and member `__4__0-276`) is byte-equal to the two box-4 components of
+  `tools/titan/runs/wave54-open/sections/css-text/per-test-ir/wpt__css-text__hyphens__hyphens-out-of-flow-001.json`
+  (sha256 `dec51fc7…3aa14e`). Executed check: `s1-fix/doc001-verbatim.out.txt` → `true count 2`.
+
+### Executed mutations (`mutate.py s1-fix/s1-fix-mutations.json <name> -- 'cd runtimes/web && npx vitest run tests/renderer/'`)
+
+Full output: `s1-fix/mutations.out.txt`. Every row was mutated, went RED, was restored byte-exact (sha256 equal) and went GREEN
+again; `mutate.py` exited 0 on all four.
+
+| id | mutation | before → mutated sha256 | RED tests | restored |
+|---|---|---|---|---|
+| S1-m1 (= S1's surviving SK6-w7) | `NodeRenderer.ts` `{ hyphensAuto: true }` | `69dd160f…` → `4005b9c1…` | (h) `…­way<` no match; (i) `[Array(1)]` ≠ `[]` | `69dd160f…` == before, GREEN |
+| S1-m2 (= SK6-w8) | `NodeRenderer.ts` `{ hyphensAuto: styles.hyphens !== 'manual' }` | `69dd160f…` → `e2db5215…` | (h) at `NONE` | == before, GREEN |
+| S1-m3 | `InlineRuns.ts` `if (join.joined < 0)` (the warn never fires) | `37cd63ea…` → `a3669486…` | (i) `[]` length 0 ≠ 1 | `37cd63ea…` == before, GREEN |
+| S1-m4 | `InlineRuns.ts` `if (join.joined >= 0)` (the warn fires on every host) | `37cd63ea…` → `8a830589…` | (i) `[…(2)]` ≠ `[]` | == before, GREEN |
+
+Before this pass, S1-m1 survived the whole web runtime suite (S1 re-executed it, rc 0). S1-m2 survived W1, InlineRuns and
+`NodeRenderer.test.tsx` (`skeptic/sk6-w1-mutations.out.txt`).
+
+### Focused suites (executed after the fix)
+
+- `npx vitest run tests/renderer/` (runtimes/web): **12 files, 140 / 140 passed**, exit 0 (138 before + (h) + (i)).
+  Output: `s1-fix/web-renderer.out.txt`.
+- `npx vitest run tests/ui/ComposedRootSeparator.test.ts tests/ui/ComposedRootSeparatorWire.test.tsx` (apps/web-harness):
+  **2 files, 14 / 14 passed**, exit 0. Output: `s1-fix/harness-separator.out.txt`.
+- `npm -w runtimes/web run typecheck`: exit 0 (`s1-fix/typecheck.out.txt`).
+- `npm -w apps/web-harness run typecheck`: exit 0 (`s1-fix/harness-typecheck.out.txt`).
+- sha256 of the five owned files, before and after: `s1-fix/sha256.before.txt` and `s1-fix/sha256.after.txt`.
+
+### Effect on the wire, pixels and harness
+
+- The breadcrumb is a `console.warn` only. The capture scripts forward only `error`-level console messages
+  (`apps/web-harness/capture-screenshots.mjs:208-213`), so captures and DOM are unchanged.
+- On the corpus it fires for the 4 joined hosts of -002 (boxes 3/4/5/6; census `w1-joins.wave53-final.out.txt`). No test
+  in `runtimes/web/tests` or `apps/web-harness/tests` asserts an absence of warnings over those documents (grep).
+
+### Not done
+
+- The full web runtime, harness and other suites were not run here (single-writer rule); the orchestrator's sweep is the
+  count of record.
+- L6 skeptic D3 (the other unpinned W1 branches: structural refusal, FIXED, `pushText`, alpha threshold, string/keyword
+  dialects) and S8 (honesty labels via `plan-build.py`) are outside this pass's items.
+
+STATUS: S1-FIX COMPLETE

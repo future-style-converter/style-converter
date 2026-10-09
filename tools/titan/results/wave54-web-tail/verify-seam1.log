@@ -1,0 +1,28 @@
+== lock taken 2026-10-08 19:16:01; patch /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-web-tail/seam-1.patch
+== sha256 before
+cc39ab6e98342c493b2404a4d9a52d1fba997063b2d42b2edc89cea7809a4d8e  apps/web-harness/src/sdui/ComponentRenderer.tsx
+87ac9ca4f30471e59dd954883f41a5f4a6c851ad2f868082e797bac3becb47b9  apps/web-harness/src/ui/ComposedCaptureGallery.tsx
+== applied; running: cd apps/web-harness && CENSUS_RUN=wave53-final CENSUS_OUT=/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-web-tail/dom-census.seam1.json npx vitest run --config ../../tools/titan/results/wave54-web-tail/vitest.census.config.mts 2>&1 | tail -4; npx vitest run tests/ui/ComposedRootSeparatorWire.test.tsx tests/ui/ComposedRootSeparator.test.ts tests/sdui/ComponentRenderer.interInlineWs.test.tsx tests/sdui/RendererParity.test.tsx tests/ui/ComposedCanvas tests/ui/ComposedCaptureGallery.test.tsx 2>&1 | tail -40; npx tsc --noEmit && echo TSC-OK
+      Tests  1 passed (1)
+   Start at  19:16:02
+   Duration  3.90s (transform 1.05s, setup 0ms, import 28ms, tests 3.81s, environment 0ms)
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vite.config.ts:146:27). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.10 /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/web-harness
+
+
+ Test Files  15 passed (15)
+      Tests  120 passed (120)
+   Start at  19:16:06
+   Duration  2.58s (transform 10.21s, setup 0ms, import 16.64s, tests 3.84s, environment 1ms)
+
+TSC-OK
+== command exit 0
+== sha256 after restore
+cc39ab6e98342c493b2404a4d9a52d1fba997063b2d42b2edc89cea7809a4d8e  apps/web-harness/src/sdui/ComponentRenderer.tsx
+87ac9ca4f30471e59dd954883f41a5f4a6c851ad2f868082e797bac3becb47b9  apps/web-harness/src/ui/ComposedCaptureGallery.tsx
+removed apps/web-harness/tests/ui/ComposedRootSeparatorWire.test.tsx
+== lock released 2026-10-08 19:16:09

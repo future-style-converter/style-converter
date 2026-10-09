@@ -1,0 +1,39 @@
+[S1-m1] file runtimes/web/src/renderer/NodeRenderer.ts sha256 before 69dd160f6296304c929d2fb7d2df00939294323252371bafd7a7e641afae8b7b
+[S1-m1] mutated sha256 4005b9c1c57276c631097d99de6fc3302cdafee751449106ffcbee2e3c850142
+[S1-m1] mutated run exit 1 → RED
+    × (h) the PRODUCTION gate: NodeRenderer keeps manual / none / absent-hyphens hosts split (S1 S3) 12ms
+    × (i) each join is warned once on the `[InlineRuns]` channel; a no-join host stays silent (S1 S4) 9ms
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (h) the PRODUCTION gate: NodeRenderer keeps manual / none / absent-hyphens h
+    AssertionError: expected '<div data-component-id="wpt__css-text…' to match />high<span[^>]*>abspos…/span>\u00ADway<
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (i) each join is warned once on the `[InlineRuns]` channel; a no-join host s
+    AssertionError: expected [ Array(1) ] to deeply equal []
+[S1-m1] restored sha256 69dd160f6296304c929d2fb7d2df00939294323252371bafd7a7e641afae8b7b == before
+[S1-m1] restored run exit 0 → GREEN
+[S1-m1] mutate.py exit 0
+[S1-m2] file runtimes/web/src/renderer/NodeRenderer.ts sha256 before 69dd160f6296304c929d2fb7d2df00939294323252371bafd7a7e641afae8b7b
+[S1-m2] mutated sha256 e2db52155f70662df7e6f52038e3e9623bef30b41d8ad65353247b7f18e5eb74
+[S1-m2] mutated run exit 1 → RED
+    × (h) the PRODUCTION gate: NodeRenderer keeps manual / none / absent-hyphens hosts split (S1 S3) 11ms
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (h) the PRODUCTION gate: NodeRenderer keeps manual / none / absent-hyphens h
+    AssertionError: NONE: expected '<div data-component-id="wpt__css-text…' to match />high<span[^>]*>abspos<\/spa…/span>way<
+[S1-m2] restored sha256 69dd160f6296304c929d2fb7d2df00939294323252371bafd7a7e641afae8b7b == before
+[S1-m2] restored run exit 0 → GREEN
+[S1-m2] mutate.py exit 0
+[S1-m3] file runtimes/web/src/renderer/InlineRuns.ts sha256 before 37cd63eae6e27df1e638d81d1436d88d5bbe8a1d591e16c27cfa3cd03c58f5ce
+[S1-m3] mutated sha256 a366948a20865827538900bfef352030224638c42fafb8ffdbdb9498360afd59
+[S1-m3] mutated run exit 1 → RED
+    × (i) each join is warned once on the `[InlineRuns]` channel; a no-join host stays silent (S1 S4) 9ms
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (i) each join is warned once on the `[InlineRuns]` channel; a no-join host s
+    AssertionError: expected [] to have a length of 1 but got +0
+[S1-m3] restored sha256 37cd63eae6e27df1e638d81d1436d88d5bbe8a1d591e16c27cfa3cd03c58f5ce == before
+[S1-m3] restored run exit 0 → GREEN
+[S1-m3] mutate.py exit 0
+[S1-m4] file runtimes/web/src/renderer/InlineRuns.ts sha256 before 37cd63eae6e27df1e638d81d1436d88d5bbe8a1d591e16c27cfa3cd03c58f5ce
+[S1-m4] mutated sha256 8a8305896bc8508447fb19927d0e256291446f3edf078c98c3673ec9ec3508e0
+[S1-m4] mutated run exit 1 → RED
+    × (i) each join is warned once on the `[InlineRuns]` channel; a no-join host stays silent (S1 S4) 15ms
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (i) each join is warned once on the `[InlineRuns]` channel; a no-join host s
+    AssertionError: expected [ …(2) ] to deeply equal []
+[S1-m4] restored sha256 37cd63eae6e27df1e638d81d1436d88d5bbe8a1d591e16c27cfa3cd03c58f5ce == before
+[S1-m4] restored run exit 0 → GREEN
+[S1-m4] mutate.py exit 0

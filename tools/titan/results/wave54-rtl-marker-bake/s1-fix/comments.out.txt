@@ -1,0 +1,5 @@
+  1 uncommented /  50 commented-or-syntax  tools/titan/bidi-marker-paint.mjs
+      · && Math.abs(r.width - q.width) <= 0.02 && Math.abs(r.height - q.height) <= 0.02;
+  0 uncommented /   2 commented-or-syntax  tools/titan/bidi-marker-bake.mjs
+  0 uncommented /   4 commented-or-syntax  tools/titan/bidi-bake.mjs
+TOTAL uncommented by this heuristic: 1

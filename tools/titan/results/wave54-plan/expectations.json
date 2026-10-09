@@ -438,7 +438,9 @@
   "css-contain/contain-content-011.html android (the \"25\" counter, ref \"17\": wrong on all three platforms; OOF-android moves only the green square)",
   "css-text/hyphens/hyphenate-character-002.html web (Chromium en dictionary: im-/ple-/men-/tation, groups [4,4,4,3] vs ref [5,4,3,3])",
   "css-text/hyphens/hyphenate-character-002.html ios (TextKit emergency breaks tati/on, izat/ion)",
-  "css-text/hyphens/hyphenate-character-002.html android (Minikin paints its own dictionary hyphen)"
+  "css-text/hyphens/hyphenate-character-002.html android (Minikin paints its own dictionary hyphen)",
+  "css-position/position-absolute-semi-replaced-stretch-other.html web (the label paints \"abel\" where the ref paints \"label\": its \"l\" lies under the green border; RS moves only the static position)",
+  "css-cascade/scope-pseudo-element.html web (the B/Foo wrap defect remains; RS moves only the box lefts x118/220 -> x123/229)"
  ],
  "recordedWall": [
   "css-anchor-position/anchor-position-multicol-007.html android"
@@ -690,7 +692,8 @@
      },
      "report": [],
      "onWave53Final": "[P] android rows WRONG (x33 / x35); [M] web/ios WRONG (no marker ink on text row y214-225), android WRONG (rtl text rows 0/4 in x95-128); every ref row OK; exit 0",
-     "onWave53Probe": "[P] all OK; [M] web/ios OK, android WRONG (rtl row 1 no marker ink on text row y214-225 (marker ink y244-245 below the line)) — the reverted unit's defect, named"
+     "onWave53Probe": "[P] all OK; [M] web/ios OK, android WRONG (rtl row 1 no marker ink on text row y214-225 (marker ink y244-245 below the line)) — the reverted unit's defect, named",
+     "teeth": "wave54-S1 fix: each RTL row's marker-ink LEFT edge must sit at the ref's x133 ±2; the L1 skeptic's nodot fake (the '.' runs whitened) prints WRONG on web (iOS was already WRONG by width); mutation-proven (wave54-S1/fix/)"
     },
     {
      "cmd": "python3 tools/titan/results/wave53-plan/lists-bakes.geometry.py <run> <base>",
@@ -714,7 +717,8 @@
      "report": [
       "counter-suffix ios"
      ],
-     "onWave53Final": "counter-suffix x3 WRONG (web left x47; ios right x126; android left x152); counter-reset-reversed-nested x3 OK (wave-53 U1, a control now)"
+     "onWave53Final": "counter-suffix x3 WRONG (web left x47; ios right x126; android left x152); counter-reset-reversed-nested x3 OK (wave-53 U1, a control now)",
+     "teeth": "wave54-S1 fix: each RTL row's marker-ink LEFT edge must sit at the ref's x133 ±2; the nodot fake prints WRONG on web and iOS (both OK before); mutation-proven (wave54-S1/fix/)"
     }
    ],
    "revertUnits": {
@@ -3673,7 +3677,7 @@
      "cell": "css-position/position-absolute-semi-replaced-stretch-other.html web",
      "from": "f 0.941",
      "to": "P 0.967 (0.9667)",
-     "kind": "flip (the space moves the next abspos box's static position, as in the ref)",
+     "kind": "flip (the space moves the next abspos box's static position, as in the ref) — DEGENERATE even if P: the label paints \"abel\" where the ref paints \"label\"; stayDegenerateEvenIfPass",
      "confidence": "MED",
      "floor": null,
      "gating": false,
@@ -3928,7 +3932,7 @@
      "cell": "css-cascade/scope-pseudo-element.html web",
      "from": "f 0.9353",
      "to": "up (box lefts to x16/123/229; its B/Foo wrap defect remains)",
-     "kind": "mover",
+     "kind": "mover — DEGENERATE even if P: the B/Foo wrap defect remains; stayDegenerateEvenIfPass",
      "confidence": "LOW",
      "floor": null,
      "gating": false,

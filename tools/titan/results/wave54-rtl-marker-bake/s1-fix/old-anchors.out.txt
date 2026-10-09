@@ -1,0 +1,33 @@
+ok  1 mutations-Mprime-4b.json M-4b (V2, no crash) a ROOT list item is planned a marker, owned and me
+ok  1 mutations-Mprime.json M-1 (V1 m1) planMarker drops `list-style-type: none` on the item
+ok  1 mutations-Mprime.json M-2 (V1 m2) the analytic RTL edge hangs the marker LEFT (li.left − w)
+ok  1 mutations-Mprime.json M-3 (V1 m3) no per-grapheme split of a no-strong-letter run
+ok  1 mutations-Mprime.json M-4 (V2) a ROOT list item is planned a marker too
+ok  1 mutations-Mprime.json M-5 (V5 a) the probe self-check is deleted (a mismatching CDP box is u
+ok  1 mutations-Mprime.json M-6 (V5 b) a probe mismatch becomes a whole-test bail
+ok  1 mutations-Mprime.json M-7 (VF) collectMarkerFacts rethrows a page fault
+ok  1 mutations-Mprime.json M-8 (FX1) an item not re-found by rect is skipped silently
+ok  1 mutations-Mprime.json M-9 (FX2) the error-fact filter is dropped from the CDP merge
+ok  1 mutations-Mprime.json M-10 (FX3) applyBidiBakePlan's box `_lossyReasons` merge is deleted
+ok  1 mutations-Mprime.json M-11 (FX4) the half-leading term `- q0` is dropped
+ok  1 mutations-Mprime.json M-12 (V6 owner) the marker runs are owned by the `<li>` again (wave-53
+ok  1 mutations-Mprime.json M-13 (V6 origin) the marker runs are measured from the `<li>`'s paddin
+ok  1 mutations-Mprime.json M-14 (V7) the marker runs are ALSO pushed to the item box (root copy k
+ok  1 mutations-Mprime.json M-15 (wiring) the marker facts are collected BEFORE the mapping check
+ok  1 mutations-P-final.json P-1 remove the `padding: 0` line (rootProperties)
+ok  1 mutations-P-final.json P-2 drop the content-box guard
+ok  1 mutations-P-final.json P-3 drop the NON-zero guard (any padding array counts)
+ok  1 mutations-P-final.json P-4 drop the overflow guard
+ok  1 mutations-P-final.json P-5 drop the padding-* longhand delete loop (applyBidiBakePlan)
+ok  1 mutations-P-final.json P-6 planBidiBake stops passing the walk record (the pre-P call)
+ok  1 mutations-P-final.json P-7 the walker stops recording the resolved padding
+ok  1 mutations-P.json P-1 remove the `padding: 0` line (rootProperties)
+ok  1 mutations-P.json P-2 drop the content-box guard
+ok  1 mutations-P.json P-3 drop the NON-zero guard (any padding array counts)
+ok  1 mutations-P.json P-4 drop the overflow guard
+ok  1 mutations-P.json P-5 drop the padding-* longhand delete loop (applyBidiBakePlan)
+ok  1 mutations-P.json P-6 planBidiBake stops passing the walk record (the pre-P call)
+ok  1 mutations-P.json P-7 the walker stops recording the resolved padding
+ok  S1 l1-m12.old {'tools/titan/bidi-bake.mjs': 1, 'tools/titan/bidi-marker-bake.mjs': 0}
+ok  S1 l1-p3.old {'tools/titan/bidi-bake.mjs': 1, 'tools/titan/bidi-marker-bake.mjs': 0}
+earlier L1 / S1 mutation anchors not matching exactly once on the fixed files: 0

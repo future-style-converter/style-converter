@@ -14,6 +14,8 @@
 #   counter-suffix <p> … → GEOMETRY OK     and, with base wave53-open: "rows 0-207 identical to wave53-open"
 # The ref row must print GEOMETRY OK (exit 1 otherwise): the rule describes the picture the test asks for.
 # Decodes 8 PNGs (16 with a base run).
+# Wave-54 S1 fix (should-fix 1): check_suffix also requires each RTL row's marker ink to START at the ref's '.' (x134 ±2 on the dark core);
+# before it, a capture whose '.' run was missing printed OK on web and iOS (wave54-S1/geom-fakes.replay.out.txt).
 import sys
 from geometry_common import paths, load, dark, bands, near
 
@@ -55,8 +57,15 @@ def check_suffix(px, rows, ref):
     for i, (r, q) in enumerate(zip(rows, ref)):
         if not near(r[2], q[2], 3): return f'rtl row {i + 1} left x{r[2]} vs ref x{q[2]}'
         if not near(r[3], q[3], 3): return f'rtl row {i + 1} right x{r[3]} vs ref x{q[3]}'
-        if not any(dark(px[x, y]) for y in range(r[0], r[1] + 1) for x in range(129, 151)):
+        # The marker column's ink on this row (x129-150; the li border box ends at x128).
+        xs = [x for y in range(r[0], r[1] + 1) for x in range(129, 151) if dark(px[x, y])]
+        if not xs:
             return f'rtl row {i + 1} no marker ink in x129-150'
+        # css-counter-styles-3 `suffix` descriptor: the marker is counter + ". ", ".1" / ".א" in RTL order, so its ink
+        # begins at the '.': ref x133 (antialiased edge) / x134 (the `dark` core read here) on all four rows. The row's
+        # right edge (x144) cannot see a dropped '.' run; this left edge can (a digit-only marker starts at x137-138).
+        if not near(min(xs), 134, 2):
+            return f'rtl row {i + 1} marker left x{min(xs)} vs ref x134±2 (the "." run missing or moved)'
     if any(dark(px[x, y]) for y in range(208, 303) for x in range(40, 64)):
         return 'ink at x40-63 in the rtl rows (marker on the wrong side)'
     return None

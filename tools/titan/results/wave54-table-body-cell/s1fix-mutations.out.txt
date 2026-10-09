@@ -1,0 +1,29 @@
+== before · TableCellHugTest.kt sha256 1afa7686e022b50a
+00:29:28 before GREEN rc 0 tests 15 red 0 [] errs [] 2.4s
+00:29:30 before X3 [hug at MIN-content (§17.5.2.2 quantity) — S1 S5] TableCellHug.kt fac6c37431056468→fac6c37431056468 byte-exact | rc 0 tests 15 red 0 errs [] 2.0s
+00:29:32 before X6 [TableCell drops the weight link — skeptic nit 2 (indexOf -1 vacuous)] TableApplier.kt 0d58a4633762893c→0d58a4633762893c byte-exact | rc 0 tests 15 red 0 errs [] 1.6s
+00:29:33 before X7 [TableCell drops fillMaxHeight — unbounded `cell` finds a later composable's] TableApplier.kt 0d58a4633762893c→0d58a4633762893c byte-exact | rc 0 tests 15 red 0 errs [] 1.6s
+== after · TableCellHugTest.kt sha256 02562df26fb00757
+00:30:11 after GREEN rc 0 tests 16 red 0 [] errs [] 5.7s
+00:30:13 after X3 [hug at MIN-content (§17.5.2.2 quantity) — S1 S5] TableCellHug.kt fac6c37431056468→fac6c37431056468 byte-exact | rc 1 tests 16 red 1 errs [] 1.8s
+    red: TableCellHugTest::hugColumnSource_enabledBranchReadsMaxContent_neverMin
+00:30:15 after X6 [TableCell drops the weight link — skeptic nit 2 (indexOf -1 vacuous)] TableApplier.kt 0d58a4633762893c→0d58a4633762893c byte-exact | rc 1 tests 16 red 1 errs [] 2.0s
+    red: TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight
+00:30:17 after X7 [TableCell drops fillMaxHeight — unbounded `cell` finds a later composable's] TableApplier.kt 0d58a4633762893c→0d58a4633762893c byte-exact | rc 1 tests 16 red 1 errs [] 2.2s
+    red: TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight
+00:30:18 after GREEN rc 0 tests 16 red 0 [] errs [] 1.7s
+== after-final · TableCellHugTest.kt sha256 ea5e7a9448b5a298
+00:30:48 after-final GREEN rc 0 tests 16 red 0 [] errs [] 1.5s
+00:30:49 after-final X3 [hug at MIN-content (§17.5.2.2 quantity) — S1 S5] TableCellHug.kt fac6c37431056468→fac6c37431056468 byte-exact | rc 1 tests 16 red 1 errs [] 1.2s
+    red: TableCellHugTest::hugColumnSource_enabledBranchReadsMaxContent_neverMin — java.lang.AssertionError: the enabled hug does not read max-content
+00:30:51 after-final X6 [TableCell drops the weight link — skeptic nit 2 (indexOf -1 vacuous)] TableApplier.kt 0d58a4633762893c→0d58a4633762893c byte-exact | rc 1 tests 16 red 1 errs [] 1.2s
+    red: TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight — java.lang.AssertionError: TableCell lacks a link: then=-1 hug=2582 fill=2657
+00:30:52 after-final X7 [TableCell drops fillMaxHeight — unbounded `cell` finds a later composable's] TableApplier.kt 0d58a4633762893c→0d58a4633762893c byte-exact | rc 1 tests 16 red 1 errs [] 1.2s
+    red: TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight — java.lang.AssertionError: TableCell lacks a link: then=2431 hug=2618 fill=-1
+00:30:53 after-final GREEN rc 0 tests 16 red 0 [] errs [] 1.3s
+== clauses · TableCellHugTest.kt sha256 ea5e7a9448b5a298
+00:31:22 clauses X8 [max read kept, a min read chained after it — the never-Min clause alone] TableCellHug.kt fac6c37431056468→fac6c37431056468 byte-exact | rc 1 tests 16 red 1 errs [] 2.1s
+    red: TableCellHugTest::hugColumnSource_enabledBranchReadsMaxContent_neverMin — java.lang.AssertionError: hugColumn reads min-content
+00:31:24 clauses X9 [max read untagged — the CELL_HUG_REFUSAL clause alone] TableCellHug.kt fac6c37431056468→fac6c37431056468 byte-exact | rc 1 tests 16 red 1 errs [] 1.4s
+    red: TableCellHugTest::hugColumnSource_enabledBranchReadsMaxContent_neverMin — java.lang.AssertionError: the read is not tagged CELL_HUG_REFUSAL
+00:31:25 clauses GREEN rc 0 tests 16 red 0 [] errs [] 1.2s

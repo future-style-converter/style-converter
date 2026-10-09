@@ -1,0 +1,12 @@
+=== sk-u3-pins 2026-10-08 22:18:45 HEAD sha 845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9 before 845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9
+applied seam-3: 2461e45e7e10d92052b469d0dd7d80d0fa2be1be677e33e2064e4d75d6bb7206; test file sha 88221750be41ac3fa481fe32204dead2a1beef6738dce9a8be59f1b0b392e056 (staged 88221750be41ac3fa481fe32204dead2a1beef6738dce9a8be59f1b0b392e056)
+  seam-3 suite> # tests 490
+  seam-3 suite> # pass 488
+  seam-3 suite> # fail 0
+  seam-3 suite> # skipped 2
+applied seam-3b: 6ab6f2b8ee7bc2e53cad7e164e454c0aa7fa9465b3fd468c868931c78ee3d1bd
+  seam-3+3b suite> # tests 490
+  seam-3+3b suite> # pass 490
+  seam-3+3b suite> # fail 0
+  seam-3+3b suite> # skipped 0
+RESTORE tools/titan/extract-fixture.mjs sha 845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9 BYTE-EXACT-TO-HEAD; test file present after restore: no

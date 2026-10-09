@@ -1,0 +1,9 @@
+baseline: rc 0, outputs == shared tree: True
+MUT-a drop the semi-replaced-stretch-other entry from the list (the D4 state: a kind label with no list entry): rc 1 -> RED
+  AssertionError: a prediction kind says DEGENERATE even if P but stayDegenerateEvenIfPass omits it: ['css-position/position-absolute-semi-replaced-stretch-other.html web']
+  restore: sha256 abac114a24c97f5f -> abac114a24c97f5f BYTE-EXACT; == shared tree: True
+  re-run: rc 0, outputs == shared tree: True -> GREEN
+MUT-b an entry naming a cell with no prediction row (scope-pseudo-element web -> ios): rc 1 -> RED
+  AssertionError: stayDegenerateEvenIfPass names a cell with no prediction row: ['css-cascade/scope-pseudo-element.html ios']
+  restore: sha256 abac114a24c97f5f -> abac114a24c97f5f BYTE-EXACT; == shared tree: True
+  re-run: rc 0, outputs == shared tree: True -> GREEN

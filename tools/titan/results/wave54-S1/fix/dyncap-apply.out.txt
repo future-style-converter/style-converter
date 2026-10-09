@@ -1,0 +1,9 @@
+== shasum -a 256 docs/DYNAMIC_CAPTURE.md (before) / git apply --check -v / git apply -v / shasum (after the hunk) — then the N1 phrase edit
+before: 4258766a8b9bfbc05835ab5eefa592aaf196eff99d4a3f4a1e9e1d23c17fdc57  docs/DYNAMIC_CAPTURE.md (= the patch header's base sha256)
+Checking patch docs/DYNAMIC_CAPTURE.md...
+check rc=0
+Checking patch docs/DYNAMIC_CAPTURE.md...
+Applied patch docs/DYNAMIC_CAPTURE.md cleanly.
+apply rc=0
+8cd8fca42f0dd7f24e61d45563c6299a5ea295c2ae80112a5a2adfcd08c10e06  docs/DYNAMIC_CAPTURE.md
+after the N1 phrase correction: 53d0a09f4b182b59bb687f7c9c9a921663e1cc6c0e2f6d08bc6125f8e5d8b9f8  docs/DYNAMIC_CAPTURE.md

@@ -1,0 +1,82 @@
+== lock taken 2026-10-08 19:17:23; patch /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-web-tail/seam-1.patch
+== sha256 before
+cc39ab6e98342c493b2404a4d9a52d1fba997063b2d42b2edc89cea7809a4d8e  apps/web-harness/src/sdui/ComponentRenderer.tsx
+87ac9ca4f30471e59dd954883f41a5f4a6c851ad2f868082e797bac3becb47b9  apps/web-harness/src/ui/ComposedCaptureGallery.tsx
+== applied; running: ( cd apps/web-harness && npx vitest run tests/ui/ComposedRootSeparatorWire.test.tsx tests/ui/ComposedRootSeparator.test.ts tests/sdui/ComponentRenderer.interInlineWs.test.tsx ) 2>&1 | grep -E 'Test Files|Tests ' ; for m in RS-m1 RS-m2 RS-m3 RS-m4 RS-m4b; do python3 /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-web-tail/mutate.py /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-web-tail/rs-mutations.json $m -- 'cd apps/web-harness && npx vitest run tests/ui/ComposedRootSeparatorWire.test.tsx tests/ui/ComposedRootSeparator.test.ts tests/sdui/ComponentRenderer.interInlineWs.test.tsx'; echo "[$m] mutate.py exit $?"; done
+ Test Files  3 passed (3)
+      Tests  23 passed (23)
+[RS-m1] file apps/web-harness/src/sdui/ComponentRenderer.tsx sha256 before c780ac1c76c28e74bb27df246be87a3a20e90c9a82d2e50bfae21809bb8028d2
+[RS-m1] mutated sha256 888f827f125066cddf55d923ec80ace3af96b4f80a35c960eb5dc330c0391535
+[RS-m1] mutated run exit 1 → RED
+    × keeps flush siblings flush when the source had no whitespace 33ms
+    × flush_anUnmarkedPairStaysFlush_onVerbatimWire 4ms
+    × everyMarkerLevelContainerCombination_spacesIffThePredicateSays 181ms
+    FAIL  tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > flush_anUnmarkedPairStaysFlush_onVerbatimWire
+    AssertionError: expected [ …(19) ] to have a length of 18 but got 19
+    FAIL  tests/ui/ComposedRootSeparatorWire.test.tsx > call-equivalence: renderChildSeparator ≡ wsAfterSeparator (wave-54 L6 RS) > everyMarkerLevelContainerCombination_spacesIffThePredicateSays
+    AssertionError: expected 16 to be 8 // Object.is equality
+    FAIL  tests/sdui/ComponentRenderer.interInlineWs.test.tsx > wave-26 WWS — composed WPT mode spaces marked inline siblings > keeps flush siblings flush when the source had no whitespace
+    AssertionError: expected '<div data-component-id="row2" data-co…' not to match /<\/div> <div/div> <div
+[RS-m1] restored sha256 c780ac1c76c28e74bb27df246be87a3a20e90c9a82d2e50bfae21809bb8028d2 == before
+[RS-m1] restored run exit 0 → GREEN
+[RS-m1] mutate.py exit 0
+[RS-m2] file apps/web-harness/src/ui/ComposedRootSeparator.ts sha256 before 1df076a632521fcdbd1a84732712b14330b0773129170aac17f3b9b3acfdafc1
+[RS-m2] mutated sha256 0626b202234f34a1292dbaa2dd7af60e77e25f34f484e6f420d7d398b12dd262
+[RS-m2] mutated run exit 1 → RED
+    × table_andInlineTable_wrapperDeclines_evenWhenThePredicateSeparates 3ms
+    × tableBody_wrapperDeclines_inTheRealGallery 10ms
+    FAIL  tests/ui/ComposedRootSeparator.test.ts > interleaveRootSeparators — mechanics (wave-54 L6 RS) > table_andInlineTable_wrapperDeclines_evenWhenThePredicateSeparates
+    AssertionError: expected [ …(5) ] to deeply equal [ …(3) ]
+    FAIL  tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > tableBody_wrapperDeclines_inTheRealGallery
+    AssertionError: expected 19 to be +0 // Object.is equality
+[RS-m2] restored sha256 1df076a632521fcdbd1a84732712b14330b0773129170aac17f3b9b3acfdafc1 == before
+[RS-m2] restored run exit 0 → GREEN
+[RS-m2] mutate.py exit 0
+[RS-m3] file apps/web-harness/src/ui/ComposedRootSeparator.ts sha256 before 1df076a632521fcdbd1a84732712b14330b0773129170aac17f3b9b3acfdafc1
+[RS-m3] mutated sha256 73ec5280ea9060a9636e082664a1d6e0ea3f50ff95276628abb9ef94035b7481
+[RS-m3] mutated run exit 1 → RED
+    × firstRoot_neverGetsASeparatorSlot_andPairsInterleaveInForestOrder 3ms
+    × predicate_isAskedAbout(prev, next, container)_inOrder 0ms
+    × bs007_interleave_19Separators_noneAfterBodyRootOrP 10ms
+    × bs007_gallery_markupCarries19RootGaps 7ms
+    × bs007_gallery_flowWrapperSite_alsoSeparates 6ms
+    × flush_anUnmarkedPairStaysFlush_onVerbatimWire 1ms
+    × preBody_declines_throughTheBodysWhiteSpace 2ms
+    FAIL  tests/ui/ComposedRootSeparator.test.ts > interleaveRootSeparators — mechanics (wave-54 L6 RS) > firstRoot_neverGetsASeparatorSlot_andPairsInterleaveInForestOrder
+    AssertionError: expected [ ' ', …(5) ] to deeply equal [ …(5) ]
+    FAIL  tests/ui/ComposedRootSeparator.test.ts > interleaveRootSeparators — mechanics (wave-54 L6 RS) > predicate_isAskedAbout(prev, next, container)_inOrder
+    FAIL  tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > bs007_interleave_19Separators_noneAfterBodyRootOrP
+    FAIL  tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > bs007_gallery_markupCarries19RootGaps
+    FAIL  tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > preBody_declines_throughTheBodysWhiteSpace
+    FAIL  tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > bs007_gallery_flowWrapperSite_alsoSeparates
+    FAIL  tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > flush_anUnmarkedPairStaysFlush_onVerbatimWire
+[RS-m3] restored sha256 1df076a632521fcdbd1a84732712b14330b0773129170aac17f3b9b3acfdafc1 == before
+[RS-m3] restored run exit 0 → GREEN
+[RS-m3] mutate.py exit 0
+[RS-m4] file apps/web-harness/src/ui/ComposedCaptureGallery.tsx sha256 before badb03dca3c715e52c066d0cd96f5e842c5f13e6f3121dc10f1c161bd64893d2
+[RS-m4] mutated sha256 7c9a3628421e8cebdd9b38f5541c95946d4eeb14fcfaf8fb6404d692da10b0c0
+[RS-m4] mutated run exit 1 → RED
+    × bs007_gallery_flowWrapperSite_alsoSeparates 22ms
+    FAIL  tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > bs007_gallery_flowWrapperSite_alsoSeparates
+    AssertionError: expected +0 to be 19 // Object.is equality
+[RS-m4] restored sha256 badb03dca3c715e52c066d0cd96f5e842c5f13e6f3121dc10f1c161bd64893d2 == before
+[RS-m4] restored run exit 0 → GREEN
+[RS-m4] mutate.py exit 0
+[RS-m4b] file apps/web-harness/src/ui/ComposedCaptureGallery.tsx sha256 before badb03dca3c715e52c066d0cd96f5e842c5f13e6f3121dc10f1c161bd64893d2
+[RS-m4b] mutated sha256 d5943c8e0e8c1a397b91e2757555ab9526c028f85bd9f01ea8119a290ddb8e5e
+[RS-m4b] mutated run exit 1 → RED
+    × bs007_gallery_markupCarries19RootGaps 26ms
+    × flush_anUnmarkedPairStaysFlush_onVerbatimWire 10ms
+    FAIL  tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > bs007_gallery_markupCarries19RootGaps
+    AssertionError: expected +0 to be 19 // Object.is equality
+    FAIL  tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > flush_anUnmarkedPairStaysFlush_onVerbatimWire
+    AssertionError: expected +0 to be 18 // Object.is equality
+[RS-m4b] restored sha256 badb03dca3c715e52c066d0cd96f5e842c5f13e6f3121dc10f1c161bd64893d2 == before
+[RS-m4b] restored run exit 0 → GREEN
+[RS-m4b] mutate.py exit 0
+== command exit 0
+== sha256 after restore
+cc39ab6e98342c493b2404a4d9a52d1fba997063b2d42b2edc89cea7809a4d8e  apps/web-harness/src/sdui/ComponentRenderer.tsx
+87ac9ca4f30471e59dd954883f41a5f4a6c851ad2f868082e797bac3becb47b9  apps/web-harness/src/ui/ComposedCaptureGallery.tsx
+removed apps/web-harness/tests/ui/ComposedRootSeparatorWire.test.tsx
+== lock released 2026-10-08 19:17:47

@@ -6,8 +6,11 @@
 # y309-317 (one 20-px run height below row 4) was never seen. It also never asked whether a row's marker ink sits ON
 # that row's text line, nor whether the marker is wider than a lone "." (the digits '1' / '2' were missing). This probe
 # asks all three, per RTL row, and adds the unit-P lines (padding kept on a bidi-bake root shifts Android runs by the
-# padding). Every line ends in "→ GEOMETRY OK" or "→ GEOMETRY WRONG (<why>)". The ref rows must print OK (exit 1
-# otherwise): the rule must describe the picture the test asks for. Pure PIL, 16 PNGs (+3 with a base run).
+# padding). Wave-54 S1 fix (should-fix 1): it also asks that the marker ink START at the ref's '.' (x134 ±2 on the dark core), because a
+# capture missing the whole '.' run kept width ≥ 5 and the x144 right edge and printed OK
+# (wave54-S1/geom-fakes.replay.out.txt). Every line ends in "→ GEOMETRY OK" or "→ GEOMETRY WRONG (<why>)". The ref
+# rows must print OK (exit 1 otherwise): the rule must describe the picture the test asks for. Pure PIL, 16 PNGs (+3
+# with a base run).
 #
 # Usage: python3 tools/titan/results/wave54-plan/rtl-marker-bake.geometry.py <run-id> [base-run-id]
 #   base-run-id adds the must-not-move crop: counter-suffix rows y0-207 (the eight LTR rows) pixel-identical to base.
@@ -25,6 +28,10 @@ args = sys.argv[1:]
 run = args[0] if args else 'wave53-final'
 base = args[1] if len(args) > 1 else None
 ref_failed = False
+# The ref's marker-ink LEFT edge on every RTL row: the '.' of ".1" / ".2" / ".א" / ".ב". Measured on the frozen ref
+# (refs/…/css-counter-styles/counter-suffix.png): x133 at the antialiased edge (sum < 600), x134 at the `dark` core
+# (sum < 300) this scan reads, on all four rows; wave53-probe web x134 ×4, iOS x134/134/135/134 (wave54-S1/fix/).
+MARKER_LEFT = 134   # the dark-core read (sum < 300): ref x134 on all four rows; the antialiased edge sits at x133 (S1 fix-pass verifier)
 
 
 def ink(p):
@@ -59,6 +66,12 @@ def m_check(px, rows, ref):
         # (iOS paints a proportional '1' without the tabular foot: '.1' = x134-141, 7 px — still ≥ 5.)
         if max(xs) - min(xs) < 5:
             return f'rtl row {i + 1} marker ink x{min(xs)}-{max(xs)} narrower than 5 px (a glyph run missing)'
+        # css-counter-styles-3 `suffix` descriptor (decimal / hebrew: ". "): the marker string is the counter plus its
+        # suffix, ".1" in RTL visual order, so its ink must begin at the '.'. A dropped '.' run leaves the digit alone
+        # at x137-144: ≥ 5 px wide, right edge x144 — only the left edge sees it (the nodot fake: x138, 5 px off; ±2
+        # admits iOS's x135 on row 3 and the ref's x134 core).
+        if not near(min(xs), MARKER_LEFT, 2):
+            return f'rtl row {i + 1} marker left x{min(xs)} vs ref x{MARKER_LEFT}±2 (the "." run missing or moved)'
         if not near(max(xs), 144, 3):
             return f'rtl row {i + 1} marker right x{max(xs)} vs ref x144±3'
     # Nothing below the last RTL row: a run placed one run-height late would land at y300-330.

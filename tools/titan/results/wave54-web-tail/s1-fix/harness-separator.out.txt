@@ -1,0 +1,8 @@
+  - `__dirname` (vite.config.ts:146:27). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+ RUN  v4.1.10 /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/web-harness
+ Test Files  2 passed (2)
+      Tests  14 passed (14)
+   Start at  00:30:29
+   Duration  1.63s (transform 2.02s, setup 0ms, import 2.50s, tests 331ms, environment 0ms)
+exit 0
