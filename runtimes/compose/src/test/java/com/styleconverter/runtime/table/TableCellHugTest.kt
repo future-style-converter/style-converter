@@ -37,6 +37,7 @@ import org.junit.Test
  *   T5 TableCell without `.hugColumn(…)`                    → the applier source pin red.
  *   T6 Table without the LocalTableCellsHugContent provider → the applier source pin red.
  *   m6 (TableBodyForest) the synthetic boxes lose the role  → the synthetic row and the fold pin red.
+ *   S1 fix (lane note §"S1 fix pass"; each SURVIVED before): X3 Max → Min → hugColumn pin red; X6 / X7 → applier pin red.
  */
 class TableCellHugTest {
 
@@ -162,25 +163,38 @@ class TableCellHugTest {
         assertNotSame(m, m.hugColumn(true))
     }
 
-    /** TableApplier.kt, found by walking up to the repo root (the SeamReachabilityTest walk-up). */
-    private val applier: String by lazy {
-        val anchor = "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt"
-        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
-        while (dir != null && !File(dir, anchor).exists()) dir = dir.parentFile
-        File(requireNotNull(dir) { "repo root not found" }, anchor).readText()
+    /** A table/ source by file name, found by walking up to the repo root (the SeamReachabilityTest walk-up). */
+    private fun tableSource(name: String): String = "runtimes/compose/src/main/java/com/styleconverter/runtime/table/$name".let { a ->
+        generateSequence(File(System.getProperty("user.dir") ?: ".").absoluteFile) { it.parentFile }   // Gradle's cwd, then up
+            .firstOrNull { File(it, a).exists() }.let { File(requireNotNull(it) { "repo root not found" }, a).readText() }
     }
+
+    /** [src] from [start] to the next `fun ` — ONE function, so a later composable's chain never answers (S1 nit 2). */
+    private fun funBody(src: String, start: String): String = src.indexOf(start).also { assertTrue("`$start` absent", it >= 0) }
+        .let { at -> src.substring(at, src.indexOf("fun ", at + start.length).takeIf { it >= 0 } ?: src.length) }  // or EOF
 
     @Test
     fun applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight() {
-        // Table(…): the parameter with the frozen default, provided per table.
-        assertTrue(applier.contains("cellsHugContent: Boolean = false,"))
-        assertTrue(applier.contains("TableCellHug.LocalTableCellsHugContent provides cellsHugContent"))
-        // TableCell: the hug sits between the cell's weight and fillMaxHeight.
-        val cell = applier.substring(applier.indexOf("fun RowScope.TableCell("))
-        val hug = cell.indexOf(".hugColumn(TableCellHug.LocalTableCellsHugContent.current)")
-        val fill = cell.indexOf(".fillMaxHeight()")
-        assertTrue("TableCell does not chain hugColumn", hug >= 0)
-        assertTrue("hugColumn is not chained before fillMaxHeight", hug < fill)
-        assertTrue(cell.indexOf(".then(cellModifier)") < hug)
+        val applier = tableSource("TableApplier.kt")                                        // read per run: mutations show
+        assertTrue(applier.contains("cellsHugContent: Boolean = false,"))                   // Table(…): the frozen default…
+        assertTrue(applier.contains("TableCellHug.LocalTableCellsHugContent provides cellsHugContent"))  // …provided per table
+        // TableCell alone: weight → hug → fillMaxHeight, every link PRESENT (an absent link's -1 orders vacuously).
+        val cell = funBody(applier, "fun RowScope.TableCell(")                              // bounded at TableHeaderCell
+        val (then, hug, fill) = listOf(".then(cellModifier)", ".hugColumn(TableCellHug.LocalTableCellsHugContent.current)",
+            ".fillMaxHeight()").map { cell.indexOf(it) }                                    // -1 = the link is gone
+        assertTrue("TableCell lacks a link: then=$then hug=$hug fill=$fill", minOf(then, hug, fill) >= 0)
+        assertTrue("TableCell is not weight → hug → fillMaxHeight: $then/$hug/$fill", then < hug && hug < fill)
+    }
+
+    @Test
+    fun hugColumnSource_enabledBranchReadsMaxContent_neverMin() {
+        // D2's QUANTITY, CSS 2.1 §17.5.2.2 (room: each column gets its MAX-content width). On 006 Min = Max (an empty
+        // cell, a fixed 20-px td) and the identity pin sees only "a node", so S1's X3 (Max → Min) survived: pin the call.
+        val body = funBody(tableSource("TableCellHug.kt"), "fun Modifier.hugColumn(")       // the body, not its KDoc
+        val on = body.substringAfter("else with(IntrinsicChannel) {", "")                  // the ENABLED branch only
+        val max = on.indexOf("this@hugColumn.widthAtMaxIntrinsic(")                         // IntrinsicSize.Max, guarded
+        assertTrue("the enabled hug does not read max-content", max >= 0)
+        assertTrue("the read is not tagged CELL_HUG_REFUSAL", on.indexOf("refusalContext = TableCellHug.CELL_HUG_REFUSAL") > max)
+        assertTrue("hugColumn reads min-content", "widthAtMinIntrinsic" !in body && "IntrinsicSize.Min" !in body)
     }
 }
