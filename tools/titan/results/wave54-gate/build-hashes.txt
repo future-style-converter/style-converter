@@ -30,3 +30,9 @@ android  MATCH
 ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=38ea8fdca14f780335b00c9d38b459b2e5d348b7  installed .app digest=38ea8fdca14f780335b00c9d38b459b2e5d348b7
 ios      MATCH
 
+== wave54-final corpus launch (closing gate, 30 sections; tree ef20c977 = 2d068100 + the sweep/restamp commit, code identical to the probe tree 206d71d9 minus CBB-android + the seeded baselines/docs) — 2026-10-09T09:03:43Z — HEAD ef20c977
+android  serial=emulator-5554  built app-debug.apk sha1=3e6173dfed43630590fe62cc6bc95ed877f0d656  installed base.apk sha1=3e6173dfed43630590fe62cc6bc95ed877f0d656
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=38ea8fdca14f780335b00c9d38b459b2e5d348b7  installed .app digest=38ea8fdca14f780335b00c9d38b459b2e5d348b7
+ios      MATCH
+

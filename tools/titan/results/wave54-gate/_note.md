@@ -119,3 +119,15 @@ row 5. After regeneration the geometry gate reads the probe as gating 30 / 30 PA
 (`stage2/probe-readout.restated.txt`; the proof that the amended rules fail on the tree that had the unit). The remaining 13 review sheets are read at the closing gate.
 Next: [W-L7] seeding on this tree, the single-writer sweep, the closing gate `wave54-final`.
 
+
+## Closing gate — `wave54-final` (2026-10-09 08:59 UTC → ; tree ef20c977; `tools/titan/gate-driver.sh wave54-final --skip-fixture-net`, then `rm -f /tmp/titan-device-pool/provisioned-*` + `--skip-corpus`)
+
+Pre-gate: the single-writer sweep on 2d068100 green on every suite (`sweep-landed.txt`; android-app re-run with `--rerun-tasks`
+after the first line came back UP-TO-DATE in 1 s), doc tables restamped (compose 3492 → 3486 = the 6 tests the CBB-android revert
+removed; tooling 2334 → 2340 = one tripwire test per seeded stem), `doc-staleness-check.sh` exit 0, committed as ef20c977 (the
+tree the gate builds from; code-identical to the probe tree 206d71d9 minus CBB-android, plus the 18 seeded PNGs and doc lines).
+Host before launch: load1 2.28, free+inactive 3065 MB; the driver stopped our two gradle daemons and read load1 2.06 / 5262 MB.
+Provision rc=0 at 09:03:01 (emulator-5554 + the seed iPhone); installed-build hashes read at 09:03:43, right after `attempt 1
+starting` (`build-hashes.txt`): **android MATCH** (`3e6173df…` — a NEW apk vs the probe's `fa7cd266…`, as it must be: CBB-android
+left the Compose tree), **ios MATCH** (`38ea8fdc…` — byte-identical to the probe's .app digest, as it must be: no Swift source
+changed between 206d71d9 and ef20c977).
