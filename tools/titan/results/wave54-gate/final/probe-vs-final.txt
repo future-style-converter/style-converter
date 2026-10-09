@@ -1,0 +1,10 @@
+A/B  exclude=wave54-probe  include=wave54-final  sections=CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-pseudo,css-tables,css-text,css-text-decor,css-transforms,css-ui,css-values,css-writing-modes,filter-effects,selectors  platforms=web,ios,android
+compared 3527 cells: 8 differ (flip, or |Δ| ≥ 0.002), 3519 within threshold
+  flip P→f     android  P 0.9668  → f 0.9574  Δ-0.0094  css/filter-effects/backdrop-filter-nested-border-radius-clip-3.html
+  mover        android  f 0.4555  → f 0.4117  Δ-0.0438  css/css-position/position-absolute-semi-replaced-stretch-input.html
+  mover        android  P 1       → P 0.9649  Δ-0.0351  css/filter-effects/backdrop-filter-nested-border-radius-clip.html
+  mover        android  P 1       → P 0.9689  Δ-0.0311  css/filter-effects/backdrop-filter-nested-border-radius-clip-2.html
+  mover        android  f 0.4679  → f 0.4396  Δ-0.0283  css/css-position/position-absolute-semi-replaced-stretch-other.html
+  mover        android  P 0.9999  → P 0.977   Δ-0.0229  css/filter-effects/backdrop-filter-nested-border-radius-clip-4.html
+  mover        android  f 0.9843  → f 0.9739  Δ-0.0104  css/css-position/position-absolute-semi-replaced-stretch-button.html
+  mover        android  P 0.9966  → P 0.9869  Δ-0.0097  css/css-flexbox/abspos/abspos-autopos-htb-rtl.html

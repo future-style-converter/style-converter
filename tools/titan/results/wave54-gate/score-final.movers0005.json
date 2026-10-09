@@ -1,0 +1,1725 @@
+{
+ "prev": "wave54-open",
+ "cur": "wave54-final",
+ "totals": {
+  "prev": {
+   "web": {
+    "passing": 1232,
+    "measured": 1372
+   },
+   "ios": {
+    "passing": 1125,
+    "measured": 1362
+   },
+   "android": {
+    "passing": 1115,
+    "measured": 1362
+   }
+  },
+  "cur": {
+   "web": {
+    "passing": 1243,
+    "measured": 1372
+   },
+   "ios": {
+    "passing": 1131,
+    "measured": 1362
+   },
+   "android": {
+    "passing": 1128,
+    "measured": 1362
+   }
+  }
+ },
+ "sections": {
+  "CSS2": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   }
+  },
+  "css-anchor-position": {
+   "prev": {
+    "web": {
+     "passing": 30,
+     "measured": 32
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 32
+    },
+    "android": {
+     "passing": 27,
+     "measured": 32
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 30,
+     "measured": 32
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 32
+    },
+    "android": {
+     "passing": 27,
+     "measured": 32
+    }
+   }
+  },
+  "css-backgrounds": {
+   "prev": {
+    "web": {
+     "passing": 26,
+     "measured": 29
+    },
+    "ios": {
+     "passing": 26,
+     "measured": 29
+    },
+    "android": {
+     "passing": 26,
+     "measured": 29
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 26,
+     "measured": 29
+    },
+    "ios": {
+     "passing": 26,
+     "measured": 29
+    },
+    "android": {
+     "passing": 26,
+     "measured": 29
+    }
+   }
+  },
+  "css-break": {
+   "prev": {
+    "web": {
+     "passing": 37,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 29,
+     "measured": 48
+    },
+    "android": {
+     "passing": 31,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 37,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 29,
+     "measured": 48
+    },
+    "android": {
+     "passing": 32,
+     "measured": 48
+    }
+   }
+  },
+  "css-cascade": {
+   "prev": {
+    "web": {
+     "passing": 36,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 41
+    },
+    "android": {
+     "passing": 36,
+     "measured": 41
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 37,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 41
+    },
+    "android": {
+     "passing": 36,
+     "measured": 41
+    }
+   }
+  },
+  "css-color": {
+   "prev": {
+    "web": {
+     "passing": 43,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 43,
+     "measured": 48
+    },
+    "android": {
+     "passing": 44,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 43,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 43,
+     "measured": 48
+    },
+    "android": {
+     "passing": 44,
+     "measured": 48
+    }
+   }
+  },
+  "css-contain": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 39,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   }
+  },
+  "css-counter-styles": {
+   "prev": {
+    "web": {
+     "passing": 40,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 28,
+     "measured": 37
+    },
+    "android": {
+     "passing": 28,
+     "measured": 37
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 40,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 28,
+     "measured": 37
+    },
+    "android": {
+     "passing": 28,
+     "measured": 37
+    }
+   }
+  },
+  "css-display": {
+   "prev": {
+    "web": {
+     "passing": 45,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 45,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   }
+  },
+  "css-flexbox": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 45,
+     "measured": 47
+    },
+    "android": {
+     "passing": 45,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 45,
+     "measured": 47
+    },
+    "android": {
+     "passing": 45,
+     "measured": 47
+    }
+   }
+  },
+  "css-gaps": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 48
+    },
+    "android": {
+     "passing": 46,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   }
+  },
+  "css-grid": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   }
+  },
+  "css-images": {
+   "prev": {
+    "web": {
+     "passing": 43,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 47
+    },
+    "android": {
+     "passing": 35,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 43,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 47
+    },
+    "android": {
+     "passing": 35,
+     "measured": 47
+    }
+   }
+  },
+  "css-lists": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   }
+  },
+  "css-masking": {
+   "prev": {
+    "web": {
+     "passing": 41,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 40,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   }
+  },
+  "css-multicol": {
+   "prev": {
+    "web": {
+     "passing": 45,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 43,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 43,
+     "measured": 48
+    }
+   }
+  },
+  "css-overflow": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 47
+    },
+    "android": {
+     "passing": 46,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 47
+    },
+    "android": {
+     "passing": 46,
+     "measured": 47
+    }
+   }
+  },
+  "css-position": {
+   "prev": {
+    "web": {
+     "passing": 36,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 41
+    },
+    "android": {
+     "passing": 33,
+     "measured": 41
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 37,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 41
+    },
+    "android": {
+     "passing": 33,
+     "measured": 41
+    }
+   }
+  },
+  "css-pseudo": {
+   "prev": {
+    "web": {
+     "passing": 33,
+     "measured": 42
+    },
+    "ios": {
+     "passing": 32,
+     "measured": 42
+    },
+    "android": {
+     "passing": 31,
+     "measured": 42
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 33,
+     "measured": 42
+    },
+    "ios": {
+     "passing": 32,
+     "measured": 42
+    },
+    "android": {
+     "passing": 31,
+     "measured": 42
+    }
+   }
+  },
+  "css-sizing": {
+   "prev": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 44,
+     "measured": 48
+    },
+    "android": {
+     "passing": 45,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 44,
+     "measured": 48
+    },
+    "android": {
+     "passing": 45,
+     "measured": 48
+    }
+   }
+  },
+  "css-tables": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 47
+    },
+    "android": {
+     "passing": 37,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 47
+    },
+    "android": {
+     "passing": 37,
+     "measured": 47
+    }
+   }
+  },
+  "css-text": {
+   "prev": {
+    "web": {
+     "passing": 35,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 48
+    },
+    "android": {
+     "passing": 34,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 39,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 39,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   }
+  },
+  "css-text-decor": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 31,
+     "measured": 48
+    },
+    "android": {
+     "passing": 29,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 31,
+     "measured": 48
+    },
+    "android": {
+     "passing": 29,
+     "measured": 48
+    }
+   }
+  },
+  "css-transforms": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 47
+    },
+    "android": {
+     "passing": 43,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 47
+    },
+    "android": {
+     "passing": 43,
+     "measured": 47
+    }
+   }
+  },
+  "css-ui": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 45,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   }
+  },
+  "css-values": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 40,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 40,
+     "measured": 48
+    }
+   }
+  },
+  "css-view-transitions": {
+   "prev": {
+    "web": {
+     "passing": 32,
+     "measured": 45
+    },
+    "ios": {
+     "passing": 27,
+     "measured": 46
+    },
+    "android": {
+     "passing": 29,
+     "measured": 46
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 32,
+     "measured": 45
+    },
+    "ios": {
+     "passing": 27,
+     "measured": 46
+    },
+    "android": {
+     "passing": 29,
+     "measured": 46
+    }
+   }
+  },
+  "css-writing-modes": {
+   "prev": {
+    "web": {
+     "passing": 36,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 30,
+     "measured": 48
+    },
+    "android": {
+     "passing": 27,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 36,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 30,
+     "measured": 48
+    },
+    "android": {
+     "passing": 27,
+     "measured": 48
+    }
+   }
+  },
+  "filter-effects": {
+   "prev": {
+    "web": {
+     "passing": 41,
+     "measured": 46
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 46
+    },
+    "android": {
+     "passing": 32,
+     "measured": 46
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 41,
+     "measured": 46
+    },
+    "ios": {
+     "passing": 37,
+     "measured": 46
+    },
+    "android": {
+     "passing": 36,
+     "measured": 46
+    }
+   }
+  },
+  "selectors": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   }
+  }
+ },
+ "gained": [
+  {
+   "sec": "css-break",
+   "test": "css/css-break/block-in-inline-015-print.html",
+   "platform": "android",
+   "prev": 0.9489,
+   "cur": 0.9986,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/scope-pseudo-element.html",
+   "platform": "web",
+   "prev": 0.9353,
+   "cur": 0.9629,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-contain",
+   "test": "css/css-contain/contain-content-003.html",
+   "platform": "android",
+   "prev": 0.9405,
+   "cur": 0.9967,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-contain",
+   "test": "css/css-contain/contain-content-011.html",
+   "platform": "android",
+   "prev": 0.9284,
+   "cur": 0.9849,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "android",
+   "prev": 0.94,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "ios",
+   "prev": 0.94,
+   "cur": 0.9993,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-filter-order.html",
+   "platform": "android",
+   "prev": 0.8406,
+   "cur": 0.9548,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-filter-order.html",
+   "platform": "ios",
+   "prev": 0.8578,
+   "cur": 0.9978,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-filter-order.html",
+   "platform": "web",
+   "prev": 0.8586,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-multicol",
+   "test": "css/css-multicol/balance-grid-container.html",
+   "platform": "web",
+   "prev": 0.9207,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-semi-replaced-stretch-other.html",
+   "platform": "web",
+   "prev": 0.941,
+   "cur": 0.9965,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/bidi/bidi-lines-001.html",
+   "platform": "android",
+   "prev": 0.8934,
+   "cur": 0.9629,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphenate-character-001.html",
+   "platform": "android",
+   "prev": 0.9301,
+   "cur": 0.9802,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphenate-character-001.html",
+   "platform": "ios",
+   "prev": 0.9287,
+   "cur": 0.9611,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphenate-character-001.html",
+   "platform": "web",
+   "prev": 0.935,
+   "cur": 0.985,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphenate-character-002.html",
+   "platform": "ios",
+   "prev": 0.9261,
+   "cur": 0.9534,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphenate-character-003.html",
+   "platform": "android",
+   "prev": 0.9292,
+   "cur": 0.9792,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphenate-character-003.html",
+   "platform": "ios",
+   "prev": 0.9337,
+   "cur": 0.957,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphenate-character-003.html",
+   "platform": "web",
+   "prev": 0.8812,
+   "cur": 0.9825,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphenate-character-004.html",
+   "platform": "android",
+   "prev": 0.905,
+   "cur": 0.9774,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphenate-character-004.html",
+   "platform": "web",
+   "prev": 0.9249,
+   "cur": 0.9832,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "platform": "web",
+   "prev": 0.9411,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-007.html",
+   "platform": "web",
+   "prev": 0.9036,
+   "cur": 0.9854,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-008.html",
+   "platform": "web",
+   "prev": 0.8943,
+   "cur": 0.9741,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-022.html",
+   "platform": "web",
+   "prev": 0.9442,
+   "cur": 0.9725,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-clip-rect.html",
+   "platform": "android",
+   "prev": 0.9315,
+   "cur": 0.9559,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-containing-block.html",
+   "platform": "android",
+   "prev": 0.7506,
+   "cur": 0.9977,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-containing-block.html",
+   "platform": "ios",
+   "prev": 0.7955,
+   "cur": 0.9987,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-edge-clipping.html",
+   "platform": "android",
+   "prev": 0.929,
+   "cur": 0.9533,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-paint-order.html",
+   "platform": "android",
+   "prev": 0.929,
+   "cur": 0.9533,
+   "prevPass": false,
+   "curPass": true
+  }
+ ],
+ "lost": [],
+ "movers": [
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-suffix.html",
+   "platform": "android",
+   "prev": 0.9547,
+   "cur": 0.989,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0343
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-suffix.html",
+   "platform": "ios",
+   "prev": 0.9802,
+   "cur": 0.9873,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0071
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-suffix.html",
+   "platform": "web",
+   "prev": 0.9818,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0182
+  },
+  {
+   "sec": "css-lists",
+   "test": "css/css-lists/counter-list-item.html",
+   "platform": "android",
+   "prev": 0.7307,
+   "cur": 0.785,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0543
+  },
+  {
+   "sec": "css-multicol",
+   "test": "css/css-multicol/balance-grid-container.html",
+   "platform": "ios",
+   "prev": 0.862,
+   "cur": 0.8735,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0115
+  },
+  {
+   "sec": "css-multicol",
+   "test": "css/css-multicol/column-height-009.html",
+   "platform": "android",
+   "prev": 0.742,
+   "cur": 0.848,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.106
+  },
+  {
+   "sec": "css-multicol",
+   "test": "css/css-multicol/column-height-009.html",
+   "platform": "ios",
+   "prev": 0.8072,
+   "cur": 0.8804,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0732
+  },
+  {
+   "sec": "css-multicol",
+   "test": "css/css-multicol/column-height-009.html",
+   "platform": "web",
+   "prev": 0.8827,
+   "cur": 0.9092,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0265
+  },
+  {
+   "sec": "css-overflow",
+   "test": "css/css-overflow/line-clamp/block-ellipsis-002.html",
+   "platform": "ios",
+   "prev": 0.9813,
+   "cur": 0.9928,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0115
+  },
+  {
+   "sec": "css-overflow",
+   "test": "css/css-overflow/line-clamp/block-ellipsis-002.html",
+   "platform": "web",
+   "prev": 0.9868,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0132
+  },
+  {
+   "sec": "css-overflow",
+   "test": "css/css-overflow/line-clamp/block-ellipsis-004.html",
+   "platform": "web",
+   "prev": 0.9737,
+   "cur": 0.998,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0243
+  },
+  {
+   "sec": "css-overflow",
+   "test": "css/css-overflow/line-clamp/block-ellipsis-005.html",
+   "platform": "web",
+   "prev": 0.9735,
+   "cur": 0.9981,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0246
+  },
+  {
+   "sec": "css-overflow",
+   "test": "css/css-overflow/line-clamp/block-ellipsis-006.html",
+   "platform": "web",
+   "prev": 0.9735,
+   "cur": 0.9981,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0246
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/change-insets-inside-strict-containment-nested.html",
+   "platform": "android",
+   "prev": 0.9589,
+   "cur": 0.9967,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0378
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/change-insets-inside-strict-containment-nested.html",
+   "platform": "ios",
+   "prev": 0.9594,
+   "cur": 0.9974,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.038
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-semi-replaced-stretch-input.html",
+   "platform": "web",
+   "prev": 0.9596,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0404
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-relative-003.html",
+   "platform": "android",
+   "prev": 0.9589,
+   "cur": 0.9967,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0378
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-relative-003.html",
+   "platform": "ios",
+   "prev": 0.9594,
+   "cur": 0.9974,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.038
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-relative-004.html",
+   "platform": "android",
+   "prev": 0.9589,
+   "cur": 0.9967,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0378
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-relative-004.html",
+   "platform": "ios",
+   "prev": 0.9594,
+   "cur": 0.9974,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.038
+  },
+  {
+   "sec": "css-text-decor",
+   "test": "css/css-text-decor/text-decoration-color.html",
+   "platform": "android",
+   "prev": 0.6164,
+   "cur": 0.672,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0556
+  },
+  {
+   "sec": "css-text-decor",
+   "test": "css/css-text-decor/text-decoration-subelements-003.html",
+   "platform": "android",
+   "prev": 0.9084,
+   "cur": 0.916,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0076
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/bidi/bidi-lines-002.html",
+   "platform": "android",
+   "prev": 0.9534,
+   "cur": 0.9818,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0284
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphenate-character-002.html",
+   "platform": "web",
+   "prev": 0.92,
+   "cur": 0.9344,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0144
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphenate-character-004.html",
+   "platform": "ios",
+   "prev": 0.9134,
+   "cur": 0.9477,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0343
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-auto-input-non-widget-001.html",
+   "platform": "web",
+   "prev": 0.9873,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0127
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-010.html",
+   "platform": "web",
+   "prev": 0.9713,
+   "cur": 0.9843,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.013
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-011.html",
+   "platform": "web",
+   "prev": 0.9713,
+   "cur": 0.9843,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.013
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-013.html",
+   "platform": "web",
+   "prev": 0.9538,
+   "cur": 0.9725,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0187
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-014.html",
+   "platform": "web",
+   "prev": 0.9713,
+   "cur": 0.9843,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.013
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-015.html",
+   "platform": "web",
+   "prev": 0.9713,
+   "cur": 0.9843,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.013
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-016.html",
+   "platform": "web",
+   "prev": 0.9713,
+   "cur": 0.9843,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.013
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-017.html",
+   "platform": "web",
+   "prev": 0.9713,
+   "cur": 0.9843,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.013
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-018.html",
+   "platform": "web",
+   "prev": 0.9713,
+   "cur": 0.9843,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.013
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-019.html",
+   "platform": "web",
+   "prev": 0.9713,
+   "cur": 0.9843,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.013
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-020.html",
+   "platform": "web",
+   "prev": 0.9599,
+   "cur": 0.9843,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0244
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-021.html",
+   "platform": "web",
+   "prev": 0.9599,
+   "cur": 0.9843,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0244
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-024.html",
+   "platform": "web",
+   "prev": 0.9599,
+   "cur": 0.9843,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0244
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-025.html",
+   "platform": "web",
+   "prev": 0.9599,
+   "cur": 0.9843,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0244
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/attr-style-sharing-1.html",
+   "platform": "web",
+   "prev": 0.9939,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0061
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/abspos/static-fixed-inside-abspos.html",
+   "platform": "android",
+   "prev": 0.9835,
+   "cur": 0.9967,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0132
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/abspos/static-fixed-inside-abspos.html",
+   "platform": "ios",
+   "prev": 0.9841,
+   "cur": 0.9974,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0133
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/abspos/static-inside-inline-block.html",
+   "platform": "web",
+   "prev": 0.9803,
+   "cur": 0.999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0187
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-border-radius-change.html",
+   "platform": "android",
+   "prev": 0.5977,
+   "cur": 0.6397,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.042
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-clip-rect.html",
+   "platform": "ios",
+   "prev": 0.956,
+   "cur": 0.9961,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0401
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-clip-rect.html",
+   "platform": "web",
+   "prev": 0.959,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.041
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-corner-shape-change.html",
+   "platform": "android",
+   "prev": 0.4904,
+   "cur": 0.5296,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0392
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-edge-clipping.html",
+   "platform": "ios",
+   "prev": 0.9578,
+   "cur": 0.9975,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0397
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-edge-clipping.html",
+   "platform": "web",
+   "prev": 0.9595,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0405
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-paint-order.html",
+   "platform": "ios",
+   "prev": 0.9578,
+   "cur": 0.9975,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0397
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-paint-order.html",
+   "platform": "web",
+   "prev": 0.9595,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0405
+  }
+ ],
+ "newlyMeasured": [],
+ "unmeasuredNow": [],
+ "missingSections": [],
+ "columnShorts": []
+}

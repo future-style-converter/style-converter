@@ -1139,6 +1139,16 @@ assert len(_rcp) == 1 and all(f'{k} {p}' in _rcp[0]['expect'] for k in _rc['keys
 assert all(_rcp[0]['expect'][f'{k} {p}'] == _rc['lineEndsWith'].lstrip('→ ') for k in _rc['keys'].values() for p in PLATS), 'retirement verdict string differs from the probe expect'
 
 _pd = probe_decisions()                     # None at planning: no unit has been reverted yet
+# ship fix (wave 54): a probe decision that withdraws a gating geometry key also withdraws the tally entries that key alone
+# certifies — TALLY above is the hand-written PLAN §1 list (asserted 37 + 2 BEFORE any decision); entries whose key now sits in
+# a probe's `withdrawn` map move to pictureCorrectTally.withdrawn, so the published full / part counts are the effective ones
+# (adjudicate.mjs reads no tally; the closing gate's cell review does — CBB-android: 6 'full' entries withdrawn, the three
+# abspos-autopos-ltr rows and nested-clip / -2 / -4, whose GATING keys the revert withdrew; 31 + 2 remain, of which the three
+# abspos-autopos-rtl rows carry report-class keys that read WRONG until their target is fixed, so 28 + 2 can print GEOMETRY OK).
+_wd_keys = {f"{os.path.basename(pr['cmd'].split()[1])} {k}" for l in lanes.values() for pr in l['geometryProbes'] for k in pr.get('withdrawn', {})}
+_tally_wd = [e for part in ('full', 'part') for e in TALLY[part] if e['key'] in _wd_keys]
+expectations['pictureCorrectTally'] = dict({p: [e for e in TALLY[p] if e['key'] not in _wd_keys] for p in ('full', 'part')},
+                                           withdrawn=_tally_wd, rule=expectations['pictureCorrectTally']['rule'])
 if _pd:
     expectations['probeDecisions'] = _pd
 # wave54-S1 should-fix 8 (L6 skeptic D4 was a row whose residue no list carried): the honesty list and the rows agree.
@@ -1246,7 +1256,8 @@ _rk = sum(len(pr.get('report', [])) for l in lanes.values() for pr in l['geometr
 _ak = sum(len(pr['expect']) for l in lanes.values() for pr in l['geometryProbes'])
 _wk = sum(len(pr.get('withdrawn', {})) for l in lanes.values() for pr in l['geometryProbes'])
 print(f'geometry keys: {_ak} = gating {_gk} + report {_rk} + control {_ak - _gk - _rk - _wk} + withdrawn {_wk}')
-print(f"picture-correct tally: {len(TALLY['full'])} in full + {len(TALLY['part'])} in part, each with its geometry key")
+print(f"picture-correct tally: {len(expectations['pictureCorrectTally']['full'])} in full + {len(expectations['pictureCorrectTally']['part'])} in part"
+      f" (+{len(_tally_wd)} withdrawn by probe decisions), each with its geometry key")
 if _pd:
     for d in _pd['reverted']:
         print(f"probe decision {d['lane']} {d['unit']}: withdrawn predictions {len(d['withdrawnPredictions'])}, demoted {d['demotedPredictions']}, "

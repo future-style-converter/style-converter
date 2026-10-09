@@ -100,8 +100,8 @@ OK on attempt 1, every column full.** Read-out in `stage1/` (the pre-registered 
   bidi-lines-002 android 0.9534 → **0.9818**; s-11-1-1b-006 android P 0.9944 → **P 0.9983**.
 - **Pictures, looked at** (`tools/titan/runs/wave54-pre/sections/…`): counter-suffix reads `foo .1 / bar .2 / foo .א / bar .ב` on
   Android, iOS and web — the root-owned marker runs land on their own rows on Compose this time (the Column no longer sizes
-  them; the plan's §2 L1 mechanism held); iOS rows 3–4 still show the Hebrew period before the letter (the pre-registered
-  "stays DEGENERATE rows 3–4"). The Android errata square is a single black square with no second cell.
+  them; the plan's §2 L1 mechanism held); iOS rows 3–4 still show the Hebrew period before the letter (pre-registered as "stays DEGENERATE rows 3–6" in
+  `expectations.stayDegenerateEvenIfPass`: rows 3–4 the Hebrew period, rows 5–6 the CJK marker offset; this look saw rows 3–4). The Android errata square is a single black square with no second cell.
 
 **Decisions (expectations `stage1Decision`): P KEPT · M′ KEPT · TB-android KEPT. No `REVERTED` entry; `plan-build.py` unchanged.**
 Stage 2 (`wave54-probe`, 26 sections) follows on the same tree.
@@ -131,3 +131,59 @@ Provision rc=0 at 09:03:01 (emulator-5554 + the seed iPhone); installed-build ha
 starting` (`build-hashes.txt`): **android MATCH** (`3e6173df…` — a NEW apk vs the probe's `fa7cd266…`, as it must be: CBB-android
 left the Compose tree), **ios MATCH** (`38ea8fdc…` — byte-identical to the probe's .app digest, as it must be: no Swift source
 changed between 206d71d9 and ef20c977).
+
+**Corpus half: 30 / 30 sections OK on attempt 1** (css-cascade 43/43/43, every other section 48/48/48; 08:59 → 10:19 UTC).
+**Read-out** (`final54-analysis.sh` = the pre-registered strings of `expectations.json` — `scoreOfRecord`, `scoreReadout`,
+`geometryGate.closingCmd`, `adjudicate`; outputs `score-final.json` / `score-final.movers0.txt`, `score-final.movers0005.json` /
+`score-final.txt`, `geometry-final.json` / `.out.txt`, `adjudicate-final.txt`, `control-final-union.*`, `final/`):
+- **Score** wave54-open → wave54-final: web 1232/1372 → **1243/1372**, iOS 1125/1362 → **1131/1362**, Android 1115/1362 →
+  **1128/1362** — **gained 30** (web 11 · iOS 6 · Android 13), **lost 0**, newly measured 0, unmeasured-now 0, **movers 51** at
+  |Δ| ≥ 0.005 (none downward); the `--movers 0` record lists 4066 cells with any Δ (the natives' 1–2 px font drift class).
+- **Geometry gate** rc 0: 185 keys — gating **30 / 30 PASS**, control **112 / 112 PASS**, report 27 / 36 (the 9 FAILs are the
+  pre-registered "expected WRONG until the target is fixed" rows: `compose-wpt-content-box-cb` abspos-autopos-htb/vlr/vrl-rtl
+  android, `ua-heading-face` text-decoration-inset-005/-006/-014 ios + android), withdrawn 7 (CBB-android's keys, FAIL: the unit
+  is off the tree — as they must).
+- **Adjudicate** rc 0 — **R1–R5 hold**: R1 lost 0 · R2 denominator unmoved · R3 no missing section / short column · R4 gating
+  predictions 27, missed 0 · R5 must-not-move 669, moved 0 · R6 **retired 8** hyphenate-character cells from
+  degenerateByConstruction (U1 + U2 + U3 on the tree and `hyphenate-character.geometry.py` "→ GEOMETRY OK" on each) — they are gains.
+  The restated L3 iOS rows: `hyphenate-character-001 ios` P 0.9611 and `-003 ios` P 0.957 — equal to the probe to 4 decimals
+  (the must-not-fall clause of §10 item 7 ¶2 holds; read by hand — `adjudicate.mjs` has no reader for it, a lesson).
+- **probe-readout** over the full gate: rule 1 fired 0 · rule 2 fired 0 · rule 3 fired 0 · leak signals 0.
+- **Control HOLDS** (`control-check.mjs`, union carriers minus CBB-android's 14 withdrawn): web 1435 compared · 1395 identical ·
+  40 changed = 40 carriers; iOS 1416 identical · 19 carriers; Android 1404 identical · 31 carriers; wire 23 content-changed + 15
+  renumbered, 0 outside the plan's carriers.
+- **Probe → final differential** (`final/probe-vs-final.txt`, `ab-diff.mjs wave54-probe wave54-final --threshold 0.002`): 3527
+  cells compared, **8 differ — all eight CBB-android carriers returning toward their base values** (nested-clip-3 android P 0.9668
+  → f 0.9574 is the taken-back flip; nested-clip / -2 / -4, autopos-htb-rtl, the three semi-replaced-stretch rows), nothing else:
+  the closing tree reproduced the probe byte-for-byte everywhere the revert did not touch.
+- **Picture-correct tally** (`expectations.pictureCorrectTally`, regenerated at ship time so the revert's withdrawn gating keys
+  leave the list: 31 full + 2 part listed, 6 withdrawn): on the closing run **28 full + 2 part print "→ GEOMETRY OK"**; the three
+  abspos-autopos-rtl android rows stay listed with report-class keys that read WRONG until their target is fixed (not counted).
+- **Watchlist** (`watchlist-check.wave54-final.txt`): unmatched 0.
+- **Red-square census** (`final/red-square-census.txt`): PASSING red **156** (web 22 / ios 62 / android 72) over 86 tests, FAILING
+  red 59 — from wave53-final's 164 / 62 (eight passing red-square cells fewer: the three css-position pairs, static-fixed-inside-abspos ×2).
+- **Cell review** (`final/cell-review.json`; every row of the 5 gained + 9 mover sheets looked at, four rows at 2× crops, then an
+  adversarial second reader on 29 cells — every non-FAITHFUL label and every pass under 0.975, `final/cell-review.second-reader.json`):
+  gains **FAITHFUL 26 · DEGENERATE 4** (all four pre-registered in `stayDegenerateEvenIfPass`, not counted as earned:
+  scope-pseudo-element web — bullets for the "M" markers and the B/Foo wrap; contain-content-011 android — "25" for "17";
+  semi-replaced-stretch-other web — "abel"; hyphenate-character-002 ios — emergency breaks); movers **FAITHFUL 36** (eight
+  DEGENERATE → faithful: the red squares under the green ones are gone on the three css-position pairs and static-fixed-inside-abspos ×2),
+  **DEGENERATE 4** (pre-registered: counter-suffix android rows 5–6 / ios rows 3–6, block-ellipsis-002 ios, bidi-lines-002 android),
+  **HONEST_FAIL 11** (still f, none moved down). Second readers: 28 agree, 1 disagreement — `hyphenate-character-004 ios` f 0.9477
+  has a FAITHFUL picture (every break and "/-/" string as the ref; the iOS monospace U+002D glyph is narrower) — a prediction MISS
+  (the plan said P ≈0.979), recorded as such. Two residues the readers found for the BACKLOG: backdrop-filter-clip-rect android's
+  416 px of red-under-blue paint order (outside the test's condition), and clip-path-filter-order android's pass not exercising the
+  clip/filter order (the gain was the text block).
+
+**Fixture-net half** (10:21 → 10:44 UTC; `--skip-corpus`): installed-build read at 10:25:53 right after `provision rc=0` —
+android MATCH on the same apk as the corpus launch, ios "built .app digest=MISSING" — the pre-registered race exactly (`test-all.sh`
+had already rebuilt the .app; the installed digest is the corpus launch's `38ea8fdc…`); annotated in `build-hashes.txt`, the
+record of value stays the corpus launch's block. Result: **exit 0 on all 9 gate fixtures** (`tools/titan/runs/wave54-final/gate-driver/fixture-net.log`): visual-test "no regressions vs
+baseline (327 platform-comparisons ran)", filter-sepia-amounts exit 0, the six gate-only combination fixtures exit 0 with 0 oracle
+violations (24 checks · 2 waived / 12 / 12 / 12 / 9 / 15), and **all-then-color against its committed baselines for the first time
+at a closing gate: "no regressions vs baseline (18 platform-comparisons ran)", 12 oracle checks, 0 violations** — obligation 0(e)
+discharged on device.
+
+**A/B arms** (`ab-arms54.sh`: each arm = HEAD minus one unit on a throwaway branch, devices re-provisioned, one section as
+`wave54-ab-<arm>`, installed-build read after `attempt 1 starting`, read ARM FIRST with `ab-diff.mjs <arm> wave54-final
+--threshold 0.002 --platforms <arm.platforms>` so Δ = final − arm is the dropped unit's share): ARMS_RESULT

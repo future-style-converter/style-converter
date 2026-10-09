@@ -34,7 +34,7 @@
 //
 // NEGATIVE CONTROL (proof of teeth), executed 2026-09-16 on campaign/wave51-labels HEAD
 // 8c4ad393 — the PRE-refresh baselines, label still INSIDE the box at its content-box
-// origin: 130/136 stem tests red, every one on (i) (111 stems in band-identical mode,
+// origin: 130/130 stem tests red, every one on (i) (111 stems in band-identical mode,
 // 19 in glyph-mask mode = the design's 19-stem band-paint list; 6 of those 19 — 024,
 // 027, 032, 037, 082, 098 — also red on (iii), the under-glyph paint differing ×3).
 // Run: 136 tests, 6 pass (geometry + synthetic controls), 130 fail. This file goes

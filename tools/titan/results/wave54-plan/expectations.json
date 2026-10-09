@@ -4684,18 +4684,6 @@
     "key": "oof-containing-block.geometry.py position-relative-003 android"
    },
    {
-    "cell": "css-flexbox/abspos/abspos-autopos-htb-ltr.html android",
-    "key": "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-htb-ltr android"
-   },
-   {
-    "cell": "css-flexbox/abspos/abspos-autopos-vlr-ltr.html android",
-    "key": "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vlr-ltr android"
-   },
-   {
-    "cell": "css-flexbox/abspos/abspos-autopos-vrl-ltr.html android",
-    "key": "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vrl-ltr android"
-   },
-   {
     "cell": "css-flexbox/abspos/abspos-autopos-htb-rtl.html android",
     "key": "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-htb-rtl android"
    },
@@ -4706,18 +4694,6 @@
    {
     "cell": "css-flexbox/abspos/abspos-autopos-vrl-rtl.html android",
     "key": "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vrl-rtl android"
-   },
-   {
-    "cell": "filter-effects/backdrop-filter-nested-border-radius-clip.html android",
-    "key": "compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip android"
-   },
-   {
-    "cell": "filter-effects/backdrop-filter-nested-border-radius-clip-2.html android",
-    "key": "compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-2 android"
-   },
-   {
-    "cell": "filter-effects/backdrop-filter-nested-border-radius-clip-4.html android",
-    "key": "compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-4 android"
    },
    {
     "cell": "css-ui/box-sizing-010.html web",
@@ -4784,6 +4760,32 @@
    {
     "cell": "css-counter-styles/counter-suffix.html android",
     "key": "rtl-marker-bake.geometry.py [M] counter-suffix android"
+   }
+  ],
+  "withdrawn": [
+   {
+    "cell": "css-flexbox/abspos/abspos-autopos-htb-ltr.html android",
+    "key": "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-htb-ltr android"
+   },
+   {
+    "cell": "css-flexbox/abspos/abspos-autopos-vlr-ltr.html android",
+    "key": "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vlr-ltr android"
+   },
+   {
+    "cell": "css-flexbox/abspos/abspos-autopos-vrl-ltr.html android",
+    "key": "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vrl-ltr android"
+   },
+   {
+    "cell": "filter-effects/backdrop-filter-nested-border-radius-clip.html android",
+    "key": "compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip android"
+   },
+   {
+    "cell": "filter-effects/backdrop-filter-nested-border-radius-clip-2.html android",
+    "key": "compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-2 android"
+   },
+   {
+    "cell": "filter-effects/backdrop-filter-nested-border-radius-clip-4.html android",
+    "key": "compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-4 android"
    }
   ],
   "rule": "a cell is counted picture-correct at the closing gate ONLY when its key prints \"→ GEOMETRY OK\" on the closing run (geometry-gate.py); a pass whose key is not OK stays DEGENERATE and is not counted"

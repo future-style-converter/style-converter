@@ -1844,7 +1844,8 @@ expected WRONG). Three decisions, each with its picture looked at:
    android` printed GEOMETRY WRONG: green (36,36,215,115) vs ref (36,36,235,135). The base was (36,36,195,95) with 4360 px of fail
    ink — so the unit IMPROVED the picture (no inverted region, 160×60 → 180×80) but a 20-px source remains on both axes; its
    P 0.9668 (≥ the 0.96 floor) would have been exactly the degenerate pass the geometry gate exists to refuse (gained-05 row 6).
-   Taken back with it: nested-clip-2 android P 0.9689 → 1, the six abspos-autopos android movers (P either way), the three
+   Taken back with it: nested-clip-2 android P 0.9689 → 1, the abspos-autopos android rows (four of the six moved at the probe —
+   `vlr-rtl` / `vrl-rtl` and `flex-gap-decorations-006` read Δ 0; P either way), the three
    semi-replaced-stretch android up-or-stay rows (f either way). `REVERTED` in `plan-build.py` withdraws its 14 predictions and
    7 geometry keys and its 14 Android capture carriers; the closing control treats a change on them as a leak. Residue for the
    BACKLOG: the remaining 20 px (the nested clip's second border band is the suspect) with the probe picture as evidence.
@@ -1859,9 +1860,11 @@ expected WRONG). Three decisions, each with its picture looked at:
    row is the picture-correctness gate — floors on geometry-gated rows should be the pass threshold.
 3. **`block-ellipsis-002 android` control restated.** The plan had pinned the BASE picture's line (`GEOMETRY WRONG (2 bands vs ref
    3)`) as a "must stay" control although the capture is a registered U3 carrier; U3 removed the stray blank line and the Android
-   picture now has the reference's three lines (movers-02 row 5: `Line 1 / Line 2 / Line 3…`), band 3's right edge x67 vs ref x77
+   picture now has the reference's three lines (`stage2/geometry-all.txt` line 48; the cell's Δ +0.0012 is under the 0.005 sheet
+   threshold, so it has no stage-2 sheet row — `movers-02 row 5` is the WEB cell), band 3's right edge x67 vs ref x77
    being the Android "…" glyph width. P 0.9884 → 0.9896. The control's line is restated to the measured one; not a regression.
-   (A control pinned on a wrong picture is a plan defect the three skeptic rounds did not catch — BACKLOG lesson.)
+   (A control pinned on a wrong picture is a plan defect; plan-skeptic round 2 HAD flagged it as nit R2-N2 and both fix passes
+   deferred it — BACKLOG lesson: a skeptic finding against a gate instrument is fixed before the probe that reads it.)
 
 Everything else held as pre-registered: U3b's probe-decided rows PASS (kept); L5 U1-android `block-in-inline-015-print android`
 f 0.9489 → P 0.9986 (geometry OK); L6 RS `box-sizing-007/-008/-022` web f → P 0.9854 / 0.9741 / 0.9725 and
