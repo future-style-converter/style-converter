@@ -16,7 +16,7 @@ the full history lives in git history.
 - **Visual harness** — `./test-all.sh` renders any fixture on all three
   platforms and compares captures with SSIM;
   `BASELINE=1` gates against the committed baseline PNGs in
-  `tools/visual/baseline/` — **390** (130 components × 3 platforms).
+  `tools/visual/baseline/` — **408** (136 components × 3 platforms).
   History behind that number: this line read 363 until the retro; PR #126
   added 63 control-fixture baselines (426), and the retro deleted the 36
   orphaned `AR_*` captures (12 per platform) whose fixture no longer
@@ -2675,7 +2675,7 @@ gate (predictions withdrawn, cells held to must-not-move, carriers
 withdrawn) and shown to fail on the probe tree itself. Every flipped or
 moved cell was looked at: 13 gains FAITHFUL, 11 movers FAITHFUL, 2 movers
 still failing as pre-registered (`hyphenate-character-001` / `-003`
-android: right breaks, wrong hyphen glyph). Fixture net exit 0 on all 9 gate fixtures. The all-then-color baselines seeded for that net were WITHDRAWN before the ship: the label-chrome tripwire (`tools/visual/label-chrome-tripwire.test.mjs`) found three of its six canvases without the harness label on ANY platform — a capture-frame defect the fixture exposes (its `all` reset reaches the chrome), so the fixture stays gate-only and the finding is queued. Suites on
+android: right breaks, wrong hyphen glyph). Fixture net exit 0 on all 9 gate fixtures. The all-then-color baselines seeded for that net were WITHDRAWN before the ship: the label-chrome tripwire (`tools/visual/label-chrome-tripwire.test.mjs`) found three of its six canvases without the harness label on ANY platform (437 / 369 / 293 glyph px ground, one count per stem name). Wave 54 (L7) traced the cause to the ORACLE, not the chrome: the three canvases are containers / a text root, which the capture contract (`docs/DYNAMIC_CAPTURE.md` §5) labels with NO chrome; the `all` reset never reaches the chrome on any platform. The tripwire learned the contract's "iff" and the baselines were seeded in wave 54, so the fixture stays gate-only and the finding is queued. Suites on
 the shipped tree: converter 551 · web runtime 1369 · web-harness 330 ·
 compose 3428 · android-harness 168 · swiftui 2192 · tooling 2291 ·
 ios-harness XCTest 30/30 · IR conformance valid. Lessons that outlive the
