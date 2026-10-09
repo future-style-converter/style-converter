@@ -22,7 +22,7 @@
 // import it — so this file compiles on a tree without the seam.
 
 import type { ReactNode } from 'react';
-// The engine entry point the gallery already uses for the body-root (GAP 2):
+// The runtime entry point the gallery already uses for the body-root (GAP 2):
 // the body's declared `white-space` is read in the same CSS spelling that
 // renderChildSeparator reads from `ctx.styles`.
 import { buildStyles } from '@style-converter/web/core/renderer/StyleBuilder';
