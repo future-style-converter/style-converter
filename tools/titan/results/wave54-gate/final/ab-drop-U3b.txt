@@ -1,0 +1,14 @@
+A/B  exclude=wave54-ab-drop-U3b  include=wave54-final  sections=css-text  platforms=web,ios,android
+compared 144 cells: 12 differ (flip, or |Δ| ≥ 0.002), 132 within threshold
+  flip f→P     android  f 0.9456  → P 0.9774  Δ+0.0318  css/css-text/hyphens/hyphenate-character-004.html
+  flip P→f     ios      P 0.9742  → f 0.9477  Δ-0.0265  css/css-text/hyphens/hyphenate-character-004.html
+  mover        web      P 0.9534  → P 0.9832  Δ+0.0298  css/css-text/hyphens/hyphenate-character-004.html
+  mover        android  P 0.956   → P 0.9792  Δ+0.0232  css/css-text/hyphens/hyphenate-character-003.html
+  mover        android  P 0.9594  → P 0.9802  Δ+0.0208  css/css-text/hyphens/hyphenate-character-001.html
+  mover        web      P 0.9617  → P 0.9825  Δ+0.0208  css/css-text/hyphens/hyphenate-character-003.html
+  mover        ios      P 0.9758  → P 0.957   Δ-0.0188  css/css-text/hyphens/hyphenate-character-003.html
+  mover        web      P 0.9665  → P 0.985   Δ+0.0185  css/css-text/hyphens/hyphenate-character-001.html
+  mover        ios      P 0.9778  → P 0.9611  Δ-0.0167  css/css-text/hyphens/hyphenate-character-001.html
+  mover        ios      P 0.9692  → P 0.9534  Δ-0.0158  css/css-text/hyphens/hyphenate-character-002.html
+  mover        web      f 0.9299  → f 0.9344  Δ+0.0045  css/css-text/hyphens/hyphenate-character-002.html
+  mover        android  f 0.9219  → f 0.9249  Δ+0.003  css/css-text/hyphens/hyphenate-character-002.html

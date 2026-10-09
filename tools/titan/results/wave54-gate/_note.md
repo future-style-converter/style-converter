@@ -128,8 +128,9 @@ removed; tooling 2334 → 2340 = one tripwire test per seeded stem), `doc-stalen
 tree the gate builds from; code-identical to the probe tree 206d71d9 minus CBB-android, plus the 18 seeded PNGs and doc lines).
 Host before launch: load1 2.28, free+inactive 3065 MB; the driver stopped our two gradle daemons and read load1 2.06 / 5262 MB.
 Provision rc=0 at 09:03:01 (emulator-5554 + the seed iPhone); installed-build hashes read at 09:03:43, right after `attempt 1
-starting` (`build-hashes.txt`): **android MATCH** (`3e6173df…` — a NEW apk vs the probe's `fa7cd266…`, as it must be: CBB-android
-left the Compose tree), **ios MATCH** (`38ea8fdc…` — byte-identical to the probe's .app digest, as it must be: no Swift source
+starting` (`build-hashes.txt`): **android MATCH** (`3e6173df…` — a new apk sha1 vs the probe's `fa7cd266…`; CBB-android had left the Compose tree, but
+the apk sha1 turned out not to be build-reproducible — see the A/B-arm block of `build-hashes.txt` — so built == installed MATCH is
+the evidence here, not the change of value), **ios MATCH** (`38ea8fdc…` — byte-identical to the probe's .app digest, as it must be: no Swift source
 changed between 206d71d9 and ef20c977).
 
 **Corpus half: 30 / 30 sections OK on attempt 1** (css-cascade 43/43/43, every other section 48/48/48; 08:59 → 10:19 UTC).
@@ -186,4 +187,23 @@ discharged on device.
 
 **A/B arms** (`ab-arms54.sh`: each arm = HEAD minus one unit on a throwaway branch, devices re-provisioned, one section as
 `wave54-ab-<arm>`, installed-build read after `attempt 1 starting`, read ARM FIRST with `ab-diff.mjs <arm> wave54-final
---threshold 0.002 --platforms <arm.platforms>` so Δ = final − arm is the dropped unit's share): ARMS_RESULT
+--threshold 0.002 --platforms <arm.platforms>` so Δ = final − arm is the dropped unit's share): 
+- **drop-W1** (css-text, web; arm tree 4802e8f4): 48 cells compared, **1 differs** — `hyphens-out-of-flow-002 web f 0.9411 → P 1`
+  (Δ +0.0589): the flip is W1's alone, the other 47 web cells within 0.002 (`final/ab-drop-W1.txt`).
+- **drop-M′** (css-counter-styles, 3 platforms; arm tree d3b3c445): 122 cells compared, **3 differ** — all three `counter-suffix`
+  cells: web P 0.9818 → P 1, android P **0.9815** → P 0.989, ios P 0.9802 → P 0.9873; the android arm value is the plan's predicted
+  "≈0.9815 with P alone" exactly, so M′ is the +0.0075 that puts the RTL markers on the page and P the padding under it; 119 other
+  cells within 0.002 (`final/ab-drop-Mprime.txt`).
+- **drop-U3b** (css-text, 3 platforms; arm tree 286f4740): 144 cells compared, **12 differ**, all `hyphenate-character` — U3b lifts
+  web and Android (`-004 android f 0.9456 → P 0.9774` is U3b's flip; `-001/-003 web +0.019/+0.021`, `-001/-003 android +0.021/+0.023`,
+  `-002 web/android +0.005/+0.003` still f) and **costs iOS**: `-001 ios 0.9778 → 0.9611`, `-003 ios 0.9758 → 0.957`, `-002 ios 0.9692
+  → 0.9534`, and **`-004 ios P 0.9742 → f 0.9477`** — the one hyphenate-character prediction miss of the gate is U3b's (without it the
+  cell is P and near the plan's ≈0.979). The plan's `abArms` expectation ("iOS unchanged or up" when U3b is dropped) read it this way;
+  the magnitude — a P→f on -004 ios — is the honest finding: U3b trades one iOS pass for one Android pass and three ~0.02 lifts
+  elsewhere, with the iOS pictures still faithful (second reader) and only line positions drifting 1–2 px. BACKLOG item: make U3b's
+  host line box platform-aware on iOS (`final/ab-drop-U3b.txt`).
+- **Installed-build records of the arms**: every arm printed built == installed MATCH on both platforms (ios digest identical to the
+  corpus launch's on all three), but the runner appended the blocks on the arm branch and the tree restore discarded them — the
+  reconstructed block in `build-hashes.txt` says exactly what survived; a runner defect → lesson (records are written after the
+  tree is restored, or outside the tree and copied in).
+
