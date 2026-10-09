@@ -115,6 +115,7 @@ Rules: rule 3 fired on two L3 iOS rows (restated — PLAN §10 item 7 ¶2); rule
 (**reverted**, `8deddc19` — ¶1); one geometry control mis-registered on a base picture (restated — ¶3). Pictures looked at for
 the three decisions: `stage2/sheets-gained/gained-03.png` rows 2 / 6, `gained-05.png` row 6, `stage2/sheets-movers/movers-02.png`
 row 5. After regeneration the geometry gate reads the probe as gating 30 / 30 PASS · control 112 / 112 PASS, and
-`probe-readout.mjs` fires nothing (`stage2/probe-readout.restated.txt`). The remaining 13 review sheets are read at the closing gate.
+`probe-readout.mjs` fires no revert rule and reports 11 leak signals = CBB-android's withdrawn carriers on the probe tree
+(`stage2/probe-readout.restated.txt`; the proof that the amended rules fail on the tree that had the unit). The remaining 13 review sheets are read at the closing gate.
 Next: [W-L7] seeding on this tree, the single-writer sweep, the closing gate `wave54-final`.
 

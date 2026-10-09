@@ -1870,5 +1870,7 @@ L4 OOF `contain-content-003 / -011` android f → P 0.9967 / 0.9849 (011 degener
 cells, `backdrop-filter-containing-block` ios / android f 0.80 / 0.75 → P 0.9987 / 0.9977; L4 GAP `flex-gap-decorations-033` ios /
 android f 0.94 → P 0.9993 / 1; L3 `clip-path-filter-order` ×3, `balance-grid-container` web, the four `block-ellipsis` web rows,
 `hyphenate-character-001/-003/-004` web + android, `-004 ios` f → f 0.9477 (undirected). With the restated expectations the
-geometry gate reads the probe as **gating 30 / 30 PASS, control 112 / 112 PASS**, and `probe-readout.mjs` fires no rule.
+geometry gate reads the probe as **gating 30 / 30 PASS, control 112 / 112 PASS**, and `probe-readout.mjs` fires no revert rule — it
+reports **11 leak signals, all CBB-android's withdrawn carriers** (the probe tree still HAD the unit): the same proof-by-failure wave 53
+used for its reverts, and the reading the closing gate must turn to 0.
 
