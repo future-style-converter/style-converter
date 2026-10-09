@@ -25,7 +25,8 @@
  * predicate guarantees it paints nothing there or anywhere.
  *
  * STATED LOSSES (never silent: the caller counts every join as
- * RunsPlacement.joinedOutOfFlowMembers, the web twin of Compose's
+ * RunsPlacement.joinedOutOfFlowMembers and resolveRuns warns it on the
+ * `[InlineRuns]` console.warn channel — the web twin of Compose's
  * Folded.droppedOutOfFlowMembers, which goes further and drops the member):
  *   - the member's accessible text and its rect follow the word's end, not
  *     its source slot (a reader deviation from spec 03 §4.1 rule 1);

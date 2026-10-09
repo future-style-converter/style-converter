@@ -28,8 +28,10 @@
 //   W1-m5 widened to "any abspos" (the Color/other-property arms off) → (e) red
 //   W1-m6 NodeRenderer paints at the wire slot (no hyphensAuto passed)→ (f) red
 //   W1-m7 predicate drift: alpha read from `srgb.alpha`               → (g) red
+// S1 fix pass (wave54-web-tail/_note.md "## S1 fix pass"): S1-m1 NodeRenderer `{ hyphensAuto: true }` (SK6-w7) and
+// S1-m2 `!== 'manual'` (SK6-w8) → (h) red; S1-m3 the join warn deleted, S1-m4 warned on 0 joins → (i) red
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { NodeRenderer } from '../../src/renderer/NodeRenderer';
 import { resolveRuns } from '../../src/renderer/InlineRuns';
@@ -65,6 +67,11 @@ const withBox4Runs = (runs: unknown[]) =>
   DOC002.map((c) => (c.id === 'wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289'
     ? { ...c, meta: { ...(c.meta as object), runs } } : c));
 const M4 = { child: 'hyphens__hyphens-out-of-flow-002__4__0' };
+/** Markup of the composed host `suffix` through the PRODUCTION path (NodeRenderer reads the host's own hyphens). */
+const markup = (components: unknown[], suffix: string) => renderToStaticMarkup(<NodeRenderer node={host(components, suffix)} />);
+// The join's breadcrumb (S1 S4) is a console.warn: muted per test so the run stays quiet; (i) reads the spy.
+beforeEach(() => { vi.spyOn(console, 'warn').mockImplementation(() => {}); });
+afterEach(() => { vi.restoreAllMocks(); });
 
 describe('W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6)', () => {
   it('(a) box 4 high|M|way → [text "highway", child], joined 1', () => {
@@ -144,6 +151,29 @@ describe('W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6)',
     expect(got.filter(Boolean)).toHaveLength(12);
     // Every one of the 12 is a <span>, so the tag ring agrees with the predicate here.
     expect(MEMBERS24.map((m) => joinsAcrossWord(leaf(m.component)))).toEqual(got);
+  });
+
+  it('(h) the PRODUCTION gate: NodeRenderer keeps manual / none / absent-hyphens hosts split (S1 S3)', () => {
+    // -001 box 4 verbatim (hyphens: manual, a P 1 must-not-move cell): the member stays at its wire slot.
+    expect(markup(DOC001_BOX4, '__4-275')).toMatch(/>high<span[^>]*>abspos<\/span>\u00ADway</);
+    // -002 box 4 with its host's Hyphens set to NONE, then removed (initial value `manual`, css-text-3 §5.4).
+    for (const data of ['NONE', null]) {
+      const doc = DOC002.map((c) => (c.id.endsWith('__4-289') ? { ...c, properties: (c.properties as Array<{ type: string }>)
+        .flatMap((q) => (q.type !== 'Hyphens' ? [q] : data ? [{ ...q, data }] : [])) } : c));
+      expect(markup(doc, '__4-289'), String(data)).toMatch(/>high<span[^>]*>abspos<\/span>way</);
+    }
+  });
+
+  it('(i) each join is warned once on the `[InlineRuns]` channel; a no-join host stays silent (S1 S4)', () => {
+    // Only this module's breadcrumbs (the StyleBuilder tracker shares console.warn).
+    const runsWarns = () => vi.mocked(console.warn).mock.calls.map((c) => String(c[0])).filter((m) => m.startsWith('[InlineRuns]'));
+    // Box 7 (member at the word edge) and -001 box 4 (manual): 0 joined, no breadcrumb.
+    markup(DOC002, '__7-295'); markup(DOC001_BOX4, '__4-275');
+    expect(runsWarns()).toEqual([]);
+    // Box 4 joins its one member: exactly one breadcrumb, naming the host and the count.
+    markup(DOC002, '__4-289');
+    expect(runsWarns()).toHaveLength(1);
+    expect(runsWarns()[0]).toContain('"wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289": 1 paint-inert out-of-flow member(s) moved');
   });
 });
 
