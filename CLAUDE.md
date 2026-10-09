@@ -288,12 +288,12 @@ Gradle commands need JDK 21):
 | suite | command | tests |
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 562 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1379 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3491 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1381 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3492 |
 | android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 169 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2212 |
 | web-harness (vitest) | `npm -w apps/web-harness run test` | 344 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 2329 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 2334 |
 | ios-harness app (XCTest — needs a simulator, so it is outside the device-less sweep) | `(cd apps/ios-harness && xcodebuild test -project StyleConverterTest.xcodeproj -scheme StyleConverterTestTests -destination 'platform=iOS Simulator,name=<a booted device>')` | 30 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
