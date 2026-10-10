@@ -16,7 +16,7 @@ for (const sec of fs.readdirSync(SD).sort()) {
     for (const c of comps) { const t = c.meta?.sourceTag; if (!TAGS.has(t)) continue;
       const addSize = !has(c, 'FontSize') && !has(c, 'Font'); const addBold = /^h/.test(t) && !has(c, 'FontWeight') && !has(c, 'Font');
       if (!addSize && !addBold) continue;
-      const k = `${sec}/${f.replace(/^wpt__[^_]+(?:-[^_]+)*__/, '').replace(/__/g, '/').replace(/\.json$/, '')}`;
+      const k = `${sec}/${f.replace(/^wpt__[^_]+__/, '') /* `[^_]+` already admits '-': the former `(?:-[^_]+)*` tail was redundant and backtracked exponentially (CodeQL, PR #153) */.replace(/__/g, '/').replace(/\.json$/, '')}`;
       (docs.get(k) ?? docs.set(k, []).get(k)).push(`${t}${addSize ? '+size' : ''}${addBold ? '+bold' : ''}${kidsOf(c).length ? `(${kidsOf(c).length} kids)` : ''}`); }
   }
 }

@@ -211,3 +211,18 @@ discharged on device.
   reconstructed block in `build-hashes.txt` says exactly what survived; a runner defect → lesson (records are written after the
   tree is restored, or outside the tree and copied in).
 
+## Post-gate CodeQL fix (2026-10-10, on the PR branch after the gate)
+
+CodeQL's default setup failed PR #153's summary check with **2 new high-severity alerts** in code this wave changed — both
+regex-backtracking findings, so they were fixed in code (never admin-merged over, per the standing rule): (1)
+`runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts` `alphaIsZero` — the decimal grammar `\d+\.?\d*` (an ambiguous split:
+polynomial on a long digit run that fails to match) is now `\d+(?:\.\d*)?`; (2) `tools/titan/results/wave54-plan/skeptic-r1/
+ua-census.mjs` — the key regex `[^_]+(?:-[^_]+)*` (exponential: `-` is already in `[^_]`) is now `[^_]+`. Both rewrites are the
+SAME LANGUAGE, proven by execution rather than asserted: alpha — all 1,111,111 strings of length ≤ 6 over `0 1 9 + - . e E x ␠`
+give identical `.test` results, 200k random strings too; key — all 335,911 strings of length ≤ 7 (dash runs ≤ 5, the old form
+being exponential on longer runs), 100k structured fuzz cases and all 1,435 real per-test-IR file names give identical
+`.replace` results, and the census script's output on `wave53-final` is byte-identical (13 lines) before and after; the new
+patterns run a 200,000-character attack string in 0.5 ms each. Suites after the edit: web runtime 1381/1381, `tsc --noEmit`
+clean, the W1 pin file 12/12. **The shipped web runtime therefore differs from the gate tree ef20c977 by this one
+semantics-preserving regex**; the captures were not re-run for it (a byte-identical language cannot move a pixel), and the
+wave-55 opening gate measures the shipped tree as always. A pre-push sweep of every regex on the PR's added lines (391 sites: NFA ambiguity check + timed attack strings in V8 / CPython; an independent refuter re-proved both rewrites on 19,173,961 and 1,398,101 exhaustive strings with a formal language argument) found no other exponential pattern; 12 quadratic/cubic regexes remain in wave54-* record scripts that read local files (outside CodeQL's remote threat model) and are left as the records they are.

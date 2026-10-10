@@ -83,7 +83,9 @@ function alphaIsZero(data: unknown): boolean {
   const raw = srgb.a;
   // NaN (absent / non-numeric) compares false below: absent alpha is opaque (css-color-4 §4.1).
   const a = typeof raw === 'number' ? raw
-    : (typeof raw === 'string' && /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(raw)) ? Number(raw) : NaN;
+    // The decimal grammar is written without an ambiguous split (`\d+(?:\.\d*)?`, not `\d+\.?\d*`): the same language, but a
+    // failing match over a long digit run no longer backtracks polynomially (CodeQL js/polynomial-redos on PR #153).
+    : (typeof raw === 'string' && /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(raw)) ? Number(raw) : NaN;
   return a <= 0;
 }
 
