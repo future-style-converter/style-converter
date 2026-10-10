@@ -1,0 +1,7 @@
+baseline: claim GREEN {'rtl:web': 'WRONG', 'lists:web': 'WRONG', 'lists:ios': 'WRONG'}
+MUT rtl-marker-bake.geometry.py (left-edge check disabled; mutated sha 484bd89d): claim RED {'rtl:web': 'OK', 'lists:web': 'WRONG', 'lists:ios': 'WRONG'}
+  restore: sha256 before 01da3224a9a34560 after 01da3224a9a34560 -> BYTE-EXACT; shared-tree file equal: True
+  re-run: claim GREEN {'rtl:web': 'WRONG', 'lists:web': 'WRONG', 'lists:ios': 'WRONG'}
+MUT lists-bakes.geometry.py (left-edge check disabled; mutated sha 32db967f): claim RED {'rtl:web': 'WRONG', 'lists:web': 'OK', 'lists:ios': 'OK'}
+  restore: sha256 before fd8004a431dc3b73 after fd8004a431dc3b73 -> BYTE-EXACT; shared-tree file equal: True
+  re-run: claim GREEN {'rtl:web': 'WRONG', 'lists:web': 'WRONG', 'lists:ios': 'WRONG'}

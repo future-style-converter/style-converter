@@ -1,0 +1,33 @@
+CSS2                 web      compared 48  identical 47  re-encoded  0  changed  1 (carriers 1)
+CSS2                 ios      compared 48  identical 47  re-encoded  0  changed  1 (carriers 1)
+CSS2                 android  compared 48  identical 46  re-encoded  0  changed  2 (carriers 2)
+css-counter-styles   web      compared 48  identical 47  re-encoded  0  changed  1 (carriers 1)
+css-counter-styles   ios      compared 48  identical 47  re-encoded  0  changed  1 (carriers 1)
+css-counter-styles   android  compared 48  identical 47  re-encoded  0  changed  1 (carriers 1)
+css-tables           web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-tables           ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-tables           android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-text             web      compared 48  identical 43  re-encoded  0  changed  5 (carriers 5)
+css-text             ios      compared 48  identical 44  re-encoded  0  changed  4 (carriers 4)
+css-text             android  compared 48  identical 42  re-encoded  0  changed  6 (carriers 6)
+total web: 192 compared · 185 identical · 0 re-encoded · 7 changed (7 carriers)
+total ios: 192 compared · 186 identical · 0 re-encoded · 6 changed (6 carriers)
+total android: 192 compared · 183 identical · 0 re-encoded · 9 changed (9 carriers)
+wire: 192 documents compared · 8 content-changed · 15 renumbered (ids only, explained by earlier carriers) · 0 outside the plan's wire carriers
+      renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-additive-symbols-setter-invalid  shift +6  by wpt__css-counter-styles__counter-suffix +6
+      renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-additive-symbols-setter  shift +6  by wpt__css-counter-styles__counter-suffix +6
+      renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-fallback-setter-invalid  shift +6  by wpt__css-counter-styles__counter-suffix +6
+      renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-fallback-setter  shift +6  by wpt__css-counter-styles__counter-suffix +6
+      renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-name-setter-invalid  shift +6  by wpt__css-counter-styles__counter-suffix +6
+      renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-name-setter  shift +6  by wpt__css-counter-styles__counter-suffix +6
+      renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-negative-setter-invalid  shift +6  by wpt__css-counter-styles__counter-suffix +6
+      renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-negative-setter  shift +6  by wpt__css-counter-styles__counter-suffix +6
+      renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-pad-setter-invalid  shift +6  by wpt__css-counter-styles__counter-suffix +6
+      renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-pad-setter  shift +6  by wpt__css-counter-styles__counter-suffix +6
+      renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter-invalid  shift +6  by wpt__css-counter-styles__counter-suffix +6
+      renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter  shift +6  by wpt__css-counter-styles__counter-suffix +6
+      renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-range-setter-invalid  shift +6  by wpt__css-counter-styles__counter-suffix +6
+      renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-range-setter  shift +6  by wpt__css-counter-styles__counter-suffix +6
+      renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-symbols-setter-invalid  shift +6  by wpt__css-counter-styles__counter-suffix +6
+
+CONTROL HOLDS: every changed capture and wire document is a carrier the plan named

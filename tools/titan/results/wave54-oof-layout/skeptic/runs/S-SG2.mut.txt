@@ -1,0 +1,11 @@
+label=S-SG2 file=runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/GapDecorationSegments.swift
+sha256 before=8f1bc461428dbf389b9606aad9e556fece485b79fda3902fb48a954c90051b7d mutated=756282e9f8d339d410d7a929d49af3d0f05b172289ee4e06398fb9f67851eae0 after=8f1bc461428dbf389b9606aad9e556fece485b79fda3902fb48a954c90051b7d restored=OK
+suite rc=65 (RED)
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.108 (0.222) seconds
+	 Executed 75 tests, with 3 failures (0 unexpected) in 5.859 (6.544) seconds
+	 Executed 75 tests, with 3 failures (0 unexpected) in 5.859 (6.545) seconds
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift:399: error: -[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingLinesPositionFullWidthRowRulesPaintedLast] : XCTAssertEqual failed: ("[]") is not equal to ("[(0.0, 45.0, 150.0, 10.0), (0.0, 95.0, 150.0, 10.0)]")
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift:402: error: -[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingLinesPositionFullWidthRowRulesPaintedLast] : XCTAssertEqual failed: ("Optional(false)") is not equal to ("Optional(true)")
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift:403: error: -[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingLinesPositionFullWidthRowRulesPaintedLast] : XCTAssertEqual failed: ("5") is not equal to ("7")
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingLinesPositionFullWidthRowRulesPaintedLast]' failed (0.003 seconds).
+** TEST FAILED **

@@ -1,0 +1,27 @@
+   L5-ua-heading-face       ua-heading-face.geometry.py                block-in-inline-015-print web                              PASS       [control: expected to stay PASS]
+   L5-ua-heading-face       ua-heading-face.geometry.py                block-in-inline-015-print ios                              PASS       [control: expected to stay PASS]
+!! L5-ua-heading-face       ua-heading-face.geometry.py                block-in-inline-015-print android                          FAIL       [GATING -> revert U1-android]
+     line: block-in-inline-015-print android bands [(23, 31, 17, 42), (42, 51, 17, 42), (61, 71, 17, 53), (80, 91, 17, 45)] → GEOMETRY WRONG (band height 9 vs ref 18 (y23))
+   L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-005 web                              PASS       [control: expected to stay PASS]
+ - L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-005 ios                              FAIL       [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-005 ios bands [(110, 130, 16, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 130, 16, 191)]))
+ - L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-005 android                          FAIL       [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-005 android bands [(110, 131, 17, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 131, 17, 191)]))
+   L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-006 web                              PASS       [control: expected to stay PASS]
+ - L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-006 ios                              FAIL       [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-006 ios bands [(110, 130, 16, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 130, 16, 194)]))
+ - L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-006 android                          FAIL       [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-006 android bands [(110, 131, 17, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 131, 17, 194)]))
+   L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-014 web                              PASS       [control: expected to stay PASS]
+ - L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-014 ios                              FAIL       [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-014 ios bands [(111, 121, 17, 133), (128, 137, 16, 84)] → GEOMETRY WRONG (line-1 band 11 px tall (< 20: the 2em face is missing))
+ - L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-014 android                          FAIL       [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-014 android bands [(111, 122, 17, 132), (127, 138, 16, 84)] → GEOMETRY WRONG (line-1 band 12 px tall (< 20: the 2em face is missing))
+   L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-011 web                              PASS       [control: expected to stay PASS]
+   L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-011 ios                              PASS       [control: expected to stay PASS]
+   L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-011 android                          PASS       [control: expected to stay PASS]
+
+geometry-gate wave53-final (base wave53-open): 15 keys — PASS 8 · FAIL 7 (gating 1) · UNMEASURED 0 · probe self-check failures 0
+  by class: gating 1 (PASS 0 FAIL 1) · control 8 (PASS 8 FAIL 0) · report 6 (PASS 0 FAIL 6) · withdrawn 0 (PASS 0 FAIL 0)
+revert rule 4 names: U1-android
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)

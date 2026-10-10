@@ -1,0 +1,7 @@
+[M5s-ua-step-writes-ink] file=runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAElementFontRule.swift sha256 before=97146660949bc1a01fc04b6208fc96cd121a10d2c80b2dc11704b7cbb851ebd9 mutated=62b01672067f6b3263f05276c5fb7e515f7f1a4c772a9cdb5f490c33cf6ff3aa
+[M5s-ua-step-writes-ink] red run rc=65
+	 Executed 25 tests, with 3 failures (0 unexpected) in 1.469 (1.664) seconds
+    RED: UAHeadingFoldGateTests.swift:168 testFoldVerdictIsInvariantUnderTheUAFace :: XCTAssertEqual failed: ("Optional(StyleConverterRuntime.InlineRunFlow.Folded(text: "the ultra-quick brown fox", adoptedHyphensMode: nil, droppedEmptyM
+[M5s-ua-step-writes-ink] restored sha256 after=97146660949bc1a01fc04b6208fc96cd121a10d2c80b2dc11704b7cbb851ebd9 BYTE-EXACT
+[M5s-ua-step-writes-ink] green run rc=0
+	 Executed 25 tests, with 0 failures (0 unexpected) in 0.055 (0.376) seconds

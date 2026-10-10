@@ -1,0 +1,17 @@
+ref           006 ref      square block solid 400/400 | stray ink 0 | red px 0 → GEOMETRY OK
+wave52-ship   006 web      square block solid 200/400 | stray ink 200 (x 24-43, rows 76-85) | red px 0 GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (200/400 black); 200 ink px outside the block)
+wave52-ship   006 ios      square block solid 300/400 | stray ink 80 (x 24-43, rows 52-55) | red px 0 GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (300/400 black); 80 ink px outside the block)
+wave52-ship   006 android  square block solid 300/400 | stray ink 80 (x 24-43, rows 52-55) | red px 0 GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (300/400 black); 80 ink px outside the block)
+wave53-open   006 web      square block solid 200/400 | stray ink 200 (x 24-43, rows 76-85) | red px 0 GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (200/400 black); 200 ink px outside the block)
+wave53-open   006 ios      square block solid 300/400 | stray ink 80 (x 24-43, rows 52-55) | red px 0 GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (300/400 black); 80 ink px outside the block)
+wave53-open   006 android  square block solid 300/400 | stray ink 80 (x 24-43, rows 52-55) | red px 0 GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (300/400 black); 80 ink px outside the block)
+wave53-probe  006 web      square block solid 400/400 | stray ink 0 | red px 0 → GEOMETRY OK
+wave53-probe  006 ios      square block solid 400/400 | stray ink 0 | red px 0 → GEOMETRY OK
+wave53-probe  006 android  square block solid 76/400 | stray ink 400 (x 44-63, rows 56-75) | red px 0 GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (76/400 black); 400 ink px outside the block)
+wave53-final  006 web      square block solid 400/400 | stray ink 0 | red px 0 → GEOMETRY OK
+wave53-final  006 ios      square block solid 400/400 | stray ink 0 | red px 0 → GEOMETRY OK
+wave53-final  006 android  square block solid 300/400 | stray ink 80 (x 24-43, rows 52-55) | red px 0 GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (300/400 black); 80 ink px outside the block)
+006 ref      square rows 56-75 (20) x 24-43 | red px 0
+006 web      square rows 56-75 (20) x 24-43 | red px 0
+006 ios      square rows 56-75 (20) x 24-43 | red px 0
+006 android  square rows 56-75 (20) x 24-63 | red px 0

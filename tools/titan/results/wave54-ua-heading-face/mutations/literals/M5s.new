@@ -1,0 +1,2 @@
+            out = substituting(out, type: "FontWeight", with: entry)
+            out = substituting(out, type: "Color", with: IRProperty(type: "Color", data: .object(["srgb": .object(["r": .double(1), "g": .double(0), "b": .double(0)])])))

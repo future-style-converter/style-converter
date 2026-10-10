@@ -1,0 +1,129 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test -scheme StyleConverterRuntime -destination "platform=macOS,variant=Mac Catalyst,arch=arm64" "-only-testing:StyleConverterRuntimeTests/UAElementFontRuleTests" "-only-testing:StyleConverterRuntimeTests/UAHeadingFoldGateTests"
+
+Resolve Package Graph
+2026-10-08 21:00:01.139 xcodebuild[31687:4339711] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+
+Resolve Package Graph
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  StyleConverterRuntime: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (4 targets)
+    Target 'StyleConverterRuntime-product' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntimeTests-product' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk /Users/dranak/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+    cd /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/.swiftpm/xcode
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -o /Users/dranak/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+
+PruneExplicitPrecompiledModules /Users/dranak/Library/Developer/Xcode/DerivedData/SDKExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+2026-10-08 21:00:21.988 xcodebuild[31687:4343850]  DVTAssertions: Warning in IDEFrameworks/IDEFoundation/Execution/LaunchSystem/IDELaunchSession.m:395
+Details:  setRunnablePIDWithDiagnostics:logSection:andCompletionHandler: called without a completion handler - blocking until diagnostics setup completes. Callers should migrate to using a completion handler for better performance.
+Object:   <IDELaunchSession: 0x76b3f02280>
+Method:   -setRunnablePIDWithDiagnostics:logSection:andCompletionHandler:
+Thread:   <NSThread: 0x76be9a9780>{number = 12, name = (null)}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+Test Suite 'Selected tests' started at 2026-10-08 21:00:23.038.
+Test Suite 'StyleConverterRuntimeTests.xctest' started at 2026-10-08 21:00:23.039.
+Test Suite 'UAElementFontRuleTests' started at 2026-10-08 21:00:23.039.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testBareH3TakesTheUAFace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testBareH3TakesTheUAFace]' passed (0.005 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testFontShorthandBlocksBothHalves]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testFontShorthandBlocksBothHalves]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingGatePredicate]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingGatePredicate]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingMultipliersMatchTheUASheet]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingMultipliersMatchTheUASheet]' passed (0.026 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingWithChildrenStandsDown]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingWithChildrenStandsDown]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testInheritedFontSizeIsSubstitutedInPlace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testInheritedFontSizeIsSubstitutedInPlace]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testInheritedSizeIsTheEmBase]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testInheritedSizeIsTheEmBase]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testMonospaceHeadingResolvesAgainstTheFixedDefault]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testMonospaceHeadingResolvesAgainstTheFixedDefault]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testOwnFontSizeAndWeightWin]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testOwnFontSizeAndWeightWin]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testProportionalHeadingResolvesAgainstSixteen]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testProportionalHeadingResolvesAgainstSixteen]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testStyleBuilderConsumesTheInjectedFace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testStyleBuilderConsumesTheInjectedFace]' passed (0.005 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testSupAndSubUseTheSmallerRatio]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testSupAndSubUseTheSmallerRatio]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testSupIsNotGatedByChildren]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testSupIsNotGatedByChildren]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntabledTagIsUnchanged]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntabledTagIsUnchanged]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntabledTagsAreInert]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntabledTagsAreInert]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntaggedComponentIsUnchanged]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntaggedComponentIsUnchanged]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testVerbatimBakedH1IsUntouched]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testVerbatimBakedH1IsUntouched]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testVerbatimLeafH1PaintsTheUAFace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testVerbatimLeafH1PaintsTheUAFace]' passed (0.002 seconds).
+Test Suite 'UAElementFontRuleTests' passed at 2026-10-08 21:00:23.175.
+	 Executed 18 tests, with 0 failures (0 unexpected) in 0.052 (0.136) seconds
+Test Suite 'UAHeadingFoldGateTests' started at 2026-10-08 21:00:23.250.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testFoldVerdictIsInvariantUnderTheUAFace]' started.
+[PropertyTracker] inline-run flow bail — member-prop:TextDecorationColor-divergence
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testFoldVerdictIsInvariantUnderTheUAFace]' passed (0.007 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset005FoldedHostTakesTheFace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset005FoldedHostTakesTheFace]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset006FoldedHostTakesTheFace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset006FoldedHostTakesTheFace]' passed (0.003 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset011BailingHostStandsDown]' started.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset011BailingHostStandsDown]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset014FoldedMonospaceHostTakesTwentySix]' started.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset014FoldedMonospaceHostTakesTwentySix]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testLeafHeadingApplies]' started.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testLeafHeadingApplies]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testNonHeadingWithChildrenKeepsTheOldFlag]' started.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testNonHeadingWithChildrenKeepsTheOldFlag]' passed (0.002 seconds).
+Test Suite 'UAHeadingFoldGateTests' passed at 2026-10-08 21:00:23.342.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.018 (0.092) seconds
+Test Suite 'StyleConverterRuntimeTests.xctest' passed at 2026-10-08 21:00:23.342.
+	 Executed 25 tests, with 0 failures (0 unexpected) in 0.070 (0.303) seconds
+Test Suite 'Selected tests' passed at 2026-10-08 21:00:23.342.
+	 Executed 25 tests, with 0 failures (0 unexpected) in 0.070 (0.304) seconds
+2026-10-08 21:00:24.757 xcodebuild[31687:4339711] [MT] IDETestOperationsObserverDebug: 3.321 elapsed -- Testing started completed.
+2026-10-08 21:00:24.757 xcodebuild[31687:4339711] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-08 21:00:24.757 xcodebuild[31687:4339711] [MT] IDETestOperationsObserverDebug: 3.321 sec, +3.321 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/dranak/Library/Developer/Xcode/DerivedData/StyleConverterRuntime-dhqlkcumqhjmieaikvonqofhsxnu/Logs/Test/Test-StyleConverterRuntime-2026.10.08_21-00-04-+0200.xcresult
+
+** TEST SUCCEEDED **
+
+Testing started

@@ -1,0 +1,2 @@
+NOT A --movers 0 RECORD: 30 cells listed against 4096 scored on wave54-open (30 against 4096 on wave54-final); a same-verdict cell below the record's mover threshold is absent from every list, so R4 would read a met P→P row as a miss and R5 would not see a must-not-move move. Adjudicate the --movers 0 record (expectations.json scoreOfRecord); the --movers 0.005 JSON is the PR read-out and the corpus snapshot's source only (scoreReadout / corpusSnapshotSource). Refusing.
+exit=2

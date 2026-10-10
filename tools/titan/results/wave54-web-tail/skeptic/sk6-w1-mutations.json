@@ -1,0 +1,116 @@
+{
+ "W1-m1": {
+  "file": "runtimes/web/src/renderer/InlineRuns.ts",
+  "old": "const join = joinWordsAroundInertOutOfFlow(entries, children, opts.hyphensAuto === true);",
+  "new": "const join = joinWordsAroundInertOutOfFlow(entries, children, false && opts.hyphensAuto === true);",
+  "what": "lane replay"
+ },
+ "W1-m2": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "old": "&& inWordEnd(last.text) && inWordStart(next.text) && joinsAcrossWord(children[e.index])) {",
+  "new": "&& inWordEnd(last.text) && inWordStart(next.text) && last.text.length >= 3 && next.text.length >= 3 && joinsAcrossWord(children[e.index])) {",
+  "what": "lane replay"
+ },
+ "W1-m3": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "old": "&& inWordEnd(last.text) && inWordStart(next.text) && joinsAcrossWord(children[e.index])) {",
+  "new": "&& joinsAcrossWord(children[e.index])) {",
+  "what": "lane replay"
+ },
+ "W1-m4": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "old": "  if (!hyphensAuto) return { entries, joined: 0 };",
+  "new": "  // MUTATION W1-m4: auto gate dropped",
+  "what": "lane replay"
+ },
+ "W1-m5": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "old": "  return outOfFlow && transparentInk;\n}",
+  "new": "  return outOfFlow || transparentInk || true;\n}",
+  "what": "lane replay"
+ },
+ "W1-m6": {
+  "file": "runtimes/web/src/renderer/NodeRenderer.ts",
+  "old": "component.id, { hyphensAuto: styles.hyphens === 'auto' });",
+  "new": "component.id);",
+  "what": "lane replay"
+ },
+ "W1-m7": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "old": "  const raw = srgb.a;",
+  "new": "  const raw = srgb.alpha;",
+  "what": "lane replay"
+ },
+ "W1-m5b": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "old": "  const c = member.component;\n  // Nested nodes",
+  "new": "  const c = member.component;\n  if (c.properties.some((p) => p.type === 'Position' && p.data === 'ABSOLUTE')) return true; // MUTATION W1-m5b: any abspos\n  // Nested nodes",
+  "what": "lane replay"
+ },
+ "SK6-w1": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "what": "structural refusal (children/runs/decorations) dropped",
+  "old": "if (member.children.length > 0 || (c.meta?.runs?.length ?? 0) > 0 || (c.meta?.decorations?.length ?? 0) > 0) return false;",
+  "new": "// SK6-w1"
+ },
+ "SK6-w2": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "what": "FIXED dropped from the out-of-flow set",
+  "old": "new Set(['ABSOLUTE', 'FIXED'])",
+  "new": "new Set(['ABSOLUTE'])"
+ },
+ "SK6-w3": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "what": "precise: transparent-ink requirement dropped",
+  "old": "  return outOfFlow && transparentInk;\n}",
+  "new": "  return outOfFlow;\n}"
+ },
+ "SK6-w4": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "what": "tag ring dropped",
+  "old": "return !!tag && TEXT_MEMBER_TAGS.has(tag) && isInertOutOfFlowMember(member);",
+  "new": "return isInertOutOfFlowMember(member);"
+ },
+ "SK6-w5": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "what": "pushText continuation branch removed (word-continuing text never cuts)",
+  "old": "if (pending.length > 0 && last?.kind === 'text' && inWordEnd(last.text) && inWordStart(t)) {",
+  "new": "if (false && pending.length > 0 && last?.kind === 'text' && inWordEnd(last.text) && inWordStart(t)) {"
+ },
+ "SK6-w6": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "what": "member lands at the RUN end, not the word end (cut>=0 branch never flushes)",
+  "old": "if (cut >= 0) { flush(); out.push({ kind: 'text', text: next.text.slice(cut) }); }",
+  "new": "if (cut >= 0) { out.push({ kind: 'text', text: next.text.slice(cut) }); }"
+ },
+ "SK6-w7": {
+  "file": "runtimes/web/src/renderer/NodeRenderer.ts",
+  "what": "NodeRenderer arms the join for EVERY host (ignores the host's hyphens)",
+  "old": "{ hyphensAuto: styles.hyphens === 'auto' }",
+  "new": "{ hyphensAuto: true }"
+ },
+ "SK6-w8": {
+  "file": "runtimes/web/src/renderer/NodeRenderer.ts",
+  "what": "NodeRenderer gate widened to any non-manual hyphens",
+  "old": "{ hyphensAuto: styles.hyphens === 'auto' }",
+  "new": "{ hyphensAuto: styles.hyphens !== 'manual' }"
+ },
+ "SK6-w9": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "what": "decimal-string alpha refused (string branch removed)",
+  "old": "(typeof raw === 'string' && /^[+-]?(\\d+\\.?\\d*|\\.\\d+)([eE][+-]?\\d+)?$/.test(raw)) ? Number(raw) : NaN;",
+  "new": "NaN;"
+ },
+ "SK6-w10": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "what": "keywordOf ignores the {keyword}/{value} object dialect",
+  "old": "return primitiveContent(o.keyword) ?? primitiveContent(o.value);",
+  "new": "return null;"
+ },
+ "SK6-w11": {
+  "file": "runtimes/web/src/renderer/InlineRuns.ts",
+  "what": "join count not reported (always 0)",
+  "old": "joinedOutOfFlowMembers: join.joined };",
+  "new": "joinedOutOfFlowMembers: 0 };"
+ }
+}

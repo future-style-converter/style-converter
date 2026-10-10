@@ -1,0 +1,16 @@
+text-decoration-inset-005 android TODAY (calibration) ssim=0.9
+text-decoration-inset-005 android A-nowrap-nomargin ssim=0.8834 Δ=-0.0166
+text-decoration-inset-005 android B-wrap-nomargin ssim=0.8863 Δ=-0.0137
+text-decoration-inset-005 android C-wrap-margin ssim=0.9959 Δ=0.0959
+text-decoration-inset-005 ios TODAY (calibration) ssim=0.8995
+text-decoration-inset-005 ios A-nowrap-nomargin ssim=0.8851 Δ=-0.0144
+text-decoration-inset-005 ios B-wrap-nomargin ssim=0.888 Δ=-0.0115
+text-decoration-inset-005 ios C-wrap-margin ssim=0.9976 Δ=0.0981
+text-decoration-inset-006 android TODAY (calibration) ssim=0.8993
+text-decoration-inset-006 android A-nowrap-nomargin ssim=0.8833 Δ=-0.0160
+text-decoration-inset-006 android B-wrap-nomargin ssim=0.8859 Δ=-0.0134
+text-decoration-inset-006 android C-wrap-margin ssim=0.9959 Δ=0.0966
+text-decoration-inset-006 ios TODAY (calibration) ssim=0.8987
+text-decoration-inset-006 ios A-nowrap-nomargin ssim=0.8851 Δ=-0.0136
+text-decoration-inset-006 ios B-wrap-nomargin ssim=0.8877 Δ=-0.0110
+text-decoration-inset-006 ios C-wrap-margin ssim=0.9977 Δ=0.0990

@@ -32,13 +32,14 @@ struct GapLine: Equatable {
     var itemSpans: [GapSpan]
 
     /// The gaps BETWEEN adjacent items — the bands an item-gap rule is
-    /// painted into. Zero-width bands are dropped: `column-gap: 0`
-    /// decorates nothing.
+    /// painted into. Overlapping (negative) bands are dropped; a zero-width
+    /// band between touching items still positions a rule (wave 54, L4:
+    /// flex-gap-decorations-033's `column-gap` absent).
     var gapBands: [GapSpan] {
         // Pairwise walk over the flow-ordered items.
         zip(itemSpans, itemSpans.dropFirst())
             .map { GapSpan(start: $0.end, end: $1.start) }
-            .filter(\.isPositive)
+            .filter(\.isPositionable)
     }
 }
 
@@ -108,12 +109,12 @@ enum GapDecorationLines {
     }
 
     /// The cross-axis gap band between each pair of adjacent lines — the
-    /// bands a line-gap rule is painted into. Non-positive bands
-    /// (touching or overlapping lines) are dropped.
+    /// bands a line-gap rule is painted into. Overlapping (negative) bands
+    /// are dropped; touching lines keep a zero band (wave 54, L4).
     static func betweenLineGaps(_ lines: [GapLine]) -> [GapSpan] {
         // Pairwise walk over the lines in flow order.
         zip(lines, lines.dropFirst())
             .map { GapSpan(start: $0.crossEnd, end: $1.crossStart) }
-            .filter(\.isPositive)
+            .filter(\.isPositionable)
     }
 }

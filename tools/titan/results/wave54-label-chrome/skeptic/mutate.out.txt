@@ -1,0 +1,82 @@
+MUT-1 [tools/visual/label-chrome-check.mjs] pre fad373782a0de0ed mutated c007c9944e857429
+  SUITE mutated : RED  rc=1 tests=148 fail=1 ['exempt mutation: the label drawn ×3 is red on (iv) ×3; drawn on one platform only, (iv) on that one']
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+MUT-2 [tools/visual/label-chrome-check.mjs] pre fad373782a0de0ed mutated 5d1e632e5695700d
+  SUITE mutated : RED  rc=1 tests=148 fail=3 ['exempt: a label-free triplet is green (P = ∅, band byte-identical, (iv) holds)', 'exempt mutation: the label drawn ×3 is red on (iv) ×3; drawn on one platform only, (iv) on that one', 'exempt mutation: a band one LSB off on one platform is still red on (ii)']
+  SEED  mutated : RED  rc=1 tests=154 fail=6 ['exempt: a label-free triplet is green (P = ∅, band byte-identical, (iv) holds)', 'exempt mutation: the label drawn ×3 is red on (iv) ×3; drawn on one platform only, (iv) on that one', 'exempt mutation: a band one LSB off on one platform is still red on (ii)', 'label chrome 001_ATC_PropsThenAll_InGreenParent']
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+  SEED  restored: GREEN  rc=0 tests=154 fail=0 []
+MUT-3 [tools/visual/label-chrome-check.mjs] pre fad373782a0de0ed mutated f9ff893786aed9ce
+  SUITE mutated : RED  rc=1 tests=148 fail=2 ['manifest mutations: a leaf, an empty _text, a kind mismatch, a missing node, a stale / partial entry are red', 'hint (d): a label absent ×3 names the container / text-root candidates — and the stem stays red']
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+MUT-4 [tools/visual/label-chrome-check.mjs] pre fad373782a0de0ed mutated dd9cabace6a9f616
+  SUITE mutated : RED  rc=1 tests=148 fail=1 ['manifest mutations: a leaf, an empty _text, a kind mismatch, a missing node, a stale / partial entry are red']
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+MUT-5 [tools/visual/label-chrome-tripwire.test.mjs] pre 9d8f2b22b8b454b6 mutated 0b060a3277b6972d
+  SEED  mutated : RED  rc=1 tests=154 fail=3 ['label chrome 001_ATC_PropsThenAll_InGreenParent', 'label chrome 003_ATC_InitialUnderRedParent', 'label chrome 005_ATC_DirectionSurvives']
+  restored sha256 9d8f2b22b8b454b62dc0872d774567bfeca22849ffe434ab9c8647d6a2a23ed5 == pre
+  SEED  restored: GREEN  rc=0 tests=154 fail=0 []
+MUT-6 [tools/visual/label-chrome-exempt.json] pre 5d5ea832eb713aaf mutated a08ccf46c3410b9c
+  SUITE mutated : RED  rc=1 tests=148 fail=1 ['label chrome exempt-entry 005_ATC_DirectionSurvives']
+  SEED  mutated : RED  rc=1 tests=154 fail=2 ['label chrome exempt-entry 005_ATC_DirectionSurvives', 'label chrome 005_ATC_DirectionSurvives']
+  restored sha256 5d5ea832eb713aaf31e83cd38304914b34491c168a8fa727bae0fcfcf1298753 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+  SEED  restored: GREEN  rc=0 tests=154 fail=0 []
+MUT-7 [tools/visual/label-chrome-check.mjs] pre fad373782a0de0ed mutated 731a0fc2345a1579
+  SUITE mutated : RED  rc=1 tests=148 fail=1 ['hint (d): a label absent ×3 names the container / text-root candidates — and the stem stays red']
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+MUT-8 [tools/visual/label-chrome-check.mjs] pre fad373782a0de0ed mutated 2c86b47d77c0a7d9
+  R3    mutated : RED  committed stems 130: identical 121, differ 9
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  R3    restored: GREEN  committed stems 130: identical 130, differ 0
+MUT-9 [tools/visual/label-chrome-check.mjs] pre fad373782a0de0ed mutated c2f86905b77e74a2
+  SUITE mutated : RED  rc=1 tests=148 fail=1 ['manifest: an entry whose fixture has NO committed baseline yet is pending — it exempts nothing']
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+X1-first-hit-only [tools/visual/label-chrome-check.mjs] pre fad373782a0de0ed mutated b53e12018df591dd
+  SUITE mutated : GREEN — MUTATION SURVIVED  rc=0 tests=148 fail=0 []
+  SEED  mutated : GREEN — MUTATION SURVIVED  rc=0 tests=154 fail=0 []
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+  SEED  restored: GREEN  rc=0 tests=154 fail=0 []
+X2-drop-base-problems [tools/visual/label-chrome-check.mjs] pre fad373782a0de0ed mutated 30a1825366094de1
+  SUITE mutated : RED  rc=1 tests=148 fail=1 ['exempt mutation: a band one LSB off on one platform is still red on (ii)']
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+X3-empty-text-is-text [tools/visual/label-chrome-check.mjs] pre fad373782a0de0ed mutated 6854040d5d738250
+  SUITE mutated : RED  rc=1 tests=148 fail=1 ['manifest mutations: a leaf, an empty _text, a kind mismatch, a missing node, a stale / partial entry are red']
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+X4-no-hint-call [tools/visual/label-chrome-tripwire.test.mjs] pre 9d8f2b22b8b454b6 mutated 942c1bee8e707cf8
+  SUITE mutated : GREEN — MUTATION SURVIVED  rc=0 tests=148 fail=0 []
+  SEED  mutated : GREEN — MUTATION SURVIVED  rc=0 tests=154 fail=0 []
+  restored sha256 9d8f2b22b8b454b62dc0872d774567bfeca22849ffe434ab9c8647d6a2a23ed5 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+  SEED  restored: GREEN  rc=0 tests=154 fail=0 []
+X5-pending-exempts [tools/visual/label-chrome-tripwire.test.mjs] pre 9d8f2b22b8b454b6 mutated 4008e3b26eeadfe4
+  SUITE mutated : RED  rc=1 tests=148 fail=130 ['label chrome 000_GrayBasis_Red', 'label chrome 000_Ratio_16_9', 'label chrome 000_Sepia_Zero', 'label chrome 000_Sizing_Fixed']
+  SEED  mutated : RED  rc=1 tests=154 fail=0 []
+  restored sha256 9d8f2b22b8b454b62dc0872d774567bfeca22849ffe434ab9c8647d6a2a23ed5 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+  SEED  restored: GREEN  rc=0 tests=154 fail=0 []
+X6-fixture-elsewhere [tools/visual/label-chrome-exempt.json] pre 5d5ea832eb713aaf mutated e39a32b8dda7bb1d
+  SUITE mutated : RED  rc=1 tests=148 fail=1 ['label chrome exempt-entry 005_ATC_DirectionSurvives']
+  SEED  mutated : RED  rc=1 tests=154 fail=2 ['label chrome exempt-entry 005_ATC_DirectionSurvives', 'label chrome 005_ATC_DirectionSurvives']
+  restored sha256 5d5ea832eb713aaf31e83cd38304914b34491c168a8fa727bae0fcfcf1298753 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+  SEED  restored: GREEN  rc=0 tests=154 fail=0 []
+X7-stale-unconditional-off [tools/visual/label-chrome-check.mjs] pre fad373782a0de0ed mutated 7d77882594791c39
+  SUITE mutated : RED  rc=1 tests=148 fail=1 ['manifest mutations: a leaf, an empty _text, a kind mismatch, a missing node, a stale / partial entry are red']
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+X8-iv-any-not-every [tools/visual/label-chrome-check.mjs] pre fad373782a0de0ed mutated 4bbeabe9e243a600
+  SUITE mutated : GREEN — MUTATION SURVIVED  rc=0 tests=148 fail=0 []
+  SEED  mutated : GREEN — MUTATION SURVIVED  rc=0 tests=154 fail=0 []
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+  SEED  restored: GREEN  rc=0 tests=154 fail=0 []

@@ -1,0 +1,19 @@
+== lock taken 2026-10-08 19:15:42; patch /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-web-tail/seam-1.liftonly.patch
+== sha256 before
+cc39ab6e98342c493b2404a4d9a52d1fba997063b2d42b2edc89cea7809a4d8e  apps/web-harness/src/sdui/ComponentRenderer.tsx
+== applied; running: cd apps/web-harness && CENSUS_RUN=wave53-final CENSUS_OUT=/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-web-tail/dom-census.liftonly.json npx vitest run --config ../../tools/titan/results/wave54-web-tail/vitest.census.config.mts 2>&1 | tail -5 && npx vitest run tests/sdui/ComponentRenderer.interInlineWs.test.tsx tests/sdui/RendererParity.test.tsx 2>&1 | tail -6
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  19:15:42
+   Duration  4.68s (transform 1.57s, setup 0ms, import 32ms, tests 4.58s, environment 0ms)
+
+
+ Test Files  2 passed (2)
+      Tests  29 passed (29)
+   Start at  19:15:47
+   Duration  1.49s (transform 1.93s, setup 0ms, import 1.26s, tests 1.43s, environment 0ms)
+
+== command exit 0
+== sha256 after restore
+cc39ab6e98342c493b2404a4d9a52d1fba997063b2d42b2edc89cea7809a4d8e  apps/web-harness/src/sdui/ComponentRenderer.tsx
+== lock released 2026-10-08 19:15:49

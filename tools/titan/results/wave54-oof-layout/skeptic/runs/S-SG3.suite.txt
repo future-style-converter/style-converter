@@ -1,0 +1,17 @@
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.036 (0.202) seconds
+	 Executed 75 tests, with 2 failures (0 unexpected) in 5.143 (5.717) seconds
+	 Executed 75 tests, with 2 failures (0 unexpected) in 5.143 (5.718) seconds
+Test Suite 'FixedHoistTests' passed at 2026-10-08 22:13:10.273.
+Test Suite 'GapDecorationBandsTests' passed at 2026-10-08 22:13:10.365.
+Test Suite 'GapDecorationGrammarTests' failed at 2026-10-08 22:13:10.455.
+Test Suite 'GapDecorationSegmentsTests' failed at 2026-10-08 22:13:10.632.
+Test Suite 'OutOfFlowContainingBlockTests' passed at 2026-10-08 22:13:14.550.
+Test Suite 'Selected tests' failed at 2026-10-08 22:13:14.752.
+Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-08 22:13:14.752.
+Test Suite 'TransformContainingBlockTests' passed at 2026-10-08 22:13:14.752.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationGrammarTests.swift:270: error: -[StyleConverterRuntimeTests.GapDecorationGrammarTests testWrapReverseDropsEveryLineGapRule] : XCTAssertTrue failed - known limitation: wrap-reverse yields no row rules
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testWrapReverseDropsEveryLineGapRule]' failed (0.002 seconds).
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift:428: error: -[StyleConverterRuntimeTests.GapDecorationSegmentsTests testOverlappingItemsPositionNoRule] : XCTAssertEqual failed: ("[(0.0, 40.0, 100.0, 10.0)]") is not equal to ("[]")
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testOverlappingItemsPositionNoRule]' failed (0.003 seconds).
+** TEST FAILED **
+xcodebuild rc=65

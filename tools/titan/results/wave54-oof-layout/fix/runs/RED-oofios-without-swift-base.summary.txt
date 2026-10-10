@@ -1,0 +1,10 @@
+	 Executed 8 tests, with 1 failure (1 unexpected) in 5.514 (5.581) seconds
+	 Executed 8 tests, with 1 failure (1 unexpected) in 5.514 (5.581) seconds
+	 Executed 8 tests, with 1 failure (1 unexpected) in 5.514 (5.582) seconds
+Test Suite 'OutOfFlowContainingBlockTests' failed at 2026-10-08 22:30:42.896.
+Test Suite 'Selected tests' failed at 2026-10-08 22:30:42.896.
+Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-08 22:30:42.896.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:148: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers] : failed: caught error: "Error Domain=NSCocoaErrorDomain Code=260 "The file “census-swift.base.txt” couldn’t be opened because there is no such file." UserInfo={NSFilePath=/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-oof-layout/census-swift.base.txt, NSURL=file:///Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-oof-layout/census-swift.base.txt, NSUnderlyingError=0x75a29e3630 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}"
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers]' failed (5.504 seconds).
+** TEST FAILED **
+xcodebuild rc=65

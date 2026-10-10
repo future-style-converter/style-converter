@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-plan/plan-build.py", line 1032, in <module>
+    _pd = probe_decisions()                     # None at planning: no unit has been reverted yet
+  File "/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-plan/plan-build.py", line 856, in probe_decisions
+    assert p['cell'] in RESTATE and 'gating' in RESTATE[p['cell']] and 'why' in RESTATE[p['cell']], \
+AssertionError: L3-hyphenate-character css-text/hyphens/hyphenate-character-001.html ios: gating, but its required unit(s) ['U2-ios'] are reverted — demote it or RESTATE it with a why

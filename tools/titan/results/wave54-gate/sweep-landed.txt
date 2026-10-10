@@ -1,0 +1,18 @@
+# Wave 54 single-writer full sweep — tree 2d068100 (campaign/applier-campaign), started 2026-10-09T08:49:40Z
+# suite | rc | count line (as the tool prints it) | wall
+tooling            | rc=0 | # pass 2336 # fail 0  | 26s
+conformance        | rc=0 | IR conformance: all documents valid (v1 goldens + v2 goldens) | 2s
+web-runtime        | rc=0 |       Tests  1381 passed (1381) | 4s
+web-harness        | rc=0 |       Tests  344 passed (344) | 7s
+converter          | rc=0 | testcases=562 BUILD SUCCESSFUL in 23s | 23s
+compose            | rc=0 | testcases=3486 BUILD SUCCESSFUL in 23s | 24s
+android-app        | rc=0 | testcases=169 BUILD SUCCESSFUL in 1s | 1s
+swiftui            | rc=0 | 	 Executed 2212 tests, with 0 failures (0 unexpected) in 47.159 (76.470) seconds | 142s
+ios-harness        | rc=0 | 	 Executed 30 tests, with 0 failures (0 unexpected) in 0.053 (0.060) seconds | 77s
+# finished 2026-10-09T08:54:46Z
+android-app(rerun) | rc=0 | testcases=169 BUILD SUCCESSFUL in 13s | 13s   (re-run with --rerun-tasks: the first android-app line above was served UP-TO-DATE in 1s)
+tooling(detail)    | rc=0 | # tests 2340 # pass 2336 # fail 0 # skipped 4 # todo 0 | (from the tooling.log header lines; the doc tables stamp # tests)
+# count moves vs the pre-probe-decisions sweep (tree 075059e8): compose 3492 → 3486 = the 6 @Test the CBB-android revert
+#   (8deddc19) removed (ChildContainingBlockSeamWiringTest 1 + DynamicValueResolverTest 5 of its cases); tooling 2330 → 2336 pass
+#   = one label-chrome tripwire test per newly seeded stem (6 stems × 3 platforms = the 18 all-then-color baselines, 390 → 408 PNGs).
+#   Every other suite unchanged. doc-staleness-check.sh exit 0 after restamp (compose 3492→3486, tooling 2334→2340 in the tables).

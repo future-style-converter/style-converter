@@ -1,0 +1,2 @@
+source: tools/titan/runs/wave54-open/sections/css-text/per-test-ir/wpt__css-text__hyphens__hyphens-out-of-flow-001.json sha256 dec51fc7dbdd6a2694a435294ecb645120e9068ba534cfd1bf4325041d3aa14e
+DOC001_BOX4 (test literal) === the two box-4 components (host __4-275 + member __4__0-276): true count 2

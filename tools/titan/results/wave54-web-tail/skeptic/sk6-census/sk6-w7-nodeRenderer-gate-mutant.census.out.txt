@@ -1,0 +1,6 @@
+perTest: 1435 docs, changed 2
+   css-text/wpt__css-text__hyphens__hyphens-out-of-flow-001  len-52  "> <"+0
+   css-text/wpt__css-text__hyphens__hyphens-out-of-flow-002  len-52  "> <"+0
+canvas: 1435 docs, changed 2
+   css-text/wpt__css-text__hyphens__hyphens-out-of-flow-001  len-52  "> <"+0
+   css-text/wpt__css-text__hyphens__hyphens-out-of-flow-002  len-52  "> <"+0

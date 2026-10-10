@@ -1,0 +1,126 @@
+[
+ {
+  "label": "P-1 remove the `padding: 0` line (rootProperties)",
+  "file": "tools/titan/bidi-bake.mjs",
+  "before": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "mutated": "fe4cbe361a9622c57a19995b6fad7b328db37f0f3ba9d7f08d5c31e4a9068a5e",
+  "restored": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "byteExact": true,
+  "mutatedRun": "# pass 66 # fail 3",
+  "red": [
+   "V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position",
+   "V3 unit P: verbatim bidi-lines-002 root (`0 0.5ch`) with its 5 hidden <br>",
+   "V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item"
+  ],
+  "restoredRun": "# pass 69 # fail 0",
+  "expectRed": [
+   "V3 unit P: verbatim counter-suffix__0__4"
+  ],
+  "verdict": "OK"
+ },
+ {
+  "label": "P-2 drop the content-box guard",
+  "file": "tools/titan/bidi-bake.mjs",
+  "before": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "mutated": "474464c4bd40ec8361683945934cd35c75f54343c8a5e8e3cff51f6b30d232a1",
+  "restored": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "byteExact": true,
+  "mutatedRun": "# pass 68 # fail 1",
+  "red": [
+   "V3 unit P: a padding that paints (content-box clip / origin) is NOT spent"
+  ],
+  "restoredRun": "# pass 69 # fail 0",
+  "expectRed": [
+   "V3 unit P: a padding that paints"
+  ],
+  "verdict": "OK"
+ },
+ {
+  "label": "P-3 drop the NON-zero guard (any padding array counts)",
+  "file": "tools/titan/bidi-bake.mjs",
+  "before": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "mutated": "98324f590c12a044895063d303faabbfd561607f0095f7a5f2ed8bd026302b18",
+  "restored": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "byteExact": true,
+  "mutatedRun": "# pass 68 # fail 1",
+  "red": [
+   "V3b unit P: VERBATIM zero-padding roots (dir-style-02a ×6, dir-selector-change-003/-004) stay deep-equal AND in order"
+  ],
+  "restoredRun": "# pass 69 # fail 0",
+  "expectRed": [
+   "V3b unit P: VERBATIM zero-padding roots"
+  ],
+  "verdict": "OK"
+ },
+ {
+  "label": "P-4 drop the overflow guard",
+  "file": "tools/titan/bidi-bake.mjs",
+  "before": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "mutated": "f5f4ecbd9a9cafd9e6ce66ff81c5106ad7c8a77e6a03e6f5f62077da6d180c22",
+  "restored": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "byteExact": true,
+  "mutatedRun": "# pass 68 # fail 1",
+  "red": [
+   "V3 unit P: a clipping / scrolling root keeps its padding (the overflow guard)"
+  ],
+  "restoredRun": "# pass 69 # fail 0",
+  "expectRed": [
+   "V3 unit P: a clipping / scrolling root keeps its padding"
+  ],
+  "verdict": "OK"
+ },
+ {
+  "label": "P-5 drop the padding-* longhand delete loop (applyBidiBakePlan)",
+  "file": "tools/titan/bidi-bake.mjs",
+  "before": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "mutated": "b13b0e3143633f87b8da638c259e21cfb77b56ecfbc2d528938261abff344169",
+  "restored": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "byteExact": true,
+  "mutatedRun": "# pass 68 # fail 1",
+  "red": [
+   "V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position"
+  ],
+  "restoredRun": "# pass 69 # fail 0",
+  "expectRed": [
+   "V3 unit P: verbatim counter-suffix__0__4"
+  ],
+  "verdict": "OK"
+ },
+ {
+  "label": "P-6 planBidiBake stops passing the walk record (the pre-P call)",
+  "file": "tools/titan/bidi-bake.mjs",
+  "before": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "mutated": "99081590017c4f4553bf5d8d6f59f432d6f05a4c3adbbef8f4d0f9053e66e1ee",
+  "restored": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "byteExact": true,
+  "mutatedRun": "# pass 66 # fail 3",
+  "red": [
+   "V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position",
+   "V3 unit P: verbatim bidi-lines-002 root (`0 0.5ch`) with its 5 hidden <br>",
+   "V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item"
+  ],
+  "restoredRun": "# pass 69 # fail 0",
+  "expectRed": [
+   "V3 unit P: verbatim counter-suffix__0__4",
+   "V3 unit P: verbatim bidi-lines-002"
+  ],
+  "verdict": "OK"
+ },
+ {
+  "label": "P-7 the walker stops recording the resolved padding",
+  "file": "tools/titan/bidi-bake.mjs",
+  "before": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "mutated": "ff75ad86faf8e6ee8790442728e1aceda4a36539787068ceec81f6471b8766cc",
+  "restored": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "byteExact": true,
+  "mutatedRun": "# pass 68 # fail 1",
+  "red": [
+   "unit P wiring: the in-page walker records the resolved padding and both guards' inputs"
+  ],
+  "restoredRun": "# pass 69 # fail 0",
+  "expectRed": [
+   "unit P wiring"
+  ],
+  "verdict": "OK"
+ }
+]

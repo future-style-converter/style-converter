@@ -1,0 +1,5 @@
+
+geometry-gate wave53-final (base wave53-open): 0 keys — PASS 0 · FAIL 0 (gating 0) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 0 (PASS 0 FAIL 0) · control 0 (PASS 0 FAIL 0) · report 0 (PASS 0 FAIL 0) · withdrawn 0 (PASS 0 FAIL 0)
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)
+exit=0

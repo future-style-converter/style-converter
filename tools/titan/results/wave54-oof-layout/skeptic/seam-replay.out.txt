@@ -1,0 +1,25 @@
+lock acquired 2026-10-08T20:04:09Z
+HEAD 029139fd; seam sha256 before: da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db; HEAD blob sha256: da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db
+applied; sha256 b5921e56f825fb46f21226f09f47aa3b56acbc65becf987de5b36fca8e02437a
+GapDecorationBandsTest tests=11 skipped=0 failures=0 errors=0
+GapDecorationExtractorTest tests=7 skipped=0 failures=0 errors=0
+GapDecorationLinesTest tests=6 skipped=0 failures=0 errors=0
+GapDecorationSegmentsTest tests=12 skipped=0 failures=0 errors=0
+GapDecorationWptPinsTest tests=4 skipped=0 failures=0 errors=0
+SkepticGapDecorationProbeTest tests=7 skipped=0 failures=0 errors=0
+ChildContainingBlockSeamWiringTest tests=1 skipped=0 failures=0 errors=0
+DynamicValueResolverTest tests=32 skipped=0 failures=0 errors=0
+CanvasRootHoistTest tests=29 skipped=0 failures=0 errors=0
+OutOfFlowContainingBlockTest tests=8 skipped=0 failures=0 errors=0
+TransformContainingBlockTest tests=8 skipped=0 failures=0 errors=0
+TOTAL tests=125 skipped=0 failures=0 errors=0
+gradle rc=0
+green rc=0
+mutated sha256 11a463a1ddf2750d3f74d29f06161be8e648236dec414f3733071431d71f6cdc
+ChildContainingBlockSeamWiringTest tests=1 skipped=0 failures=1 errors=0 FAILED: ['the child containing block is computed with the WPT capture mode']
+DynamicValueResolverTest tests=32 skipped=0 failures=0 errors=0
+TOTAL tests=33 skipped=0 failures=1 errors=0
+gradle rc=1
+red rc=1 (expected non-zero)
+seam sha256 after: da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db
+lock released 2026-10-08T20:04:18Z

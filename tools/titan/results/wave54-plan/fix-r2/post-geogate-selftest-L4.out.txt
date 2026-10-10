@@ -1,0 +1,84 @@
+   L4-oof-layout            oof-containing-block.geometry.py           position-relative-003 web                                  PASS       [control: expected to stay PASS]
+ - L4-oof-layout            oof-containing-block.geometry.py           position-relative-003 ios                                  FAIL       [report: expected WRONG until the target is fixed]
+     line: position-relative-003 ios {'green': (16, 16, 115, 115), 'greenPx': 10000, 'red': (16, 116, 115, 187), 'redPx': 7200} → GEOMETRY WRONG (green (16, 16, 115, 115) vs ref (16, 88, 115, 187))
+ - L4-oof-layout            oof-containing-block.geometry.py           position-relative-003 android                              FAIL       [report: expected WRONG until the target is fixed]
+     line: position-relative-003 android {'green': (16, 16, 115, 115), 'greenPx': 10000, 'red': (16, 116, 115, 187), 'redPx': 7200} → GEOMETRY WRONG (green (16, 16, 115, 115) vs ref (16, 88, 115, 187))
+   L4-oof-layout            oof-containing-block.geometry.py           abspos/static-fixed-inside-abspos web                      PASS       [control: expected to stay PASS]
+!! L4-oof-layout            oof-containing-block.geometry.py           abspos/static-fixed-inside-abspos ios                      FAIL       [GATING -> revert OOF-ios]
+     line: abspos/static-fixed-inside-abspos ios {'green': (16, 16, 115, 187), 'greenPx': 10000, 'red': (66, 138, 115, 187), 'redPx': 2500} → GEOMETRY WRONG (green (16, 16, 115, 187) vs ref (16, 88, 115, 187))
+!! L4-oof-layout            oof-containing-block.geometry.py           abspos/static-fixed-inside-abspos android                  FAIL       [GATING -> revert OOF-android]
+     line: abspos/static-fixed-inside-abspos android {'green': (16, 16, 115, 187), 'greenPx': 10000, 'red': (66, 138, 115, 187), 'redPx': 2500} → GEOMETRY WRONG (green (16, 16, 115, 187) vs ref (16, 88, 115, 187))
+   L4-oof-layout            oof-containing-block.geometry.py           position-relative-004 web                                  PASS       [control: expected to stay PASS]
+!! L4-oof-layout            oof-containing-block.geometry.py           position-relative-004 ios                                  FAIL       [GATING -> revert OOF-ios]
+     line: position-relative-004 ios {'green': (16, 16, 115, 115), 'greenPx': 10000, 'red': (16, 116, 115, 187), 'redPx': 7200} → GEOMETRY WRONG (green (16, 16, 115, 115) vs ref (16, 88, 115, 187))
+!! L4-oof-layout            oof-containing-block.geometry.py           position-relative-004 android                              FAIL       [GATING -> revert OOF-android]
+     line: position-relative-004 android {'green': (16, 16, 115, 115), 'greenPx': 10000, 'red': (16, 116, 115, 187), 'redPx': 7200} → GEOMETRY WRONG (green (16, 16, 115, 115) vs ref (16, 88, 115, 187))
+   L4-oof-layout            oof-containing-block.geometry.py           change-insets-inside-strict-containment-nested web         PASS       [control: expected to stay PASS]
+!! L4-oof-layout            oof-containing-block.geometry.py           change-insets-inside-strict-containment-nested ios         FAIL       [GATING -> revert OOF-ios]
+     line: change-insets-inside-strict-containment-nested ios {'green': (16, 16, 115, 115), 'greenPx': 10000, 'red': (16, 116, 115, 187), 'redPx': 7200} → GEOMETRY WRONG (green (16, 16, 115, 115) vs ref (16, 88, 115, 187))
+!! L4-oof-layout            oof-containing-block.geometry.py           change-insets-inside-strict-containment-nested android     FAIL       [GATING -> revert OOF-android]
+     line: change-insets-inside-strict-containment-nested android {'green': (16, 16, 115, 115), 'greenPx': 10000, 'red': (16, 116, 115, 187), 'redPx': 7200} → GEOMETRY WRONG (green (16, 16, 115, 115) vs ref (16, 88, 115, 187))
+   L4-oof-layout            oof-containing-block.geometry.py           contain-content-003 web                                    PASS       [control: expected to stay PASS]
+   L4-oof-layout            oof-containing-block.geometry.py           contain-content-003 ios                                    PASS       [control: expected to stay PASS]
+!! L4-oof-layout            oof-containing-block.geometry.py           contain-content-003 android                                FAIL       [GATING -> revert OOF-android]
+     line: contain-content-003 android {'green': (274, 16, 373, 583), 'greenPx': 10000, 'red': (16, 88, 115, 187), 'redPx': 10000} → GEOMETRY WRONG (green (274, 16, 373, 583) vs ref (16, 88, 115, 187))
+   L4-oof-layout            oof-containing-block.geometry.py           contain-content-011 web                                    PASS       [control: expected to stay PASS]
+   L4-oof-layout            oof-containing-block.geometry.py           contain-content-011 ios                                    PASS       [control: expected to stay PASS]
+!! L4-oof-layout            oof-containing-block.geometry.py           contain-content-011 android                                FAIL       [GATING -> revert OOF-android]
+     line: contain-content-011 android {'green': (274, 16, 373, 583), 'greenPx': 10000, 'red': (16, 88, 115, 187), 'redPx': 10000} → GEOMETRY WRONG (green (274, 16, 373, 583) vs ref (16, 88, 115, 187))
+   L4-oof-layout            oof-containing-block.geometry.py           backdrop-filter-containing-block web                       PASS       [control: expected to stay PASS]
+ - L4-oof-layout            oof-containing-block.geometry.py           backdrop-filter-containing-block ios                       FAIL       [report: expected WRONG until the target is fixed]
+     line: backdrop-filter-containing-block ios {'green': (16, 16, 373, 215), 'greenPx': 71600, 'red': (226, 216, 373, 287), 'redPx': 10656} → GEOMETRY WRONG (green (16, 16, 373, 215) vs ref (16, 88, 215, 287))
+ - L4-oof-layout            oof-containing-block.geometry.py           backdrop-filter-containing-block android                   FAIL       [report: expected WRONG until the target is fixed]
+     line: backdrop-filter-containing-block android {'green': (16, 16, 225, 215), 'greenPx': 42000, 'red': (226, 16, 373, 215), 'redPx': 29600} → GEOMETRY WRONG (green (16, 16, 225, 215) vs ref (16, 88, 215, 287))
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-ltr web                          PASS       [control: expected to stay PASS]
+!! L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-ltr android                      FAIL       [GATING -> revert CBB-android]
+     line: abspos/abspos-autopos-htb-ltr android {'green': (16, 88, 85, 167), 'greenPx': 5600, 'failInkPx': 4400} → GEOMETRY WRONG (green (16, 88, 85, 167) vs ref (16, 88, 115, 187))
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-ltr web                          PASS       [control: expected to stay PASS]
+!! L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-ltr android                      FAIL       [GATING -> revert CBB-android]
+     line: abspos/abspos-autopos-vlr-ltr android {'green': (16, 88, 85, 167), 'greenPx': 5600, 'failInkPx': 4400} → GEOMETRY WRONG (green (16, 88, 85, 167) vs ref (16, 88, 115, 187))
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-ltr web                          PASS       [control: expected to stay PASS]
+!! L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-ltr android                      FAIL       [GATING -> revert CBB-android]
+     line: abspos/abspos-autopos-vrl-ltr android {'green': (16, 88, 85, 167), 'greenPx': 5600, 'failInkPx': 4400} → GEOMETRY WRONG (green (16, 88, 85, 167) vs ref (16, 88, 115, 187))
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-rtl web                          PASS       [control: expected to stay PASS]
+ - L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-rtl android                      FAIL       [report: expected WRONG until the target is fixed]
+     line: abspos/abspos-autopos-htb-rtl android {'green': (66, 88, 135, 167), 'greenPx': 4800, 'failInkPx': 6000} → GEOMETRY WRONG (green (66, 88, 135, 167) vs ref (16, 88, 115, 187))
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-rtl web                          PASS       [control: expected to stay PASS]
+ - L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-rtl android                      FAIL       [report: expected WRONG until the target is fixed]
+     line: abspos/abspos-autopos-vlr-rtl android {'green': (36, 108, 105, 187), 'greenPx': 5600, 'failInkPx': 4400} → GEOMETRY WRONG (green (36, 108, 105, 187) vs ref (16, 88, 115, 187))
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-rtl web                          PASS       [control: expected to stay PASS]
+ - L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-rtl android                      FAIL       [report: expected WRONG until the target is fixed]
+     line: abspos/abspos-autopos-vrl-rtl android {'green': (36, 108, 105, 187), 'greenPx': 5600, 'failInkPx': 4400} → GEOMETRY WRONG (green (36, 108, 105, 187) vs ref (16, 88, 115, 187))
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-ltr ios                          PASS       [control: expected to stay PASS]
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-ltr ios                          PASS       [control: expected to stay PASS]
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-ltr ios                          PASS       [control: expected to stay PASS]
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-rtl ios                          PASS       [control: expected to stay PASS]
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-rtl ios                          PASS       [control: expected to stay PASS]
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-rtl ios                          PASS       [control: expected to stay PASS]
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip web              PASS       [control: expected to stay PASS]
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip ios              PASS       [control: expected to stay PASS]
+!! L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip android          FAIL       [GATING -> revert CBB-android]
+     line: backdrop-filter-nested-border-radius-clip android {'green': (46, 26, 225, 105), 'greenPx': 14238, 'failInkPx': 5156} → GEOMETRY WRONG (green (46, 26, 225, 105) vs ref (26, 26, 225, 125))
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-2 web            PASS       [control: expected to stay PASS]
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-2 ios            PASS       [control: expected to stay PASS]
+!! L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-2 android        FAIL       [GATING -> revert CBB-android]
+     line: backdrop-filter-nested-border-radius-clip-2 android {'green': (46, 26, 225, 105), 'greenPx': 14266, 'failInkPx': 5210} → GEOMETRY WRONG (green (46, 26, 225, 105) vs ref (26, 26, 225, 125))
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-3 web            PASS       [control: expected to stay PASS]
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-3 ios            PASS       [control: expected to stay PASS]
+!! L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-3 android        FAIL       [GATING -> revert CBB-android]
+     line: backdrop-filter-nested-border-radius-clip-3 android {'green': (36, 36, 195, 95), 'greenPx': 9438, 'failInkPx': 4360} → GEOMETRY WRONG (green (36, 36, 195, 95) vs ref (36, 36, 235, 135))
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-4 web            PASS       [control: expected to stay PASS]
+   L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-4 ios            PASS       [control: expected to stay PASS]
+!! L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-4 android        FAIL       [GATING -> revert CBB-android]
+     line: backdrop-filter-nested-border-radius-clip-4 android {'green': (42, 26, 185, 89), 'greenPx': 9177, 'failInkPx': 3385} → GEOMETRY WRONG (green (42, 26, 185, 89) vs ref (26, 26, 185, 105))
+   L4-oof-layout            flex-zero-gap-rules.geometry.py            flex/flex-gap-decorations-033 web                          PASS       [control: expected to stay PASS]
+!! L4-oof-layout            flex-zero-gap-rules.geometry.py            flex/flex-gap-decorations-033 ios                          FAIL       [GATING -> revert GAP-ios]
+     line: flex/flex-gap-decorations-033 ios {'red': None, 'redPx': 0, 'blue': None, 'bluePx': 0, 'redRuns': {20: [], 95: [], 145: []}, 'blueRuns': {40: [], 90: [], 140: []}} → GEOMETRY WRONG (redPx 0 vs ref 2200)
+!! L4-oof-layout            flex-zero-gap-rules.geometry.py            flex/flex-gap-decorations-033 android                      FAIL       [GATING -> revert GAP-android]
+     line: flex/flex-gap-decorations-033 android {'red': None, 'redPx': 0, 'blue': None, 'bluePx': 0, 'redRuns': {20: [], 95: [], 145: []}, 'blueRuns': {40: [], 90: [], 140: []}} → GEOMETRY WRONG (redPx 0 vs ref 2200)
+
+geometry-gate wave53-final (base wave53-open): 54 keys — PASS 30 · FAIL 24 (gating 17) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 17 (PASS 0 FAIL 17) · control 30 (PASS 30 FAIL 0) · report 7 (PASS 0 FAIL 7) · withdrawn 0 (PASS 0 FAIL 0)
+revert rule 4 names: CBB-android, GAP-android, GAP-ios, OOF-android, OOF-ios
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)
+exit 0

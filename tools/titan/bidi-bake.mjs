@@ -76,6 +76,15 @@
 //   - NO PSEUDO GEOMETRY, NO PROPAGATED DECORATIONS. `_pseudo` content and
 //     `text-decoration-line` propagate from boxes we are about to dissolve;
 //     both bail rather than silently drop.
+//   - ::MARKER GEOMETRY (wave-53 hunk M, re-landed as wave-54 L1 unit M′): a
+//     list item the bake turns into a BOX keeps its marker only as baked runs
+//     OWNED BY ITS ENCLOSING ROOT — bidi-marker-bake.mjs reads Chromium's
+//     marker string/box/glyphs, and the item gets `list-style-type: none`;
+//     anything it cannot honour is stamped `marker-not-baked` on the item,
+//     never dropped silently — including a paint effect (opacity, transform,
+//     filter, clip-path, overflow, visibility, text-shadow) on the item or a
+//     box between it and the root, which a root-owned run would escape
+//     (bidi-marker-paint.mjs; wave-54 S1 should-fix S6).
 //
 // ACTIVATION (opt-in, same shape as the wave-16 post-load mode):
 //   BIDI_BAKE=1 node tools/titan/extract-fixture.mjs <paths>...
@@ -127,6 +136,13 @@ import {
 // `<stem>__N…`, so the bake must rebuild them from the same subdir-encoded
 // stem extractFixture seeded buildComponents with (wave-21 collision fix).
 import { fixtureStem } from './safe-name.mjs';
+// Wave-54 L1 unit M′: a list item's ::marker inside a bake root, baked as
+// positioned runs (that module's banner: the walker sees text nodes only, so
+// the marker's direction-dependent SIDE used to be dropped silently).
+import { collectMarkerFacts, planMarker, MARKER_STAMPS } from './bidi-marker-bake.mjs';
+// Wave-54 S1 S6: the paint-effect decline of that marker bake (its banner: a
+// root-owned run escapes the item's opacity / transform / clip / visibility…).
+import { markerPaintLoss } from './bidi-marker-paint.mjs';
 // The browser-ref rendering contract: same launch flags, same 358-wide
 // UNPADDED white canvas, same embedded Inter faces + line-height pin.
 // Geometry must be measured under the environment the ref PNGs and the
@@ -506,7 +522,7 @@ export function boxProperties(rect, origin) {
  * is not always the document root), and because every descendant inherits
  * from here — one statement neutralises the whole baked subtree.
  */
-export function rootProperties(rect, position) {
+export function rootProperties(rect, position, el = null) {
   const props = {
     width:  px(rect.width),
     height: px(rect.height),
@@ -529,7 +545,50 @@ export function rootProperties(rect, position) {
     'text-align': 'left',
   };
   if (position === 'static') props.position = 'relative';
+  // Wave-54 lane L1 unit P — see paddingIsSpent. applyBidiBakePlan deletes
+  // every padding longhand / logical side before it merges this one.
+  if (paddingIsSpent(el)) props.padding = '0';
   return props;
+}
+
+/**
+ * Wave-54 lane L1 unit P (wave-53 hunk P of a8ffd1c6, fix-pass state
+ * b0edb788^, re-landed as its own revert unit): is this bake root's padding
+ * a SPENT input?
+ *
+ * After the bake every surviving descendant of a root is ABSOLUTELY
+ * positioned (or hidden — `plan.hides` gives the `<br>`s `display: none`,
+ * so they generate no box), and an abspos box resolves its insets against
+ * the PADDING box of its containing block (CSS 2.1 §10.1 item 4;
+ * css-position-3 §3.1). The root also carries `box-sizing: border-box` with
+ * its used width/height, so its padding box is the border box minus borders
+ * whatever the padding is: zeroing it moves nothing on web or iOS. Android
+ * anchors abspos children at the CONTENT box (runtimes/compose/…/layout/
+ * position/PositionedParentFlowSlot.kt:74-76, a documented approximation),
+ * so a padding left on the wire there shifts every baked run by it —
+ * measured: counter-suffix's RTL `foo` at x152 where ref/web/iOS have x104
+ * (`ol { padding: 0 3em }`), bidi-lines-001/-002 +4 px (`0 0.5ch`); with
+ * these bytes at wave53-probe bidi-lines-001 android went f 0.8934 → P
+ * 0.9629 while web/iOS stayed decoded-pixel identical
+ * (tools/titan/results/wave54-plan/rtl-marker-bake.md §4).
+ *
+ * Only a root whose browser-resolved padding is NON-ZERO on some side is
+ * rewritten: a zero-padding root keeps its `padding*` keys in place and in
+ * order, so its per-test IR stays byte-identical (selectors/dir-style-02a,
+ * dir-selector-change-003/-004 — tools/titan/results/wave53-plan/
+ * rtl-marker-bake.padding-census.py). And never where the padding still
+ * paints or clips something: `background-clip`/`-origin: content-box`
+ * (css-backgrounds-3 §2.7-2.8) or a non-`visible` overflow (css-overflow-3
+ * §3: the padding box is the scroll container's clip edge). `el` null (every
+ * pre-wave-54 caller and pin) → false.
+ */
+export function paddingIsSpent(el) {
+  // The walker's four resolved sides, top/right/bottom/left in px.
+  if (!Array.isArray(el?.padding) || !el.padding.some((v) => v !== 0)) return false;
+  // Any layer clipped/positioned to the content box keeps its padding.
+  if (/content-box/.test(`${el.backgroundClip ?? ''} ${el.backgroundOrigin ?? ''}`)) return false;
+  // A clipping/scrolling root keeps the padding its clip edge depends on.
+  return !(el.overflow ?? []).some((v) => v && v !== 'visible');
 }
 
 /**
@@ -751,6 +810,12 @@ function inPageBidiWalker(params) {
         borderTop:  parseFloat(cs.borderTopWidth)  || 0,
         display: cs.display,
         position: cs.position,
+        // Wave-54 lane L1 unit P: the resolved padding (top/right/bottom/left
+        // px) and the two guards paddingIsSpent reads before zeroing it.
+        padding: [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft].map((v) => parseFloat(v) || 0),
+        backgroundClip: cs.backgroundClip,
+        backgroundOrigin: cs.backgroundOrigin,
+        overflow: [cs.overflowX, cs.overflowY],
         // Decorations propagate from a box to its inline descendants; an
         // absolutely positioned run would NOT receive them, so their presence
         // bails rather than silently dropping an underline.
@@ -862,11 +927,33 @@ export function planBidiBake(walk) {
     }
   }
 
+  // Unit M′: each kept list-item BOX's ::marker (never a root's, never a
+  // hidden element's), planned before any edit so a decline costs nothing but
+  // its stamp (bidi-marker-bake.mjs planMarker). Its runs are measured from —
+  // and owned by — the ENCLOSING ROOT (roots never nest: selectBakeRoots), so
+  // every runtime mounts them through the relative root's positioned-child
+  // path, never through the abspos item's own flow (wave54-plan/
+  // rtl-marker-bake.md §3: Compose's host-inactive Column loop gave a second
+  // run under the `<li>` +20 px and a third no slot at all).
+  const markers = new Map();
+  for (const e of inScope) {
+    const k = e.path.join('.');
+    if (isRootPath(e.path) || e.rectCount === 0 || e.tag === 'br') continue;
+    const rootPath = rootKeys.find((rp) => isDescendantPath(rp, e.path));
+    let m = planMarker(walk.markers?.[k], originOf.get(rootPath.join('.')), runsByPath.get(k)?.[0]);   // `let`: S6 may decline it
+    // S1 S6: a PLANNED marker (runs) whose item→root chain carries a paint
+    // effect would lose it under the root (css-lists-3 §3.1: the marker is the
+    // item's) — declined instead, item unchanged + `marker-not-baked`.
+    if (m?.runs && markerPaintLoss(walk.markers[k], walk.elements, e.path, rootPath)) m = { lossy: [MARKER_STAMPS.notBaked] };
+    if (m) markers.set(k, { ...m, rootPath });
+  }
+
   const plan = { roots: [], boxes: [], hides: [], runs: [] };
   const hidden = new Set();
   for (const e of inScope) {
     if (isRootPath(e.path)) {
-      plan.roots.push({ path: e.path, props: rootProperties(e.rect, e.position) });
+      // Unit P: the walk record carries the resolved padding paddingIsSpent reads.
+      plan.roots.push({ path: e.path, props: rootProperties(e.rect, e.position, e) });
     } else if (e.rectCount === 0 || e.tag === 'br') {
       // Nothing to bake:
       //   - rectCount 0 — the browser painted no box at all (display:none);
@@ -882,7 +969,10 @@ export function planBidiBake(walk) {
       const parent = originOf.get(e.path.slice(0, -1).join('.'));
       // Parent must be in scope by construction (a root encloses the chain).
       if (!parent) return { bail: `missing containing block for <${e.tag}> at ${e.path.join('.')}` };
-      plan.boxes.push({ path: e.path, props: boxProperties(e.rect, parent) });
+      // Unit M′: a baked marker adds `list-style-type: none` and its stamps.
+      const m = markers.get(e.path.join('.'));
+      plan.boxes.push({ path: e.path, props: { ...boxProperties(e.rect, parent), ...(m?.boxProps ?? {}) },
+        ...(m?.lossy?.length ? { lossy: m.lossy } : {}) });
     }
   }
 
@@ -901,6 +991,11 @@ export function planBidiBake(walk) {
       }
       plan.runs.push({ ownerPath: e.path, props: runProperties(run, style, originOf.get(key)), text: run.text });
     }
+    // Unit M′: the item's marker runs go to its enclosing ROOT, after the
+    // root's own runs (pushed when the root itself was visited), so every text
+    // run keeps its pre-bake child id and the item keeps ONE child; they append
+    // after the root's static children (appendChildComponent numbering).
+    for (const r of markers.get(key)?.runs ?? []) plan.runs.push({ ownerPath: markers.get(key).rootPath, props: r.props, text: r.text });
   }
   if (plan.runs.length > MAX_BIDI_RUNS) {
     return { bail: `run budget exceeded (${plan.runs.length} > ${MAX_BIDI_RUNS})` };
@@ -954,6 +1049,13 @@ export function applyBidiBakePlan(fixture, stem, plan) {
   for (const { path, props } of plan.roots) {
     const cmp = componentAtPath(fixture, stem, path);
     if (!cmp) throw new Error(`bidi-bake: no component at ${path.join('.')}`);
+    // Unit P: a spent padding leaves as ONE `padding: 0` — every longhand and
+    // logical side goes first, so none can outlive it; an authored shorthand
+    // keeps its key position (Object.assign overwrites it in place — all six
+    // non-zero roots of the corpus carry only the shorthand, padding census).
+    if ('padding' in props) {
+      for (const k of Object.keys(cmp.properties ?? {})) if (k.startsWith('padding-')) delete cmp.properties[k];
+    }
     Object.assign(cmp.properties ??= {}, props);
     delete cmp._text;
     cmp._lossy = true;
@@ -961,11 +1063,16 @@ export function applyBidiBakePlan(fixture, stem, plan) {
     touched++;
   }
   // 2. Boxes: absolutely positioned used rects; their text moves to runs.
-  for (const { path, props } of plan.boxes) {
+  for (const { path, props, lossy } of plan.boxes) {
     const cmp = componentAtPath(fixture, stem, path);
     if (!cmp) throw new Error(`bidi-bake: no component at ${path.join('.')}`);
     Object.assign(cmp.properties ??= {}, props);
     delete cmp._text;
+    // Unit M′: a modelled / mismatched / declined marker is stamped LOUDLY.
+    if (lossy?.length) {
+      cmp._lossy = true;
+      cmp._lossyReasons = [...new Set([...(cmp._lossyReasons ?? []), ...lossy])];
+    }
     touched++;
   }
   // 3. Hides: elements the browser painted nothing for (<br>, display:none).
@@ -1096,6 +1203,10 @@ export async function bidiBakeFixture(fixture, testRel) {
     // land on the wrong component.
     const mismatch = mappingMismatch(staticPaths, walk.elements);
     if (mismatch) return { status: 'bailed', reason: `element-mapping-mismatch (${mismatch})` };
+    // Unit M′: the ::marker facts of every kept list item — CDP string/box +
+    // a probe span's glyphs, read AFTER the walk measured everything
+    // (bidi-marker-bake.mjs). Empty for a list-free walk.
+    walk.markers = await collectMarkerFacts(page, walk.elements, { fixture, html, stem: fixtureStem(testRel) });
     const { bail, plan, note } = planBidiBake(walk);
     if (bail) return { status: 'bailed', reason: bail };
     // A triggered test that turns out to have nothing to bake is a SKIP, not

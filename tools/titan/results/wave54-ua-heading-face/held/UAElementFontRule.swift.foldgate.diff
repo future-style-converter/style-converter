@@ -1,0 +1,81 @@
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAElementFontRule.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAElementFontRule.swift
+index cfc88128..34e6dd17 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAElementFontRule.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAElementFontRule.swift
+@@ -77,16 +77,17 @@
+ //     than carrying a "this size came from a keyword" channel the wire does
+ //     not have.
+ //
+-//  TWIN STATUS: still iOS-only. `typography/UAElementFontRule.kt` does not
+-//  exist; Android shows the identical defect in the same captures
+-//  (`css-text-decor/text-decoration-color` android 0.6164 F at
+-//  wave49-final). The wave-40 reason given here — "this lane owns no Android
+-//  device" — was a LANE's constraint, not a standing one, and it stood as
+-//  the whole plan for nine waves without ever becoming work (retro finding
+-//  A4#7). It is now a QUEUED backlog item: docs/BACKLOG.md ranked-queue
+-//  entry (g), which carries the target cell and the iOS gate table's caveat
+-//  that only leaf-text hosts improve (iOS 0.674 after the gated heading
+-//  face). Point a port at that entry, not at this banner.
++//  TWIN STATUS (wave 54, lane L5): PORTED. The Compose twin is
++//  `runtimes/compose/…/typography/UAElementFontRule.kt` (same table, same
++//  em base, same in-place substitution), run at ComponentRenderer.kt's
++//  ListStyleUaRule site BEFORE DynamicValueResolver so `em` / `ch` on the
++//  heading resolve against the UA face. Its target was
++//  css-break/block-in-inline-015-print android f 0.9489 (four 16px regular
++//  lines where this rule gives iOS P 0.9894 on the same IR). The wave-40
++//  reason it waited — "this lane owns no Android device" — was a LANE's
++//  constraint that stood for fourteen waves (retro finding A4#7, BACKLOG
++//  0(g)). Both platforms now share ONE heading gate predicate,
++//  `typography/UAHeadingFoldGate.{swift,kt}` (see headingAppliesTo below).
+ //
+ 
+ import Foundation
+@@ -130,9 +131,23 @@ enum UAElementFontRule {
+ 
+     /// Does the HEADING half apply to a heading with these composed children?
+     ///
+-    /// It applies to a heading whose content is its own single text run, and
+-    /// STANDS DOWN for one that hosts child boxes. Not timidity — a MEASURED
+-    /// interaction with a modelling gap this lane does not close.
++    /// WAVE 54 (lane L5) — the caller no longer passes "has element
++    /// children": ComponentRenderer.mergedProperties(now:) passes
++    /// `UAHeadingFoldGate.standsDown(component:inFlowChildren:mergedPreUA:)`,
++    /// which is true only for a heading whose children would still paint
++    /// STACKED (its `meta.runs` do not fold). The wave-44/45 inline-run fold
++    /// is the inline formatting context the paragraph below asked for, for
++    /// the shapes it admits: on wave53-final the folded inset-005/-006/-014
++    /// hosts paint ONE paragraph at the 16px face (ios f 0.8995 / 0.8987 /
++    /// 0.9238) where the ref wraps the 2em bold face, so they take the face
++    /// now; inset-011 (its fold refuses the diverging decoration colours)
++    /// keeps the stand-down. This predicate is unchanged and still reads the
++    /// flag; the table below is the wave-40 STACKED-render measurement it
++    /// rests on, kept as the record of why stacked hosts stand down.
++    ///
++    /// Wave 40: it applies to a heading whose content is its own single text
++    /// run, and STANDS DOWN for one that hosts child boxes. Not timidity — a
++    /// MEASURED interaction with a modelling gap this lane does not close.
+     ///
+     /// A SwiftUI block container has no inline line box, so a heading like
+     /// `the <u>ultra-quick</u> fox` is painted as a VERTICAL STACK of its
+@@ -153,7 +168,9 @@ enum UAElementFontRule {
+     ///
+     /// The REAL fix for the stacked cells is an inline formatting context on
+     /// this platform, which is a wave-scale mechanism of its own; when it
+-    /// lands, this gate should be deleted, not widened.
++    /// lands, this gate should be deleted, not widened. (Wave 54: it landed
++    /// as the fold for the admitted shapes, and the gate was NARROWED to the
++    /// hosts the fold refuses — UAHeadingFoldGate — not widened.)
+     static func headingAppliesTo(hasElementChildren: Bool) -> Bool {
+         !hasElementChildren
+     }
+@@ -201,7 +218,9 @@ enum UAElementFontRule {
+     ///   - own: the element's OWN declarations, post bucket/media fold. A
+     ///     guarded type here means the author declared it and the UA loses.
+     ///   - merged: the inheritance-merged list to correct.
+-    ///   - hasElementChildren: does this component host composed child boxes?
++    ///   - hasElementChildren: does this component's content paint as a
++    ///     STACK of child boxes? Since wave 54 the renderer passes
++    ///     UAHeadingFoldGate's verdict (children AND no inline-run fold).
+     ///     Gates the HEADING half only — see `headingAppliesTo` for the
+     ///     measurement that put the gate there.
+     /// - Returns: `merged`, with the FontSize / FontWeight entries substituted

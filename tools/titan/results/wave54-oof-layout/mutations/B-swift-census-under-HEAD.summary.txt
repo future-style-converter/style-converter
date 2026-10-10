@@ -1,0 +1,4 @@
+label=B-swift-census-under-HEAD file=runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/FixedHoist.swift (swapped to HEAD bytes)
+sha256 before=e88a6433ec0562190fb03d5ccc2d8f1c7e42f3ec5524422df7b784b0e639f441 head=e3393794f3585a5d8c530cee776589053832732f5933e9803c4ed7fbd1aed97e after=e88a6433ec0562190fb03d5ccc2d8f1c7e42f3ec5524422df7b784b0e639f441 restored=OK
+suite rc=65 (RED)
+census written under HEAD code == tools/titan/results/wave54-oof-layout/census-swift.base.txt (byte-equal,     1435 lines)

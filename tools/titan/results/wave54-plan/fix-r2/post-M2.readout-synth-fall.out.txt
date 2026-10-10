@@ -1,0 +1,53 @@
+probe-readout  wave53-final → synthetic-probe-fall   (Δ = synthetic-probe-fall − wave53-final; a gain prints +, a fall −)
+  sections read (26): CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-pseudo,css-tables,css-text,css-text-decor,css-transforms,css-ui,css-values,css-writing-modes,filter-effects,selectors
+  lanes that decide: all
+
+rule 1 — lost carriers (P on the base, f on the probe):
+  none
+
+rules 2 / 3 — prediction rows:
+  ok        L1-rtl-marker-bake  css-text/bidi/bidi-lines-001.html android  f 0.8934 → P 0.9629 Δ+0.0695  (predicted P ≈0.9629 (device-measured: these hunk bytes at wave53-probe); HIGH, gating floor 0.955)
+  ok        L1-rtl-marker-bake  css-text/bidi/bidi-lines-002.html android  P 0.9534 → P 0.9818 Δ+0.0284  (predicted P ≈0.9818 (device-measured at wave53-probe); HIGH, gating floor 0.975)
+  ok        L1-rtl-marker-bake  css-counter-styles/counter-suffix.html android  P 0.9547 → P 0.9815 Δ+0.0268  (predicted P ≈0.9815 with P alone (replay); ≈0.989 with M′ on P (replay 0.9894 / 0.9900); MED-HIGH (P floor) / MED (M′ magnitude, geometry-gated), gating floor 0.97)
+  ok        L1-rtl-marker-bake  css-counter-styles/counter-suffix.html web  P 0.9818 → P 1 Δ+0.0182  (predicted P 1 (wave53-probe measured 1 with the same marker geometry); HIGH, gating floor 0.999)
+  ok        L1-rtl-marker-bake  css-counter-styles/counter-suffix.html ios  P 0.9802 → P 0.987 Δ+0.0068  (predicted P ≈0.987 (wave53-probe measured 0.9873); MED-HIGH, gating floor 0.985)
+  ok        L2-table-body-cell  CSS2/css21-errata/s-11-1-1b-006.html android  P 0.9944 → P 0.9983 Δ+0.0039  (predicted P ≈0.9983 (replay from both the final and the probe picture); square x24-43 rows 56-75, no stroke; MED-HIGH (geometry) / MED (score), gating floor 0.996)
+  ok        L3-hyphenate-character  css-text/hyphens/hyphenate-character-001.html ios  f 0.9287 → P 0.979 Δ+0.0503  (predicted P ≈0.979 (GBd 0.9852 − 0.006); MED-HIGH, gating floor 0.965)
+  ok        L3-hyphenate-character  css-text/hyphens/hyphenate-character-003.html ios  f 0.9337 → P 0.977 Δ+0.0433  (predicted P ≈0.977 (GBd 0.9831 − 0.006); MED-HIGH, gating floor 0.965)
+  ok        L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-002.html web  P 0.9868 → P 1 Δ+0.0132  (predicted P ≈1.0 (B replay 1); MED-HIGH, gating floor 0.995)
+  ok        L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-004.html web  P 0.9737 → P 0.998 Δ+0.0243  (predicted P ≈0.998 (B replay 0.998); MED-HIGH, gating floor 0.99)
+  ok        L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-005.html web  P 0.9735 → P 0.998 Δ+0.0245  (predicted P ≈0.998 (B replay 0.998); MED-HIGH, gating floor 0.99)
+  ok        L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-006.html web  P 0.9735 → P 0.998 Δ+0.0245  (predicted P ≈0.998 (B replay 0.998); MED-HIGH, gating floor 0.99)
+  FIRES     L3-hyphenate-character  filter-effects/backdrop-filter-plus-filter.html web  P 1 → P 0.997 Δ-0.003  (predicted stays (the stray br is the <p>'s trailing one; nothing in flow below it); MED)  — rule 2 Δ-0.003
+  ok        L4-oof-layout  css-contain/contain-content-003.html android  f 0.9405 → P 0.997 Δ+0.0565  (predicted P ≈0.997 (sim 0.9967); HIGH, gating floor 0.99)
+  ok        L4-oof-layout  css-contain/contain-content-011.html android  f 0.9284 → P 0.985 Δ+0.0566  (predicted P ≈0.985 (sim ≤0.9854, an upper bound); MED-HIGH, gating floor 0.97)
+  ok        L4-oof-layout  css-position/position-relative-004.html ios  P 0.9594 → P 0.9974 Δ+0.038  (predicted P ≈0.9974; MED-HIGH, gating floor 0.99)
+  ok        L4-oof-layout  css-position/position-relative-004.html android  P 0.9589 → P 0.9967 Δ+0.0378  (predicted P ≈0.9967; MED-HIGH, gating floor 0.99)
+  ok        L4-oof-layout  css-position/change-insets-inside-strict-containment-nested.html ios  P 0.9594 → P 0.9974 Δ+0.038  (predicted P ≈0.9974; MED-HIGH, gating floor 0.99)
+  ok        L4-oof-layout  css-position/change-insets-inside-strict-containment-nested.html android  P 0.9589 → P 0.9967 Δ+0.0378  (predicted P ≈0.9967; MED-HIGH, gating floor 0.99)
+  ok        L4-oof-layout  CSS2/abspos/static-fixed-inside-abspos.html ios  P 0.9841 → P 0.9974 Δ+0.0133  (predicted P ≈0.9974; HIGH, gating floor 0.99)
+  ok        L4-oof-layout  CSS2/abspos/static-fixed-inside-abspos.html android  P 0.9835 → P 0.9967 Δ+0.0132  (predicted P ≈0.9967 (via PositionedParentFlowSlot); MED-HIGH, gating floor 0.99)
+  ok        L4-oof-layout  filter-effects/backdrop-filter-nested-border-radius-clip-3.html android  f 0.9574 → P 0.99 Δ+0.0326  (predicted P ≈0.99 (iOS twin of the same geometry 0.9921); MED-HIGH, gating floor 0.96)
+  ok        L4-oof-layout  filter-effects/backdrop-filter-nested-border-radius-clip.html android  P 0.9649 → P 0.99 Δ+0.0251  (predicted P ≈0.99 (iOS twin 0.9936 / 0.9998 / 0.9981); MED-HIGH, gating floor 0.98)
+  ok        L4-oof-layout  filter-effects/backdrop-filter-nested-border-radius-clip-2.html android  P 0.9689 → P 0.99 Δ+0.0211  (predicted P ≈0.99 (iOS twin 0.9936 / 0.9998 / 0.9981); MED-HIGH, gating floor 0.98)
+  ok        L4-oof-layout  filter-effects/backdrop-filter-nested-border-radius-clip-4.html android  P 0.977 → P 0.99 Δ+0.013  (predicted P ≈0.99 (iOS twin 0.9936 / 0.9998 / 0.9981); MED-HIGH, gating floor 0.98)
+  ok        L4-oof-layout  css-flexbox/abspos/abspos-autopos-htb-ltr.html android  P 0.9966 → P 0.9967 Δ+0.0001  (predicted P 0.9967 (sim: green repainted 100x100); HIGH, gating floor 0.995)
+  ok        L4-oof-layout  css-flexbox/abspos/abspos-autopos-vlr-ltr.html android  P 0.9966 → P 0.9967 Δ+0.0001  (predicted P 0.9967 (sim: green repainted 100x100); HIGH, gating floor 0.995)
+  ok        L4-oof-layout  css-flexbox/abspos/abspos-autopos-vrl-ltr.html android  P 0.9966 → P 0.9967 Δ+0.0001  (predicted P 0.9967 (sim: green repainted 100x100); HIGH, gating floor 0.995)
+  ok        L4-oof-layout  css-gaps/flex/flex-gap-decorations-033.html ios  f 0.94 → P 1 Δ+0.06  (predicted P ≈1.000 (sim 1.0000: every non-rule pixel is already ref-exact); HIGH, gating floor 0.99)
+  ok        L4-oof-layout  css-gaps/flex/flex-gap-decorations-033.html android  f 0.94 → P 1 Δ+0.06  (predicted P ≈1.000 (sim 1.0000); HIGH, gating floor 0.99)
+  ok        L5-ua-heading-face  css-break/block-in-inline-015-print.html android  f 0.9489 → P 0.989 Δ+0.0401  (predicted P ≈0.989 (the identical rule on iOS gives P 0.9894 on the same IR); HIGH, gating floor 0.97)
+  ok        L6-web-tail  css-ui/box-sizing-007.html web  f 0.9036 → P 0.985 Δ+0.0814  (predicted P 0.985 (simulated separator 0.9852); HIGH, gating floor 0.975)
+  ok        L6-web-tail  css-ui/box-sizing-008.html web  f 0.8943 → P 0.974 Δ+0.0797  (predicted P 0.974 (0.9736); HIGH, gating floor 0.965)
+  ok        L6-web-tail  css-ui/box-sizing-022.html web  f 0.9442 → P 0.97 Δ+0.0258  (predicted P 0.970 (0.9704); MED-HIGH, gating floor 0.96)
+  ok        L6-web-tail  css-text/hyphens/hyphens-out-of-flow-002.html web  f 0.9411 → P 1 Δ+0.0589  (predicted P 1 (replay W1-exact: ssim 1, 0 mismatched px); HIGH (branch R) / MED-HIGH (branch H), gating floor 0.995)
+
+leak signals (score side of rule 5) — non-carrier cells that moved at all:
+  3409 non-carrier cells read (631 of them must-not-move lines); 0 leak signal(s)
+
+summary: rule 1 fired 0 · rule 2 fired 1 · rule 3 fired 0 · leak signals 0 · undirected falls read 0 · unmeasured 0 · recorded for another stage 0
+units named (revert rule 6: each unit with its revertOrder, latest first; re-probe between steps):
+  L3-hyphenate-character U3  (revertOrder U3b → U3): 1 reason(s) — rule 2 Δ-0.003 filter-effects/backdrop-filter-plus-filter.html web
+
+PROBE: revert rules fired — revert the named units (leaks: bisect)
+exit 1

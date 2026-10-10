@@ -1,0 +1,1 @@
+        if (multiplier != null && own.none { it.type in SIZE_DECLARING }) {

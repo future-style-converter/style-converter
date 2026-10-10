@@ -1,0 +1,511 @@
+{
+ "run": "wave54-final",
+ "against": "wave54-open",
+ "reviewer": "orchestrator first read (every row of final/sheets-gained/*.png and final/sheets-movers/*.png looked at: re-frozen ref | wave54-open | wave54-final; four rows re-read at 2x crops), then an adversarial second reader per non-FAITHFUL label and per thin pass (see notes.secondReader)",
+ "date": "2026-10-09",
+ "gained": {
+  "css-break/block-in-inline-015-print.html android": {
+   "label": "FAITHFUL",
+   "what": "the UA heading face: \"one two three four\" now bold and large as the ref; the open capture had it in body size",
+   "prev": 0.9489,
+   "cur": 0.9986
+  },
+  "css-cascade/scope-pseudo-element.html web": {
+   "label": "DEGENERATE",
+   "what": "PRE-REGISTERED (stayDegenerateEvenIfPass): the first two boxes still wrap \"B / Foo\" and \"Foo / A\" onto two lines and the third box draws bullets where the ref draws the ::marker text \"M\"; RS moved only the box lefts (zoom: scratch crop of gained-01 row 2)",
+   "prev": 0.9353,
+   "cur": 0.9629
+  },
+  "css-contain/contain-content-003.html android": {
+   "label": "FAITHFUL",
+   "what": "the red square and the two stray green strips of the open capture are gone; one green square as the ref",
+   "prev": 0.9405,
+   "cur": 0.9967
+  },
+  "css-contain/contain-content-011.html android": {
+   "label": "DEGENERATE",
+   "what": "PRE-REGISTERED (stayDegenerateEvenIfPass): the green square is right and the red is gone, but the digits read \"25\" where the test requires \"17\" — the counter is wrong on all three platforms; OOF-android moved only the square",
+   "prev": 0.9284,
+   "cur": 0.9849
+  },
+  "css-gaps/flex/flex-gap-decorations-033.html android": {
+   "label": "FAITHFUL",
+   "what": "the red column rules and blue row rules are drawn over the grey box as the ref; the open capture was a blank box",
+   "prev": 0.94,
+   "cur": 1
+  },
+  "css-gaps/flex/flex-gap-decorations-033.html ios": {
+   "label": "FAITHFUL",
+   "what": "same picture as android: rules present, positions as the ref",
+   "prev": 0.94,
+   "cur": 0.9993
+  },
+  "css-masking/clip-path/clip-path-filter-order.html android": {
+   "label": "FAITHFUL",
+   "what": "thin (0.9548): the 200×200 green box at the ref's exact bbox, 0 red pixels, a crisp edge (one 1/255 antialias column); residue: the wrapped instruction lines keep a leading space, as predicted. Second reader's caveat: the open capture already had 0 red and a crisp edge — the gain is the text block losing a blank line (box y148 → y128), so this cell does NOT demonstrate the clip-path/filter ORDER mechanism (Android may simply drop the drop-shadow); the picture meets every clause of the pass condition, the mechanism claim is not made here",
+   "prev": 0.8406,
+   "cur": 0.9548
+  },
+  "css-masking/clip-path/clip-path-filter-order.html ios": {
+   "label": "FAITHFUL",
+   "what": "green box, crisp edge, text block as the ref",
+   "prev": 0.8578,
+   "cur": 0.9978
+  },
+  "css-masking/clip-path/clip-path-filter-order.html web": {
+   "label": "FAITHFUL",
+   "what": "identical to the ref (score 1)",
+   "prev": 0.8586,
+   "cur": 1
+  },
+  "css-multicol/balance-grid-container.html web": {
+   "label": "FAITHFUL",
+   "what": "ID Number / Address / Relevant Countries grid and the trailing paragraph lay out as the ref (score 1); the open capture had the trailing paragraph displaced",
+   "prev": 0.9207,
+   "cur": 1
+  },
+  "css-position/position-absolute-semi-replaced-stretch-other.html web": {
+   "label": "DEGENERATE",
+   "what": "PRE-REGISTERED (stayDegenerateEvenIfPass): every widget box sits and sizes as the ref, but the label box reads \"abel\" — its \"l\" lies under the green border — where the ref reads \"label\"; RS moved only the static position",
+   "prev": 0.941,
+   "cur": 0.9965
+  },
+  "css-text/bidi/bidi-lines-001.html android": {
+   "label": "FAITHFUL",
+   "what": "the six lines read \"français\" flush left (x29) / \"فارسی\" flush right on the ref's rows — second reader: the open capture already had the rows right; its faults were horizontal (français pushed to x33, the Farsi ink to x356 against the border with no right padding), both fixed; residue: the Farsi font is lighter and its ink ends 5 px short of the ref's right gap (font bearing)",
+   "prev": 0.8934,
+   "cur": 0.9629
+  },
+  "css-text/hyphens/hyphenate-character-001.html android": {
+   "label": "FAITHFUL",
+   "what": "no hyphen glyph and the breaks at the ref positions (im/ple/men/ta/tion, ini/tial/iza/tion, real/iza/tion, hy/phen/ation); R6 retired it from degenerateByConstruction on the geometry key \"→ GEOMETRY OK\"",
+   "prev": 0.9301,
+   "cur": 0.9802
+  },
+  "css-text/hyphens/hyphenate-character-001.html ios": {
+   "label": "FAITHFUL",
+   "what": "no hyphen glyph and the breaks at the ref positions (im/ple/men/ta/tion, ini/tial/iza/tion, real/iza/tion, hy/phen/ation); R6 retired it from degenerateByConstruction on the geometry key \"→ GEOMETRY OK\"",
+   "prev": 0.9287,
+   "cur": 0.9611
+  },
+  "css-text/hyphens/hyphenate-character-001.html web": {
+   "label": "FAITHFUL",
+   "what": "no hyphen glyph and the breaks at the ref positions (im/ple/men/ta/tion, ini/tial/iza/tion, real/iza/tion, hy/phen/ation); R6 retired it from degenerateByConstruction on the geometry key \"→ GEOMETRY OK\"",
+   "prev": 0.935,
+   "cur": 0.985
+  },
+  "css-text/hyphens/hyphenate-character-002.html ios": {
+   "label": "DEGENERATE",
+   "what": "PRE-REGISTERED (stayDegenerateEvenIfPass): no hyphen glyph (the target), but TextKit breaks men/tati/on and hy/phen/atio/n where the ref breaks ta/tion and ation — emergency breaks, not hyphenation positions",
+   "prev": 0.9261,
+   "cur": 0.9534
+  },
+  "css-text/hyphens/hyphenate-character-003.html android": {
+   "label": "FAITHFUL",
+   "what": "the bullet (•) hyphenate-character at every one of the 11 breaks as the ref (im•/ple•/men•/ta•/tion …), \"real•\" kept on one line, nothing after \"ation\"; the open capture drew hyphen-minus marks; R6 retired on \"→ GEOMETRY OK\"; residue: the instruction's bold run renders regular (not part of the condition)",
+   "prev": 0.9292,
+   "cur": 0.9792
+  },
+  "css-text/hyphens/hyphenate-character-003.html ios": {
+   "label": "FAITHFUL",
+   "what": "the bullet (•) hyphenate-character at every one of the 11 breaks as the ref (im•/ple•/men•/ta•/tion …), \"real•\" kept on one line, nothing after \"ation\"; the open capture drew hyphen-minus marks; R6 retired on \"→ GEOMETRY OK\"; residue: the instruction's bold run renders regular (not part of the condition)",
+   "prev": 0.9337,
+   "cur": 0.957
+  },
+  "css-text/hyphens/hyphenate-character-003.html web": {
+   "label": "FAITHFUL",
+   "what": "the bullet (•) hyphenate-character at every break as the ref (im•/ple•/men•/ta•/tion …); the open web capture printed the literal \"\\2022\" escape; R6 retired on \"→ GEOMETRY OK\"",
+   "prev": 0.8812,
+   "cur": 0.9825
+  },
+  "css-text/hyphens/hyphenate-character-004.html android": {
+   "label": "FAITHFUL",
+   "what": "the \"/-/\" string at every break as the ref; the dash glyph is a plain hyphen where the ref's font draws a slightly wider one (font, not layout); R6 retired on \"→ GEOMETRY OK\"",
+   "prev": 0.905,
+   "cur": 0.9774
+  },
+  "css-text/hyphens/hyphenate-character-004.html web": {
+   "label": "FAITHFUL",
+   "what": "the \"/-/\" string at every break as the ref; the dash glyph is a plain hyphen where the ref's font draws a slightly wider one (font, not layout); R6 retired on \"→ GEOMETRY OK\"",
+   "prev": 0.9249,
+   "cur": 0.9832
+  },
+  "css-text/hyphens/hyphens-out-of-flow-002.html web": {
+   "label": "FAITHFUL",
+   "what": "all seven orange boxes read \"high-/way\" as the ref (score 1); the open capture had boxes 4 and 5 on one line \"highway\"",
+   "prev": 0.9411,
+   "cur": 1
+  },
+  "css-ui/box-sizing-007.html web": {
+   "label": "FAITHFUL",
+   "what": "20 filled green squares of one size in two columns as the ref",
+   "prev": 0.9036,
+   "cur": 0.9854
+  },
+  "css-ui/box-sizing-008.html web": {
+   "label": "FAITHFUL",
+   "what": "6 filled green rectangles of one size as the ref",
+   "prev": 0.8943,
+   "cur": 0.9741
+  },
+  "css-ui/box-sizing-022.html web": {
+   "label": "FAITHFUL",
+   "what": "two green rectangles 130×150 at the ref's x16 / x151 with the ref's 5 px gap (second reader: 0 differing pixels below the instruction text; no width residue — the first reader's \"2-px width difference\" is withdrawn); the open capture had one 260 px rectangle; the only diff is the instruction's <strong> runs rendered regular",
+   "prev": 0.9442,
+   "cur": 0.9725
+  },
+  "filter-effects/backdrop-filter-clip-rect.html android": {
+   "label": "FAITHFUL",
+   "what": "thin (0.9559): the inverted region (10000 pink px) matches the ref pixel-for-pixel in place and extent, black ends and the tall red outline as the ref; the gain is the description text losing its blank lines. Second reader found a residual the first missed: where the red menu borders cross the navbar's blue border (rows 166-167 / 218-219, x163-266) the ref is red and the final blue — 416 px of paint order (children's borders under the parent's), present in open too; outside the test's inversion condition → BACKLOG residue, not a verdict change",
+   "prev": 0.9315,
+   "cur": 0.9559
+  },
+  "filter-effects/backdrop-filter-containing-block.html android": {
+   "label": "FAITHFUL",
+   "what": "one green and one red 200px square side by side under the text as the ref; the open capture had them at the top edge with no text and the wrong size",
+   "prev": 0.7506,
+   "cur": 0.9977
+  },
+  "filter-effects/backdrop-filter-containing-block.html ios": {
+   "label": "FAITHFUL",
+   "what": "same as android: both squares as the ref",
+   "prev": 0.7955,
+   "cur": 0.9987
+  },
+  "filter-effects/backdrop-filter-edge-clipping.html android": {
+   "label": "FAITHFUL",
+   "what": "thin (0.9533): the white box with the blue border is clean white inside the green as the ref; the open capture had a grey gradient leaking into it; the residual is the description text wrapping over the box (same on all three)",
+   "prev": 0.929,
+   "cur": 0.9533
+  },
+  "filter-effects/backdrop-filter-paint-order.html android": {
+   "label": "FAITHFUL",
+   "what": "thin (0.9533): same picture and same residual as edge-clipping",
+   "prev": 0.929,
+   "cur": 0.9533
+  }
+ },
+ "movers": {
+  "css-counter-styles/counter-suffix.html android": {
+   "label": "DEGENERATE",
+   "what": "PRE-REGISTERED (stayDegenerateEvenIfPass rows 5-6): the RTL list — the wave's target — now reads \"foo .1 / bar .2 / foo .א / bar .ב\" exactly as the ref (zoom: scratch crop of movers-01 row 1) and rows 3-4 keep the letter-then-period order; rows 5-6 keep the CJK marker 4 px left of the ref. Picture-correct in PART (pictureCorrectTally part)",
+   "prev": 0.9547,
+   "cur": 0.989
+  },
+  "css-counter-styles/counter-suffix.html ios": {
+   "label": "DEGENERATE",
+   "what": "PRE-REGISTERED (stayDegenerateEvenIfPass rows 3-6): the RTL list now carries its markers as the ref; rows 3-4 still draw the Hebrew period BEFORE the letter (\".א foo / .ב bar\" where the ref reads \"א. foo / ב. bar\") and rows 5-6 keep the CJK marker offset. Picture-correct in PART",
+   "prev": 0.9802,
+   "cur": 0.9873
+  },
+  "css-counter-styles/counter-suffix.html web": {
+   "label": "FAITHFUL",
+   "what": "identical to the ref (score 1): the RTL list carries its markers",
+   "prev": 0.9818,
+   "cur": 1
+  },
+  "css-lists/counter-list-item.html android": {
+   "label": "HONEST_FAIL",
+   "what": "still f: the UA heading face is now right (bold, large heading) and — second reader — every counter(list-item) value matches the ref exactly; the fault is SPACING, not numbering: no 16 px ol margin-top (20 px pitch vs the ref's 36), no gap before \"Reversed ordered lists\" / \"Unordered lists\", inter-list gaps 40 vs 36 px, bullets 4 px right (x43 vs x39)",
+   "prev": 0.7307,
+   "cur": 0.785
+  },
+  "css-multicol/balance-grid-container.html ios": {
+   "label": "HONEST_FAIL",
+   "what": "still f: the Relevant Countries column stays displaced (\"Ireland / United Kingdom\" under the address)",
+   "prev": 0.862,
+   "cur": 0.8735
+  },
+  "css-multicol/column-height-009.html android": {
+   "label": "HONEST_FAIL",
+   "what": "still f: the letters a-p fill one cyan column at the left where the ref balances three columns; moved up with the blue rules now drawn",
+   "prev": 0.742,
+   "cur": 0.848
+  },
+  "css-multicol/column-height-009.html ios": {
+   "label": "HONEST_FAIL",
+   "what": "still f: same picture class as android",
+   "prev": 0.8072,
+   "cur": 0.8804
+  },
+  "css-multicol/column-height-009.html web": {
+   "label": "HONEST_FAIL",
+   "what": "still f: three columns now (a-f / g-l / m-p) but the column heights differ from the ref",
+   "prev": 0.8827,
+   "cur": 0.9092
+  },
+  "css-overflow/line-clamp/block-ellipsis-002.html ios": {
+   "label": "DEGENERATE",
+   "what": "PRE-REGISTERED (stayDegenerateEvenIfPass): Line 4 is still painted and no \"…\" — the iOS clamp is not applied; U3 removed the stray blank lines",
+   "prev": 0.9813,
+   "cur": 0.9928
+  },
+  "css-overflow/line-clamp/block-ellipsis-002.html web": {
+   "label": "FAITHFUL",
+   "what": "\"Line 1 / Line 2 / Line 3…\" as the ref (score 1); the open capture had a blank line before Line 3",
+   "prev": 0.9868,
+   "cur": 1
+  },
+  "css-overflow/line-clamp/block-ellipsis-004.html web": {
+   "label": "FAITHFUL",
+   "what": "the boxed \"Line 3…\" directly under Line 2 as the ref",
+   "prev": 0.9737,
+   "cur": 0.998
+  },
+  "css-overflow/line-clamp/block-ellipsis-005.html web": {
+   "label": "FAITHFUL",
+   "what": "as -004",
+   "prev": 0.9735,
+   "cur": 0.9981
+  },
+  "css-overflow/line-clamp/block-ellipsis-006.html web": {
+   "label": "FAITHFUL",
+   "what": "as -004",
+   "prev": 0.9735,
+   "cur": 0.9981
+  },
+  "css-position/change-insets-inside-strict-containment-nested.html android": {
+   "label": "FAITHFUL",
+   "what": "DEGENERATE → faithful: the open capture passed with a red square painted under the green one; the final paints the green square alone as the ref",
+   "prev": 0.9589,
+   "cur": 0.9967
+  },
+  "css-position/change-insets-inside-strict-containment-nested.html ios": {
+   "label": "FAITHFUL",
+   "what": "DEGENERATE → faithful: the open capture passed with a red square painted under the green one; the final paints the green square alone as the ref",
+   "prev": 0.9594,
+   "cur": 0.9974
+  },
+  "css-position/position-absolute-semi-replaced-stretch-input.html web": {
+   "label": "FAITHFUL",
+   "what": "identical to the ref (score 1): input-btn / Submit / Reset / the black box / text / password / date fields",
+   "prev": 0.9596,
+   "cur": 1
+  },
+  "css-position/position-relative-003.html android": {
+   "label": "FAITHFUL",
+   "what": "DEGENERATE → faithful: the open capture passed with a red square painted under the green one; the final paints the green square alone as the ref",
+   "prev": 0.9589,
+   "cur": 0.9967
+  },
+  "css-position/position-relative-003.html ios": {
+   "label": "FAITHFUL",
+   "what": "DEGENERATE → faithful: the open capture passed with a red square painted under the green one; the final paints the green square alone as the ref",
+   "prev": 0.9594,
+   "cur": 0.9974
+  },
+  "css-position/position-relative-004.html android": {
+   "label": "FAITHFUL",
+   "what": "DEGENERATE → faithful: the open capture passed with a red square painted under the green one; the final paints the green square alone as the ref",
+   "prev": 0.9589,
+   "cur": 0.9967
+  },
+  "css-position/position-relative-004.html ios": {
+   "label": "FAITHFUL",
+   "what": "DEGENERATE → faithful: the open capture passed with a red square painted under the green one; the final paints the green square alone as the ref",
+   "prev": 0.9594,
+   "cur": 0.9974
+  },
+  "css-text-decor/text-decoration-color.html android": {
+   "label": "HONEST_FAIL",
+   "what": "still f: the heading now bold as the ref (UA face); the decoration colours/positions below still differ",
+   "prev": 0.6164,
+   "cur": 0.672
+  },
+  "css-text-decor/text-decoration-subelements-003.html android": {
+   "label": "HONEST_FAIL",
+   "what": "still f (0.916): \"All this text should / be / underlined / .\" with the word and the period on their own lines and ZERO blue pixels (the continuous blue underline the test requires is absent) in both open and final; the +0.0076 is real — the stacked sup shrank and moved up (its green underline 322 → 268 px, y273 → y268), the predicted \"stacked sup → smaller\" move — but not a fix",
+   "prev": 0.9084,
+   "cur": 0.916
+  },
+  "css-text/bidi/bidi-lines-002.html android": {
+   "label": "DEGENERATE",
+   "what": "PRE-REGISTERED (stayDegenerateEvenIfPass): the orange \"!\" marks still sit at the LEFT edge where the ref has them at the right (zoom: scratch crop of movers-04 row 5); the score rose with P's padding, the picture did not change",
+   "prev": 0.9534,
+   "cur": 0.9818
+  },
+  "css-text/hyphens/hyphenate-character-002.html web": {
+   "label": "HONEST_FAIL",
+   "what": "still f: Chromium's dictionary breaks im/ple/men/tation (groups 4,4,4,3) where the ref breaks 5,4,3,3 — pre-registered wall",
+   "prev": 0.92,
+   "cur": 0.9344
+  },
+  "css-text/hyphens/hyphenate-character-004.html ios": {
+   "label": "HONEST_FAIL",
+   "what": "still f (0.9477) with a FAITHFUL picture — second reader: every break at the ref position (groups 4,4,4,3; the forbidden ta|tion break not taken), every taken break ends in the \"/-/\" string (the open capture drew the UA hyphen), line extents within 1 px; the only residue is the iOS monospace font's narrower U+002D glyph (~5 px vs the ref's ~10; the same glyph in hyphens-none-012) which alone keeps the score under 0.95. A prediction MISS (the plan predicted P ≈0.979 via the spent-hyphen hunk; adjudicate-final.txt line 19), not a pre-registered f — the first reader's \"pre-registered to stay f\" was wrong and is withdrawn",
+   "prev": 0.9134,
+   "cur": 0.9477,
+   "pictureCorrect": true,
+   "secondReader": "FAITHFUL picture; verdict class kept HONEST_FAIL because the cell still fails"
+  },
+  "css-ui/appearance-auto-input-non-widget-001.html web": {
+   "label": "FAITHFUL",
+   "what": "\"[img]def [Choose File] No file chosen\" as the ref (score 1)",
+   "prev": 0.9873,
+   "cur": 1
+  },
+  "css-ui/box-sizing-010.html web": {
+   "label": "FAITHFUL",
+   "what": "two green squares/rectangles of one size side by side as the ref; the open capture had one wide box",
+   "prev": 0.9713,
+   "cur": 0.9843
+  },
+  "css-ui/box-sizing-011.html web": {
+   "label": "FAITHFUL",
+   "what": "two green squares/rectangles of one size side by side as the ref; the open capture had one wide box",
+   "prev": 0.9713,
+   "cur": 0.9843
+  },
+  "css-ui/box-sizing-013.html web": {
+   "label": "FAITHFUL",
+   "what": "two green squares/rectangles of one size side by side as the ref; the open capture had one wide box",
+   "prev": 0.9538,
+   "cur": 0.9725
+  },
+  "css-ui/box-sizing-014.html web": {
+   "label": "FAITHFUL",
+   "what": "two green squares/rectangles of one size side by side as the ref; the open capture had one wide box",
+   "prev": 0.9713,
+   "cur": 0.9843
+  },
+  "css-ui/box-sizing-015.html web": {
+   "label": "FAITHFUL",
+   "what": "two green squares/rectangles of one size side by side as the ref; the open capture had one wide box",
+   "prev": 0.9713,
+   "cur": 0.9843
+  },
+  "css-ui/box-sizing-016.html web": {
+   "label": "FAITHFUL",
+   "what": "two green squares/rectangles of one size side by side as the ref; the open capture had one wide box",
+   "prev": 0.9713,
+   "cur": 0.9843
+  },
+  "css-ui/box-sizing-017.html web": {
+   "label": "FAITHFUL",
+   "what": "two green squares/rectangles of one size side by side as the ref; the open capture had one wide box",
+   "prev": 0.9713,
+   "cur": 0.9843
+  },
+  "css-ui/box-sizing-018.html web": {
+   "label": "FAITHFUL",
+   "what": "two green squares/rectangles of one size side by side as the ref; the open capture had one wide box",
+   "prev": 0.9713,
+   "cur": 0.9843
+  },
+  "css-ui/box-sizing-019.html web": {
+   "label": "FAITHFUL",
+   "what": "two green squares/rectangles of one size side by side as the ref; the open capture had one wide box",
+   "prev": 0.9713,
+   "cur": 0.9843
+  },
+  "css-ui/box-sizing-020.html web": {
+   "label": "FAITHFUL",
+   "what": "two green squares/rectangles of one size side by side as the ref; the open capture had one wide box",
+   "prev": 0.9599,
+   "cur": 0.9843
+  },
+  "css-ui/box-sizing-021.html web": {
+   "label": "FAITHFUL",
+   "what": "two green squares/rectangles of one size side by side as the ref; the open capture had one wide box",
+   "prev": 0.9599,
+   "cur": 0.9843
+  },
+  "css-ui/box-sizing-024.html web": {
+   "label": "FAITHFUL",
+   "what": "two green squares/rectangles of one size side by side as the ref; the open capture had one wide box",
+   "prev": 0.9599,
+   "cur": 0.9843
+  },
+  "css-ui/box-sizing-025.html web": {
+   "label": "FAITHFUL",
+   "what": "two green squares/rectangles of one size side by side as the ref; the open capture had one wide box",
+   "prev": 0.9599,
+   "cur": 0.9843
+  },
+  "css-values/attr-style-sharing-1.html web": {
+   "label": "FAITHFUL",
+   "what": "\"green\" highlighted, \"not green\" plain, as the ref (score 1)",
+   "prev": 0.9939,
+   "cur": 1
+  },
+  "CSS2/abspos/static-fixed-inside-abspos.html android": {
+   "label": "FAITHFUL",
+   "what": "DEGENERATE → faithful: the open capture passed with a stray small green square at the top-left and a red square beside the green one; the final paints one green square as the ref",
+   "prev": 0.9835,
+   "cur": 0.9967
+  },
+  "CSS2/abspos/static-fixed-inside-abspos.html ios": {
+   "label": "FAITHFUL",
+   "what": "DEGENERATE → faithful: the open capture passed with a stray small green square at the top-left and a red square beside the green one; the final paints one green square as the ref",
+   "prev": 0.9841,
+   "cur": 0.9974
+  },
+  "CSS2/abspos/static-inside-inline-block.html web": {
+   "label": "FAITHFUL",
+   "what": "the green square at the ref offset (0.999)",
+   "prev": 0.9803,
+   "cur": 0.999
+  },
+  "filter-effects/backdrop-filter-border-radius-change.html android": {
+   "label": "HONEST_FAIL",
+   "what": "still f: \"Hello World\" now bold as the ref (UA face); the green circle still covers the text differently",
+   "prev": 0.5977,
+   "cur": 0.6397
+  },
+  "filter-effects/backdrop-filter-clip-rect.html ios": {
+   "label": "FAITHFUL",
+   "what": "the inverted band, the black rounded ends and the red outline as the ref",
+   "prev": 0.956,
+   "cur": 0.9961
+  },
+  "filter-effects/backdrop-filter-clip-rect.html web": {
+   "label": "FAITHFUL",
+   "what": "identical to the ref (score 1)",
+   "prev": 0.959,
+   "cur": 1
+  },
+  "filter-effects/backdrop-filter-corner-shape-change.html android": {
+   "label": "HONEST_FAIL",
+   "what": "still f: the heading now bold as the ref; the ref's four-point star (corner-shape) is still a circle",
+   "prev": 0.4904,
+   "cur": 0.5296
+  },
+  "filter-effects/backdrop-filter-edge-clipping.html ios": {
+   "label": "FAITHFUL",
+   "what": "white box clean inside the green as the ref",
+   "prev": 0.9578,
+   "cur": 0.9975
+  },
+  "filter-effects/backdrop-filter-edge-clipping.html web": {
+   "label": "FAITHFUL",
+   "what": "white box clean inside the green as the ref",
+   "prev": 0.9595,
+   "cur": 1
+  },
+  "filter-effects/backdrop-filter-paint-order.html ios": {
+   "label": "FAITHFUL",
+   "what": "white box clean inside the green as the ref",
+   "prev": 0.9578,
+   "cur": 0.9975
+  },
+  "filter-effects/backdrop-filter-paint-order.html web": {
+   "label": "FAITHFUL",
+   "what": "white box clean inside the green as the ref",
+   "prev": 0.9595,
+   "cur": 1
+  }
+ },
+ "lost": {},
+ "notes": {
+  "summary": "gained 30: FAITHFUL 26, DEGENERATE 4 (all four pre-registered in expectations.stayDegenerateEvenIfPass — not counted as earned); movers 51: FAITHFUL 36 (eight of them DEGENERATE → faithful: the three css-position pairs and static-fixed-inside-abspos ×2), DEGENERATE 4 (pre-registered: counter-suffix android/ios, block-ellipsis-002 ios, bidi-lines-002 android), HONEST_FAIL 11 (still f after moving up; none moved down). Lost 0.",
+  "geometryReportFails": "geometry-final.out.txt: 9 report-class keys FAIL as pre-registered \"expected WRONG until the target is fixed\" (compose-wpt-content-box-cb abspos-autopos-htb/vlr/vrl-rtl android; ua-heading-face text-decoration-inset-005/-006/-014 ios+android) and the 7 CBB-android keys WITHDRAWN (FAIL, the unit is off the tree); control 112/112 PASS, gating 30/30 PASS",
+  "mustNotFallClause": "PLAN §10 item 7 ¶2 restated the two L3 iOS floors to 0.95 + \"must not fall vs the probe (≥ probe − 0.002)\": hyphenate-character-001 ios final 0.9611 = probe 0.9611; -003 ios final 0.957 = probe 0.957 (byte-deterministic host) — holds; read by hand, adjudicate.mjs has no reader for the clause (lesson)",
+  "secondReader": "29 cells re-read adversarially (every DEGENERATE / HONEST_FAIL and every FAITHFUL under 0.975; readings in final/cell-review.second-reader.json): 28 agree; 1 disagreement — hyphenate-character-004 ios, reader: FAITHFUL picture (glyph-metric miss), reconciled above. Reader corrections folded into the texts: counter-list-item android (spacing, not numbering), bidi-lines-001 android (open rows were right), box-sizing-022 web (no width residue), text-decoration-subelements-003 android (the sup did move), backdrop-filter-clip-rect android (a 416-px paint-order residual, red-under-blue), clip-path-filter-order android (the gain is the text block; the order mechanism is not shown by this cell), hyphenate-character-003 ios (the \\2022 escape was the web capture).",
+  "residuesForBacklog": [
+   "backdrop-filter-clip-rect android: positioned children's borders paint under the parent's blue border (416 px red-under-blue; same in open) — outside the test's condition",
+   "clip-path-filter-order android: the pass does not exercise clip-path/filter order (drop-shadow possibly dropped); the gain came from text-block spacing",
+   "counter-list-item android f 0.785: list spacing (ol margin-top 16 px missing, inter-list gaps, bullet x) — numbering now exact",
+   "hyphenate-character-004 ios f 0.9477 with a faithful picture: the monospace U+002D glyph width (font, not layout)"
+  ]
+ }
+}

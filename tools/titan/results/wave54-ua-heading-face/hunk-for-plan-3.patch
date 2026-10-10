@@ -1,0 +1,32 @@
+# hunk-for-plan-3.patch — wave 54 lane L5 FIX PASS for the ORCHESTRATOR: land-units.sh's L5 block restated for GO-SMALL
+# file: tools/titan/results/wave54-plan/land-units.sh (untracked at the fix pass); file sha256 at base: 672c74b93f884312acd8aa645b373c39db51392730e08bbda443ecd95b14f0b8
+# U1-android now holds: UAElementFontRule.kt, UAElementFontRuleTest.kt, the patch-borne UAElementFontRuleSeamWiringTest.kt, the seam,
+#   UAElementFontRule.swift (docs only) and the lane dir; UAHeadingFoldGate.kt / its test / UAHeadingFaceReplay.kt / UAHeadingFaceWire.kt are
+#   no longer in the tree (git add of a missing path would stop the script). U2-ios block removed (HELD).
+diff --git a/tools/titan/results/wave54-plan/land-units.sh b/tools/titan/results/wave54-plan/land-units.sh
+index d4751d9..6f3628d 100644
+--- a/tools/titan/results/wave54-plan/land-units.sh
++++ b/tools/titan/results/wave54-plan/land-units.sh
+@@ -79,16 +79,14 @@ commit "wave54 L6 W1: a paint-inert out-of-flow member no longer splits an auto-
+ "Revert unit L6-W1 ($L6/_note.md). Reverting undoes hyphens-out-of-flow-002 web." \
+   runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts runtimes/web/tests/renderer/InertOutOfFlowWordJoin.test.tsx runtimes/web/src/renderer/InlineRuns.ts runtimes/web/src/renderer/NodeRenderer.ts
+ 
+-# ── L5 U1-android (+ kt seam-1), then U2-ios (+ swift seam-2) ────────────────
++# ── L5 U1-android (+ kt seam-1) — GO-SMALL since the L5 fix pass; U2-ios is HELD (no seam-2) ───────
+ L5=$R/wave54-ua-heading-face
+ apply "$L5/seam-1.patch"
+-commit "wave54 L5 U1-android: the UA element-font step for headings on Compose (UAElementFontRule / UAHeadingFoldGate; HTML §15.3.6 rendering)" \
+-"Revert unit L5-U1-android ($L5/_note.md). Reverting undoes block-in-inline-015-print android and the text-decoration-inset-005/-006/-014 android movers." \
+-  "$KT/typography/UAElementFontRule.kt" "$KT/typography/UAHeadingFoldGate.kt" "$KTT/typography/UAElementFontRuleTest.kt" "$KTT/typography/UAHeadingFoldGateTest.kt" "$KTT/typography/UAHeadingFaceReplay.kt" "$KTT/typography/UAHeadingFaceWire.kt" "$CR_KT" "$L5"
+-apply "$L5/seam-2.patch"
+-commit "wave54 L5 U2-ios: the SwiftUI heading fold gate (UAHeadingFoldGate.swift twin)" \
+-"Revert unit L5-U2-ios ($L5/_note.md). Reverting undoes the text-decoration-inset-005/-006/-014 ios movers." \
+-  "$SW/StyleEngine/typography/UAHeadingFoldGate.swift" "$SW/StyleEngine/typography/UAElementFontRule.swift" "$SWT/UAHeadingFoldGateTests.swift" "$SWT/UAElementFontRuleTests.swift" "$CR_SW"
++commit "wave54 L5 U1-android: the UA element-font step for leaf headings and sub/sup on Compose (UAElementFontRule; HTML §15.3 rendering)" \
++"Revert unit L5-U1-android ($L5/_note.md, \"Fix pass\"). Reverting undoes block-in-inline-015-print android and the six android movers (text-decoration-color, counter-list-item, counter-reset-increment-overflow-underflow, text-decoration-subelements-003, backdrop-filter-border-radius-change / -corner-shape-change)." \
++  "$KT/typography/UAElementFontRule.kt" "$KTT/typography/UAElementFontRuleTest.kt" "$KTT/typography/UAElementFontRuleSeamWiringTest.kt" "$CR_KT" "$SW/StyleEngine/typography/UAElementFontRule.swift" "$L5"
++# L5 U2-ios: HELD at the lane fix pass (the fold-aware heading gate waits for the abspos UA heading margin;
++# $L5/held/) — nothing to apply or commit.
+ 
+ # ── L4 OOF-android, OOF-ios, CBB-android (+ kt seam-1), GAP-android, GAP-ios ─
+ L4=$R/wave54-oof-layout

@@ -1,0 +1,6 @@
+score-gate  prev=wave53-final  cur=wave54-open
+  prev totals: web 1232/1372  ios 1125/1362  android 1115/1362
+  cur  totals: web 1232/1372  ios 1125/1362  android 1115/1362
+  per-cell: gained 0  lost 0  newly-measured 0  unmeasured-now 0  movers(|Δ|>=0) 4096
+  per section (prev → cur):
+    CSS2                     web 44/47→44/47  ios 41/47→41/47  android 41/47→41/47

@@ -1,0 +1,13 @@
+extracted css/selectors/dir-selector-change-003.html → fixtures/wpt/selectors/dir-selector-change-003.json (+ ref) [post-load: extracted] [bidi-bake: baked — 1 roots, 1 runs]
+extracted css/selectors/dir-selector-change-004.html → fixtures/wpt/selectors/dir-selector-change-004.json (+ ref) [post-load: extracted] [bidi-bake: baked — 1 roots, 1 runs]
+extracted css/selectors/dir-style-01a.html → fixtures/wpt/selectors/dir-style-01a.json (+ ref) [post-load: extracted] [bidi-bake: bailed — fragmented inline <span> at 3.3.0 (8 client rects)]
+extracted css/selectors/dir-style-02a.html → fixtures/wpt/selectors/dir-style-02a.json (+ ref) [post-load: extracted] [bidi-bake: baked — 6 roots, 17 runs]
+extracted css/selectors/dir-style-03a.html → fixtures/wpt/selectors/dir-style-03a.json (+ ref) [bidi-bake: baked — 1 roots, 2 runs]
+converter: no warning lines
+documents 48: identical 48 · renumbered 0 · content-changed 0
+ok   content-changed ⊆ L1 wire carriers: []
+ok   wpt__selectors__dir-style-02a byte-identical (zero-padding roots, pin V3b)
+ok   wpt__selectors__dir-selector-change-003 byte-identical (zero-padding roots, pin V3b)
+ok   wpt__selectors__dir-selector-change-004 byte-identical (zero-padding roots, pin V3b)
+W2 CHECK: ALL PASS
+exit 0

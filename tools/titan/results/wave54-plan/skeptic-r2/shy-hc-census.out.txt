@@ -1,0 +1,33 @@
+(a) documents carrying U+00AD: 17
+   css-overflow/line-clamp/block-ellipsis-014.html                        shy   1  L3 must-not-move
+   css-overflow/line-clamp/block-ellipsis-028.html                        shy   1  L3 must-not-move
+   css-text/hyphens/hyphenate-character-001.html                          shy  24  L3 CARRIER
+   css-text/hyphens/hyphenate-character-003.html                          shy  24  L3 CARRIER
+   css-text/hyphens/hyphenate-character-004.html                          shy  24  L3 CARRIER
+   css-text/hyphens/hyphenate-character-005.html                          shy   1  L3 must-not-move
+   css-text/hyphens/hyphens-auto-control.html                             shy   3  L3 must-not-move
+   css-text/hyphens/hyphens-manual-011.html                               shy   2  L3 must-not-move
+   css-text/hyphens/hyphens-manual-012.html                               shy   4  L3 must-not-move
+   css-text/hyphens/hyphens-manual-013.html                               shy   1  L3 must-not-move
+   css-text/hyphens/hyphens-manual-inline-011.html                        shy   2  L3 must-not-move
+   css-text/hyphens/hyphens-manual-inline-012.html                        shy   4  L3 must-not-move
+   css-text/hyphens/hyphens-none-011.html                                 shy   2  L3 must-not-move
+   css-text/hyphens/hyphens-none-shy-on-2nd-line-001.html                 shy   4  L3 must-not-move
+   css-text/hyphens/hyphens-out-of-flow-001.html                          shy  13  L3 must-not-move
+   css-text/hyphens/hyphens-span-001.html                                 shy   9  L3 must-not-move
+   css-text/hyphens/hyphens-vertical-001.html                             shy   1  L3 must-not-move
+(b) hyphenate-character declarations on the wire: 14
+   css-text/hyphens/hyphenate-character-001.html wpt__css-text__hyphens__hyphenate-character-001__1 {"type":"Generic","data":{"propertyName":"hyphenate-character","rawValue":"\"\"","_unmapped":true}}
+   css-text/hyphens/hyphenate-character-002.html wpt__css-text__hyphens__hyphenate-character-002__1 {"type":"Generic","data":{"propertyName":"hyphenate-character","rawValue":"\"\"","_unmapped":true}}
+   css-text/hyphens/hyphenate-character-003.html wpt__css-text__hyphens__hyphenate-character-003__1 {"type":"HyphenateCharacter","data":{"type":"string","value":"\\2022"}}
+   css-text/hyphens/hyphenate-character-004.html wpt__css-text__hyphens__hyphenate-character-004__1 {"type":"HyphenateCharacter","data":{"type":"string","value":"/-/"}}
+   css-text/hyphens/hyphenate-character-005.html wpt__css-text__hyphens__hyphenate-character-005__1 {"type":"HyphenateCharacter","data":{"type":"string","value":"\\00a0\\0640"}}
+   css-text/hyphens/hyphenate-limit-chars-001.html hyphens__hyphenate-limit-chars-001__0__0 {"type":"HyphenateCharacter","data":{"type":"string","value":"-"}}
+   css-text/hyphens/hyphenate-limit-chars-001.html hyphens__hyphenate-limit-chars-001__0__1 {"type":"HyphenateCharacter","data":{"type":"string","value":"-"}}
+   css-text/hyphens/hyphenate-limit-chars-001.html hyphens__hyphenate-limit-chars-001__0__2 {"type":"HyphenateCharacter","data":{"type":"string","value":"-"}}
+   css-text/hyphens/hyphenate-limit-chars-001.html hyphens__hyphenate-limit-chars-001__0__3 {"type":"HyphenateCharacter","data":{"type":"string","value":"-"}}
+   css-text/hyphens/hyphenate-limit-chars-001.html hyphens__hyphenate-limit-chars-001__0__4 {"type":"HyphenateCharacter","data":{"type":"string","value":"-"}}
+   css-text/hyphens/hyphenate-limit-chars-001.html hyphens__hyphenate-limit-chars-001__0__5 {"type":"HyphenateCharacter","data":{"type":"string","value":"-"}}
+   css-text/hyphens/hyphenate-limit-chars-001.html hyphens__hyphenate-limit-chars-001__0__6 {"type":"HyphenateCharacter","data":{"type":"string","value":"-"}}
+   css-text/hyphens/hyphenate-limit-chars-001.html hyphens__hyphenate-limit-chars-001__0__7 {"type":"HyphenateCharacter","data":{"type":"string","value":"-"}}
+   css-text/hyphens/hyphenate-limit-chars-001.html hyphens__hyphenate-limit-chars-001__0__8 {"type":"HyphenateCharacter","data":{"type":"string","value":"-"}}

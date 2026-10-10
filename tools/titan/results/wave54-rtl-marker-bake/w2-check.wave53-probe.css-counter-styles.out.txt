@@ -1,0 +1,39 @@
+documents 48: identical 32 · renumbered 15 · content-changed 1
+ok   content-changed ⊆ L1 wire carriers: ["wpt__css-counter-styles__counter-suffix"]
+ok   renumbered = 15 (got 15: cssom-additive-symbols-setter-invalid, cssom-additive-symbols-setter, cssom-fallback-setter-invalid, cssom-fallback-setter, cssom-name-setter-invalid, cssom-name-setter, cssom-negative-setter-invalid, cssom-negative-setter, cssom-pad-setter-invalid, cssom-pad-setter, cssom-prefix-suffix-setter-invalid, cssom-prefix-suffix-setter, cssom-range-setter-invalid, cssom-range-setter, cssom-symbols-setter-invalid)
+ok   counter-suffix components 23 → 29 (expect 23 → 29)
+ok   wpt__css-counter-styles__counter-suffix__0: unchanged
+ok   counter-suffix__0__0: unchanged
+ok   counter-suffix__0__0__0: unchanged
+ok   counter-suffix__0__0__1: unchanged
+ok   counter-suffix__0__1: unchanged
+ok   counter-suffix__0__1__0: unchanged
+ok   counter-suffix__0__1__1: unchanged
+ok   counter-suffix__0__2: unchanged
+ok   counter-suffix__0__2__0: unchanged
+ok   counter-suffix__0__2__1: unchanged
+ok   counter-suffix__0__3: unchanged
+ok   counter-suffix__0__3__0: unchanged
+ok   counter-suffix__0__3__1: unchanged
+ok   counter-suffix__0__4 (root): only Padding* → {px:0} (["PaddingRight","PaddingLeft"])
+ok   counter-suffix__0__4__0 (item): + ListStyleType NONE, − meta.markerText (["ListStyleType"], meta {"sourceTag":"li"})
+ok   counter-suffix__0__4__0__0: unchanged
+ok   counter-suffix__0__4__1 (item): + ListStyleType NONE, − meta.markerText (["ListStyleType"], meta {"sourceTag":"li"})
+ok   counter-suffix__0__4__1__0: unchanged
+ok   counter-suffix__0__5 (root): only Padding* → {px:0} (["PaddingRight","PaddingLeft"])
+ok   counter-suffix__0__5__0 (item): + ListStyleType NONE, − meta.markerText (["ListStyleType"], meta {"sourceTag":"li"})
+ok   counter-suffix__0__5__0__0: unchanged
+ok   counter-suffix__0__5__1 (item): + ListStyleType NONE, − meta.markerText (["ListStyleType"], meta {"sourceTag":"li"})
+ok   counter-suffix__0__5__1__0: unchanged
+ok   6 added components: ["counter-suffix__0__4__0__1","counter-suffix__0__4__0__2","counter-suffix__0__4__1__1","counter-suffix__0__4__1__2","counter-suffix__0__5__0__1","counter-suffix__0__5__1__1"]
+FAIL counter-suffix__0__4__0__1: parent counter-suffix__0__4__0 Left 68.3 Top 2 FVN ["TABULAR_NUMS"] Dir "LTR" (want counter-suffix__0__4 116.3 2)
+FAIL counter-suffix__0__4__0__2: parent counter-suffix__0__4__0 Left 72.59 Top 2 FVN ["TABULAR_NUMS"] Dir "LTR" (want counter-suffix__0__4 120.59 2)
+FAIL counter-suffix__0__4__1__1: parent counter-suffix__0__4__1 Left 68.3 Top 2 FVN ["TABULAR_NUMS"] Dir "LTR" (want counter-suffix__0__4 116.3 26)
+FAIL counter-suffix__0__4__1__2: parent counter-suffix__0__4__1 Left 72.59 Top 2 FVN ["TABULAR_NUMS"] Dir "LTR" (want counter-suffix__0__4 120.59 26)
+FAIL counter-suffix__0__5__0__1: parent counter-suffix__0__5__0 Left 68.3 Top 2 FVN ["TABULAR_NUMS"] Dir "RTL" (want counter-suffix__0__5 116.3 2)
+FAIL counter-suffix__0__5__1__1: parent counter-suffix__0__5__1 Left 68.3 Top 2 FVN ["TABULAR_NUMS"] Dir "RTL" (want counter-suffix__0__5 116.3 26)
+FAIL counter-suffix__0__4__0 keeps exactly ONE child
+FAIL counter-suffix__0__5__0 keeps exactly ONE child
+FAIL counter-suffix__0__4__1 keeps exactly ONE child
+FAIL counter-suffix__0__5__1 keeps exactly ONE child
+W2 CHECK: 10 FAIL

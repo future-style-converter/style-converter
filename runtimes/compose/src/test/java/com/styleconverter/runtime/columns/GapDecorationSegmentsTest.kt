@@ -186,4 +186,78 @@ class GapDecorationSegmentsTest {
             build(GapDecorationConfig(column = solid(0f)))
         )
     }
+
+    // ── Wave 54 (lane L4, GAP-android): WPT 033, rules on ZERO gaps ──────
+    // css-gap-decorations-1 centres a rule of the declared width on its gap
+    // even when the gap is 0px. 033's container (verbatim wave53-final IR,
+    // tools/titan/runs/wave53-final/sections/css-gaps/per-test-ir/
+    // wpt__css-gaps__flex__flex-gap-decorations-033.json): `width: 150px;
+    // flex-wrap: wrap`, no gap, 10px red column rules, 10px blue row rules;
+    // items 50/50/50 | 100/50 | 50/50/50, all 50 tall → three lines whose
+    // items AND lines touch. Ref (frozen PNG, content origin 16): red at
+    // x61-70 / x111-120, blue full-width at y61-70 / y111-120, blue over red.
+
+    /** 033's container declarations, verbatim from the per-test IR. */
+    private val config033 = GapDecorationExtractor.extract(listOf(
+        "RowRuleStyle" to kotlinx.serialization.json.JsonPrimitive("SOLID"),
+        "RowRuleColor" to kotlinx.serialization.json.Json.parseToJsonElement("""{"srgb":{"r":0,"g":0,"b":1},"original":"blue"}"""),
+        "RowRuleWidth" to kotlinx.serialization.json.Json.parseToJsonElement("""{"type":"length","px":10}"""),
+        "ColumnRuleStyle" to kotlinx.serialization.json.JsonPrimitive("SOLID"),
+        "ColumnRuleColor" to kotlinx.serialization.json.Json.parseToJsonElement("""{"srgb":{"r":1,"g":0,"b":0},"original":"red"}"""),
+        "ColumnRuleWidth" to kotlinx.serialization.json.Json.parseToJsonElement("""{"type":"length","px":10}"""),
+    ))
+
+    /** 033's placed items in its 150×150 content box, DOM order (the 50px grid). */
+    private val items033 = listOf(
+        rect(0f, 0f, 50f, 50f), rect(50f, 0f, 100f, 50f), rect(100f, 0f, 150f, 50f),
+        rect(0f, 50f, 100f, 100f), rect(100f, 50f, 150f, 100f),
+        rect(0f, 100f, 50f, 150f), rect(50f, 100f, 100f, 150f), rect(100f, 100f, 150f, 150f),
+    )
+
+    @Test
+    fun `033 touching items still position 2 + 1 + 2 column rules, line by line`() {
+        val segments = build(config033, items033, rect(0f, 0f, 150f, 150f))
+        // Line 2's ONE rule sits at the RIGHT boundary (x95-105, after the
+        // 100px item) — the per-line order a mis-indexed gap would break.
+        assertEquals(
+            listOf(
+                rect(45f, 0f, 55f, 50f), rect(95f, 0f, 105f, 50f),
+                rect(95f, 50f, 105f, 100f),
+                rect(45f, 100f, 55f, 150f), rect(95f, 100f, 105f, 150f),
+            ),
+            of(segments, GapAxis.COLUMN)
+        )
+    }
+
+    @Test
+    fun `033 touching lines still position two full-width row rules painted last`() {
+        val segments = build(config033, items033, rect(0f, 0f, 150f, 150f))
+        // A zero gap cuts nothing, so each row rule spans the content box.
+        assertEquals(listOf(rect(0f, 45f, 150f, 55f), rect(0f, 95f, 150f, 105f)), of(segments, GapAxis.ROW))
+        // rule-overlap initial ROW_OVER_COLUMN: blue paints over red (the ref).
+        assertEquals(GapAxis.ROW, segments.last().axis)
+        assertEquals(7, segments.size)
+    }
+
+    @Test
+    fun `033 whole-pixel rules snap to themselves at x 50 and 100`() {
+        // GapDecorationPainter.snapped (wave-52 7(a′)): integral bands come back unchanged.
+        for (r in of(build(config033, items033, rect(0f, 0f, 150f, 150f)), GapAxis.COLUMN)) {
+            assertEquals(r, GapDecorationPainter.snapped(r))
+        }
+    }
+
+    @Test
+    fun `overlapping items still open no gap and position no rule`() {
+        // A NEGATIVE extent (items overlap by 4px) stays dropped: no rule is
+        // centred on an overlap — the boundary the new rule must keep.
+        val overlap = listOf(rect(0f, 0f, 54f, 50f), rect(50f, 0f, 100f, 50f))
+        val segments = build(config033, overlap, rect(0f, 0f, 100f, 50f))
+        assertEquals(emptyList<GapRect>(), of(segments, GapAxis.COLUMN))
+        // Twin row (the Swift grouping reads a main overlap as a wrap): two
+        // LINES overlapping by 10px — line 2 starts at y40, line 1 ends at
+        // y50 — give a [50, 40] band that must position no row rule.
+        val lines = listOf(rect(0f, 0f, 50f, 50f), rect(50f, 0f, 100f, 50f), rect(0f, 40f, 50f, 90f))
+        assertEquals(emptyList<GapRect>(), of(build(config033, lines, rect(0f, 0f, 100f, 90f)), GapAxis.ROW))
+    }
 }

@@ -1,0 +1,27 @@
+{
+ "RS-m1": {
+  "file": "apps/web-harness/src/sdui/ComponentRenderer.tsx",
+  "old": "  if (!isWsAfterMarked(prev)) return null;\n  // Only an INLINE FORMATTING CONTEXT",
+  "new": "  // MUTATION RS-m1: marker gate removed\n  // Only an INLINE FORMATTING CONTEXT"
+ },
+ "RS-m2": {
+  "file": "apps/web-harness/src/ui/ComposedRootSeparator.ts",
+  "old": "const declined = typeof container.display === 'string' && TABLE_BOX_DISPLAYS.has(container.display);",
+  "new": "const declined = false && typeof container.display === 'string' && TABLE_BOX_DISPLAYS.has(container.display);"
+ },
+ "RS-m3": {
+  "file": "apps/web-harness/src/ui/ComposedRootSeparator.ts",
+  "old": "if (index === 0 || declined) return [el];",
+  "new": "if (declined) return [el];"
+ },
+ "RS-m4": {
+  "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+  "old": "), rootSeparatorContainer(doc, canvasTableBody), wsAfterSeparator)}",
+  "new": "), rootSeparatorContainer(doc, canvasTableBody), () => null)}"
+ },
+ "RS-m4b": {
+  "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+  "old": "          ), rootSeparatorContainer(doc, canvasTableBody), wsAfterSeparator)\n",
+  "new": "          ), rootSeparatorContainer(doc, canvasTableBody), () => null)\n"
+ }
+}

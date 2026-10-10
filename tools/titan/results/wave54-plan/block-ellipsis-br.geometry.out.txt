@@ -1,0 +1,16 @@
+block-ellipsis-002   ref      bands [(19, 32, 17, 61), (39, 52, 17, 63), (59, 72, 17, 77)] → GEOMETRY OK
+block-ellipsis-002   web      bands [(19, 32, 17, 61), (39, 52, 17, 63), (79, 92, 17, 78)] → GEOMETRY WRONG (band top y79 vs ref y59)
+block-ellipsis-002   ios      bands [(19, 32, 17, 60), (39, 52, 17, 63), (79, 92, 17, 63), (119, 132, 17, 63)] → GEOMETRY WRONG (4 bands vs ref 3)
+block-ellipsis-002   android  bands [(19, 32, 17, 61), (39, 52, 20, 67)] → GEOMETRY WRONG (2 bands vs ref 3)
+block-ellipsis-004   ref      bands [(19, 32, 17, 57), (39, 86, 16, 101)] → GEOMETRY OK
+block-ellipsis-004   web      bands [(19, 32, 17, 57), (39, 52, 17, 60), (74, 105, 16, 101)] → GEOMETRY WRONG (3 bands vs ref 2)
+block-ellipsis-004   ios      bands [(14, 27, 17, 57), (34, 47, 17, 60), (56, 75, 17, 98)] → GEOMETRY WRONG (3 bands vs ref 2)
+block-ellipsis-004   android  bands [(20, 32, 17, 57), (40, 72, 17, 85)] → GEOMETRY WRONG (band bottom y72 vs ref y86 (top y40))
+block-ellipsis-005   ref      bands [(19, 32, 17, 57), (39, 86, 16, 103)] → GEOMETRY OK
+block-ellipsis-005   web      bands [(19, 32, 17, 57), (39, 52, 17, 60), (74, 105, 16, 101)] → GEOMETRY WRONG (3 bands vs ref 2)
+block-ellipsis-005   ios      bands [(14, 27, 17, 57), (34, 47, 17, 60), (56, 75, 17, 98)] → GEOMETRY WRONG (3 bands vs ref 2)
+block-ellipsis-005   android  bands [(20, 32, 17, 57), (40, 72, 17, 85)] → GEOMETRY WRONG (band bottom y72 vs ref y86 (top y40))
+block-ellipsis-006   ref      bands [(19, 32, 17, 57), (39, 86, 16, 103)] → GEOMETRY OK
+block-ellipsis-006   web      bands [(19, 32, 17, 57), (39, 52, 17, 60), (74, 105, 16, 101)] → GEOMETRY WRONG (3 bands vs ref 2)
+block-ellipsis-006   ios      bands [(14, 27, 17, 57), (34, 47, 17, 60), (56, 75, 17, 98)] → GEOMETRY WRONG (3 bands vs ref 2)
+block-ellipsis-006   android  bands [(20, 32, 17, 57), (40, 72, 17, 85)] → GEOMETRY WRONG (band bottom y72 vs ref y86 (top y40))

@@ -1,0 +1,13 @@
+(1) wave53-final: unpatched exit 0, patched exit 0; output BYTE-IDENTICAL
+(2) text-decoration-inset-005 lift  0px: bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+(2) text-decoration-inset-005 lift 10px: bands [(124, 163, 16, 336), (178, 202, 16, 64)] → GEOMETRY WRONG (band top y124 vs ref y134 (the abspos heading's UA margin))
+(2) text-decoration-inset-005 lift 21px: bands [(113, 152, 16, 336), (167, 191, 16, 64)] → GEOMETRY WRONG (band top y113 vs ref y134 (the abspos heading's UA margin))
+(2) text-decoration-inset-005 lift 24px: bands [(110, 149, 16, 336), (164, 188, 16, 64)] → GEOMETRY WRONG (band top y110 vs ref y134 (the abspos heading's UA margin))
+(2) text-decoration-inset-006 lift  0px: bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+(2) text-decoration-inset-006 lift 10px: bands [(124, 163, 16, 331), (178, 202, 16, 64)] → GEOMETRY WRONG (band top y124 vs ref y134 (the abspos heading's UA margin))
+(2) text-decoration-inset-006 lift 21px: bands [(113, 152, 16, 331), (167, 191, 16, 64)] → GEOMETRY WRONG (band top y113 vs ref y134 (the abspos heading's UA margin))
+(2) text-decoration-inset-006 lift 24px: bands [(110, 149, 16, 331), (164, 188, 16, 64)] → GEOMETRY WRONG (band top y110 vs ref y134 (the abspos heading's UA margin))
+(2) text-decoration-inset-014 lift  0px: bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+(2) text-decoration-inset-014 lift 10px: bands [(119, 144, 17, 258), (153, 176, 16, 155)] → GEOMETRY WRONG (band top y119 vs ref y129 (the abspos heading's UA margin))
+(2) text-decoration-inset-014 lift 21px: bands [(110, 133, 17, 258), (142, 165, 16, 155)] → GEOMETRY WRONG (band top y110 vs ref y129 (the abspos heading's UA margin))
+(2) text-decoration-inset-014 lift 24px: bands [(110, 130, 17, 258), (139, 162, 16, 155)] → GEOMETRY WRONG (band top y110 vs ref y129 (the abspos heading's UA margin))

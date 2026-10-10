@@ -1,0 +1,3 @@
+A/B  exclude=wave54-ab-drop-W1  include=wave54-final  sections=css-text  platforms=web
+compared 48 cells: 1 differ (flip, or |Δ| ≥ 0.002), 47 within threshold
+  flip f→P     web      f 0.9411  → P 1       Δ+0.0589  css/css-text/hyphens/hyphens-out-of-flow-002.html

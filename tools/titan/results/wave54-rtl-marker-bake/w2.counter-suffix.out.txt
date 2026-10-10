@@ -1,0 +1,42 @@
+extracted css/css-counter-styles/counter-suffix.html → fixtures/wpt/css-counter-styles/counter-suffix.json (+ ref) [bidi-bake: baked — 2 roots, 10 runs] [counter-bake: baked — 6 markers, 2 declined]
+converter: no warning lines
+documents 1: identical 0 · renumbered 0 · content-changed 1
+(subset run: an untouched document is compared modulo the converter id counter)
+ok   content-changed ⊆ L1 wire carriers: ["wpt__css-counter-styles__counter-suffix"]
+ok   counter-suffix components 23 → 29 (expect 23 → 29)
+ok   wpt__css-counter-styles__counter-suffix__0: unchanged
+ok   counter-suffix__0__0: unchanged
+ok   counter-suffix__0__0__0: unchanged
+ok   counter-suffix__0__0__1: unchanged
+ok   counter-suffix__0__1: unchanged
+ok   counter-suffix__0__1__0: unchanged
+ok   counter-suffix__0__1__1: unchanged
+ok   counter-suffix__0__2: unchanged
+ok   counter-suffix__0__2__0: unchanged
+ok   counter-suffix__0__2__1: unchanged
+ok   counter-suffix__0__3: unchanged
+ok   counter-suffix__0__3__0: unchanged
+ok   counter-suffix__0__3__1: unchanged
+ok   counter-suffix__0__4 (root): only Padding* → {px:0} (["PaddingRight","PaddingLeft"])
+ok   counter-suffix__0__4__0 (item): + ListStyleType NONE, − meta.markerText (["ListStyleType"], meta {"sourceTag":"li"})
+ok   counter-suffix__0__4__0__0: unchanged
+ok   counter-suffix__0__4__1 (item): + ListStyleType NONE, − meta.markerText (["ListStyleType"], meta {"sourceTag":"li"})
+ok   counter-suffix__0__4__1__0: unchanged
+ok   counter-suffix__0__5 (root): only Padding* → {px:0} (["PaddingRight","PaddingLeft"])
+ok   counter-suffix__0__5__0 (item): + ListStyleType NONE, − meta.markerText (["ListStyleType"], meta {"sourceTag":"li"})
+ok   counter-suffix__0__5__0__0: unchanged
+ok   counter-suffix__0__5__1 (item): + ListStyleType NONE, − meta.markerText (["ListStyleType"], meta {"sourceTag":"li"})
+ok   counter-suffix__0__5__1__0: unchanged
+ok   6 added components: ["counter-suffix__0__4__2","counter-suffix__0__4__3","counter-suffix__0__4__4","counter-suffix__0__4__5","counter-suffix__0__5__2","counter-suffix__0__5__3"]
+ok   counter-suffix__0__4__2: parent counter-suffix__0__4 Left 116.3 Top 2 FVN ["TABULAR_NUMS"] Dir "LTR" (want counter-suffix__0__4 116.3 2)
+ok   counter-suffix__0__4__3: parent counter-suffix__0__4 Left 120.59 Top 2 FVN ["TABULAR_NUMS"] Dir "LTR" (want counter-suffix__0__4 120.59 2)
+ok   counter-suffix__0__4__4: parent counter-suffix__0__4 Left 116.3 Top 26 FVN ["TABULAR_NUMS"] Dir "LTR" (want counter-suffix__0__4 116.3 26)
+ok   counter-suffix__0__4__5: parent counter-suffix__0__4 Left 120.59 Top 26 FVN ["TABULAR_NUMS"] Dir "LTR" (want counter-suffix__0__4 120.59 26)
+ok   counter-suffix__0__5__2: parent counter-suffix__0__5 Left 116.3 Top 2 FVN ["TABULAR_NUMS"] Dir "RTL" (want counter-suffix__0__5 116.3 2)
+ok   counter-suffix__0__5__3: parent counter-suffix__0__5 Left 116.3 Top 26 FVN ["TABULAR_NUMS"] Dir "RTL" (want counter-suffix__0__5 116.3 26)
+ok   counter-suffix__0__4__0 keeps exactly ONE child
+ok   counter-suffix__0__5__0 keeps exactly ONE child
+ok   counter-suffix__0__4__1 keeps exactly ONE child
+ok   counter-suffix__0__5__1 keeps exactly ONE child
+W2 CHECK: ALL PASS
+exit 0

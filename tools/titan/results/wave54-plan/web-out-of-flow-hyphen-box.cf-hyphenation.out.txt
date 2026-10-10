@@ -1,0 +1,16 @@
+hyphenation available for en: True
+# (1) FRAGMENTS
+highway  points [4] -> high-way
+high     points [] -> high
+way      points [] -> way
+h        points [] -> h
+ighway   points [3] -> igh-way
+highwa   points [4] -> high-wa
+y        points [] -> y
+# (2) U+FFFC at the member position — CF answer at before-index 1..n (box: runs split)
+box 2 |M|highway    [-1, -1, -1, -1, -1, 5, 5, 5]
+box 3 h|M|ighway    [-1, -1, -1, -1, -1, 5, 5, 5]
+box 4 high|M|way    [-1, -1, -1, -1, -1, -1, -1, -1]
+box 5 high|M|way    [-1, -1, -1, -1, -1, -1, -1, -1]
+box 6 highwa|M|y    [-1, -1, -1, -1, 4, 4, -1, -1]
+box 7 highway|M|    [-1, -1, -1, -1, 4, 4, 4, -1]

@@ -1,0 +1,8 @@
+css-ui/box-sizing-007                                          web shipped 0.9036  simulated-separator 0.9852
+css-ui/box-sizing-008                                          web shipped 0.8943  simulated-separator 0.9736
+css-ui/box-sizing-022                                          web shipped 0.9442  simulated-separator 0.9704
+css-ui/box-sizing-010                                          web shipped 0.9713  simulated-separator 0.9822
+css-ui/box-sizing-013                                          web shipped 0.9538  simulated-separator 0.9704
+css-ui/box-sizing-020                                          web shipped 0.9599  simulated-separator 0.9822
+css-position/position-absolute-semi-replaced-stretch-other     web shipped 0.9410  simulated-separator 0.9667
+css-position/position-absolute-semi-replaced-stretch-input     web shipped 0.9596  simulated-separator 0.9664

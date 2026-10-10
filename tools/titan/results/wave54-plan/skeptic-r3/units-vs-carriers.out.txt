@@ -1,0 +1,9 @@
+MISMATCH L3-hyphenate-character css-text/hyphens/hyphenate-character-002.html web: units ['U1', 'U3'] carriers-in-lane ['U1', 'U3', 'U3b'] other-lanes []
+MISMATCH L3-hyphenate-character css-text/hyphens/hyphenate-character-002.html ios: units ['U1', 'U2-ios', 'U3'] carriers-in-lane ['U1', 'U2-ios', 'U3', 'U3b'] other-lanes []
+MISMATCH L3-hyphenate-character css-text/hyphens/hyphenate-character-002.html android: units ['U3'] carriers-in-lane ['U3', 'U3b'] other-lanes []
+prediction rows checked; mismatches 3
+carrier cells without a prediction row: 4
+    css-anchor-position/anchor-center-safe-rtl.html android [('L1-rtl-marker-bake', 'P')]
+    css-position/overlay/overlay-button-appearance.html web [('L6-web-tail', 'RS')]
+    css-position/position-fixed-scroll-nested-fixed.html android [('L4-oof-layout', 'OOF-android')]
+    css-position/position-fixed-scroll-nested-fixed.html ios [('L4-oof-layout', 'OOF-ios')]

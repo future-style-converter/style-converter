@@ -1,0 +1,18 @@
+2026-10-08T19:30:41 m6 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt sha256 d80054ce72a079d3 → mutated → restored d80054ce72a079d3 byte-exact | rc 1 tests 26 red 3 expected-red-seen True RED-OK
+    red: TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot
+    red: TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds
+    red: TableCellHugTest::anonymousTable_noStroke_cellsHug
+2026-10-08T19:30:44 T1 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt sha256 fac6c37431056468 → mutated → restored fac6c37431056468 byte-exact | rc 1 tests 26 red 2 expected-red-seen True RED-OK
+    red: TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds
+    red: TableCellHugTest::anonymousTable_noStroke_cellsHug
+2026-10-08T19:30:48 T2 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt sha256 fac6c37431056468 → mutated → restored fac6c37431056468 byte-exact | rc 1 tests 26 red 2 expected-red-seen True RED-OK
+    red: TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds
+    red: TableCellHugTest::anonymousTable_noStroke_cellsHug
+2026-10-08T19:30:52 T3 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt sha256 fac6c37431056468 → mutated → restored fac6c37431056468 byte-exact | rc 1 tests 26 red 4 expected-red-seen True RED-OK
+    red: TableCellHugTest::declaredTableBodyRoot_keepsTodaysStroke_noHug
+    red: TableCellHugTest::declaredTable_percentageSizing003_keepsTodaysStroke_noHug
+    red: TableCellHugTest::uaTable_baselineEmptyCell001_noStroke_noHug
+    red: TableCellHugTest::uaTable_containContent004_isTodaysExpression_noHug
+2026-10-08T19:30:55 T4 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt sha256 fac6c37431056468 → mutated → restored fac6c37431056468 byte-exact | rc 1 tests 26 red 1 expected-red-seen True RED-OK
+    red: TableCellHugTest::hugColumn_disabled_isTheReceiverItself
+GREEN-AFTER-RESTORE rc 0 tests 110 red [] compile-errors []

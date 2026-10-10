@@ -54,6 +54,16 @@ data class GapInterval(val start: Float, val end: Float) {
     /** True when the interval has no positive extent → contributes no paint. */
     val isEmpty: Boolean get() = end <= start
 
+    /**
+     * Wave 54 (lane L4, GAP-android) — true when the interval can still
+     * POSITION a rule: a zero extent (touching neighbours / touching lines)
+     * does, a negative one (overlap) does not. css-gap-decorations-1 centres a
+     * rule of the declared width on its gap even when the gap is 0px (WPT
+     * flex-gap-decorations-033's 10px rules on touching items). [isEmpty]
+     * keeps its meaning for CUTS: a zero gap still cuts nothing.
+     */
+    val isPositionable: Boolean get() = end >= start
+
     /** Positive extent, 0 for an empty interval. */
     val size: Float get() = (end - start).coerceAtLeast(0f)
 }

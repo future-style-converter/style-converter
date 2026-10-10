@@ -1,0 +1,19 @@
+[
+ {
+  "label": "M-4b (V2, no crash) a ROOT list item is planned a marker, owned and measured by itself",
+  "file": "tools/titan/bidi-bake.mjs",
+  "before": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "mutated": "aa4e357dd9f4dd284ac519bdb6a48f8c5869405323e7fe9711fd3627f3247faa",
+  "restored": "98ad650e42193e90c558e901e0a859ccd90c07c0b4e69774ac3551c7fdffc6a3",
+  "byteExact": true,
+  "mutatedRun": "# pass 68 # fail 1",
+  "red": [
+   "V2 unit M′: a ROOT list item (arabic-indic-101 shape) gets no marker run"
+  ],
+  "restoredRun": "# pass 69 # fail 0",
+  "expectRed": [
+   "V2 unit M′"
+  ],
+  "verdict": "OK"
+ }
+]

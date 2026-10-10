@@ -1,0 +1,27 @@
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-001 android                            PASS       [GATING -> revert P]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-002 android                            PASS       [GATING -> revert P]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-001 web                                PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-001 ios                                PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-002 web                                PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-002 ios                                PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [M] counter-suffix web                                     PASS       [GATING -> revert Mprime]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [M] counter-suffix ios                                     PASS       [GATING -> revert Mprime]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [M] counter-suffix android                                 PASS       [GATING -> revert Mprime]
+   L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-suffix web                                         PASS       [GATING -> revert Mprime]
+   L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-suffix ios                                         PASS       [report: expected WRONG until the target is fixed]
+   L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-suffix android                                     PASS       [GATING -> revert Mprime]
+ ? L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-reset-reversed-nested web                          UNMEASURED [control: expected to stay PASS]
+     line: rsed-nested web MISSING /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave54-pre/sections/css-lists/screenshots/wpt__css-lists__counter-reset-reversed-nested.png
+ ? L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-reset-reversed-nested ios                          UNMEASURED [control: expected to stay PASS]
+     line: -nested ios MISSING /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave54-pre/sections/css-lists/ios-screenshots/wpt__css-lists__counter-reset-reversed-nested.png
+ ? L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-reset-reversed-nested android                      UNMEASURED [control: expected to stay PASS]
+     line: android MISSING /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave54-pre/sections/css-lists/android-screenshots/wpt__css-lists__counter-reset-reversed-nested.png
+   L2-table-body-cell       compose-table-body-cell.geometry.py        006 web                                                    PASS       [control: expected to stay PASS]
+   L2-table-body-cell       compose-table-body-cell.geometry.py        006 ios                                                    PASS       [control: expected to stay PASS]
+   L2-table-body-cell       compose-table-body-cell.geometry.py        006 android                                                PASS       [GATING -> revert TB-android]
+   L2-table-body-cell       display-table-body.geometry.py             006 web                                                    PASS       [control: expected to stay PASS]
+   L2-table-body-cell       display-table-body.geometry.py             006 ios                                                    PASS       [control: expected to stay PASS]
+   L2-table-body-cell       display-table-body.geometry.py             006 android                                                PASS       [GATING -> revert TB-android]
+
+geometry-gate wave54-pre (base wave54-open): 21 keys — PASS 18 · FAIL 0 (gating 0) · UNMEASURED 3 (gating 0) · probe self-check failures 0
+  by class: gating 9 (PASS 9 FAIL 0) · control 11 (PASS 8 FAIL 0) · report 1 (PASS 1 FAIL 0) · withdrawn 0 (PASS 0 FAIL 0)

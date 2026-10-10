@@ -1,0 +1,13 @@
+[M4-weight-as-double] file=runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 before=aaceeebf4218d2bca7f2b2017e999f33ff4f06848d415fe7cb1046025aa08c64 mutated=005085f9ccb44b1957c337df53cd5dce96f7e4cd0c1632f99d25c8d3e02d61dc
+[M4-weight-as-double] mutated run rc=1
+  com.styleconverter.runtime.typography.UAElementFontRuleTest tests=11 failures=5 errors=0
+    RED: block-in-inline-015-print - every leaf h1 takes the UA 2em bold face :: java.lang.AssertionError: expected:<700> but was:<null>
+    RED: inset-005 and -006 - the folded h1 hosts take 32 and bold :: java.lang.AssertionError: expected:<700> but was:<null>
+    RED: inset-014 - the folded monospace h1 resolves 2em against the 13px fixed default :: java.lang.AssertionError: expected:<700> but was:<null>
+    RED: text-decoration-color - the leaf h3 takes 1_17em bold :: java.lang.AssertionError: expected:<700> but was:<null>
+    RED: block-in-inline-015-print - TextStyleApplier paints the injected face :: java.lang.AssertionError: expected:<FontWeight(weight=700)> but was:<null>
+  com.styleconverter.runtime.typography.UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[M4-weight-as-double] restored sha256 after=aaceeebf4218d2bca7f2b2017e999f33ff4f06848d415fe7cb1046025aa08c64 BYTE-EXACT
+[M4-weight-as-double] restored run rc=0
+  com.styleconverter.runtime.typography.UAElementFontRuleTest tests=11 failures=0 errors=0
+  com.styleconverter.runtime.typography.UAHeadingFoldGateTest tests=9 failures=0 errors=0

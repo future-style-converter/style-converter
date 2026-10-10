@@ -1,0 +1,1 @@
+properties.any { it.type in INSET_TYPES }

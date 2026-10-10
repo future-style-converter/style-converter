@@ -1,0 +1,82 @@
+package com.styleconverter.runtime.typography
+
+// Wave 54 (lane L5) — replays seam-1's cascade step (ComponentRenderer
+// RenderComponent, the :1141 site) over a verbatim document, so the pins
+// read the SAME lists the renderer builds: for every node on the root →
+// target path, own → mergeInherited(own, inherited) → ListStyleUaRule →
+// UAElementFontRule(standsDown = UAHeadingFoldGate) → the INHERITED subset
+// handed to the next level (the renderer's inheritableForChildren filter).
+//
+// What the replay leaves out, and why that is exact for these documents
+// (each one is ASSERTED below, so a document that broke the premise fails
+// loudly instead of pinning a wrong list): AllReset (no `All` on the path),
+// the bucket fold (no selectors / media), DynamicValueResolver (no var() on
+// an inherited property — every inherited payload is already static px /
+// srgb), and the currentColor substitution (no currentColor Color).
+
+import com.styleconverter.runtime.core.ir.IRComponent
+import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.core.ir.IRProperty
+import com.styleconverter.runtime.core.renderer.ComponentRenderer
+import com.styleconverter.runtime.core.renderer.SlotComposer
+import com.styleconverter.runtime.lists.ListStyleUaRule
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
+
+internal object UAHeadingFaceReplay {
+
+    /** One element at the seam: its own list and its PRE-UA merged list. */
+    data class Site(
+        val component: IRComponent,
+        val own: List<IRProperty>,
+        val mergedPreUa: List<IRProperty>,
+    )
+
+    /** Decode + compose through the production reader (as the harness does). */
+    fun roots(doc: String): List<IRComponent> =
+        SlotComposer.compose(IRDocumentDecoder.decode(doc))
+
+    /** Root → target path for the component whose wire id is [id]. */
+    fun path(doc: String, id: String): List<IRComponent> {
+        // Depth-first walk keeping the current ancestry.
+        fun walk(node: IRComponent, trail: List<IRComponent>): List<IRComponent>? {
+            val here = trail + node
+            if (node.id == id) return here
+            return node.children.orEmpty().firstNotNullOfOrNull { walk(it, here) }
+        }
+        val found = roots(doc).firstNotNullOfOrNull { walk(it, emptyList()) }
+        assertNotNull("component $id must exist in the verbatim document", found)
+        return found!!
+    }
+
+    /** The seam's pre-UA site for [id], replaying every ancestor's seam. */
+    fun site(doc: String, id: String): Site {
+        // The inheritance channel a root receives (no ancestor).
+        var inherited = emptyList<IRProperty>()
+        val nodes = path(doc, id)
+        for ((index, node) in nodes.withIndex()) {
+            // The replay's premises, asserted per node (see the banner).
+            assertFalse("no All on the path", node.properties.any { it.type == "All" })
+            assertTrue("no buckets on the path", node.selectors.isEmpty() && node.media.isEmpty())
+            assertFalse("no var() on the path", node.properties.any { "var(" in it.data.toString() })
+            // seam-1, verbatim order: merge, then the list UA rule.
+            val own = node.properties
+            val preUa = ListStyleUaRule.apply(node._tag, own, ComponentRenderer.mergeInherited(own, inherited))
+            // The target: hand back the list the UA font step receives.
+            if (index == nodes.lastIndex) return Site(node, own, preUa)
+            // An ancestor: its POST-UA list is what it publishes.
+            val postUa = UAElementFontRule.apply(node._tag, own, preUa, UAHeadingFoldGate.standsDown(node, preUa))
+            inherited = postUa.filter { it.type in ComponentRenderer.INHERITED_PROPERTY_TYPES }
+        }
+        error("unreachable: the path always ends at the target")
+    }
+
+    /** seam-1's output for [site]: the UA font step with the fold gate. */
+    fun seam(site: Site): List<IRProperty> = UAElementFontRule.apply(
+        site.component._tag,
+        site.own,
+        site.mergedPreUa,
+        standsDown = UAHeadingFoldGate.standsDown(site.component, site.mergedPreUa),
+    )
+}

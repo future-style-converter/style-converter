@@ -1,0 +1,16 @@
+CAUGHT           G-1 the `'padding' in props` guard is dropped (every root loses its padding-* longhands)
+    sha256 98ad650e4219 -> f547fce9e781 -> 98ad650e4219 byte-exact=True
+    mutated: # pass 68 # fail 1 # skipped 0 red=['V3b unit P: VERBATIM zero-padding roots (dir-style-02a ×6, dir-selector-change-003/-004) stay deep-equal AND in order']
+    restored: # pass 69 # fail 0 # skipped 0
+GAP(no pin red)  G-2 the marker owner is the item's PARENT, not the enclosing root (equal only when the item is a direct child of its root)
+    sha256 98ad650e4219 -> 107c3c3e687d -> 98ad650e4219 byte-exact=True
+    mutated: # pass 69 # fail 0 # skipped 0 red=[]
+    restored: # pass 69 # fail 0 # skipped 0
+CAUGHT           G-3 marker runs pushed BEFORE the item's own text runs (root-run / id order)
+    sha256 98ad650e4219 -> 3b6ac1f96dfd -> 98ad650e4219 byte-exact=True
+    mutated: # pass 66 # fail 3 # skipped 0 red=['V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item', 'V6 unit M′: every marker run is owned by its ENCLOSING ROOT at the measured root-relative geometry', 'V4 unit M′ × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake); root runs never stamped']
+    restored: # pass 69 # fail 0 # skipped 0
+GAP(no pin red)  G-4 marker runs skip the hidden-element check (a list item hidden by rectCount 0 still gets root-owned runs)
+    sha256 98ad650e4219 -> b94d15d134d2 -> 98ad650e4219 byte-exact=True
+    mutated: # pass 69 # fail 0 # skipped 0 red=[]
+    restored: # pass 69 # fail 0 # skipped 0

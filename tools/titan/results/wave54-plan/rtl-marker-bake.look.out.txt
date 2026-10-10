@@ -1,0 +1,22 @@
+A. counter-suffix, marker column x129-165, y205-340 (ink bands)
+   ref      y214-225:x134-144 y238-249:x134-144 y264-273:x134-145 y289-297:x134-144
+   web      y214-225:x134-144 y238-249:x134-144 y264-273:x134-145 y289-297:x134-144
+   ios      y214-225:x134-141 y238-249:x134-145 y266-273:x135-145 y290-297:x134-144
+   android  y244-245:x134-134 y268-269:x134-134 y285-293:x134-145 y309-317:x134-144
+   android wave53-probe blobs at x>=129, y>=205: y244-245:x134-134(n2) y268-269:x134-134(n2) y285-293:x138-145(n24) y292-293:x134-134(n2) y309-317:x138-144(n19) y316-317:x134-134(n2)
+B. dir-style-02a wave53-final, leading "." column x16-20 (ink bands) and row 7 extent
+   ref      dot rows y30-31 y40-51 y70-71 y80-91 y100-111 y130-131 y150-151 y160-171 y190-191 y200-211 y230-231 | row 7 y139-151:x17-243
+   web      dot rows y30-31 y40-51 y70-71 y80-91 y100-111 y130-131 y150-151 y160-171 y190-191 y200-211 y230-231 | row 7 y139-151:x17-243
+   ios      dot rows y30-31 y40-51 y70-71 y80-91 y100-111 y150-151 y160-171 y200-211 y230-231 | row 7 y140-151:x17-243
+   android  dot rows y30-31 y40-51 y70-71 y80-91 y100-111 y160-171 y200-211 y230-231 | row 7 y140-151:x22-243
+C. anchor-center-safe-rtl wave53-final android, the 4-run box (x17-111) ink rows
+    y57-68:x38-108 y78-88:x51-109 y97-108:x80-108 y117-131:x41-109
+D. counter-suffix wave53-final LTR rows: marker ink (x<63) / text ink (x63-99)
+   ref      y22-33 m x47-58 | y46-57 m x47-58 | y70-81 m x46-58 | y94-105 m x47-58 | y118-129 m x33-51 | y142-153 m x33-51 | y165-179 m x43-57 | y189-203 m x43-57
+   web      y22-33 m x47-58 | y46-57 m x47-58 | y70-81 m x46-58 | y94-105 m x47-58 | y118-129 m x33-51 | y142-153 m x33-51 | y165-179 m x43-57 | y189-203 m x43-57
+   ios      y22-33 m x49-56 | y46-57 m x46-57 | y70-81 m x48-57 | y94-105 m x48-58 | y118-130 m x29-48 | y142-154 m x29-48 | y165-180 m x42-57 | y189-204 m x42-57
+   android  y22-33 m x49-56 | y46-57 m x46-57 | y70-81 m x46-57 | y95-105 m x47-57 | y118-129 m x29-48 | y143-153 m x30-48 | y166-179 m x41-57 | y190-203 m x42-57
+   ref      row 3 baseline (y81) ink x: [46, 53, 57]
+   web      row 3 baseline (y81) ink x: [46, 53, 57]
+   ios      row 3 baseline (y81) ink x: [48, 51, 52, 57]
+   android  row 3 baseline (y81) ink x: [46, 53, 57]

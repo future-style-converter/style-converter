@@ -1,0 +1,8 @@
+STALE expectations.json — gating keys of reverted units (re-run plan-build.py):
+  L1-rtl-marker-bake [M] counter-suffix web needs Mprime
+  L1-rtl-marker-bake [M] counter-suffix ios needs Mprime
+  L1-rtl-marker-bake [M] counter-suffix android needs Mprime
+  L1-rtl-marker-bake counter-suffix web needs Mprime
+  L1-rtl-marker-bake counter-suffix android needs Mprime
+  L2-table-body-cell 006 android needs TB-android
+  L2-table-body-cell 006 android needs TB-android

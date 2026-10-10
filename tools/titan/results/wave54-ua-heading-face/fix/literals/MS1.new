@@ -1,0 +1,5 @@
+        val rawProperties = com.styleconverter.runtime.lists.ListStyleUaRule.apply(
+            component._tag,
+            allReset.own,
+            mergeInherited(allReset.own, allReset.inherited)
+        )

@@ -1,0 +1,43 @@
+BASELINE rc=0 25 passed (25)
+W1-m1 join never armed (InlineRuns): RED -> GREEN | mutated: 6 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 eb7dcd389591…==eb7dcd389591… True | restored: 25 passed (25)
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — join mechanics beyond the corpus shapes (wave-54 L6) > a continuation with white space lands the member at the WORD end, not the run end
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — join mechanics beyond the corpus shapes (wave-54 L6) > several members in one word all move after it, in order (joined 2)
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (a) box 4 high|M|way → [text "highway", child], joined 1
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (b) boxes 3 (h|M|ighway), 5 and 6 (highwa|M|y) → the same box-7 shape
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (e) a member that could paint is refused: alpha 1, a background, a border colour, relative, an <img>
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (f) package-default render of box 4: `highway` then ONE member element, no split text
+W1-m2 over-narrow (require dictionary point ~ both fragments >= 3 chars): RED -> GREEN | mutated: 2 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 21389d5a4e92…==21389d5a4e92… True | restored: 25 passed (25)
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — join mechanics beyond the corpus shapes (wave-54 L6) > several members in one word all move after it, in order (joined 2)
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (b) boxes 3 (h|M|ighway), 5 and 6 (highwa|M|y) → the same box-7 shape
+W1-m3 mid-word test dropped: RED -> GREEN | mutated: 1 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 21389d5a4e92…==21389d5a4e92… True | restored: 25 passed (25)
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (c) word-edge boxes 2 / 7 and SPACED splits are unchanged, 0 joined
+W1-m4 auto gate dropped (join fn): RED -> GREEN | mutated: 1 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 21389d5a4e92…==21389d5a4e92… True | restored: 25 passed (25)
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (d) -001 box 4 (hyphens: manual) is unchanged — the U+00AD point lives inside the text
+W1-m5 Color requirement dropped: RED -> GREEN | mutated: 1 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 21389d5a4e92…==21389d5a4e92… True | restored: 25 passed (25)
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (e) a member that could paint is refused: alpha 1, a background, a border colour, relative, an <img>
+W1-m5b widened to any abspos: RED -> GREEN | mutated: 2 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 21389d5a4e92…==21389d5a4e92… True | restored: 25 passed (25)
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (e) a member that could paint is refused: alpha 1, a background, a border colour, relative, an <img>
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (g) the predicate over the 24 census members gives the same 12 trues as Compose
+W1-m6 NodeRenderer paints at the wire slot: RED -> GREEN | mutated: 1 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 69dd160f6296…==69dd160f6296… True | restored: 25 passed (25)
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (f) package-default render of box 4: `highway` then ONE member element, no split text
+W1-m7 predicate drift srgb.alpha: RED -> GREEN | mutated: 7 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 21389d5a4e92…==21389d5a4e92… True | restored: 25 passed (25)
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — join mechanics beyond the corpus shapes (wave-54 L6) > a continuation with white space lands the member at the WORD end, not the run end
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — join mechanics beyond the corpus shapes (wave-54 L6) > several members in one word all move after it, in order (joined 2)
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (a) box 4 high|M|way → [text "highway", child], joined 1
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (b) boxes 3 (h|M|ighway), 5 and 6 (highwa|M|y) → the same box-7 shape
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (e) a member that could paint is refused: alpha 1, a background, a border colour, relative, an <img>
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (f) package-default render of box 4: `highway` then ONE member element, no split text
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (g) the predicate over the 24 census members gives the same 12 trues as Compose
+SK-x1 NodeRenderer gate always on (W1-u, reaches -001 manual): NOT-RED(green!) -> GREEN | mutated: 25 passed (25) | restored sha256 69dd160f6296…==69dd160f6296… True | restored: 25 passed (25)
+SK-x2 NodeRenderer gate reads hyphens !== 'none': NOT-RED(green!) -> GREEN | mutated: 25 passed (25) | restored sha256 69dd160f6296…==69dd160f6296… True | restored: 25 passed (25)
+SK-x3 pushText continuation branch disabled: NOT-RED(green!) -> GREEN | mutated: 25 passed (25) | restored sha256 21389d5a4e92…==21389d5a4e92… True | restored: 25 passed (25)
+SK-x4 pushText continuation: members land BEFORE the continuation: NOT-RED(green!) -> GREEN | mutated: 25 passed (25) | restored sha256 21389d5a4e92…==21389d5a4e92… True | restored: 25 passed (25)
+SK-x5 child entry no longer flushes pending members first: NOT-RED(green!) -> GREEN | mutated: 25 passed (25) | restored sha256 21389d5a4e92…==21389d5a4e92… True | restored: 25 passed (25)
+SK-x6 tag ring dropped: RED -> GREEN | mutated: 1 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 21389d5a4e92…==21389d5a4e92… True | restored: 25 passed (25)
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (e) a member that could paint is refused: alpha 1, a background, a border colour, relative, an <img>
+SK-x7 alpha threshold loosened (a < 0.5): NOT-RED(green!) -> GREEN | mutated: 25 passed (25) | restored sha256 21389d5a4e92…==21389d5a4e92… True | restored: 25 passed (25)
+SK-x8 children check dropped: NOT-RED(green!) -> GREEN | mutated: 25 passed (25) | restored sha256 21389d5a4e92…==21389d5a4e92… True | restored: 25 passed (25)
+SK-x9 Position check accepts any keyword: RED -> GREEN | mutated: 1 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 21389d5a4e92…==21389d5a4e92… True | restored: 25 passed (25)
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (e) a member that could paint is refused: alpha 1, a background, a border colour, relative, an <img>
+SK-x10 rest-of-continuation dropped (cut>=0 path): RED -> GREEN | mutated: 1 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 21389d5a4e92…==21389d5a4e92… True | restored: 25 passed (25)
+     red: tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — join mechanics beyond the corpus shapes (wave-54 L6) > a continuation with white space lands the member at the WORD end, not the run end

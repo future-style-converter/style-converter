@@ -1,0 +1,38 @@
+== h2: 2 differing paths
+   /lanes/L4-oof-layout/predictions[1]/kind 
+      installed: flip; the "25" counter (ref "17") stays wrong on ALL THREE platforms — not this lane 
+      variant  : flip in score only — DEGENERATE even if P: the "25" counter (ref "17") stays wrong on ALL THREE platforms (not this lane); stayDegenerateEvenIfPass
+   /stayDegenerateEvenIfPass 
+      installed: len 4 
+      variant  : len 5
+== h1h2: 7 differing paths
+   /lanes/L4-oof-layout/captureCarriers/android 
+      installed: len 21 
+      variant  : len 24
+   /lanes/L4-oof-layout/carrierRule/CBB 
+      installed: a content-box (no BoxSizing BORDER_BOX) container with a px/% size, a non-zero padding/border band and an out-of-flow child carrying a % size or inset: 10 containers in 10 tests (+ the in-flow control 
+      variant  : a content-box (no BoxSizing BORDER_BOX) container with a px/% size, a non-zero padding/border band and an out-of-flow child carrying a % size or inset: 10 containers in 10 tests (+ the in-flow control
+   /lanes/L4-oof-layout/predictions 
+      installed: len 26 
+      variant  : len 29
+   /lanes/L4-oof-layout/revertUnits/CBB-android/captures/android 
+      installed: len 11 
+      variant  : len 14
+   /lanes/L6-web-tail/mustNotMove 
+      installed: len 68 
+      variant  : len 66
+   /stayDegenerateEvenIfPass 
+      installed: len 4 
+      variant  : len 5
+   /unionCaptureCarriers/android 
+      installed: len 51 
+      variant  : len 54
+h1h2 stayDegenerateEvenIfPass: [
+ "css-text/bidi/bidi-lines-002.html android (orange \"!\" on the left: bake measurement)",
+ "css-counter-styles/counter-suffix.html ios (rows 3-6)",
+ "css-counter-styles/counter-suffix.html android (rows 5-6)",
+ "css-overflow/line-clamp/block-ellipsis-002.html ios (Line 4 painted and no \"…\": the iOS clamp is not applied; U3 only removes the stray blank lines)",
+ "css-contain/contain-content-011.html android (the \"25\" counter, ref \"17\": wrong on all three platforms; OOF-android moves only the green square)"
+]
+h1h2 CBB-android android captures: 14
+h1h2 contain-content-011 android row: [{"cell": "css-contain/contain-content-011.html android", "from": "f 0.9284", "to": "P ≈0.985 (sim ≤0.9854, an upper bound)", "kind": "flip in score only — DEGENERATE even if P: the \"25\" counter (ref \"17\") stays wrong on ALL THREE platforms (not this lane); stayDegenerateEvenIfPass", "confidence": "MED-HIGH", "floor": 0.97, "gating": true, "geometry": "GEOMETRY OK", "units": ["OOF-android"], "direction": "up-or-stay", "requires": ["OOF-android"]}]

@@ -296,11 +296,27 @@ under test.)
 | iOS | `runtimes/swiftui/…/Renderer/HarnessLabelChrome.swift` — reads `\.wptCaptureMode` itself, `EmptyView` under the backdrop `.sampling` pass | `apps/ios-harness/…/Screenshot/CaptureCanvas.swift` `.overlay(alignment: .topLeading)` after `.background(canvasBackground)`, both root branches |
 
 `tools/visual/label-chrome-tripwire.test.mjs` (CI glob `node --test
-tools/visual/*.test.mjs`) re-derives the expected glyph pixel set P per
-committed baseline stem from the atlas + file name and asserts POSITIONALLY
-on all three PNGs: every p ∈ P is non-ground; where rows 0..15 outside P are
-pure ground on all three, the band is byte-identical across platforms;
-elsewhere the P-mask bytes agree within ±1 per channel. It is red on
+tools/visual/*.test.mjs`; pure checker `tools/visual/label-chrome-check.mjs`)
+re-derives the expected glyph pixel set P per committed baseline stem from
+the atlas + file name and asserts POSITIONALLY on all three PNGs: every
+p ∈ P is non-ground; where rows 0..15 outside P are pure ground on all three,
+the band is byte-identical across platforms; elsewhere the spread of the
+bytes under P is returned in the verdict object (`underPaintSpread`), never
+asserted (the component's own under-glyph paint legitimately differs per
+platform).
+The **iff** of "When" is honoured through `tools/visual/label-chrome-exempt.json`:
+a stem listed there (`fixture` + `why`: `container` | `text`) is verified
+STRUCTURALLY against its fixture — every node of that name is a container
+(non-empty `children`) or a text root (non-empty `_text`) matching `why`, and
+the stem has a committed triplet once its fixture has any committed baseline
+(an unseeded fixture's entry is `pending` and exempts nothing) — and is then
+checked with P = ∅ plus clause (iv): the name's would-be label is never
+fully drawn on any platform. A listed leaf, a renamed node or a stale stem is
+red; an unlisted stem whose label is absent on all three stays red and
+prints a HINT naming candidate fixture nodes. Exemptions are never inferred
+from pixels (a label lost ×3 by a predicate regression would pass) or from
+(index, name) matching (`000_Sizing_Fixed` is a leaf in `visual-test.json`
+and a text root in `visual-test-controls.json`). It is red on
 pre-chrome baselines by design (its header records that negative control).
 `UPDATE_BASELINE=1` runs carry the label (part of the historical capture
 path); a `CAPTURE_WIDTH` run truncates it to that width on all three.

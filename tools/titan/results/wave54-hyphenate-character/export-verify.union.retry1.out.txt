@@ -1,0 +1,13 @@
+# 2026-10-08 22:01:45 export-verify.sh union (shared tree HEAD 029139fd; retry 1 after L5's in-flight test edit broke compileDebugUnitTestKotlin at 21:52)
+export union: seam ComponentRenderer.kt sha256 0a92203a9fb5081e
+> Task :runtime:compileDebugKotlin
+> Task :runtime:compileDebugUnitTestKotlin
+> Task :runtime:testDebugUnitTest
+BUILD SUCCESSFUL in 25s
+  junit GreedyLineBreakerTest: tests=23 skipped=0 failures=0 errors=0
+  junit HyphenateCharacterExtractorTest: tests=6 skipped=0 failures=0 errors=0
+  junit PreBreakPipelineTest: tests=26 skipped=0 failures=0 errors=0
+  junit SoftHyphenPolicyTest: tests=9 skipped=0 failures=0 errors=0
+  junit WordBreakOpportunitiesTest: tests=9 skipped=0 failures=0 errors=0
+bytecode: 1 compiled renderer class(es) reference HyphenateCharacterApplier (ComponentRenderer.class )
+exit 0

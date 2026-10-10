@@ -1,0 +1,1 @@
+        if (false && isHexDigit(s[i])) {

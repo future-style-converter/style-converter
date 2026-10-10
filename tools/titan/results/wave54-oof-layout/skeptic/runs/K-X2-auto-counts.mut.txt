@@ -1,0 +1,5 @@
+label=K-X2-auto-counts file=runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt
+sha256 before=ed0d29ac7577f7e56a34c7002cddbf662617db144908dfc8f42223b60f1b86d6 mutated=eba224c596d4cff031c34f7d3ecacf5bce6d065bef523d096cdaa194fdbefd37 after=ed0d29ac7577f7e56a34c7002cddbf662617db144908dfc8f42223b60f1b86d6 restored=OK
+suite rc=1 (RED)
+OutOfFlowContainingBlockTest tests=8 skipped=0 failures=1 errors=0 FAILED: ['P1 declared insets - auto and absence are not, px and unresolved expressions are']
+TOTAL tests=124 skipped=0 failures=1 errors=0

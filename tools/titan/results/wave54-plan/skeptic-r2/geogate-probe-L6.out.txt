@@ -1,0 +1,118 @@
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-007 web                                         UNMEASURED [GATING -> revert RS]
+     line: box-sizing-007 web MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-008 web                                         UNMEASURED [GATING -> revert RS]
+     line: box-sizing-008 web MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-010 web                                         UNMEASURED [report: expected WRONG until the target is fixed]
+     line: box-sizing-010 web MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-013 web                                         UNMEASURED [report: expected WRONG until the target is fixed]
+     line: box-sizing-013 web MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-022 web                                         UNMEASURED [GATING -> revert RS]
+     line: box-sizing-022 web MISSING → GEOMETRY WRONG (no capture)
+ - L6-web-tail              web-root-separator.geometry.py             position-absolute-semi-replaced-stretch-other web          FAIL       [report: expected WRONG until the target is fixed]
+     line: position-absolute-semi-replaced-stretch-other web edge x187 → GEOMETRY WRONG (second atom edge x187 vs ref x192 on row 60)
+ - L6-web-tail              web-root-separator.geometry.py             position-absolute-semi-replaced-stretch-input web          FAIL       [report: expected WRONG until the target is fixed]
+     line: position-absolute-semi-replaced-stretch-input web edge x187 → GEOMETRY WRONG (second atom edge x187 vs ref x192 on row 60)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-007 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-007 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-007 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-007 android MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-008 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-008 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-008 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-008 android MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-010 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-010 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-010 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-010 android MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-022 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-022 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-022 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-022 android MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-011 web                                         UNMEASURED [report: expected WRONG until the target is fixed]
+     line: box-sizing-011 web MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-011 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-011 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-011 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-011 android MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-014 web                                         UNMEASURED [report: expected WRONG until the target is fixed]
+     line: box-sizing-014 web MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-014 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-014 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-014 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-014 android MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-015 web                                         UNMEASURED [report: expected WRONG until the target is fixed]
+     line: box-sizing-015 web MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-015 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-015 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-015 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-015 android MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-016 web                                         UNMEASURED [report: expected WRONG until the target is fixed]
+     line: box-sizing-016 web MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-016 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-016 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-016 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-016 android MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-017 web                                         UNMEASURED [report: expected WRONG until the target is fixed]
+     line: box-sizing-017 web MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-017 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-017 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-017 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-017 android MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-018 web                                         UNMEASURED [report: expected WRONG until the target is fixed]
+     line: box-sizing-018 web MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-018 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-018 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-018 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-018 android MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-019 web                                         UNMEASURED [report: expected WRONG until the target is fixed]
+     line: box-sizing-019 web MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-019 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-019 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-019 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-019 android MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-020 web                                         UNMEASURED [report: expected WRONG until the target is fixed]
+     line: box-sizing-020 web MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-020 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-020 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-020 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-020 android MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-021 web                                         UNMEASURED [report: expected WRONG until the target is fixed]
+     line: box-sizing-021 web MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-021 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-021 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-021 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-021 android MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-024 web                                         UNMEASURED [report: expected WRONG until the target is fixed]
+     line: box-sizing-024 web MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-024 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-024 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-024 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-024 android MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-025 web                                         UNMEASURED [report: expected WRONG until the target is fixed]
+     line: box-sizing-025 web MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-025 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-025 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-025 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-025 android MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-013 ios                                         UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-013 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L6-web-tail              web-root-separator.geometry.py             box-sizing-013 android                                     UNMEASURED [control: expected to stay PASS]
+     line: box-sizing-013 android MISSING → GEOMETRY WRONG (no capture)
+   L6-web-tail              web-root-separator.geometry.py             position-absolute-semi-replaced-stretch-other ios          PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             position-absolute-semi-replaced-stretch-other android      PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             position-absolute-semi-replaced-stretch-input ios          PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             position-absolute-semi-replaced-stretch-input android      PASS       [control: expected to stay PASS]
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-span-002 web                               PASS       [control: expected to stay PASS]
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-span-002 ios                               PASS       [control: expected to stay PASS]
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-span-002 android                           PASS       [control: expected to stay PASS]
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-001 web                        PASS       [control: expected to stay PASS]
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-001 ios                        PASS       [control: expected to stay PASS]
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-001 android                    PASS       [control: expected to stay PASS]
+!! L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-002 web                        FAIL       [GATING -> revert W1]
+     line: hyphens/hyphens-out-of-flow-002 web heights [46, 46, 46, 26, 26, 46, 46] ink-right [(61, 54), (61, 54), (61, 54), (86,), (86,), (61, 54), (61, 54)] → GEOMETRY WRONG (boxes 4,5 height 26 vs ref 46)
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-002 ios                        PASS       [control: expected to stay PASS]
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-002 android                    PASS       [control: expected to stay PASS]
+
+geometry-gate wave53-probe (base wave53-open): 63 keys — PASS 12 · FAIL 3 (gating 1) · UNMEASURED 48 · probe self-check failures 0
+  by class: gating 4 (PASS 0 FAIL 1) · control 44 (PASS 12 FAIL 0) · report 15 (PASS 0 FAIL 2) · withdrawn 0 (PASS 0 FAIL 0)
+revert rule 4 names: W1

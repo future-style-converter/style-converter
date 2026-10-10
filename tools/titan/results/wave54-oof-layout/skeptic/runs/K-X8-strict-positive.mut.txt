@@ -1,0 +1,5 @@
+label=K-X8-strict-positive file=runtimes/compose/src/main/java/com/styleconverter/runtime/columns/GapDecorationGeometry.kt
+sha256 before=ce69eb46626ee111af23c9c1ec385d07703c30523fc12764647b05af26420473 mutated=cc410f5c5a396077eb0d2217674e0eaefe5d47d931343dbf25a461ec652378b8 after=ce69eb46626ee111af23c9c1ec385d07703c30523fc12764647b05af26420473 restored=OK
+suite rc=1 (RED)
+GapDecorationSegmentsTest tests=12 skipped=0 failures=2 errors=0 FAILED: ['033 touching items still position 2 + 1 + 2 column rules, line by line', '033 touching lines still position two full-width row rules painted last']
+TOTAL tests=124 skipped=0 failures=2 errors=0

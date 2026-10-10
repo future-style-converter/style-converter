@@ -1,0 +1,12 @@
+css-text__bidi__bidi-lines-001                 screenshots          identical=True diff-bbox=None rows0-207-identical=True
+css-text__bidi__bidi-lines-001                 ios-screenshots      identical=True diff-bbox=None rows0-207-identical=True
+css-text__bidi__bidi-lines-001                 android-screenshots  identical=False diff-bbox=(29, 117, 359, 350) rows0-207-identical=False
+css-text__bidi__bidi-lines-002                 screenshots          identical=True diff-bbox=None rows0-207-identical=True
+css-text__bidi__bidi-lines-002                 ios-screenshots      identical=True diff-bbox=None rows0-207-identical=True
+css-text__bidi__bidi-lines-002                 android-screenshots  identical=False diff-bbox=(31, 118, 351, 303) rows0-207-identical=False
+css-anchor-position__anchor-center-safe-rtl    screenshots          identical=True diff-bbox=None rows0-207-identical=True
+css-anchor-position__anchor-center-safe-rtl    ios-screenshots      identical=True diff-bbox=None rows0-207-identical=True
+css-anchor-position__anchor-center-safe-rtl    android-screenshots  identical=False diff-bbox=(27, 46, 373, 133) rows0-207-identical=False
+css-counter-styles__counter-suffix             screenshots          identical=False diff-bbox=(45, 214, 147, 299) rows0-207-identical=True
+css-counter-styles__counter-suffix             ios-screenshots      identical=False diff-bbox=(133, 214, 147, 299) rows0-207-identical=True
+css-counter-styles__counter-suffix             android-screenshots  identical=False diff-bbox=(103, 213, 176, 319) rows0-207-identical=True

@@ -1,0 +1,77 @@
+probe-readout  wave53-open → wave53-probe   (Δ = wave53-probe − wave53-open; a gain prints +, a fall −)
+  sections read (18): CSS2,css-anchor-position,css-backgrounds,css-cascade,css-contain,css-counter-styles,css-display,css-flexbox,css-images,css-lists,css-masking,css-position,css-pseudo,css-tables,css-text,css-writing-modes,filter-effects,selectors
+  MISSING probed sections (8): css-break,css-gaps,css-multicol,css-overflow,css-text-decor,css-transforms,css-ui,css-values — re-run them; nothing in them is decided
+  lanes that decide: all
+
+rule 1 — lost carriers (P on the base, f on the probe):
+  none
+
+rules 2 / 3 — prediction rows:
+  ok        L1-rtl-marker-bake  css-text/bidi/bidi-lines-001.html android  f 0.8934 → P 0.9629 Δ+0.0695  (predicted P ≈0.9629 (device-measured: these hunk bytes at wave53-probe); HIGH, gating floor 0.955)
+  ok        L1-rtl-marker-bake  css-text/bidi/bidi-lines-002.html android  P 0.9534 → P 0.9818 Δ+0.0284  (predicted P ≈0.9818 (device-measured at wave53-probe); HIGH, gating floor 0.975)
+  ok        L1-rtl-marker-bake  css-counter-styles/counter-suffix.html android  P 0.9547 → P 0.9793 Δ+0.0246  (predicted P ≈0.9815 with P alone (replay); ≈0.989 with M′ on P (replay 0.9894 / 0.9900); MED-HIGH (P floor) / MED (M′ magnitude, geometry-gated), gating floor 0.97)
+  ok        L1-rtl-marker-bake  css-counter-styles/counter-suffix.html web  P 0.9818 → P 1 Δ+0.0182  (predicted P 1 (wave53-probe measured 1 with the same marker geometry); HIGH, gating floor 0.999)
+  ok        L1-rtl-marker-bake  css-counter-styles/counter-suffix.html ios  P 0.9802 → P 0.9873 Δ+0.0071  (predicted P ≈0.987 (wave53-probe measured 0.9873); MED-HIGH, gating floor 0.985)
+  FIRES     L2-table-body-cell  CSS2/css21-errata/s-11-1-1b-006.html android  P 0.9944 → P 0.9906 Δ-0.0038  (predicted P ≈0.9983 (replay from both the final and the probe picture); square x24-43 rows 56-75, no stroke; MED-HIGH (geometry) / MED (score), gating floor 0.996)  — rule 3 below floor 0.996; rule 2 Δ-0.0038
+  FIRES     L3-hyphenate-character  css-text/hyphens/hyphenate-character-001.html ios  f 0.9287 → f 0.9287 Δ+0  (predicted P ≈0.979 (GBd 0.9852 − 0.006); MED-HIGH, gating floor 0.965)  — rule 3 below floor 0.965
+  FIRES     L3-hyphenate-character  css-text/hyphens/hyphenate-character-003.html ios  f 0.9337 → f 0.9337 Δ+0  (predicted P ≈0.977 (GBd 0.9831 − 0.006); MED-HIGH, gating floor 0.965)  — rule 3 below floor 0.965
+  ok        L3-hyphenate-character  css-text/hyphens/hyphenate-character-001.html android  f 0.9136 → f 0.9301 Δ+0.0165  (predicted ≈0.957 (U3); ≈0.976-0.981 with U3b; LOW-MED)
+  ok        L3-hyphenate-character  css-text/hyphens/hyphenate-character-003.html android  f 0.9168 → f 0.9292 Δ+0.0124  (predicted ≈0.953 (U3); ≈0.976-0.981 with U3b; LOW)
+  FIRES     L4-oof-layout  css-contain/contain-content-003.html android  f 0.9405 → f 0.9405 Δ+0  (predicted P ≈0.997 (sim 0.9967); HIGH, gating floor 0.99)  — rule 3 below floor 0.99
+  FIRES     L4-oof-layout  css-contain/contain-content-011.html android  f 0.9284 → f 0.9284 Δ+0  (predicted P ≈0.985 (sim ≤0.9854, an upper bound); MED-HIGH, gating floor 0.97)  — rule 3 below floor 0.97
+  FIRES     L4-oof-layout  css-position/position-relative-004.html ios  P 0.9594 → P 0.9594 Δ+0  (predicted P ≈0.9974; MED-HIGH, gating floor 0.99)  — rule 3 below floor 0.99
+  FIRES     L4-oof-layout  css-position/position-relative-004.html android  P 0.9589 → P 0.9589 Δ+0  (predicted P ≈0.9967; MED-HIGH, gating floor 0.99)  — rule 3 below floor 0.99
+  FIRES     L4-oof-layout  css-position/change-insets-inside-strict-containment-nested.html ios  P 0.9594 → P 0.9594 Δ+0  (predicted P ≈0.9974; MED-HIGH, gating floor 0.99)  — rule 3 below floor 0.99
+  FIRES     L4-oof-layout  css-position/change-insets-inside-strict-containment-nested.html android  P 0.9589 → P 0.9589 Δ+0  (predicted P ≈0.9967; MED-HIGH, gating floor 0.99)  — rule 3 below floor 0.99
+  FIRES     L4-oof-layout  CSS2/abspos/static-fixed-inside-abspos.html ios  P 0.9841 → P 0.9841 Δ+0  (predicted P ≈0.9974; HIGH, gating floor 0.99)  — rule 3 below floor 0.99
+  FIRES     L4-oof-layout  CSS2/abspos/static-fixed-inside-abspos.html android  P 0.9835 → P 0.9835 Δ+0  (predicted P ≈0.9967 (via PositionedParentFlowSlot); MED-HIGH, gating floor 0.99)  — rule 3 below floor 0.99
+  FIRES     L4-oof-layout  filter-effects/backdrop-filter-nested-border-radius-clip-3.html android  f 0.9574 → f 0.9574 Δ+0  (predicted P ≈0.99 (iOS twin of the same geometry 0.9921); MED-HIGH, gating floor 0.96)  — rule 3 below floor 0.96
+  FIRES     L4-oof-layout  filter-effects/backdrop-filter-nested-border-radius-clip.html android  P 0.9649 → P 0.9649 Δ+0  (predicted P ≈0.99 (iOS twin 0.9936 / 0.9998 / 0.9981); MED-HIGH, gating floor 0.98)  — rule 3 below floor 0.98
+  FIRES     L4-oof-layout  filter-effects/backdrop-filter-nested-border-radius-clip-2.html android  P 0.9689 → P 0.9689 Δ+0  (predicted P ≈0.99 (iOS twin 0.9936 / 0.9998 / 0.9981); MED-HIGH, gating floor 0.98)  — rule 3 below floor 0.98
+  FIRES     L4-oof-layout  filter-effects/backdrop-filter-nested-border-radius-clip-4.html android  P 0.977 → P 0.977 Δ+0  (predicted P ≈0.99 (iOS twin 0.9936 / 0.9998 / 0.9981); MED-HIGH, gating floor 0.98)  — rule 3 below floor 0.98
+  ok        L4-oof-layout  css-flexbox/abspos/abspos-autopos-htb-ltr.html android  P 0.9966 → P 0.9966 Δ+0  (predicted P 0.9967 (sim: green repainted 100x100); HIGH, gating floor 0.995)
+  ok        L4-oof-layout  css-flexbox/abspos/abspos-autopos-vlr-ltr.html android  P 0.9966 → P 0.9966 Δ+0  (predicted P 0.9967 (sim: green repainted 100x100); HIGH, gating floor 0.995)
+  ok        L4-oof-layout  css-flexbox/abspos/abspos-autopos-vrl-ltr.html android  P 0.9966 → P 0.9966 Δ+0  (predicted P 0.9967 (sim: green repainted 100x100); HIGH, gating floor 0.995)
+  FIRES     L6-web-tail  css-text/hyphens/hyphens-out-of-flow-002.html web  f 0.9411 → f 0.9411 Δ+0  (predicted P 1 (replay W1-exact: ssim 1, 0 mismatched px); HIGH (branch R) / MED-HIGH (branch H), gating floor 0.995)  — rule 3 below floor 0.995
+
+leak signals (score side of rule 5) — non-carrier cells that moved at all:
+  LEAK      css-backgrounds/background-attachment-margin-root-001.html android  f 0.451 → P 0.9996 [gained] — bisect by commit (rule 5)
+  LEAK      css-backgrounds/background-attachment-margin-root-001.html ios  f 0.4509 → P 0.9995 [gained] — bisect by commit (rule 5)
+  LEAK      css-backgrounds/background-attachment-margin-root-001.html web  f 0.4511 → P 1 [gained] — bisect by commit (rule 5)
+  LEAK      css-backgrounds/background-attachment-margin-root-002.html android  f 0.3389 → P 0.9996 [gained] — bisect by commit (rule 5)
+  LEAK      css-backgrounds/background-attachment-margin-root-002.html ios  f 0.3391 → P 0.9994 [gained] — bisect by commit (rule 5)
+  LEAK      css-backgrounds/background-attachment-margin-root-002.html web  f 0.339 → P 1 [gained] — bisect by commit (rule 5)
+  LEAK      css-contain/contain-inline-size-bfc-floats-002.html android  f 0.9311 → P 0.9974 [gained] — bisect by commit (rule 5)
+  LEAK      css-contain/contain-inline-size-bfc-floats-002.html ios  f 0.9322 → P 0.9985 [gained] — bisect by commit (rule 5)
+  LEAK      css-display/display-contents-root-background.html android  f 0.5355 → P 0.9989 [gained] — bisect by commit (rule 5)
+  LEAK      css-display/display-contents-root-background.html ios  f 0.5346 → P 0.9995 [gained] — bisect by commit (rule 5)
+  LEAK      css-display/display-contents-root-background.html web  f 0.5341 → P 1 [gained] — bisect by commit (rule 5)
+  LEAK      css-text/hyphens/hyphens-out-of-flow-001.html ios  f 0.8935 → P 0.9971 [gained] must-not-move of L6-web-tail — bisect by commit (rule 5)
+  LEAK      css-text/hyphens/hyphens-span-001.html ios  f 0.8652 → P 0.9968 [gained] must-not-move of L3-hyphenate-character — bisect by commit (rule 5)
+  LEAK      css-contain/contain-inline-size-bfc-floats-001.html android  P 0.9519 → P 0.9972 [movers] — bisect by commit (rule 5)
+  LEAK      css-contain/contain-inline-size-bfc-floats-001.html ios  P 0.9531 → P 0.9984 [movers] — bisect by commit (rule 5)
+  LEAK      css-display/display-flow-root-002.html android  P 0.9734 → P 1 [movers] — bisect by commit (rule 5)
+  LEAK      css-display/display-flow-root-002.html ios  P 0.9734 → P 1 [movers] — bisect by commit (rule 5)
+  LEAK      css-lists/counter-reset-reversed-nested.html android  P 0.9509 → P 0.9852 [movers] — bisect by commit (rule 5)
+  LEAK      css-lists/counter-reset-reversed-nested.html ios  P 0.9508 → P 0.9989 [movers] — bisect by commit (rule 5)
+  LEAK      css-lists/counter-reset-reversed-nested.html web  P 0.9506 → P 1 [movers] — bisect by commit (rule 5)
+  LEAK      css-text/hyphens/hyphens-out-of-flow-001.html android  P 0.9685 → P 0.9943 [movers] must-not-move of L6-web-tail — bisect by commit (rule 5)
+  LEAK      css-text/hyphens/hyphens-out-of-flow-002.html android  P 0.982 → P 0.9943 [movers] must-not-move of L6-web-tail — bisect by commit (rule 5)
+  LEAK      css-text/hyphens/hyphens-span-001.html android  P 0.9532 → P 0.9937 [movers] must-not-move of L3-hyphenate-character — bisect by commit (rule 5)
+  LEAK      CSS2/css21-errata/s-11-1-1b-006.html ios  P 0.9953 → P 0.9992 [movers] must-not-move of L2-table-body-cell — bisect by commit (rule 5)
+  LEAK      CSS2/css21-errata/s-11-1-1b-006.html web  P 0.9941 → P 1 [movers] must-not-move of L2-table-body-cell — bisect by commit (rule 5)
+  2313 non-carrier cells read (394 of them must-not-move lines); 25 leak signal(s)
+
+summary: rule 1 fired 0 · rule 2 fired 1 · rule 3 fired 16 · leak signals 25 · undirected falls read 0 · unmeasured 0 · recorded for another stage 0
+units named (revert rule 6: each unit with its revertOrder, latest first; re-probe between steps):
+  L2-table-body-cell TB-android  (revertOrder TB-android): 1 reason(s) — rule 3 below floor 0.996; rule 2 Δ-0.0038 CSS2/css21-errata/s-11-1-1b-006.html android
+  L3-hyphenate-character U1  (revertOrder U3b → U3 → U1): 2 reason(s) — rule 3 below floor 0.965 css-text/hyphens/hyphenate-character-001.html ios; rule 3 below floor 0.965 css-text/hyphens/hyphenate-character-003.html ios
+  L3-hyphenate-character U2-ios  (revertOrder U2-ios): 2 reason(s) — rule 3 below floor 0.965 css-text/hyphens/hyphenate-character-001.html ios; rule 3 below floor 0.965 css-text/hyphens/hyphenate-character-003.html ios
+  L3-hyphenate-character U3  (revertOrder U3b → U3): 2 reason(s) — rule 3 below floor 0.965 css-text/hyphens/hyphenate-character-001.html ios; rule 3 below floor 0.965 css-text/hyphens/hyphenate-character-003.html ios
+  L3-hyphenate-character U3b  (revertOrder U3b): 2 reason(s) — rule 3 below floor 0.965 css-text/hyphens/hyphenate-character-001.html ios; rule 3 below floor 0.965 css-text/hyphens/hyphenate-character-003.html ios
+  L4-oof-layout OOF-android  (revertOrder OOF-android): 5 reason(s) — rule 3 below floor 0.99 css-contain/contain-content-003.html android; rule 3 below floor 0.97 css-contain/contain-content-011.html android; rule 3 below floor 0.99 css-position/position-relative-004.html android; rule 3 below floor 0.99 css-position/change-insets-inside-strict-containment-nested.html android; …
+  L4-oof-layout OOF-ios  (revertOrder OOF-ios): 3 reason(s) — rule 3 below floor 0.99 css-position/position-relative-004.html ios; rule 3 below floor 0.99 css-position/change-insets-inside-strict-containment-nested.html ios; rule 3 below floor 0.99 CSS2/abspos/static-fixed-inside-abspos.html ios
+  L4-oof-layout CBB-android  (revertOrder CBB-android): 4 reason(s) — rule 3 below floor 0.96 filter-effects/backdrop-filter-nested-border-radius-clip-3.html android; rule 3 below floor 0.98 filter-effects/backdrop-filter-nested-border-radius-clip.html android; rule 3 below floor 0.98 filter-effects/backdrop-filter-nested-border-radius-clip-2.html android; rule 3 below floor 0.98 filter-effects/backdrop-filter-nested-border-radius-clip-4.html android
+  L6-web-tail W1  (revertOrder W1): 1 reason(s) — rule 3 below floor 0.995 css-text/hyphens/hyphens-out-of-flow-002.html web
+
+PROBE: revert rules fired — revert the named units (leaks: bisect)

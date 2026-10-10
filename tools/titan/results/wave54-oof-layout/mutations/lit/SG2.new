@@ -1,0 +1,1 @@
+            guard gap.isPositive else { continue }

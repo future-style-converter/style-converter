@@ -1,0 +1,53 @@
+# seam-2.patch — wave 54 lane L5 (ua-heading-face), revert unit U2-ios
+# seam file: runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+# base: db6e8aa0 (= dev 7cce3b22 + the committed wave-54 plan; the seam file is byte-identical at both)
+# seam file sha256 at base: 905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e
+# anchor: :343-356 `mergedProperties(now:)` — the `return UAElementFontRule.apply(` call (PLAN §3 row 5);
+#   `inFlowChildren` is the private computed var at :781
+# hunk: hoists the ListStyleUaRule result into `mergedPreUA`; the `hasElementChildren:` argument becomes
+#   UAHeadingFoldGate.standsDown(component:inFlowChildren:mergedPreUA:)
+# needs, in the SAME commit: runtimes/swiftui/…/StyleEngine/typography/UAHeadingFoldGate.swift (new file of U2-ios)
+# check: git apply --check tools/titan/results/wave54-ua-heading-face/seam-2.patch
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+@@ -340,20 +340,29 @@
+         // The UA tag rules and the merge below all read the POST-reset own
+         // list (identical to the old list for every All-free element).
+         let ownProperties = reset.own
++        // Hoisted (wave 54, lane L5): the UA heading fold gate reads the
++        // same PRE-UA merged list the font rule corrects.
++        let mergedPreUA = ListStyleUaRule.apply(
++            sourceTag: component.meta?.sourceTag,
++            own: ownProperties,
++            merged: InheritedText.merge(
++                own: InheritedText.resolvingCurrentColorOnColor(ownProperties),
++                inherited: reset.inherited))
+         return UAElementFontRule.apply(
+             sourceTag: component.meta?.sourceTag,
+             own: ownProperties,
+-            merged: ListStyleUaRule.apply(
+-                sourceTag: component.meta?.sourceTag,
+-                own: ownProperties,
+-                merged: InheritedText.merge(
+-                    own: InheritedText.resolvingCurrentColorOnColor(ownProperties),
+-                    inherited: reset.inherited)),
+-            // The heading half stands down for a heading that hosts child
+-            // boxes — this container stacks them, and a 2em face only
+-            // magnifies that (UAElementFontRule.headingAppliesTo carries the
+-            // measured cells). sup/sub are unaffected by the flag.
+-            hasElementChildren: component.children?.isEmpty == false)
++            merged: mergedPreUA,
++            // Wave 54 (lane L5, U2-ios): the heading half stands down only
++            // for a heading whose children would still paint STACKED — a
++            // host whose `meta.runs` FOLD into one paragraph (the wave-44/45
++            // inline flow) takes the 2em face like a leaf does. The wave-40
++            // all-children stand-down was measured on the pre-fold stacked
++            // render (UAElementFontRule.headingAppliesTo); UAHeadingFoldGate
++            // carries the re-measured cells. sup/sub are unaffected.
++            hasElementChildren: UAHeadingFoldGate.standsDown(
++                component: component,
++                inFlowChildren: inFlowChildren,
++                mergedPreUA: mergedPreUA))
+     }
+ 
+     /// Wave 9 (#37) — true when the merged list's `Color` arrived ONLY

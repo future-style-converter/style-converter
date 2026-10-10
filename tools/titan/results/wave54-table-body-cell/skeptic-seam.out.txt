@@ -1,0 +1,11 @@
+{"step": "lock+sha-before", "sha256": "da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db", "equalsHEAD": true}
+{"step": "applied", "patchedSha256": "eaf9111e77596e0c3b730a84d26ead113002bbe45a1f36e308d10bf79bcac8d0"}
+{"step": "GREEN-patched", "rc": 0, "tests": 28, "red": [], "classes": {"TableBoxTreeTest": 11, "TableBodyForestTest": 7, "TableCellHugTest": 8, "TableCellHugSeamWiringTest": 2}, "errs": []}
+{"step": "S1", "rc": 1, "tests": 28, "red": ["TableCellHugSeamWiringTest::the call spends both halves of the chrome and no inline stroke expression is left"], "errs": [], "restoredToPatched": true}
+{"step": "S2", "rc": 1, "tests": 28, "red": ["TableCellHugSeamWiringTest::the call spends both halves of the chrome and no inline stroke expression is left"], "errs": [], "restoredToPatched": true}
+{"step": "S3", "rc": 1, "tests": 28, "red": ["TableCellHugSeamWiringTest::the arm computes the chrome from today's stroke expression, verbatim"], "errs": [], "restoredToPatched": true}
+{"step": "S4", "rc": 1, "tests": 28, "red": ["TableCellHugSeamWiringTest::the call spends both halves of the chrome and no inline stroke expression is left"], "errs": [], "restoredToPatched": true}
+{"step": "S5", "rc": 0, "tests": 28, "red": [], "errs": [], "restoredToPatched": true}
+{"step": "S0", "rc": 1, "tests": 28, "red": ["TableCellHugSeamWiringTest::the arm computes the chrome from today's stroke expression, verbatim", "TableCellHugSeamWiringTest::the call spends both halves of the chrome and no inline stroke expression is left"], "errs": []}
+{"step": "restored", "sha256": "da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db", "byteExact": true, "wireTestRemoved": true}
+{"step": "lock released"}

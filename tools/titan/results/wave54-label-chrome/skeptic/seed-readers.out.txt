@@ -1,0 +1,10 @@
+######## head PNGs=390
+# tests 40
+# pass 40
+# fail 0
+exit=0
+######## u1-seed PNGs=408
+# tests 40
+# pass 40
+# fail 0
+exit=0

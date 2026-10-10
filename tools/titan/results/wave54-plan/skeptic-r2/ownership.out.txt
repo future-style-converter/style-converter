@@ -1,0 +1,86 @@
+L1: 7 owned tokens
+   tools/titan/bidi-bake.mjs
+   bidi-marker-bake.mjs
+   tools/titan/bidi-marker-bake.mjs
+   tools/titan/bidi-bake.test.mjs
+   tools/titan/results/wave54-rtl-marker-bake/
+   wave53-lists-bakes/marker-probe.mjs
+   kids.slice(1)
+L2: 8 owned tokens
+   runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt
+   src/test/…/table/TableBodyForestTest.kt
+   runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt
+   src/test/…/table/TableCellHugTest.kt
+   runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt
+   apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt
+   apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/ComposedCanvasTableBodyTest.kt
+   tools/titan/results/wave54-table-body-cell/
+L3: 21 owned tokens
+   HyphenateCharacterPropertyParser.kt
+   primitiveParsers/CssStringParser.kt
+   HyphenateCharacterPropertyParserTest.kt
+   typography/wrapping/HyphenateCharacterConfig.kt
+   typography/wrapping/HyphenateCharacterExtractor.kt
+   typography/wrapping/HyphenateCharacterApplier.kt
+   SoftHyphenCuts.kt
+   typography/wrapping/PreBreakPipeline.kt
+   PreBreakPipelineTest.kt
+   HyphenateCharacterExtractorTest.kt
+   StyleEngine/typography/wrapping/HyphenateCharacterConfig.swift
+   StyleEngine/typography/wrapping/HyphenateCharacterExtractor.swift
+   StyleEngine/typography/wrapping/HyphenateCharacterApplier.swift
+   SpentHyphen.swift
+   StyleEngine/typography/TypographyAggregate.swift
+   Renderer/StyleBuilder.swift
+   StyleEngine/typography/GreedyLineBreaker.swift
+   Tests/…/GreedyLineBreakerTests.swift
+   TypographyTests.swift
+   tools/titan/extract-fixture-br-line-context.test.mjs
+   tools/titan/results/wave54-hyphenate-character/
+L4: 17 owned tokens
+   runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt
+   src/test/…/layout/position/OutOfFlowContainingBlockTest.kt
+   runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift
+   Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift
+   layout/position/CanvasRootHoist.kt
+   CanvasRootHoistTest.kt
+   Renderer/FixedHoist.swift
+   core/variables/DynamicValueResolver.kt
+   core/variables/ContainingBlockBands.kt
+   DynamicValueResolverTest.kt
+   columns/GapDecorationLines.kt
+   columns/GapDecorationSegments.kt
+   columns/GapDecorationGeometry.kt
+   StyleEngine/columns/GapDecorationLines.swift
+   StyleEngine/columns/GapDecorationSegments.swift
+   StyleEngine/columns/GapDecorationGeometry.swift
+   tools/titan/results/wave54-oof-layout/
+L5: 8 owned tokens
+   runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt
+   UAHeadingFoldGate.kt
+   runtimes/compose/src/test/java/com/styleconverter/runtime/typography/
+   runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift
+   Tests/StyleConverterRuntimeTests/UAHeadingFoldGateTests.swift
+   StyleEngine/typography/UAElementFontRule.swift
+   UAElementFontRuleTests.swift
+   tools/titan/results/wave54-ua-heading-face/
+L6: 10 owned tokens
+   apps/web-harness/src/ui/ComposedRootSeparator.ts
+   apps/web-harness/src/ui/ComposedRootSeparator.test.ts
+   apps/web-harness/src/ui/ComposedCaptureGallery.tsx
+   .map
+   seam-1.patch
+   runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts
+   runtimes/web/tests/renderer/InertOutOfFlowWordJoin.test.tsx
+   runtimes/web/src/renderer/InlineRuns.ts
+   runtimes/web/src/renderer/NodeRenderer.ts
+   tools/titan/results/wave54-web-tail/
+L7: 7 owned tokens
+   tools/visual/label-chrome-tripwire.test.mjs
+   tools/visual/label-chrome-exempt.json
+   tools/visual/label-chrome-check.mjs
+   tools/visual/baseline/Android__000..5_*.png
+   tools/visual/baseline/iOS__000..5_*.png
+   tools/visual/baseline/web__000..5_*.png
+   tools/titan/results/wave54-label-chrome/
+basename collisions across lanes: 0

@@ -1,0 +1,120 @@
+seam-1.liftonly.patch — the ComponentRenderer.tsx half of seam-1.patch ALONE (no gallery call sites, no wire test): the pure-lift byte-identity probe input. Not a landing artifact.
+
+diff --git a/apps/web-harness/src/sdui/ComponentRenderer.tsx b/apps/web-harness/src/sdui/ComponentRenderer.tsx
+index 8413fb9..1dfb454 100644
+--- a/apps/web-harness/src/sdui/ComponentRenderer.tsx
++++ b/apps/web-harness/src/sdui/ComponentRenderer.tsx
+@@ -331,6 +331,63 @@ function isInlineLevelSibling(node: ComposedNode): boolean {
+   return !!tag && INLINE_LEVEL_SOURCE_TAGS.has(tag);
+ }
+ 
++/**
++ * wave-26 lane WWS — the inter-INLINE whitespace predicate, LIFTED out of
++ * HARNESS_OPTIONS.renderChildSeparator by wave-54 lane L6 (unit RS) as a
++ * pure export, so the composed canvas can ask the SAME question one level
++ * up, between the body's sibling ROOTS (ComposedRootSeparator.ts). The body
++ * below is the old WWS branch verbatim, with `ctx.styles` renamed to the
++ * `container` it always meant; renderChildSeparator keeps its two mode gates
++ * and calls this after them, so the child-level DOM is byte-identical
++ * (pinned: ComposedRootSeparatorWire.test.tsx call-equivalence + the
++ * interInlineWs suite). Returns `' '` to separate, null for flush.
++ */
++export function wsAfterSeparator(
++  prev: ComposedNode,
++  next: ComposedNode,
++  container: { display?: unknown; whiteSpace?: unknown },
++): string | null {
++  // The source must actually have separated them (the whole honesty
++  // gate — see WS_AFTER_ROLE). Marker sits on the EARLIER sibling.
++  if (!isWsAfterMarked(prev)) return null;
++  // Only an INLINE FORMATTING CONTEXT turns a collapsed space into a
++  // visible advance. Flex/grid containers drop whitespace-only children
++  // outright (css-flexbox-1 §4 / css-grid-1 §6), so a separator there is
++  // dead DOM bytes — skip explicitly rather than lean on that.
++  const d = container.display;
++  if (d === 'flex' || d === 'grid' || d === 'inline-flex' || d === 'inline-grid') return null;
++  // A whitespace-PRESERVING container replays the run verbatim instead of
++  // collapsing it (CSS Text §4.1.1): the ref shows the source's real
++  // newline + indent there, and injecting one space would substitute a
++  // different wrong answer for the current one. Out of contract — the
++  // preserved-run case needs the ordered inline-run wire, not this hook.
++  // Set mirrors the extractor's WHITESPACE_PRESERVING plus `pre-line`
++  // (which collapses spaces but KEEPS the newline, so the ref breaks the
++  // line where we would have put a space).
++  //
++  // KNOWN REACH LIMIT, measured not assumed: at child level `container` is
++  // `ctx.styles`, the RAW engine output for THIS container's own declared
++  // properties, so the gate catches `white-space` declared ON the container
++  // and NOT a value inherited from an ancestor — `<div style="white-space:pre"><div>
++  // <span>a</span> <span>b</span></div></div>` still emits the space.
++  // Resolving that needs the inherited cascade, which this hook has no
++  // handle on (it sees prev/next/container, not the ancestor chain).
++  // Bounded cost: in an inherited-pre context the ref paints a LINE BREAK
++  // and both our variants keep one line, so the separator moves an
++  // already-wrong layout by one space advance — it cannot turn a passing
++  // comparison into a failing one. Promote to a resolved-style read when
++  // the renderer grows an inheritance context.
++  const ws = container.whiteSpace;
++  if (typeof ws === 'string' && WHITESPACE_PRESERVING_CONTAINERS.has(ws)) return null;
++  // Both neighbours must be inline-level, or there is no line box for
++  // the advance to land on (whitespace between blocks paints nothing —
++  // CSS 2.1 §9.2.2.1 — so this is precision, not correctness).
++  if (!isInlineLevelSibling(prev) || !isInlineLevelSibling(next)) return null;
++  // A REAL collapsed-whitespace text node: the browser measures the
++  // advance in the capture's own font, exactly as it does in the ref.
++  return ' ';
++}
++
+ /**
+  * Detect the display/layout type from properties.
+  */
+@@ -1112,45 +1169,10 @@ const HARNESS_OPTIONS: RendererOptions = {
+     // component on its own canvas with no page geometry to match, and
+     // widening it would move captures no ref-page comparison reads.
+     if (!WPT_COMPOSED_MODE) return null;
+-    // The source must actually have separated them (the whole honesty
+-    // gate — see WS_AFTER_ROLE). Marker sits on the EARLIER sibling.
+-    if (!isWsAfterMarked(prev)) return null;
+-    // Only an INLINE FORMATTING CONTEXT turns a collapsed space into a
+-    // visible advance. Flex/grid containers drop whitespace-only children
+-    // outright (css-flexbox-1 §4 / css-grid-1 §6), so a separator there is
+-    // dead DOM bytes — skip explicitly rather than lean on that.
+-    const d = ctx.styles.display;
+-    if (d === 'flex' || d === 'grid' || d === 'inline-flex' || d === 'inline-grid') return null;
+-    // A whitespace-PRESERVING container replays the run verbatim instead of
+-    // collapsing it (CSS Text §4.1.1): the ref shows the source's real
+-    // newline + indent there, and injecting one space would substitute a
+-    // different wrong answer for the current one. Out of contract — the
+-    // preserved-run case needs the ordered inline-run wire, not this hook.
+-    // Set mirrors the extractor's WHITESPACE_PRESERVING plus `pre-line`
+-    // (which collapses spaces but KEEPS the newline, so the ref breaks the
+-    // line where we would have put a space).
+-    //
+-    // KNOWN REACH LIMIT, measured not assumed: `ctx.styles` is the RAW
+-    // engine output for THIS container's own declared properties, so the
+-    // gate catches `white-space` declared ON the container and NOT a value
+-    // inherited from an ancestor — `<div style="white-space:pre"><div>
+-    // <span>a</span> <span>b</span></div></div>` still emits the space.
+-    // Resolving that needs the inherited cascade, which this hook has no
+-    // handle on (it sees prev/next/container, not the ancestor chain).
+-    // Bounded cost: in an inherited-pre context the ref paints a LINE BREAK
+-    // and both our variants keep one line, so the separator moves an
+-    // already-wrong layout by one space advance — it cannot turn a passing
+-    // comparison into a failing one. Promote to a resolved-style read when
+-    // the renderer grows an inheritance context.
+-    const ws = ctx.styles.whiteSpace;
+-    if (typeof ws === 'string' && WHITESPACE_PRESERVING_CONTAINERS.has(ws)) return null;
+-    // Both neighbours must be inline-level, or there is no line box for
+-    // the advance to land on (whitespace between blocks paints nothing —
+-    // CSS 2.1 §9.2.2.1 — so this is precision, not correctness).
+-    if (!isInlineLevelSibling(prev) || !isInlineLevelSibling(next)) return null;
+-    // A REAL collapsed-whitespace text node: the browser measures the
+-    // advance in the capture's own font, exactly as it does in the ref.
+-    return ' ';
++    // wave-54 L6 (RS): the WWS gates live in the pure `wsAfterSeparator`
++    // above (lifted verbatim), so the composed canvas's ROOT walk asks the
++    // identical question; here the container is this component's styles.
++    return wsAfterSeparator(prev, next, ctx.styles);
+   },
+ };
+ 

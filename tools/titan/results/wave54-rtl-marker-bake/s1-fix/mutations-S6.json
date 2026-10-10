@@ -1,0 +1,99 @@
+[
+ {
+  "label": "S6-m1 (REQUIRED) the decline is disabled at planBidiBake's call site",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "    if (m?.runs && markerPaintLoss(walk.markers[k], walk.elements, e.path, rootPath)) m = { lossy: [MARKER_STAMPS.notBaked] };",
+  "new": "    if (false && m?.runs && markerPaintLoss(walk.markers[k], walk.elements, e.path, rootPath)) m = { lossy: [MARKER_STAMPS.notBaked] };",
+  "expectRed": [
+   "S6-1 paint decline",
+   "S6-2 paint decline",
+   "S6-4 paint decline"
+  ]
+ },
+ {
+  "label": "S6-m2 the chain bound reaches the ROOT (its own effects judged)",
+  "file": "tools/titan/bidi-marker-paint.mjs",
+  "old": "...itemPath.slice(rootPath.length).map(",
+  "new": "...itemPath.slice(rootPath.length - 1).map(",
+  "expectRed": [
+   "S6-2 paint decline",
+   "S6-3 paint decline"
+  ]
+ },
+ {
+  "label": "S6-m3 a box BETWEEN item and root is not read (item only)",
+  "file": "tools/titan/bidi-marker-paint.mjs",
+  "old": "...itemPath.slice(rootPath.length).map(",
+  "new": "...itemPath.slice(itemPath.length - 1).map(",
+  "expectRed": [
+   "S6-3 paint decline"
+  ]
+ },
+ {
+  "label": "S6-m4 an unmeasured chain reads as clean",
+  "file": "tools/titan/bidi-marker-paint.mjs",
+  "old": "  if (!Array.isArray(chain)) return `paint chain unmeasured${chain?.error ? ` (${chain.error})` : ''}`;",
+  "new": "  if (!Array.isArray(chain)) return null;",
+  "expectRed": [
+   "S6-4 paint decline",
+   "S6-5 paint chain read"
+  ]
+ },
+ {
+  "label": "S6-m5 the tag alignment check is dropped",
+  "file": "tools/titan/bidi-marker-paint.mjs",
+  "old": "    if (!e || e.tag !== want[d]) return",
+  "new": "    if (!e) return",
+  "expectRed": [
+   "S6-4 paint decline"
+  ]
+ },
+ {
+  "label": "S6-m6 opacity is not judged",
+  "file": "tools/titan/bidi-marker-paint.mjs",
+  "old": "const lost = k === 'opacity' ? !(Number.parseFloat(e[k]) >= 1) : e[k] !== init;",
+  "new": "const lost = k === 'opacity' ? false : e[k] !== init;",
+  "expectRed": [
+   "S6-1 paint decline",
+   "S6-2 paint decline",
+   "S6-4 paint decline"
+  ]
+ },
+ {
+  "label": "S6-m7 text-shadow is dropped from the read set",
+  "file": "tools/titan/bidi-marker-paint.mjs",
+  "old": "  // css-text-decor-3 #text-shadow-property: inherited, initial none.\n  textShadow: 'none',\n",
+  "new": "",
+  "expectRed": [
+   "S6-2 paint decline",
+   "S6-5 paint chain read"
+  ]
+ },
+ {
+  "label": "S6-m8 the in-page reader skips the ::marker pseudo",
+  "file": "tools/titan/bidi-marker-paint.mjs",
+  "old": "    const chain = [read(getComputedStyle(el, '::marker'), '::marker')];",
+  "new": "    const chain = [];",
+  "expectRed": [
+   "S6-5 paint chain read"
+  ]
+ },
+ {
+  "label": "S6-m9 collectMarkerFacts stops attaching the chain",
+  "file": "tools/titan/bidi-marker-bake.mjs",
+  "old": "    return await readMarkerPaintChains(page, facts, items);",
+  "new": "    return facts;",
+  "expectRed": [
+   "S6-5 paint chain read"
+  ]
+ },
+ {
+  "label": "S6-m10 the in-page walk does not stop below <body>",
+  "file": "tools/titan/bidi-marker-paint.mjs",
+  "old": "for (let n = el; n && n !== document.body; n = n.parentElement)",
+  "new": "for (let n = el; n; n = n.parentElement)",
+  "expectRed": [
+   "S6-5 paint chain read"
+  ]
+ }
+]

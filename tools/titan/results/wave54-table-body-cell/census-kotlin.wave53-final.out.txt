@@ -1,0 +1,4 @@
+run wave53-final: documents 1435 · decode errors 0 · boxes walked 10716 · forest non-identity 1 · documents with an anonymous box 1 · documents where chrome differs from (fabricatedDefault, hug=false) 1
+FOREST wpt__CSS2__css21-errata__s-11-1-1b-006.json
+ANON wpt__CSS2__css21-errata__s-11-1-1b-006.json [wpt__css2__css21-errata__s-11-1-1b-006__0-141#table, wpt__css2__css21-errata__s-11-1-1b-006__0-141#row, wpt__css2__css21-errata__s-11-1-1b-006__0-141#cell0]
+CHROME wpt__CSS2__css21-errata__s-11-1-1b-006.json [wpt__css2__css21-errata__s-11-1-1b-006__0-141#table, wpt__css2__css21-errata__s-11-1-1b-006__0-141#row, wpt__css2__css21-errata__s-11-1-1b-006__0-141#cell0]

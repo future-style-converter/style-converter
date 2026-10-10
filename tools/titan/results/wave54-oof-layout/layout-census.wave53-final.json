@@ -1,0 +1,842 @@
+{
+ "runId": "wave53-final",
+ "generatedFrom": "tools/titan/runs/wave53-final",
+ "oofcb": {
+  "m1": [
+   {
+    "test": "CSS2/abspos/static-fixed-inside-abspos.html",
+    "postLoad": false,
+    "cells": "web:P0.999 ios:P0.9841R android:P0.9835R",
+    "id": "abspos__static-fixed-inside-abspos__1__0__0-018",
+    "depth": 2,
+    "ancestors": [
+     "div:ABSOLUTE",
+     "div:STATIC"
+    ]
+   },
+   {
+    "test": "css-position/position-fixed-scroll-nested-fixed.html",
+    "postLoad": false,
+    "cells": "web:— ios:— android:—",
+    "id": "wpt__css-position__position-fixed-scroll-nested-fixed__0-185",
+    "depth": 0,
+    "ancestors": []
+   },
+   {
+    "test": "css-position/position-fixed-scroll-nested-fixed.html",
+    "postLoad": false,
+    "cells": "web:— ios:— android:—",
+    "id": "position-fixed-scroll-nested-fixed__0__0-186",
+    "depth": 1,
+    "ancestors": [
+     "div:FIXED"
+    ]
+   },
+   {
+    "test": "css-position/position-relative-003.html",
+    "postLoad": false,
+    "cells": "web:P0.999 ios:P0.9594R android:P0.9589R",
+    "id": "position-relative-003__1__0__0__0-201",
+    "depth": 3,
+    "ancestors": [
+     "span:RELATIVE",
+     "span:RELATIVE",
+     "div:STATIC"
+    ]
+   }
+  ],
+  "m2": [
+   {
+    "test": "css-contain/contain-content-003.html",
+    "postLoad": false,
+    "cells": "web:P0.999 ios:P0.9974 android:f0.9405R",
+    "id": "contain-content-003__1__0-046",
+    "position": "ABSOLUTE",
+    "insets": [
+     "Top",
+     "Right"
+    ],
+    "establisher": "wpt__css-contain__contain-content-003__1-045",
+    "why": [
+     "contain:CONTENT"
+    ],
+    "nativeCB": "canvas"
+   },
+   {
+    "test": "css-contain/contain-content-003.html",
+    "postLoad": false,
+    "cells": "web:P0.999 ios:P0.9974 android:f0.9405R",
+    "id": "contain-content-003__1__1-047",
+    "position": "ABSOLUTE",
+    "insets": [
+     "Bottom",
+     "Right"
+    ],
+    "establisher": "wpt__css-contain__contain-content-003__1-045",
+    "why": [
+     "contain:CONTENT"
+    ],
+    "nativeCB": "canvas"
+   },
+   {
+    "test": "css-contain/contain-content-004.html",
+    "postLoad": false,
+    "cells": "web:P0.9985 ios:f0.8094R android:f0.8286R",
+    "id": "contain-content-004__1__1__1__1-057",
+    "position": "ABSOLUTE",
+    "insets": [
+     "Top",
+     "Left"
+    ],
+    "establisher": "contain-content-004__1__1__1-055",
+    "why": [
+     "contain:CONTENT"
+    ],
+    "nativeCB": "canvas"
+   },
+   {
+    "test": "css-contain/contain-content-011.html",
+    "postLoad": false,
+    "cells": "web:P0.9873 ios:P0.9854 android:f0.9284R",
+    "id": "contain-content-011__1__0-061",
+    "position": "ABSOLUTE",
+    "insets": [
+     "Top",
+     "Right"
+    ],
+    "establisher": "wpt__css-contain__contain-content-011__2-060",
+    "why": [
+     "contain:CONTENT"
+    ],
+    "nativeCB": "canvas"
+   },
+   {
+    "test": "css-contain/contain-content-011.html",
+    "postLoad": false,
+    "cells": "web:P0.9873 ios:P0.9854 android:f0.9284R",
+    "id": "contain-content-011__1__1-062",
+    "position": "ABSOLUTE",
+    "insets": [
+     "Bottom",
+     "Right"
+    ],
+    "establisher": "wpt__css-contain__contain-content-011__2-060",
+    "why": [
+     "contain:CONTENT"
+    ],
+    "nativeCB": "canvas"
+   },
+   {
+    "test": "css-position/change-insets-inside-strict-containment-nested.html",
+    "postLoad": true,
+    "cells": "web:P0.999 ios:P0.9594R android:P0.9589R",
+    "id": "change-insets-inside-strict-containment-nested__1__0-012",
+    "position": "FIXED",
+    "insets": [
+     "Top",
+     "Left"
+    ],
+    "establisher": "wpt__css-position__change-insets-inside-strict-containment-nested__1-011",
+    "why": [
+     "contain:STRICT"
+    ],
+    "nativeCB": "canvas"
+   },
+   {
+    "test": "css-position/change-insets-inside-strict-containment-nested.html",
+    "postLoad": true,
+    "cells": "web:P0.999 ios:P0.9594R android:P0.9589R",
+    "id": "change-insets-inside-strict-containment-nested__1__0__0__0-014",
+    "position": "FIXED",
+    "insets": [
+     "Top",
+     "Left"
+    ],
+    "establisher": "change-insets-inside-strict-containment-nested__1__0__0-013",
+    "why": [
+     "contain:STRICT"
+    ],
+    "nativeCB": "canvas"
+   },
+   {
+    "test": "css-position/position-relative-004.html",
+    "postLoad": true,
+    "cells": "web:P0.999 ios:P0.9594R android:P0.9589R",
+    "id": "position-relative-004__1__0__0__0-206",
+    "position": "FIXED",
+    "insets": [
+     "Top",
+     "Left"
+    ],
+    "establisher": "wpt__css-position__position-relative-004__1-203",
+    "why": [
+     "contain:PAINT"
+    ],
+    "nativeCB": "canvas"
+   },
+   {
+    "test": "filter-effects/backdrop-filter-containing-block.html",
+    "postLoad": false,
+    "cells": "web:P1 ios:f0.7955 android:f0.7506",
+    "id": "backdrop-filter-containing-block__1__0-089",
+    "position": "FIXED",
+    "insets": [
+     "Top"
+    ],
+    "establisher": "wpt__filter-effects__backdrop-filter-containing-block__1-088",
+    "why": [
+     "backdrop-filter"
+    ],
+    "nativeCB": "canvas"
+   },
+   {
+    "test": "filter-effects/backdrop-filter-containing-block.html",
+    "postLoad": false,
+    "cells": "web:P1 ios:f0.7955 android:f0.7506",
+    "id": "backdrop-filter-containing-block__1__1-090",
+    "position": "ABSOLUTE",
+    "insets": [
+     "Top",
+     "Left"
+    ],
+    "establisher": "wpt__filter-effects__backdrop-filter-containing-block__1-088",
+    "why": [
+     "backdrop-filter"
+    ],
+    "nativeCB": "canvas"
+   }
+  ],
+  "fixedControls": [
+   {
+    "test": "css-anchor-position/anchor-center-safe-rtl.html",
+    "postLoad": false,
+    "cells": "web:— ios:— android:—"
+   },
+   {
+    "test": "css-anchor-position/anchor-center-safe.html",
+    "postLoad": true,
+    "cells": "web:P0.9999 ios:P0.999 android:P0.9534"
+   },
+   {
+    "test": "css-anchor-position/anchor-fixed-pos-descendant.html",
+    "postLoad": true,
+    "cells": "web:P0.9994 ios:P0.9994 android:P0.9994"
+   },
+   {
+    "test": "css-anchor-position/anchor-name-006.html",
+    "postLoad": true,
+    "cells": "web:P0.999 ios:P0.9974 android:P0.9967"
+   },
+   {
+    "test": "css-anchor-position/anchor-name-007.html",
+    "postLoad": true,
+    "cells": "web:P0.999 ios:P0.9974 android:P0.9967"
+   },
+   {
+    "test": "css-anchor-position/anchor-position-multicol-002.html",
+    "postLoad": true,
+    "cells": "web:P1 ios:f0.9175R android:f0.9381R"
+   },
+   {
+    "test": "css-display/display-contents-oof-002.html",
+    "postLoad": false,
+    "cells": "web:P1 ios:P0.9843 android:P0.9837"
+   },
+   {
+    "test": "css-flexbox/abspos/position-absolute-containing-block-001.html",
+    "postLoad": false,
+    "cells": "web:P1 ios:P1 android:P1"
+   },
+   {
+    "test": "css-flexbox/abspos/position-absolute-containing-block-002.html",
+    "postLoad": false,
+    "cells": "web:P1 ios:P1 android:P1"
+   },
+   {
+    "test": "css-masking/clip-path/clip-path-on-fixed-position-scroll.html",
+    "postLoad": false,
+    "cells": "web:— ios:— android:—"
+   },
+   {
+    "test": "css-position/absolute-pos-box-inside-fixed-pos-box-with-changing-height.html",
+    "postLoad": true,
+    "cells": "web:P1 ios:P1 android:P1"
+   },
+   {
+    "test": "css-position/hypothetical-dynamic-change-001.html",
+    "postLoad": true,
+    "cells": "web:P1 ios:P1 android:P1"
+   },
+   {
+    "test": "css-position/hypothetical-dynamic-change-002.html",
+    "postLoad": true,
+    "cells": "web:P1 ios:P1 android:P1"
+   },
+   {
+    "test": "css-position/hypothetical-dynamic-change-003.html",
+    "postLoad": true,
+    "cells": "web:P1 ios:P1 android:P1"
+   },
+   {
+    "test": "css-position/position-absolute-dynamic-auto-overflow.html",
+    "postLoad": true,
+    "cells": "web:P0.999 ios:P0.9974 android:P0.9967"
+   },
+   {
+    "test": "css-position/position-fixed-dynamic-transformed-sibling.html",
+    "postLoad": true,
+    "cells": "web:P1 ios:P1 android:P1"
+   },
+   {
+    "test": "css-position/position-fixed-root-element-flex.html",
+    "postLoad": false,
+    "cells": "web:f0.8456 ios:f0.8467 android:f0.712"
+   },
+   {
+    "test": "css-position/position-fixed-root-element-grid.html",
+    "postLoad": false,
+    "cells": "web:f0.8456 ios:f0.8467 android:f0.712"
+   },
+   {
+    "test": "css-pseudo/first-letter-list-item-dynamic-001.html",
+    "postLoad": true,
+    "cells": "web:P0.9999 ios:P0.9995 android:P0.9987"
+   },
+   {
+    "test": "css-transforms/3d-rendering-context-and-fixpos.html",
+    "postLoad": false,
+    "cells": "web:P1 ios:P0.9992 android:P0.9988"
+   },
+   {
+    "test": "css-transforms/backface-visibility-hidden-004.html",
+    "postLoad": false,
+    "cells": "web:P1 ios:P0.9992 android:f0.998R"
+   },
+   {
+    "test": "css-view-transitions/content-with-child-with-transparent-background.html",
+    "postLoad": true,
+    "cells": "web:P0.9977 ios:P0.9977 android:P0.9977"
+   },
+   {
+    "test": "css-view-transitions/content-with-transparent-background.html",
+    "postLoad": true,
+    "cells": "web:P1 ios:P1 android:P1"
+   },
+   {
+    "test": "filter-effects/backdrop-filter-fixed-clip.html",
+    "postLoad": false,
+    "cells": "web:P1 ios:f0.9733 android:f0.9481"
+   },
+   {
+    "test": "filter-effects/backdrop-filter-isolation-fixed.html",
+    "postLoad": false,
+    "cells": "web:P1 ios:P0.9975 android:P0.9729"
+   },
+   {
+    "test": "filter-effects/backdrop-filters-blur-large.html",
+    "postLoad": false,
+    "cells": "web:P0.9877 ios:P0.9859 android:P0.9855"
+   }
+  ],
+  "establisherControls": [
+   {
+    "test": "filter-effects/backdrop-filter-clip-rect-zoom.html",
+    "postLoad": false,
+    "cells": "web:— ios:— android:—",
+    "id": "wpt__filter-effects__backdrop-filter-clip-rect-zoom__2-064",
+    "position": "ABSOLUTE",
+    "why": [
+     "backdrop-filter"
+    ],
+    "oof": "AA"
+   },
+   {
+    "test": "filter-effects/backdrop-filter-clip-rect.html",
+    "postLoad": false,
+    "cells": "web:P0.959 ios:P0.956 android:f0.9315",
+    "id": "wpt__filter-effects__backdrop-filter-clip-rect__2-073",
+    "position": "ABSOLUTE",
+    "why": [
+     "backdrop-filter"
+    ],
+    "oof": "AA"
+   },
+   {
+    "test": "filter-effects/backdrop-filter-edge-clipping.html",
+    "postLoad": false,
+    "cells": "web:P0.9595 ios:P0.9578 android:f0.929",
+    "id": "wpt__filter-effects__backdrop-filter-edge-clipping__4-114",
+    "position": "ABSOLUTE",
+    "why": [
+     "backdrop-filter"
+    ],
+    "oof": "AAAA"
+   },
+   {
+    "test": "filter-effects/backdrop-filter-zero-size.html",
+    "postLoad": false,
+    "cells": "web:P1 ios:P0.9993 android:P0.9988",
+    "id": "wpt__filter-effects__backdrop-filter-zero-size__2-228",
+    "position": "ABSOLUTE",
+    "why": [
+     "backdrop-filter"
+    ],
+    "oof": "A"
+   }
+  ],
+  "hostFlips": [
+   {
+    "test": "css-contain/contain-content-003.html",
+    "postLoad": false,
+    "cells": "web:P0.999 ios:P0.9974 android:f0.9405R",
+    "hostBefore": true,
+    "hostAfter": false
+   },
+   {
+    "test": "css-contain/contain-content-004.html",
+    "postLoad": false,
+    "cells": "web:P0.9985 ios:f0.8094R android:f0.8286R",
+    "hostBefore": true,
+    "hostAfter": false
+   },
+   {
+    "test": "css-contain/contain-content-011.html",
+    "postLoad": false,
+    "cells": "web:P0.9873 ios:P0.9854 android:f0.9284R",
+    "hostBefore": true,
+    "hostAfter": false
+   },
+   {
+    "test": "css-position/change-insets-inside-strict-containment-nested.html",
+    "postLoad": true,
+    "cells": "web:P0.999 ios:P0.9594R android:P0.9589R",
+    "hostBefore": true,
+    "hostAfter": false
+   },
+   {
+    "test": "css-position/position-relative-003.html",
+    "postLoad": false,
+    "cells": "web:P0.999 ios:P0.9594R android:P0.9589R",
+    "hostBefore": true,
+    "hostAfter": false
+   },
+   {
+    "test": "css-position/position-relative-004.html",
+    "postLoad": true,
+    "cells": "web:P0.999 ios:P0.9594R android:P0.9589R",
+    "hostBefore": true,
+    "hostAfter": false
+   },
+   {
+    "test": "filter-effects/backdrop-filter-containing-block.html",
+    "postLoad": false,
+    "cells": "web:P1 ios:f0.7955 android:f0.7506",
+    "hostBefore": true,
+    "hostAfter": false
+   }
+  ]
+ },
+ "floatroots": [
+  {
+   "test": "CSS2/borders/border-conflict-style-107.html",
+   "postLoad": false,
+   "cells": "web:f0.9381R ios:f0.6564R android:f0.3262R",
+   "roots": 20,
+   "runs": "L×4 L×4 L×4 L×4"
+  },
+  {
+   "test": "css-counter-styles/counter-style-at-rule/name-case-sensitivity.html",
+   "postLoad": false,
+   "cells": "web:f0.9593 ios:f0.9354 android:f0.9364",
+   "roots": 14,
+   "runs": "L×2"
+  },
+  {
+   "test": "css-grid/abspos/grid-abspos-staticpos-align-self-safe-001.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:f0.9448 android:f0.9441",
+   "roots": 4,
+   "runs": "L×4"
+  },
+  {
+   "test": "css-lists/counter-list-item.html",
+   "postLoad": false,
+   "cells": "web:P0.9975 ios:f0.7864 android:f0.7307",
+   "roots": 4,
+   "runs": "L×3"
+  },
+  {
+   "test": "css-values/ch-unit-001.html",
+   "postLoad": false,
+   "cells": "web:P0.9779 ios:f0.8235R android:f0.8229R",
+   "roots": 3,
+   "runs": "L×2"
+  },
+  {
+   "test": "css-writing-modes/abs-pos-border-offset-001.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:f0.4519 android:f0.4508",
+   "roots": 43,
+   "runs": "L×6 L×6 L×6 L×6 L×6 L×6"
+  },
+  {
+   "test": "css-writing-modes/abs-pos-border-offset-002.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:f0.3384 android:f0.3383",
+   "roots": 75,
+   "runs": "L×4 L×4 L×4 L×4 L×4 L×4 L×10 L×10 L×10 L×10"
+  },
+  {
+   "test": "css-writing-modes/direction-upright-001.html",
+   "postLoad": false,
+   "cells": "web:f0.9269 ios:f0.5491 android:f0.4896",
+   "roots": 12,
+   "runs": "L×5 L×5"
+  },
+  {
+   "test": "css-writing-modes/direction-upright-002.html",
+   "postLoad": false,
+   "cells": "web:f0.7002 ios:f0.6092 android:f0.5935",
+   "roots": 12,
+   "runs": "L×5 L×5"
+  }
+ ],
+ "gapzero": [
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-007.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P0.9998 android:P0.9856",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-007__1-052",
+   "display": "FLEX",
+   "columnGap": 10,
+   "rowGap": null,
+   "rules": "ColumnRuleStyle,ColumnRuleWidth,ColumnRuleColor"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-008.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P0.9996 android:P0.999",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-008__1-057",
+   "display": "FLEX",
+   "columnGap": 10,
+   "rowGap": null,
+   "rules": "ColumnRuleStyle,ColumnRuleWidth,ColumnRuleColor"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-017.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P0.9987 android:P0.9984",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-017__1-141",
+   "display": "FLEX",
+   "columnGap": null,
+   "rowGap": 20,
+   "rules": "RowRuleColor,RowRuleWidth,RowRuleStyle"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-018.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P0.9986 android:P0.9984",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-018__1-146",
+   "display": "FLEX",
+   "columnGap": null,
+   "rowGap": 20,
+   "rules": "RowRuleColor,RowRuleWidth,RowRuleStyle"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-027.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P0.9997 android:P0.9991",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-027__1-194",
+   "display": "FLEX",
+   "columnGap": 10,
+   "rowGap": null,
+   "rules": "ColumnRuleStyle,ColumnRuleWidth,ColumnRuleColor"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-033.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:f0.94 android:f0.94",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-033__1-242",
+   "display": "FLEX",
+   "columnGap": null,
+   "rowGap": null,
+   "rules": "RowRuleStyle,RowRuleColor,RowRuleWidth,ColumnRuleStyle,ColumnRuleColor,ColumnRuleWidth"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-040.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P0.9997 android:P0.9997",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-040__1-290",
+   "display": "FLEX",
+   "columnGap": null,
+   "rowGap": null,
+   "rules": "ColumnRuleWidth,ColumnRuleStyle,ColumnRuleColor"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-041.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P1 android:P1",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-041__1-301",
+   "display": "FLEX",
+   "columnGap": null,
+   "rowGap": null,
+   "rules": "ColumnRuleWidth,ColumnRuleStyle,ColumnRuleColor"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-042.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P0.9999 android:P0.9999",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-042__1-312",
+   "display": "FLEX",
+   "columnGap": null,
+   "rowGap": null,
+   "rules": "ColumnRuleWidth,ColumnRuleStyle,ColumnRuleColor"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-043.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P0.9997 android:P0.9997",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-043__1-323",
+   "display": "FLEX",
+   "columnGap": null,
+   "rowGap": null,
+   "rules": "RowRuleWidth,RowRuleStyle,RowRuleColor"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-044.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P0.9998 android:P0.9998",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-044__1-334",
+   "display": "FLEX",
+   "columnGap": 13,
+   "rowGap": null,
+   "rules": "ColumnRuleWidth,ColumnRuleStyle,ColumnRuleColor"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-045.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P0.9996 android:P0.9996",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-045__1-345",
+   "display": "FLEX",
+   "columnGap": 5,
+   "rowGap": null,
+   "rules": "RowRuleWidth,RowRuleStyle,RowRuleColor,ColumnRuleWidth,ColumnRuleStyle,ColumnRuleColor"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-046.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P1 android:P0.9947",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-046__1-356",
+   "display": "FLEX",
+   "columnGap": null,
+   "rowGap": 5,
+   "rules": "RowRuleWidth,RowRuleStyle,RowRuleColor"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-047.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P1 android:P1",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-047__1-364",
+   "display": "FLEX",
+   "columnGap": null,
+   "rowGap": null,
+   "rules": "RowRuleWidth,RowRuleStyle,RowRuleColor"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-048.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P1 android:P1",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-048__1-372",
+   "display": "FLEX",
+   "columnGap": null,
+   "rowGap": null,
+   "rules": "RowRuleWidth,RowRuleStyle,RowRuleColor"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-049.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P1 android:P1",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-049__1-380",
+   "display": "FLEX",
+   "columnGap": null,
+   "rowGap": null,
+   "rules": "RowRuleWidth,RowRuleStyle,RowRuleColor"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-050.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P0.9997 android:P0.9997",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-050__1-388",
+   "display": "FLEX",
+   "columnGap": null,
+   "rowGap": 10,
+   "rules": "ColumnRuleWidth,ColumnRuleStyle,ColumnRuleColor,RowRuleWidth,RowRuleColor,RowRuleStyle,RowRuleBreak"
+  }
+ ],
+ "cbborder": [
+  {
+   "test": "css-flexbox/abspos/abspos-autopos-htb-ltr.html",
+   "postLoad": false,
+   "cells": "web:P0.999 ios:P0.9974 android:P0.9966R",
+   "id": "wpt__css-flexbox__abspos__abspos-autopos-htb-ltr__1-002",
+   "band": "BorderLeftWidth,BorderRightWidth,BorderTopWidth,BorderBottomWidth",
+   "pctKids": [
+    "abspos__abspos-autopos-htb-ltr__1__0-003:ABSOLUTE"
+   ]
+  },
+  {
+   "test": "css-flexbox/abspos/abspos-autopos-htb-rtl.html",
+   "postLoad": false,
+   "cells": "web:P0.999 ios:P0.9974 android:P0.9869R",
+   "id": "wpt__css-flexbox__abspos__abspos-autopos-htb-rtl__1-005",
+   "band": "BorderLeftWidth,BorderRightWidth,BorderTopWidth,BorderBottomWidth",
+   "pctKids": [
+    "abspos__abspos-autopos-htb-rtl__1__0-006:ABSOLUTE"
+   ]
+  },
+  {
+   "test": "css-flexbox/abspos/abspos-autopos-vlr-ltr.html",
+   "postLoad": false,
+   "cells": "web:P0.999 ios:P0.9974 android:P0.9966R",
+   "id": "wpt__css-flexbox__abspos__abspos-autopos-vlr-ltr__1-008",
+   "band": "BorderLeftWidth,BorderRightWidth,BorderTopWidth,BorderBottomWidth",
+   "pctKids": [
+    "abspos__abspos-autopos-vlr-ltr__1__0-009:ABSOLUTE"
+   ]
+  },
+  {
+   "test": "css-flexbox/abspos/abspos-autopos-vlr-rtl.html",
+   "postLoad": false,
+   "cells": "web:P0.999 ios:P0.9974 android:P0.9966R",
+   "id": "wpt__css-flexbox__abspos__abspos-autopos-vlr-rtl__1-011",
+   "band": "BorderLeftWidth,BorderRightWidth,BorderTopWidth,BorderBottomWidth",
+   "pctKids": [
+    "abspos__abspos-autopos-vlr-rtl__1__0-012:ABSOLUTE"
+   ]
+  },
+  {
+   "test": "css-flexbox/abspos/abspos-autopos-vrl-ltr.html",
+   "postLoad": false,
+   "cells": "web:P0.999 ios:P0.9974 android:P0.9966R",
+   "id": "wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr__1-014",
+   "band": "BorderLeftWidth,BorderRightWidth,BorderTopWidth,BorderBottomWidth",
+   "pctKids": [
+    "abspos__abspos-autopos-vrl-ltr__1__0-015:ABSOLUTE"
+   ]
+  },
+  {
+   "test": "css-flexbox/abspos/abspos-autopos-vrl-rtl.html",
+   "postLoad": false,
+   "cells": "web:P0.999 ios:P0.9974 android:P0.9966R",
+   "id": "wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl__1-017",
+   "band": "BorderLeftWidth,BorderRightWidth,BorderTopWidth,BorderBottomWidth",
+   "pctKids": [
+    "abspos__abspos-autopos-vrl-rtl__1__0-018:ABSOLUTE"
+   ]
+  },
+  {
+   "test": "css-images/cross-fade-target-alpha.html",
+   "postLoad": false,
+   "cells": "web:P0.9981 ios:P0.996 android:P0.9957",
+   "id": "wpt__css-images__cross-fade-target-alpha__1-020",
+   "band": "PaddingLeft,PaddingRight,PaddingTop,PaddingBottom",
+   "pctKids": [
+    "cross-fade-target-alpha__1__0-021:STATIC"
+   ]
+  },
+  {
+   "test": "filter-effects/backdrop-filter-nested-border-radius-clip-2.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:P0.9998 android:P0.9689",
+   "id": "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-2__0-167",
+   "band": "PaddingLeft,PaddingRight,PaddingTop,PaddingBottom",
+   "pctKids": [
+    "backdrop-filter-nested-border-radius-clip-2__0__0-168:RELATIVE"
+   ]
+  },
+  {
+   "test": "filter-effects/backdrop-filter-nested-border-radius-clip-3.html",
+   "postLoad": false,
+   "cells": "web:P0.9921 ios:P0.9921 android:f0.9574",
+   "id": "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3__0-171",
+   "band": "PaddingLeft,PaddingRight,PaddingTop,PaddingBottom",
+   "pctKids": [
+    "backdrop-filter-nested-border-radius-clip-3__0__0-172:RELATIVE"
+   ]
+  },
+  {
+   "test": "filter-effects/backdrop-filter-nested-border-radius-clip-4.html",
+   "postLoad": false,
+   "cells": "web:P0.9964 ios:P0.9981 android:P0.977",
+   "id": "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-4__0-176",
+   "band": "PaddingLeft,PaddingRight,PaddingTop,PaddingBottom",
+   "pctKids": [
+    "backdrop-filter-nested-border-radius-clip-4__0__0-177:RELATIVE"
+   ]
+  },
+  {
+   "test": "filter-effects/backdrop-filter-nested-border-radius-clip.html",
+   "postLoad": false,
+   "cells": "web:P0.9936 ios:P0.9936 android:P0.9649",
+   "id": "wpt__filter-effects__backdrop-filter-nested-border-radius-clip__0-181",
+   "band": "PaddingLeft,PaddingRight,PaddingTop,PaddingBottom",
+   "pctKids": [
+    "backdrop-filter-nested-border-radius-clip__0__0-182:RELATIVE"
+   ]
+  }
+ ],
+ "docsScanned": 1435,
+ "establishers": 142,
+ "establisherDocs": 91,
+ "cbborderVerticalText": [
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-006.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:f0.8266 android:f0.8223",
+   "id": "flex__flex-gap-decorations-006__0__0-045"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-006.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:f0.8266 android:f0.8223",
+   "id": "flex__flex-gap-decorations-006__0__1-046"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-006.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:f0.8266 android:f0.8223",
+   "id": "flex__flex-gap-decorations-006__0__2-047"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-006.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:f0.8266 android:f0.8223",
+   "id": "flex__flex-gap-decorations-006__0__3-048"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-006.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:f0.8266 android:f0.8223",
+   "id": "flex__flex-gap-decorations-006__0__4-049"
+  },
+  {
+   "test": "css-gaps/flex/flex-gap-decorations-006.html",
+   "postLoad": false,
+   "cells": "web:P1 ios:f0.8266 android:f0.8223",
+   "id": "flex__flex-gap-decorations-006__0__5-050"
+  }
+ ],
+ "summary": {
+  "docsScanned": 1435,
+  "establishers": "142 components / 91 tests",
+  "cbborderVerticalText": "6 text runs",
+  "oofcb_m1": "4 boxes / 3 tests",
+  "oofcb_m2": "10 boxes / 6 tests",
+  "oofcb_fixedControls": "26 tests",
+  "oofcb_hostFlips": "7 tests",
+  "oofcb_establisherControls": "4 establishers / 4 tests",
+  "floatroots": "9 tests",
+  "gapzero": "17 containers / 17 tests",
+  "cbborder": "11 containers / 11 tests"
+ }
+}

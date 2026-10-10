@@ -1,0 +1,57 @@
+ - L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-001 web                                FAIL       [report: expected WRONG until the target is fixed]
+     line: racter-001 web groups 5 4 4 3 → GEOMETRY WRONG (lines: groups [5, 4, 4, 3] lines vs ref [5, 4, 3, 3]; glyph: group 1 line 1 ink x18-42 end-cell 2px vs ref x18-34 end-cell 9px; offset: group 3 line 1 top y345 vs ref y320)
+!! L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-001 ios                                FAIL       [GATING -> revert U2-ios|U3]
+     line: racter-001 ios groups 5 5 4 3 → GEOMETRY WRONG (lines: groups [5, 5, 4, 3] lines vs ref [5, 4, 3, 3]; glyph: group 1 line 1 ink x17-41 end-cell 2px vs ref x18-34 end-cell 9px; offset: group 2 line 3 top y270 vs ref y263)
+ - L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-001 android                            FAIL       [report: expected WRONG until the target is fixed]
+     line: er-001 android groups 5 4 4 3 → GEOMETRY WRONG (lines: groups [5, 4, 4, 3] lines vs ref [5, 4, 3, 3]; glyph: group 1 line 1 ink x18-41 end-cell 1px vs ref x18-34 end-cell 9px; offset: group 3 line 1 top y345 vs ref y320)
+ - L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-003 web                                FAIL       [report: expected WRONG until the target is fixed]
+     line: acter-003 web groups 5 4 4 3 → GEOMETRY WRONG (lines: groups [5, 4, 4, 3] lines vs ref [5, 4, 3, 3]; glyph: group 1 line 1 ink x18-81 end-cell 12px vs ref x18-42 end-cell 5px; offset: group 3 line 1 top y322 vs ref y300)
+!! L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-003 ios                                FAIL       [GATING -> revert U2-ios|U3]
+     line: hyphenate-character-003 ios groups 5 4 3 3 → GEOMETRY WRONG (glyph: group 1 line 1 ink x17-41 end-cell 2px vs ref x18-42 end-cell 5px; offset: group 3 line 1 top y320 vs ref y300)
+ - L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-003 android                            FAIL       [report: expected WRONG until the target is fixed]
+     line: hyphenate-character-003 android groups 5 4 3 3 → GEOMETRY WRONG (glyph: group 1 line 1 ink x18-41 end-cell 1px vs ref x18-42 end-cell 5px; offset: group 3 line 1 top y322 vs ref y300)
+ - L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-004 web                                FAIL       [report: expected WRONG until the target is fixed]
+     line: hyphenate-character-004 web groups 4 4 4 3 → GEOMETRY WRONG (offset: group 3 line 1 top y303 vs ref y281)
+ - L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-004 ios                                FAIL       [report: expected WRONG until the target is fixed]
+     line: acter-004 ios groups 3 4 3 3 → GEOMETRY WRONG (lines: groups [3, 4, 3, 3] lines vs ref [4, 4, 4, 3]; glyph: group 1 line 1 ink x17-70 end-cell 2px vs ref x18-62 end-cell 11px; offset: group 2 line 1 top y167 vs ref y186)
+ - L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-004 android                            FAIL       [report: expected WRONG until the target is fixed]
+     line: r-004 android groups 3 4 3 3 → GEOMETRY WRONG (lines: groups [3, 4, 3, 3] lines vs ref [4, 4, 4, 3]; glyph: group 1 line 1 ink x18-70 end-cell 1px vs ref x18-62 end-cell 11px; offset: group 2 line 1 top y168 vs ref y186)
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-span-002 web                               PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-span-002 ios                               PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-span-002 android                           PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-span-001 web                               PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-span-001 ios                               PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-span-001 android                           PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-out-of-flow-001 web                        PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-out-of-flow-001 ios                        PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-out-of-flow-001 android                    PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-out-of-flow-002 ios                        PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-out-of-flow-002 android                    PASS       [control: expected to stay PASS]
+ ? L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-002 web                                     UNMEASURED [GATING -> revert U3]
+     line: block-ellipsis-002 web MISSING → GEOMETRY WRONG (no capture)
+ ? L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-004 web                                     UNMEASURED [GATING -> revert U3]
+     line: block-ellipsis-004 web MISSING → GEOMETRY WRONG (no capture)
+ ? L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-005 web                                     UNMEASURED [GATING -> revert U3]
+     line: block-ellipsis-005 web MISSING → GEOMETRY WRONG (no capture)
+ ? L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-006 web                                     UNMEASURED [GATING -> revert U3]
+     line: block-ellipsis-006 web MISSING → GEOMETRY WRONG (no capture)
+ ? L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-002 ios                                     UNMEASURED [control: expected to stay PASS]
+     line: block-ellipsis-002 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-002 android                                 UNMEASURED [control: expected to stay PASS]
+     line: block-ellipsis-002 android MISSING → GEOMETRY WRONG (no capture)
+ ? L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-004 ios                                     UNMEASURED [control: expected to stay PASS]
+     line: block-ellipsis-004 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-005 ios                                     UNMEASURED [control: expected to stay PASS]
+     line: block-ellipsis-005 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-006 ios                                     UNMEASURED [control: expected to stay PASS]
+     line: block-ellipsis-006 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-004 android                                 UNMEASURED [control: expected to stay PASS]
+     line: block-ellipsis-004 android MISSING → GEOMETRY WRONG (no capture)
+ ? L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-005 android                                 UNMEASURED [control: expected to stay PASS]
+     line: block-ellipsis-005 android MISSING → GEOMETRY WRONG (no capture)
+ ? L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-006 android                                 UNMEASURED [control: expected to stay PASS]
+     line: block-ellipsis-006 android MISSING → GEOMETRY WRONG (no capture)
+
+geometry-gate wave53-probe (base wave53-open): 32 keys — PASS 11 · FAIL 9 (gating 2) · UNMEASURED 12 · probe self-check failures 0
+  by class: gating 6 (PASS 0 FAIL 2) · control 19 (PASS 11 FAIL 0) · report 7 (PASS 0 FAIL 7) · withdrawn 0 (PASS 0 FAIL 0)
+revert rule 4 names: U2-ios|U3

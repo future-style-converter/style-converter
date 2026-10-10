@@ -308,8 +308,16 @@ final class TypographyTests: XCTestCase {
         if HyphensExtractor.extract(from: props([("Hyphens", .string("auto"))]))?.mode != "auto" {
             f.append("Hyphens: auto")
         }
-        if HyphenateCharacterExtractor.extract(from: props([("HyphenateCharacter", .string("-"))]))?.keyword != "-" {
-            f.append("HyphenateCharacter: -")
+        // Wave 54 (lane L3, U2-ios): the pin moves to the reader's OBJECT shape
+        // (irmodels HyphenateCharacterProperty: {type: auto} | {type: string, value}).
+        if HyphenateCharacterExtractor.extract(from: props([("HyphenateCharacter",
+            .object(["type": .string("string"), "value": .string("-")]))]))?.value != "-" {
+            f.append("HyphenateCharacter: {string -}")
+        }
+        // `auto` → nil value (the UA hyphen), but a DECLARED config.
+        if HyphenateCharacterExtractor.extract(from: props([("HyphenateCharacter",
+            .object(["type": .string("auto")]))])) != HyphenateCharacterConfig(value: nil) {
+            f.append("HyphenateCharacter: {auto}")
         }
         // TextOverflow ellipsis
         if case .some(.ellipsis) = TextOverflowExtractor.extract(from: props([("TextOverflow", .string("ellipsis"))]))?.mode {

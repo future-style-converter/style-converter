@@ -1,0 +1,136 @@
+=== U2-android seam-1 applied: focused Compose suite  (2026-10-08 19:20:23)
+seam: runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+sha256 HEAD:    da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db
+sha256 before:  da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db
+sha256 applied: 0a92203a9fb5081e5bc2c5721f3c41377039ea7e2b22ae24912e18b6e21282be  (patches: tools/titan/results/wave54-hyphenate-character/seam-1.patch)
+command exit=0: bash -c cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest --tests '*PreBreakPipelineTest' --tests '*GreedyLineBreakerTest' --tests '*HyphenateCharacter*' --tests '*WordBreakOpportunities*' --tests '*SoftHyphenPolicy*'
+  > BUILD SUCCESSFUL in 4s
+sha256 restored: da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db BYTE-EXACT-TO-HEAD
+=== U2-android seam-1 applied (re-run, task lines shown)  (2026-10-08 19:20:38)
+seam: runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+sha256 HEAD:    da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db
+sha256 before:  da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db
+sha256 applied: 0a92203a9fb5081e5bc2c5721f3c41377039ea7e2b22ae24912e18b6e21282be  (patches: tools/titan/results/wave54-hyphenate-character/seam-1.patch)
+command exit=1: bash -c cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest --tests '*PreBreakPipelineTest' --tests '*HyphenateCharacter*' --console=plain 2>&1 | grep -E 'compileDebugKotlin|testDebugUnitTest|BUILD'; grep -c 'hyphenChar = com.styleconverter.runtime.typography.wrapping.HyphenateCharacterApplier' runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt; ls -la --time-style=+%H:%M:%S runtimes/compose/build/tmp/kotlin-classes/debug/com/styleconverter/runtime/core/renderer/ComponentRendererKt.class 2>/dev/null || ls -lT runtimes/compose/build/tmp/kotlin-classes/debug/com/styleconverter/runtime/core/renderer/ComponentRendererKt.class
+  > BUILD SUCCESSFUL in 1s
+sha256 restored: da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db BYTE-EXACT-TO-HEAD
+=== U2-ios seam-2 applied: Catalyst GreedyLineBreakerTests + TypographyTests + SoftHyphenPolicyTests  (2026-10-08 19:30:12)
+seam: runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+sha256 HEAD:    905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e
+sha256 before:  905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e
+sha256 applied: 417853cefdc7627fadc21003efa735d99d47ed0c545b6c1747d7292403fd26f3  (patches: tools/titan/results/wave54-hyphenate-character/seam-2.patch)
+command exit=0: xcodebuild test -scheme StyleConverterRuntime -destination platform=macOS,variant=Mac Catalyst,arch=arm64 -derivedDataPath /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/dd-l3 -only-testing:StyleConverterRuntimeTests/GreedyLineBreakerTests -only-testing:StyleConverterRuntimeTests/TypographyTests -only-testing:StyleConverterRuntimeTests/SoftHyphenPolicyTests
+  > 	 Executed 19 tests, with 0 failures (0 unexpected) in 0.177 (0.667) seconds
+  > 	 Executed 20 tests, with 0 failures (0 unexpected) in 0.181 (0.389) seconds
+  > 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.461 (0.464) seconds
+  > 	 Executed 49 tests, with 0 failures (0 unexpected) in 0.819 (1.521) seconds
+  > 	 Executed 49 tests, with 0 failures (0 unexpected) in 0.819 (1.523) seconds
+sha256 restored: 905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e BYTE-EXACT-TO-HEAD
+=== U3 seam-3 applied: br-line-context pins + extract-fixture.test.mjs + U3 mutations  (2026-10-08 19:45:53)
+seam: tools/titan/extract-fixture.mjs
+sha256 HEAD:    845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9
+sha256 before:  845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9
+sha256 applied: 2461e45e7e10d92052b469d0dd7d80d0fa2be1be677e33e2064e4d75d6bb7206  (patches: tools/titan/results/wave54-hyphenate-character/seam-3.patch)
+command exit=0: tools/titan/results/wave54-hyphenate-character/u3-pins.sh u3
+  > # tests 490
+  > # pass 488
+  > # fail 0
+  >   green> 	 Executed 19 tests, with 0 failures (0 unexpected) in 0.022 (0.177) seconds
+  >   green> 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.273 (0.275) seconds
+  >   green> 	 Executed 29 tests, with 0 failures (0 unexpected) in 0.295 (0.453) seconds
+  >   green> 	 Executed 29 tests, with 0 failures (0 unexpected) in 0.295 (0.453) seconds
+  >   green> # pass 5
+  >   green> # fail 0
+  >   green> # pass 5
+  >   green> # fail 0
+  >   red> # pass 4
+sha256 restored: 845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9 BYTE-EXACT-TO-HEAD
+=== U3+U3b seam-3,seam-3b applied: br-line-context pins + extract-fixture.test.mjs + U3b mutations  (2026-10-08 19:46:39)
+seam: tools/titan/extract-fixture.mjs
+sha256 HEAD:    845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9
+sha256 before:  845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9
+sha256 applied: 6ab6f2b8ee7bc2e53cad7e164e454c0aa7fa9465b3fd468c868931c78ee3d1bd  (patches: tools/titan/results/wave54-hyphenate-character/seam-3.patch,tools/titan/results/wave54-hyphenate-character/seam-3b.patch)
+command exit=0: tools/titan/results/wave54-hyphenate-character/u3-pins.sh u3b
+  > # tests 490
+  > # pass 490
+  > # fail 0
+  >   red> # pass 4
+  >   red> # fail 1
+  >   green> # pass 5
+  >   green> # fail 0
+  >   red> # pass 6
+  >   red> # fail 1
+  >   green> # pass 7
+  >   green> # fail 0
+  >   red> # pass 6
+sha256 restored: 845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9 BYTE-EXACT-TO-HEAD
+=== U2-android seam-1 applied (final re-verify, gradle-focused.sh: compile state + fresh JUnit XML)  (2026-10-08 21:01:35)
+seam: runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+sha256 HEAD:    da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db
+sha256 before:  da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db
+sha256 applied: 0a92203a9fb5081e5bc2c5721f3c41377039ea7e2b22ae24912e18b6e21282be  (patches: tools/titan/results/wave54-hyphenate-character/seam-1.patch)
+command exit=0: tools/titan/results/wave54-hyphenate-character/gradle-focused.sh *PreBreakPipelineTest *GreedyLineBreakerTest *HyphenateCharacter* *WordBreakOpportunities* *SoftHyphenPolicy*
+  > BUILD SUCCESSFUL in 2s
+sha256 restored: da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db BYTE-EXACT-TO-HEAD
+=== U2-ios seam-2 applied (final re-verify): Catalyst GreedyLineBreakerTests + TypographyTests + SoftHyphenPolicyTests  (2026-10-08 21:05:24)
+seam: runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+sha256 HEAD:    905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e
+sha256 before:  905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e
+sha256 applied: 417853cefdc7627fadc21003efa735d99d47ed0c545b6c1747d7292403fd26f3  (patches: tools/titan/results/wave54-hyphenate-character/seam-2.patch)
+command exit=0: xcodebuild test -scheme StyleConverterRuntime -destination platform=macOS,variant=Mac Catalyst,arch=arm64 -derivedDataPath /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/dd-l3 -only-testing:StyleConverterRuntimeTests/GreedyLineBreakerTests -only-testing:StyleConverterRuntimeTests/TypographyTests -only-testing:StyleConverterRuntimeTests/SoftHyphenPolicyTests
+  > 	 Executed 19 tests, with 0 failures (0 unexpected) in 0.106 (0.192) seconds
+  > 	 Executed 20 tests, with 0 failures (0 unexpected) in 0.100 (0.195) seconds
+  > 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.154 (0.206) seconds
+  > 	 Executed 49 tests, with 0 failures (0 unexpected) in 0.360 (0.593) seconds
+  > 	 Executed 49 tests, with 0 failures (0 unexpected) in 0.360 (0.594) seconds
+sha256 restored: 905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e BYTE-EXACT-TO-HEAD
+=== U2-ios seam-2 applied (final re-verify after the StyleBuilder end-to-end pin): Catalyst GreedyLineBreakerTests + TypographyTests + SoftHyphenPolicyTests  (2026-10-08 21:57:12)
+seam: runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+sha256 HEAD:    905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e
+sha256 before:  905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e
+sha256 applied: 417853cefdc7627fadc21003efa735d99d47ed0c545b6c1747d7292403fd26f3  (patches: tools/titan/results/wave54-hyphenate-character/seam-2.patch)
+command exit=0: xcodebuild test -scheme StyleConverterRuntime -destination platform=macOS,variant=Mac Catalyst,arch=arm64 -derivedDataPath /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/dd-l3 -only-testing:StyleConverterRuntimeTests/GreedyLineBreakerTests -only-testing:StyleConverterRuntimeTests/TypographyTests -only-testing:StyleConverterRuntimeTests/SoftHyphenPolicyTests
+  > 	 Executed 19 tests, with 0 failures (0 unexpected) in 0.015 (0.153) seconds
+  > 	 Executed 20 tests, with 0 failures (0 unexpected) in 0.256 (0.259) seconds
+  > 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.037 (0.088) seconds
+  > 	 Executed 49 tests, with 0 failures (0 unexpected) in 0.308 (0.501) seconds
+  > 	 Executed 49 tests, with 0 failures (0 unexpected) in 0.308 (0.502) seconds
+sha256 restored: 905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e BYTE-EXACT-TO-HEAD
+=== U3 seam-3 applied (final re-run): br-line-context pins + extract-fixture.test.mjs + U3 mutations  (2026-10-08 21:59:45)
+seam: tools/titan/extract-fixture.mjs
+sha256 HEAD:    845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9
+sha256 before:  845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9
+sha256 applied: 2461e45e7e10d92052b469d0dd7d80d0fa2be1be677e33e2064e4d75d6bb7206  (patches: tools/titan/results/wave54-hyphenate-character/seam-3.patch)
+command exit=0: tools/titan/results/wave54-hyphenate-character/u3-pins.sh u3
+  > # tests 490
+  > # pass 488
+  > # fail 0
+  >   green> 	 Executed 20 tests, with 0 failures (0 unexpected) in 0.010 (0.248) seconds
+  >   green> 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.332 (0.334) seconds
+  >   green> 	 Executed 49 tests, with 0 failures (0 unexpected) in 0.368 (0.886) seconds
+  >   green> 	 Executed 49 tests, with 0 failures (0 unexpected) in 0.368 (0.887) seconds
+  >   green> # pass 5
+  >   green> # fail 0
+  >   green> # pass 5
+  >   green> # fail 0
+  >   red> # pass 4
+sha256 restored: 845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9 BYTE-EXACT-TO-HEAD
+=== U3+U3b seam-3,seam-3b applied (final re-run): br-line-context pins + extract-fixture.test.mjs + U3b mutations  (2026-10-08 21:59:46)
+seam: tools/titan/extract-fixture.mjs
+sha256 HEAD:    845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9
+sha256 before:  845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9
+sha256 applied: 6ab6f2b8ee7bc2e53cad7e164e454c0aa7fa9465b3fd468c868931c78ee3d1bd  (patches: tools/titan/results/wave54-hyphenate-character/seam-3.patch,tools/titan/results/wave54-hyphenate-character/seam-3b.patch)
+command exit=0: tools/titan/results/wave54-hyphenate-character/u3-pins.sh u3b
+  > # tests 490
+  > # pass 490
+  > # fail 0
+  >   red> # pass 4
+  >   red> # fail 1
+  >   green> # pass 5
+  >   green> # fail 0
+  >   red> # pass 6
+  >   red> # fail 1
+  >   green> # pass 7
+  >   green> # fail 0
+  >   red> # pass 6
+sha256 restored: 845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9 BYTE-EXACT-TO-HEAD

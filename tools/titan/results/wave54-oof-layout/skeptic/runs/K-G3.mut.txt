@@ -1,0 +1,5 @@
+label=K-G3 file=runtimes/compose/src/main/java/com/styleconverter/runtime/columns/GapDecorationGeometry.kt
+sha256 before=ce69eb46626ee111af23c9c1ec385d07703c30523fc12764647b05af26420473 mutated=c0493286382a829d35eeef4b4aabc73dada3e5c3aa55a4a254e20f844c39606e after=ce69eb46626ee111af23c9c1ec385d07703c30523fc12764647b05af26420473 restored=OK
+suite rc=1 (RED)
+GapDecorationSegmentsTest tests=12 skipped=0 failures=1 errors=0 FAILED: ['overlapping items still open no gap and position no rule']
+TOTAL tests=124 skipped=0 failures=1 errors=0

@@ -1,0 +1,304 @@
+# seam-3.patch — wave 54, lane L3 (hyphenate-character), revert unit U3
+# base: db6e8aa01dac7ca1209435bdbcc014e3f980dba2 (= dev 7cce3b22 + the committed wave-54 plan; the seam file is byte-identical at both)
+# seam file: tools/titan/extract-fixture.mjs
+# sha256 at base: 845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9
+# anchor: buildNode's children loop, `node.children.forEach((child, i) => {` (base :11711-11713; the childLineCtx seed is :11706)
+#   — PLAN §3 row "L3 · U3": the child-scope twin of the body scope's re-arm (:11727-11733).
+# PATCH-BORNE NEW FILE (build-workflow rule 2b): tools/titan/extract-fixture-br-line-context.test.mjs — the U3 (and, feature-detected, U3b) pins hold only
+#   with the seam applied, so the test file enters the tree with this patch and belongs to the U3 commit.
+# Apply: git apply tools/titan/results/wave54-hyphenate-character/seam-3.patch   (before seam-3b.patch; the two also apply in either order — disjoint hunks)
+--- a/tools/titan/extract-fixture.mjs
++++ b/tools/titan/extract-fixture.mjs
+@@ -11710,6 +11710,25 @@
+       const lastChildIdx = node.children.length - 1;
+       node.children.forEach((child, i) => {
+         const childId = `${id}__${i}`;
++        // wave-54 lane L3 U3 — the child-scope twin of the body scope's
++        // re-arm below (`bodyRuns.some((run) => run.afterElemIndex === idx)`):
++        // text INTERLEAVED between element children — a `{text}` entry of
++        // node.runs after child i-1 and before child i — puts inline content
++        // on the open line, so a br at i ENDS that line (CSS 2.1 §9.5) instead
++        // of adding a blank 20px one. Only the seed above re-armed before
++        // (once, from ownText), so every LATER text line's br stayed 20px:
++        // hyphenate-character-001's two stray blank lines, on all three
++        // runtimes. Collapsible white space alone is no content (css-text-3
++        // §4.1.1: space, tab, segment break — the body scanner's ASCII class).
++        const runAt = node.runs ? node.runs.findIndex((e) => e.childIndex === i) : -1;
++        // Entries strictly between child i-1 and child i (from 0 for i = 0).
++        const runFrom = node.runs ? node.runs.findIndex((e) => e.childIndex === i - 1) + 1 : 0;
++        // Re-arm only — a block sibling still closes the line (the
++        // non-br rule in buildNode), exactly as at body scope.
++        if (runAt > 0 && node.runs.slice(runFrom, runAt)
++          .some((e) => e.childIndex === undefined && /[^ \t\n\r\f]/.test(e.text))) {
++          childLineCtx.hasInline = true;
++        }
+         const childCmp = buildNode(child, childId, childLineCtx);
+         stampWsAfter(childCmp, child, i < lastChildIdx);
+         childMap[childId] = { id: childId, ...childCmp };
+--- /dev/null
++++ b/tools/titan/extract-fixture-br-line-context.test.mjs
+@@ -0,0 +1,264 @@
++#!/usr/bin/env node
++//
++// Unit tests for the wave-54 lane L3 br line-context rules in
++// tools/titan/extract-fixture.mjs (PLAN tools/titan/results/wave54-plan/PLAN.md
++// §2 "L3 · hyphenate-character", units U3 and U3b).
++//
++// U3 — the child-scope re-arm: text INTERLEAVED between element children (a
++//   `{text}` entry of node.runs after child i-1 and before child i) puts
++//   inline content on the open line, so a <br> there ENDS that line (CSS 2.1
++//   §9.5, height 0) instead of adding a blank 20px line. Before it, only the
++//   ownText seed armed the children's scope, once — hyphenate-character-001's
++//   brs read [0,20,20,20,20,20] where the ref has one blank line per group.
++// U3b — a LINE-START br in a host that declares line-height ON ITSELF gets
++//   that line box (CSS 2.1 §10.8), `normal` → 1.2 × font-size: 19.2px in 001.
++//   An INHERITED line-height does not trigger it (baseline-002/-007 stay 20).
++//
++// Lives in its OWN file and ships INSIDE the lane's seam patch
++// (tools/titan/results/wave54-hyphenate-character/seam-3.patch), because its
++// pins only hold with the seam applied (build-workflow rule 2b). U3b is a
++// SEPARATE, probe-decided revert unit (seam-3b.patch): its pins detect the
++// unit by its exported helper and SKIP — loudly — when U3b is reverted, and
++// the 001 row then expects U3's 20px blank lines.
++//
++// Every document below is VERBATIM WPT source (tools/wpt is gitignored, so the
++// bytes ride here); extraction is in-process through the production
++// buildComponents, no browser, <100 ms.
++//
++// MUTATIONS EXECUTED (tools/titan/results/wave54-hyphenate-character/_note.md):
++//   U3-a drop the re-arm                       → the 001 and revert-val-001 pins fail;
++//   U3-b count white-space-only runs as content → the white-space pin fails;
++//   U3b-a read the ANCESTOR's line box (the inherited reading) → the baseline-007 pin fails;
++//   U3b-b drop the host line box from the br rule                → the 001 (U3b) pin fails.
++
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++
++import * as EF from './extract-fixture.mjs';
++
++// U3b is on the tree iff its helper is exported (seam-3b.patch adds it).
++const U3B = typeof EF.brHostLineBoxPx === 'function';
++
++/** The <br> heights of a document, in document order, as numbers (px). */
++function brHeights(html) {
++  // The production pipeline: comment strip, inline sheet, buildComponents.
++  const cleaned = EF.stripComments(html);
++  const { components } = EF.buildComponents(cleaned, EF.parseCss(EF.extractInlineStyle(cleaned)), 'stem');
++  const out = [];
++  // Insertion order of the component maps IS document order.
++  const walk = (map) => {
++    for (const c of Object.values(map ?? {})) {
++      if (c._role === 'line-break') out.push(parseFloat(c.properties.height));
++      walk(c.children);
++    }
++  };
++  walk(components);
++  return out;
++}
++
++// css-text/hyphens/hyphenate-character-001.html — VERBATIM (tools/wpt/css/css-text/hyphens/hyphenate-character-001.html).
++const HC_001 = `<!DOCTYPE html>
++<meta charset="utf-8">
++<title>CSS Text test: hyphenate-character</title>
++<link rel="author" title="Jonathan Kew" href="mailto:jkew@mozilla.com">
++<link rel="help" href="https://drafts.csswg.org/css-text-4/#hyphenate-character">
++<link rel="match" href="reference/hyphenate-character-001-ref.html">
++<meta name="assert" content="Specifies the string that appears at the end of the line before a hyphenation break">
++<style>
++div {
++  font: 16px monospace;
++  width: 4.5ch;  /* wide enough that the first potential break in "re-al-iza-tion" should NOT be used */
++  hyphens: manual;
++  hyphenate-character: "";
++}
++</style>
++
++<p>Test passes if the words below are broken at hyphenation positions but <b>no visible hyphens appear</b>.
++
++<div lang="en">
++im&shy;ple&shy;men&shy;ta&shy;tion<br><br>
++ini&shy;tial&shy;iza&shy;tion<br><br>
++re&shy;al&shy;iza&shy;tion<br><br>
++hy&shy;phen&shy;ation
++</div>
++`;
++
++// css-cascade/revert-val-001.html — VERBATIM (tools/wpt/css/css-cascade/revert-val-001.html).
++const REVERT_VAL_001 = `<!DOCTYPE html>
++<html>
++<head>
++  <meta charset="utf-8">
++  <title>CSS Cascade: 'revert' keyword for 'display' property of div element</title>
++  <link rel="author" title="Chris Rebert" href="http://chrisrebert.com">
++  <link rel="help" href="https://www.w3.org/TR/css-cascade-4/#default">
++  <link rel="help" href="https://html.spec.whatwg.org/multipage/rendering.html#flow-content-3">
++  <link rel="match" href="reference/ref-filled-green-100px-square.xht">
++  <meta name="assert" content="On a <div>, display:revert should compute to display:block per the default styles for <div>s in the UA stylesheet.">
++  <style>
++#outer {
++  background-color: red;
++  width: 100px;
++  height: 100px;
++  overflow: hidden;
++}
++#inner {
++  color: green;
++  background-color: green;
++  display: inline;
++  display: revert;/* since #inner is a <div>, this should compute to 'block' */
++}
++  </style>
++</head>
++<body>
++  <p>Test passes if there is a filled green square and <strong>no red</strong>.</p>
++  <div id="outer">
++    <div id="inner">
++      This<br>
++      is<br>
++      filler<br>
++      text.<br>
++      This<br>
++      is<br>
++      filler<br>
++      text.
++    </div>
++  </div>
++</body>
++</html>
++`;
++
++// css-multicol/abspos-containing-block-outside-spanner.html — VERBATIM (tools/wpt/css/css-multicol/abspos-containing-block-outside-spanner.html).
++const SPANNER_B_RC1 = `<!DOCTYPE html>
++<title>Abspos elements nested inside a column spanner</title>
++<link rel="help" href="https://drafts.csswg.org/css-multicol/">
++<link rel="match" href="abspos-containing-block-outside-spanner-ref.html">
++<br><br><br><br><br>
++<p>There should be no red.</p>
++<div style="position:absolute; top:0; left:0; background-color:red; height:100px; width:100px;"></div>
++<div style="position:absolute; bottom:0; right:0; background-color:red; height:100px; width:100px;"></div>
++<div style="columns:3; column-gap:1em; width:20em;">
++    <div style="position:relative;">
++        <div style="column-span:all; height:50px;">
++            <div style="position:absolute; top:0; left:0; background-color:green; height:100px; width:100px;"></div>
++            <div style="position:absolute; bottom:0; right:0; background-color:green; height:100px; width:100px;"></div>
++        </div>
++    </div>
++</div>
++`;
++
++// css-text/bidi/empty-span-001.html — VERBATIM (tools/wpt/css/css-text/bidi/empty-span-001.html).
++const EMPTY_SPAN_001 = `<!DOCTYPE html>
++<meta charset="utf-8">
++<title>CSS Text: bidi reordering testcase</title>
++
++<link rel="author" href="mailto:jkew@mozilla.com">
++<link rel="help" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1966313">
++<link rel="match" href="empty-span-001-ref.html">
++<meta name="assert" content="empty spans should not disrupt bidi reordering">
++
++<p>All the following lines should match:</p>
++
++<span dir="auto">1;234;56א;</span><br>
++<span dir="auto"><span></span>1;234;56א;</span><br>
++<span dir="auto">1<span></span>;234;56א;</span><br>
++<span dir="auto">1;<span></span>234;56א;</span><br>
++<span dir="auto">1;2<span></span>34;56א;</span><br>
++<span dir="auto">1;23<span></span>4;56א;</span><br>
++<span dir="auto">1;234<span></span>;56א;</span><br>
++<span dir="auto">1;234;<span></span>56א;</span><br>
++<span dir="auto">1;234;5<span></span>6א;</span><br>
++<span dir="auto">1;234;56<span></span>א;</span><br>
++<span dir="auto">1;234;56א<span></span>;</span><br>
++<span dir="auto">1;234;56א;<span></span></span><br>
++`;
++
++// css-multicol/baseline-002.html — VERBATIM (tools/wpt/css/css-multicol/baseline-002.html).
++const BASELINE_002 = `<!DOCTYPE html>
++<link rel="author" title="Morten Stenshorne" href="mailto:mstensho@chromium.org">
++<link rel="help" href="https://drafts.csswg.org/css-multicol-1">
++<link rel="help" href="https://drafts.csswg.org/css-align/#baseline-export">
++<link rel="match" href="baseline-002-ref.html">
++<meta name="assert" content="The first-baseline is propagated from the secound column, as it is the highest.">
++<p>There should be a green square below.</p>
++<div style="display:flex; align-items:baseline; line-height:2em;">
++  <div style="background:green; width:50px; height:100px;">
++    <br>
++  </div>
++  <div style="background:green; columns:3; orphans:1; widows:1; width:50px; height:100px;">
++    <div style="break-inside:avoid; height:2em;"></div>
++    <br>
++    <br>
++    <br>
++  </div>
++</div>
++`;
++
++// css-multicol/baseline-007.html — VERBATIM (tools/wpt/css/css-multicol/baseline-007.html).
++const BASELINE_007 = `<!DOCTYPE html>
++<link rel="author" title="Morten Stenshorne" href="mailto:mstensho@chromium.org">
++<link rel="help" href="https://drafts.csswg.org/css-multicol-1">
++<link rel="help" href="https://drafts.csswg.org/css-align/#baseline-export">
++<link rel="match" href="baseline-007-ref.html">
++<p>There should be a green square below.</p>
++<div style="display:flex; align-items:baseline; line-height:40px;">
++  <div style="width:50px; background:green;">
++    <div style="height:60px;"></div>
++    <br>
++  </div>
++  <div style="columns:3; width:50px; background:green;">
++    <div style="height:90px;"></div>
++    <div style="column-span:all; height:30px;"></div>
++    <br>
++  </div>
++</div>
++`;
++
++test('U3: hyphenate-character-001 — a br that ENDS a text line is 0, only the blank lines keep a line box', () => {
++  // Ref: one blank line between word groups; U3b sizes it to the host's 19.2px.
++  const blank = U3B ? 19.2 : 20;
++  assert.deepEqual(brHeights(HC_001), [0, blank, 0, blank, 0, blank]);
++});
++
++test('U3: revert-val-001 — every br follows its text line, so all seven are 0', () => {
++  // Green-on-green filler text inside a 100px overflow:hidden box (must-not-move pixels).
++  assert.deepEqual(brHeights(REVERT_VAL_001), [0, 0, 0, 0, 0, 0, 0]);
++});
++
++test('U3: B-RC1 body-level brs (abspos-containing-block-outside-spanner) stay five 20px blank lines', () => {
++  // Body scope is not this unit's: no text precedes them.
++  assert.deepEqual(brHeights(SPANNER_B_RC1), [20, 20, 20, 20, 20]);
++});
++
++test('U3: empty-span-001 — twelve `<span>…</span><br>` lines stay 0 (the wave-22 element rule)', () => {
++  assert.deepEqual(brHeights(EMPTY_SPAN_001), Array(12).fill(0));
++});
++
++test('U3: collapsible white space between children is no content — the blank br keeps its line box', () => {
++  // `a<br> <br>b`: the run between the two brs is a lone space (css-text-3 §4.1.1).
++  assert.deepEqual(brHeights('<div>a<br> <br>b</div>'), [0, 20]);
++  // …whereas a glyph there ends the line.
++  assert.deepEqual(brHeights('<div>a<br>c<br>b</div>'), [0, 0]);
++});
++
++test('U3b: brHostLineBoxPx reads only the host\'s OWN declaration', { skip: U3B ? false : 'U3b (seam-3b) not on the tree' }, () => {
++  // `font` shorthand with no /line-height resets it to normal → 1.2 × 16.
++  assert.equal(EF.brHostLineBoxPx({ font: '16px monospace' }), '19.2px');
++  // An explicit /line-height inside the shorthand: a number × the size.
++  assert.equal(EF.brHostLineBoxPx({ font: '16px/2 monospace' }), '32px');
++  // A px longhand is the line box itself.
++  assert.equal(EF.brHostLineBoxPx({ 'line-height': '40px' }), '40px');
++  // normal with no px font-size of its own: unknowable → null (keep 20).
++  assert.equal(EF.brHostLineBoxPx({ 'line-height': 'normal' }), null);
++  // em / relative sizes: unknowable here → null.
++  assert.equal(EF.brHostLineBoxPx({ 'line-height': '2em' }), null);
++  // No line-height of its own: never inherited.
++  assert.equal(EF.brHostLineBoxPx({ 'font-size': '16px' }), null);
++  assert.equal(EF.brHostLineBoxPx(null), null);
++});
++
++test('U3b negative: an ANCESTOR\'s line-height does not resize a br (baseline-007 40px, baseline-002 2em)', { skip: U3B ? false : 'U3b (seam-3b) not on the tree' }, () => {
++  // line-height:40px sits on the flex container, not on the brs' parents.
++  assert.deepEqual(brHeights(BASELINE_007), [20, 20]);
++  // line-height:2em likewise on the container.
++  assert.deepEqual(brHeights(BASELINE_002), [20, 20, 20, 20]);
++});

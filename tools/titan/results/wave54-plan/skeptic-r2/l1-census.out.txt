@@ -1,0 +1,6 @@
+bake roots (RELATIVE, baked-bidi-visual-order): 0 with non-zero px padding: 0 in 0 docs
+markerText + ABSOLUTE|FIXED components: 4
+   wpt__css-counter-styles__counter-suffix.json counter-suffix__0__4__0
+   wpt__css-counter-styles__counter-suffix.json counter-suffix__0__4__1
+   wpt__css-counter-styles__counter-suffix.json counter-suffix__0__5__0
+   wpt__css-counter-styles__counter-suffix.json counter-suffix__0__5__1

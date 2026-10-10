@@ -1,0 +1,87 @@
+!! L6-web-tail              web-root-separator.geometry.py             box-sizing-007 web                                         FAIL       [GATING -> revert RS]
+     line: box-sizing-007 web edge x146 → GEOMETRY WRONG (second atom edge x146 vs ref x151 on row 150)
+!! L6-web-tail              web-root-separator.geometry.py             box-sizing-008 web                                         FAIL       [GATING -> revert RS]
+     line: box-sizing-008 web edge x146 → GEOMETRY WRONG (second atom edge x146 vs ref x151 on row 150)
+ - L6-web-tail              web-root-separator.geometry.py             box-sizing-010 web                                         FAIL       [report: expected WRONG until the target is fixed]
+     line: box-sizing-010 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x91 on row 140)
+ - L6-web-tail              web-root-separator.geometry.py             box-sizing-013 web                                         FAIL       [report: expected WRONG until the target is fixed]
+     line: box-sizing-013 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x91 on row 150)
+!! L6-web-tail              web-root-separator.geometry.py             box-sizing-022 web                                         FAIL       [GATING -> revert RS]
+     line: box-sizing-022 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x151 on row 200)
+ - L6-web-tail              web-root-separator.geometry.py             position-absolute-semi-replaced-stretch-other web          FAIL       [report: expected WRONG until the target is fixed]
+     line: position-absolute-semi-replaced-stretch-other web edge x187 → GEOMETRY WRONG (second atom edge x187 vs ref x192 on row 60)
+ - L6-web-tail              web-root-separator.geometry.py             position-absolute-semi-replaced-stretch-input web          FAIL       [report: expected WRONG until the target is fixed]
+     line: position-absolute-semi-replaced-stretch-input web edge x187 → GEOMETRY WRONG (second atom edge x187 vs ref x192 on row 60)
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-007 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-007 android                                     PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-008 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-008 android                                     PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-010 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-010 android                                     PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-022 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-022 android                                     PASS       [control: expected to stay PASS]
+ - L6-web-tail              web-root-separator.geometry.py             box-sizing-011 web                                         FAIL       [report: expected WRONG until the target is fixed]
+     line: box-sizing-011 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x91 on row 140)
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-011 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-011 android                                     PASS       [control: expected to stay PASS]
+ - L6-web-tail              web-root-separator.geometry.py             box-sizing-014 web                                         FAIL       [report: expected WRONG until the target is fixed]
+     line: box-sizing-014 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x91 on row 140)
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-014 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-014 android                                     PASS       [control: expected to stay PASS]
+ - L6-web-tail              web-root-separator.geometry.py             box-sizing-015 web                                         FAIL       [report: expected WRONG until the target is fixed]
+     line: box-sizing-015 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x91 on row 140)
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-015 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-015 android                                     PASS       [control: expected to stay PASS]
+ - L6-web-tail              web-root-separator.geometry.py             box-sizing-016 web                                         FAIL       [report: expected WRONG until the target is fixed]
+     line: box-sizing-016 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x91 on row 140)
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-016 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-016 android                                     PASS       [control: expected to stay PASS]
+ - L6-web-tail              web-root-separator.geometry.py             box-sizing-017 web                                         FAIL       [report: expected WRONG until the target is fixed]
+     line: box-sizing-017 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x91 on row 140)
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-017 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-017 android                                     PASS       [control: expected to stay PASS]
+ - L6-web-tail              web-root-separator.geometry.py             box-sizing-018 web                                         FAIL       [report: expected WRONG until the target is fixed]
+     line: box-sizing-018 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x91 on row 140)
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-018 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-018 android                                     PASS       [control: expected to stay PASS]
+ - L6-web-tail              web-root-separator.geometry.py             box-sizing-019 web                                         FAIL       [report: expected WRONG until the target is fixed]
+     line: box-sizing-019 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x91 on row 140)
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-019 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-019 android                                     PASS       [control: expected to stay PASS]
+ - L6-web-tail              web-root-separator.geometry.py             box-sizing-020 web                                         FAIL       [report: expected WRONG until the target is fixed]
+     line: box-sizing-020 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x151 on row 150)
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-020 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-020 android                                     PASS       [control: expected to stay PASS]
+ - L6-web-tail              web-root-separator.geometry.py             box-sizing-021 web                                         FAIL       [report: expected WRONG until the target is fixed]
+     line: box-sizing-021 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x151 on row 150)
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-021 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-021 android                                     PASS       [control: expected to stay PASS]
+ - L6-web-tail              web-root-separator.geometry.py             box-sizing-024 web                                         FAIL       [report: expected WRONG until the target is fixed]
+     line: box-sizing-024 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x151 on row 150)
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-024 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-024 android                                     PASS       [control: expected to stay PASS]
+ - L6-web-tail              web-root-separator.geometry.py             box-sizing-025 web                                         FAIL       [report: expected WRONG until the target is fixed]
+     line: box-sizing-025 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x151 on row 150)
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-025 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-025 android                                     PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-013 ios                                         PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             box-sizing-013 android                                     PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             position-absolute-semi-replaced-stretch-other ios          PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             position-absolute-semi-replaced-stretch-other android      PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             position-absolute-semi-replaced-stretch-input ios          PASS       [control: expected to stay PASS]
+   L6-web-tail              web-root-separator.geometry.py             position-absolute-semi-replaced-stretch-input android      PASS       [control: expected to stay PASS]
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-span-002 web                               PASS       [control: expected to stay PASS]
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-span-002 ios                               PASS       [control: expected to stay PASS]
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-span-002 android                           PASS       [control: expected to stay PASS]
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-001 web                        PASS       [control: expected to stay PASS]
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-001 ios                        PASS       [control: expected to stay PASS]
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-001 android                    PASS       [control: expected to stay PASS]
+!! L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-002 web                        FAIL       [GATING -> revert W1]
+     line: hyphens/hyphens-out-of-flow-002 web heights [46, 46, 46, 26, 26, 46, 46] ink-right [(61, 54), (61, 54), (61, 54), (86,), (86,), (61, 54), (61, 54)] → GEOMETRY WRONG (boxes 4,5 height 26 vs ref 46)
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-002 ios                        PASS       [control: expected to stay PASS]
+   L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-002 android                    PASS       [control: expected to stay PASS]
+
+geometry-gate wave53-final (base wave53-open): 63 keys — PASS 44 · FAIL 19 (gating 4) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 4 (PASS 0 FAIL 4) · control 44 (PASS 44 FAIL 0) · report 15 (PASS 0 FAIL 15) · withdrawn 0 (PASS 0 FAIL 0)
+revert rule 4 names: RS, W1
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)

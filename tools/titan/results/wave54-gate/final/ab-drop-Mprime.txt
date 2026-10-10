@@ -1,0 +1,5 @@
+A/B  exclude=wave54-ab-drop-Mprime  include=wave54-final  sections=css-counter-styles  platforms=web,ios,android
+compared 122 cells: 3 differ (flip, or |Δ| ≥ 0.002), 119 within threshold
+  mover        web      P 0.9818  → P 1       Δ+0.0182  css/css-counter-styles/counter-suffix.html
+  mover        android  P 0.9815  → P 0.989   Δ+0.0075  css/css-counter-styles/counter-suffix.html
+  mover        ios      P 0.9802  → P 0.9873  Δ+0.0071  css/css-counter-styles/counter-suffix.html

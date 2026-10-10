@@ -1,0 +1,2 @@
+gate fixtures (9) other than all-then-color declaring a seed name: 0
+tracked fixtures (446) other than all-then-color declaring a seed name: 0

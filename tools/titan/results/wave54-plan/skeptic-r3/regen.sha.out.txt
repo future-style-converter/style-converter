@@ -1,0 +1,12 @@
+8f870f8e9b6619728716560c10235b3c3ce16fed4b5ccd4f393f12173fdaf128  tools/titan/results/wave54-plan/expectations.json
+2557d870289e87e4e3fde5cfbe46455e1b0a76ffbe60d4252af64e5e490eacf1  tools/titan/results/wave54-plan/watchlist.txt
+8f870f8e9b6619728716560c10235b3c3ce16fed4b5ccd4f393f12173fdaf128  tools/titan/results/wave54-plan/skeptic-r3/regen1/expectations.json
+2557d870289e87e4e3fde5cfbe46455e1b0a76ffbe60d4252af64e5e490eacf1  tools/titan/results/wave54-plan/skeptic-r3/regen1/watchlist.txt
+8f870f8e9b6619728716560c10235b3c3ce16fed4b5ccd4f393f12173fdaf128  tools/titan/results/wave54-plan/skeptic-r3/regen2/expectations.json
+2557d870289e87e4e3fde5cfbe46455e1b0a76ffbe60d4252af64e5e490eacf1  tools/titan/results/wave54-plan/skeptic-r3/regen2/watchlist.txt
+regen1==regen2 exp
+regen1==regen2 watch
+installed==regen exp
+installed==regen watch
+stdout1==stdout2
+stdout==plan-build.out.txt (modulo out path)

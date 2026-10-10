@@ -1,0 +1,34 @@
+kt:1141         val rawProperties = com.styleconverter.runtime.lists.ListStyleUaRule.apply(
+kt:1206         // evaluated, em/rem/vw/% rewritten to px against the live context.
+kt:1251         val wptCaptureModeForStretch = LocalWptCaptureMode.current
+kt:1934                 .childContainingBlock(effectiveProperties, containingBlock)
+kt:2010         val childHasTransformedAncestor =
+kt:2014                     .establishesTransformContainingBlock(component.properties)
+kt:2653                 TableApplier.Table(
+kt:2670                     fabricatedCellBorder = !(LocalWptCaptureMode.current &&
+kt:3471             val transformCbHostsOutOfFlowChild =
+kt:3473                     .establishesTransformContainingBlock(component.properties) &&
+kt:7072         val preBroken = com.styleconverter.runtime.typography.wrapping.PreBreakPipeline.preBreak(
+swift:343         return UAElementFontRule.apply(
+swift:356             hasElementChildren: component.children?.isEmpty == false)
+swift:781     private var inFlowChildren: [IRComponent] {
+swift:5011                 hyphenChar: AutoHyphenation.defaultHyphenCharacter,
+swift:5026             let overlong = GreedyLineBreaker.hasUnbreakableOverflowingLine(
+tsx:991   renderText: (text) => <span>{text}</span>,
+tsx:1099   renderChildSeparator: (prev, next, ctx) => {
+tsx:1105     const prevTag = prev.component.meta?.sourceTag?.toLowerCase();
+tsx:1107     if (prevTag && nextTag && WIDGET_TAGS.has(prevTag) && WIDGET_TAGS.has(nextTag)) return ' ';
+tsx:1108     // ── wave-26 WWS: the inline-level extension ──────────────────────
+tsx:1158  * Render a single composed IR node (one component + composed children)
+ex:11457       const brEndsInlineLine = lineCtx?.hasInline === true;
+ex:11459       const brHeight = (brEndsInlineLine || brIsClearMarker) ? '0px' : '20px';
+ex:11706       const childLineCtx = { hasInline: !!node.ownText };
+ex:11727   const topLineCtx = { hasInline: !!leading.text };
+ex:11733     if (bodyRuns.some((run) => run.afterElemIndex === idx)) topLineCtx.hasInline = true;
+ex:4883 const WS_AFTER_ROLE = 'ws-after';
+ex:4905   cmp._role = WS_AFTER_ROLE;
+    8446 runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+    6287 runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+    1457 apps/web-harness/src/sdui/ComponentRenderer.tsx
+   12206 tools/titan/extract-fixture.mjs
+   28396 total

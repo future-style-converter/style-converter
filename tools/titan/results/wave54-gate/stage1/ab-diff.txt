@@ -1,0 +1,50 @@
+section css-anchor-position: absent from wave54-pre — not compared
+section css-backgrounds: absent from wave54-pre — not compared
+section css-break: absent from wave54-pre — not compared
+section css-cascade: absent from wave54-pre — not compared
+section css-color: absent from wave54-pre — not compared
+section css-contain: absent from wave54-pre — not compared
+section css-display: absent from wave54-pre — not compared
+section css-flexbox: absent from wave54-pre — not compared
+section css-gaps: absent from wave54-pre — not compared
+section css-grid: absent from wave54-pre — not compared
+section css-images: absent from wave54-pre — not compared
+section css-lists: absent from wave54-pre — not compared
+section css-masking: absent from wave54-pre — not compared
+section css-multicol: absent from wave54-pre — not compared
+section css-overflow: absent from wave54-pre — not compared
+section css-position: absent from wave54-pre — not compared
+section css-pseudo: absent from wave54-pre — not compared
+section css-sizing: absent from wave54-pre — not compared
+section css-text-decor: absent from wave54-pre — not compared
+section css-transforms: absent from wave54-pre — not compared
+section css-ui: absent from wave54-pre — not compared
+section css-values: absent from wave54-pre — not compared
+section css-view-transitions: absent from wave54-pre — not compared
+section css-writing-modes: absent from wave54-pre — not compared
+section filter-effects: absent from wave54-pre — not compared
+section selectors: absent from wave54-pre — not compared
+A/B  exclude=wave54-open  include=wave54-pre  sections=CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-color,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-grid,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-pseudo,css-sizing,css-tables,css-text,css-text-decor,css-transforms,css-ui,css-values,css-view-transitions,css-writing-modes,filter-effects,selectors  platforms=web,ios,android
+compared 548 cells: 22 differ (flip, or |Δ| ≥ 0.002), 526 within threshold
+  flip f→P     web      f 0.8812  → P 0.9825  Δ+0.1013  css/css-text/hyphens/hyphenate-character-003.html
+  flip f→P     android  f 0.905   → P 0.9774  Δ+0.0724  css/css-text/hyphens/hyphenate-character-004.html
+  flip f→P     android  f 0.8934  → P 0.9629  Δ+0.0695  css/css-text/bidi/bidi-lines-001.html
+  flip f→P     web      f 0.9411  → P 1       Δ+0.0589  css/css-text/hyphens/hyphens-out-of-flow-002.html
+  flip f→P     web      f 0.9249  → P 0.9832  Δ+0.0583  css/css-text/hyphens/hyphenate-character-004.html
+  flip f→P     android  f 0.9301  → P 0.9802  Δ+0.0501  css/css-text/hyphens/hyphenate-character-001.html
+  flip f→P     web      f 0.935   → P 0.985   Δ+0.05  css/css-text/hyphens/hyphenate-character-001.html
+  flip f→P     android  f 0.9292  → P 0.9792  Δ+0.05  css/css-text/hyphens/hyphenate-character-003.html
+  flip f→P     ios      f 0.9287  → P 0.9611  Δ+0.0324  css/css-text/hyphens/hyphenate-character-001.html
+  flip f→P     ios      f 0.9261  → P 0.9534  Δ+0.0273  css/css-text/hyphens/hyphenate-character-002.html
+  flip f→P     ios      f 0.9337  → P 0.957   Δ+0.0233  css/css-text/hyphens/hyphenate-character-003.html
+  mover        android  P 0.9547  → P 0.989   Δ+0.0343  css/css-counter-styles/counter-suffix.html
+  mover        ios      f 0.9134  → f 0.9477  Δ+0.0343  css/css-text/hyphens/hyphenate-character-004.html
+  mover        android  P 0.9534  → P 0.9818  Δ+0.0284  css/css-text/bidi/bidi-lines-002.html
+  mover        web      P 0.9803  → P 0.999   Δ+0.0187  css/CSS2/abspos/static-inside-inline-block.html
+  mover        web      P 0.9818  → P 1       Δ+0.0182  css/css-counter-styles/counter-suffix.html
+  mover        web      f 0.92    → f 0.9344  Δ+0.0144  css/css-text/hyphens/hyphenate-character-002.html
+  mover        ios      P 0.9841  → P 0.9974  Δ+0.0133  css/CSS2/abspos/static-fixed-inside-abspos.html
+  mover        android  P 0.9835  → P 0.9967  Δ+0.0132  css/CSS2/abspos/static-fixed-inside-abspos.html
+  mover        ios      P 0.9802  → P 0.9873  Δ+0.0071  css/css-counter-styles/counter-suffix.html
+  mover        android  P 0.9944  → P 0.9983  Δ+0.0039  css/CSS2/css21-errata/s-11-1-1b-006.html
+  mover        android  f 0.9223  → f 0.9249  Δ+0.0026  css/css-text/hyphens/hyphenate-character-002.html

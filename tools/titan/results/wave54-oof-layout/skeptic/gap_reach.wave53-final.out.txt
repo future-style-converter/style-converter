@@ -1,0 +1,14 @@
+rule-painting containers 51 (flex 46); with a zero/absent gap on a ruled axis:
+  wpt__css-gaps__flex__flex-gap-decorations-033 s-033__1-242 FLEX None WRAP rules=Column+Row cg=None rg=None ZERO-ON:Column+Row jc=None ac=None items=8 margins=-
+  wpt__css-gaps__flex__flex-gap-decorations-040 s-040__1-290 FLEX None WRAP rules=Column cg=None rg=None ZERO-ON:Column jc=SPACE_BETWEEN ac=None items=9 margins=-
+  wpt__css-gaps__flex__flex-gap-decorations-041 s-041__1-301 FLEX None WRAP rules=Column cg=None rg=None ZERO-ON:Column jc=SPACE_AROUND ac=None items=9 margins=-
+  wpt__css-gaps__flex__flex-gap-decorations-042 s-042__1-312 FLEX None WRAP rules=Column cg=None rg=None ZERO-ON:Column jc=SPACE_EVENLY ac=None items=9 margins=-
+  wpt__css-gaps__flex__flex-gap-decorations-043 s-043__1-323 FLEX COLUMN WRAP rules=Row cg=None rg=None ZERO-ON:Row jc=SPACE_BETWEEN ac=None items=9 margins=-
+  wpt__css-gaps__flex__flex-gap-decorations-045 s-045__1-345 FLEX COLUMN WRAP rules=Column+Row cg=5 rg=None ZERO-ON:Row jc=SPACE_BETWEEN ac=STRETCH items=9 margins=-
+  wpt__css-gaps__flex__flex-gap-decorations-047 s-047__1-364 FLEX None WRAP rules=Row cg=None rg=None ZERO-ON:Row jc=None ac=SPACE_BETWEEN items=6 margins=-
+  wpt__css-gaps__flex__flex-gap-decorations-048 s-048__1-372 FLEX None WRAP rules=Row cg=None rg=None ZERO-ON:Row jc=None ac=SPACE_AROUND items=6 margins=-
+  wpt__css-gaps__flex__flex-gap-decorations-049 s-049__1-380 FLEX None WRAP rules=Row cg=None rg=None ZERO-ON:Row jc=None ac=SPACE_EVENLY items=6 margins=-
+  wpt__css-gaps__flex__flex-gap-decorations-050 s-050__1-388 FLEX None WRAP rules=Column+Row cg=None rg=10 ZERO-ON:Column jc=SPACE_BETWEEN ac=None items=9 margins=-
+  wpt__css-multicol__broken-column-rule-1 -1__0__0-174 None None None rules=Column cg=None rg=None ZERO-ON:Column jc=None ac=None items=1 margins=-
+  wpt__css-multicol__column-balancing-paged-001-print print__1-205 None None None rules=Column cg=None rg=None ZERO-ON:Column jc=None ac=None items=1 margins=-
+  wpt__css-multicol__column-balancing-paged-001-print nt__0__0-206 None None None rules=Column cg=None rg=None ZERO-ON:Column jc=None ac=None items=3 margins=-

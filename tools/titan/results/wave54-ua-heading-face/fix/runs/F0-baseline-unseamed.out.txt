@@ -1,0 +1,3 @@
+[F0-baseline-unseamed] run: gradle rc=0 (log tools/titan/results/wave54-ua-heading-face/fix/runs/F0-baseline-unseamed.run.log)
+[F0-baseline-unseamed] run: UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T19:55:27.022Z
+[F0-baseline-unseamed] run: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:55:27.117Z

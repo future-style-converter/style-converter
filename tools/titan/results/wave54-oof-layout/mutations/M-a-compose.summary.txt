@@ -1,0 +1,3 @@
+label=M-a-compose file=runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt
+sha256 before=ed0d29ac7577f7e56a34c7002cddbf662617db144908dfc8f42223b60f1b86d6 mutated=c3370ee5b847d81ba680c48093da248f8bab12c7ed7de602e281806d4db73b32 after=ed0d29ac7577f7e56a34c7002cddbf662617db144908dfc8f42223b60f1b86d6 restored=OK
+suite rc=1 (RED)

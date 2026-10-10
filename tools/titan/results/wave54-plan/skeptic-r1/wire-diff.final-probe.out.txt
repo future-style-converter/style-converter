@@ -1,0 +1,20 @@
+CONTENT    css-anchor-position/wpt__css-anchor-position__anchor-center-safe-rtl.json components 14 -> 14
+CONTENT    css-counter-styles/wpt__css-counter-styles__counter-suffix.json components 23 -> 29
+renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-additive-symbols-setter-invalid.json
+renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-additive-symbols-setter.json
+renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-fallback-setter-invalid.json
+renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-fallback-setter.json
+renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-name-setter-invalid.json
+renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-name-setter.json
+renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-negative-setter-invalid.json
+renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-negative-setter.json
+renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-pad-setter-invalid.json
+renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-pad-setter.json
+renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter-invalid.json
+renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter.json
+renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-range-setter-invalid.json
+renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-range-setter.json
+renumbered css-counter-styles/wpt__css-counter-styles__cssom__cssom-symbols-setter-invalid.json
+CONTENT    css-text/wpt__css-text__bidi__bidi-lines-001.json components 13 -> 13
+CONTENT    css-text/wpt__css-text__bidi__bidi-lines-002.json components 19 -> 19
+{"identical":936,"renumbered":15,"content":4,"onlyOne":0}

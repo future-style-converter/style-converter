@@ -1,0 +1,29 @@
+# seam-1.patch — wave 54, lane L3 (hyphenate-character), revert unit U2-android
+# base: db6e8aa01dac7ca1209435bdbcc014e3f980dba2 (= dev 7cce3b22 + the committed wave-54 plan; the seam file is byte-identical at both)
+# seam file: runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+# sha256 at base: da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db
+# anchor: the PreBreakPipeline.preBreak( call (base :7072), one named argument inserted after
+#         `clampLines = …DrawnLineClamp.cap(properties),` (base :7101) — PLAN §3 row "L3 · U2-android".
+# Tree rule 2b: consumes only symbols that exist on the shared tree without this patch
+#   (typography/wrapping/HyphenateCharacter{Extractor,Applier}.kt, PreBreakPipeline.preBreak(hyphenChar = …)).
+# Deviation from the registry text: preBreakString takes a 2nd argument, `dictionaryHyphenation` (already in scope
+#   at the call site, :6541), so the Applier can log the Minikin-dictionary wall (PLAN §2 L3 U2-android).
+# Apply: git apply tools/titan/results/wave54-hyphenate-character/seam-1.patch
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -7101,6 +7101,15 @@
+             // a run that does not fire keeps Minikin's wrapping and gets its
+             // marker from placeholderOverflow below (F3) — one owner each.
+             clampLines = com.styleconverter.runtime.typography.wrapping.DrawnLineClamp.cap(properties),
++            // Wave 54 (lane L3, U2-android) — css-text-4 §6.3 `hyphenate-character`:
++            // the string a taken soft hyphen paints enters the FOLD, because its
++            // width decides the breaks (HyphenateCharacterApplier's banner). No
++            // declaration / `auto` yields the UA hyphen that is preBreak's default,
++            // so every other run is byte-identical by construction; a hyphens:auto
++            // run is reported once (Minikin paints its own dictionary hyphen).
++            hyphenChar = com.styleconverter.runtime.typography.wrapping.HyphenateCharacterApplier.preBreakString(
++                com.styleconverter.runtime.typography.wrapping.HyphenateCharacterExtractor.extract(properties),
++                dictionaryHyphenation),
+             // Single-line advance through the EXACT render style and the
+             // EXACT run transform (runAnnotated), so measure and paint can
+             // never disagree. getLineWidth(0) is the raw float advance —

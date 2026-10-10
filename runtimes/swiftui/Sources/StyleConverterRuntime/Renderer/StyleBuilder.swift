@@ -155,6 +155,13 @@ struct TextConfig {
     // that would expose NSParagraphStyle), and `auto` vetoes the
     // unbreakable-word overflow rule. nil / `manual` = byte-identical.
     var hyphensMode: String?      = nil
+    // Wave 54 (lane L3, U2-ios) — css-text-4 §6.3 `hyphenate-character`,
+    // the author's string verbatim (nil = `auto` / undeclared). Rides
+    // TextConfig because the label owns its own pre-break: the string is
+    // the `hyphenChar` the greedy fold measures and paints, and the
+    // `spentHyphen` the overflow check strips (css-text-3 §5.5). nil keeps
+    // the UA U+2010 and no strip — byte-identical.
+    var hyphenateCharacter: String? = nil
     // Lane IOS wave 5 (finding 4) — `text-decoration-line: overline`
     // (css-text-decor-3 §2.1). SwiftUI Text has no overline API, so
     // PlaceholderLabel overlays one Rectangle per rendered line at the
@@ -523,6 +530,8 @@ enum StyleBuilder {
             // no OR): a `manual` declaration on the element must clear
             // an inherited `none` that reached this aggregate.
             s.text.hyphensMode = agg.hyphensMode
+            // Wave 54 (lane L3, U2-ios) — the hyphenate-character string, mirrored like hyphensMode (last write wins).
+            s.text.hyphenateCharacter = agg.hyphenateCharacter
             // Lane IOS wave 5 (finding 4) — overline flag + decoration
             // color for the label's per-line Rectangle overlay
             // (css-text-decor-3 §2.1/§2.2).

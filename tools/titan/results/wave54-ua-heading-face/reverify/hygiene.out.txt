@@ -1,0 +1,30 @@
+## owned-source grep (probe / Probe / /tmp / scratchpad / SKEPTIC / ReverifyGoSmallProbe / UAHeadingFoldGate refs)
+0  runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt
+0  runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt
+0  runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAElementFontRule.swift
+0  runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAElementFontRuleTests.swift
+## UAHeadingFoldGate references anywhere under runtimes/ (src+tests, excluding build dirs)
+(end)
+## seam files status (git status --short -- the four seam files)
+(empty above = clean)
+da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db  runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e  runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+cc39ab6e98342c493b2404a4d9a52d1fba997063b2d42b2edc89cea7809a4d8e  apps/web-harness/src/sdui/ComponentRenderer.tsx
+845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9  tools/titan/extract-fixture.mjs
+## lock dir
+(empty above = no lock left)
+## patch-borne test absent from shared tree
+ls: runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt: No such file or directory
+## held SHA256SUMS
+UAElementFontRule.foldgate.kt.txt: OK
+UAElementFontRule.swift.foldgate.diff: OK
+UAElementFontRuleTest.foldgate.kt.txt: OK
+UAElementFontRuleTests.swift.foldgate.diff: OK
+UAHeadingFaceReplay.kt.txt: OK
+UAHeadingFaceWire.kt.txt: OK
+UAHeadingFoldGate.kt.txt: OK
+UAHeadingFoldGate.swift.txt: OK
+UAHeadingFoldGateTest.kt.txt: OK
+UAHeadingFoldGateTests.swift.txt: OK
+seam-1.foldgate.patch: OK
+seam-2.foldgate.patch: OK

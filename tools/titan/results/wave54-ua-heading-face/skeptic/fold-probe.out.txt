@@ -1,0 +1,60 @@
+subelements-002 wpt__css-text-decor__text-decoration-subelements-002__0-252 tag=p kids=0 fired=false standsDown=false FontSize=null
+subelements-002 wpt__css-text-decor__text-decoration-subelements-002__1-253 tag=null kids=2 fired=false standsDown=true FontSize={"original":{"type":"length","original":{"v":2,"u":"EM"}}}
+subelements-002   text-decoration-subelements-002__1__0-254 tag=null kids=1 fired=false standsDown=true FontSize={"original":{"type":"length","original":{"v":2,"u":"EM"}}}
+subelements-002     text-decoration-subelements-002__1__0__0-255 tag=null kids=1 fired=false standsDown=true FontSize={"original":{"type":"length","original":{"v":2,"u":"EM"}}} RUNS-HOST plan=true fold=Folded("Einstein said that e = mc2.")
+subelements-002       text-decoration-subelements-002__1__0__0__0-256 tag=i kids=1 fired=false standsDown=true FontSize={"original":{"type":"length","original":{"v":2,"u":"EM"}}} RUNS-HOST plan=true fold=Folded("e = mc2")
+subelements-002         text-decoration-subelements-002__1__0__0__0__0-257 tag=sup kids=0 fired=true standsDown=false FontSize={"px":13.333333333333334}
+subelements-002   text-decoration-subelements-002__1__1-258 tag=null kids=1 fired=false standsDown=true FontSize={"original":{"type":"length","original":{"v":2,"u":"EM"}}}
+subelements-002     text-decoration-subelements-002__1__1__0-259 tag=null kids=1 fired=false standsDown=true FontSize={"original":{"type":"length","original":{"v":2,"u":"EM"}}} RUNS-HOST plan=true fold=Folded("Is an + bn = cn ever true for n > 2.")
+subelements-002       text-decoration-subelements-002__1__1__0__0-260 tag=i kids=3 fired=false standsDown=true FontSize={"original":{"type":"length","original":{"v":2,"u":"EM"}}} RUNS-HOST plan=true fold=Folded("an + bn = cn")
+subelements-002         text-decoration-subelements-002__1__1__0__0__0-261 tag=sup kids=0 fired=true standsDown=false FontSize={"px":13.333333333333334}
+subelements-002         text-decoration-subelements-002__1__1__0__0__1-262 tag=sup kids=0 fired=true standsDown=false FontSize={"px":13.333333333333334}
+subelements-002         text-decoration-subelements-002__1__1__0__0__2-263 tag=sup kids=0 fired=true standsDown=false FontSize={"px":13.333333333333334}
+subelements-003 wpt__css-text-decor__text-decoration-subelements-003__0-264 tag=p kids=0 fired=false standsDown=false FontSize=null
+subelements-003 wpt__css-text-decor__text-decoration-subelements-003__1-265 tag=null kids=1 fired=false standsDown=true FontSize={"original":{"type":"length","original":{"v":2,"u":"EM"}}}
+subelements-003   text-decoration-subelements-003__1__0-266 tag=p kids=1 fired=false standsDown=true FontSize={"original":{"type":"length","original":{"v":2,"u":"EM"}}} RUNS-HOST plan=true fold=Bailed(member-prop:TextDecorationColor-divergence)
+subelements-003     text-decoration-subelements-003__1__0__0-267 tag=sup kids=0 fired=true standsDown=false FontSize={"px":13.333333333333334}
+inset-005 wpt__css-text-decor__text-decoration-inset-005__0-066 tag=null kids=0 fired=false standsDown=false FontSize=null
+inset-005 wpt__css-text-decor__text-decoration-inset-005__1-067 tag=p kids=0 fired=false standsDown=false FontSize=null
+inset-005 wpt__css-text-decor__text-decoration-inset-005__2-068 tag=null kids=1 fired=false standsDown=true FontSize=null
+inset-005   text-decoration-inset-005__1__0-069 tag=h1 kids=1 fired=true standsDown=false FontSize={"px":32.0} RUNS-HOST plan=true fold=Folded("the ultra-quick brown fox")
+inset-005     text-decoration-inset-005__1__0__0-070 tag=u kids=2 fired=false standsDown=true FontSize={"px":32.0} RUNS-HOST plan=true fold=Folded("ultra-quick brown")
+inset-005       text-decoration-inset-005__1__0__0__0-071 tag=sup kids=0 fired=true standsDown=false FontSize={"px":26.666666666666668}
+inset-005       text-decoration-inset-005__1__0__0__1-072 tag=sub kids=0 fired=true standsDown=false FontSize={"px":26.666666666666668}
+inset-006 wpt__css-text-decor__text-decoration-inset-006__0-073 tag=null kids=0 fired=false standsDown=false FontSize=null
+inset-006 wpt__css-text-decor__text-decoration-inset-006__1-074 tag=p kids=0 fired=false standsDown=false FontSize=null
+inset-006 wpt__css-text-decor__text-decoration-inset-006__2-075 tag=null kids=1 fired=false standsDown=true FontSize=null
+inset-006   text-decoration-inset-006__1__0-076 tag=h1 kids=1 fired=true standsDown=false FontSize={"px":32.0} RUNS-HOST plan=true fold=Folded("the ultra-quick brown fox")
+inset-006     text-decoration-inset-006__1__0__0-077 tag=u kids=2 fired=false standsDown=true FontSize={"px":32.0} RUNS-HOST plan=true fold=Folded("ultra-quick brown")
+inset-006       text-decoration-inset-006__1__0__0__0-078 tag=sup kids=0 fired=true standsDown=false FontSize={"px":26.666666666666668}
+inset-006       text-decoration-inset-006__1__0__0__1-079 tag=sub kids=0 fired=true standsDown=false FontSize={"px":26.666666666666668}
+inset-011 wpt__css-text-decor__text-decoration-inset-011__0-092 tag=null kids=0 fired=false standsDown=false FontSize=null
+inset-011 wpt__css-text-decor__text-decoration-inset-011__1-093 tag=p kids=0 fired=false standsDown=false FontSize=null
+inset-011 wpt__css-text-decor__text-decoration-inset-011__2-094 tag=null kids=1 fired=false standsDown=true FontSize=null
+inset-011   text-decoration-inset-011__1__0-095 tag=h1 kids=3 fired=false standsDown=true FontSize=null RUNS-HOST plan=true fold=Bailed(member-prop:TextDecorationColor-divergence)
+inset-011     text-decoration-inset-011__1__0__0-096 tag=u kids=0 fired=false standsDown=false FontSize=null
+inset-011     text-decoration-inset-011__1__0__1-097 tag=br kids=0 fired=false standsDown=false FontSize=null
+inset-011     text-decoration-inset-011__1__0__2-098 tag=u kids=0 fired=false standsDown=false FontSize=null
+inset-014 wpt__css-text-decor__text-decoration-inset-014__0-107 tag=null kids=0 fired=false standsDown=false FontSize=null
+inset-014 wpt__css-text-decor__text-decoration-inset-014__1-108 tag=p kids=0 fired=false standsDown=false FontSize=null
+inset-014 wpt__css-text-decor__text-decoration-inset-014__2-109 tag=null kids=1 fired=false standsDown=true FontSize=null
+inset-014   text-decoration-inset-014__1__0-110 tag=h1 kids=1 fired=true standsDown=false FontSize={"px":26.0} RUNS-HOST plan=true fold=Folded("the ultra-quick brown fox")
+inset-014     text-decoration-inset-014__1__0__0-111 tag=u kids=0 fired=false standsDown=false FontSize={"px":26.0}
+color wpt__css-text-decor__text-decoration-color__0-021 tag=h3 kids=0 fired=true standsDown=false FontSize={"px":18.72}
+color wpt__css-text-decor__text-decoration-color__1-022 tag=null kids=0 fired=false standsDown=false FontSize=null
+color wpt__css-text-decor__text-decoration-color__2-023 tag=br kids=0 fired=false standsDown=false FontSize=null
+color wpt__css-text-decor__text-decoration-color__3-024 tag=null kids=0 fired=false standsDown=false FontSize=null
+color wpt__css-text-decor__text-decoration-color__4-025 tag=br kids=0 fired=false standsDown=false FontSize=null
+color wpt__css-text-decor__text-decoration-color__5-026 tag=null kids=0 fired=false standsDown=false FontSize=null
+color wpt__css-text-decor__text-decoration-color__6-027 tag=br kids=0 fired=false standsDown=false FontSize=null
+color wpt__css-text-decor__text-decoration-color__7-028 tag=null kids=0 fired=false standsDown=false FontSize=null
+color wpt__css-text-decor__text-decoration-color__8-029 tag=br kids=0 fired=false standsDown=false FontSize=null
+color wpt__css-text-decor__text-decoration-color__9-030 tag=null kids=1 fired=false standsDown=true FontSize=null
+color   text-decoration-color__9__0-031 tag=span kids=2 fired=false standsDown=true FontSize=null
+color     text-decoration-color__9__0__0-032 tag=sub kids=0 fired=true standsDown=false FontSize={"px":13.333333333333334}
+color     text-decoration-color__9__0__1-033 tag=sup kids=0 fired=true standsDown=false FontSize={"px":13.333333333333334}
+color wpt__css-text-decor__text-decoration-color__10-034 tag=br kids=0 fired=false standsDown=false FontSize=null
+color wpt__css-text-decor__text-decoration-color__11-035 tag=null kids=0 fired=false standsDown=false FontSize=null
+color wpt__css-text-decor__text-decoration-color__12-036 tag=br kids=0 fired=false standsDown=false FontSize=null
+color wpt__css-text-decor__text-decoration-color__13-037 tag=null kids=0 fired=false standsDown=false FontSize=null
+color wpt__css-text-decor__text-decoration-color__14-038 tag=br kids=0 fired=false standsDown=false FontSize=null

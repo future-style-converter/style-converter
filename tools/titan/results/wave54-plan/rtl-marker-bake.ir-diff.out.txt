@@ -1,0 +1,24 @@
+wpt__css-text__bidi__bidi-lines-001: 13 → 13 components
+   CHANGED wpt__css-text__bidi__bidi-lines-001__1 PaddingRight:{"original":{"v":0.5,"u":"CH"}}→{"px":0} PaddingLeft:{"original":{"v":0.5,"u":"CH"}}→{"px":0}
+wpt__css-text__bidi__bidi-lines-002: 19 → 19 components
+   CHANGED wpt__css-text__bidi__bidi-lines-002__1 PaddingRight:{"original":{"v":0.5,"u":"CH"}}→{"px":0} PaddingLeft:{"original":{"v":0.5,"u":"CH"}}→{"px":0}
+wpt__css-anchor-position__anchor-center-safe-rtl: 14 → 14 components
+   CHANGED wpt__css-anchor-position__anchor-center-safe-rtl__2 PaddingTop:{"px":10}→{"px":0} PaddingRight:{"px":10}→{"px":0} PaddingBottom:{"px":10}→{"px":0} PaddingLeft:{"px":10}→{"px":0}
+   CHANGED wpt__css-anchor-position__anchor-center-safe-rtl__4 PaddingTop:{"px":10}→{"px":0} PaddingRight:{"px":10}→{"px":0} PaddingBottom:{"px":10}→{"px":0} PaddingLeft:{"px":10}→{"px":0}
+wpt__css-counter-styles__counter-suffix: 23 → 29 components
+   CHANGED counter-suffix__0__4 PaddingRight:{"original":{"v":3,"u":"EM"}}→{"px":0} PaddingLeft:{"original":{"v":3,"u":"EM"}}→{"px":0}
+   CHANGED counter-suffix__0__4__0 ListStyleType:∅→"none"
+   META    counter-suffix__0__4__0 {"sourceTag":"li","markerText":"1."}→{"sourceTag":"li"}
+   ADDED   counter-suffix__0__4__0__1 text="." parent=counter-suffix__0__4__0
+   ADDED   counter-suffix__0__4__0__2 text="1" parent=counter-suffix__0__4__0
+   CHANGED counter-suffix__0__4__1 ListStyleType:∅→"none"
+   META    counter-suffix__0__4__1 {"sourceTag":"li","markerText":"2."}→{"sourceTag":"li"}
+   ADDED   counter-suffix__0__4__1__1 text="." parent=counter-suffix__0__4__1
+   ADDED   counter-suffix__0__4__1__2 text="2" parent=counter-suffix__0__4__1
+   CHANGED counter-suffix__0__5 PaddingRight:{"original":{"v":3,"u":"EM"}}→{"px":0} PaddingLeft:{"original":{"v":3,"u":"EM"}}→{"px":0}
+   CHANGED counter-suffix__0__5__0 ListStyleType:∅→"none"
+   META    counter-suffix__0__5__0 {"sourceTag":"li","markerText":"א."}→{"sourceTag":"li"}
+   ADDED   counter-suffix__0__5__0__1 text="א." parent=counter-suffix__0__5__0
+   CHANGED counter-suffix__0__5__1 ListStyleType:∅→"none"
+   META    counter-suffix__0__5__1 {"sourceTag":"li","markerText":"ב."}→{"sourceTag":"li"}
+   ADDED   counter-suffix__0__5__1__1 text="ב." parent=counter-suffix__0__5__1

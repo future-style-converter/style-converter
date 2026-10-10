@@ -1,0 +1,47 @@
+
+    // ── TEMPORARY census method (tools/titan/results/wave54-table-body-cell/census-kotlin.py appends it, runs it, and
+    // restores this file byte-exact). It executes the REAL composed-canvas chain over every per-test IR document of a
+    // run and counts where wave 54's TB-android can reach. Never committed.
+    @Test
+    fun zzCensusWave54L2() {
+        val anchor = "tools/titan/runs"
+        var dir: java.io.File? = java.io.File(System.getProperty("user.dir") ?: ".").absoluteFile
+        while (dir != null && !java.io.File(dir, anchor).exists()) dir = dir.parentFile
+        val repo = requireNotNull(dir)
+        val run = System.getenv("L2_CENSUS_RUN") ?: "wave53-final"
+        // <section>/per-test-ir/*.json only — never walk a section (its web/node_modules is a symlinked tree).
+        val files = (java.io.File(repo, "$anchor/$run/sections").listFiles() ?: emptyArray())
+            .flatMap { (java.io.File(it, "per-test-ir").listFiles() ?: emptyArray()).toList() }
+            .filter { it.isFile && it.name.endsWith(".json") }.sortedBy { it.path }
+        fun walk(c: IRComponent): Sequence<IRComponent> = sequenceOf(c) + c.children.orEmpty().asSequence().flatMap { walk(it) }
+        val lines = mutableListOf<String>()
+        var decodeErrors = 0; var forestChanged = 0; var anonDocs = 0; var chromeMovedDocs = 0; var boxes = 0
+        for (f in files) {
+            val raw = try {
+                com.styleconverter.runtime.core.renderer.SlotComposer.compose(
+                    com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(f.readText()))
+            } catch (e: Exception) { decodeErrors++; lines += "DECODE-ERROR ${f.name} ${e.message}"; continue }
+            // The composable's own chain (ScreenshotCaptureScreen.ComposedCaptureCanvas), stage by stage.
+            val margined = withCanvasOwnedBodyMargin(raw, resolveComposedCanvasMargin(raw)).map(::withUaBlockMarginOnHoistedRoot)
+            val plan = resolveComposedCanvasRootBackground(raw)
+            val itemA = com.styleconverter.runtime.background.RootBackgroundPropagation.withCanvasOwnedRootBackground(margined, plan)
+            val forest = com.styleconverter.runtime.table.TableBodyForest.rewrite(itemA)
+            val full = composedCanvasRoots(margined, plan)
+            val all = full.asSequence().flatMap { walk(it) }.toList()
+            boxes += all.size
+            val anon = all.filter { com.styleconverter.runtime.table.TableBodyForest.isAnonymous(it) }
+            // chrome moves a box iff, for some fabricatedDefault, it differs from (that default, hug = false).
+            val moved = all.filter { c -> listOf(true, false).any { x ->
+                com.styleconverter.runtime.table.TableCellHug.chrome(c, x) !=
+                    com.styleconverter.runtime.table.TableCellHug.Chrome(x, false) } }
+            if (forest !== itemA) { forestChanged++; lines += "FOREST ${f.name}" }
+            if (anon.isNotEmpty()) { anonDocs++; lines += "ANON ${f.name} ${anon.map { it.id }}" }
+            if (moved.isNotEmpty()) { chromeMovedDocs++; lines += "CHROME ${f.name} ${moved.map { it.id }}" }
+            // the composed chain must equal "item A then the forest" (no other stage moved)
+            assertEquals(f.name, forest, full)
+        }
+        lines.add(0, "run $run: documents ${files.size} · decode errors $decodeErrors · boxes walked $boxes · " +
+            "forest non-identity $forestChanged · documents with an anonymous box $anonDocs · documents where chrome differs " +
+            "from (fabricatedDefault, hug=false) $chromeMovedDocs")
+        java.io.File(repo, "tools/titan/results/wave54-table-body-cell/census-kotlin.$run.out.txt").writeText(lines.joinToString("\n") + "\n")
+    }

@@ -1,0 +1,18 @@
+=== 2026-10-08 22:40:37 tools/titan/results/wave54-hyphenate-character/seam-2.patch on runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift HEAD 905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e before 905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e
+applied 417853cefdc7627fadc21003efa735d99d47ed0c545b6c1747d7292403fd26f3
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.085 (0.087) seconds
+	 Executed 19 tests, with 0 failures (0 unexpected) in 0.014 (0.147) seconds
+	 Executed 20 tests, with 0 failures (0 unexpected) in 0.091 (0.178) seconds
+	 Executed 49 tests, with 0 failures (0 unexpected) in 0.191 (0.412) seconds
+** TEST SUCCEEDED **
+command exit=0
+restored 905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e BYTE-EXACT-TO-HEAD
+=== 2026-10-08 22:41:43 tools/titan/results/wave54-hyphenate-character/seam-1.patch on runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt HEAD da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db before da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db
+applied 0a92203a9fb5081e5bc2c5721f3c41377039ea7e2b22ae24912e18b6e21282be
+BUILD SUCCESSFUL in 4s
+junit PreBreakPipelineTest tests=26 skipped=0 failures=0 errors=0
+junit HyphenateCharacterExtractorTest tests=6 skipped=0 failures=0 errors=0
+bash: line 0: cd: runtimes/compose/build/tmp/kotlin-classes/debug: No such file or directory
+0
+command exit=1
+restored da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db BYTE-EXACT-TO-HEAD

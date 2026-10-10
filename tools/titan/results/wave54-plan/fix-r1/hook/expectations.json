@@ -1,0 +1,4351 @@
+{
+ "wave": 54,
+ "readAgainst": "wave53-final",
+ "scoreOfRecord": "node tools/titan/score-gate.mjs wave54-open wave54-final --watch tools/titan/results/wave54-plan/watchlist.txt --movers 0 --json tools/titan/results/wave54-gate/score-final.json > tools/titan/results/wave54-gate/score-final.movers0.txt",
+ "adjudicate": "node tools/titan/results/wave54-gate/adjudicate.mjs tools/titan/results/wave54-gate/score-final.json",
+ "scoreReadout": "node tools/titan/score-gate.mjs wave54-open wave54-final --watch tools/titan/results/wave54-plan/watchlist.txt --movers 0.005 > tools/titan/results/wave54-gate/score-final.txt   (the human-readable mover list for the PR; adjudicates nothing)",
+ "adjudicateCalibrations": [
+  {
+   "input": "skeptic-r1/synth-score.json (every gating row at its predicted value, built with the old --movers 0.005 rule)",
+   "expect": "FAIL R4 missed 4 (abspos-autopos-{htb,vlr,vrl}-ltr android, s-11-1-1b-006 android): the defect, reproduced",
+   "out": "fix-r1/pre-M1.adjudicate-synth.out.txt"
+  },
+  {
+   "input": "fix-r1/synth-movers0-allmet.json (score-gate diffRuns, moverThreshold 0, over the 4096 wave53-final cells with every gating row at its predicted value)",
+   "expect": "R1-R5 hold, exit 0",
+   "out": "fix-r1/post-M1.adjudicate-allmet.out.txt"
+  },
+  {
+   "input": "fix-r1/synth-movers0-floor.json (as all-met, counter-suffix ios exactly at its floor 0.985, delta +0.0048)",
+   "expect": "R1-R5 hold, exit 0",
+   "out": "fix-r1/post-M1.adjudicate-floor.out.txt"
+  },
+  {
+   "input": "fix-r1/synth-movers0-mnm3.json (as all-met, one must-not-move cell +0.003)",
+   "expect": "FAIL R5 moved 1 (the (0.002, 0.005) hole is closed)",
+   "out": "fix-r1/post-M1.adjudicate-mnm3.out.txt"
+  },
+  {
+   "input": "fix-r1/score-identity-movers0.json (score-gate.mjs wave53-final wave54-open --movers 0: nothing moved)",
+   "expect": "FAIL R4 missed 31 = 34 gating rows minus the 3 autopos-ltr rows whose floor 0.995 sits below today's 0.9966 (their gate is geometry alone: PLAN §6)",
+   "out": "fix-r1/post-M1.adjudicate-identity.out.txt"
+  }
+ ],
+ "openingGate": {
+  "cmd": "node tools/titan/score-gate.mjs wave53-final wave54-open --watch tools/titan/results/wave53-plan/watchlist.txt",
+  "expect": "0 gained / 0 lost / 0 movers / 0 newly measured / 0 unmeasured-now over 4096 cells; fixture net exit 0 on all 9 gate fixtures, the all-then-color child reading \"(gate-only: no committed baseline)\" exactly as at wave53-open (the obligation-0 clause \"all-then-color now has committed baselines\" is stale: label-chrome brief §9 R6)",
+  "alsoRun": [
+   "RUN=wave54-open WATCH=tools/titan/results/wave54-plan/watchlist.txt node tools/titan/results/wave52-plan/watchlist-check.mjs  -> unmatched 0",
+   "per-test IR wave53-final -> wave54-open byte-identical (the lanes' verbatim pins come from wave53-final)",
+   "node tools/titan/results/wave54-gate/control-check.mjs wave53-final wave54-open  -> 0 changed, 0 renumbered, 0 leaks (same host)"
+  ],
+  "onDivergence": "the first divergence is wave 54's first item: PLAN §10 restates every affected prediction against wave54-open BEFORE any lane lands"
+ },
+ "stage1Probe": {
+  "runId": "wave54-pre",
+  "sections": [
+   "CSS2",
+   "css-counter-styles",
+   "css-tables",
+   "css-text"
+  ],
+  "cmd": "tools/titan/gate-driver.sh wave54-pre --sections CSS2,css-counter-styles,css-tables,css-text --skip-fixture-net",
+  "decides": [
+   "L1-rtl-marker-bake P / Mprime",
+   "L2-table-body-cell TB-android"
+  ],
+  "readWith": "the UNION carrier set (BACKLOG wave-53 lesson: a probe of a shared tree measures the union); per-lane geometry decides L1 and L2 only; every other lane's cells in these sections are recorded and decided at wave54-probe"
+ },
+ "probeRun": {
+  "runId": "wave54-probe",
+  "sections": [
+   "CSS2",
+   "css-anchor-position",
+   "css-backgrounds",
+   "css-break",
+   "css-cascade",
+   "css-contain",
+   "css-counter-styles",
+   "css-display",
+   "css-flexbox",
+   "css-gaps",
+   "css-images",
+   "css-lists",
+   "css-masking",
+   "css-multicol",
+   "css-overflow",
+   "css-position",
+   "css-pseudo",
+   "css-tables",
+   "css-text",
+   "css-text-decor",
+   "css-transforms",
+   "css-ui",
+   "css-values",
+   "css-writing-modes",
+   "filter-effects",
+   "selectors"
+  ],
+  "cmd": "tools/titan/gate-driver.sh wave54-probe --sections CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-pseudo,css-tables,css-text,css-text-decor,css-transforms,css-ui,css-values,css-writing-modes,filter-effects,selectors --skip-fixture-net",
+  "notProbed": {
+   "css-color": "no carrier, no named control; the closing gate R4/R7",
+   "css-grid": "no carrier, no named control (the wave-53 float controls are closed); the closing gate R4/R7",
+   "css-sizing": "no carrier; holds only the unstaffed web singleton aspect-ratio/abspos-016; the closing gate R4/R7",
+   "css-view-transitions": "two L4 fixed controls (content-with-child-with-transparent-background, content-with-transparent-background, P x3) — replaced by the L4 skeptic's P3 pure-walk census over all 26 fixedControls payloads (JVM + Catalyst) and the closing gate R4/R7; the section runs 8-30 min under swap"
+  }
+ },
+ "geometryGate": {
+  "cmd": "python3 tools/titan/results/wave54-plan/geometry-gate.py <run> --base wave54-open",
+  "what": "runs every lane's geometryProbes, prints one PASS/FAIL per expect key, names the unit each failing gating row reverts (rule 4), exits 1 on a gating FAIL or a probe self-check failure"
+ },
+ "revertRule": [
+  "1 lost: a carrier cell (any lane, any tier, predicted or not) that is P on wave54-open and f on the probe reverts the commit that carries it (R1's empty lost list applied at the probe)",
+  "2 moved down: delta <= -0.002 wave54-open -> probe on any prediction row whose direction is \"up-or-stay\" (any tier) reverts the commit that carries it. A row with direction \"undirected\" (a move whose sign is not pre-registered; lanes.*.predictions[].directionWhy) is EXEMPT from rule 2: its fall is looked at against the ref and named with its cause in the probe read-out and the PR, never a revert by itself; rules 1 and 5 still bind it",
+  "3 floor: a gating prediction (every HIGH / MED-HIGH row) below its floor reverts the commit that carries it",
+  "4 geometry: a geometryProbes gating key whose line does not end in its exact expect string (or lacks its contains string) reverts the unit geometry-gate.py names",
+  "5 leak: a composed capture outside every carrier set that differs in decoded pixels (R4), or a per-test IR document outside the wire carriers that differs in bytes and is not \"renumbered\" (R4b), reverts the commit it is bisected to (one re-probe of the leaked section per step; never guessed)",
+  "6 unit: the commit (lanes.*.revertUnits); a cell carried by several commits of one lane reverts them in that unit's revertOrder (latest first), re-probing its sections between steps. Lane dependencies: M′ before P (M′ never without P); U3b before U3; U2-seed before U1. L3 reasons: a `glyph:` failure names U2-<platform> (U1 on web), an `offset:`/`lines:` failure names U3b, then U3",
+  "6x shared cells (L4 sharedCells): carriers are disjoint by construction, so a cell always names ONE lane's commits; L4's invariance claims on L3 / L1 carriers are pinned in-lane (P1/P3) and attributed at the closing A/B",
+  "7 stage 1: L1 and L2 are decided at wave54-pre (lanes.L1-rtl-marker-bake.stage1Decision, lanes.L2-table-body-cell.stage1Decision); a unit reverted there is withdrawn (probeDecisions) before wave54-probe runs",
+  "8 U3b is probe-decided (lanes.L3-hyphenate-character.revertUnits.U3b.probeDecided)",
+  "tier: MED and below carry no floor and no geometry trigger; a shortfall against their predicted magnitude is read and labelled, never a trigger. Rules 1 and 5 apply to every row of every tier; rule 2 to every \"up-or-stay\" row of every tier"
+ ],
+ "beforeEveryDeviceRun": "source tools/titan/own-processes.sh && kill_own_gradle_daemons \"$PROJECT_ROOT\" <every tree on a lane note's TREES: line (the shared tree is PROJECT_ROOT; list any export tree a lane or skeptic ran Gradle in)>  — never ./gradlew --stop",
+ "controlCalibrations": [
+  {
+   "pair": "wave53-open -> wave53-final",
+   "expectations": "tools/titan/results/wave53-plan/expectations.json",
+   "expect": "the copied control-check.mjs reproduces the wave-53 closing control verdict byte-for-byte (the copy changes only the expectations path)"
+  },
+  {
+   "pair": "wave53-final -> wave54-open",
+   "expectations": "tools/titan/results/wave54-plan/expectations.json",
+   "expect": "HOLDS: 0 changed captures, 0 content-changed wire documents, 0 renumbered (the opening gate is the identity on this host)"
+  },
+  {
+   "pair": "wave53-open -> wave53-final",
+   "expectations": "tools/titan/results/wave54-plan/expectations.json",
+   "expect": "FAILS with leaks (wave 53's landed changes — counter-reset-reversed-nested x3, display-contents-root-background x3, the float-avoid cells, … — are not wave-54 carriers): the wave-54 carrier set can fail"
+  },
+  {
+   "pair": "wave53-final -> wave54-open, then wave53-open -> wave53-final",
+   "expectations": "tools/titan/results/wave54-plan/expectations.json",
+   "lane": "L7-label-chrome",
+   "expect": "--lane L7-label-chrome (an EMPTY carrier set) HOLDS on the identity pair and FAILS on the wave-53 pair: the per-lane path is exercised both ways"
+  }
+ ],
+ "wireRenumbering": {
+  "rule": "Unchanged from wave 53 (BACKLOG \"Wave 53 lessons\"): a per-test IR document byte-different ONLY because an earlier content-changed document of the same section changed its component count — identical once the id counter is stripped from id / slot.parent, every id shifted by the same amount, equal to the running component-count delta of the content-changed documents before it — is RENUMBERED, not a leak.",
+  "expectedShadow": {
+   "css-counter-styles": {
+    "after": "wpt__css-counter-styles__counter-suffix",
+    "shift": 6,
+    "documents": 15,
+    "unit": "L1 Mprime (6 root-owned marker runs: counter-suffix 23 -> 29 components)",
+    "basis": "rtl brief §4 predicted wire; the same +6 x 15 shadow the reverted wave-53 U2 produced (wave53-gate/_note.md item 6)"
+   }
+  },
+  "noShadowFrom": "L1 P (no component added: 13->13, 19->19, 14->14 at wave53-probe), L3 U1 (Generic -> HyphenateCharacter, same component), L3 U3 / U3b (br Height values only)"
+ },
+ "expected": {
+  "lost": [],
+  "unmeasuredNow": [],
+  "newlyMeasured": [],
+  "missingSections": 0,
+  "columnShorts": 0,
+  "fixtureNet": "exit 0 on all 9 gate fixtures; all-then-color against its newly committed baselines (L7 U2-seed)"
+ },
+ "abArms": [
+  {
+   "arm": "drop-W1",
+   "lane": "L6-web-tail",
+   "sections": [
+    "css-text"
+   ],
+   "platforms": [
+    "web"
+   ],
+   "expect": "hyphens-out-of-flow-002 web returns to f 0.9411 (the flip is W1's alone)"
+  },
+  {
+   "arm": "drop-Mprime",
+   "lane": "L1-rtl-marker-bake",
+   "sections": [
+    "css-counter-styles"
+   ],
+   "platforms": [
+    "web",
+    "ios",
+    "android"
+   ],
+   "when": "only if M′ is on the closing tree",
+   "expect": "counter-suffix android returns to ≈0.9815 (P alone), web to 0.9818, ios to 0.9802"
+  },
+  {
+   "arm": "drop-U3b",
+   "lane": "L3-hyphenate-character",
+   "sections": [
+    "css-text"
+   ],
+   "platforms": [
+    "web",
+    "ios",
+    "android"
+   ],
+   "when": "only if U3b is on the closing tree",
+   "expect": "hyphenate-character-001..004 return to the U3-only values (web/android ≈0.95-0.96; iOS unchanged or up)"
+  }
+ ],
+ "unionCaptureCarriers": {
+  "web": [
+   "wpt__CSS2__abspos__static-inside-inline-block",
+   "wpt__css-break__block-in-inline-015-print",
+   "wpt__css-cascade__scope-pseudo-element",
+   "wpt__css-counter-styles__counter-suffix",
+   "wpt__css-display__display-flow-root-list-item-001",
+   "wpt__css-masking__clip-path__clip-path-filter-order",
+   "wpt__css-multicol__balance-grid-container",
+   "wpt__css-multicol__column-height-009",
+   "wpt__css-overflow__line-clamp__block-ellipsis-002",
+   "wpt__css-overflow__line-clamp__block-ellipsis-004",
+   "wpt__css-overflow__line-clamp__block-ellipsis-005",
+   "wpt__css-overflow__line-clamp__block-ellipsis-006",
+   "wpt__css-position__overlay__overlay-button-appearance",
+   "wpt__css-position__position-absolute-semi-replaced-stretch-input",
+   "wpt__css-position__position-absolute-semi-replaced-stretch-other",
+   "wpt__css-text__hyphens__hyphenate-character-001",
+   "wpt__css-text__hyphens__hyphenate-character-002",
+   "wpt__css-text__hyphens__hyphenate-character-003",
+   "wpt__css-text__hyphens__hyphenate-character-004",
+   "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+   "wpt__css-ui__appearance-auto-input-non-widget-001",
+   "wpt__css-ui__box-sizing-007",
+   "wpt__css-ui__box-sizing-008",
+   "wpt__css-ui__box-sizing-009",
+   "wpt__css-ui__box-sizing-010",
+   "wpt__css-ui__box-sizing-011",
+   "wpt__css-ui__box-sizing-013",
+   "wpt__css-ui__box-sizing-014",
+   "wpt__css-ui__box-sizing-015",
+   "wpt__css-ui__box-sizing-016",
+   "wpt__css-ui__box-sizing-017",
+   "wpt__css-ui__box-sizing-018",
+   "wpt__css-ui__box-sizing-019",
+   "wpt__css-ui__box-sizing-020",
+   "wpt__css-ui__box-sizing-021",
+   "wpt__css-ui__box-sizing-022",
+   "wpt__css-ui__box-sizing-024",
+   "wpt__css-ui__box-sizing-025",
+   "wpt__css-values__attr-style-sharing-1",
+   "wpt__css-writing-modes__baseline-with-orthogonal-flow-001",
+   "wpt__filter-effects__backdrop-filter-clip-rect",
+   "wpt__filter-effects__backdrop-filter-edge-clipping",
+   "wpt__filter-effects__backdrop-filter-paint-order",
+   "wpt__filter-effects__backdrop-filter-plus-filter"
+  ],
+  "ios": [
+   "wpt__CSS2__abspos__static-fixed-inside-abspos",
+   "wpt__css-counter-styles__counter-suffix",
+   "wpt__css-gaps__flex__flex-gap-decorations-033",
+   "wpt__css-masking__clip-path__clip-path-filter-order",
+   "wpt__css-multicol__balance-grid-container",
+   "wpt__css-multicol__column-height-009",
+   "wpt__css-overflow__line-clamp__block-ellipsis-002",
+   "wpt__css-overflow__line-clamp__block-ellipsis-004",
+   "wpt__css-overflow__line-clamp__block-ellipsis-005",
+   "wpt__css-overflow__line-clamp__block-ellipsis-006",
+   "wpt__css-position__change-insets-inside-strict-containment-nested",
+   "wpt__css-position__position-fixed-scroll-nested-fixed",
+   "wpt__css-position__position-relative-003",
+   "wpt__css-position__position-relative-004",
+   "wpt__css-text-decor__text-decoration-inset-005",
+   "wpt__css-text-decor__text-decoration-inset-006",
+   "wpt__css-text-decor__text-decoration-inset-014",
+   "wpt__css-text__hyphens__hyphenate-character-001",
+   "wpt__css-text__hyphens__hyphenate-character-002",
+   "wpt__css-text__hyphens__hyphenate-character-003",
+   "wpt__css-text__hyphens__hyphenate-character-004",
+   "wpt__css-text__hyphens__hyphenate-limit-chars-001",
+   "wpt__filter-effects__backdrop-filter-clip-rect",
+   "wpt__filter-effects__backdrop-filter-containing-block",
+   "wpt__filter-effects__backdrop-filter-edge-clipping",
+   "wpt__filter-effects__backdrop-filter-paint-order",
+   "wpt__filter-effects__backdrop-filter-plus-filter"
+  ],
+  "android": [
+   "wpt__CSS2__abspos__static-fixed-inside-abspos",
+   "wpt__CSS2__css21-errata__s-11-1-1b-006",
+   "wpt__css-anchor-position__anchor-center-safe-rtl",
+   "wpt__css-break__block-in-inline-015-print",
+   "wpt__css-contain__contain-content-003",
+   "wpt__css-contain__contain-content-004",
+   "wpt__css-contain__contain-content-011",
+   "wpt__css-counter-styles__counter-suffix",
+   "wpt__css-flexbox__abspos__abspos-autopos-htb-ltr",
+   "wpt__css-flexbox__abspos__abspos-autopos-htb-rtl",
+   "wpt__css-flexbox__abspos__abspos-autopos-vlr-ltr",
+   "wpt__css-flexbox__abspos__abspos-autopos-vlr-rtl",
+   "wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr",
+   "wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl",
+   "wpt__css-gaps__flex__flex-gap-decorations-006",
+   "wpt__css-gaps__flex__flex-gap-decorations-033",
+   "wpt__css-lists__counter-list-item",
+   "wpt__css-lists__counter-reset-increment-overflow-underflow",
+   "wpt__css-masking__clip-path__clip-path-filter-order",
+   "wpt__css-multicol__balance-grid-container",
+   "wpt__css-multicol__column-height-009",
+   "wpt__css-overflow__line-clamp__block-ellipsis-002",
+   "wpt__css-overflow__line-clamp__block-ellipsis-004",
+   "wpt__css-overflow__line-clamp__block-ellipsis-005",
+   "wpt__css-overflow__line-clamp__block-ellipsis-006",
+   "wpt__css-position__change-insets-inside-strict-containment-nested",
+   "wpt__css-position__position-fixed-scroll-nested-fixed",
+   "wpt__css-position__position-relative-003",
+   "wpt__css-position__position-relative-004",
+   "wpt__css-text-decor__text-decoration-color",
+   "wpt__css-text-decor__text-decoration-inset-005",
+   "wpt__css-text-decor__text-decoration-inset-006",
+   "wpt__css-text-decor__text-decoration-inset-014",
+   "wpt__css-text-decor__text-decoration-subelements-003",
+   "wpt__css-text__bidi__bidi-lines-001",
+   "wpt__css-text__bidi__bidi-lines-002",
+   "wpt__css-text__hyphens__hyphenate-character-001",
+   "wpt__css-text__hyphens__hyphenate-character-002",
+   "wpt__css-text__hyphens__hyphenate-character-003",
+   "wpt__css-text__hyphens__hyphenate-character-004",
+   "wpt__filter-effects__backdrop-filter-border-radius-change",
+   "wpt__filter-effects__backdrop-filter-clip-rect",
+   "wpt__filter-effects__backdrop-filter-containing-block",
+   "wpt__filter-effects__backdrop-filter-corner-shape-change",
+   "wpt__filter-effects__backdrop-filter-edge-clipping",
+   "wpt__filter-effects__backdrop-filter-nested-border-radius-clip",
+   "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-2",
+   "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3",
+   "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-4",
+   "wpt__filter-effects__backdrop-filter-paint-order",
+   "wpt__filter-effects__backdrop-filter-plus-filter"
+  ]
+ },
+ "unionWireCarriers": [
+  "wpt__css-anchor-position__anchor-center-safe-rtl",
+  "wpt__css-cascade__revert-layer-006",
+  "wpt__css-cascade__revert-val-001",
+  "wpt__css-cascade__revert-val-002",
+  "wpt__css-counter-styles__counter-suffix",
+  "wpt__css-masking__clip-path__clip-path-filter-order",
+  "wpt__css-multicol__balance-grid-container",
+  "wpt__css-multicol__column-height-009",
+  "wpt__css-overflow__line-clamp__block-ellipsis-002",
+  "wpt__css-overflow__line-clamp__block-ellipsis-004",
+  "wpt__css-overflow__line-clamp__block-ellipsis-005",
+  "wpt__css-overflow__line-clamp__block-ellipsis-006",
+  "wpt__css-text__bidi__bidi-lines-001",
+  "wpt__css-text__bidi__bidi-lines-002",
+  "wpt__css-text__hyphens__hyphenate-character-001",
+  "wpt__css-text__hyphens__hyphenate-character-002",
+  "wpt__css-text__hyphens__hyphenate-character-003",
+  "wpt__css-text__hyphens__hyphenate-character-004",
+  "wpt__css-text__hyphens__hyphenate-character-005",
+  "wpt__filter-effects__backdrop-filter-clip-rect",
+  "wpt__filter-effects__backdrop-filter-edge-clipping",
+  "wpt__filter-effects__backdrop-filter-paint-order",
+  "wpt__filter-effects__backdrop-filter-plus-filter"
+ ],
+ "degenerateByConstruction": [
+  "css-text/hyphens/hyphenate-character-001.html",
+  "css-text/hyphens/hyphenate-character-003.html",
+  "css-text/hyphens/hyphenate-character-004.html"
+ ],
+ "degenerateRetirement": "a hyphenate-character-001/003/004 cell on platform p is faithful only when U1, U2-p (none needed on web) and U3 are all on the closing tree AND hyphenate-character.geometry.py prints \"→ GEOMETRY OK\" on its row; anything else stays DEGENERATE",
+ "stayDegenerateEvenIfPass": [
+  "css-text/bidi/bidi-lines-002.html android (orange \"!\" on the left: bake measurement)",
+  "css-counter-styles/counter-suffix.html ios (rows 3-6)",
+  "css-counter-styles/counter-suffix.html android (rows 5-6)",
+  "css-overflow/line-clamp/block-ellipsis-002.html ios (Line 4 painted and no \"…\": the iOS clamp is not applied; U3 only removes the stray blank lines)"
+ ],
+ "recordedWall": [
+  "css-anchor-position/anchor-position-multicol-007.html android"
+ ],
+ "ringFenced": "filter-effects/backdrop-filter-basic-blur — report only, never a target, never carved out (not a carrier of any lane; L4 OOF claims its leaf boxes inertly, L3 U3 does not reach it)",
+ "lanes": {
+  "L1-rtl-marker-bake": {
+   "dir": "tools/titan/results/wave54-rtl-marker-bake",
+   "briefs": [
+    "rtl-marker-bake.md"
+   ],
+   "captureCarriers": {
+    "web": [
+     "wpt__css-counter-styles__counter-suffix"
+    ],
+    "ios": [
+     "wpt__css-counter-styles__counter-suffix"
+    ],
+    "android": [
+     "wpt__css-anchor-position__anchor-center-safe-rtl",
+     "wpt__css-counter-styles__counter-suffix",
+     "wpt__css-text__bidi__bidi-lines-001",
+     "wpt__css-text__bidi__bidi-lines-002"
+    ]
+   },
+   "wireCarriers": [
+    "wpt__css-anchor-position__anchor-center-safe-rtl",
+    "wpt__css-counter-styles__counter-suffix",
+    "wpt__css-text__bidi__bidi-lines-001",
+    "wpt__css-text__bidi__bidi-lines-002"
+   ],
+   "carrierRule": {
+    "P": "a bidi-bake root (_lossyReasons 'baked-bidi-visual-order') whose browser-resolved padding is NON-ZERO on some side: 6 roots in 4 documents (census paddedRoots); the 8 zero-padding roots (dir-style-02a x6, dir-selector-change-003/-004) keep their padding-* keys in place and in order (pin V3b)",
+    "Mprime": "a component with meta.markerText and Position ABSOLUTE|FIXED: exactly 4, all in counter-suffix (census markerTextAndOutOfFlow); after M′ every marker run is a child of the RELATIVE bake root and every <li> box keeps one run (pin V7; stack-shape census 10 host-inactive parents, 0 new)",
+    "zeroPaddingBakeRootsMustStayByteIdentical": [
+     "wpt__selectors__dir-style-02a",
+     "wpt__selectors__dir-selector-change-003",
+     "wpt__selectors__dir-selector-change-004"
+    ]
+   },
+   "probeSections": [
+    "css-counter-styles",
+    "css-text",
+    "css-anchor-position",
+    "css-backgrounds",
+    "css-writing-modes",
+    "selectors"
+   ],
+   "stage1Sections": [
+    "css-counter-styles",
+    "css-text"
+   ],
+   "predictions": [
+    {
+     "cell": "css-text/bidi/bidi-lines-001.html android",
+     "from": "f 0.8934",
+     "to": "P ≈0.9629 (device-measured: these hunk bytes at wave53-probe)",
+     "kind": "flip (line starts on the ref x; the native Arabic face is wider, right edge x354 vs x348 — a font residual)",
+     "confidence": "HIGH",
+     "floor": 0.955,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "P"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text/bidi/bidi-lines-002.html android",
+     "from": "P 0.9534",
+     "to": "P ≈0.9818 (device-measured at wave53-probe)",
+     "kind": "mover up; stays DEGENERATE (the orange \"!\" sits on the LEFT on all three platforms: a bake-measurement defect, not P)",
+     "confidence": "HIGH",
+     "floor": 0.975,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "P"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-counter-styles/counter-suffix.html android",
+     "from": "P 0.9547 DEGENERATE",
+     "to": "P ≈0.9815 with P alone (replay); ≈0.989 with M′ on P (replay 0.9894 / 0.9900)",
+     "kind": "P: RTL text moves to the ref x, still no marker (DEGENERATE). M′: RTL rows picture-correct ONLY if [M] android prints GEOMETRY OK; the cell stays DEGENERATE on rows 5-6 (CJK marker 4 px left)",
+     "confidence": "MED-HIGH (P floor) / MED (M′ magnitude, geometry-gated)",
+     "floor": 0.97,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "P",
+      "Mprime"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-counter-styles/counter-suffix.html web",
+     "from": "P 0.9818",
+     "to": "P 1 (wave53-probe measured 1 with the same marker geometry)",
+     "kind": "faithful (the RTL markers move from the left x46-58 to the inline-start side)",
+     "confidence": "HIGH",
+     "floor": 0.999,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "Mprime"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-counter-styles/counter-suffix.html ios",
+     "from": "P 0.9802 DEGENERATE",
+     "to": "P ≈0.987 (wave53-probe measured 0.9873)",
+     "kind": "RTL rows picture-correct; cell stays DEGENERATE on rows 3-6 (iOS: Hebrew period order, CJK marker 4 px left)",
+     "confidence": "MED-HIGH",
+     "floor": 0.985,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "Mprime"
+     ],
+     "direction": "up-or-stay"
+    }
+   ],
+   "neverShip": "M′ without P (counter-suffix android → f ≈0.947, the wave-53 replay); M′ is reverted before P, never cherry-picked alone",
+   "mustNotMove": [
+    "css-counter-styles/arabic-indic/css3-counter-styles-101.html android",
+    "css-counter-styles/arabic-indic/css3-counter-styles-101.html ios",
+    "css-counter-styles/arabic-indic/css3-counter-styles-101.html web",
+    "css-counter-styles/arabic-indic/css3-counter-styles-102.html web",
+    "css-counter-styles/arabic-indic/css3-counter-styles-103.html android",
+    "css-counter-styles/arabic-indic/css3-counter-styles-103.html ios",
+    "css-counter-styles/arabic-indic/css3-counter-styles-103.html web",
+    "css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html android",
+    "css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html ios",
+    "css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html web",
+    "css-counter-styles/cssom/cssom-additive-symbols-setter.html android",
+    "css-counter-styles/cssom/cssom-additive-symbols-setter.html ios",
+    "css-counter-styles/cssom/cssom-additive-symbols-setter.html web",
+    "css-counter-styles/cssom/cssom-fallback-setter-invalid.html android",
+    "css-counter-styles/cssom/cssom-fallback-setter-invalid.html ios",
+    "css-counter-styles/cssom/cssom-fallback-setter-invalid.html web",
+    "css-counter-styles/cssom/cssom-fallback-setter.html android",
+    "css-counter-styles/cssom/cssom-fallback-setter.html ios",
+    "css-counter-styles/cssom/cssom-fallback-setter.html web",
+    "css-counter-styles/cssom/cssom-name-setter-invalid.html android",
+    "css-counter-styles/cssom/cssom-name-setter-invalid.html ios",
+    "css-counter-styles/cssom/cssom-name-setter-invalid.html web",
+    "css-counter-styles/cssom/cssom-name-setter.html android",
+    "css-counter-styles/cssom/cssom-name-setter.html ios",
+    "css-counter-styles/cssom/cssom-name-setter.html web",
+    "css-counter-styles/cssom/cssom-negative-setter-invalid.html android",
+    "css-counter-styles/cssom/cssom-negative-setter-invalid.html ios",
+    "css-counter-styles/cssom/cssom-negative-setter-invalid.html web",
+    "css-counter-styles/cssom/cssom-negative-setter.html android",
+    "css-counter-styles/cssom/cssom-negative-setter.html ios",
+    "css-counter-styles/cssom/cssom-negative-setter.html web",
+    "css-counter-styles/cssom/cssom-pad-setter-invalid.html android",
+    "css-counter-styles/cssom/cssom-pad-setter-invalid.html ios",
+    "css-counter-styles/cssom/cssom-pad-setter-invalid.html web",
+    "css-counter-styles/cssom/cssom-pad-setter.html android",
+    "css-counter-styles/cssom/cssom-pad-setter.html ios",
+    "css-counter-styles/cssom/cssom-pad-setter.html web",
+    "css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html android",
+    "css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html ios",
+    "css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html web",
+    "css-counter-styles/cssom/cssom-prefix-suffix-setter.html android",
+    "css-counter-styles/cssom/cssom-prefix-suffix-setter.html ios",
+    "css-counter-styles/cssom/cssom-prefix-suffix-setter.html web",
+    "css-counter-styles/cssom/cssom-range-setter-invalid.html android",
+    "css-counter-styles/cssom/cssom-range-setter-invalid.html ios",
+    "css-counter-styles/cssom/cssom-range-setter-invalid.html web",
+    "css-counter-styles/cssom/cssom-range-setter.html android",
+    "css-counter-styles/cssom/cssom-range-setter.html ios",
+    "css-counter-styles/cssom/cssom-range-setter.html web",
+    "css-counter-styles/cssom/cssom-symbols-setter-invalid.html android",
+    "css-counter-styles/cssom/cssom-symbols-setter-invalid.html ios",
+    "css-counter-styles/cssom/cssom-symbols-setter-invalid.html web",
+    "css-text/bidi/bidi-lines-001.html ios",
+    "css-text/bidi/bidi-lines-001.html web",
+    "css-text/bidi/bidi-lines-002.html ios",
+    "css-text/bidi/bidi-lines-002.html web",
+    "css-text/bidi/bidi-tab-001.html android",
+    "css-text/bidi/bidi-tab-001.html ios",
+    "css-text/bidi/bidi-tab-001.html web",
+    "css-text/boundary-shaping/boundary-shaping-009.html android",
+    "css-text/boundary-shaping/boundary-shaping-009.html ios",
+    "css-text/boundary-shaping/boundary-shaping-009.html web",
+    "css-text/hyphens/hyphenate-character-005.html android",
+    "css-text/hyphens/hyphenate-character-005.html ios",
+    "css-text/hyphens/hyphenate-character-005.html web",
+    "css-writing-modes/bidi-plaintext-br-001.html android",
+    "css-writing-modes/bidi-plaintext-br-001.html ios",
+    "css-writing-modes/bidi-plaintext-br-001.html web",
+    "selectors/dir-selector-change-003.html android",
+    "selectors/dir-selector-change-003.html ios",
+    "selectors/dir-selector-change-003.html web",
+    "selectors/dir-selector-change-004.html android",
+    "selectors/dir-selector-change-004.html ios",
+    "selectors/dir-selector-change-004.html web",
+    "selectors/dir-style-02a.html android",
+    "selectors/dir-style-02a.html ios",
+    "selectors/dir-style-02a.html web",
+    "selectors/dir-style-03a.html android",
+    "selectors/dir-style-03a.html ios",
+    "selectors/dir-style-03a.html web"
+   ],
+   "geometryProbes": [
+    {
+     "cmd": "python3 tools/titan/results/wave54-plan/rtl-marker-bake.geometry.py <run> <base>",
+     "expect": {
+      "[P] bidi/bidi-lines-001 android": "GEOMETRY OK",
+      "[P] bidi/bidi-lines-002 android": "GEOMETRY OK",
+      "[P] bidi/bidi-lines-001 web": "GEOMETRY OK",
+      "[P] bidi/bidi-lines-001 ios": "GEOMETRY OK",
+      "[P] bidi/bidi-lines-002 web": "GEOMETRY OK",
+      "[P] bidi/bidi-lines-002 ios": "GEOMETRY OK",
+      "[M] counter-suffix web": "GEOMETRY OK",
+      "[M] counter-suffix ios": "GEOMETRY OK",
+      "[M] counter-suffix android": "GEOMETRY OK"
+     },
+     "contains": {
+      "[M] counter-suffix web": "rows 0-207 identical to <base>",
+      "[M] counter-suffix ios": "rows 0-207 identical to <base>",
+      "[M] counter-suffix android": "rows 0-207 identical to <base>"
+     },
+     "gating": {
+      "[P] bidi/bidi-lines-001 android": "P",
+      "[P] bidi/bidi-lines-002 android": "P"
+     },
+     "report": [],
+     "onWave53Final": "[P] android rows WRONG (x33 / x35); [M] web/ios WRONG (no marker ink on text row y214-225), android WRONG (rtl text rows 0/4 in x95-128); every ref row OK; exit 0",
+     "onWave53Probe": "[P] all OK; [M] web/ios OK, android WRONG (rtl row 1 no marker ink on text row y214-225 (marker ink y244-245 below the line)) — the reverted unit's defect, named",
+     "withdrawn": {
+      "[M] counter-suffix android": "was gating -> Mprime; unit Mprime reverted at wave54-pre (rule 4)",
+      "[M] counter-suffix ios": "was gating -> Mprime; unit Mprime reverted at wave54-pre (rule 4)",
+      "[M] counter-suffix web": "was gating -> Mprime; unit Mprime reverted at wave54-pre (rule 4)"
+     }
+    },
+    {
+     "cmd": "python3 tools/titan/results/wave53-plan/lists-bakes.geometry.py <run> <base>",
+     "expect": {
+      "counter-suffix web": "GEOMETRY OK",
+      "counter-suffix ios": "GEOMETRY OK",
+      "counter-suffix android": "GEOMETRY OK",
+      "counter-reset-reversed-nested web": "GEOMETRY OK",
+      "counter-reset-reversed-nested ios": "GEOMETRY OK",
+      "counter-reset-reversed-nested android": "GEOMETRY OK"
+     },
+     "contains": {
+      "counter-suffix web": "rows 0-207 identical to <base>",
+      "counter-suffix ios": "rows 0-207 identical to <base>",
+      "counter-suffix android": "rows 0-207 identical to <base>"
+     },
+     "gating": {},
+     "report": [
+      "counter-suffix ios"
+     ],
+     "onWave53Final": "counter-suffix x3 WRONG (web left x47; ios right x126; android left x152); counter-reset-reversed-nested x3 OK (wave-53 U1, a control now)",
+     "withdrawn": {
+      "counter-suffix android": "was gating -> Mprime; unit Mprime reverted at wave54-pre (rule 4)",
+      "counter-suffix web": "was gating -> Mprime; unit Mprime reverted at wave54-pre (rule 4)"
+     }
+    }
+   ],
+   "revertUnits": {
+    "P": {
+     "commit": "tools/titan/bidi-bake.mjs hunk P (paddingIsSpent + rootProperties(rect, position, el) + applyBidiBakePlan padding-* delete; the b0edb788^ fix-pass state) + pins V3 / V3b / content-box + overflow guards",
+     "captures": {
+      "web": [],
+      "ios": [],
+      "android": [
+       "wpt__css-anchor-position__anchor-center-safe-rtl",
+       "wpt__css-counter-styles__counter-suffix",
+       "wpt__css-text__bidi__bidi-lines-001",
+       "wpt__css-text__bidi__bidi-lines-002"
+      ]
+     },
+     "wire": [
+      "wpt__css-anchor-position__anchor-center-safe-rtl",
+      "wpt__css-counter-styles__counter-suffix",
+      "wpt__css-text__bidi__bidi-lines-001",
+      "wpt__css-text__bidi__bidi-lines-002"
+     ],
+     "wireShadow": null,
+     "revertOrder": [
+      "Mprime",
+      "P"
+     ],
+     "note": "reverting P reverts M′ first (M′ never ships without P)"
+    },
+    "Mprime": {
+     "commit": "tools/titan/bidi-marker-bake.mjs (restored from b0edb788^, 200 lines) + the two bidi-bake.mjs call-site lines (l.925 origin = the enclosing ROOT, l.974 ownerPath = the enclosing ROOT) + import + pins V1/V2/V4/V5/VF/VF1-3 (root ownership) + V6 + V7",
+     "captures": {
+      "web": [
+       "wpt__css-counter-styles__counter-suffix"
+      ],
+      "ios": [
+       "wpt__css-counter-styles__counter-suffix"
+      ],
+      "android": [
+       "wpt__css-counter-styles__counter-suffix"
+      ]
+     },
+     "wire": [
+      "wpt__css-counter-styles__counter-suffix"
+     ],
+     "wireShadow": {
+      "css-counter-styles": {
+       "after": "wpt__css-counter-styles__counter-suffix",
+       "shift": 6,
+       "documents": 15
+      }
+     },
+     "revertOrder": [
+      "Mprime"
+     ]
+    }
+   },
+   "stage1Decision": "at wave54-pre: M′ is reverted on ANY [M] line that is not GEOMETRY OK (any platform), on a missing \"rows 0-207 identical to wave54-open\", on counter-suffix web < 0.999 or ios < 0.985, or on any leak in css-counter-styles beyond the 15 renumbered cssom documents; P stays unless its own [P] android rows or its floors fail (then M′ and P go, M′ first)"
+  },
+  "L2-table-body-cell": {
+   "dir": "tools/titan/results/wave54-table-body-cell",
+   "briefs": [
+    "compose-table-body-cell.md"
+   ],
+   "captureCarriers": {
+    "web": [],
+    "ios": [],
+    "android": [
+     "wpt__CSS2__css21-errata__s-11-1-1b-006"
+    ]
+   },
+   "wireCarriers": [],
+   "carrierRule": "a synthetic TableBodyForest box (role 'anonymous-table'): only the forest of a body-root whose last Display is TABLE/INLINE_TABLE creates one — 1 document (census forestTriggerDocs); every other Compose table gets chrome(...) = (today's stroke, hug=false), byte-identical by construction",
+   "probeSections": [
+    "CSS2",
+    "css-tables",
+    "css-position",
+    "css-break",
+    "css-contain",
+    "css-display",
+    "css-values",
+    "css-writing-modes",
+    "selectors",
+    "css-text",
+    "css-backgrounds"
+   ],
+   "stage1Sections": [
+    "CSS2",
+    "css-tables"
+   ],
+   "predictions": [
+    {
+     "cell": "CSS2/css21-errata/s-11-1-1b-006.html android",
+     "from": "P 0.9944 DEGENERATE (square 5 px too high: rows 51-70 vs the ref 56-75)",
+     "to": "P ≈0.9983 (replay from both the final and the probe picture); square x24-43 rows 56-75, no stroke",
+     "kind": "degenerate->faithful",
+     "confidence": "MED-HIGH (geometry) / MED (score)",
+     "floor": 0.996,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "TB-android"
+     ],
+     "direction": "up-or-stay"
+    }
+   ],
+   "mustNotMove": [
+    "CSS2/borders/border-conflict-style-107.html android",
+    "CSS2/css21-errata/s-11-1-1b-001.html android",
+    "CSS2/css21-errata/s-11-1-1b-001.html ios",
+    "CSS2/css21-errata/s-11-1-1b-001.html web",
+    "CSS2/css21-errata/s-11-1-1b-002.html android",
+    "CSS2/css21-errata/s-11-1-1b-002.html ios",
+    "CSS2/css21-errata/s-11-1-1b-002.html web",
+    "CSS2/css21-errata/s-11-1-1b-003.html android",
+    "CSS2/css21-errata/s-11-1-1b-003.html ios",
+    "CSS2/css21-errata/s-11-1-1b-003.html web",
+    "CSS2/css21-errata/s-11-1-1b-004.html android",
+    "CSS2/css21-errata/s-11-1-1b-004.html ios",
+    "CSS2/css21-errata/s-11-1-1b-004.html web",
+    "CSS2/css21-errata/s-11-1-1b-005.html android",
+    "CSS2/css21-errata/s-11-1-1b-005.html ios",
+    "CSS2/css21-errata/s-11-1-1b-005.html web",
+    "CSS2/css21-errata/s-11-1-1b-006.html ios",
+    "CSS2/css21-errata/s-11-1-1b-006.html web",
+    "CSS2/css21-errata/s-11-1-1b-007.html android",
+    "CSS2/css21-errata/s-11-1-1b-007.html ios",
+    "CSS2/css21-errata/s-11-1-1b-007.html web",
+    "CSS2/css21-errata/s-11-1-1b-008.html android",
+    "CSS2/css21-errata/s-11-1-1b-008.html ios",
+    "CSS2/css21-errata/s-11-1-1b-008.html web",
+    "CSS2/css21-errata/s-11-1-1b-009.html android",
+    "CSS2/css21-errata/s-11-1-1b-009.html ios",
+    "CSS2/css21-errata/s-11-1-1b-009.html web",
+    "css-backgrounds/animations/background-color-animation-with-table1.html android",
+    "css-backgrounds/animations/background-color-animation-with-table2.html android",
+    "css-backgrounds/animations/background-color-animation-with-table3.html android",
+    "css-backgrounds/animations/background-color-animation-with-table4.html android",
+    "css-break/background-image-006.html android",
+    "css-display/display-contents-td-001.html android",
+    "css-position/position-absolute-center-006.html android",
+    "css-position/position-absolute-center-007.html android",
+    "css-position/position-absolute-dynamic-static-position-table-cell.html android",
+    "css-position/position-absolute-dynamic-static-position-table-cell.html ios",
+    "css-position/position-absolute-dynamic-static-position-table-cell.html web",
+    "css-position/position-relative-008.html android",
+    "css-tables/absolute-tables-007.html android",
+    "css-tables/absolute-tables-016.html android",
+    "css-tables/abspos-container-change-dynamic-001.html android",
+    "css-tables/anonymous-table-cell-margin-collapsing.html android",
+    "css-tables/anonymous-table-ws-001.html android",
+    "css-tables/background-clip-001.html android",
+    "css-tables/baseline-empty-cell-001.html android",
+    "css-tables/baseline-vertical.html android",
+    "css-tables/baseline-vertical.html ios",
+    "css-tables/baseline-vertical.html web",
+    "css-tables/border-collapse-dynamic-col-001.html android",
+    "css-tables/border-collapse-dynamic-oof.html android",
+    "css-tables/border-collapse-dynamic-section.html android",
+    "css-tables/border-collapse-empty-cell.html android",
+    "css-tables/border-collapse-rowspan-cell.html android",
+    "css-tables/border-conflict-resolution.html android",
+    "css-tables/box-shadow-001.html android",
+    "css-tables/collapsed-border-color-change-with-compositing.html android",
+    "css-tables/collapsed-border-positioned-tr-td.html android",
+    "css-tables/collapsed-border-remove-row-group.html android",
+    "css-tables/collapsed-border-sideways-rl-rtl-overflow.html android",
+    "css-tables/collapsed-border-vertical-lr-rtl-overflow.html android",
+    "css-tables/collapsed-border-vertical-rtl-overflow.html android",
+    "css-tables/colspan-004.html android",
+    "css-tables/empty-table-height.html android",
+    "css-tables/fixup-dynamic-anonymous-inline-table-001.html android",
+    "css-tables/fixup-dynamic-anonymous-inline-table-001.html ios",
+    "css-tables/fixup-dynamic-anonymous-inline-table-001.html web",
+    "css-tables/fixup-dynamic-anonymous-inline-table-002.html android",
+    "css-tables/fixup-dynamic-anonymous-inline-table-002.html ios",
+    "css-tables/fixup-dynamic-anonymous-inline-table-002.html web",
+    "css-tables/fixup-dynamic-anonymous-inline-table-003.html android",
+    "css-tables/fixup-dynamic-anonymous-inline-table-003.html ios",
+    "css-tables/fixup-dynamic-anonymous-inline-table-003.html web",
+    "css-tables/fixup-dynamic-anonymous-table-001.html android",
+    "css-tables/fixup-dynamic-anonymous-table-001.html ios",
+    "css-tables/fixup-dynamic-anonymous-table-001.html web",
+    "css-tables/height-distribution/extra-height-given-to-all-row-groups-001.html android",
+    "css-tables/height-distribution/extra-height-given-to-all-row-groups-002.html android",
+    "css-tables/height-distribution/extra-height-given-to-all-row-groups-005.html android",
+    "css-tables/height-distribution/percentage-sizing-of-table-cell-children-003.html android",
+    "css-tables/height-distribution/percentage-sizing-of-table-cell-children-004.html android",
+    "css-tables/height-distribution/percentage-sizing-of-table-cell-children-005.html android",
+    "css-tables/height-distribution/percentage-sizing-of-table-cell-children-006.html android",
+    "css-tables/height-distribution/td-different-subpixel-padding-in-same-row-vertical-rl.html android",
+    "css-text-decor/text-decoration-propagation-05.html android",
+    "css-text/hanging-punctuation/hanging-scrollable-001.html android",
+    "css-values/calc-height-table-1.html android",
+    "css-writing-modes/ch-units-vrl-001.html android",
+    "css-writing-modes/ch-units-vrl-002.html android",
+    "css-writing-modes/ch-units-vrl-003.html android",
+    "css-writing-modes/ch-units-vrl-004.html android",
+    "css-writing-modes/ch-units-vrl-005.html android",
+    "css-writing-modes/ch-units-vrl-006.html android",
+    "css-writing-modes/ch-units-vrl-007.html android",
+    "css-writing-modes/ch-units-vrl-008.html android",
+    "css-writing-modes/direction-upright-002.html android",
+    "selectors/invalidation/nth-child-of-attr-largedom.html android"
+   ],
+   "geometryProbes": [
+    {
+     "cmd": "python3 tools/titan/results/wave54-plan/compose-table-body-cell.geometry.py <run>",
+     "expect": {
+      "006 web": "GEOMETRY OK",
+      "006 ios": "GEOMETRY OK",
+      "006 android": "GEOMETRY OK"
+     },
+     "gating": {},
+     "report": [],
+     "onWave53Final": "006 android WRONG (solid 300/400, stray ink 80 rows 52-55); web/ios/ref OK",
+     "onWave53Probe": "006 android WRONG (solid 76/400, stray ink 400 at x44-63) — the reverted B-android picture",
+     "withdrawn": {
+      "006 android": "was gating -> TB-android; unit TB-android reverted at wave54-pre (rule 4)"
+     }
+    },
+    {
+     "cmd": "python3 tools/titan/results/wave53-plan/display-table-body.geometry.py <run> 006",
+     "expect": {
+      "006 web": "square rows 56-75 (20) x 24-43 | red px 0",
+      "006 ios": "square rows 56-75 (20) x 24-43 | red px 0",
+      "006 android": "square rows 56-75 (20) x 24-43 | red px 0"
+     },
+     "gating": {},
+     "report": [],
+     "onWave53Final": "006 android \"square rows 51-70 (20) x 24-43 | red px 0\"; web/ios/ref rows 56-75",
+     "withdrawn": {
+      "006 android": "was gating -> TB-android; unit TB-android reverted at wave54-pre (rule 4)"
+     }
+    }
+   ],
+   "revertUnits": {
+    "TB-android": {
+     "commit": "TableBodyForest.kt (re-land 276757ea + ANONYMOUS_ROLE + isAnonymous) + TableCellHug.kt (new) + TableApplier.kt (cellsHugContent param, provider, TableCell hugColumn) + ScreenshotCaptureScreen.kt composedCanvasRoots call site + ComponentRenderer.kt seam (chrome = TableCellHug.chrome(...)) + TableBodyForestTest / TableCellHugTest / ComposedCanvasTableBodyTest",
+     "captures": {
+      "web": [],
+      "ios": [],
+      "android": [
+       "wpt__CSS2__css21-errata__s-11-1-1b-006"
+      ]
+     },
+     "wire": [],
+     "revertOrder": [
+      "TB-android"
+     ]
+    }
+   },
+   "stage1Decision": "at wave54-pre: TB-android is reverted unless BOTH 006 android lines print their expected string and 006 android ≥ 0.996; css-tables android must be 48/48 identical (control)"
+  },
+  "L3-hyphenate-character": {
+   "dir": "tools/titan/results/wave54-hyphenate-character",
+   "briefs": [
+    "hyphenate-character-compose.md"
+   ],
+   "captureCarriers": {
+    "web": [
+     "wpt__css-masking__clip-path__clip-path-filter-order",
+     "wpt__css-multicol__balance-grid-container",
+     "wpt__css-multicol__column-height-009",
+     "wpt__css-overflow__line-clamp__block-ellipsis-002",
+     "wpt__css-overflow__line-clamp__block-ellipsis-004",
+     "wpt__css-overflow__line-clamp__block-ellipsis-005",
+     "wpt__css-overflow__line-clamp__block-ellipsis-006",
+     "wpt__css-text__hyphens__hyphenate-character-001",
+     "wpt__css-text__hyphens__hyphenate-character-002",
+     "wpt__css-text__hyphens__hyphenate-character-003",
+     "wpt__css-text__hyphens__hyphenate-character-004",
+     "wpt__filter-effects__backdrop-filter-clip-rect",
+     "wpt__filter-effects__backdrop-filter-edge-clipping",
+     "wpt__filter-effects__backdrop-filter-paint-order",
+     "wpt__filter-effects__backdrop-filter-plus-filter"
+    ],
+    "ios": [
+     "wpt__css-masking__clip-path__clip-path-filter-order",
+     "wpt__css-multicol__balance-grid-container",
+     "wpt__css-multicol__column-height-009",
+     "wpt__css-overflow__line-clamp__block-ellipsis-002",
+     "wpt__css-overflow__line-clamp__block-ellipsis-004",
+     "wpt__css-overflow__line-clamp__block-ellipsis-005",
+     "wpt__css-overflow__line-clamp__block-ellipsis-006",
+     "wpt__css-text__hyphens__hyphenate-character-001",
+     "wpt__css-text__hyphens__hyphenate-character-002",
+     "wpt__css-text__hyphens__hyphenate-character-003",
+     "wpt__css-text__hyphens__hyphenate-character-004",
+     "wpt__css-text__hyphens__hyphenate-limit-chars-001",
+     "wpt__filter-effects__backdrop-filter-clip-rect",
+     "wpt__filter-effects__backdrop-filter-edge-clipping",
+     "wpt__filter-effects__backdrop-filter-paint-order",
+     "wpt__filter-effects__backdrop-filter-plus-filter"
+    ],
+    "android": [
+     "wpt__css-masking__clip-path__clip-path-filter-order",
+     "wpt__css-multicol__balance-grid-container",
+     "wpt__css-multicol__column-height-009",
+     "wpt__css-overflow__line-clamp__block-ellipsis-002",
+     "wpt__css-overflow__line-clamp__block-ellipsis-004",
+     "wpt__css-overflow__line-clamp__block-ellipsis-005",
+     "wpt__css-overflow__line-clamp__block-ellipsis-006",
+     "wpt__css-text__hyphens__hyphenate-character-001",
+     "wpt__css-text__hyphens__hyphenate-character-002",
+     "wpt__css-text__hyphens__hyphenate-character-003",
+     "wpt__css-text__hyphens__hyphenate-character-004",
+     "wpt__filter-effects__backdrop-filter-clip-rect",
+     "wpt__filter-effects__backdrop-filter-edge-clipping",
+     "wpt__filter-effects__backdrop-filter-paint-order",
+     "wpt__filter-effects__backdrop-filter-plus-filter"
+    ]
+   },
+   "wireCarriers": [
+    "wpt__css-cascade__revert-layer-006",
+    "wpt__css-cascade__revert-val-001",
+    "wpt__css-cascade__revert-val-002",
+    "wpt__css-masking__clip-path__clip-path-filter-order",
+    "wpt__css-multicol__balance-grid-container",
+    "wpt__css-multicol__column-height-009",
+    "wpt__css-overflow__line-clamp__block-ellipsis-002",
+    "wpt__css-overflow__line-clamp__block-ellipsis-004",
+    "wpt__css-overflow__line-clamp__block-ellipsis-005",
+    "wpt__css-overflow__line-clamp__block-ellipsis-006",
+    "wpt__css-text__hyphens__hyphenate-character-001",
+    "wpt__css-text__hyphens__hyphenate-character-002",
+    "wpt__css-text__hyphens__hyphenate-character-003",
+    "wpt__css-text__hyphens__hyphenate-character-004",
+    "wpt__css-text__hyphens__hyphenate-character-005",
+    "wpt__filter-effects__backdrop-filter-clip-rect",
+    "wpt__filter-effects__backdrop-filter-edge-clipping",
+    "wpt__filter-effects__backdrop-filter-paint-order",
+    "wpt__filter-effects__backdrop-filter-plus-filter"
+   ],
+   "carrierRule": {
+    "U1": "a HyphenateCharacter declaration the parser rejected (\"\" -> Generic _unmapped) or left escaped (a backslash in the value): 4 documents (001, 002, 003, 005); \"/-/\" (004) and \"-\" (hyphenate-limit-chars-001) are byte-identical",
+    "U2": "a text run whose host declares a non-auto HyphenateCharacter and whose pre-break fires (Compose: space-less / spaced U+00AD runs of 001/003/004; iOS: the same plus the CF-dictionary fold of 002 and hyphenate-limit-chars-001); every other run takes the defaulted parameter, identity by construction",
+    "U3": "a <br> that ends a line opened by text interleaved BETWEEN children (node.runs {text} after the previous child): 54 brs in 18 documents (census brHeight); 3 of them (revert-layer-006, revert-val-001/-002) are pixel-invariant -> must-not-move captures, wire carriers",
+    "U3b": "a line-start <br> whose HOST (the br's parent element) declares line-height ON ITSELF (its own declared cascade; the font shorthand counts): 12 brs in 4 documents, all hyphenate-character-001..004 (b2 census). An INHERITED line-height (an ancestor's) does NOT trigger U3b: under the inherited reading 23 more 20-px brs in 4 documents would move, css-multicol/baseline-002 and baseline-007 among them (not carriers; skeptic-r1/br-census-all.out.txt) — pinned negative in extract-fixture-br-line-context.test.mjs"
+   },
+   "probeSections": [
+    "css-text",
+    "css-overflow",
+    "filter-effects",
+    "css-cascade",
+    "css-masking",
+    "css-multicol"
+   ],
+   "predictions": [
+    {
+     "cell": "css-text/hyphens/hyphenate-character-001.html ios",
+     "from": "f 0.9287",
+     "to": "P ≈0.979 (GBd 0.9852 − 0.006)",
+     "kind": "flip; faithful only with U1+U2-ios+U3 on the tree AND hyphenate-character.geometry.py OK on the row",
+     "confidence": "MED-HIGH",
+     "floor": 0.965,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U1",
+      "U2-ios",
+      "U3",
+      "U3b"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text/hyphens/hyphenate-character-003.html ios",
+     "from": "f 0.9337",
+     "to": "P ≈0.977 (GBd 0.9831 − 0.006)",
+     "kind": "flip; faithful only with U1+U2-ios+U3 AND geometry OK (U3 alone = 0.9566 with hyphens for bullets: DEGENERATE)",
+     "confidence": "MED-HIGH",
+     "floor": 0.965,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U1",
+      "U2-ios",
+      "U3",
+      "U3b"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text/hyphens/hyphenate-character-004.html ios",
+     "from": "f 0.9134",
+     "to": "P ≈0.979 (GBd 0.9855 − 0.006; needs the spent-hyphen hunk)",
+     "kind": "flip",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U2-ios",
+      "U3",
+      "U3b"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text/hyphens/hyphenate-character-001.html web",
+     "from": "f 0.935",
+     "to": "P ≈0.960 (U3); ≈0.976-0.981 with U3b",
+     "kind": "flip",
+     "confidence": "MED-LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U1",
+      "U3",
+      "U3b"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text/hyphens/hyphenate-character-003.html web",
+     "from": "f 0.8812",
+     "to": "P ≈0.956 (U3); ≈0.976-0.981 with U3b",
+     "kind": "flip",
+     "confidence": "MED-LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U1",
+      "U3",
+      "U3b"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text/hyphens/hyphenate-character-004.html web",
+     "from": "f 0.9249",
+     "to": "0.947-0.966 (U3; B on own pixels 0.966); ≈0.976-0.981 with U3b",
+     "kind": "coin flip; glyph already right on web, so not degenerate",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U3",
+      "U3b"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text/hyphens/hyphenate-character-001.html android",
+     "from": "f 0.9301",
+     "to": "≈0.957 (U3); ≈0.976-0.981 with U3b",
+     "kind": "possible flip",
+     "confidence": "LOW-MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U1",
+      "U2-android",
+      "U3",
+      "U3b"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text/hyphens/hyphenate-character-003.html android",
+     "from": "f 0.9292",
+     "to": "≈0.953 (U3); ≈0.976-0.981 with U3b",
+     "kind": "possible flip",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U1",
+      "U2-android",
+      "U3",
+      "U3b"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text/hyphens/hyphenate-character-004.html android",
+     "from": "f 0.905",
+     "to": "≈0.945 stays f (U3); ≈0.976-0.981 with U3b",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U2-android",
+      "U3",
+      "U3b"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text/hyphens/hyphenate-character-002.html web",
+     "from": "f 0.92",
+     "to": "≈0.96 (Chromium en breaks equal the shys; B alone 0.9426)",
+     "kind": "possible flip",
+     "confidence": "LOW-MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U1",
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text/hyphens/hyphenate-character-002.html ios",
+     "from": "f 0.9261",
+     "to": "mover",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U1",
+      "U2-ios",
+      "U3"
+     ],
+     "direction": "undirected",
+     "directionWhy": "U3 alone replays UP (B 0.9382) but U1 + U2-ios change the glyph of a CF-dictionary fold that no replay models"
+    },
+    {
+     "cell": "css-text/hyphens/hyphenate-character-002.html android",
+     "from": "f 0.9223",
+     "to": "stays f (Minikin paints its own dictionary hyphen: a logged wall)",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay",
+     "directionWhy": "U3 is its only unit (U2-android is identity on a dictionary run) and replay B, which models U3 alone, gives 0.923 >= 0.9223"
+    },
+    {
+     "cell": "css-text/hyphens/hyphenate-limit-chars-001.html ios",
+     "from": "f 0.8919",
+     "to": "mover (U+2010 -> U+002D in the dictionary fold)",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U2-ios"
+     ],
+     "direction": "undirected",
+     "directionWhy": "the glyph swap is not replayed; no sign is pre-registered"
+    },
+    {
+     "cell": "css-overflow/line-clamp/block-ellipsis-002.html web",
+     "from": "P 0.9868",
+     "to": "P ≈1.0 (B replay 1)",
+     "kind": "picture-correctness (stray blank line removed)",
+     "confidence": "MED-HIGH",
+     "floor": 0.995,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-overflow/line-clamp/block-ellipsis-002.html ios",
+     "from": "P 0.9813 DEGENERATE",
+     "to": "P ≈0.993 (B replay 0.9928); stays DEGENERATE (Line 4 painted, no \"…\")",
+     "kind": "mover up; stays DEGENERATE (block-ellipsis-br.geometry.py keeps \"4 bands vs ref 3\")",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY WRONG (4 bands vs ref 3)",
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-overflow/line-clamp/block-ellipsis-002.html android",
+     "from": "P 0.9884",
+     "to": "identical or up (two lines painted; the clamp interplay is unknown)",
+     "kind": "watch",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-overflow/line-clamp/block-ellipsis-004.html web",
+     "from": "P 0.9737",
+     "to": "P ≈0.998 (B replay 0.998)",
+     "kind": "picture-correctness (stray blank line removed)",
+     "confidence": "MED-HIGH",
+     "floor": 0.99,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-overflow/line-clamp/block-ellipsis-005.html web",
+     "from": "P 0.9735",
+     "to": "P ≈0.998 (B replay 0.998)",
+     "kind": "picture-correctness (stray blank line removed)",
+     "confidence": "MED-HIGH",
+     "floor": 0.99,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-overflow/line-clamp/block-ellipsis-006.html web",
+     "from": "P 0.9735",
+     "to": "P ≈0.998 (B replay 0.998)",
+     "kind": "picture-correctness (stray blank line removed)",
+     "confidence": "MED-HIGH",
+     "floor": 0.99,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-overflow/line-clamp/block-ellipsis-004.html ios",
+     "from": "P 0.9713",
+     "to": "byte-identical expected (no stray gap on the natives)",
+     "kind": "watch",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-overflow/line-clamp/block-ellipsis-004.html android",
+     "from": "P 0.9792",
+     "to": "byte-identical expected (no stray gap on the natives)",
+     "kind": "watch",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-overflow/line-clamp/block-ellipsis-005.html ios",
+     "from": "P 0.9705",
+     "to": "byte-identical expected (no stray gap on the natives)",
+     "kind": "watch",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-overflow/line-clamp/block-ellipsis-005.html android",
+     "from": "P 0.9786",
+     "to": "byte-identical expected (no stray gap on the natives)",
+     "kind": "watch",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-overflow/line-clamp/block-ellipsis-006.html ios",
+     "from": "P 0.9705",
+     "to": "byte-identical expected (no stray gap on the natives)",
+     "kind": "watch",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-overflow/line-clamp/block-ellipsis-006.html android",
+     "from": "P 0.9786",
+     "to": "byte-identical expected (no stray gap on the natives)",
+     "kind": "watch",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-clip-rect.html web",
+     "from": "P 0.959",
+     "to": "up",
+     "kind": "mover (stray blank line before \"No dark/black…\" removed)",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-clip-rect.html ios",
+     "from": "P 0.956",
+     "to": "up",
+     "kind": "mover (stray blank line before \"No dark/black…\" removed)",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-edge-clipping.html web",
+     "from": "P 0.9595",
+     "to": "up",
+     "kind": "mover (stray blank line before \"No dark/black…\" removed)",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-edge-clipping.html ios",
+     "from": "P 0.9578",
+     "to": "up",
+     "kind": "mover (stray blank line before \"No dark/black…\" removed)",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-paint-order.html web",
+     "from": "P 0.9595",
+     "to": "up",
+     "kind": "mover (stray blank line before \"No dark/black…\" removed)",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-paint-order.html ios",
+     "from": "P 0.9578",
+     "to": "up",
+     "kind": "mover (stray blank line before \"No dark/black…\" removed)",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-clip-rect.html android",
+     "from": "f 0.9315",
+     "to": "up; a flip is possible",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-edge-clipping.html android",
+     "from": "f 0.929",
+     "to": "up; a flip is possible",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-paint-order.html android",
+     "from": "f 0.929",
+     "to": "up; a flip is possible",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-plus-filter.html web",
+     "from": "P 1",
+     "to": "stays (the stray br is the <p>'s trailing one; nothing in flow below it)",
+     "kind": "watch",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-plus-filter.html ios",
+     "from": "f 0.9499",
+     "to": "stays (the stray br is the <p>'s trailing one; nothing in flow below it)",
+     "kind": "watch",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-plus-filter.html android",
+     "from": "P 0.9709",
+     "to": "stays (the stray br is the <p>'s trailing one; nothing in flow below it)",
+     "kind": "watch",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-masking/clip-path/clip-path-filter-order.html web",
+     "from": "f 0.8586",
+     "to": "up or unchanged",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-masking/clip-path/clip-path-filter-order.html ios",
+     "from": "f 0.8578",
+     "to": "up or unchanged",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-masking/clip-path/clip-path-filter-order.html android",
+     "from": "f 0.8406",
+     "to": "up or unchanged",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-multicol/balance-grid-container.html web",
+     "from": "f 0.9207",
+     "to": "up or unchanged",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-multicol/balance-grid-container.html ios",
+     "from": "f 0.862",
+     "to": "up or unchanged",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-multicol/balance-grid-container.html android",
+     "from": "f 0.8724",
+     "to": "up or unchanged",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-multicol/column-height-009.html web",
+     "from": "f 0.8827",
+     "to": "up or unchanged",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-multicol/column-height-009.html ios",
+     "from": "f 0.8072",
+     "to": "up or unchanged",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-multicol/column-height-009.html android",
+     "from": "f 0.742",
+     "to": "up or unchanged",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U3"
+     ],
+     "direction": "up-or-stay"
+    }
+   ],
+   "mustNotMove": [
+    "css-cascade/revert-layer-006.html android",
+    "css-cascade/revert-layer-006.html ios",
+    "css-cascade/revert-layer-006.html web",
+    "css-cascade/revert-val-001.html android",
+    "css-cascade/revert-val-001.html ios",
+    "css-cascade/revert-val-001.html web",
+    "css-cascade/revert-val-002.html android",
+    "css-cascade/revert-val-002.html ios",
+    "css-cascade/revert-val-002.html web",
+    "css-overflow/line-clamp/block-ellipsis-014.html android",
+    "css-overflow/line-clamp/block-ellipsis-014.html ios",
+    "css-overflow/line-clamp/block-ellipsis-028.html android",
+    "css-overflow/line-clamp/block-ellipsis-028.html ios",
+    "css-text/hyphens/hyphenate-character-005.html android",
+    "css-text/hyphens/hyphenate-character-005.html ios",
+    "css-text/hyphens/hyphenate-character-005.html web",
+    "css-text/hyphens/hyphenate-limit-chars-001.html android",
+    "css-text/hyphens/hyphenate-limit-chars-001.html web",
+    "css-text/hyphens/hyphens-auto-001.html web",
+    "css-text/hyphens/hyphens-auto-010.html web",
+    "css-text/hyphens/hyphens-auto-control.html android",
+    "css-text/hyphens/hyphens-auto-control.html ios",
+    "css-text/hyphens/hyphens-auto-control.html web",
+    "css-text/hyphens/hyphens-auto-inline-010.html web",
+    "css-text/hyphens/hyphens-auto-last-word-001.html web",
+    "css-text/hyphens/hyphens-auto-min-content.html web",
+    "css-text/hyphens/hyphens-manual-010.html android",
+    "css-text/hyphens/hyphens-manual-010.html ios",
+    "css-text/hyphens/hyphens-manual-010.html web",
+    "css-text/hyphens/hyphens-manual-011.html android",
+    "css-text/hyphens/hyphens-manual-011.html ios",
+    "css-text/hyphens/hyphens-manual-011.html web",
+    "css-text/hyphens/hyphens-manual-012.html android",
+    "css-text/hyphens/hyphens-manual-012.html ios",
+    "css-text/hyphens/hyphens-manual-012.html web",
+    "css-text/hyphens/hyphens-manual-013.html android",
+    "css-text/hyphens/hyphens-manual-013.html ios",
+    "css-text/hyphens/hyphens-manual-013.html web",
+    "css-text/hyphens/hyphens-manual-inline-010.html android",
+    "css-text/hyphens/hyphens-manual-inline-010.html ios",
+    "css-text/hyphens/hyphens-manual-inline-010.html web",
+    "css-text/hyphens/hyphens-manual-inline-011.html android",
+    "css-text/hyphens/hyphens-manual-inline-011.html ios",
+    "css-text/hyphens/hyphens-manual-inline-011.html web",
+    "css-text/hyphens/hyphens-manual-inline-012.html android",
+    "css-text/hyphens/hyphens-manual-inline-012.html ios",
+    "css-text/hyphens/hyphens-manual-inline-012.html web",
+    "css-text/hyphens/hyphens-none-011.html android",
+    "css-text/hyphens/hyphens-none-011.html ios",
+    "css-text/hyphens/hyphens-none-011.html web",
+    "css-text/hyphens/hyphens-none-012.html android",
+    "css-text/hyphens/hyphens-none-012.html ios",
+    "css-text/hyphens/hyphens-none-012.html web",
+    "css-text/hyphens/hyphens-none-013.html android",
+    "css-text/hyphens/hyphens-none-013.html ios",
+    "css-text/hyphens/hyphens-none-013.html web",
+    "css-text/hyphens/hyphens-none-shy-on-2nd-line-001.html android",
+    "css-text/hyphens/hyphens-none-shy-on-2nd-line-001.html ios",
+    "css-text/hyphens/hyphens-none-shy-on-2nd-line-001.html web",
+    "css-text/hyphens/hyphens-out-of-flow-001.html android",
+    "css-text/hyphens/hyphens-out-of-flow-001.html ios",
+    "css-text/hyphens/hyphens-out-of-flow-001.html web",
+    "css-text/hyphens/hyphens-out-of-flow-002.html android",
+    "css-text/hyphens/hyphens-out-of-flow-002.html ios",
+    "css-text/hyphens/hyphens-punctuation-001.html web",
+    "css-text/hyphens/hyphens-span-001.html android",
+    "css-text/hyphens/hyphens-span-001.html ios",
+    "css-text/hyphens/hyphens-span-001.html web",
+    "css-text/hyphens/hyphens-span-002.html android",
+    "css-text/hyphens/hyphens-span-002.html ios",
+    "css-text/hyphens/hyphens-span-002.html web",
+    "css-text/hyphens/hyphens-vertical-001.html android",
+    "css-text/hyphens/hyphens-vertical-001.html ios",
+    "css-text/hyphens/hyphens-vertical-001.html web"
+   ],
+   "geometryProbes": [
+    {
+     "cmd": "python3 tools/titan/results/wave54-plan/hyphenate-character.geometry.py <run>",
+     "expect": {
+      "hyphenate-character-001 web": "GEOMETRY OK",
+      "hyphenate-character-001 ios": "GEOMETRY OK",
+      "hyphenate-character-001 android": "GEOMETRY OK",
+      "hyphenate-character-003 web": "GEOMETRY OK",
+      "hyphenate-character-003 ios": "GEOMETRY OK",
+      "hyphenate-character-003 android": "GEOMETRY OK",
+      "hyphenate-character-004 web": "GEOMETRY OK",
+      "hyphenate-character-004 ios": "GEOMETRY OK",
+      "hyphenate-character-004 android": "GEOMETRY OK"
+     },
+     "gating": {
+      "hyphenate-character-001 ios": "U2-ios|U3",
+      "hyphenate-character-003 ios": "U2-ios|U3"
+     },
+     "requires": {
+      "hyphenate-character-001 ios": [
+       "U1",
+       "U2-ios",
+       "U3"
+      ],
+      "hyphenate-character-003 ios": [
+       "U1",
+       "U2-ios",
+       "U3"
+      ]
+     },
+     "report": [
+      "hyphenate-character-001 web",
+      "hyphenate-character-001 android",
+      "hyphenate-character-003 web",
+      "hyphenate-character-003 android",
+      "hyphenate-character-004 web",
+      "hyphenate-character-004 ios",
+      "hyphenate-character-004 android"
+     ],
+     "reasonToUnit": {
+      "glyph:": "U2-<platform> (U1 on web)",
+      "lines:": "U3b, then U3 (a glyph-width line count goes to U2-<platform>)",
+      "offset:": "U3b, then U3"
+     },
+     "onWave53Final": "9/9 capture rows WRONG (lines / glyph / offset), every ref row OK; the GB and GBd replays print 9/9 OK",
+     "limitation": "the ±4 px offset tolerance does not see the 1-3 px drift (brief §4.E): a score effect, not a wrong picture"
+    },
+    {
+     "cmd": "python3 tools/titan/results/wave53-plan/soft-hyphen.geometry.py <run>",
+     "expect": {
+      "hyphens/hyphens-span-002 web": "GEOMETRY OK",
+      "hyphens/hyphens-span-002 ios": "GEOMETRY OK",
+      "hyphens/hyphens-span-002 android": "GEOMETRY OK",
+      "hyphens/hyphens-span-001 web": "GEOMETRY OK",
+      "hyphens/hyphens-span-001 ios": "GEOMETRY OK",
+      "hyphens/hyphens-span-001 android": "GEOMETRY OK",
+      "hyphens/hyphens-out-of-flow-001 web": "GEOMETRY OK",
+      "hyphens/hyphens-out-of-flow-001 ios": "GEOMETRY OK",
+      "hyphens/hyphens-out-of-flow-001 android": "GEOMETRY OK",
+      "hyphens/hyphens-out-of-flow-002 ios": "GEOMETRY OK",
+      "hyphens/hyphens-out-of-flow-002 android": "GEOMETRY OK"
+     },
+     "gating": {},
+     "report": [],
+     "note": "control: the wave-53 soft-hyphen pictures must survive U2's defaulted parameter (hyphens-out-of-flow-002 web is L6's carrier and is read by its own probe)"
+    },
+    {
+     "cmd": "python3 tools/titan/results/wave54-plan/block-ellipsis-br.geometry.py <run>",
+     "expect": {
+      "block-ellipsis-002 web": "GEOMETRY OK",
+      "block-ellipsis-004 web": "GEOMETRY OK",
+      "block-ellipsis-005 web": "GEOMETRY OK",
+      "block-ellipsis-006 web": "GEOMETRY OK",
+      "block-ellipsis-002 ios": "GEOMETRY WRONG (4 bands vs ref 3)",
+      "block-ellipsis-002 android": "GEOMETRY WRONG (2 bands vs ref 3)",
+      "block-ellipsis-004 ios": "GEOMETRY WRONG (3 bands vs ref 2)",
+      "block-ellipsis-005 ios": "GEOMETRY WRONG (3 bands vs ref 2)",
+      "block-ellipsis-006 ios": "GEOMETRY WRONG (3 bands vs ref 2)",
+      "block-ellipsis-004 android": "GEOMETRY WRONG (band bottom y72 vs ref y86 (top y40))",
+      "block-ellipsis-005 android": "GEOMETRY WRONG (band bottom y72 vs ref y86 (top y40))",
+      "block-ellipsis-006 android": "GEOMETRY WRONG (band bottom y72 vs ref y86 (top y40))"
+     },
+     "gating": {
+      "block-ellipsis-002 web": "U3",
+      "block-ellipsis-004 web": "U3",
+      "block-ellipsis-005 web": "U3",
+      "block-ellipsis-006 web": "U3"
+     },
+     "report": [],
+     "onWave53Final": "web 4/4 WRONG (002: band top y79 vs ref y59 — the stray blank line; 004-006: 3 bands vs ref 2); natives print their recorded lines; every ref row OK",
+     "onReplayB": "web 4/4 OK on the brief's U3 replay pictures; natives unchanged (fix-r1/post-S3.block-ellipsis-fakes.out.txt)"
+    }
+   ],
+   "revertUnits": {
+    "U1": {
+     "commit": "converter HyphenateCharacterPropertyParser.kt + new primitiveParsers/CssStringParser.kt (css-syntax-3 §4.3.5/§4.3.7) + HyphenateCharacterPropertyParserTest.kt",
+     "captures": {
+      "web": [
+       "wpt__css-text__hyphens__hyphenate-character-001",
+       "wpt__css-text__hyphens__hyphenate-character-002",
+       "wpt__css-text__hyphens__hyphenate-character-003"
+      ],
+      "ios": [
+       "wpt__css-text__hyphens__hyphenate-character-001",
+       "wpt__css-text__hyphens__hyphenate-character-002",
+       "wpt__css-text__hyphens__hyphenate-character-003"
+      ],
+      "android": [
+       "wpt__css-text__hyphens__hyphenate-character-001",
+       "wpt__css-text__hyphens__hyphenate-character-003"
+      ]
+     },
+     "wire": [
+      "wpt__css-text__hyphens__hyphenate-character-001",
+      "wpt__css-text__hyphens__hyphenate-character-002",
+      "wpt__css-text__hyphens__hyphenate-character-003",
+      "wpt__css-text__hyphens__hyphenate-character-005"
+     ],
+     "revertOrder": [
+      "U3b",
+      "U3",
+      "U1"
+     ],
+     "note": "reverting U1 leaves 001/002/003 on the unmapped / escaped wire on every platform; U3 stays only if its own rows hold, and the 001/003 flips are then DEGENERATE by construction"
+    },
+    "U2-android": {
+     "commit": "Compose typography/wrapping/HyphenateCharacter{Config,Extractor,Applier}.kt + SoftHyphenCuts.kt + PreBreakPipeline.kt defaulted hyphenChar + ComponentRenderer.kt seam-1 (:7072 one argument) + PreBreakPipelineTest / HyphenateCharacterExtractorTest",
+     "captures": {
+      "web": [],
+      "ios": [],
+      "android": [
+       "wpt__css-text__hyphens__hyphenate-character-001",
+       "wpt__css-text__hyphens__hyphenate-character-003",
+       "wpt__css-text__hyphens__hyphenate-character-004"
+      ]
+     },
+     "wire": [],
+     "revertOrder": [
+      "U2-android"
+     ]
+    },
+    "U2-ios": {
+     "commit": "Swift typography/wrapping/HyphenateCharacter{Config,Extractor,Applier}.swift + SpentHyphen.swift + TypographyAggregate.swift (+1 field) + StyleBuilder.swift (+1 TextConfig field, +1 line) + GreedyLineBreaker.swift (defaulted spentHyphen) + ComponentRenderer.swift seam-2 (:5011, :5026) + GreedyLineBreakerTests / TypographyTests",
+     "captures": {
+      "web": [],
+      "ios": [
+       "wpt__css-text__hyphens__hyphenate-character-001",
+       "wpt__css-text__hyphens__hyphenate-character-002",
+       "wpt__css-text__hyphens__hyphenate-character-003",
+       "wpt__css-text__hyphens__hyphenate-character-004",
+       "wpt__css-text__hyphens__hyphenate-limit-chars-001"
+      ],
+      "android": []
+     },
+     "wire": [],
+     "revertOrder": [
+      "U2-ios"
+     ]
+    },
+    "U3": {
+     "commit": "tools/titan/extract-fixture.mjs seam-3 (buildNode children loop re-arm, the child-scope twin of :11733) + tools/titan/extract-fixture-br-line-context.test.mjs",
+     "captures": {
+      "web": [
+       "wpt__css-masking__clip-path__clip-path-filter-order",
+       "wpt__css-multicol__balance-grid-container",
+       "wpt__css-multicol__column-height-009",
+       "wpt__css-overflow__line-clamp__block-ellipsis-002",
+       "wpt__css-overflow__line-clamp__block-ellipsis-004",
+       "wpt__css-overflow__line-clamp__block-ellipsis-005",
+       "wpt__css-overflow__line-clamp__block-ellipsis-006",
+       "wpt__css-text__hyphens__hyphenate-character-001",
+       "wpt__css-text__hyphens__hyphenate-character-002",
+       "wpt__css-text__hyphens__hyphenate-character-003",
+       "wpt__css-text__hyphens__hyphenate-character-004",
+       "wpt__filter-effects__backdrop-filter-clip-rect",
+       "wpt__filter-effects__backdrop-filter-edge-clipping",
+       "wpt__filter-effects__backdrop-filter-paint-order",
+       "wpt__filter-effects__backdrop-filter-plus-filter"
+      ],
+      "ios": [
+       "wpt__css-masking__clip-path__clip-path-filter-order",
+       "wpt__css-multicol__balance-grid-container",
+       "wpt__css-multicol__column-height-009",
+       "wpt__css-overflow__line-clamp__block-ellipsis-002",
+       "wpt__css-overflow__line-clamp__block-ellipsis-004",
+       "wpt__css-overflow__line-clamp__block-ellipsis-005",
+       "wpt__css-overflow__line-clamp__block-ellipsis-006",
+       "wpt__css-text__hyphens__hyphenate-character-001",
+       "wpt__css-text__hyphens__hyphenate-character-002",
+       "wpt__css-text__hyphens__hyphenate-character-003",
+       "wpt__css-text__hyphens__hyphenate-character-004",
+       "wpt__filter-effects__backdrop-filter-clip-rect",
+       "wpt__filter-effects__backdrop-filter-edge-clipping",
+       "wpt__filter-effects__backdrop-filter-paint-order",
+       "wpt__filter-effects__backdrop-filter-plus-filter"
+      ],
+      "android": [
+       "wpt__css-masking__clip-path__clip-path-filter-order",
+       "wpt__css-multicol__balance-grid-container",
+       "wpt__css-multicol__column-height-009",
+       "wpt__css-overflow__line-clamp__block-ellipsis-002",
+       "wpt__css-overflow__line-clamp__block-ellipsis-004",
+       "wpt__css-overflow__line-clamp__block-ellipsis-005",
+       "wpt__css-overflow__line-clamp__block-ellipsis-006",
+       "wpt__css-text__hyphens__hyphenate-character-001",
+       "wpt__css-text__hyphens__hyphenate-character-002",
+       "wpt__css-text__hyphens__hyphenate-character-003",
+       "wpt__css-text__hyphens__hyphenate-character-004",
+       "wpt__filter-effects__backdrop-filter-clip-rect",
+       "wpt__filter-effects__backdrop-filter-edge-clipping",
+       "wpt__filter-effects__backdrop-filter-paint-order",
+       "wpt__filter-effects__backdrop-filter-plus-filter"
+      ]
+     },
+     "wire": [
+      "wpt__css-cascade__revert-layer-006",
+      "wpt__css-cascade__revert-val-001",
+      "wpt__css-cascade__revert-val-002",
+      "wpt__css-masking__clip-path__clip-path-filter-order",
+      "wpt__css-multicol__balance-grid-container",
+      "wpt__css-multicol__column-height-009",
+      "wpt__css-overflow__line-clamp__block-ellipsis-002",
+      "wpt__css-overflow__line-clamp__block-ellipsis-004",
+      "wpt__css-overflow__line-clamp__block-ellipsis-005",
+      "wpt__css-overflow__line-clamp__block-ellipsis-006",
+      "wpt__css-text__hyphens__hyphenate-character-001",
+      "wpt__css-text__hyphens__hyphenate-character-002",
+      "wpt__css-text__hyphens__hyphenate-character-003",
+      "wpt__css-text__hyphens__hyphenate-character-004",
+      "wpt__filter-effects__backdrop-filter-clip-rect",
+      "wpt__filter-effects__backdrop-filter-edge-clipping",
+      "wpt__filter-effects__backdrop-filter-paint-order",
+      "wpt__filter-effects__backdrop-filter-plus-filter"
+     ],
+     "revertOrder": [
+      "U3b",
+      "U3"
+     ]
+    },
+    "U3b": {
+     "commit": "tools/titan/extract-fixture.mjs seam-3b (a line-start br in a host declaring line-height gets that line box, normal = 1.2 x font-size) + its pins in extract-fixture-br-line-context.test.mjs",
+     "captures": {
+      "web": [
+       "wpt__css-text__hyphens__hyphenate-character-001",
+       "wpt__css-text__hyphens__hyphenate-character-002",
+       "wpt__css-text__hyphens__hyphenate-character-003",
+       "wpt__css-text__hyphens__hyphenate-character-004"
+      ],
+      "ios": [
+       "wpt__css-text__hyphens__hyphenate-character-001",
+       "wpt__css-text__hyphens__hyphenate-character-002",
+       "wpt__css-text__hyphens__hyphenate-character-003",
+       "wpt__css-text__hyphens__hyphenate-character-004"
+      ],
+      "android": [
+       "wpt__css-text__hyphens__hyphenate-character-001",
+       "wpt__css-text__hyphens__hyphenate-character-002",
+       "wpt__css-text__hyphens__hyphenate-character-003",
+       "wpt__css-text__hyphens__hyphenate-character-004"
+      ]
+     },
+     "wire": [
+      "wpt__css-text__hyphens__hyphenate-character-001",
+      "wpt__css-text__hyphens__hyphenate-character-002",
+      "wpt__css-text__hyphens__hyphenate-character-003",
+      "wpt__css-text__hyphens__hyphenate-character-004"
+     ],
+     "revertOrder": [
+      "U3b"
+     ],
+     "probeDecided": "U3b is IN at wave54-probe. It stays iff 001 ios and 003 ios meet their 0.965 floors with no `offset:`/`lines:` reason on any iOS row, and rules 1/2/5 hold on its carriers; else it is reverted FIRST and css-text is re-probed (the brief's GBn risk: iOS loses its zero-drift compensation, 0.947-0.958)"
+    }
+   },
+   "sequencing": "U3 never lands without U1 + U2-android + U2-ios in the tree before it (U3 alone manufactures a DEGENERATE -003 ios pass, replay B 0.9566); the landing order guarantees it, and a later revert of U1/U2-<p> keeps that platform's 001/003/004 flips labelled DEGENERATE by construction"
+  },
+  "L4-oof-layout": {
+   "dir": "tools/titan/results/wave54-oof-layout",
+   "briefs": [
+    "oof-containing-block.md",
+    "compose-wpt-content-box-cb.md",
+    "flex-zero-gap-rules.md",
+    "queue-scout-layout.md"
+   ],
+   "captureCarriers": {
+    "web": [],
+    "ios": [
+     "wpt__CSS2__abspos__static-fixed-inside-abspos",
+     "wpt__css-gaps__flex__flex-gap-decorations-033",
+     "wpt__css-position__change-insets-inside-strict-containment-nested",
+     "wpt__css-position__position-fixed-scroll-nested-fixed",
+     "wpt__css-position__position-relative-003",
+     "wpt__css-position__position-relative-004",
+     "wpt__filter-effects__backdrop-filter-containing-block"
+    ],
+    "android": [
+     "wpt__CSS2__abspos__static-fixed-inside-abspos",
+     "wpt__css-contain__contain-content-003",
+     "wpt__css-contain__contain-content-004",
+     "wpt__css-contain__contain-content-011",
+     "wpt__css-flexbox__abspos__abspos-autopos-htb-ltr",
+     "wpt__css-flexbox__abspos__abspos-autopos-htb-rtl",
+     "wpt__css-flexbox__abspos__abspos-autopos-vlr-ltr",
+     "wpt__css-flexbox__abspos__abspos-autopos-vlr-rtl",
+     "wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr",
+     "wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl",
+     "wpt__css-gaps__flex__flex-gap-decorations-006",
+     "wpt__css-gaps__flex__flex-gap-decorations-033",
+     "wpt__css-position__change-insets-inside-strict-containment-nested",
+     "wpt__css-position__position-fixed-scroll-nested-fixed",
+     "wpt__css-position__position-relative-003",
+     "wpt__css-position__position-relative-004",
+     "wpt__filter-effects__backdrop-filter-containing-block",
+     "wpt__filter-effects__backdrop-filter-nested-border-radius-clip",
+     "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-2",
+     "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3",
+     "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-4"
+    ]
+   },
+   "wireCarriers": [],
+   "carrierRule": {
+    "OOF": "an out-of-flow box whose spec containing block is a non-positioned contain:layout|paint|strict|content / filter / backdrop-filter (or will-change of one) ancestor (M2: 10 boxes in 6 tests), or an all-auto-inset FIXED box (M1: 4 boxes in 3 tests); Compose host activation flips true -> false on exactly the 7 hostFlips documents",
+    "CBB": "a content-box (no BoxSizing BORDER_BOX) container with a px/% size, a non-zero padding/border band and an out-of-flow child carrying a % size or inset: 10 containers in 10 tests (+ the in-flow control cross-fade-target-alpha); side reader flex-gap-decorations-006 (VerticalTextFlowLayout budget, watched)",
+    "GAP": "a flex container with a rule family on an axis whose gap is 0 or absent AND touching neighbours/lines: 033 only of the 17 gapzero containers"
+   },
+   "probeSections": [
+    "css-position",
+    "css-contain",
+    "CSS2",
+    "filter-effects",
+    "css-transforms",
+    "css-flexbox",
+    "css-images",
+    "css-gaps",
+    "css-anchor-position",
+    "css-display",
+    "css-masking",
+    "css-pseudo"
+   ],
+   "predictions": [
+    {
+     "cell": "css-contain/contain-content-003.html android",
+     "from": "f 0.9405",
+     "to": "P ≈0.997 (sim 0.9967)",
+     "kind": "flip (red-ink failure becomes the ref picture)",
+     "confidence": "HIGH",
+     "floor": 0.99,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "OOF-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-contain/contain-content-011.html android",
+     "from": "f 0.9284",
+     "to": "P ≈0.985 (sim ≤0.9854, an upper bound)",
+     "kind": "flip; the \"25\" counter (ref \"17\") stays wrong on ALL THREE platforms — not this lane",
+     "confidence": "MED-HIGH",
+     "floor": 0.97,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "OOF-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-containing-block.html ios",
+     "from": "f 0.7955",
+     "to": "P (sim bracket 0.9414 … 1.0)",
+     "kind": "flip",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "OOF-ios"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-containing-block.html android",
+     "from": "f 0.7506",
+     "to": "P (sim bracket 0.9414 … 1.0)",
+     "kind": "flip",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "OOF-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-position/position-relative-004.html ios",
+     "from": "P 0.9594 DEGENERATE",
+     "to": "P ≈0.9974",
+     "kind": "degenerate->faithful",
+     "confidence": "MED-HIGH",
+     "floor": 0.99,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "OOF-ios"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-position/position-relative-004.html android",
+     "from": "P 0.9589 DEGENERATE",
+     "to": "P ≈0.9967",
+     "kind": "degenerate->faithful",
+     "confidence": "MED-HIGH",
+     "floor": 0.99,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "OOF-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-position/change-insets-inside-strict-containment-nested.html ios",
+     "from": "P 0.9594 DEGENERATE",
+     "to": "P ≈0.9974",
+     "kind": "degenerate->faithful",
+     "confidence": "MED-HIGH",
+     "floor": 0.99,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "OOF-ios"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-position/change-insets-inside-strict-containment-nested.html android",
+     "from": "P 0.9589 DEGENERATE",
+     "to": "P ≈0.9967",
+     "kind": "degenerate->faithful",
+     "confidence": "MED-HIGH",
+     "floor": 0.99,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "OOF-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "CSS2/abspos/static-fixed-inside-abspos.html ios",
+     "from": "P 0.9841 DEGENERATE",
+     "to": "P ≈0.9974",
+     "kind": "degenerate->faithful",
+     "confidence": "HIGH",
+     "floor": 0.99,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "OOF-ios"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "CSS2/abspos/static-fixed-inside-abspos.html android",
+     "from": "P 0.9835 DEGENERATE",
+     "to": "P ≈0.9967 (via PositionedParentFlowSlot)",
+     "kind": "degenerate->faithful",
+     "confidence": "MED-HIGH",
+     "floor": 0.99,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "OOF-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-position/position-relative-003.html ios",
+     "from": "P 0.9594 DEGENERATE",
+     "to": "P ≈0.9974 (the relpos span chain must net 0)",
+     "kind": "degenerate->faithful",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "OOF-ios"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-position/position-relative-003.html android",
+     "from": "P 0.9589 DEGENERATE",
+     "to": "P ≈0.9967",
+     "kind": "degenerate->faithful",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "OOF-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-contain/contain-content-004.html android",
+     "from": "f 0.8286",
+     "to": "moves, stays f (the table itself renders wrong on both natives)",
+     "kind": "mover",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "OOF-android"
+     ],
+     "direction": "undirected",
+     "directionWhy": "oof-containing-block.md §10 R1: the positioned-container Box now hosts 004's in-flow <span>FAIL</span>; its sign is not pre-registered"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-nested-border-radius-clip-3.html android",
+     "from": "f 0.9574",
+     "to": "P ≈0.99 (iOS twin of the same geometry 0.9921)",
+     "kind": "flip",
+     "confidence": "MED-HIGH",
+     "floor": 0.96,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "CBB-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-nested-border-radius-clip.html android",
+     "from": "P 0.9649",
+     "to": "P ≈0.99 (iOS twin 0.9936 / 0.9998 / 0.9981)",
+     "kind": "short box -> faithful",
+     "confidence": "MED-HIGH",
+     "floor": 0.98,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "CBB-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-nested-border-radius-clip-2.html android",
+     "from": "P 0.9689",
+     "to": "P ≈0.99 (iOS twin 0.9936 / 0.9998 / 0.9981)",
+     "kind": "short box -> faithful",
+     "confidence": "MED-HIGH",
+     "floor": 0.98,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "CBB-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-nested-border-radius-clip-4.html android",
+     "from": "P 0.977",
+     "to": "P ≈0.99 (iOS twin 0.9936 / 0.9998 / 0.9981)",
+     "kind": "short box -> faithful",
+     "confidence": "MED-HIGH",
+     "floor": 0.98,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "CBB-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-flexbox/abspos/abspos-autopos-htb-ltr.html android",
+     "from": "P 0.9966 DEGENERATE",
+     "to": "P 0.9967 (sim: green repainted 100x100)",
+     "kind": "degenerate->faithful",
+     "confidence": "HIGH",
+     "floor": 0.995,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "CBB-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-flexbox/abspos/abspos-autopos-vlr-ltr.html android",
+     "from": "P 0.9966 DEGENERATE",
+     "to": "P 0.9967 (sim: green repainted 100x100)",
+     "kind": "degenerate->faithful",
+     "confidence": "HIGH",
+     "floor": 0.995,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "CBB-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-flexbox/abspos/abspos-autopos-vrl-ltr.html android",
+     "from": "P 0.9966 DEGENERATE",
+     "to": "P 0.9967 (sim: green repainted 100x100)",
+     "kind": "degenerate->faithful",
+     "confidence": "HIGH",
+     "floor": 0.995,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "CBB-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-flexbox/abspos/abspos-autopos-htb-rtl.html android",
+     "from": "P 0.9869 DEGENERATE",
+     "to": "P ≈0.9967 (the rtl static-position arithmetic runs with the corrected size for the first time)",
+     "kind": "degenerate->faithful",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "CBB-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-flexbox/abspos/abspos-autopos-vlr-rtl.html android",
+     "from": "P 0.9966 DEGENERATE",
+     "to": "P ≈0.9967 (the rtl static-position arithmetic runs with the corrected size for the first time)",
+     "kind": "degenerate->faithful",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "CBB-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-flexbox/abspos/abspos-autopos-vrl-rtl.html android",
+     "from": "P 0.9966 DEGENERATE",
+     "to": "P ≈0.9967 (the rtl static-position arithmetic runs with the corrected size for the first time)",
+     "kind": "degenerate->faithful",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "CBB-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-gaps/flex/flex-gap-decorations-006.html android",
+     "from": "f 0.8223",
+     "to": "may move, stays f (VerticalTextFlowLayout budget reads LocalContainingBlock)",
+     "kind": "watched side reader",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "CBB-android"
+     ],
+     "direction": "undirected",
+     "directionWhy": "a side reader of the corrected containing block; no replay"
+    },
+    {
+     "cell": "css-gaps/flex/flex-gap-decorations-033.html ios",
+     "from": "f 0.94",
+     "to": "P ≈1.000 (sim 1.0000: every non-rule pixel is already ref-exact)",
+     "kind": "flip",
+     "confidence": "HIGH",
+     "floor": 0.99,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "GAP-ios"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-gaps/flex/flex-gap-decorations-033.html android",
+     "from": "f 0.94",
+     "to": "P ≈1.000 (sim 1.0000)",
+     "kind": "flip",
+     "confidence": "HIGH",
+     "floor": 0.99,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "GAP-android"
+     ],
+     "direction": "up-or-stay"
+    }
+   ],
+   "mustNotMove": [
+    "CSS2/abspos/static-fixed-inside-abspos.html web",
+    "css-anchor-position/anchor-center-safe.html android",
+    "css-anchor-position/anchor-center-safe.html ios",
+    "css-anchor-position/anchor-center-safe.html web",
+    "css-anchor-position/anchor-fixed-pos-descendant.html android",
+    "css-anchor-position/anchor-fixed-pos-descendant.html ios",
+    "css-anchor-position/anchor-fixed-pos-descendant.html web",
+    "css-anchor-position/anchor-name-006.html android",
+    "css-anchor-position/anchor-name-006.html ios",
+    "css-anchor-position/anchor-name-006.html web",
+    "css-anchor-position/anchor-name-007.html android",
+    "css-anchor-position/anchor-name-007.html ios",
+    "css-anchor-position/anchor-name-007.html web",
+    "css-anchor-position/anchor-position-multicol-002.html android",
+    "css-anchor-position/anchor-position-multicol-002.html ios",
+    "css-anchor-position/anchor-position-multicol-002.html web",
+    "css-contain/contain-content-003.html ios",
+    "css-contain/contain-content-003.html web",
+    "css-contain/contain-content-004.html ios",
+    "css-contain/contain-content-004.html web",
+    "css-contain/contain-content-011.html ios",
+    "css-contain/contain-content-011.html web",
+    "css-display/display-contents-oof-002.html android",
+    "css-display/display-contents-oof-002.html ios",
+    "css-display/display-contents-oof-002.html web",
+    "css-flexbox/abspos/abspos-autopos-htb-ltr.html ios",
+    "css-flexbox/abspos/abspos-autopos-htb-ltr.html web",
+    "css-flexbox/abspos/abspos-autopos-htb-rtl.html ios",
+    "css-flexbox/abspos/abspos-autopos-htb-rtl.html web",
+    "css-flexbox/abspos/abspos-autopos-vlr-ltr.html ios",
+    "css-flexbox/abspos/abspos-autopos-vlr-ltr.html web",
+    "css-flexbox/abspos/abspos-autopos-vlr-rtl.html ios",
+    "css-flexbox/abspos/abspos-autopos-vlr-rtl.html web",
+    "css-flexbox/abspos/abspos-autopos-vrl-ltr.html ios",
+    "css-flexbox/abspos/abspos-autopos-vrl-ltr.html web",
+    "css-flexbox/abspos/abspos-autopos-vrl-rtl.html ios",
+    "css-flexbox/abspos/abspos-autopos-vrl-rtl.html web",
+    "css-flexbox/abspos/position-absolute-containing-block-001.html android",
+    "css-flexbox/abspos/position-absolute-containing-block-001.html ios",
+    "css-flexbox/abspos/position-absolute-containing-block-001.html web",
+    "css-flexbox/abspos/position-absolute-containing-block-002.html android",
+    "css-flexbox/abspos/position-absolute-containing-block-002.html ios",
+    "css-flexbox/abspos/position-absolute-containing-block-002.html web",
+    "css-gaps/flex/flex-gap-decorations-001.html android",
+    "css-gaps/flex/flex-gap-decorations-001.html ios",
+    "css-gaps/flex/flex-gap-decorations-001.html web",
+    "css-gaps/flex/flex-gap-decorations-002.html android",
+    "css-gaps/flex/flex-gap-decorations-002.html ios",
+    "css-gaps/flex/flex-gap-decorations-002.html web",
+    "css-gaps/flex/flex-gap-decorations-003.html android",
+    "css-gaps/flex/flex-gap-decorations-003.html ios",
+    "css-gaps/flex/flex-gap-decorations-003.html web",
+    "css-gaps/flex/flex-gap-decorations-004.html android",
+    "css-gaps/flex/flex-gap-decorations-004.html ios",
+    "css-gaps/flex/flex-gap-decorations-004.html web",
+    "css-gaps/flex/flex-gap-decorations-005.html android",
+    "css-gaps/flex/flex-gap-decorations-005.html ios",
+    "css-gaps/flex/flex-gap-decorations-005.html web",
+    "css-gaps/flex/flex-gap-decorations-006.html ios",
+    "css-gaps/flex/flex-gap-decorations-006.html web",
+    "css-gaps/flex/flex-gap-decorations-007.html android",
+    "css-gaps/flex/flex-gap-decorations-007.html ios",
+    "css-gaps/flex/flex-gap-decorations-007.html web",
+    "css-gaps/flex/flex-gap-decorations-008.html android",
+    "css-gaps/flex/flex-gap-decorations-008.html ios",
+    "css-gaps/flex/flex-gap-decorations-008.html web",
+    "css-gaps/flex/flex-gap-decorations-009.html android",
+    "css-gaps/flex/flex-gap-decorations-009.html ios",
+    "css-gaps/flex/flex-gap-decorations-009.html web",
+    "css-gaps/flex/flex-gap-decorations-010.html android",
+    "css-gaps/flex/flex-gap-decorations-010.html ios",
+    "css-gaps/flex/flex-gap-decorations-010.html web",
+    "css-gaps/flex/flex-gap-decorations-011.html android",
+    "css-gaps/flex/flex-gap-decorations-011.html ios",
+    "css-gaps/flex/flex-gap-decorations-011.html web",
+    "css-gaps/flex/flex-gap-decorations-012.html android",
+    "css-gaps/flex/flex-gap-decorations-012.html ios",
+    "css-gaps/flex/flex-gap-decorations-012.html web",
+    "css-gaps/flex/flex-gap-decorations-013.html android",
+    "css-gaps/flex/flex-gap-decorations-013.html ios",
+    "css-gaps/flex/flex-gap-decorations-013.html web",
+    "css-gaps/flex/flex-gap-decorations-014.html android",
+    "css-gaps/flex/flex-gap-decorations-014.html ios",
+    "css-gaps/flex/flex-gap-decorations-014.html web",
+    "css-gaps/flex/flex-gap-decorations-015.html android",
+    "css-gaps/flex/flex-gap-decorations-015.html ios",
+    "css-gaps/flex/flex-gap-decorations-015.html web",
+    "css-gaps/flex/flex-gap-decorations-016.html android",
+    "css-gaps/flex/flex-gap-decorations-016.html ios",
+    "css-gaps/flex/flex-gap-decorations-016.html web",
+    "css-gaps/flex/flex-gap-decorations-017.html android",
+    "css-gaps/flex/flex-gap-decorations-017.html ios",
+    "css-gaps/flex/flex-gap-decorations-017.html web",
+    "css-gaps/flex/flex-gap-decorations-018.html android",
+    "css-gaps/flex/flex-gap-decorations-018.html ios",
+    "css-gaps/flex/flex-gap-decorations-018.html web",
+    "css-gaps/flex/flex-gap-decorations-019.html android",
+    "css-gaps/flex/flex-gap-decorations-019.html ios",
+    "css-gaps/flex/flex-gap-decorations-019.html web",
+    "css-gaps/flex/flex-gap-decorations-020.html android",
+    "css-gaps/flex/flex-gap-decorations-020.html ios",
+    "css-gaps/flex/flex-gap-decorations-020.html web",
+    "css-gaps/flex/flex-gap-decorations-021.html android",
+    "css-gaps/flex/flex-gap-decorations-021.html ios",
+    "css-gaps/flex/flex-gap-decorations-021.html web",
+    "css-gaps/flex/flex-gap-decorations-022.html android",
+    "css-gaps/flex/flex-gap-decorations-022.html ios",
+    "css-gaps/flex/flex-gap-decorations-022.html web",
+    "css-gaps/flex/flex-gap-decorations-023.html android",
+    "css-gaps/flex/flex-gap-decorations-023.html ios",
+    "css-gaps/flex/flex-gap-decorations-023.html web",
+    "css-gaps/flex/flex-gap-decorations-024.html android",
+    "css-gaps/flex/flex-gap-decorations-024.html ios",
+    "css-gaps/flex/flex-gap-decorations-024.html web",
+    "css-gaps/flex/flex-gap-decorations-025.html android",
+    "css-gaps/flex/flex-gap-decorations-025.html ios",
+    "css-gaps/flex/flex-gap-decorations-025.html web",
+    "css-gaps/flex/flex-gap-decorations-027.html android",
+    "css-gaps/flex/flex-gap-decorations-027.html ios",
+    "css-gaps/flex/flex-gap-decorations-027.html web",
+    "css-gaps/flex/flex-gap-decorations-028.html android",
+    "css-gaps/flex/flex-gap-decorations-028.html ios",
+    "css-gaps/flex/flex-gap-decorations-028.html web",
+    "css-gaps/flex/flex-gap-decorations-029.html android",
+    "css-gaps/flex/flex-gap-decorations-029.html ios",
+    "css-gaps/flex/flex-gap-decorations-029.html web",
+    "css-gaps/flex/flex-gap-decorations-030.html android",
+    "css-gaps/flex/flex-gap-decorations-030.html ios",
+    "css-gaps/flex/flex-gap-decorations-030.html web",
+    "css-gaps/flex/flex-gap-decorations-031.html android",
+    "css-gaps/flex/flex-gap-decorations-031.html ios",
+    "css-gaps/flex/flex-gap-decorations-031.html web",
+    "css-gaps/flex/flex-gap-decorations-032.html android",
+    "css-gaps/flex/flex-gap-decorations-032.html ios",
+    "css-gaps/flex/flex-gap-decorations-032.html web",
+    "css-gaps/flex/flex-gap-decorations-033.html web",
+    "css-gaps/flex/flex-gap-decorations-034.html android",
+    "css-gaps/flex/flex-gap-decorations-034.html ios",
+    "css-gaps/flex/flex-gap-decorations-034.html web",
+    "css-gaps/flex/flex-gap-decorations-035.html android",
+    "css-gaps/flex/flex-gap-decorations-035.html ios",
+    "css-gaps/flex/flex-gap-decorations-035.html web",
+    "css-gaps/flex/flex-gap-decorations-036.html android",
+    "css-gaps/flex/flex-gap-decorations-036.html ios",
+    "css-gaps/flex/flex-gap-decorations-036.html web",
+    "css-gaps/flex/flex-gap-decorations-037.html android",
+    "css-gaps/flex/flex-gap-decorations-037.html ios",
+    "css-gaps/flex/flex-gap-decorations-037.html web",
+    "css-gaps/flex/flex-gap-decorations-039.html android",
+    "css-gaps/flex/flex-gap-decorations-039.html ios",
+    "css-gaps/flex/flex-gap-decorations-039.html web",
+    "css-gaps/flex/flex-gap-decorations-040.html android",
+    "css-gaps/flex/flex-gap-decorations-040.html ios",
+    "css-gaps/flex/flex-gap-decorations-040.html web",
+    "css-gaps/flex/flex-gap-decorations-041.html android",
+    "css-gaps/flex/flex-gap-decorations-041.html ios",
+    "css-gaps/flex/flex-gap-decorations-041.html web",
+    "css-gaps/flex/flex-gap-decorations-042.html android",
+    "css-gaps/flex/flex-gap-decorations-042.html ios",
+    "css-gaps/flex/flex-gap-decorations-042.html web",
+    "css-gaps/flex/flex-gap-decorations-043.html android",
+    "css-gaps/flex/flex-gap-decorations-043.html ios",
+    "css-gaps/flex/flex-gap-decorations-043.html web",
+    "css-gaps/flex/flex-gap-decorations-044.html android",
+    "css-gaps/flex/flex-gap-decorations-044.html ios",
+    "css-gaps/flex/flex-gap-decorations-044.html web",
+    "css-gaps/flex/flex-gap-decorations-045.html android",
+    "css-gaps/flex/flex-gap-decorations-045.html ios",
+    "css-gaps/flex/flex-gap-decorations-045.html web",
+    "css-gaps/flex/flex-gap-decorations-046.html android",
+    "css-gaps/flex/flex-gap-decorations-046.html ios",
+    "css-gaps/flex/flex-gap-decorations-046.html web",
+    "css-gaps/flex/flex-gap-decorations-047.html android",
+    "css-gaps/flex/flex-gap-decorations-047.html ios",
+    "css-gaps/flex/flex-gap-decorations-047.html web",
+    "css-gaps/flex/flex-gap-decorations-048.html android",
+    "css-gaps/flex/flex-gap-decorations-048.html ios",
+    "css-gaps/flex/flex-gap-decorations-048.html web",
+    "css-gaps/flex/flex-gap-decorations-049.html android",
+    "css-gaps/flex/flex-gap-decorations-049.html ios",
+    "css-gaps/flex/flex-gap-decorations-049.html web",
+    "css-gaps/flex/flex-gap-decorations-050.html android",
+    "css-gaps/flex/flex-gap-decorations-050.html ios",
+    "css-gaps/flex/flex-gap-decorations-050.html web",
+    "css-images/cross-fade-target-alpha.html android",
+    "css-images/cross-fade-target-alpha.html ios",
+    "css-images/cross-fade-target-alpha.html web",
+    "css-position/absolute-pos-box-inside-fixed-pos-box-with-changing-height.html android",
+    "css-position/absolute-pos-box-inside-fixed-pos-box-with-changing-height.html ios",
+    "css-position/absolute-pos-box-inside-fixed-pos-box-with-changing-height.html web",
+    "css-position/change-insets-inside-strict-containment-nested.html web",
+    "css-position/hypothetical-dynamic-change-001.html android",
+    "css-position/hypothetical-dynamic-change-001.html ios",
+    "css-position/hypothetical-dynamic-change-001.html web",
+    "css-position/hypothetical-dynamic-change-002.html android",
+    "css-position/hypothetical-dynamic-change-002.html ios",
+    "css-position/hypothetical-dynamic-change-002.html web",
+    "css-position/hypothetical-dynamic-change-003.html android",
+    "css-position/hypothetical-dynamic-change-003.html ios",
+    "css-position/hypothetical-dynamic-change-003.html web",
+    "css-position/position-absolute-dynamic-auto-overflow.html android",
+    "css-position/position-absolute-dynamic-auto-overflow.html ios",
+    "css-position/position-absolute-dynamic-auto-overflow.html web",
+    "css-position/position-fixed-dynamic-transformed-sibling.html android",
+    "css-position/position-fixed-dynamic-transformed-sibling.html ios",
+    "css-position/position-fixed-dynamic-transformed-sibling.html web",
+    "css-position/position-fixed-root-element-flex.html android",
+    "css-position/position-fixed-root-element-flex.html ios",
+    "css-position/position-fixed-root-element-flex.html web",
+    "css-position/position-fixed-root-element-grid.html android",
+    "css-position/position-fixed-root-element-grid.html ios",
+    "css-position/position-fixed-root-element-grid.html web",
+    "css-position/position-relative-003.html web",
+    "css-position/position-relative-004.html web",
+    "css-pseudo/first-letter-list-item-dynamic-001.html android",
+    "css-pseudo/first-letter-list-item-dynamic-001.html ios",
+    "css-pseudo/first-letter-list-item-dynamic-001.html web",
+    "css-transforms/3d-rendering-context-and-fixpos.html android",
+    "css-transforms/3d-rendering-context-and-fixpos.html ios",
+    "css-transforms/3d-rendering-context-and-fixpos.html web",
+    "css-transforms/backface-visibility-hidden-001.html android",
+    "css-transforms/backface-visibility-hidden-001.html ios",
+    "css-transforms/backface-visibility-hidden-001.html web",
+    "css-transforms/backface-visibility-hidden-004.html android",
+    "css-transforms/backface-visibility-hidden-004.html ios",
+    "css-transforms/backface-visibility-hidden-004.html web",
+    "css-view-transitions/content-with-child-with-transparent-background.html android",
+    "css-view-transitions/content-with-child-with-transparent-background.html ios",
+    "css-view-transitions/content-with-child-with-transparent-background.html web",
+    "css-view-transitions/content-with-transparent-background.html android",
+    "css-view-transitions/content-with-transparent-background.html ios",
+    "css-view-transitions/content-with-transparent-background.html web",
+    "filter-effects/backdrop-filter-containing-block.html web",
+    "filter-effects/backdrop-filter-fixed-clip.html android",
+    "filter-effects/backdrop-filter-fixed-clip.html ios",
+    "filter-effects/backdrop-filter-fixed-clip.html web",
+    "filter-effects/backdrop-filter-isolation-fixed.html android",
+    "filter-effects/backdrop-filter-isolation-fixed.html ios",
+    "filter-effects/backdrop-filter-isolation-fixed.html web",
+    "filter-effects/backdrop-filter-nested-border-radius-clip-2.html ios",
+    "filter-effects/backdrop-filter-nested-border-radius-clip-2.html web",
+    "filter-effects/backdrop-filter-nested-border-radius-clip-3.html ios",
+    "filter-effects/backdrop-filter-nested-border-radius-clip-3.html web",
+    "filter-effects/backdrop-filter-nested-border-radius-clip-4.html ios",
+    "filter-effects/backdrop-filter-nested-border-radius-clip-4.html web",
+    "filter-effects/backdrop-filter-nested-border-radius-clip.html ios",
+    "filter-effects/backdrop-filter-nested-border-radius-clip.html web",
+    "filter-effects/backdrop-filter-zero-size.html android",
+    "filter-effects/backdrop-filter-zero-size.html ios",
+    "filter-effects/backdrop-filter-zero-size.html web",
+    "filter-effects/backdrop-filters-blur-large.html android",
+    "filter-effects/backdrop-filters-blur-large.html ios",
+    "filter-effects/backdrop-filters-blur-large.html web"
+   ],
+   "geometryProbes": [
+    {
+     "cmd": "python3 tools/titan/results/wave54-plan/oof-containing-block.geometry.py <run>",
+     "expect": {
+      "position-relative-003 web": "GEOMETRY OK",
+      "position-relative-003 ios": "GEOMETRY OK",
+      "position-relative-003 android": "GEOMETRY OK",
+      "abspos/static-fixed-inside-abspos web": "GEOMETRY OK",
+      "abspos/static-fixed-inside-abspos ios": "GEOMETRY OK",
+      "abspos/static-fixed-inside-abspos android": "GEOMETRY OK",
+      "position-relative-004 web": "GEOMETRY OK",
+      "position-relative-004 ios": "GEOMETRY OK",
+      "position-relative-004 android": "GEOMETRY OK",
+      "change-insets-inside-strict-containment-nested web": "GEOMETRY OK",
+      "change-insets-inside-strict-containment-nested ios": "GEOMETRY OK",
+      "change-insets-inside-strict-containment-nested android": "GEOMETRY OK",
+      "contain-content-003 web": "GEOMETRY OK",
+      "contain-content-003 ios": "GEOMETRY OK",
+      "contain-content-003 android": "GEOMETRY OK",
+      "contain-content-011 web": "GEOMETRY OK",
+      "contain-content-011 ios": "GEOMETRY OK",
+      "contain-content-011 android": "GEOMETRY OK",
+      "backdrop-filter-containing-block web": "GEOMETRY OK",
+      "backdrop-filter-containing-block ios": "GEOMETRY OK",
+      "backdrop-filter-containing-block android": "GEOMETRY OK"
+     },
+     "gating": {
+      "contain-content-003 android": "OOF-android",
+      "contain-content-011 android": "OOF-android",
+      "position-relative-004 ios": "OOF-ios",
+      "position-relative-004 android": "OOF-android",
+      "change-insets-inside-strict-containment-nested ios": "OOF-ios",
+      "change-insets-inside-strict-containment-nested android": "OOF-android",
+      "abspos/static-fixed-inside-abspos ios": "OOF-ios",
+      "abspos/static-fixed-inside-abspos android": "OOF-android"
+     },
+     "report": [
+      "position-relative-003 ios",
+      "position-relative-003 android",
+      "backdrop-filter-containing-block ios",
+      "backdrop-filter-containing-block android"
+     ],
+     "onWave53Final": "12 native rows WRONG (green at the canvas origin / top-right), every ref and web row OK, iOS contain-content-003/-011 OK"
+    },
+    {
+     "cmd": "python3 tools/titan/results/wave54-plan/compose-wpt-content-box-cb.geometry.py <run>",
+     "expect": {
+      "abspos/abspos-autopos-htb-ltr web": "GEOMETRY OK",
+      "abspos/abspos-autopos-htb-ltr android": "GEOMETRY OK",
+      "abspos/abspos-autopos-vlr-ltr web": "GEOMETRY OK",
+      "abspos/abspos-autopos-vlr-ltr android": "GEOMETRY OK",
+      "abspos/abspos-autopos-vrl-ltr web": "GEOMETRY OK",
+      "abspos/abspos-autopos-vrl-ltr android": "GEOMETRY OK",
+      "abspos/abspos-autopos-htb-rtl web": "GEOMETRY OK",
+      "abspos/abspos-autopos-htb-rtl android": "GEOMETRY OK",
+      "abspos/abspos-autopos-vlr-rtl web": "GEOMETRY OK",
+      "abspos/abspos-autopos-vlr-rtl android": "GEOMETRY OK",
+      "abspos/abspos-autopos-vrl-rtl web": "GEOMETRY OK",
+      "abspos/abspos-autopos-vrl-rtl android": "GEOMETRY OK",
+      "abspos/abspos-autopos-htb-ltr ios": "GEOMETRY OK",
+      "abspos/abspos-autopos-vlr-ltr ios": "GEOMETRY OK",
+      "abspos/abspos-autopos-vrl-ltr ios": "GEOMETRY OK",
+      "abspos/abspos-autopos-htb-rtl ios": "GEOMETRY WRONG (green (16, 88, 105, 187) vs ref (16, 88, 115, 187))",
+      "abspos/abspos-autopos-vlr-rtl ios": "GEOMETRY WRONG (green (16, 88, 105, 187) vs ref (16, 88, 115, 187))",
+      "abspos/abspos-autopos-vrl-rtl ios": "GEOMETRY WRONG (green (16, 88, 105, 187) vs ref (16, 88, 115, 187))",
+      "backdrop-filter-nested-border-radius-clip web": "GEOMETRY OK",
+      "backdrop-filter-nested-border-radius-clip ios": "GEOMETRY OK",
+      "backdrop-filter-nested-border-radius-clip android": "GEOMETRY OK",
+      "backdrop-filter-nested-border-radius-clip-2 web": "GEOMETRY OK",
+      "backdrop-filter-nested-border-radius-clip-2 ios": "GEOMETRY OK",
+      "backdrop-filter-nested-border-radius-clip-2 android": "GEOMETRY OK",
+      "backdrop-filter-nested-border-radius-clip-3 web": "GEOMETRY OK",
+      "backdrop-filter-nested-border-radius-clip-3 ios": "GEOMETRY OK",
+      "backdrop-filter-nested-border-radius-clip-3 android": "GEOMETRY OK",
+      "backdrop-filter-nested-border-radius-clip-4 web": "GEOMETRY OK",
+      "backdrop-filter-nested-border-radius-clip-4 ios": "GEOMETRY OK",
+      "backdrop-filter-nested-border-radius-clip-4 android": "GEOMETRY OK"
+     },
+     "gating": {
+      "abspos/abspos-autopos-htb-ltr android": "CBB-android",
+      "abspos/abspos-autopos-vlr-ltr android": "CBB-android",
+      "abspos/abspos-autopos-vrl-ltr android": "CBB-android",
+      "backdrop-filter-nested-border-radius-clip android": "CBB-android",
+      "backdrop-filter-nested-border-radius-clip-2 android": "CBB-android",
+      "backdrop-filter-nested-border-radius-clip-3 android": "CBB-android",
+      "backdrop-filter-nested-border-radius-clip-4 android": "CBB-android"
+     },
+     "report": [
+      "abspos/abspos-autopos-htb-rtl android",
+      "abspos/abspos-autopos-vlr-rtl android",
+      "abspos/abspos-autopos-vrl-rtl android"
+     ],
+     "note": "the three iOS *-rtl rows keep their own 10-px iOS offset (queue-scout-layout §3; not this lane): their expected line is today's WRONG verdict, verbatim",
+     "onWave53Final": "Android 10/10 WRONG; ref + web 20/20 OK; iOS 7 OK + the 3 rtl rows WRONG"
+    },
+    {
+     "cmd": "python3 tools/titan/results/wave54-plan/flex-zero-gap-rules.geometry.py <run>",
+     "expect": {
+      "flex/flex-gap-decorations-033 web": "GEOMETRY OK",
+      "flex/flex-gap-decorations-033 ios": "GEOMETRY OK",
+      "flex/flex-gap-decorations-033 android": "GEOMETRY OK"
+     },
+     "gating": {
+      "flex/flex-gap-decorations-033 ios": "GAP-ios",
+      "flex/flex-gap-decorations-033 android": "GAP-android"
+     },
+     "report": [],
+     "onWave53Final": "ios / android WRONG (redPx 0 vs ref 2200); ref / web OK"
+    }
+   ],
+   "revertUnits": {
+    "OOF-android": {
+     "commit": "Compose layout/position/OutOfFlowContainingBlock.kt (new) + CanvasRootHoist.kt call-site lines :222 (one OR), :340 (inset clause), :389 (FIXED joins RC1) + OutOfFlowContainingBlockTest.kt + CanvasRootHoistTest rows",
+     "captures": {
+      "web": [],
+      "ios": [],
+      "android": [
+       "wpt__CSS2__abspos__static-fixed-inside-abspos",
+       "wpt__css-contain__contain-content-003",
+       "wpt__css-contain__contain-content-004",
+       "wpt__css-contain__contain-content-011",
+       "wpt__css-position__change-insets-inside-strict-containment-nested",
+       "wpt__css-position__position-fixed-scroll-nested-fixed",
+       "wpt__css-position__position-relative-003",
+       "wpt__css-position__position-relative-004",
+       "wpt__filter-effects__backdrop-filter-containing-block"
+      ]
+     },
+     "wire": [],
+     "revertOrder": [
+      "OOF-android"
+     ]
+    },
+    "OOF-ios": {
+     "commit": "Swift StyleEngine/layout/position/OutOfFlowContainingBlock.swift (new) + FixedHoist.swift call-site lines :309, :347, :115 + OutOfFlowContainingBlockTests.swift + FixedHoist test rows",
+     "captures": {
+      "web": [],
+      "ios": [
+       "wpt__CSS2__abspos__static-fixed-inside-abspos",
+       "wpt__css-position__change-insets-inside-strict-containment-nested",
+       "wpt__css-position__position-fixed-scroll-nested-fixed",
+       "wpt__css-position__position-relative-003",
+       "wpt__css-position__position-relative-004",
+       "wpt__filter-effects__backdrop-filter-containing-block"
+      ],
+      "android": []
+     },
+     "wire": [],
+     "revertOrder": [
+      "OOF-ios"
+     ]
+    },
+    "CBB-android": {
+     "commit": "DynamicValueResolver.kt childContainingBlock(…, wptCaptureMode = false) + one condition (or ContainingBlockBands.kt ≤ 60 lines) + DynamicValueResolverTest rows + ComponentRenderer.kt seam (:1934 one named argument)",
+     "captures": {
+      "web": [],
+      "ios": [],
+      "android": [
+       "wpt__css-flexbox__abspos__abspos-autopos-htb-ltr",
+       "wpt__css-flexbox__abspos__abspos-autopos-htb-rtl",
+       "wpt__css-flexbox__abspos__abspos-autopos-vlr-ltr",
+       "wpt__css-flexbox__abspos__abspos-autopos-vlr-rtl",
+       "wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr",
+       "wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl",
+       "wpt__css-gaps__flex__flex-gap-decorations-006",
+       "wpt__filter-effects__backdrop-filter-nested-border-radius-clip",
+       "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-2",
+       "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3",
+       "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-4"
+      ]
+     },
+     "wire": [],
+     "revertOrder": [
+      "CBB-android"
+     ]
+    },
+    "GAP-android": {
+     "commit": "Compose columns/GapDecoration{Lines,Segments,Geometry}.kt (keep a zero-extent gap as a rule position; isPositionable) + GapDecoration*Test rows",
+     "captures": {
+      "web": [],
+      "ios": [],
+      "android": [
+       "wpt__css-gaps__flex__flex-gap-decorations-033"
+      ]
+     },
+     "wire": [],
+     "revertOrder": [
+      "GAP-android"
+     ]
+    },
+    "GAP-ios": {
+     "commit": "Swift StyleEngine/columns/GapDecoration{Lines,Segments,Geometry}.swift (the byte-parallel twin) + GapDecoration*Tests rows",
+     "captures": {
+      "web": [],
+      "ios": [
+       "wpt__css-gaps__flex__flex-gap-decorations-033"
+      ],
+      "android": []
+     },
+     "wire": [],
+     "revertOrder": [
+      "GAP-ios"
+     ]
+    }
+   },
+   "sharedCells": {
+    "css-contain/contain-content-004.html": "in compose-table-body-cell's D2 radius but NOT an L2 carrier (L2's carrier set is 006 android only): an L4 carrier on android, must-not-move on ios/web",
+    "filter-effects/backdrop-filter-clip-rect.html, -edge-clipping.html": "L4 positioned-establisher CONTROLS (kept inert by F1's \"not itself absolute/fixed\" restriction) that are also L3 U3 CAPTURE carriers: the capture control cannot attribute them, so L4's invariance claim on them rests on pins P1 (last row) and P3 (pure walks hoist exactly as today) and on the closing A/B; a fall there reverts U3 first (rule 6x)",
+    "wpt__css-anchor-position__anchor-center-safe-rtl (unscored)": "an L4 fixed control and an L1 P android capture carrier: L4's invariance rests on pin P3 over its verbatim payload"
+   }
+  },
+  "L5-ua-heading-face": {
+   "dir": "tools/titan/results/wave54-ua-heading-face",
+   "briefs": [
+    "ua-heading-face.md",
+    "queue-scout-text-web.md"
+   ],
+   "captureCarriers": {
+    "web": [],
+    "ios": [
+     "wpt__css-text-decor__text-decoration-inset-005",
+     "wpt__css-text-decor__text-decoration-inset-006",
+     "wpt__css-text-decor__text-decoration-inset-014"
+    ],
+    "android": [
+     "wpt__css-break__block-in-inline-015-print",
+     "wpt__css-lists__counter-list-item",
+     "wpt__css-lists__counter-reset-increment-overflow-underflow",
+     "wpt__css-text-decor__text-decoration-color",
+     "wpt__css-text-decor__text-decoration-inset-005",
+     "wpt__css-text-decor__text-decoration-inset-006",
+     "wpt__css-text-decor__text-decoration-inset-014",
+     "wpt__css-text-decor__text-decoration-subelements-003",
+     "wpt__filter-effects__backdrop-filter-border-radius-change",
+     "wpt__filter-effects__backdrop-filter-corner-shape-change"
+    ]
+   },
+   "wireCarriers": [],
+   "carrierRule": "an author-UNSIZED h1-h6 (no own FontSize/Font/FontWeight; 8 documents) or a sub/sup leaf, on Compose; on iOS only a FOLDED heading host (the stand-down retires only where InlineRunFold/InlineRunFlow returns Folded): inset-005/-006/-014. 14 sized-heading documents stand down (byte-identical) except the bold-only half on two filter-effects h1s (android movers)",
+   "probeSections": [
+    "css-text-decor",
+    "css-break",
+    "css-lists",
+    "filter-effects"
+   ],
+   "predictions": [
+    {
+     "cell": "css-break/block-in-inline-015-print.html android",
+     "from": "f 0.9489",
+     "to": "P ≈0.989 (the identical rule on iOS gives P 0.9894 on the same IR)",
+     "kind": "flip",
+     "confidence": "HIGH",
+     "floor": 0.97,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U1-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text-decor/text-decoration-inset-005.html android",
+     "from": "f 0.9",
+     "to": "P ≈0.98 (anchors inset-001…004 android 0.984-0.9859)",
+     "kind": "flip",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U1-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text-decor/text-decoration-inset-006.html android",
+     "from": "f 0.8993",
+     "to": "P ≈0.98",
+     "kind": "flip",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U1-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text-decor/text-decoration-inset-005.html ios",
+     "from": "f 0.8995",
+     "to": "P ≈0.965 (anchors ios 0.9634-0.9707)",
+     "kind": "flip",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U2-ios"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text-decor/text-decoration-inset-006.html ios",
+     "from": "f 0.8987",
+     "to": "P ≈0.965",
+     "kind": "flip",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U2-ios"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text-decor/text-decoration-inset-014.html ios",
+     "from": "f 0.9238",
+     "to": "P (no monospace anchor; the probe decides)",
+     "kind": "flip",
+     "confidence": "MED-LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U2-ios"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text-decor/text-decoration-inset-014.html android",
+     "from": "f 0.923",
+     "to": "P (no monospace anchor; the probe decides)",
+     "kind": "flip",
+     "confidence": "MED-LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "U1-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text-decor/text-decoration-color.html android",
+     "from": "f 0.6164",
+     "to": "≈0.67 (the iOS anchor with the rule is f 0.674)",
+     "kind": "mover; look, never count",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U1-android"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-lists/counter-list-item.html android",
+     "from": "f 0.7307",
+     "to": "moves (iOS with the rule: f 0.7864)",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U1-android"
+     ],
+     "direction": "undirected",
+     "directionWhy": "only a cross-platform anchor (iOS), which the brief declined to turn into a magnitude"
+    },
+    {
+     "cell": "css-lists/counter-reset-increment-overflow-underflow.html android",
+     "from": "f 0.8699",
+     "to": "direction unknown (iOS with the rule f 0.857; its digits are a counter defect)",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U1-android"
+     ],
+     "direction": "undirected",
+     "directionWhy": "the brief says \"direction unknown\"; the iOS anchor (0.857) sits BELOW today's 0.8699"
+    },
+    {
+     "cell": "css-text-decor/text-decoration-subelements-003.html android",
+     "from": "f 0.9084",
+     "to": "moves (stacked sup -> smaller)",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U1-android"
+     ],
+     "direction": "undirected",
+     "directionWhy": "no replay; the stacked sup face change has no pre-registered sign"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-border-radius-change.html android",
+     "from": "f 0.5977",
+     "to": "moves (bold half only)",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U1-android"
+     ],
+     "direction": "undirected",
+     "directionWhy": "bold-only half of a sized h1; no replay"
+    },
+    {
+     "cell": "filter-effects/backdrop-filter-corner-shape-change.html android",
+     "from": "f 0.4904",
+     "to": "moves (bold half only)",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U1-android"
+     ],
+     "direction": "undirected",
+     "directionWhy": "bold-only half of a sized h1; no replay"
+    }
+   ],
+   "mustNotMove": [
+    "css-break/block-in-inline-015-print.html ios",
+    "css-lists/counter-list-item.html ios",
+    "css-lists/counter-list-item.html web",
+    "css-lists/counter-reset-increment-overflow-underflow.html ios",
+    "css-lists/counter-reset-increment-overflow-underflow.html web",
+    "css-text-decor/text-decoration-color.html ios",
+    "css-text-decor/text-decoration-color.html web",
+    "css-text-decor/text-decoration-inset-001.html android",
+    "css-text-decor/text-decoration-inset-001.html ios",
+    "css-text-decor/text-decoration-inset-002.html android",
+    "css-text-decor/text-decoration-inset-002.html ios",
+    "css-text-decor/text-decoration-inset-003.html android",
+    "css-text-decor/text-decoration-inset-003.html ios",
+    "css-text-decor/text-decoration-inset-004.html android",
+    "css-text-decor/text-decoration-inset-004.html ios",
+    "css-text-decor/text-decoration-inset-005.html web",
+    "css-text-decor/text-decoration-inset-006.html web",
+    "css-text-decor/text-decoration-inset-007.html android",
+    "css-text-decor/text-decoration-inset-007.html ios",
+    "css-text-decor/text-decoration-inset-008.html android",
+    "css-text-decor/text-decoration-inset-008.html ios",
+    "css-text-decor/text-decoration-inset-009.html android",
+    "css-text-decor/text-decoration-inset-009.html ios",
+    "css-text-decor/text-decoration-inset-011.html android",
+    "css-text-decor/text-decoration-inset-011.html ios",
+    "css-text-decor/text-decoration-inset-011.html web",
+    "css-text-decor/text-decoration-inset-012.html android",
+    "css-text-decor/text-decoration-inset-012.html ios",
+    "css-text-decor/text-decoration-inset-013.html android",
+    "css-text-decor/text-decoration-inset-013.html ios",
+    "css-text-decor/text-decoration-inset-014.html web",
+    "css-text-decor/text-decoration-inset-015.html android",
+    "css-text-decor/text-decoration-inset-015.html ios",
+    "css-text-decor/text-decoration-inset-016.html android",
+    "css-text-decor/text-decoration-inset-016.html ios",
+    "css-text-decor/text-decoration-inset-024.html android",
+    "css-text-decor/text-decoration-inset-024.html ios",
+    "css-text-decor/text-decoration-subelements-002.html android",
+    "css-text-decor/text-decoration-subelements-002.html ios",
+    "css-text-decor/text-decoration-subelements-002.html web",
+    "css-text-decor/text-decoration-subelements-003.html ios",
+    "css-text-decor/text-decoration-subelements-003.html web",
+    "filter-effects/backdrop-filter-border-radius-change.html ios",
+    "filter-effects/backdrop-filter-border-radius-change.html web",
+    "filter-effects/backdrop-filter-corner-shape-change.html ios",
+    "filter-effects/backdrop-filter-corner-shape-change.html web"
+   ],
+   "geometryProbes": [
+    {
+     "cmd": "python3 tools/titan/results/wave54-plan/ua-heading-face.geometry.py <run>",
+     "expect": {
+      "block-in-inline-015-print web": "GEOMETRY OK",
+      "block-in-inline-015-print ios": "GEOMETRY OK",
+      "block-in-inline-015-print android": "GEOMETRY OK",
+      "text-decoration-inset-005 web": "GEOMETRY OK",
+      "text-decoration-inset-005 ios": "GEOMETRY OK",
+      "text-decoration-inset-005 android": "GEOMETRY OK",
+      "text-decoration-inset-006 web": "GEOMETRY OK",
+      "text-decoration-inset-006 ios": "GEOMETRY OK",
+      "text-decoration-inset-006 android": "GEOMETRY OK",
+      "text-decoration-inset-014 web": "GEOMETRY OK",
+      "text-decoration-inset-014 ios": "GEOMETRY OK",
+      "text-decoration-inset-014 android": "GEOMETRY OK",
+      "text-decoration-inset-011 web": "GEOMETRY OK",
+      "text-decoration-inset-011 ios": "GEOMETRY OK",
+      "text-decoration-inset-011 android": "GEOMETRY OK"
+     },
+     "gating": {
+      "block-in-inline-015-print android": "U1-android"
+     },
+     "report": [
+      "text-decoration-inset-005 ios",
+      "text-decoration-inset-005 android",
+      "text-decoration-inset-006 ios",
+      "text-decoration-inset-006 android",
+      "text-decoration-inset-014 ios",
+      "text-decoration-inset-014 android"
+     ],
+     "note": "inset-011 is the CONTROL: the probe prints OK only while its native bands EQUAL the recorded wave53-final bands",
+     "onWave53Final": "7 target rows WRONG (android band 9 vs ref 18; inset-005/-006 one band vs 2; inset-014 line-1 11/12 px); ref, web, iOS block-in-inline and the inset-011 control OK",
+     "teeth": "fix r1 (plan-skeptic M2): block-in-inline-015-print also checks every band TOP within ±3 px of the ref; the skeptic's pitch fakes print WRONG from +2 px/line (fix-r1/post-M2.pitch-down6.out.txt), the iOS anchor (tops 30/66/105/144 vs 29/65/103/142) stays OK"
+    }
+   ],
+   "revertUnits": {
+    "U1-android": {
+     "commit": "Compose typography/UAElementFontRule.kt (new twin) + typography/UAHeadingFoldGate.kt (new) + their JVM tests + ComponentRenderer.kt seam-1 (:1141 wrap ListStyleUaRule.apply in UAElementFontRule.apply, before DynamicValueResolver :1206)",
+     "captures": {
+      "web": [],
+      "ios": [],
+      "android": [
+       "wpt__css-break__block-in-inline-015-print",
+       "wpt__css-lists__counter-list-item",
+       "wpt__css-lists__counter-reset-increment-overflow-underflow",
+       "wpt__css-text-decor__text-decoration-color",
+       "wpt__css-text-decor__text-decoration-inset-005",
+       "wpt__css-text-decor__text-decoration-inset-006",
+       "wpt__css-text-decor__text-decoration-inset-014",
+       "wpt__css-text-decor__text-decoration-subelements-003",
+       "wpt__filter-effects__backdrop-filter-border-radius-change",
+       "wpt__filter-effects__backdrop-filter-corner-shape-change"
+      ]
+     },
+     "wire": [],
+     "revertOrder": [
+      "U1-android"
+     ]
+    },
+    "U2-ios": {
+     "commit": "Swift StyleEngine/typography/UAHeadingFoldGate.swift (new) + UAHeadingFoldGateTests.swift + UAElementFontRule.swift (docs only) + UAElementFontRuleTests.swift (additions) + ComponentRenderer.swift seam-2 (:343-356 the hasElementChildren: argument)",
+     "captures": {
+      "web": [],
+      "ios": [
+       "wpt__css-text-decor__text-decoration-inset-005",
+       "wpt__css-text-decor__text-decoration-inset-006",
+       "wpt__css-text-decor__text-decoration-inset-014"
+      ],
+      "android": []
+     },
+     "wire": [],
+     "revertOrder": [
+      "U2-ios"
+     ]
+    }
+   },
+   "stopRule": "if the lane's first JVM / Catalyst pins say the verbatim inset-005/-006/-014 hosts BAIL (not Folded), the 005/006/014 rows are void and the lane stops at the GO-SMALL fallback (U1 leaf-only)"
+  },
+  "L6-web-tail": {
+   "dir": "tools/titan/results/wave54-web-tail",
+   "briefs": [
+    "web-root-separator.md",
+    "web-out-of-flow-hyphen-box.md",
+    "queue-scout-text-web.md"
+   ],
+   "captureCarriers": {
+    "web": [
+     "wpt__CSS2__abspos__static-inside-inline-block",
+     "wpt__css-break__block-in-inline-015-print",
+     "wpt__css-cascade__scope-pseudo-element",
+     "wpt__css-display__display-flow-root-list-item-001",
+     "wpt__css-position__overlay__overlay-button-appearance",
+     "wpt__css-position__position-absolute-semi-replaced-stretch-input",
+     "wpt__css-position__position-absolute-semi-replaced-stretch-other",
+     "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+     "wpt__css-ui__appearance-auto-input-non-widget-001",
+     "wpt__css-ui__box-sizing-007",
+     "wpt__css-ui__box-sizing-008",
+     "wpt__css-ui__box-sizing-009",
+     "wpt__css-ui__box-sizing-010",
+     "wpt__css-ui__box-sizing-011",
+     "wpt__css-ui__box-sizing-013",
+     "wpt__css-ui__box-sizing-014",
+     "wpt__css-ui__box-sizing-015",
+     "wpt__css-ui__box-sizing-016",
+     "wpt__css-ui__box-sizing-017",
+     "wpt__css-ui__box-sizing-018",
+     "wpt__css-ui__box-sizing-019",
+     "wpt__css-ui__box-sizing-020",
+     "wpt__css-ui__box-sizing-021",
+     "wpt__css-ui__box-sizing-022",
+     "wpt__css-ui__box-sizing-024",
+     "wpt__css-ui__box-sizing-025",
+     "wpt__css-values__attr-style-sharing-1",
+     "wpt__css-writing-modes__baseline-with-orthogonal-flow-001"
+    ],
+    "ios": [],
+    "android": []
+   },
+   "wireCarriers": [],
+   "carrierRule": {
+    "RS": "a root-level adjacent pair of inline-level roots whose earlier sibling carries meta.role \"ws-after\" (the WWS predicate, lifted verbatim from renderChildSeparator): 27 documents (web only; the natives already pack root atoms with ROOT_ATOM_GAP_PX)",
+    "W1": "a paint-inert out-of-flow run member (byte-for-byte the Compose InertOutOfFlowMember.admits predicate) splitting a word mid-word in a host whose OWN hyphens is auto: 4 members, all in hyphens-out-of-flow-002 (W1-u, the ungated fallback, would add -001: not taken, L6 owns NodeRenderer.ts)"
+   },
+   "probeSections": [
+    "css-ui",
+    "css-position",
+    "css-cascade",
+    "css-display",
+    "CSS2",
+    "css-break",
+    "css-values",
+    "css-writing-modes",
+    "css-text",
+    "css-pseudo",
+    "css-tables"
+   ],
+   "predictions": [
+    {
+     "cell": "css-ui/box-sizing-007.html web",
+     "from": "f 0.9036",
+     "to": "P 0.985 (simulated separator 0.9852)",
+     "kind": "flip (bold <strong> residue: the corpus inline-run-merged convention)",
+     "confidence": "HIGH",
+     "floor": 0.975,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-008.html web",
+     "from": "f 0.8943",
+     "to": "P 0.974 (0.9736)",
+     "kind": "flip",
+     "confidence": "HIGH",
+     "floor": 0.965,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-022.html web",
+     "from": "f 0.9442",
+     "to": "P 0.970 (0.9704)",
+     "kind": "flip",
+     "confidence": "MED-HIGH",
+     "floor": 0.96,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-position/position-absolute-semi-replaced-stretch-other.html web",
+     "from": "f 0.941",
+     "to": "P 0.967 (0.9667)",
+     "kind": "flip (the space moves the next abspos box's static position, as in the ref)",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-010.html web",
+     "from": "P 0.9713 DEGENERATE",
+     "to": "≈0.982 (simulated 0.9822)",
+     "kind": "degenerate->faithful (atoms packed)",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-011.html web",
+     "from": "P 0.9713 DEGENERATE",
+     "to": "≈0.982 (simulated 0.9822)",
+     "kind": "degenerate->faithful (atoms packed)",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-014.html web",
+     "from": "P 0.9713 DEGENERATE",
+     "to": "≈0.982 (simulated 0.9822)",
+     "kind": "degenerate->faithful (atoms packed)",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-015.html web",
+     "from": "P 0.9713 DEGENERATE",
+     "to": "≈0.982 (simulated 0.9822)",
+     "kind": "degenerate->faithful (atoms packed)",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-016.html web",
+     "from": "P 0.9713 DEGENERATE",
+     "to": "≈0.982 (simulated 0.9822)",
+     "kind": "degenerate->faithful (atoms packed)",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-017.html web",
+     "from": "P 0.9713 DEGENERATE",
+     "to": "≈0.982 (simulated 0.9822)",
+     "kind": "degenerate->faithful (atoms packed)",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-018.html web",
+     "from": "P 0.9713 DEGENERATE",
+     "to": "≈0.982 (simulated 0.9822)",
+     "kind": "degenerate->faithful (atoms packed)",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-019.html web",
+     "from": "P 0.9713 DEGENERATE",
+     "to": "≈0.982 (simulated 0.9822)",
+     "kind": "degenerate->faithful (atoms packed)",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-020.html web",
+     "from": "P 0.9599 DEGENERATE",
+     "to": "≈0.982 (simulated 0.9822)",
+     "kind": "degenerate->faithful",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-021.html web",
+     "from": "P 0.9599 DEGENERATE",
+     "to": "≈0.982 (simulated 0.9822)",
+     "kind": "degenerate->faithful",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-024.html web",
+     "from": "P 0.9599 DEGENERATE",
+     "to": "≈0.982 (simulated 0.9822)",
+     "kind": "degenerate->faithful",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-025.html web",
+     "from": "P 0.9599 DEGENERATE",
+     "to": "≈0.982 (simulated 0.9822)",
+     "kind": "degenerate->faithful",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-013.html web",
+     "from": "P 0.9538 DEGENERATE",
+     "to": "≈0.970 (simulated 0.9704)",
+     "kind": "degenerate->faithful",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-position/position-absolute-semi-replaced-stretch-input.html web",
+     "from": "P 0.9596 DEGENERATE",
+     "to": "≈0.966 (simulated 0.9664)",
+     "kind": "degenerate->faithful",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-cascade/scope-pseudo-element.html web",
+     "from": "f 0.9353",
+     "to": "up (box lefts to x16/123/229; its B/Foo wrap defect remains)",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-display/display-flow-root-list-item-001.html web",
+     "from": "f 0.8003",
+     "to": "mover",
+     "kind": "mover",
+     "confidence": "LOW",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "RS"
+     ],
+     "direction": "undirected",
+     "directionWhy": "in the RS 27-document radius; not simulated"
+    },
+    {
+     "cell": "CSS2/abspos/static-inside-inline-block.html web",
+     "from": "P 0.9803",
+     "to": "stays or rises (the separator replays a space the SOURCE had)",
+     "kind": "at-risk pass",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-break/block-in-inline-015-print.html web",
+     "from": "P 1",
+     "to": "stays or rises (the separator replays a space the SOURCE had)",
+     "kind": "at-risk pass",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/appearance-auto-input-non-widget-001.html web",
+     "from": "P 0.9873",
+     "to": "stays or rises (the separator replays a space the SOURCE had)",
+     "kind": "at-risk pass",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-values/attr-style-sharing-1.html web",
+     "from": "P 0.9939",
+     "to": "stays or rises (the separator replays a space the SOURCE had)",
+     "kind": "at-risk pass",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-writing-modes/baseline-with-orthogonal-flow-001.html web",
+     "from": "P 0.9854",
+     "to": "stays or rises (the separator replays a space the SOURCE had)",
+     "kind": "at-risk pass",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-ui/box-sizing-009.html web",
+     "from": "P 0.9811",
+     "to": "stays or rises (the separator replays a space the SOURCE had)",
+     "kind": "at-risk pass",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "RS"
+     ],
+     "direction": "up-or-stay"
+    },
+    {
+     "cell": "css-text/hyphens/hyphens-out-of-flow-002.html web",
+     "from": "f 0.9411",
+     "to": "P 1 (replay W1-exact: ssim 1, 0 mismatched px)",
+     "kind": "flip (boxes 4-5 become box 7's runs shape)",
+     "confidence": "HIGH (branch R) / MED-HIGH (branch H)",
+     "floor": 0.995,
+     "gating": true,
+     "geometry": "GEOMETRY OK",
+     "units": [
+      "W1"
+     ],
+     "direction": "up-or-stay"
+    }
+   ],
+   "mustNotMove": [
+    "CSS2/abspos/between-float-and-text.html web",
+    "CSS2/abspos/hypothetical-inline-alone-on-second-line.html web",
+    "CSS2/abspos/static-inside-inline-001.html web",
+    "CSS2/abspos/static-inside-inline-002.html web",
+    "CSS2/abspos/static-inside-inline-003.html web",
+    "CSS2/abspos/static-inside-inline-block.html android",
+    "CSS2/abspos/static-inside-inline-block.html ios",
+    "css-break/block-in-inline-015-print.html ios",
+    "css-cascade/all-prop-001.html web",
+    "css-cascade/scope-pseudo-element.html android",
+    "css-cascade/scope-pseudo-element.html ios",
+    "css-display/display-flow-root-list-item-001.html android",
+    "css-display/display-flow-root-list-item-001.html ios",
+    "css-position/position-absolute-semi-replaced-stretch-input.html android",
+    "css-position/position-absolute-semi-replaced-stretch-input.html ios",
+    "css-position/position-absolute-semi-replaced-stretch-other.html android",
+    "css-position/position-absolute-semi-replaced-stretch-other.html ios",
+    "css-pseudo/first-letter-list-item-dynamic-001.html web",
+    "css-tables/abspos-container-change-dynamic-001.html web",
+    "css-text/hyphens/hyphens-auto-control.html web",
+    "css-text/hyphens/hyphens-auto-inline-010.html web",
+    "css-text/hyphens/hyphens-out-of-flow-001.html android",
+    "css-text/hyphens/hyphens-out-of-flow-001.html ios",
+    "css-text/hyphens/hyphens-out-of-flow-001.html web",
+    "css-text/hyphens/hyphens-out-of-flow-002.html android",
+    "css-text/hyphens/hyphens-out-of-flow-002.html ios",
+    "css-text/hyphens/hyphens-span-002.html web",
+    "css-ui/appearance-auto-input-non-widget-001.html android",
+    "css-ui/appearance-auto-input-non-widget-001.html ios",
+    "css-ui/box-sizing-007.html android",
+    "css-ui/box-sizing-007.html ios",
+    "css-ui/box-sizing-008.html android",
+    "css-ui/box-sizing-008.html ios",
+    "css-ui/box-sizing-009.html android",
+    "css-ui/box-sizing-009.html ios",
+    "css-ui/box-sizing-010.html android",
+    "css-ui/box-sizing-010.html ios",
+    "css-ui/box-sizing-011.html android",
+    "css-ui/box-sizing-011.html ios",
+    "css-ui/box-sizing-013.html android",
+    "css-ui/box-sizing-013.html ios",
+    "css-ui/box-sizing-014.html android",
+    "css-ui/box-sizing-014.html ios",
+    "css-ui/box-sizing-015.html android",
+    "css-ui/box-sizing-015.html ios",
+    "css-ui/box-sizing-016.html android",
+    "css-ui/box-sizing-016.html ios",
+    "css-ui/box-sizing-017.html android",
+    "css-ui/box-sizing-017.html ios",
+    "css-ui/box-sizing-018.html android",
+    "css-ui/box-sizing-018.html ios",
+    "css-ui/box-sizing-019.html android",
+    "css-ui/box-sizing-019.html ios",
+    "css-ui/box-sizing-020.html android",
+    "css-ui/box-sizing-020.html ios",
+    "css-ui/box-sizing-021.html android",
+    "css-ui/box-sizing-021.html ios",
+    "css-ui/box-sizing-022.html android",
+    "css-ui/box-sizing-022.html ios",
+    "css-ui/box-sizing-024.html android",
+    "css-ui/box-sizing-024.html ios",
+    "css-ui/box-sizing-025.html android",
+    "css-ui/box-sizing-025.html ios",
+    "css-values/attr-style-sharing-1.html android",
+    "css-values/attr-style-sharing-1.html ios",
+    "css-values/ch-unit-001.html web",
+    "css-writing-modes/baseline-with-orthogonal-flow-001.html android",
+    "css-writing-modes/baseline-with-orthogonal-flow-001.html ios"
+   ],
+   "geometryProbes": [
+    {
+     "cmd": "python3 tools/titan/results/wave54-plan/web-root-separator.geometry.py <run>",
+     "expect": {
+      "box-sizing-007 web": "GEOMETRY OK",
+      "box-sizing-008 web": "GEOMETRY OK",
+      "box-sizing-010 web": "GEOMETRY OK",
+      "box-sizing-013 web": "GEOMETRY OK",
+      "box-sizing-022 web": "GEOMETRY OK",
+      "position-absolute-semi-replaced-stretch-other web": "GEOMETRY OK",
+      "position-absolute-semi-replaced-stretch-input web": "GEOMETRY OK",
+      "box-sizing-007 ios": "GEOMETRY OK",
+      "box-sizing-007 android": "GEOMETRY OK",
+      "box-sizing-008 ios": "GEOMETRY OK",
+      "box-sizing-008 android": "GEOMETRY OK",
+      "box-sizing-010 ios": "GEOMETRY OK",
+      "box-sizing-010 android": "GEOMETRY OK",
+      "box-sizing-022 ios": "GEOMETRY OK",
+      "box-sizing-022 android": "GEOMETRY OK",
+      "box-sizing-011 web": "GEOMETRY OK",
+      "box-sizing-011 ios": "GEOMETRY OK",
+      "box-sizing-011 android": "GEOMETRY OK",
+      "box-sizing-014 web": "GEOMETRY OK",
+      "box-sizing-014 ios": "GEOMETRY OK",
+      "box-sizing-014 android": "GEOMETRY OK",
+      "box-sizing-015 web": "GEOMETRY OK",
+      "box-sizing-015 ios": "GEOMETRY OK",
+      "box-sizing-015 android": "GEOMETRY OK",
+      "box-sizing-016 web": "GEOMETRY OK",
+      "box-sizing-016 ios": "GEOMETRY OK",
+      "box-sizing-016 android": "GEOMETRY OK",
+      "box-sizing-017 web": "GEOMETRY OK",
+      "box-sizing-017 ios": "GEOMETRY OK",
+      "box-sizing-017 android": "GEOMETRY OK",
+      "box-sizing-018 web": "GEOMETRY OK",
+      "box-sizing-018 ios": "GEOMETRY OK",
+      "box-sizing-018 android": "GEOMETRY OK",
+      "box-sizing-019 web": "GEOMETRY OK",
+      "box-sizing-019 ios": "GEOMETRY OK",
+      "box-sizing-019 android": "GEOMETRY OK",
+      "box-sizing-020 web": "GEOMETRY OK",
+      "box-sizing-020 ios": "GEOMETRY OK",
+      "box-sizing-020 android": "GEOMETRY OK",
+      "box-sizing-021 web": "GEOMETRY OK",
+      "box-sizing-021 ios": "GEOMETRY OK",
+      "box-sizing-021 android": "GEOMETRY OK",
+      "box-sizing-024 web": "GEOMETRY OK",
+      "box-sizing-024 ios": "GEOMETRY OK",
+      "box-sizing-024 android": "GEOMETRY OK",
+      "box-sizing-025 web": "GEOMETRY OK",
+      "box-sizing-025 ios": "GEOMETRY OK",
+      "box-sizing-025 android": "GEOMETRY OK",
+      "box-sizing-013 ios": "GEOMETRY WRONG (second atom edge xNone vs ref x91 on row 150)",
+      "box-sizing-013 android": "GEOMETRY WRONG (second atom edge xNone vs ref x91 on row 150)",
+      "position-absolute-semi-replaced-stretch-other ios": "GEOMETRY WRONG (second atom edge xNone vs ref x192 on row 60)",
+      "position-absolute-semi-replaced-stretch-other android": "GEOMETRY WRONG (second atom edge xNone vs ref x192 on row 60)",
+      "position-absolute-semi-replaced-stretch-input ios": "GEOMETRY WRONG (second atom edge xNone vs ref x192 on row 60)",
+      "position-absolute-semi-replaced-stretch-input android": "GEOMETRY WRONG (second atom edge xNone vs ref x192 on row 60)"
+     },
+     "gating": {
+      "box-sizing-007 web": "RS",
+      "box-sizing-008 web": "RS",
+      "box-sizing-022 web": "RS"
+     },
+     "report": [
+      "box-sizing-010 web",
+      "box-sizing-011 web",
+      "box-sizing-013 web",
+      "box-sizing-014 web",
+      "box-sizing-015 web",
+      "box-sizing-016 web",
+      "box-sizing-017 web",
+      "box-sizing-018 web",
+      "box-sizing-019 web",
+      "box-sizing-020 web",
+      "box-sizing-021 web",
+      "box-sizing-024 web",
+      "box-sizing-025 web",
+      "position-absolute-semi-replaced-stretch-other web",
+      "position-absolute-semi-replaced-stretch-input web"
+     ],
+     "teeth": "fix r1 (plan-skeptic S2): after the recorded row, EVERY ref atom row band is checked on its middle row; the skeptic's partial fix (only the probed band separated) prints WRONG on 007 / 008 web (fix-r1/post-S2.rs-partial.out.txt), the ref itself 72/72 OK",
+     "note": "native rows are controls; box-sizing-013 and the semi-replaced natives keep their own (larger) native defects — their expected line is today's WRONG verdict, verbatim",
+     "onWave53Final": "every web row WRONG (x146 / xNone / x187); every ref row OK"
+    },
+    {
+     "cmd": "python3 tools/titan/results/wave54-plan/web-out-of-flow-hyphen-box.geometry.py <run>",
+     "expect": {
+      "hyphens/hyphens-span-002 web": "GEOMETRY OK",
+      "hyphens/hyphens-span-002 ios": "GEOMETRY OK",
+      "hyphens/hyphens-span-002 android": "GEOMETRY OK",
+      "hyphens/hyphens-out-of-flow-001 web": "GEOMETRY OK",
+      "hyphens/hyphens-out-of-flow-001 ios": "GEOMETRY OK",
+      "hyphens/hyphens-out-of-flow-001 android": "GEOMETRY OK",
+      "hyphens/hyphens-out-of-flow-002 web": "GEOMETRY OK",
+      "hyphens/hyphens-out-of-flow-002 ios": "GEOMETRY OK",
+      "hyphens/hyphens-out-of-flow-002 android": "GEOMETRY OK"
+     },
+     "gating": {
+      "hyphens/hyphens-out-of-flow-002 web": "W1"
+     },
+     "report": [],
+     "onWave53Final": "hyphens-out-of-flow-002 web WRONG (boxes 4,5 height 26 vs ref 46); every other row OK (anchor self-check)"
+    }
+   ],
+   "revertUnits": {
+    "RS": {
+     "commit": "apps/web-harness/src/ui/ComposedRootSeparator.ts (new) + ComposedRootSeparator.test.ts + the two ComposedCaptureGallery.tsx .map call sites + ComponentRenderer.tsx seam-1 (pure lift + export of the WWS branch as wsAfterSeparator)",
+     "captures": {
+      "web": [
+       "wpt__CSS2__abspos__static-inside-inline-block",
+       "wpt__css-break__block-in-inline-015-print",
+       "wpt__css-cascade__scope-pseudo-element",
+       "wpt__css-display__display-flow-root-list-item-001",
+       "wpt__css-position__overlay__overlay-button-appearance",
+       "wpt__css-position__position-absolute-semi-replaced-stretch-input",
+       "wpt__css-position__position-absolute-semi-replaced-stretch-other",
+       "wpt__css-ui__appearance-auto-input-non-widget-001",
+       "wpt__css-ui__box-sizing-007",
+       "wpt__css-ui__box-sizing-008",
+       "wpt__css-ui__box-sizing-009",
+       "wpt__css-ui__box-sizing-010",
+       "wpt__css-ui__box-sizing-011",
+       "wpt__css-ui__box-sizing-013",
+       "wpt__css-ui__box-sizing-014",
+       "wpt__css-ui__box-sizing-015",
+       "wpt__css-ui__box-sizing-016",
+       "wpt__css-ui__box-sizing-017",
+       "wpt__css-ui__box-sizing-018",
+       "wpt__css-ui__box-sizing-019",
+       "wpt__css-ui__box-sizing-020",
+       "wpt__css-ui__box-sizing-021",
+       "wpt__css-ui__box-sizing-022",
+       "wpt__css-ui__box-sizing-024",
+       "wpt__css-ui__box-sizing-025",
+       "wpt__css-values__attr-style-sharing-1",
+       "wpt__css-writing-modes__baseline-with-orthogonal-flow-001"
+      ],
+      "ios": [],
+      "android": []
+     },
+     "wire": [],
+     "revertOrder": [
+      "RS"
+     ]
+    },
+    "W1": {
+     "commit": "branch R/H2: runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts (new) + InlineRuns.ts (optional 4th arg, joinedOutOfFlowMembers) + NodeRenderer.ts :339 one line + tests/renderer/InertOutOfFlowWordJoin.test.tsx; branch H: ComponentRenderer.tsx seam-2 (renderText :991) INSTEAD of the runtime files",
+     "captures": {
+      "web": [
+       "wpt__css-text__hyphens__hyphens-out-of-flow-002"
+      ],
+      "ios": [],
+      "android": []
+     },
+     "wire": [],
+     "revertOrder": [
+      "W1"
+     ]
+    }
+   },
+   "step0": {
+    "what": "the CDP probe of web-out-of-flow-hyphen-box.md §5 (variants V0-V6, getBoundingClientRect heights, puppeteer Chromium, Inter embedded, 390-px viewport)",
+    "preRegistered": "V1 = 26, V3 = 46, V5 = 46; prediction (MED): V6 boxes 4/5 = 26 and V0 = 26 (branch R)",
+    "decision": {
+     "V6/V0 = 26": "branch R: W1 in the runtime",
+     "V6 = V0 = 46, V2 = 46, V1 = 26": "branch H: seam-2 (renderText) instead of W1, prediction rests on V2 (MED-HIGH)",
+     "V6 = 46, V2 = 26": "branch H2: bisect V2 -> V0 one attribute at a time; land W1 and record the bisect",
+     "V3 != 46": "STOP: the premise is false; W1 is not built, the -002 web row is withdrawn"
+    }
+   }
+  },
+  "L7-label-chrome": {
+   "dir": "tools/titan/results/wave54-label-chrome",
+   "briefs": [
+    "label-chrome-all-reset.md"
+   ],
+   "captureCarriers": {
+    "web": [],
+    "ios": [],
+    "android": []
+   },
+   "wireCarriers": [],
+   "carrierRule": "none in the corpus: WPT-mode captures draw no chrome on any platform; the radius is tools/visual/ (the tripwire, its exempt manifest, 18 new baseline PNGs)",
+   "probeSections": [],
+   "predictions": [
+    {
+     "cell": "tripwire: 001_ATC_PropsThenAll_InGreenParent / 003_ATC_InitialUnderRedParent / 005_ATC_DirectionSurvives RED -> green (exempt: container / container / text root; band rows 0..15 byte-identical x3) — HIGH (replay R1 on the same bytes)",
+     "from": "-",
+     "to": "-",
+     "kind": "non-corpus",
+     "confidence": "see PLAN",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U1",
+      "U2-seed"
+     ],
+     "direction": null
+    },
+    {
+     "cell": "tripwire: 000_ATC_AllThenProps / 002_reset / 004_span green with glyph px 224 / 80 / 65 — HIGH (R0/R1)",
+     "from": "-",
+     "to": "-",
+     "kind": "non-corpus",
+     "confidence": "see PLAN",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U1",
+      "U2-seed"
+     ],
+     "direction": null
+    },
+    {
+     "cell": "tripwire: the 130 committed stems green with verdict objects identical 130/130 — HIGH (R3)",
+     "from": "-",
+     "to": "-",
+     "kind": "non-corpus",
+     "confidence": "see PLAN",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U1"
+     ],
+     "direction": null
+    },
+    {
+     "cell": "tripwire: mutations m1-m5 red — HIGH (R2)",
+     "from": "-",
+     "to": "-",
+     "kind": "non-corpus",
+     "confidence": "see PLAN",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U1"
+     ],
+     "direction": null
+    },
+    {
+     "cell": "fixture net: fixtures/combinations/all-then-color.json exit 0 against committed baselines, \"no regressions vs baseline (18 platform-comparisons ran)\" — MED-HIGH, floor exit 0",
+     "from": "-",
+     "to": "-",
+     "kind": "non-corpus",
+     "confidence": "see PLAN",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U2-seed"
+     ],
+     "direction": null
+    },
+    {
+     "cell": "fresh seed byte-identical to label-chrome-all-reset.seeded-77fe41e8/ on 18/18 — MED (a wave-54 lane may legitimately move a pixel: then it is named and looked at, never waved through)",
+     "from": "-",
+     "to": "-",
+     "kind": "non-corpus",
+     "confidence": "see PLAN",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U2-seed"
+     ],
+     "direction": null
+    }
+   ],
+   "mustNotMove": [
+    "css-cascade/all-prop-001.html android",
+    "css-cascade/all-prop-001.html ios",
+    "css-cascade/all-prop-001.html web",
+    "css-cascade/all-prop-002.html android",
+    "css-cascade/all-prop-002.html ios",
+    "css-cascade/all-prop-002.html web",
+    "css-cascade/all-prop-inherit-color.html android",
+    "css-cascade/all-prop-inherit-color.html ios",
+    "css-cascade/all-prop-inherit-color.html web",
+    "css-cascade/all-prop-initial-color.html android",
+    "css-cascade/all-prop-initial-color.html ios",
+    "css-cascade/all-prop-initial-color.html web",
+    "css-cascade/all-prop-initial-visited.html android",
+    "css-cascade/all-prop-initial-visited.html ios",
+    "css-cascade/all-prop-initial-visited.html web",
+    "css-cascade/all-prop-revert-color.html android",
+    "css-cascade/all-prop-revert-color.html ios",
+    "css-cascade/all-prop-revert-color.html web",
+    "css-cascade/all-prop-unset-color.html android",
+    "css-cascade/all-prop-unset-color.html ios",
+    "css-cascade/all-prop-unset-color.html web",
+    "css-display/display-contents-button.html android",
+    "css-display/display-contents-button.html ios",
+    "css-display/display-contents-button.html web",
+    "css-display/display-contents-details.html android",
+    "css-display/display-contents-details.html ios",
+    "css-display/display-contents-details.html web",
+    "css-display/display-contents-fieldset.html android",
+    "css-display/display-contents-fieldset.html ios",
+    "css-display/display-contents-fieldset.html web",
+    "css-ui/appearance-revert-001.tentative.html android",
+    "css-ui/appearance-revert-001.tentative.html ios",
+    "css-ui/appearance-revert-001.tentative.html web"
+   ],
+   "geometryProbes": [],
+   "geometrySeed": {
+    "cmd": "python3 tools/titan/results/wave54-plan/label-chrome-all-reset.geometry.py baseline",
+    "expect": "18 x \"→ GEOMETRY OK\", 6 x \"band rows 0..15 byte-identical ×3: True\", \"label drawn ⇔ label-due …: 18/18\", exit 0",
+    "teeth": "--naive prints GEOMETRY WRONG on 001/003/005 x3 and exits 1",
+    "onSeededCopy": "18 OK on label-chrome-all-reset.seeded-77fe41e8/ (executed at planning)"
+   },
+   "revertUnits": {
+    "U1": {
+     "commit": "tools/visual/label-chrome-tripwire.test.mjs (verified exempt manifest, P = empty path, clause (iv), synthetic controls, hint on red) + tools/visual/label-chrome-exempt.json (new) + optional tools/visual/label-chrome-check.mjs (new, the pure checker)",
+     "captures": {
+      "web": [],
+      "ios": [],
+      "android": []
+     },
+     "wire": [],
+     "revertOrder": [
+      "U2-seed",
+      "U1"
+     ]
+    },
+    "U2-seed": {
+     "commit": "the 18 tools/visual/baseline/{Android,iOS,web}__00{0..5}_*.png from UPDATE_BASELINE=1 ./test-all.sh fixtures/combinations/all-then-color.json on the CLOSING tree + the orchestrator doc lines (DYNAMIC_CAPTURE.md §5, tripwire header 130 -> 136 / 390 -> 408, STATUS.md:19, tooling counts, gate-fixtures.txt comment, fixture _comment, BACKLOG 0(e), wave53-gate/_note.md + STATUS.md:2678 correction lines)",
+     "captures": {
+      "web": [],
+      "ios": [],
+      "android": []
+     },
+     "wire": [],
+     "revertOrder": [
+      "U2-seed"
+     ],
+     "note": "PNGs without U1 re-create the wave-53 red in CI test-tooling: U2-seed is reverted before U1, never after"
+    }
+   }
+  }
+ },
+ "pictureCorrectTally": {
+  "full": [
+   {
+    "cell": "css-counter-styles/counter-suffix.html web",
+    "key": "rtl-marker-bake.geometry.py [M] counter-suffix web"
+   },
+   {
+    "cell": "CSS2/css21-errata/s-11-1-1b-006.html android",
+    "key": "compose-table-body-cell.geometry.py 006 android"
+   },
+   {
+    "cell": "css-overflow/line-clamp/block-ellipsis-002.html web",
+    "key": "block-ellipsis-br.geometry.py block-ellipsis-002 web"
+   },
+   {
+    "cell": "css-overflow/line-clamp/block-ellipsis-004.html web",
+    "key": "block-ellipsis-br.geometry.py block-ellipsis-004 web"
+   },
+   {
+    "cell": "css-overflow/line-clamp/block-ellipsis-005.html web",
+    "key": "block-ellipsis-br.geometry.py block-ellipsis-005 web"
+   },
+   {
+    "cell": "css-overflow/line-clamp/block-ellipsis-006.html web",
+    "key": "block-ellipsis-br.geometry.py block-ellipsis-006 web"
+   },
+   {
+    "cell": "css-position/position-relative-004.html ios",
+    "key": "oof-containing-block.geometry.py position-relative-004 ios"
+   },
+   {
+    "cell": "css-position/position-relative-004.html android",
+    "key": "oof-containing-block.geometry.py position-relative-004 android"
+   },
+   {
+    "cell": "css-position/change-insets-inside-strict-containment-nested.html ios",
+    "key": "oof-containing-block.geometry.py change-insets-inside-strict-containment-nested ios"
+   },
+   {
+    "cell": "css-position/change-insets-inside-strict-containment-nested.html android",
+    "key": "oof-containing-block.geometry.py change-insets-inside-strict-containment-nested android"
+   },
+   {
+    "cell": "CSS2/abspos/static-fixed-inside-abspos.html ios",
+    "key": "oof-containing-block.geometry.py abspos/static-fixed-inside-abspos ios"
+   },
+   {
+    "cell": "CSS2/abspos/static-fixed-inside-abspos.html android",
+    "key": "oof-containing-block.geometry.py abspos/static-fixed-inside-abspos android"
+   },
+   {
+    "cell": "css-position/position-relative-003.html ios",
+    "key": "oof-containing-block.geometry.py position-relative-003 ios"
+   },
+   {
+    "cell": "css-position/position-relative-003.html android",
+    "key": "oof-containing-block.geometry.py position-relative-003 android"
+   },
+   {
+    "cell": "css-flexbox/abspos/abspos-autopos-htb-ltr.html android",
+    "key": "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-htb-ltr android"
+   },
+   {
+    "cell": "css-flexbox/abspos/abspos-autopos-vlr-ltr.html android",
+    "key": "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vlr-ltr android"
+   },
+   {
+    "cell": "css-flexbox/abspos/abspos-autopos-vrl-ltr.html android",
+    "key": "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vrl-ltr android"
+   },
+   {
+    "cell": "css-flexbox/abspos/abspos-autopos-htb-rtl.html android",
+    "key": "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-htb-rtl android"
+   },
+   {
+    "cell": "css-flexbox/abspos/abspos-autopos-vlr-rtl.html android",
+    "key": "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vlr-rtl android"
+   },
+   {
+    "cell": "css-flexbox/abspos/abspos-autopos-vrl-rtl.html android",
+    "key": "compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vrl-rtl android"
+   },
+   {
+    "cell": "filter-effects/backdrop-filter-nested-border-radius-clip.html android",
+    "key": "compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip android"
+   },
+   {
+    "cell": "filter-effects/backdrop-filter-nested-border-radius-clip-2.html android",
+    "key": "compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-2 android"
+   },
+   {
+    "cell": "filter-effects/backdrop-filter-nested-border-radius-clip-4.html android",
+    "key": "compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-4 android"
+   },
+   {
+    "cell": "css-ui/box-sizing-010.html web",
+    "key": "web-root-separator.geometry.py box-sizing-010 web"
+   },
+   {
+    "cell": "css-ui/box-sizing-011.html web",
+    "key": "web-root-separator.geometry.py box-sizing-011 web"
+   },
+   {
+    "cell": "css-ui/box-sizing-013.html web",
+    "key": "web-root-separator.geometry.py box-sizing-013 web"
+   },
+   {
+    "cell": "css-ui/box-sizing-014.html web",
+    "key": "web-root-separator.geometry.py box-sizing-014 web"
+   },
+   {
+    "cell": "css-ui/box-sizing-015.html web",
+    "key": "web-root-separator.geometry.py box-sizing-015 web"
+   },
+   {
+    "cell": "css-ui/box-sizing-016.html web",
+    "key": "web-root-separator.geometry.py box-sizing-016 web"
+   },
+   {
+    "cell": "css-ui/box-sizing-017.html web",
+    "key": "web-root-separator.geometry.py box-sizing-017 web"
+   },
+   {
+    "cell": "css-ui/box-sizing-018.html web",
+    "key": "web-root-separator.geometry.py box-sizing-018 web"
+   },
+   {
+    "cell": "css-ui/box-sizing-019.html web",
+    "key": "web-root-separator.geometry.py box-sizing-019 web"
+   },
+   {
+    "cell": "css-ui/box-sizing-020.html web",
+    "key": "web-root-separator.geometry.py box-sizing-020 web"
+   },
+   {
+    "cell": "css-ui/box-sizing-021.html web",
+    "key": "web-root-separator.geometry.py box-sizing-021 web"
+   },
+   {
+    "cell": "css-ui/box-sizing-024.html web",
+    "key": "web-root-separator.geometry.py box-sizing-024 web"
+   },
+   {
+    "cell": "css-ui/box-sizing-025.html web",
+    "key": "web-root-separator.geometry.py box-sizing-025 web"
+   },
+   {
+    "cell": "css-position/position-absolute-semi-replaced-stretch-input.html web",
+    "key": "web-root-separator.geometry.py position-absolute-semi-replaced-stretch-input web"
+   }
+  ],
+  "part": [
+   {
+    "cell": "css-counter-styles/counter-suffix.html ios",
+    "key": "rtl-marker-bake.geometry.py [M] counter-suffix ios"
+   },
+   {
+    "cell": "css-counter-styles/counter-suffix.html android",
+    "key": "rtl-marker-bake.geometry.py [M] counter-suffix android"
+   }
+  ],
+  "rule": "a cell is counted picture-correct at the closing gate ONLY when its key prints \"→ GEOMETRY OK\" on the closing run (geometry-gate.py); a pass whose key is not OK stays DEGENERATE and is not counted"
+ },
+ "probeDecisions": {
+  "reverted": [
+   {
+    "lane": "L1-rtl-marker-bake",
+    "unit": "Mprime",
+    "run": "wave54-pre",
+    "commit": "x",
+    "revertCommit": "y",
+    "rule": "4",
+    "withdrawnPredictions": [
+     "css-counter-styles/counter-suffix.html web",
+     "css-counter-styles/counter-suffix.html ios"
+    ],
+    "mustNotMoveAfter": [
+     "css-counter-styles/counter-suffix.html web",
+     "css-counter-styles/counter-suffix.html ios"
+    ],
+    "withdrawnGeometryKeys": [
+     "rtl-marker-bake.geometry.py [M] counter-suffix android",
+     "rtl-marker-bake.geometry.py [M] counter-suffix ios",
+     "rtl-marker-bake.geometry.py [M] counter-suffix web",
+     "lists-bakes.geometry.py counter-suffix android",
+     "lists-bakes.geometry.py counter-suffix web"
+    ],
+    "carriersWithdrawn": {
+     "captures": {
+      "web": [
+       "wpt__css-counter-styles__counter-suffix"
+      ],
+      "ios": [
+       "wpt__css-counter-styles__counter-suffix"
+      ],
+      "android": []
+     },
+     "wire": []
+    }
+   },
+   {
+    "lane": "L2-table-body-cell",
+    "unit": "TB-android",
+    "run": "wave54-pre",
+    "commit": "x",
+    "revertCommit": "y",
+    "rule": "4",
+    "withdrawnPredictions": [
+     "CSS2/css21-errata/s-11-1-1b-006.html android"
+    ],
+    "mustNotMoveAfter": [
+     "CSS2/css21-errata/s-11-1-1b-006.html android"
+    ],
+    "withdrawnGeometryKeys": [
+     "compose-table-body-cell.geometry.py 006 android",
+     "display-table-body.geometry.py 006 android"
+    ],
+    "carriersWithdrawn": {
+     "captures": {
+      "web": [],
+      "ios": [],
+      "android": [
+       "wpt__CSS2__css21-errata__s-11-1-1b-006"
+      ]
+     },
+     "wire": []
+    }
+   },
+   {
+    "lane": "L3-hyphenate-character",
+    "unit": "U3b",
+    "run": "wave54-probe",
+    "commit": "x",
+    "revertCommit": "y",
+    "rule": "8",
+    "withdrawnPredictions": [],
+    "mustNotMoveAfter": [],
+    "withdrawnGeometryKeys": [],
+    "carriersWithdrawn": {
+     "captures": {
+      "web": [],
+      "ios": [],
+      "android": []
+     },
+     "wire": []
+    }
+   }
+  ]
+ }
+}

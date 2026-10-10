@@ -1,0 +1,9 @@
+[G1-gate-never-stands-down] MUTATED runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 c78f355705a8c45f → fbe1cf3f842dc4f8
+[G1-gate-never-stands-down] red: gradle rc=1 (log tools/titan/results/wave54-ua-heading-face/fix/runs/G1-gate-never-stands-down.red.log)
+[G1-gate-never-stands-down] red: UAElementFontRuleTest tests=10 failures=1 errors=0 ts=2026-10-08T19:56:56.285Z
+[G1-gate-never-stands-down] red:   RED GO-SMALL - every heading host with child boxes keeps its list (005, 006, 014 held, 011 control) :: java.lang.AssertionError: text-decoration-inset-005__1__0-069
+[G1-gate-never-stands-down] red: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:56:56.373Z
+[G1-gate-never-stands-down] restored runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256=c78f355705a8c45f BYTE-EXACT
+[G1-gate-never-stands-down] green: gradle rc=0 (log tools/titan/results/wave54-ua-heading-face/fix/runs/G1-gate-never-stands-down.green.log)
+[G1-gate-never-stands-down] green: UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T19:56:58.119Z
+[G1-gate-never-stands-down] green: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:56:58.660Z

@@ -1,0 +1,9 @@
+[F-M1-drop-own-guard] MUTATED runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 c78f355705a8c45f → 7efb8f43f713c264
+[F-M1-drop-own-guard] red: gradle rc=1 (log tools/titan/results/wave54-ua-heading-face/fix/runs/F-M1-drop-own-guard.red.log)
+[F-M1-drop-own-guard] red: UAElementFontRuleTest tests=10 failures=1 errors=0 ts=2026-10-08T19:57:09.638Z
+[F-M1-drop-own-guard] red:   RED inset-001 - the extractor-baked h1 (own 32 and 700) comes back as the SAME list :: java.lang.AssertionError: expected same:<[IRProperty(type=Color, data={"srgb":{"r":0,"g":0,"b":0},"original":"black"}), IRProperty(type=Position, data="ABSOLUTE"), IRProp
+[F-M1-drop-own-guard] red: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:57:09.713Z
+[F-M1-drop-own-guard] restored runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256=c78f355705a8c45f BYTE-EXACT
+[F-M1-drop-own-guard] green: gradle rc=0 (log tools/titan/results/wave54-ua-heading-face/fix/runs/F-M1-drop-own-guard.green.log)
+[F-M1-drop-own-guard] green: UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T19:57:10.910Z
+[F-M1-drop-own-guard] green: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:57:11.322Z

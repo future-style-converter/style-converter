@@ -1,0 +1,6 @@
+documents 48: identical 48 · renumbered 0 · content-changed 0
+ok   content-changed ⊆ L1 wire carriers: []
+ok   wpt__selectors__dir-style-02a byte-identical (zero-padding roots, pin V3b)
+ok   wpt__selectors__dir-selector-change-003 byte-identical (zero-padding roots, pin V3b)
+ok   wpt__selectors__dir-selector-change-004 byte-identical (zero-padding roots, pin V3b)
+W2 CHECK: ALL PASS

@@ -1,0 +1,18 @@
+== wave53-final
+flex/flex-gap-decorations-033 ref      {'red': (61, 16, 120, 165), 'redPx': 2200, 'blue': (16, 61, 165, 120), 'bluePx': 3000, 'redRuns': {20: [(61, 70), (111, 120)], 95: [(111, 120)], 145: [(61, 70), (111, 120)]}, 'blueRuns': {40: [(61, 70), (111, 120)], 90: [(61, 70), (111, 120)], 140: [(61, 70), (111, 120)]}} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {'red': (61, 16, 120, 165), 'redPx': 2200, 'blue': (16, 61, 165, 120), 'bluePx': 3000, 'redRuns': {20: [(61, 70), (111, 120)], 95: [(111, 120)], 145: [(61, 70), (111, 120)]}, 'blueRuns': {40: [(61, 70), (111, 120)], 90: [(61, 70), (111, 120)], 140: [(61, 70), (111, 120)]}} → GEOMETRY OK
+flex/flex-gap-decorations-033 ios      {'red': None, 'redPx': 0, 'blue': None, 'bluePx': 0, 'redRuns': {20: [], 95: [], 145: []}, 'blueRuns': {40: [], 90: [], 140: []}} → GEOMETRY WRONG (redPx 0 vs ref 2200)
+flex/flex-gap-decorations-033 android  {'red': None, 'redPx': 0, 'blue': None, 'bluePx': 0, 'redRuns': {20: [], 95: [], 145: []}, 'blueRuns': {40: [], 90: [], 140: []}} → GEOMETRY WRONG (redPx 0 vs ref 2200)
+exit 0
+== wave54-open
+flex/flex-gap-decorations-033 ref      {'red': (61, 16, 120, 165), 'redPx': 2200, 'blue': (16, 61, 165, 120), 'bluePx': 3000, 'redRuns': {20: [(61, 70), (111, 120)], 95: [(111, 120)], 145: [(61, 70), (111, 120)]}, 'blueRuns': {40: [(61, 70), (111, 120)], 90: [(61, 70), (111, 120)], 140: [(61, 70), (111, 120)]}} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {'red': (61, 16, 120, 165), 'redPx': 2200, 'blue': (16, 61, 165, 120), 'bluePx': 3000, 'redRuns': {20: [(61, 70), (111, 120)], 95: [(111, 120)], 145: [(61, 70), (111, 120)]}, 'blueRuns': {40: [(61, 70), (111, 120)], 90: [(61, 70), (111, 120)], 140: [(61, 70), (111, 120)]}} → GEOMETRY OK
+flex/flex-gap-decorations-033 ios      {'red': None, 'redPx': 0, 'blue': None, 'bluePx': 0, 'redRuns': {20: [], 95: [], 145: []}, 'blueRuns': {40: [], 90: [], 140: []}} → GEOMETRY WRONG (redPx 0 vs ref 2200)
+flex/flex-gap-decorations-033 android  {'red': None, 'redPx': 0, 'blue': None, 'bluePx': 0, 'redRuns': {20: [], 95: [], 145: []}, 'blueRuns': {40: [], 90: [], 140: []}} → GEOMETRY WRONG (redPx 0 vs ref 2200)
+exit 0
+== ../results/wave54-plan/skeptic-r2/fake-gap
+flex/flex-gap-decorations-033 ref      {'red': (61, 16, 120, 165), 'redPx': 2200, 'blue': (16, 61, 165, 120), 'bluePx': 3000, 'redRuns': {20: [(61, 70), (111, 120)], 95: [(111, 120)], 145: [(61, 70), (111, 120)]}, 'blueRuns': {40: [(61, 70), (111, 120)], 90: [(61, 70), (111, 120)], 140: [(61, 70), (111, 120)]}} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {'red': (61, 16, 120, 165), 'redPx': 2200, 'blue': (16, 61, 165, 120), 'bluePx': 3000, 'redRuns': {20: [(61, 70), (111, 120)], 95: [(61, 70)], 145: [(61, 70), (111, 120)]}, 'blueRuns': {40: [(61, 70), (111, 120)], 90: [(61, 70), (111, 120)], 140: [(61, 70), (111, 120)]}} → GEOMETRY WRONG (red runs row 95 [(61, 70)] vs ref [(111, 120)])
+flex/flex-gap-decorations-033 ios      {'red': (61, 16, 120, 165), 'redPx': 2200, 'blue': (16, 61, 165, 120), 'bluePx': 3000, 'redRuns': {20: [(61, 70), (111, 120)], 95: [(61, 70)], 145: [(61, 70), (111, 120)]}, 'blueRuns': {40: [(61, 70), (111, 120)], 90: [(61, 70), (111, 120)], 140: [(61, 70), (111, 120)]}} → GEOMETRY WRONG (red runs row 95 [(61, 70)] vs ref [(111, 120)])
+flex/flex-gap-decorations-033 android  {'red': (61, 16, 120, 165), 'redPx': 2200, 'blue': (16, 61, 165, 120), 'bluePx': 3000, 'redRuns': {20: [(61, 70), (111, 120)], 95: [(61, 70)], 145: [(61, 70), (111, 120)]}, 'blueRuns': {40: [(61, 70), (111, 120)], 90: [(61, 70), (111, 120)], 140: [(61, 70), (111, 120)]}} → GEOMETRY WRONG (red runs row 95 [(61, 70)] vs ref [(111, 120)])
+exit 0

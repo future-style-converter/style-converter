@@ -1,0 +1,8 @@
+abs-pos-border-offset-001 ios: ref boxes 36, native boxes 36, box-identical to ref 6/36
+abs-pos-border-offset-001 android: ref boxes 36, native boxes 36, box-identical to ref 6/36
+abs-pos-border-offset-002 ios: ref boxes 64, native boxes 64, box-identical to ref 0/64
+abs-pos-border-offset-002 android: ref boxes 64, native boxes 64, box-identical to ref 0/64
+abs-pos-border-offset-001 ios rows-only composite ssim 0.9063
+abs-pos-border-offset-001 android rows-only composite ssim 0.906
+abs-pos-border-offset-002 ios rows-only composite ssim 0.8368
+abs-pos-border-offset-002 android rows-only composite ssim 0.8395

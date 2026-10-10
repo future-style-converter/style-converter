@@ -1,0 +1,26 @@
+{
+ "S1-m1": {
+  "what": "NodeRenderer arms the join for EVERY host (= S1's surviving SK6-w7)",
+  "file": "runtimes/web/src/renderer/NodeRenderer.ts",
+  "old": "{ hyphensAuto: styles.hyphens === 'auto' }",
+  "new": "{ hyphensAuto: true }"
+ },
+ "S1-m2": {
+  "what": "NodeRenderer gate widened to any non-manual hyphens (= the L6 skeptic's SK6-w8)",
+  "file": "runtimes/web/src/renderer/NodeRenderer.ts",
+  "old": "{ hyphensAuto: styles.hyphens === 'auto' }",
+  "new": "{ hyphensAuto: styles.hyphens !== 'manual' }"
+ },
+ "S1-m3": {
+  "what": "the join breadcrumb never fires (the pre-fix silence)",
+  "file": "runtimes/web/src/renderer/InlineRuns.ts",
+  "old": "  if (join.joined > 0) {",
+  "new": "  if (join.joined < 0) {"
+ },
+ "S1-m4": {
+  "what": "the join breadcrumb fires for every resolved host, joined or not",
+  "file": "runtimes/web/src/renderer/InlineRuns.ts",
+  "old": "  if (join.joined > 0) {",
+  "new": "  if (join.joined >= 0) {"
+ }
+}

@@ -1,0 +1,25 @@
+u3: fixtures changed 18, brs 54, NON-BR fixture changes 0, refFixtures changed 22 (non-br 0)
+   css/css-cascade/revert-layer-006.html 6 20px->0px
+   css/css-cascade/revert-val-001.html 6 20px->0px
+   css/css-cascade/revert-val-002.html 6 20px->0px
+   css/css-masking/clip-path/clip-path-filter-order.html 1 20px->0px
+   css/css-multicol/balance-grid-container.html 2 20px->0px
+   css/css-multicol/column-height-009.html 15 20px->0px
+   css/css-overflow/line-clamp/block-ellipsis-002.html 2 20px->0px
+   css/css-overflow/line-clamp/block-ellipsis-004.html 1 20px->0px
+   css/css-overflow/line-clamp/block-ellipsis-005.html 1 20px->0px
+   css/css-overflow/line-clamp/block-ellipsis-006.html 1 20px->0px
+   css/css-text/hyphens/hyphenate-character-001.html 2 20px->0px
+   css/css-text/hyphens/hyphenate-character-002.html 2 20px->0px
+   css/css-text/hyphens/hyphenate-character-003.html 2 20px->0px
+   css/css-text/hyphens/hyphenate-character-004.html 2 20px->0px
+   css/filter-effects/backdrop-filter-clip-rect.html 2 20px->0px
+   css/filter-effects/backdrop-filter-edge-clipping.html 1 20px->0px
+   css/filter-effects/backdrop-filter-paint-order.html 1 20px->0px
+   css/filter-effects/backdrop-filter-plus-filter.html 1 20px->0px
+u3b: fixtures changed 4, brs 12, NON-BR fixture changes 0, refFixtures changed 4 (non-br 0)
+   css/css-text/hyphens/hyphenate-character-001.html 3 20px->19.2px
+   css/css-text/hyphens/hyphenate-character-002.html 3 20px->19.2px
+   css/css-text/hyphens/hyphenate-character-003.html 3 20px->19.2px
+   css/css-text/hyphens/hyphenate-character-004.html 3 20px->19.2px
+tests 1435 extraction errors 0

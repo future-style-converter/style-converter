@@ -1,0 +1,7 @@
+-002 web capture (gate: f 0.9411)        ssim 0.9411 pass 
+-002 ios capture (gate: P 0.9971)        ssim 0.9971 pass 
+-002 android capture (gate: P 0.9943)    ssim 0.9943 pass 
+-001 web capture (gate: P 1)             ssim 1 pass 
+-002 web W1 replay (boxes 4,5 := 7)      ssim 1 pass 
+-002 web W1-exact (boxes 3-6 := 7)       ssim 1 pass 
+-001 web W1-exact, ungated (3,6 := 7)    ssim 1 pass 

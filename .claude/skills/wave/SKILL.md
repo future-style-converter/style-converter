@@ -166,8 +166,9 @@ One full sweep on the merged tree — **single-writer, sequential, run by
 the orchestrator alone** (all suites, exact counts — remember skeptic/fix
 lanes add tests, so counts move late). The sweep is: converter
 (`--rerun-tasks`), web runtime, compose `:runtime:testDebugUnitTest
---rerun-tasks`, **android-harness `:app:testDebugUnitTest`**, swiftui
-(Catalyst), **`npm -w apps/web-harness run test`**, tooling (`node --test
+--rerun-tasks`, **android-harness `:app:testDebugUnitTest --rerun-tasks`**
+(without the flag the task comes back UP-TO-DATE in ~1 s and stamps a count
+that ran no tests — wave 54 saw it twice), swiftui (Catalyst), **`npm -w apps/web-harness run test`**, tooling (`node --test
 tools/visual/*.test.mjs tools/titan/*.test.mjs`), IR conformance (`node
 schema/conformance/run.mjs --emit`). The two harness suites pin the
 em-margin ladder, the flow-root rule and the root-clip web rule and were
@@ -235,10 +236,28 @@ rules from the retrospective, none optional:
   the closing gate** — a replay composited onto the web picture cannot
   predict native row assignment (wave 53 U2: SSIM rose 0.9547 → 0.9793 with
   every Android marker on the wrong row; only the geometry row caught it).
-- **The installed-build hash is read right after provisioning** (the one-shot
-  `until grep 'attempt 1 starting' <driver log>` wait), never during the
-  fixture net — `test-all.sh` rebuilds and reinstalls the iOS harness per
-  fixture, so a mid-net read finds the built .app missing.
+- **The installed-build hash of record is the CORPUS launch's read right
+  after `provision rc=0`** (the one-shot `until grep 'attempt 1 starting'
+  <driver log>` wait). A fixture-net launch's read is annotated, never of
+  record: `test-all.sh` rebuilds and reinstalls the iOS harness per fixture,
+  so even a read seconds after provisioning finds the built .app missing
+  (wave 53; confirmed wave 54), and a post-net re-read comes after the
+  driver's teardown.
+- **A floor on a geometry-gated prediction row is the pass threshold
+  (0.95), never a replay magnitude**: wave 54's two L3 iOS rows missed a
+  0.965 replay estimate by ~0.02 with their geometry keys PASS and faithful
+  pictures, and rule 3 read literally would have reverted three
+  picture-correct units (PLAN §10 item 7). The geometry key is the
+  picture-correctness gate; the magnitude is the row's `to`.
+- **A landing script's `--check` / dry-run path runs no destructive step**
+  (`git checkout`, `rm`, `git apply`) and is first exercised in a throwaway
+  worktree: wave 54's `land-units.sh --check` rewound the shared files and
+  wiped a lane's in-tree edits (restored byte-exact from its unit patches).
+- **While any instrument is still writing, orchestrator commits stage named
+  paths only** — a directory-wide `git add` captured 379 half-written
+  per-test-IR files and a 0-byte differential output (wave 54, c7e37409);
+  lane evidence of record is `.txt` (or force-added): `*.log` is gitignored
+  and 104 cited logs had to be force-added before the closing gate.
 
 The gate contract (post-overhaul): exit 3 aborts a section (fix the
 capture, never the check); exit 4 → fix or ledger with reason/owner/expires

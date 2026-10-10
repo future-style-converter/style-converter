@@ -1,0 +1,34 @@
+[baseline] rc=0 	 Executed 25 tests, with 0 failures (0 unexpected) in 0.132 (0.227) seconds
+[M3s-old-hasChildren-gate] runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift sha256 before=2ca760a686e7 mutated=7e189b269366
+[M3s-old-hasChildren-gate] mutated: rc=65
+[M3s-old-hasChildren-gate] mutated: Executed 25 tests, with 5 failures (0 unexpected) in 1.616 (1.792) seconds
+[M3s-old-hasChildren-gate] mutated:   RED UAHeadingFoldGateTests testInset005FoldedHostTakesTheFace
+[M3s-old-hasChildren-gate] mutated:   RED UAHeadingFoldGateTests testInset006FoldedHostTakesTheFace
+[M3s-old-hasChildren-gate] mutated:   RED UAHeadingFoldGateTests testInset014FoldedMonospaceHostTakesTwentySix
+[M3s-old-hasChildren-gate] restored sha256=2ca760a686e7 BYTE-EXACT
+[M3s-old-hasChildren-gate] restored: rc=0
+[M3s-old-hasChildren-gate] restored: Executed 25 tests, with 0 failures (0 unexpected) in 0.188 (0.268) seconds
+[M5s-ua-step-writes-color] runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAElementFontRule.swift sha256 before=97146660949b mutated=62b01672067f
+[M5s-ua-step-writes-color] mutated: rc=65
+[M5s-ua-step-writes-color] mutated: Executed 25 tests, with 3 failures (0 unexpected) in 5.592 (5.933) seconds
+[M5s-ua-step-writes-color] mutated:   RED UAHeadingFoldGateTests testFoldVerdictIsInvariantUnderTheUAFace
+[M5s-ua-step-writes-color] restored sha256=97146660949b BYTE-EXACT
+[M5s-ua-step-writes-color] restored: rc=0
+[M5s-ua-step-writes-color] restored: Executed 25 tests, with 0 failures (0 unexpected) in 0.321 (0.720) seconds
+[S6-gate-fold-on-empty-list] runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift sha256 before=2ca760a686e7 mutated=95b75d005338
+[S6-gate-fold-on-empty-list] mutated: rc=65
+[S6-gate-fold-on-empty-list] mutated: Executed 25 tests, with 5 failures (0 unexpected) in 1.890 (2.076) seconds
+[S6-gate-fold-on-empty-list] mutated:   RED UAHeadingFoldGateTests testInset005FoldedHostTakesTheFace
+[S6-gate-fold-on-empty-list] mutated:   RED UAHeadingFoldGateTests testInset006FoldedHostTakesTheFace
+[S6-gate-fold-on-empty-list] mutated:   RED UAHeadingFoldGateTests testInset014FoldedMonospaceHostTakesTwentySix
+[S6-gate-fold-on-empty-list] restored sha256=2ca760a686e7 BYTE-EXACT
+[S6-gate-fold-on-empty-list] restored: rc=0
+[S6-gate-fold-on-empty-list] restored: Executed 25 tests, with 0 failures (0 unexpected) in 0.214 (0.226) seconds
+[S7-gate-ignores-runs] runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift sha256 before=2ca760a686e7 mutated=cf0d02f6bf16
+[S7-gate-ignores-runs] mutated: rc=65
+[S7-gate-ignores-runs] mutated: Executed 25 tests, with 2 failures (0 unexpected) in 17.263 (18.477) seconds
+[S7-gate-ignores-runs] mutated:   RED UAHeadingFoldGateTests testInset011BailingHostStandsDown
+[S7-gate-ignores-runs] restored sha256=2ca760a686e7 BYTE-EXACT
+[S7-gate-ignores-runs] restored: rc=0
+[S7-gate-ignores-runs] restored: Executed 25 tests, with 0 failures (0 unexpected) in 0.061 (0.381) seconds
+BATCH-DONE

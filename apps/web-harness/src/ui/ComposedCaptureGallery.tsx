@@ -75,7 +75,11 @@ import {
 // below a table box, so Chrome runs CSS 2.1 §17.2.1's fixup itself.
 import { resolveCanvasTableBody } from './CanvasTableBody';
 import { composeTree } from '../sdui/Composer';
-import { ComponentRenderer } from '../sdui/ComponentRenderer';
+// wave-54 lane L6 (RS): the WWS predicate lifted out of renderChildSeparator,
+// handed to the root walk below so roots are spaced by the child-level rule.
+import { ComponentRenderer, wsAfterSeparator } from '../sdui/ComponentRenderer';
+// wave-54 lane L6 (RS): the root-level twin of NodeRenderer's separator slot.
+import { interleaveRootSeparators, rootSeparatorContainer } from './ComposedRootSeparator';
 
 /**
  * The pipeline's default composed-canvas background — the WHITE the ref
@@ -1067,20 +1071,22 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
               ...(canvasTableBody?.borderSpacing ? { borderSpacing: canvasTableBody.borderSpacing } : {}),
             }}
           >
-            {flowRoots.map((root, i) => (
+            {/* wave-54 L6 (RS): source whitespace between inline-level roots → one ' ' (ComposedRootSeparator.ts). */}
+            {interleaveRootSeparators(flowRoots, (root, i) => (
               <RootErrorBoundary key={root.component.id || i} componentId={root.component.id}>
                 <ComponentRenderer node={root} />
               </RootErrorBoundary>
-            ))}
+            ), rootSeparatorContainer(doc, canvasTableBody), wsAfterSeparator)}
           </div>
         ) : (
           // wave-53 L3 (item A): the forest minus the canvas-owned image
           // layers — the SAME array as `roots` for every plan-less document.
-          canvasRoots.map((root, i) => (
+          // wave-54 L6 (RS): the same root-level separator, in the ICB's flow-root.
+          interleaveRootSeparators(canvasRoots, (root, i) => (
             <RootErrorBoundary key={root.component.id || i} componentId={root.component.id}>
               <ComponentRenderer node={root} />
             </RootErrorBoundary>
-          ))
+          ), rootSeparatorContainer(doc, canvasTableBody), wsAfterSeparator)
         )}
       </div>
     </div>

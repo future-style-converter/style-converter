@@ -1,0 +1,83 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "e-001",
+            "name": "E",
+            "properties": [
+                {
+                    "type": "HyphenateCharacter",
+                    "data": {
+                        "type": "string",
+                        "value": ""
+                    }
+                }
+            ]
+        },
+        {
+            "id": "b-002",
+            "name": "B",
+            "properties": [
+                {
+                    "type": "HyphenateCharacter",
+                    "data": {
+                        "type": "string",
+                        "value": "•"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "k-003",
+            "name": "K",
+            "properties": [
+                {
+                    "type": "HyphenateCharacter",
+                    "data": {
+                        "type": "string",
+                        "value": " ـ"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "s-004",
+            "name": "S",
+            "properties": [
+                {
+                    "type": "HyphenateCharacter",
+                    "data": {
+                        "type": "string",
+                        "value": "/-/"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "a-005",
+            "name": "A",
+            "properties": [
+                {
+                    "type": "HyphenateCharacter",
+                    "data": {
+                        "type": "auto"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "u-006",
+            "name": "U",
+            "properties": [
+                {
+                    "type": "HyphenateCharacter",
+                    "data": {
+                        "type": "string",
+                        "value": "-"
+                    }
+                }
+            ]
+        }
+    ]
+}

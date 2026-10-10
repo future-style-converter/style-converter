@@ -1,0 +1,15 @@
+OOF-android: commits 5 path(s); tests ['OutOfFlowContainingBlockTest.kt', 'CanvasRootHoistTest.kt']; seam -
+   ok   OutOfFlowContainingBlockTest.kt reads runtimes/compose/build/oof-census.now.txt (gitignored, guarded)
+   ok   OutOfFlowContainingBlockTest.kt reads tools/titan/results/wave54-oof-layout/census-compose.base.txt (committed by OOF-android)
+   ok   OutOfFlowContainingBlockTest.kt reads tools/titan/runs/wave53-final/sections (gitignored, guarded)
+OOF-ios: commits 4 path(s); tests ['OutOfFlowContainingBlockTests.swift', 'FixedHoistTests.swift']; seam -
+   FAIL OutOfFlowContainingBlockTests.swift reads tools/titan/results/wave54-oof-layout/census-swift.base.txt — committed by OOF-android, not OOF-ios
+   ok   OutOfFlowContainingBlockTests.swift reads tools/titan/runs/wave53-final/sections (gitignored, guarded)
+CBB-android: commits 5 path(s); tests ['DynamicValueResolverTest.kt', 'ChildContainingBlockSeamWiringTest.kt']; seam tools/titan/results/wave54-oof-layout/seam-1.patch
+   ok   DynamicValueResolverTest.kt reads runtimes/compose/build/cbb-census.now.txt (gitignored, guarded)
+   ok   DynamicValueResolverTest.kt reads tools/titan/runs/wave53-final/sections (gitignored, guarded)
+   ok   ChildContainingBlockSeamWiringTest.kt reads runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt (committed by CBB-android)
+GAP-android: commits 4 path(s); tests ['GapDecorationSegmentsTest.kt']; seam -
+GAP-ios: commits 4 path(s); tests ['GapDecorationSegmentsTests.swift']; seam -
+closure: 1 FAIL(s)
+installed rc=1

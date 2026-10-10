@@ -1,0 +1,19 @@
+17 documents carry U+00AD; 21 distinct texts
+  wpt__css-overflow__line-clamp__block-ellipsis-014 1
+  wpt__css-overflow__line-clamp__block-ellipsis-028 1
+  wpt__css-text__hyphens__hyphenate-character-001 5
+  wpt__css-text__hyphens__hyphenate-character-003 5
+  wpt__css-text__hyphens__hyphenate-character-004 5
+  wpt__css-text__hyphens__hyphenate-character-005 1
+  wpt__css-text__hyphens__hyphens-auto-control 1
+  wpt__css-text__hyphens__hyphens-manual-011 1
+  wpt__css-text__hyphens__hyphens-manual-012 1
+  wpt__css-text__hyphens__hyphens-manual-013 1
+  wpt__css-text__hyphens__hyphens-manual-inline-011 1
+  wpt__css-text__hyphens__hyphens-manual-inline-012 1
+  wpt__css-text__hyphens__hyphens-none-011 1
+  wpt__css-text__hyphens__hyphens-none-shy-on-2nd-line-001 1
+  wpt__css-text__hyphens__hyphens-out-of-flow-001 5
+  wpt__css-text__hyphens__hyphens-span-001 1
+  wpt__css-text__hyphens__hyphens-vertical-001 1
+texts NOT literally in PreBreakPipelineTest.kt: 0

@@ -1,0 +1,6 @@
+frames web 390x600 ref 390x600
+shipped 0.9353
+box2 +4 box3 +9: 0.9578
+box2 +5 box3 +9: 0.9628
+box2 +5 box3 +10: 0.9549
+box2 +4 box3 +8: 0.9507

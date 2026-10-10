@@ -1,0 +1,15 @@
+[MS4-resolver-fed-pre-ua] lock taken 21:58:35; seam sha256 before=da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db (HEAD da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db)
+[MS4-resolver-fed-pre-ua] seam-1 applied: seam sha256=c6a83ecdb6e36ae44ae21c7c9ce76bdd0797b4584fbbd85450e386da00148a0d, +runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt
+[MS4-resolver-fed-pre-ua] MUTATED runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt sha256 c6a83ecdb6e36ae4 → c0bf5107c0c17394
+[MS4-resolver-fed-pre-ua] red: gradle rc=1 (log tools/titan/results/wave54-ua-heading-face/fix/runs/MS4-resolver-fed-pre-ua.red.log)
+[MS4-resolver-fed-pre-ua] red: UAElementFontRuleSeamWiringTest tests=2 failures=1 errors=0 ts=2026-10-08T19:58:37.345Z
+[MS4-resolver-fed-pre-ua] red:   RED DynamicValueResolver resolves the UA step's output, after it :: java.lang.AssertionError: rawProperties must flow to unresolvedProperties
+[MS4-resolver-fed-pre-ua] red: UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T19:58:37.405Z
+[MS4-resolver-fed-pre-ua] red: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:58:37.459Z
+[MS4-resolver-fed-pre-ua] restored runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt sha256=c6a83ecdb6e36ae4 BYTE-EXACT
+[MS4-resolver-fed-pre-ua] green: gradle rc=0 (log tools/titan/results/wave54-ua-heading-face/fix/runs/MS4-resolver-fed-pre-ua.green.log)
+[MS4-resolver-fed-pre-ua] green: UAElementFontRuleSeamWiringTest tests=2 failures=0 errors=0 ts=2026-10-08T19:58:39.143Z
+[MS4-resolver-fed-pre-ua] green: UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T19:58:39.528Z
+[MS4-resolver-fed-pre-ua] green: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:58:39.575Z
+[MS4-resolver-fed-pre-ua] seam restored sha256=da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db BYTE-EXACT-HEAD; patch-borne test removed=True
+[MS4-resolver-fed-pre-ua] lock released 21:58:39

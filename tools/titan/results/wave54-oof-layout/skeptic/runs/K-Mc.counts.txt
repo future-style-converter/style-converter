@@ -1,0 +1,12 @@
+GapDecorationBandsTest tests=11 skipped=0 failures=0 errors=0
+GapDecorationExtractorTest tests=7 skipped=0 failures=0 errors=0
+GapDecorationLinesTest tests=6 skipped=0 failures=0 errors=0
+GapDecorationSegmentsTest tests=12 skipped=0 failures=0 errors=0
+GapDecorationWptPinsTest tests=4 skipped=0 failures=0 errors=0
+SkepticGapDecorationProbeTest tests=7 skipped=0 failures=0 errors=0
+DynamicValueResolverTest tests=32 skipped=0 failures=0 errors=0
+CanvasRootHoistTest tests=29 skipped=0 failures=0 errors=0
+OutOfFlowContainingBlockTest tests=8 skipped=0 failures=2 errors=0 FAILED: ['P3 P4 the corpus moves in exactly the 9 OOF-android carriers and the host in exactly 7', 'P1 a positioned establisher withholds the claim and leaves a breadcrumb']
+TransformContainingBlockTest tests=8 skipped=0 failures=0 errors=0
+TOTAL tests=124 skipped=0 failures=2 errors=0
+gradle rc=1

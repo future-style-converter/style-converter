@@ -368,4 +368,115 @@ class PreBreakPipelineTest {
         assertFalse(r.fired)
         assertSame(text, r.text)
     }
+
+    // ── Wave 54 (lane L3, U2-android) — the hyphenate-character string ──
+    //
+    // css-text-4 §6.3: a taken soft hyphen paints the author's string, and
+    // its WIDTH decides the breaks (hyphenate-character brief §4.C). Inputs
+    // are the hyphenate-character-001/-003/-004 host's meta.runs pieces
+    // VERBATIM (wave53-final css-text per-test-ir, `…__1-177` / `-201`); the
+    // boxes are those tests' 4.5ch / 5.5ch / 6.5ch (CH-linear, so the 16px
+    // tests' ratios hold at this file's 32px CH).
+    //
+    // MUTATION PROOF (executed; tools/titan/results/wave54-hyphenate-character/
+    // mutations.log): U2A-a `SoftHyphenCuts.took` answering by the wave-52
+    // count → pin (a) and the `""` row of the width pin return identity;
+    // U2A-b PreBreakPipeline dropping `hyphenChar` from the fold → (a)-(d)
+    // paint U+2010. Restored byte-exact (sha256) after each.
+
+    /** Pieces 1-3 of the host's runs, verbatim. */
+    private val HC_PIECE_1 = "im­ple­men­ta­tion"
+    private val HC_PIECE_2 = " ini­tial­iza­tion"
+    private val HC_PIECE_3 = " re­al­iza­tion"
+
+    /** All gates open, `hyphens: manual` (no dictionary), one hyphen string. */
+    private fun fireWith(text: String, widthCh: Float, hyphenChar: String) =
+        PreBreakPipeline.preBreak(
+            text = text, wrapWidthPx = widthCh * CH, enabled = true,
+            softWrapAllowed = true, allowMidWordBreak = false, preservesSpaces = false,
+            hyphenChar = hyphenChar, measure = mono)
+
+    /** (a) -001: `""` — the cut is TAKEN although nothing is painted, so the
+     *  run fires with the ref's five lines and no hyphen glyph. Before wave 54
+     *  the count saw 0 hyphens and declined: Minikin's `impl/emen/tati/on`. */
+    @Test
+    fun anEmptyHyphenateCharacterStillFiresAtTheTakenCuts() {
+        val r = fireWith(HC_PIECE_1, 4.5f, "")
+        assertTrue(r.fired)
+        assertEquals("im\nple\nmen\nta\ntion", r.text)
+    }
+
+    /** (b) the width case: with `""` `real` (4ch) fits 4.5ch, so the fold
+     *  breaks `real/iza/tion` (the ref); U+2010 makes `real‐` 5ch and gives
+     *  `re‐/al‐/iza‐/tion` (today's Android picture). */
+    @Test
+    fun theHyphenStringsWidthDecidesTheBreaks() {
+        assertEquals("real\niza\ntion", fireWith(HC_PIECE_3, 4.5f, "").text)
+        assertEquals("re‐\nal‐\niza‐\ntion", fireWith(HC_PIECE_3, 4.5f, "‐").text)
+    }
+
+    /** (c) -003: `"\2022"` decoded by the reader → U+2022 at every cut. */
+    @Test
+    fun aBulletHyphenateCharacterIsPaintedAtEveryCut() {
+        val r = fireWith(HC_PIECE_1, 5.5f, "•")
+        assertTrue(r.fired)
+        assertEquals("im•\nple•\nmen•\nta•\ntion", r.text)
+    }
+
+    /** (d) -004: the 3ch `/-/` — `tial/-/` is 7ch and overflows 6.5ch (the
+     *  ref's overflowing line 2), taken by the earliest-op fallback. */
+    @Test
+    fun aMultiCharacterHyphenateCharacterOverflowsLikeTheRef() {
+        val r = fireWith(HC_PIECE_2, 6.5f, "/-/")
+        assertTrue(r.fired)
+        assertEquals("ini/-/\ntial/-/\niza/-/\ntion", r.text)
+    }
+
+    /** hyphenate-limit-chars-001 (R2-N6): its 9 runs carry `"-"` into the
+     *  pipeline, but `example` has no space and no U+00AD, so the early
+     *  guard declines before the fold — identity, the hyphen string unread. */
+    @Test
+    fun aSpacelessRunWithoutSoftHyphensIgnoresTheHyphenString() {
+        val text = "example"
+        val r = PreBreakPipeline.preBreak(
+            text = text, wrapWidthPx = 1 * CH, enabled = true,
+            softWrapAllowed = true, allowMidWordBreak = false, preservesSpaces = false,
+            dictionaryHyphenation = true, hyphenChar = "-", measure = mono)
+        assertFalse(r.fired)
+        assertSame(text, r.text)
+    }
+
+    /** Every U+00AD text on the wave53-final wire (21 distinct, 17
+     *  documents — the U2 default population plus the carriers), verbatim,
+     *  plus the inline-012 fold. */
+    private val CORPUS_SHY_TEXTS = listOf(
+        "This time, Mark, who had always been the center of attention in\nany social gathering, walked into the room uncharacteristi­cally quietly, barely speaking as he settled into a chair.\n\nWhen asked, he said that he was fine, when he wasn't really fine.",
+        "This time, Mark, who had always been the center of attention in any social gathering, walked into the room uncharacteristi­cally quietly, barely speaking as he settled into a chair. When asked, he said that he was fine, when he wasn't really fine.",
+        "im­ple­men­ta­tion ini­tial­iza­tion re­al­iza­tion hy­phen­ation",
+        HC_PIECE_1, HC_PIECE_2, HC_PIECE_3, " hy­phen­ation",
+        "قىل­", "fragilistic­expiali", "Deoxy­ribo­nucleic acid",
+        "Deo­xy­ribo­nu­cleic acid", "Deoxy­ribonucleic acid",
+        "means Deoxy­ribo­nucleic acid", "means Deo­xy­ribo­nu­cleic acid",
+        "12345678 Deoxy­ribo­nucleic Deoxy­ribo­nucleic 12345678",
+        "high­way", "igh­way", "­way", "high­", "high­wa", "hyphen­ation",
+        MANUAL_INLINE_012
+    )
+
+    /** (e) R2-N6 — the default argument is identity in DECISION, not only in
+     *  instance: over every corpus U+00AD text at every half-ch box from 1ch
+     *  to 40ch, the wave-54 walk answers exactly what the wave-52 count did
+     *  (and answers by itself — the fallback is never needed). */
+    @Test
+    fun theWalkAgreesWithTheWave52CountOnEveryCorpusRun() {
+        var cases = 0
+        for (text in CORPUS_SHY_TEXTS) for (half in 2..80) {
+            val lines = GreedyLineBreaker.lines(text, half * CH / 2, mono)
+            val dflt = WordBreakOpportunities.DEFAULT_HYPHEN_CHARACTER
+            assertEquals("$text @ ${half / 2.0}ch", SoftHyphenCuts.legacyCount(text, lines, dflt),
+                SoftHyphenCuts.took(text, lines, dflt))
+            assertTrue("$text @ ${half / 2.0}ch must align", SoftHyphenCuts.walkAligns(text, lines, dflt))
+            cases++
+        }
+        assertEquals(22 * 79, cases)
+    }
 }

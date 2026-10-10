@@ -26,9 +26,9 @@ adb shell am start -n com.styleconverter.test/.MainActivity
 adb pull /sdcard/Android/data/com.styleconverter.test/files/test_screenshots/ ./screenshots/
 ```
 
-The runtime's JUnit suite (3428 tests) also runs from this build:
+The runtime's JUnit suite (3486 tests) also runs from this build:
 `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)`.
-This app has its own JUnit suite too (168 tests — the capture path itself:
+This app has its own JUnit suite too (169 tests — the capture path itself:
 WPT capture mode, composed-canvas padding/height, atomic PNG publication,
 Titan inbox, harness label chrome): `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)`.
 

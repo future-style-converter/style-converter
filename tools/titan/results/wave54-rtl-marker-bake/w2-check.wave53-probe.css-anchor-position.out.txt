@@ -1,0 +1,6 @@
+documents 48: identical 47 · renumbered 0 · content-changed 1
+ok   content-changed ⊆ L1 wire carriers: ["wpt__css-anchor-position__anchor-center-safe-rtl"]
+ok   wpt__css-anchor-position__anchor-center-safe-rtl: 14 → 14 components (no component added)
+ok   wpt__css-anchor-position__anchor-center-safe-rtl wpt__css-anchor-position__anchor-center-safe-rtl__2: changed ["PaddingTop","PaddingRight","PaddingBottom","PaddingLeft"] → all Padding* {px:0}
+ok   wpt__css-anchor-position__anchor-center-safe-rtl wpt__css-anchor-position__anchor-center-safe-rtl__4: changed ["PaddingTop","PaddingRight","PaddingBottom","PaddingLeft"] → all Padding* {px:0}
+W2 CHECK: ALL PASS

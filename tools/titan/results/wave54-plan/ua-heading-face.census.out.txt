@@ -1,0 +1,20 @@
+run wave53-final: 24 documents carry h1–h6/sup/sub; 8 carry an author-UNSIZED heading
+  unsized heading shape leaf: 4 documents
+  unsized heading shape folded: 4 documents
+
+unsized-heading documents (shape list | ancestorSize | cells web / ios / android):
+css-break/block-in-inline-015-print.html                                   h1:leaf,h1:leaf,h1:leaf,h1:leaf    P 1 / P 0.9894 / f 0.9489
+css-lists/counter-list-item.html                                           h2:leaf                            P 0.9975 / f 0.7864 / f 0.7307
+css-lists/counter-reset-increment-overflow-underflow.html                  h3:leaf,h3:leaf,h3:leaf,h3:leaf,h3:leaf,h3:leaf P 0.997 / f 0.857 / f 0.8699
+css-text-decor/text-decoration-color.html                                  h3:leaf                            P 0.9898 / f 0.674 / f 0.6164
+css-text-decor/text-decoration-inset-005.html                              h1:folded                          P 0.9983 / f 0.8995 / f 0.9
+css-text-decor/text-decoration-inset-006.html                              h1:folded                          P 0.9985 / f 0.8987 / f 0.8993
+css-text-decor/text-decoration-inset-011.html                              h1:folded                          P 0.9948 / f 0.6999 / f 0.6852
+css-text-decor/text-decoration-inset-014.html                              h1:folded                          P 0.9975 / f 0.9238 / f 0.923
+
+unsized sup/sub documents: 5
+css-text-decor/text-decoration-color.html                                  sub:leaf,sup:leaf                  P 0.9898 / f 0.674 / f 0.6164
+css-text-decor/text-decoration-inset-005.html                              sup:leaf+member,sub:leaf+member    P 0.9983 / f 0.8995 / f 0.9
+css-text-decor/text-decoration-inset-006.html                              sup:leaf+member,sub:leaf+member    P 0.9985 / f 0.8987 / f 0.8993
+css-text-decor/text-decoration-subelements-002.html                        sup:leaf+member,sup:leaf+member,su P 0.9988 / f 0.7975 / f 0.9047
+css-text-decor/text-decoration-subelements-003.html                        sup:leaf+member                    P 0.9987 / f 0.9043 / f 0.9084

@@ -1,0 +1,12 @@
+line-clamp__block-ellipsis-002 web     capture 0.9868 B 1
+line-clamp__block-ellipsis-002 ios     capture 0.9813 B 0.9928
+line-clamp__block-ellipsis-002 android capture 0.9884 B 0.9884
+line-clamp__block-ellipsis-004 web     capture 0.9737 B 0.998
+line-clamp__block-ellipsis-004 ios     capture 0.9713 B 0.9713
+line-clamp__block-ellipsis-004 android capture 0.9792 B 0.9792
+line-clamp__block-ellipsis-005 web     capture 0.9735 B 0.9981
+line-clamp__block-ellipsis-005 ios     capture 0.9705 B 0.9705
+line-clamp__block-ellipsis-005 android capture 0.9786 B 0.9786
+line-clamp__block-ellipsis-006 web     capture 0.9735 B 0.9981
+line-clamp__block-ellipsis-006 ios     capture 0.9705 B 0.9705
+line-clamp__block-ellipsis-006 android capture 0.9786 B 0.9786

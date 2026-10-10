@@ -1,0 +1,9 @@
+wave53-final web (capture)               ssim 0.9818
+wave53-final ios (capture)               ssim 0.9802
+wave53-final android (capture)           ssim 0.9547
+wave53-probe web (capture)               ssim 1
+wave53-probe ios (capture)               ssim 0.9873
+wave53-probe android (capture)           ssim 0.9793
+replay android P (from wave53-final)     ssim 0.9815
+replay android M'+P device glyphs        ssim 0.9894
+replay android M'+P ref marker           ssim 0.99

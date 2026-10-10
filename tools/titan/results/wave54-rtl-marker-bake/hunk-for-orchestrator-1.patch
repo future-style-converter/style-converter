@@ -1,0 +1,32 @@
+# hunk-for-orchestrator-1.patch — wave-54 L1 hand-off for the orchestrator's DOCS PASS (PLAN §9 D18): the
+# ListMarkerOutsideHang.swift :33-41 comment re-true, to land ONLY once unit M′ stands after stage 1 (comment-only).
+# base: db6e8aa0 (= dev 7cce3b22 + wave54-plan); runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerOutsideHang.swift sha256 at base b50d9bd1a087aa812d9740bfb647b88ffea4bc0ffa60e0aa13cda5b1d0d47e27;
+# anchor: the '## RTL (BACKLOG (c⁴): ...)' paragraph, lines 33-41 at base. Check: git apply --check <this file>.
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerOutsideHang.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerOutsideHang.swift
+index 2e36b01..b66b096 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerOutsideHang.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerOutsideHang.swift
+@@ -34,11 +34,18 @@
+ //  SwiftUI's Layout engine mirrors every `place(at:)` x about the layout
+ //  bounds under an RTL layoutDirection (probe-verified — see
+ //  FloatBlockLayout.placedX), so the physical `-(w + gap)` handed in here
+-//  lands at `width + gap`: the inline-END side css-lists-3 §3.5 asks for,
+-//  with no code of its own. (Compose's `place` is NOT mirrored, so the
+-//  Kotlin twin spells the mirror explicitly.) The corpus's RTL rows still
+-//  lack markers for an UPSTREAM reason (no `meta.markerText` reaches
+-//  them), so this does not move a cell this wave — stated, not hidden.
++//  lands at `width + gap`: the inline-START side of an RTL item, which is
++//  where css-lists-3 §3.5 puts an outside marker (its start edge is the
++//  physical right), with no code of its own. (Compose's `place` is NOT
++//  mirrored, so the Kotlin twin spells the mirror explicitly.) The corpus's
++//  only RTL list rows (css-counter-styles/counter-suffix, `dir=rtl`) never
++//  reach this hang: the extractor's bidi bake makes each of their `<li>`
++//  ABSOLUTELY positioned, and the positioned overlay has no marker branch.
++//  Wave-54 lane L1 (unit M′) bakes those markers upstream instead
++//  (tools/titan/bidi-marker-bake.mjs): the marker becomes positioned glyph
++//  runs OWNED BY THE RELATIVE BAKE ROOT and the item gets
++//  `list-style-type: none`, so no `meta.markerText` reaches them now — this
++//  file still moves no RTL cell, stated, not hidden.
+ //
+ //  Staged as a DEVICE A/B: the `markerPlacement` seam that swaps the HStack
+ //  for this Layout is tools/titan/results/wave52-counters-and-lists/

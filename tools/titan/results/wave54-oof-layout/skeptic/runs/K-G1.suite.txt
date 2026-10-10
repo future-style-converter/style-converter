@@ -1,0 +1,12 @@
+GapDecorationBandsTest tests=11 skipped=0 failures=0 errors=0
+GapDecorationExtractorTest tests=7 skipped=0 failures=0 errors=0
+GapDecorationLinesTest tests=6 skipped=0 failures=0 errors=0
+GapDecorationSegmentsTest tests=12 skipped=0 failures=2 errors=0 FAILED: ['033 touching items still position 2 + 1 + 2 column rules, line by line', '033 touching lines still position two full-width row rules painted last']
+GapDecorationWptPinsTest tests=4 skipped=0 failures=0 errors=0
+SkepticGapDecorationProbeTest tests=7 skipped=0 failures=0 errors=0
+DynamicValueResolverTest tests=32 skipped=0 failures=0 errors=0
+CanvasRootHoistTest tests=29 skipped=0 failures=0 errors=0
+OutOfFlowContainingBlockTest tests=8 skipped=0 failures=0 errors=0
+TransformContainingBlockTest tests=8 skipped=0 failures=0 errors=0
+TOTAL tests=124 skipped=0 failures=2 errors=0
+gradle rc=1

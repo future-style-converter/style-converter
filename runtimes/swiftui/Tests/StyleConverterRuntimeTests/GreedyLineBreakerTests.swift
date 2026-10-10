@@ -218,4 +218,97 @@ final class GreedyLineBreakerTests: XCTestCase {
             GreedyLineBreaker.lines(text: "im\u{AD}ple\u{AD}men\u{AD}ta\u{AD}tion", maxWidth: 4.5 * ch, measure: mono),
             ["im\u{2010}", "ple\u{2010}", "men\u{2010}", "ta\u{2010}", "tion"])
     }
+
+    // MARK: - Wave 54 (lane L3, U2-ios) — the hyphenate-character string
+    //
+    // css-text-4 §6.3: the string a taken soft hyphen paints enters the fold
+    // (its width decides the breaks) and, once painted at a line end, is
+    // SPENT (css-text-3 §5.5) — SpentHyphen.swift. Inputs are
+    // hyphenate-character-001/-004's host meta.runs pieces VERBATIM
+    // (wave53-final css-text per-test-ir); boxes are those tests' 4.5ch /
+    // 6.5ch. Kotlin twin: PreBreakPipelineTest pins (a)-(d).
+    //
+    // MUTATION PROOF (executed; tools/titan/results/wave54-hyphenate-character/
+    // mutations.log): U2I-a drop the strip in SpentHyphen.opportunityText →
+    // the spent-hyphen pin fails; U2I-b the extractor lower-cases / reads
+    // `value` before `type` → the extractor pins fail. Restored byte-exact.
+
+    /// hyphenate-character-004's piece 2 at 6.5ch with `/-/`: `tial/-/` is
+    /// 7ch and overflows (the ref's overflowing line), four lines in all.
+    func testASlashHyphenSlashStringIsMeasuredInTheFold() {
+        XCTAssertEqual(
+            GreedyLineBreaker.lines(text: " ini\u{AD}tial\u{AD}iza\u{AD}tion", maxWidth: 6.5 * ch,
+                                    measure: mono, hyphenChar: "/-/"),
+            ["ini/-/", "tial/-/", "iza/-/", "tion"])
+    }
+
+    /// hyphenate-character-001 with `""`: nothing painted, and `real` (4ch)
+    /// fits 4.5ch — the ref's `real/iza/tion`, not `re‐/al‐/iza‐/tion`.
+    func testAnEmptyStringPaintsNothingAndWidensTheFit() {
+        XCTAssertEqual(
+            GreedyLineBreaker.lines(text: "im\u{AD}ple\u{AD}men\u{AD}ta\u{AD}tion", maxWidth: 4.5 * ch,
+                                    measure: mono, hyphenChar: ""),
+            ["im", "ple", "men", "ta", "tion"])
+        XCTAssertEqual(
+            GreedyLineBreaker.lines(text: " re\u{AD}al\u{AD}iza\u{AD}tion", maxWidth: 4.5 * ch,
+                                    measure: mono, hyphenChar: ""),
+            ["real", "iza", "tion"])
+    }
+
+    /// The lone-hyphen defect: `tial/-/` overflows ONLY by the hyphen its own
+    /// taken break painted. With the string spent the line has nowhere left
+    /// to break, so rule B claims it (TextKit no longer re-wraps it); nil —
+    /// every run that declares nothing — keeps the wave-53 answer.
+    func testALineOverflowingOnlyByItsSpentHyphenIsUnbreakable() {
+        XCTAssertTrue(GreedyLineBreaker.hasUnbreakableOverflowingLine(
+            ["tial/-/"], maxWidth: 6.5 * ch, spentHyphen: "/-/", measure: mono))
+        XCTAssertFalse(GreedyLineBreaker.hasUnbreakableOverflowingLine(
+            ["tial/-/"], maxWidth: 6.5 * ch, measure: mono))
+        // The UA population is untouched: `tial‐` (001 today) stays breakable.
+        XCTAssertFalse(GreedyLineBreaker.hasUnbreakableOverflowingLine(
+            ["tial\u{2010}"], maxWidth: 4.5 * ch, measure: mono))
+    }
+
+    /// SpentHyphen is identity unless the line ENDS with the string and has
+    /// ink before it; it strips exactly one occurrence.
+    func testSpentHyphenStripsOneTrailingOccurrenceOnly() {
+        XCTAssertEqual(SpentHyphen.opportunityText("tial/-/", spentHyphen: "/-/"), "tial")
+        XCTAssertEqual(SpentHyphen.opportunityText("a/-//-/", spentHyphen: "/-/"), "a/-/")
+        XCTAssertEqual(SpentHyphen.opportunityText("tial/-/", spentHyphen: nil), "tial/-/")
+        XCTAssertEqual(SpentHyphen.opportunityText("tial", spentHyphen: ""), "tial")
+        XCTAssertEqual(SpentHyphen.opportunityText("/-/", spentHyphen: "/-/"), "/-/")
+        XCTAssertEqual(SpentHyphen.opportunityText("ta-b", spentHyphen: "/-/"), "ta-b")
+    }
+
+    /// The extractor on the wire's object shape: -004's `/-/` verbatim, `""`
+    /// as a value, a cased string never folded, a quoted "auto" a string.
+    func testTheExtractorReadsTheObjectShapeVerbatim() {
+        func cfg(_ o: [String: IRValue]) -> HyphenateCharacterConfig? {
+            HyphenateCharacterExtractor.extract(from: [IRProperty(type: "HyphenateCharacter", data: .object(o))])
+        }
+        XCTAssertEqual(cfg(["type": .string("string"), "value": .string("/-/")])?.value, "/-/")
+        XCTAssertEqual(cfg(["type": .string("string"), "value": .string("")]), HyphenateCharacterConfig(value: ""))
+        XCTAssertEqual(cfg(["type": .string("string"), "value": .string("AbC")])?.value, "AbC")
+        XCTAssertEqual(cfg(["type": .string("string"), "value": .string("auto")])?.value, "auto")
+        XCTAssertEqual(cfg(["type": .string("auto")]), HyphenateCharacterConfig(value: nil))
+        XCTAssertNil(HyphenateCharacterExtractor.extract(from: []))
+    }
+
+    /// Applier → aggregate: a string touches the aggregate (so StyleBuilder
+    /// mirrors it into TextConfig); `auto` leaves a fresh aggregate untouched.
+    /// End to end, StyleBuilder.build puts -004's verbatim wire string on
+    /// TextConfig — the field seam-2 reads (mutation U2I-d: drop the mirror).
+    func testTheApplierCarriesTheStringOntoTheAggregate() {
+        var agg = TypographyAggregate()
+        HyphenateCharacterApplier.contribute(HyphenateCharacterConfig(value: ""), into: &agg)
+        XCTAssertEqual(agg.hyphenateCharacter, "")
+        XCTAssertTrue(agg.touched)
+        var autoAgg = TypographyAggregate()
+        HyphenateCharacterApplier.contribute(HyphenateCharacterConfig(value: nil), into: &autoAgg)
+        XCTAssertNil(autoAgg.hyphenateCharacter)
+        XCTAssertFalse(autoAgg.touched)
+        let wire004 = IRProperty(type: "HyphenateCharacter", data: .object(["type": .string("string"), "value": .string("/-/")]))
+        XCTAssertEqual(StyleBuilder.build(from: [wire004]).text.hyphenateCharacter, "/-/")
+        XCTAssertNil(StyleBuilder.build(from: []).text.hyphenateCharacter)
+    }
 }

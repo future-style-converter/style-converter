@@ -1,0 +1,13 @@
+[seam-1] lock taken; seam sha256 before=da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db (HEAD da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db)
+[seam-1] patch applied: 0cef8ca1b764bf6e97c34a00afe610e5b4612d887aaab454e8293dcb0be11bdf
+> Task :runtime:compileDebugKotlin
+> Task :runtime:testDebugUnitTest
+BUILD SUCCESSFUL in 3s
+compiled-renderer: md5=a79df2a23cba2cdf0b9975da8f02f7c5 gate-refs= 1
+<testsuite name="com.styleconverter.runtime.typography.UAElementFontRuleTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-08T17:47:19.367Z" hostname="mac-1.home" time="0.06">
+<testsuite name="com.styleconverter.runtime.typography.UAHeadingFoldGateTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-08T17:47:19.428Z" hostname="mac-1.home" time="0.014">
+<testsuite name="com.styleconverter.runtime.typography.inline.InlineRunFoldTest" tests="45" skipped="0" failures="0" errors="0" timestamp="2026-10-08T17:47:19.476Z" hostname="mac-1.home" time="0.01">
+Thu Oct  8 19:47:19 CEST 2026
+[seam-1] focused suite rc=0
+[seam-1] restored seam sha256 after=da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db BYTE-EXACT-HEAD
+[seam-1] lock released

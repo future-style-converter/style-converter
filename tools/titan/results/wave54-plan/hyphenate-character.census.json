@@ -1,0 +1,481 @@
+{
+ "run": "wave53-final",
+ "docs": 1435,
+ "hyphenateCharacter": [
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-character-001.json",
+   "test": "css-text/hyphens/hyphenate-character-001.html",
+   "comp": "wpt__css-text__hyphens__hyphenate-character-001__1-177",
+   "value": "Generic rawValue \"\"",
+   "undecodedEscape": false,
+   "rejectedByParser": true,
+   "hyphens": "MANUAL",
+   "carriesShy": true,
+   "cells": {
+    "web": "f 0.935",
+    "ios": "f 0.9287",
+    "android": "f 0.9301"
+   }
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-character-002.json",
+   "test": "css-text/hyphens/hyphenate-character-002.html",
+   "comp": "wpt__css-text__hyphens__hyphenate-character-002__1-185",
+   "value": "Generic rawValue \"\"",
+   "undecodedEscape": false,
+   "rejectedByParser": true,
+   "hyphens": "AUTO",
+   "carriesShy": false,
+   "cells": {
+    "web": "f 0.92",
+    "ios": "f 0.9261",
+    "android": "f 0.9223"
+   }
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-character-003.json",
+   "test": "css-text/hyphens/hyphenate-character-003.html",
+   "comp": "wpt__css-text__hyphens__hyphenate-character-003__1-193",
+   "value": "{\"type\":\"string\",\"value\":\"\\\\2022\"}",
+   "undecodedEscape": true,
+   "rejectedByParser": false,
+   "hyphens": "MANUAL",
+   "carriesShy": true,
+   "cells": {
+    "web": "f 0.8812",
+    "ios": "f 0.9337",
+    "android": "f 0.9292"
+   }
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-character-004.json",
+   "test": "css-text/hyphens/hyphenate-character-004.html",
+   "comp": "wpt__css-text__hyphens__hyphenate-character-004__1-201",
+   "value": "{\"type\":\"string\",\"value\":\"/-/\"}",
+   "undecodedEscape": false,
+   "rejectedByParser": false,
+   "hyphens": "MANUAL",
+   "carriesShy": true,
+   "cells": {
+    "web": "f 0.9249",
+    "ios": "f 0.9134",
+    "android": "f 0.905"
+   }
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-character-005.json",
+   "test": "css-text/hyphens/hyphenate-character-005.html",
+   "comp": "wpt__css-text__hyphens__hyphenate-character-005__1-219",
+   "value": "{\"type\":\"string\",\"value\":\"\\\\00a0\\\\0640\"}",
+   "undecodedEscape": true,
+   "rejectedByParser": false,
+   "hyphens": null,
+   "carriesShy": false,
+   "cells": {
+    "web": "P 0.974",
+    "ios": "f 0.9428",
+    "android": "f 0.9474"
+   }
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-limit-chars-001.json",
+   "test": "css-text/hyphens/hyphenate-limit-chars-001.html",
+   "comp": "hyphens__hyphenate-limit-chars-001__0__0-223",
+   "value": "{\"type\":\"string\",\"value\":\"-\"}",
+   "undecodedEscape": false,
+   "rejectedByParser": false,
+   "hyphens": "AUTO",
+   "carriesShy": false,
+   "cells": {
+    "web": "f 0.9068",
+    "ios": "f 0.8919",
+    "android": "f 0.8581"
+   }
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-limit-chars-001.json",
+   "test": "css-text/hyphens/hyphenate-limit-chars-001.html",
+   "comp": "hyphens__hyphenate-limit-chars-001__0__1-224",
+   "value": "{\"type\":\"string\",\"value\":\"-\"}",
+   "undecodedEscape": false,
+   "rejectedByParser": false,
+   "hyphens": "AUTO",
+   "carriesShy": false,
+   "cells": {
+    "web": "f 0.9068",
+    "ios": "f 0.8919",
+    "android": "f 0.8581"
+   }
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-limit-chars-001.json",
+   "test": "css-text/hyphens/hyphenate-limit-chars-001.html",
+   "comp": "hyphens__hyphenate-limit-chars-001__0__2-225",
+   "value": "{\"type\":\"string\",\"value\":\"-\"}",
+   "undecodedEscape": false,
+   "rejectedByParser": false,
+   "hyphens": "AUTO",
+   "carriesShy": false,
+   "cells": {
+    "web": "f 0.9068",
+    "ios": "f 0.8919",
+    "android": "f 0.8581"
+   }
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-limit-chars-001.json",
+   "test": "css-text/hyphens/hyphenate-limit-chars-001.html",
+   "comp": "hyphens__hyphenate-limit-chars-001__0__3-226",
+   "value": "{\"type\":\"string\",\"value\":\"-\"}",
+   "undecodedEscape": false,
+   "rejectedByParser": false,
+   "hyphens": "AUTO",
+   "carriesShy": false,
+   "cells": {
+    "web": "f 0.9068",
+    "ios": "f 0.8919",
+    "android": "f 0.8581"
+   }
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-limit-chars-001.json",
+   "test": "css-text/hyphens/hyphenate-limit-chars-001.html",
+   "comp": "hyphens__hyphenate-limit-chars-001__0__4-227",
+   "value": "{\"type\":\"string\",\"value\":\"-\"}",
+   "undecodedEscape": false,
+   "rejectedByParser": false,
+   "hyphens": "AUTO",
+   "carriesShy": false,
+   "cells": {
+    "web": "f 0.9068",
+    "ios": "f 0.8919",
+    "android": "f 0.8581"
+   }
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-limit-chars-001.json",
+   "test": "css-text/hyphens/hyphenate-limit-chars-001.html",
+   "comp": "hyphens__hyphenate-limit-chars-001__0__5-228",
+   "value": "{\"type\":\"string\",\"value\":\"-\"}",
+   "undecodedEscape": false,
+   "rejectedByParser": false,
+   "hyphens": "AUTO",
+   "carriesShy": false,
+   "cells": {
+    "web": "f 0.9068",
+    "ios": "f 0.8919",
+    "android": "f 0.8581"
+   }
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-limit-chars-001.json",
+   "test": "css-text/hyphens/hyphenate-limit-chars-001.html",
+   "comp": "hyphens__hyphenate-limit-chars-001__0__6-229",
+   "value": "{\"type\":\"string\",\"value\":\"-\"}",
+   "undecodedEscape": false,
+   "rejectedByParser": false,
+   "hyphens": "AUTO",
+   "carriesShy": false,
+   "cells": {
+    "web": "f 0.9068",
+    "ios": "f 0.8919",
+    "android": "f 0.8581"
+   }
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-limit-chars-001.json",
+   "test": "css-text/hyphens/hyphenate-limit-chars-001.html",
+   "comp": "hyphens__hyphenate-limit-chars-001__0__7-230",
+   "value": "{\"type\":\"string\",\"value\":\"-\"}",
+   "undecodedEscape": false,
+   "rejectedByParser": false,
+   "hyphens": "AUTO",
+   "carriesShy": false,
+   "cells": {
+    "web": "f 0.9068",
+    "ios": "f 0.8919",
+    "android": "f 0.8581"
+   }
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-limit-chars-001.json",
+   "test": "css-text/hyphens/hyphenate-limit-chars-001.html",
+   "comp": "hyphens__hyphenate-limit-chars-001__0__8-231",
+   "value": "{\"type\":\"string\",\"value\":\"-\"}",
+   "undecodedEscape": false,
+   "rejectedByParser": false,
+   "hyphens": "AUTO",
+   "carriesShy": false,
+   "cells": {
+    "web": "f 0.9068",
+    "ios": "f 0.8919",
+    "android": "f 0.8581"
+   }
+  }
+ ],
+ "brHeight": [
+  {
+   "sec": "css-cascade",
+   "ir": "wpt__css-cascade__revert-layer-006.json",
+   "test": "css-cascade/revert-layer-006.html",
+   "host": "revert-layer-006__1__0-056",
+   "br": "revert-layer-006__1__0__6-063",
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "n": 6
+  },
+  {
+   "sec": "css-cascade",
+   "ir": "wpt__css-cascade__revert-val-001.json",
+   "test": "css-cascade/revert-val-001.html",
+   "host": "revert-val-001__1__0-080",
+   "br": "revert-val-001__1__0__6-087",
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "n": 6
+  },
+  {
+   "sec": "css-cascade",
+   "ir": "wpt__css-cascade__revert-val-002.json",
+   "test": "css-cascade/revert-val-002.html",
+   "host": "revert-val-002__1__0-090",
+   "br": "revert-val-002__1__0__6-097",
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "n": 6
+  },
+  {
+   "sec": "css-masking",
+   "ir": "wpt__css-masking__clip-path__clip-path-filter-order.json",
+   "test": "css-masking/clip-path/clip-path-filter-order.html",
+   "host": "clip-path__clip-path-filter-order__0__0-069",
+   "br": "clip-path__clip-path-filter-order__0__0__1-071",
+   "cells": {
+    "web": "f 0.8586",
+    "ios": "f 0.8578",
+    "android": "f 0.8406"
+   },
+   "n": 1
+  },
+  {
+   "sec": "css-multicol",
+   "ir": "wpt__css-multicol__balance-grid-container.json",
+   "test": "css-multicol/balance-grid-container.html",
+   "host": "balance-grid-container__0__0__3__0-088",
+   "br": "balance-grid-container__0__0__3__0__2-091",
+   "cells": {
+    "web": "f 0.9207",
+    "ios": "f 0.862",
+    "android": "f 0.8724"
+   },
+   "n": 2
+  },
+  {
+   "sec": "css-multicol",
+   "ir": "wpt__css-multicol__column-height-009.json",
+   "test": "css-multicol/column-height-009.html",
+   "host": "column-height-009__0__0__0-284",
+   "br": "column-height-009__0__0__0__15-300",
+   "cells": {
+    "web": "f 0.8827",
+    "ios": "f 0.8072",
+    "android": "f 0.742"
+   },
+   "n": 15
+  },
+  {
+   "sec": "css-overflow",
+   "ir": "wpt__css-overflow__line-clamp__block-ellipsis-002.json",
+   "test": "css-overflow/line-clamp/block-ellipsis-002.html",
+   "host": "wpt__css-overflow__line-clamp__block-ellipsis-002__0-054",
+   "br": "line-clamp__block-ellipsis-002__0__2-057",
+   "cells": {
+    "web": "P 0.9868",
+    "ios": "P 0.9813",
+    "android": "P 0.9884"
+   },
+   "n": 2
+  },
+  {
+   "sec": "css-overflow",
+   "ir": "wpt__css-overflow__line-clamp__block-ellipsis-004.json",
+   "test": "css-overflow/line-clamp/block-ellipsis-004.html",
+   "host": "wpt__css-overflow__line-clamp__block-ellipsis-004__0-061",
+   "br": "line-clamp__block-ellipsis-004__0__1-063",
+   "cells": {
+    "web": "P 0.9737",
+    "ios": "P 0.9713",
+    "android": "P 0.9792"
+   },
+   "n": 1
+  },
+  {
+   "sec": "css-overflow",
+   "ir": "wpt__css-overflow__line-clamp__block-ellipsis-005.json",
+   "test": "css-overflow/line-clamp/block-ellipsis-005.html",
+   "host": "wpt__css-overflow__line-clamp__block-ellipsis-005__0-066",
+   "br": "line-clamp__block-ellipsis-005__0__1-068",
+   "cells": {
+    "web": "P 0.9735",
+    "ios": "P 0.9705",
+    "android": "P 0.9786"
+   },
+   "n": 1
+  },
+  {
+   "sec": "css-overflow",
+   "ir": "wpt__css-overflow__line-clamp__block-ellipsis-006.json",
+   "test": "css-overflow/line-clamp/block-ellipsis-006.html",
+   "host": "wpt__css-overflow__line-clamp__block-ellipsis-006__0-071",
+   "br": "line-clamp__block-ellipsis-006__0__1-073",
+   "cells": {
+    "web": "P 0.9735",
+    "ios": "P 0.9705",
+    "android": "P 0.9786"
+   },
+   "n": 1
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-character-001.json",
+   "test": "css-text/hyphens/hyphenate-character-001.html",
+   "host": "wpt__css-text__hyphens__hyphenate-character-001__1-177",
+   "br": "hyphens__hyphenate-character-001__1__4-182",
+   "cells": {
+    "web": "f 0.935",
+    "ios": "f 0.9287",
+    "android": "f 0.9301"
+   },
+   "n": 2
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-character-002.json",
+   "test": "css-text/hyphens/hyphenate-character-002.html",
+   "host": "wpt__css-text__hyphens__hyphenate-character-002__1-185",
+   "br": "hyphens__hyphenate-character-002__1__4-190",
+   "cells": {
+    "web": "f 0.92",
+    "ios": "f 0.9261",
+    "android": "f 0.9223"
+   },
+   "n": 2
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-character-003.json",
+   "test": "css-text/hyphens/hyphenate-character-003.html",
+   "host": "wpt__css-text__hyphens__hyphenate-character-003__1-193",
+   "br": "hyphens__hyphenate-character-003__1__4-198",
+   "cells": {
+    "web": "f 0.8812",
+    "ios": "f 0.9337",
+    "android": "f 0.9292"
+   },
+   "n": 2
+  },
+  {
+   "sec": "css-text",
+   "ir": "wpt__css-text__hyphens__hyphenate-character-004.json",
+   "test": "css-text/hyphens/hyphenate-character-004.html",
+   "host": "wpt__css-text__hyphens__hyphenate-character-004__1-201",
+   "br": "hyphens__hyphenate-character-004__1__4-206",
+   "cells": {
+    "web": "f 0.9249",
+    "ios": "f 0.9134",
+    "android": "f 0.905"
+   },
+   "n": 2
+  },
+  {
+   "sec": "filter-effects",
+   "ir": "wpt__filter-effects__backdrop-filter-clip-rect.json",
+   "test": "filter-effects/backdrop-filter-clip-rect.html",
+   "host": "backdrop-filter-clip-rect__0__0-068",
+   "br": "backdrop-filter-clip-rect__0__0__2-071",
+   "cells": {
+    "web": "P 0.959",
+    "ios": "P 0.956",
+    "android": "f 0.9315"
+   },
+   "n": 2
+  },
+  {
+   "sec": "filter-effects",
+   "ir": "wpt__filter-effects__backdrop-filter-edge-clipping.json",
+   "test": "filter-effects/backdrop-filter-edge-clipping.html",
+   "host": "backdrop-filter-edge-clipping__0__0-108",
+   "br": "backdrop-filter-edge-clipping__0__0__1-110",
+   "cells": {
+    "web": "P 0.9595",
+    "ios": "P 0.9578",
+    "android": "f 0.929"
+   },
+   "n": 1
+  },
+  {
+   "sec": "filter-effects",
+   "ir": "wpt__filter-effects__backdrop-filter-paint-order.json",
+   "test": "filter-effects/backdrop-filter-paint-order.html",
+   "host": "backdrop-filter-paint-order__0__0-190",
+   "br": "backdrop-filter-paint-order__0__0__1-192",
+   "cells": {
+    "web": "P 0.9595",
+    "ios": "P 0.9578",
+    "android": "f 0.929"
+   },
+   "n": 1
+  },
+  {
+   "sec": "filter-effects",
+   "ir": "wpt__filter-effects__backdrop-filter-plus-filter.json",
+   "test": "filter-effects/backdrop-filter-plus-filter.html",
+   "host": "wpt__filter-effects__backdrop-filter-plus-filter__0-199",
+   "br": "backdrop-filter-plus-filter__0__1-201",
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9499",
+    "android": "P 0.9709"
+   },
+   "n": 1
+  }
+ ],
+ "escapes": [
+  {
+   "sec": "css-view-transitions",
+   "ir": "wpt__css-view-transitions__escaped-name.json",
+   "test": "css-view-transitions/escaped-name.html",
+   "comp": "wpt__css-view-transitions__escaped-name__3-192",
+   "type": "ViewTransitionName",
+   "data": "{\"type\":\"named\",\"name\":\"third\\\\000021\"}",
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  }
+ ]
+}

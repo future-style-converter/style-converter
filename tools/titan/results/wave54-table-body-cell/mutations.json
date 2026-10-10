@@ -1,0 +1,371 @@
+{
+ "runs": [
+  {
+   "id": "BS",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restoredSha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 25,
+   "red": [
+    "TableBodyForestTest::m2_cellLosesItsMargins",
+    "TableBodyForestTest::m3_absposStaysARoot_neverWrapped",
+    "TableBodyForestTest::m4_nonCellRunIsWrappedInAnAnonymousCell",
+    "TableBodyForestTest::m5_tableCarriesTheBodysBorderSpacing",
+    "TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot",
+    "TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos",
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "expectedRed": [
+    "TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:14:44"
+  },
+  {
+   "id": "BM1",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restoredSha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 25,
+   "red": [
+    "TableBodyForestTest::m1_identity_onNonTableBodies"
+   ],
+   "expectedRed": [
+    "TableBodyForestTest::m1_identity_onNonTableBodies"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:14:46"
+  },
+  {
+   "id": "BM2",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restoredSha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 25,
+   "red": [
+    "TableBodyForestTest::m2_cellLosesItsMargins"
+   ],
+   "expectedRed": [
+    "TableBodyForestTest::m2_cellLosesItsMargins"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:14:47"
+  },
+  {
+   "id": "BM3",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restoredSha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 25,
+   "red": [
+    "TableBodyForestTest::m3_absposStaysARoot_neverWrapped",
+    "TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos"
+   ],
+   "expectedRed": [
+    "TableBodyForestTest::m3_absposStaysARoot_neverWrapped"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:14:49"
+  },
+  {
+   "id": "BM4",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restoredSha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 25,
+   "red": [
+    "TableBodyForestTest::m4_nonCellRunIsWrappedInAnAnonymousCell",
+    "TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot",
+    "TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos"
+   ],
+   "expectedRed": [
+    "TableBodyForestTest::m4_nonCellRunIsWrappedInAnAnonymousCell"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:14:51"
+  },
+  {
+   "id": "BM5",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restoredSha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 25,
+   "red": [
+    "TableBodyForestTest::m5_tableCarriesTheBodysBorderSpacing"
+   ],
+   "expectedRed": [
+    "TableBodyForestTest::m5_tableCarriesTheBodysBorderSpacing"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:14:52"
+  },
+  {
+   "id": "BK",
+   "file": "apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt",
+   "sha256": "b98e80ee33db68fd1ab7937db92c882ce0e41fcc66eea004024a1843b05cdb4d",
+   "restoredSha256": "b98e80ee33db68fd1ab7937db92c882ce0e41fcc66eea004024a1843b05cdb4d",
+   "rc": 1,
+   "tests": 109,
+   "red": [
+    "ComposedCanvasTableBodyTest::stack_zeroGapAboveTheSyntheticTable_tdIsNoRoot"
+   ],
+   "expectedRed": [
+    "ComposedCanvasTableBodyTest::stack_zeroGapAboveTheSyntheticTable_tdIsNoRoot"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:14:55"
+  },
+  {
+   "id": "m6",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restoredSha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 25,
+   "red": [
+    "TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot",
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "expectedRed": [
+    "TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot",
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:14:57"
+  },
+  {
+   "id": "T1",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "838f3c936b220e087a4f35a34a4c56581d21c2b166fb786080d7b63a34e18d59",
+   "restoredSha256": "838f3c936b220e087a4f35a34a4c56581d21c2b166fb786080d7b63a34e18d59",
+   "rc": 1,
+   "tests": 25,
+   "red": [
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "expectedRed": [
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:14:58"
+  },
+  {
+   "id": "T2",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "838f3c936b220e087a4f35a34a4c56581d21c2b166fb786080d7b63a34e18d59",
+   "restoredSha256": "838f3c936b220e087a4f35a34a4c56581d21c2b166fb786080d7b63a34e18d59",
+   "rc": 1,
+   "tests": 25,
+   "red": [
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "expectedRed": [
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:15:00"
+  },
+  {
+   "id": "T3",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "838f3c936b220e087a4f35a34a4c56581d21c2b166fb786080d7b63a34e18d59",
+   "restoredSha256": "838f3c936b220e087a4f35a34a4c56581d21c2b166fb786080d7b63a34e18d59",
+   "rc": 1,
+   "tests": 25,
+   "red": [
+    "TableCellHugTest::declaredTableBodyRoot_keepsTodaysStroke_noHug",
+    "TableCellHugTest::declaredTable_percentageSizing003_keepsTodaysStroke_noHug",
+    "TableCellHugTest::uaTable_baselineEmptyCell001_noStroke_noHug",
+    "TableCellHugTest::uaTable_containContent004_isTodaysExpression_noHug"
+   ],
+   "expectedRed": [
+    "TableCellHugTest::declaredTableBodyRoot_keepsTodaysStroke_noHug",
+    "TableCellHugTest::declaredTable_percentageSizing003_keepsTodaysStroke_noHug",
+    "TableCellHugTest::uaTable_baselineEmptyCell001_noStroke_noHug",
+    "TableCellHugTest::uaTable_containContent004_isTodaysExpression_noHug"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:15:01"
+  },
+  {
+   "id": "T4",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "838f3c936b220e087a4f35a34a4c56581d21c2b166fb786080d7b63a34e18d59",
+   "restoredSha256": "838f3c936b220e087a4f35a34a4c56581d21c2b166fb786080d7b63a34e18d59",
+   "rc": 1,
+   "tests": 25,
+   "red": [
+    "TableCellHugTest::hugColumn_disabled_isTheReceiverItself"
+   ],
+   "expectedRed": [
+    "TableCellHugTest::hugColumn_disabled_isTheReceiverItself"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:15:03"
+  },
+  {
+   "id": "T5",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "sha256": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "restoredSha256": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "rc": 1,
+   "tests": 25,
+   "red": [
+    "TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight"
+   ],
+   "expectedRed": [
+    "TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:15:05"
+  },
+  {
+   "id": "T6",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "sha256": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "restoredSha256": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "rc": 1,
+   "tests": 25,
+   "red": [
+    "TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight"
+   ],
+   "expectedRed": [
+    "TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:15:06"
+  },
+  {
+   "id": "m6",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restoredSha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot",
+    "TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds",
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "expectedRed": [
+    "TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot",
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug",
+    "TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:30:41"
+  },
+  {
+   "id": "T1",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restoredSha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds",
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "expectedRed": [
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug",
+    "TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:30:44"
+  },
+  {
+   "id": "T2",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restoredSha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds",
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "expectedRed": [
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug",
+    "TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:30:48"
+  },
+  {
+   "id": "T3",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restoredSha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::declaredTableBodyRoot_keepsTodaysStroke_noHug",
+    "TableCellHugTest::declaredTable_percentageSizing003_keepsTodaysStroke_noHug",
+    "TableCellHugTest::uaTable_baselineEmptyCell001_noStroke_noHug",
+    "TableCellHugTest::uaTable_containContent004_isTodaysExpression_noHug"
+   ],
+   "expectedRed": [
+    "TableCellHugTest::declaredTableBodyRoot_keepsTodaysStroke_noHug",
+    "TableCellHugTest::declaredTable_percentageSizing003_keepsTodaysStroke_noHug",
+    "TableCellHugTest::uaTable_baselineEmptyCell001_noStroke_noHug",
+    "TableCellHugTest::uaTable_containContent004_isTodaysExpression_noHug"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:30:52"
+  },
+  {
+   "id": "T4",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restoredSha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::hugColumn_disabled_isTheReceiverItself"
+   ],
+   "expectedRed": [
+    "TableCellHugTest::hugColumn_disabled_isTheReceiverItself"
+   ],
+   "proven": true,
+   "compileErrors": [],
+   "at": "2026-10-08T19:30:55"
+  }
+ ],
+ "green": {
+  "rc": 0,
+  "tests": 110,
+  "red": [],
+  "compileErrors": [],
+  "at": "2026-10-08T19:31:00",
+  "sha256": {
+   "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt": "b98e80ee33db68fd1ab7937db92c882ce0e41fcc66eea004024a1843b05cdb4d"
+  }
+ }
+}

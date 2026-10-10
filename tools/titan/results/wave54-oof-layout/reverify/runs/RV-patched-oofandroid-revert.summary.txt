@@ -1,0 +1,9 @@
+	 Executed 8 tests, with 0 failures (0 unexpected) in 3.811 (3.891) seconds
+	 Executed 24 tests, with 0 failures (0 unexpected) in 4.501 (4.715) seconds
+	 Executed 24 tests, with 0 failures (0 unexpected) in 4.501 (4.716) seconds
+Test Suite 'FixedHoistTests' passed at 2026-10-08 22:47:13.739.
+Test Suite 'OutOfFlowContainingBlockTests' passed at 2026-10-08 22:47:17.631.
+Test Suite 'Selected tests' passed at 2026-10-08 22:47:17.631.
+Test Suite 'StyleConverterRuntimeTests.xctest' passed at 2026-10-08 22:47:17.631.
+** TEST SUCCEEDED **
+xcodebuild rc=0

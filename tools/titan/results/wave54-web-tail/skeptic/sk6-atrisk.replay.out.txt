@@ -1,0 +1,4 @@
+baseline-with-orthogonal-flow-001        capture 0.9854  shift4 0.9851  shift5 0.985
+attr-style-sharing-1                     capture 0.9939  shift4 0.9991  shift5 0.9992
+appearance-auto-input-non-widget-001     capture 0.9873  shift4 0.9979  shift5 0.9975
+static-inside-inline-block               capture 0.9803  shift4 0.9955  shift5 0.999

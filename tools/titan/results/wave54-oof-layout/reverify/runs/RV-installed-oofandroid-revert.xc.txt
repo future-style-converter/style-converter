@@ -1,0 +1,114 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test -scheme StyleConverterRuntime -destination "platform=macOS,variant=Mac Catalyst,arch=arm64" "-only-testing:StyleConverterRuntimeTests/OutOfFlowContainingBlockTests"
+
+Resolve Package Graph
+2026-10-08 22:45:49.560 xcodebuild[60331:4508148] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+
+
+Resolved source packages:
+  StyleConverterRuntime: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (4 targets)
+    Target 'StyleConverterRuntime-product' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntimeTests-product' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: 2ce3ba406921fd6bef5ecb40357fef14
+Build description path: /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/XCBuildData/2ce3ba406921fd6bef5ecb40357fef14.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk /Users/dranak/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+    cd /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/.swiftpm/xcode
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -o /Users/dranak/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+
+ProcessInfoPlistFile /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntime_StyleConverterRuntime.bundle/Contents/Info.plist /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime_StyleConverterRuntime-b.build/empty-StyleConverterRuntime_StyleConverterRuntime.plist (in target 'StyleConverterRuntime_StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+    builtin-infoPlistUtility /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime_StyleConverterRuntime-b.build/empty-StyleConverterRuntime_StyleConverterRuntime.plist -producttype com.apple.product-type.bundle -expandbuildsettings -platform macosx -o /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntime_StyleConverterRuntime.bundle/Contents/Info.plist
+
+ProcessInfoPlistFile /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Info.plist /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/empty-StyleConverterRuntimeTests.plist (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+    builtin-infoPlistUtility /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/empty-StyleConverterRuntimeTests.plist -producttype com.apple.product-type.bundle.unit-test -expandbuildsettings -platform macosx -scanforprivacyfile /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Resources/StyleConverterRuntime_StyleConverterRuntime.bundle -o /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Info.plist
+
+CopySwiftLibs /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+    builtin-swiftStdLibTool --copy --verbose --scan-executable /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/MacOS/StyleConverterRuntimeTests --scan-folder /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Frameworks --scan-folder /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/PlugIns --scan-folder /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Library/SystemExtensions --scan-folder /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Extensions --platform macosx --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Frameworks --strip-bitcode --scan-executable /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libXCTestSwiftSupport.dylib --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+Ignoring --strip-bitcode because --sign was not passed
+
+PruneExplicitPrecompiledModules /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/dranak/Library/Developer/Xcode/DerivedData/SDKExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+2026-10-08 22:46:02.160 xcodebuild[60331:4508959]  DVTAssertions: Warning in IDEFrameworks/IDEFoundation/Execution/LaunchSystem/IDELaunchSession.m:395
+Details:  setRunnablePIDWithDiagnostics:logSection:andCompletionHandler: called without a completion handler - blocking until diagnostics setup completes. Callers should migrate to using a completion handler for better performance.
+Object:   <IDELaunchSession: 0x7abf3e6280>
+Method:   -setRunnablePIDWithDiagnostics:logSection:andCompletionHandler:
+Thread:   <NSThread: 0x7ac15ab480>{number = 6, name = (null)}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+Test Suite 'Selected tests' started at 2026-10-08 22:46:02.453.
+Test Suite 'StyleConverterRuntimeTests.xctest' started at 2026-10-08 22:46:02.453.
+Test Suite 'OutOfFlowContainingBlockTests' started at 2026-10-08 22:46:02.453.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainSizeInlineSizeStyleNoneDoNot]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainSizeInlineSizeStyleNoneDoNot]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1DeclaredInsets]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1DeclaredInsets]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1FilterBackdropFilterAndWillChangeHintsEstablish]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1FilterBackdropFilterAndWillChangeHintsEstablish]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1NoneFormsAndWillChangeOpacityDoNotEstablish]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1NoneFormsAndWillChangeOpacityDoNotEstablish]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1PositionedEstablisherWithholdsTheClaim]' started.
+[PropertyTracker] ContainingBlock[positioned-establisher-fixed-descendant]: claim withheld on a positioned establisher
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1PositionedEstablisherWithholdsTheClaim]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers]' started.
+2026-10-08 22:46:06.585766+0200 xctest[60710:4509719] [Default] Exception attempting to serialize sanitized error of issue. All userInfo with be discarded except localized description: NSInvalidUnarchiveOperationException: The data couldn’t be read because it isn’t in the correct format.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:148: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers] : failed: caught error: "Error Domain=NSCocoaErrorDomain Code=260 "The file “census-swift.base.txt” couldn’t be opened because there is no such file." UserInfo={NSFilePath=/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-oof-layout/census-swift.base.txt, NSURL=file:///Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-oof-layout/census-swift.base.txt, NSUnderlyingError=0x7782b9f630 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}"
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers]' failed (4.082 seconds).
+Test Suite 'OutOfFlowContainingBlockTests' failed at 2026-10-08 22:46:06.682.
+	 Executed 8 tests, with 1 failure (1 unexpected) in 4.088 (4.229) seconds
+Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-08 22:46:06.683.
+	 Executed 8 tests, with 1 failure (1 unexpected) in 4.088 (4.230) seconds
+Test Suite 'Selected tests' failed at 2026-10-08 22:46:06.683.
+	 Executed 8 tests, with 1 failure (1 unexpected) in 4.088 (4.230) seconds
+2026-10-08 22:46:12.482 xcodebuild[60331:4508148] [MT] IDETestOperationsObserverDebug: 10.759 elapsed -- Testing started completed.
+2026-10-08 22:46:12.483 xcodebuild[60331:4508148] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-08 22:46:12.483 xcodebuild[60331:4508148] [MT] IDETestOperationsObserverDebug: 10.759 sec, +10.759 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/dranak/Library/Developer/Xcode/DerivedData/StyleConverterRuntime-dhqlkcumqhjmieaikvonqofhsxnu/Logs/Test/Test-StyleConverterRuntime-2026.10.08_22-45-50-+0200.xcresult
+
+Failing tests:
+	OutOfFlowContainingBlockTests.testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers()
+
+** TEST FAILED **
+
+Testing started

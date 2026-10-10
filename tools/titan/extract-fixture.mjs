@@ -10142,6 +10142,39 @@ export function rootPropsWithFontShorthand(rootProps) {
 }
 
 /**
+ * wave-54 lane L3 U3b — the line box (`'<n>px'`) a LINE-START <br> inside
+ * this host occupies, or null for "keep the 20px REF_LINE_HEIGHT".
+ *
+ * Only a host that declares line-height ON ITSELF answers (the longhand, or
+ * the `font` shorthand, whose absent `/<line-height>` resets it to `normal`,
+ * css-fonts-4 §4.3) — an inherited value is deliberately not read. The value
+ * resolves the way the reader maps it: `<n>px` as is; `normal` → 1.2 × the
+ * font size and a bare `<number>` → n × the font size (the converter's
+ * LineHeight multiplier), both ONLY against a px font size this host also
+ * declares. Anything else (em/%, an inherited or keyword font size, var())
+ * is unknowable here and answers null. Pure; exported for the unit pins.
+ */
+export function brHostLineBoxPx(hostProps) {
+  // No bag, or no line-height of its own: the inherited reading is not taken.
+  if (!hostProps || (hostProps['line-height'] === undefined && hostProps.font === undefined)) return null;
+  // Longhands derived from `font` fill the gaps; author longhands win.
+  const bag = rootPropsWithFontShorthand(hostProps);
+  // The line-height token, normalised for matching.
+  const lh = String(bag['line-height'] ?? '').trim().toLowerCase();
+  // An absolute length is the line box itself.
+  const lhPx = /^(\d+(?:\.\d+)?)px$/.exec(lh);
+  if (lhPx) return `${Number(lhPx[1])}px`;
+  // `normal` / a number need the host's own px font size.
+  const fs = /^(\d+(?:\.\d+)?)px$/.exec(String(bag['font-size'] ?? '').trim().toLowerCase());
+  if (!fs) return null;
+  // `normal` → 1.2 (the reader's mapping); a bare number → itself.
+  const mult = lh === 'normal' ? 1.2 : (/^\d+(?:\.\d+)?$/.test(lh) ? Number(lh) : null);
+  if (mult === null) return null;
+  // Rounded so 1.2 × 16 prints 19.2, not 19.200000000000003.
+  return `${Number((mult * Number(fs[1])).toFixed(4))}px`;
+}
+
+/**
  * The bake-down (wave-30 A4, reworked after the gate finding). Returns the
  * subset of `rootProps`' trigger properties to copy onto ONE top-level
  * body-child bag, or `null` when the child needs nothing.
@@ -11456,7 +11489,15 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       // the 100x100 empty-node placeholder below can never claim a br.
       const brEndsInlineLine = lineCtx?.hasInline === true;
       const brIsClearMarker = 'clear' in props;
-      const brHeight = (brEndsInlineLine || brIsClearMarker) ? '0px' : '20px';
+      // wave-54 lane L3 U3b — a LINE-START br inside a host that declares
+      // line-height ON ITSELF (the longhand, or the `font` shorthand, which
+      // resets it — css-fonts-4 §4.3) is a blank line of THAT line box (CSS
+      // 2.1 §10.8: the strut of the host's line-height), not the 20px
+      // REF_LINE_HEIGHT: hyphenate-character-001's `font: 16px monospace`
+      // host draws 1.2 × 16 = 19.2px blank lines in the ref. An INHERITED
+      // line-height does not trigger it (the radius stays the 4 measured
+      // documents; css-multicol/baseline-002/-007 keep 20). null → 20px.
+      const brHeight = (brEndsInlineLine || brIsClearMarker) ? '0px' : (lineCtx?.hostLineBox ?? '20px');
       cmp.properties = { width: '0px', height: brHeight, ...props };
       // meta.role wire: `_role` → IR v2 `meta.role` (same channel as
       // 'body-root') so renderers can special-case the break if needed.
@@ -11703,13 +11744,34 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       // banner), so a non-empty ownText opens the children's first line
       // with inline content — a leading child br then ENDS that line
       // instead of adding a blank one.
-      const childLineCtx = { hasInline: !!node.ownText };
+      // wave-54 lane L3 U3b: the host's OWN declared line box rides the
+      // scope too (brHostLineBoxPx — null unless this element declares it).
+      const childLineCtx = { hasInline: !!node.ownText, hostLineBox: brHostLineBoxPx(props) };
       // wave-26 lane WWS: the last child's `wsAfter` describes the gap to
       // the parent's close tag, which separates nothing — so the stamp is
       // gated on having a following sibling (see the WS_AFTER_ROLE banner).
       const lastChildIdx = node.children.length - 1;
       node.children.forEach((child, i) => {
         const childId = `${id}__${i}`;
+        // wave-54 lane L3 U3 — the child-scope twin of the body scope's
+        // re-arm below (`bodyRuns.some((run) => run.afterElemIndex === idx)`):
+        // text INTERLEAVED between element children — a `{text}` entry of
+        // node.runs after child i-1 and before child i — puts inline content
+        // on the open line, so a br at i ENDS that line (CSS 2.1 §9.5) instead
+        // of adding a blank 20px one. Only the seed above re-armed before
+        // (once, from ownText), so every LATER text line's br stayed 20px:
+        // hyphenate-character-001's two stray blank lines, on all three
+        // runtimes. Collapsible white space alone is no content (css-text-3
+        // §4.1.1: space, tab, segment break — the body scanner's ASCII class).
+        const runAt = node.runs ? node.runs.findIndex((e) => e.childIndex === i) : -1;
+        // Entries strictly between child i-1 and child i (from 0 for i = 0).
+        const runFrom = node.runs ? node.runs.findIndex((e) => e.childIndex === i - 1) + 1 : 0;
+        // Re-arm only — a block sibling still closes the line (the
+        // non-br rule in buildNode), exactly as at body scope.
+        if (runAt > 0 && node.runs.slice(runFrom, runAt)
+          .some((e) => e.childIndex === undefined && /[^ \t\n\r\f]/.test(e.text))) {
+          childLineCtx.hasInline = true;
+        }
         const childCmp = buildNode(child, childId, childLineCtx);
         stampWsAfter(childCmp, child, i < lastChildIdx);
         childMap[childId] = { id: childId, ...childCmp };

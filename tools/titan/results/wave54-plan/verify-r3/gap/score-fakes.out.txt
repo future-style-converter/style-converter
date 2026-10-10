@@ -1,0 +1,5 @@
+verify-r3/gap/fake-ref-as-run        ssim 1  >= floor 0.99
+verify-r3/gap/fake-red-l1r-down2     ssim 0.9997  >= floor 0.99
+verify-r3/gap/fake-red-l3r-up2       ssim 1  >= floor 0.99
+verify-r3/gap/fake-blue-r1-short5    ssim 0.999  >= floor 0.99
+verify-r3/gap/fake-blue-r2-lshort4   ssim 0.9993  >= floor 0.99

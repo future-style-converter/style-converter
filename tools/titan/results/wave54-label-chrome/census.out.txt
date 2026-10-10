@@ -1,0 +1,38 @@
+(A) tracked files naming a U1 file (outside results/docs): 2 → apps/web-harness/tests/ui/LabelChrome.raster.test.tsx, tools/visual/label-chrome-tripwire.test.mjs
+(A) of which on a capture / extraction / runtime path: 0
+(B) per-test IR documents scanned: 1435; carrying an All property: 11
+    css-cascade/all-prop-001.html web P 0.9689
+    css-cascade/all-prop-001.html ios P 0.9641
+    css-cascade/all-prop-001.html android P 0.9642
+    css-cascade/all-prop-002.html web P 0.999
+    css-cascade/all-prop-002.html ios P 0.9709
+    css-cascade/all-prop-002.html android P 0.9702
+    css-cascade/all-prop-inherit-color.html web P 1
+    css-cascade/all-prop-inherit-color.html ios P 0.9993
+    css-cascade/all-prop-inherit-color.html android P 0.9992
+    css-cascade/all-prop-initial-color.html web P 0.9787
+    css-cascade/all-prop-initial-color.html ios P 0.9993
+    css-cascade/all-prop-initial-color.html android P 0.9992
+    css-cascade/all-prop-initial-visited.html web P 0.9839
+    css-cascade/all-prop-initial-visited.html ios P 0.999
+    css-cascade/all-prop-initial-visited.html android P 0.9995
+    css-cascade/all-prop-revert-color.html web P 1
+    css-cascade/all-prop-revert-color.html ios P 0.9993
+    css-cascade/all-prop-revert-color.html android P 0.9992
+    css-cascade/all-prop-unset-color.html web P 1
+    css-cascade/all-prop-unset-color.html ios P 0.9993
+    css-cascade/all-prop-unset-color.html android P 0.9992
+    css-display/display-contents-button.html web P 0.9772
+    css-display/display-contents-button.html ios P 0.9692
+    css-display/display-contents-button.html android P 0.9705
+    css-display/display-contents-details.html web P 0.9724
+    css-display/display-contents-details.html ios P 0.968
+    css-display/display-contents-details.html android P 0.9693
+    css-display/display-contents-fieldset.html web P 0.9708
+    css-display/display-contents-fieldset.html ios P 0.968
+    css-display/display-contents-fieldset.html android P 0.9693
+    css-ui/appearance-revert-001.tentative.html web P 1
+    css-ui/appearance-revert-001.tentative.html ios P 0.9897
+    css-ui/appearance-revert-001.tentative.html android P 0.9895
+(B) my must-not-move cells: 33; expectations.json mustNotMove: 33; only mine 0 ; only plan 0 
+(X) expectations.json L7 capture+wire carriers: 0 (census (A): empty); revertUnits: U1, U2-seed

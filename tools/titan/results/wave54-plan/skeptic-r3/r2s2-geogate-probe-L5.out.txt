@@ -1,0 +1,36 @@
+ ? L5-ua-heading-face       ua-heading-face.geometry.py                block-in-inline-015-print web                              UNMEASURED [control: expected to stay PASS]
+     line: block-in-inline-015-print web MISSING → GEOMETRY WRONG (no capture)
+ ? L5-ua-heading-face       ua-heading-face.geometry.py                block-in-inline-015-print ios                              UNMEASURED [control: expected to stay PASS]
+     line: block-in-inline-015-print ios MISSING → GEOMETRY WRONG (no capture)
+ ? L5-ua-heading-face       ua-heading-face.geometry.py                block-in-inline-015-print android                          UNMEASURED [GATING -> revert U1-android]
+     line: block-in-inline-015-print android MISSING → GEOMETRY WRONG (no capture)
+ ? L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-005 web                              UNMEASURED [control: expected to stay PASS]
+     line: text-decoration-inset-005 web MISSING → GEOMETRY WRONG (no capture)
+ ? L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-005 ios                              UNMEASURED [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-005 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-005 android                          UNMEASURED [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-005 android MISSING → GEOMETRY WRONG (no capture)
+ ? L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-006 web                              UNMEASURED [control: expected to stay PASS]
+     line: text-decoration-inset-006 web MISSING → GEOMETRY WRONG (no capture)
+ ? L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-006 ios                              UNMEASURED [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-006 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-006 android                          UNMEASURED [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-006 android MISSING → GEOMETRY WRONG (no capture)
+ ? L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-014 web                              UNMEASURED [control: expected to stay PASS]
+     line: text-decoration-inset-014 web MISSING → GEOMETRY WRONG (no capture)
+ ? L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-014 ios                              UNMEASURED [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-014 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-014 android                          UNMEASURED [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-014 android MISSING → GEOMETRY WRONG (no capture)
+ ? L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-011 web                              UNMEASURED [control: expected to stay PASS]
+     line: text-decoration-inset-011 web MISSING → GEOMETRY WRONG (no capture)
+ ? L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-011 ios                              UNMEASURED [control: expected to stay PASS]
+     line: text-decoration-inset-011 ios MISSING → GEOMETRY WRONG (no capture)
+ ? L5-ua-heading-face       ua-heading-face.geometry.py                text-decoration-inset-011 android                          UNMEASURED [control: expected to stay PASS]
+     line: text-decoration-inset-011 android MISSING → GEOMETRY WRONG (no capture)
+
+geometry-gate wave53-probe (base wave53-open): 15 keys — PASS 0 · FAIL 0 (gating 0) · UNMEASURED 15 (gating 1) · probe self-check failures 0
+  by class: gating 1 (PASS 0 FAIL 0) · control 8 (PASS 0 FAIL 0) · report 6 (PASS 0 FAIL 0) · withdrawn 0 (PASS 0 FAIL 0)
+UNMEASURED GATING KEYS (1) — not a pass: re-run the section (R3) or narrow --lanes to the lanes this run covers; exit 3 unless a gating key FAILed (exit 1):
+   L5-ua-heading-face ua-heading-face.geometry.py block-in-inline-015-print android [unit U1-android]
+exit=3

@@ -1,0 +1,4 @@
+calibration  wave53-final android as shipped 0.9944   wave53-probe android as shipped 0.9906
+FIX          from probe 0.9983   from final 0.9983
+D1-only      square at x44-63, no outline 0.9893   (geometry probe must print WRONG)
+D2-only      td stroked black-on-black 0.9983   (identical bytes to FIX: true)

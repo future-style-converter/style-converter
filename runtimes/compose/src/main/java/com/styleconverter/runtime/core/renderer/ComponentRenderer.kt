@@ -1138,10 +1138,27 @@ object ComponentRenderer {
         // for every non-container and every own-declaring container, so no
         // committed capture moves. See ListStyleUaRule for the full
         // argument and the nested-list KNOWN GAP.
-        val rawProperties = com.styleconverter.runtime.lists.ListStyleUaRule.apply(
+        val listUaProperties = com.styleconverter.runtime.lists.ListStyleUaRule.apply(
             component._tag,
             allReset.own,
             mergeInherited(allReset.own, allReset.inherited)
+        )
+        // Wave 54 (lane L5, U1-android) - the SECOND tag-keyed UA rule, twin
+        // of iOS UAElementFontRule at the same cascade step for the same
+        // css-cascade-4 §4.3 reason: `h1…h6 { font-size: <n>em; font-weight:
+        // bold }` and `sub, sup { font-size: smaller }` (HTML §15.3) beat the
+        // inherited body face and lose to the author's own. It runs BEFORE
+        // DynamicValueResolver (below) so `em` / `ch` on the heading resolve
+        // against the UA face. The heading half stands down for an element
+        // that hosts child boxes (headingStandsDown - iOS's wave-40 gate,
+        // verbatim). Same list instance for every untagged component (the
+        // 327-pair corpus carries no `_tag`), so no committed capture moves.
+        // UAElementFontRuleSeamWiringTest pins this call's exact arguments.
+        val rawProperties = com.styleconverter.runtime.typography.UAElementFontRule.apply(
+            component._tag,
+            allReset.own,
+            listUaProperties,
+            standsDown = com.styleconverter.runtime.typography.UAElementFontRule.headingStandsDown(component),
         )
         // The `all` reset already ran above (AllReset, before the merge); the
         // post-merge drop-everything it replaced is gone.
@@ -2650,6 +2667,21 @@ object ComponentRenderer {
                     // which is the pre-wave-34 result byte-for-byte.
                     sourceTag = if (LocalWptCaptureMode.current) component._tag else null
                 )
+                // Wave 54 (lane L2, TB-android) — the chrome of the table box
+                // (table/TableCellHug.kt): TableBodyForest's synthetic
+                // ANONYMOUS table paints no demo cell stroke (CSS 2.1
+                // §17.2.1, §17.6.1) and sizes its cells at max-content
+                // (§17.5.2.2). Every other table gets `fabricatedDefault`
+                // back as its stroke — the wave-38 expression below, moved
+                // here verbatim — and hug = false, so it is byte-identical.
+                val chrome = com.styleconverter.runtime.table.TableCellHug.chrome(
+                    component,
+                    fabricatedDefault = !(LocalWptCaptureMode.current &&
+                        component.properties.none { it.type == "Display" } &&
+                        com.styleconverter.runtime.table.TableBoxTree
+                            .uaRoleOf(component._tag) ==
+                            com.styleconverter.runtime.table.TableBoxTree.Role.TABLE)
+                )
                 TableApplier.Table(
                     config = tableConfig,
                     // Wave-38 finish pass — a table this runtime reached
@@ -2666,12 +2698,10 @@ object ComponentRenderer {
                     // above makes — role from the tag, no declared `Display`,
                     // capture-gated — so the border decision and the spacing
                     // decision can never disagree about where this table box
-                    // came from.
-                    fabricatedCellBorder = !(LocalWptCaptureMode.current &&
-                        component.properties.none { it.type == "Display" } &&
-                        com.styleconverter.runtime.table.TableBoxTree
-                            .uaRoleOf(component._tag) ==
-                            com.styleconverter.runtime.table.TableBoxTree.Role.TABLE),
+                    // came from. (Wave 54: that predicate is `chrome`'s
+                    // fabricatedDefault above; only an anonymous table
+                    // turns it off.)
+                    fabricatedCellBorder = chrome.stroke,
                     // Wave 39 (lane A6) — CSS 2.1 §17.5.2 auto table width.
                     // RenderComponent's `isShrinkToFitTable` already keeps
                     // this box out of the composed-WPT block-fill channel;
@@ -2691,6 +2721,9 @@ object ComponentRenderer {
                             ),
                             composedCapture = LocalWptComposedMode.current
                         ),
+                    // Wave 54 (lane L2) — §17.5.2.2: the anonymous table's
+                    // columns take their max-content widths (TableCellHug).
+                    cellsHugContent = chrome.hug,
                     modifier = modifier
                 ) {
                     RenderTableContent(component, textColor)
@@ -7101,6 +7134,15 @@ object ComponentRenderer {
             // a run that does not fire keeps Minikin's wrapping and gets its
             // marker from placeholderOverflow below (F3) — one owner each.
             clampLines = com.styleconverter.runtime.typography.wrapping.DrawnLineClamp.cap(properties),
+            // Wave 54 (lane L3, U2-android) — css-text-4 §6.3 `hyphenate-character`:
+            // the string a taken soft hyphen paints enters the FOLD, because its
+            // width decides the breaks (HyphenateCharacterApplier's banner). No
+            // declaration / `auto` yields the UA hyphen that is preBreak's default,
+            // so every other run is byte-identical by construction; a hyphens:auto
+            // run is reported once (Minikin paints its own dictionary hyphen).
+            hyphenChar = com.styleconverter.runtime.typography.wrapping.HyphenateCharacterApplier.preBreakString(
+                com.styleconverter.runtime.typography.wrapping.HyphenateCharacterExtractor.extract(properties),
+                dictionaryHyphenation),
             // Single-line advance through the EXACT render style and the
             // EXACT run transform (runAnnotated), so measure and paint can
             // never disagree. getLineWidth(0) is the raw float advance —

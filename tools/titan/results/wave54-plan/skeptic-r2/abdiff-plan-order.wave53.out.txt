@@ -1,0 +1,29 @@
+A/B  exclude=wave53-final  include=wave53-open  sections=CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-color,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-grid,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-pseudo,css-sizing,css-tables,css-text,css-text-decor,css-transforms,css-ui,css-values,css-view-transitions,css-writing-modes,filter-effects,selectors  platforms=web,ios,android
+compared 4096 cells: 27 differ (flip, or |Δ| ≥ 0.002), 4069 within threshold
+  flip P→f     web      P 1       → f 0.339   Δ-0.661  css/css-backgrounds/background-attachment-margin-root-002.html
+  flip P→f     android  P 0.9996  → f 0.3389  Δ-0.6607  css/css-backgrounds/background-attachment-margin-root-002.html
+  flip P→f     ios      P 0.9994  → f 0.3391  Δ-0.6603  css/css-backgrounds/background-attachment-margin-root-002.html
+  flip P→f     web      P 1       → f 0.4511  Δ-0.5489  css/css-backgrounds/background-attachment-margin-root-001.html
+  flip P→f     ios      P 0.9995  → f 0.4509  Δ-0.5486  css/css-backgrounds/background-attachment-margin-root-001.html
+  flip P→f     android  P 0.9996  → f 0.451   Δ-0.5486  css/css-backgrounds/background-attachment-margin-root-001.html
+  flip P→f     web      P 1       → f 0.5341  Δ-0.4659  css/css-display/display-contents-root-background.html
+  flip P→f     ios      P 0.9995  → f 0.5346  Δ-0.4649  css/css-display/display-contents-root-background.html
+  flip P→f     android  P 0.9989  → f 0.5355  Δ-0.4634  css/css-display/display-contents-root-background.html
+  flip P→f     ios      P 0.9968  → f 0.8652  Δ-0.1316  css/css-text/hyphens/hyphens-span-001.html
+  flip P→f     ios      P 0.9971  → f 0.8935  Δ-0.1036  css/css-text/hyphens/hyphens-out-of-flow-001.html
+  flip P→f     ios      P 0.9985  → f 0.9322  Δ-0.0663  css/css-contain/contain-inline-size-bfc-floats-002.html
+  flip P→f     android  P 0.9974  → f 0.9311  Δ-0.0663  css/css-contain/contain-inline-size-bfc-floats-002.html
+  mover        web      P 1       → P 0.9506  Δ-0.0494  css/css-lists/counter-reset-reversed-nested.html
+  mover        ios      P 0.9989  → P 0.9508  Δ-0.0481  css/css-lists/counter-reset-reversed-nested.html
+  mover        ios      P 0.9984  → P 0.9531  Δ-0.0453  css/css-contain/contain-inline-size-bfc-floats-001.html
+  mover        android  P 0.9972  → P 0.9519  Δ-0.0453  css/css-contain/contain-inline-size-bfc-floats-001.html
+  mover        android  P 0.9937  → P 0.9532  Δ-0.0405  css/css-text/hyphens/hyphens-span-001.html
+  mover        android  P 0.9852  → P 0.9509  Δ-0.0343  css/css-lists/counter-reset-reversed-nested.html
+  mover        ios      P 1       → P 0.9734  Δ-0.0266  css/css-display/display-flow-root-002.html
+  mover        android  P 1       → P 0.9734  Δ-0.0266  css/css-display/display-flow-root-002.html
+  mover        android  P 0.9943  → P 0.9685  Δ-0.0258  css/css-text/hyphens/hyphens-out-of-flow-001.html
+  mover        android  f 0.9301  → f 0.9136  Δ-0.0165  css/css-text/hyphens/hyphenate-character-001.html
+  mover        android  f 0.9292  → f 0.9168  Δ-0.0124  css/css-text/hyphens/hyphenate-character-003.html
+  mover        android  P 0.9943  → P 0.982   Δ-0.0123  css/css-text/hyphens/hyphens-out-of-flow-002.html
+  mover        web      P 1       → P 0.9941  Δ-0.0059  css/CSS2/css21-errata/s-11-1-1b-006.html
+  mover        ios      P 0.9992  → P 0.9953  Δ-0.0039  css/CSS2/css21-errata/s-11-1-1b-006.html

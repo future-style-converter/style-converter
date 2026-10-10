@@ -1,0 +1,95 @@
+GATING keys:
+  FAIL  L1-rtl-marker-bake     rtl-marker-bake.geometry.py              [P] bidi/bidi-lines-001 android -> P
+  FAIL  L1-rtl-marker-bake     rtl-marker-bake.geometry.py              [P] bidi/bidi-lines-002 android -> P
+  FAIL  L1-rtl-marker-bake     rtl-marker-bake.geometry.py              [M] counter-suffix web -> Mprime
+  FAIL  L1-rtl-marker-bake     rtl-marker-bake.geometry.py              [M] counter-suffix ios -> Mprime
+  FAIL  L1-rtl-marker-bake     rtl-marker-bake.geometry.py              [M] counter-suffix android -> Mprime
+  FAIL  L1-rtl-marker-bake     lists-bakes.geometry.py                  counter-suffix web -> Mprime
+  FAIL  L1-rtl-marker-bake     lists-bakes.geometry.py                  counter-suffix android -> Mprime
+  FAIL  L2-table-body-cell     compose-table-body-cell.geometry.py      006 android -> TB-android
+  FAIL  L2-table-body-cell     display-table-body.geometry.py           006 android -> TB-android
+  FAIL  L3-hyphenate-character hyphenate-character.geometry.py          hyphenate-character-001 ios -> U2-ios|U3
+  FAIL  L3-hyphenate-character hyphenate-character.geometry.py          hyphenate-character-003 ios -> U2-ios|U3
+  FAIL  L4-oof-layout          oof-containing-block.geometry.py         abspos/static-fixed-inside-abspos ios -> OOF-ios
+  FAIL  L4-oof-layout          oof-containing-block.geometry.py         abspos/static-fixed-inside-abspos android -> OOF-android
+  FAIL  L4-oof-layout          oof-containing-block.geometry.py         position-relative-004 ios -> OOF-ios
+  FAIL  L4-oof-layout          oof-containing-block.geometry.py         position-relative-004 android -> OOF-android
+  FAIL  L4-oof-layout          oof-containing-block.geometry.py         change-insets-inside-strict-containment-nested ios -> OOF-ios
+  FAIL  L4-oof-layout          oof-containing-block.geometry.py         change-insets-inside-strict-containment-nested android -> OOF-android
+  FAIL  L4-oof-layout          oof-containing-block.geometry.py         contain-content-003 android -> OOF-android
+  FAIL  L4-oof-layout          oof-containing-block.geometry.py         contain-content-011 android -> OOF-android
+  FAIL  L4-oof-layout          compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-htb-ltr android -> CBB-android
+  FAIL  L4-oof-layout          compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-vlr-ltr android -> CBB-android
+  FAIL  L4-oof-layout          compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-vrl-ltr android -> CBB-android
+  FAIL  L4-oof-layout          compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip android -> CBB-android
+  FAIL  L4-oof-layout          compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip-2 android -> CBB-android
+  FAIL  L4-oof-layout          compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip-3 android -> CBB-android
+  FAIL  L4-oof-layout          compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip-4 android -> CBB-android
+  FAIL  L4-oof-layout          flex-zero-gap-rules.geometry.py          flex/flex-gap-decorations-033 ios -> GAP-ios
+  FAIL  L4-oof-layout          flex-zero-gap-rules.geometry.py          flex/flex-gap-decorations-033 android -> GAP-android
+  FAIL  L5-ua-heading-face     ua-heading-face.geometry.py              block-in-inline-015-print android -> U1-android
+  FAIL  L6-web-tail            web-root-separator.geometry.py           box-sizing-007 web -> RS
+  FAIL  L6-web-tail            web-root-separator.geometry.py           box-sizing-008 web -> RS
+  FAIL  L6-web-tail            web-root-separator.geometry.py           box-sizing-022 web -> RS
+  FAIL  L6-web-tail            web-out-of-flow-hyphen-box.geometry.py   hyphens/hyphens-out-of-flow-002 web -> W1
+CONTROL keys FAIL:
+  FAIL L1-rtl-marker-bake lists-bakes.geometry.py counter-suffix ios | want: GEOMETRY OK | line: 273:x103-126 y286-297:x104-126 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 right x126 vs ref x144)
+  FAIL L3-hyphenate-character hyphenate-character.geometry.py hyphenate-character-001 web | want: GEOMETRY OK | line: ; glyph: group 1 line 1 ink x18-42 end-cell 2px vs ref x18-34 end-cell 9px; offset: group 3 line 1 top y345 vs ref y320)
+  FAIL L3-hyphenate-character hyphenate-character.geometry.py hyphenate-character-001 android | want: GEOMETRY OK | line: ; glyph: group 1 line 1 ink x18-41 end-cell 1px vs ref x18-34 end-cell 9px; offset: group 3 line 1 top y345 vs ref y320)
+  FAIL L3-hyphenate-character hyphenate-character.geometry.py hyphenate-character-003 web | want: GEOMETRY OK | line:  glyph: group 1 line 1 ink x18-81 end-cell 12px vs ref x18-42 end-cell 5px; offset: group 3 line 1 top y322 vs ref y300)
+  FAIL L3-hyphenate-character hyphenate-character.geometry.py hyphenate-character-003 android | want: GEOMETRY OK | line:  (glyph: group 1 line 1 ink x18-41 end-cell 1px vs ref x18-42 end-cell 5px; offset: group 3 line 1 top y322 vs ref y300)
+  FAIL L3-hyphenate-character hyphenate-character.geometry.py hyphenate-character-004 web | want: GEOMETRY OK | line: hyphenate-character-004 web groups 4 4 4 3 → GEOMETRY WRONG (offset: group 3 line 1 top y303 vs ref y281)
+  FAIL L3-hyphenate-character hyphenate-character.geometry.py hyphenate-character-004 ios | want: GEOMETRY OK | line:  glyph: group 1 line 1 ink x17-70 end-cell 2px vs ref x18-62 end-cell 11px; offset: group 2 line 1 top y167 vs ref y186)
+  FAIL L3-hyphenate-character hyphenate-character.geometry.py hyphenate-character-004 android | want: GEOMETRY OK | line:  glyph: group 1 line 1 ink x18-70 end-cell 1px vs ref x18-62 end-cell 11px; offset: group 2 line 1 top y168 vs ref y186)
+  FAIL L4-oof-layout oof-containing-block.geometry.py position-relative-003 ios | want: GEOMETRY OK | line:  10000, 'red': (16, 116, 115, 187), 'redPx': 7200} → GEOMETRY WRONG (green (16, 16, 115, 115) vs ref (16, 88, 115, 187))
+  FAIL L4-oof-layout oof-containing-block.geometry.py position-relative-003 android | want: GEOMETRY OK | line:  10000, 'red': (16, 116, 115, 187), 'redPx': 7200} → GEOMETRY WRONG (green (16, 16, 115, 115) vs ref (16, 88, 115, 187))
+  FAIL L4-oof-layout oof-containing-block.geometry.py backdrop-filter-containing-block ios | want: GEOMETRY OK | line: 1600, 'red': (226, 216, 373, 287), 'redPx': 10656} → GEOMETRY WRONG (green (16, 16, 373, 215) vs ref (16, 88, 215, 287))
+  FAIL L4-oof-layout oof-containing-block.geometry.py backdrop-filter-containing-block android | want: GEOMETRY OK | line: 42000, 'red': (226, 16, 373, 215), 'redPx': 29600} → GEOMETRY WRONG (green (16, 16, 225, 215) vs ref (16, 88, 215, 287))
+  FAIL L4-oof-layout compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-htb-rtl android | want: GEOMETRY OK | line: 88, 135, 167), 'greenPx': 4800, 'failInkPx': 6000} → GEOMETRY WRONG (green (66, 88, 135, 167) vs ref (16, 88, 115, 187))
+  FAIL L4-oof-layout compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vlr-rtl android | want: GEOMETRY OK | line: 8, 105, 187), 'greenPx': 5600, 'failInkPx': 4400} → GEOMETRY WRONG (green (36, 108, 105, 187) vs ref (16, 88, 115, 187))
+  FAIL L4-oof-layout compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vrl-rtl android | want: GEOMETRY OK | line: 8, 105, 187), 'greenPx': 5600, 'failInkPx': 4400} → GEOMETRY WRONG (green (36, 108, 105, 187) vs ref (16, 88, 115, 187))
+  FAIL L5-ua-heading-face ua-heading-face.geometry.py text-decoration-inset-005 ios | want: GEOMETRY OK | line: set-005 ios bands [(110, 130, 16, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 130, 16, 191)]))
+  FAIL L5-ua-heading-face ua-heading-face.geometry.py text-decoration-inset-005 android | want: GEOMETRY OK | line: 005 android bands [(110, 131, 17, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 131, 17, 191)]))
+  FAIL L5-ua-heading-face ua-heading-face.geometry.py text-decoration-inset-006 ios | want: GEOMETRY OK | line: set-006 ios bands [(110, 130, 16, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 130, 16, 194)]))
+  FAIL L5-ua-heading-face ua-heading-face.geometry.py text-decoration-inset-006 android | want: GEOMETRY OK | line: 006 android bands [(110, 131, 17, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 131, 17, 194)]))
+  FAIL L5-ua-heading-face ua-heading-face.geometry.py text-decoration-inset-014 ios | want: GEOMETRY OK | line: ands [(111, 121, 17, 133), (128, 137, 16, 84)] → GEOMETRY WRONG (line-1 band 11 px tall (< 20: the 2em face is missing))
+  FAIL L5-ua-heading-face ua-heading-face.geometry.py text-decoration-inset-014 android | want: GEOMETRY OK | line: ands [(111, 122, 17, 132), (127, 138, 16, 84)] → GEOMETRY WRONG (line-1 band 12 px tall (< 20: the 2em face is missing))
+  FAIL L6-web-tail web-root-separator.geometry.py box-sizing-010 web | want: GEOMETRY OK | line: box-sizing-010 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x91 on row 140)
+  FAIL L6-web-tail web-root-separator.geometry.py box-sizing-013 web | want: GEOMETRY OK | line: box-sizing-013 web edge xNone → GEOMETRY WRONG (second atom edge xNone vs ref x91 on row 150)
+  FAIL L6-web-tail web-root-separator.geometry.py position-absolute-semi-replaced-stretch-other web | want: GEOMETRY OK | line: sition-absolute-semi-replaced-stretch-other web edge x187 → GEOMETRY WRONG (second atom edge x187 vs ref x192 on row 60)
+  FAIL L6-web-tail web-root-separator.geometry.py position-absolute-semi-replaced-stretch-input web | want: GEOMETRY OK | line: sition-absolute-semi-replaced-stretch-input web edge x187 → GEOMETRY WRONG (second atom edge x187 vs ref x192 on row 60)
+gating predictions:
+  L1-rtl-marker-bake     css-text/bidi/bidi-lines-001.html android                              HIGH      floor 0.955 geom "GEOMETRY OK"
+  L1-rtl-marker-bake     css-text/bidi/bidi-lines-002.html android                              HIGH      floor 0.975 geom "GEOMETRY OK"
+  L1-rtl-marker-bake     css-counter-styles/counter-suffix.html android                         MED-HIGH (P floor) / MED (M′ magnitude, geometry-gated) floor 0.97 geom "GEOMETRY OK"
+  L1-rtl-marker-bake     css-counter-styles/counter-suffix.html web                             HIGH      floor 0.999 geom "GEOMETRY OK"
+  L1-rtl-marker-bake     css-counter-styles/counter-suffix.html ios                             MED-HIGH  floor 0.985 geom "GEOMETRY OK"
+  L2-table-body-cell     CSS2/css21-errata/s-11-1-1b-006.html android                           MED-HIGH (geometry) / MED (score) floor 0.996 geom "GEOMETRY OK"
+  L3-hyphenate-character css-text/hyphens/hyphenate-character-001.html ios                      MED-HIGH  floor 0.965 geom "GEOMETRY OK"
+  L3-hyphenate-character css-text/hyphens/hyphenate-character-003.html ios                      MED-HIGH  floor 0.965 geom "GEOMETRY OK"
+  L3-hyphenate-character css-overflow/line-clamp/block-ellipsis-002.html web                    MED-HIGH  floor 0.995 geom null
+  L3-hyphenate-character css-overflow/line-clamp/block-ellipsis-004.html web                    MED-HIGH  floor 0.99 geom null
+  L3-hyphenate-character css-overflow/line-clamp/block-ellipsis-005.html web                    MED-HIGH  floor 0.99 geom null
+  L3-hyphenate-character css-overflow/line-clamp/block-ellipsis-006.html web                    MED-HIGH  floor 0.99 geom null
+  L4-oof-layout          css-contain/contain-content-003.html android                           HIGH      floor 0.99 geom "GEOMETRY OK"
+  L4-oof-layout          css-contain/contain-content-011.html android                           MED-HIGH  floor 0.97 geom "GEOMETRY OK"
+  L4-oof-layout          css-position/position-relative-004.html ios                            MED-HIGH  floor 0.99 geom "GEOMETRY OK"
+  L4-oof-layout          css-position/position-relative-004.html android                        MED-HIGH  floor 0.99 geom "GEOMETRY OK"
+  L4-oof-layout          css-position/change-insets-inside-strict-containment-nested.html ios   MED-HIGH  floor 0.99 geom "GEOMETRY OK"
+  L4-oof-layout          css-position/change-insets-inside-strict-containment-nested.html android MED-HIGH  floor 0.99 geom "GEOMETRY OK"
+  L4-oof-layout          CSS2/abspos/static-fixed-inside-abspos.html ios                        HIGH      floor 0.99 geom "GEOMETRY OK"
+  L4-oof-layout          CSS2/abspos/static-fixed-inside-abspos.html android                    MED-HIGH  floor 0.99 geom "GEOMETRY OK"
+  L4-oof-layout          filter-effects/backdrop-filter-nested-border-radius-clip-3.html android MED-HIGH  floor 0.96 geom "GEOMETRY OK"
+  L4-oof-layout          filter-effects/backdrop-filter-nested-border-radius-clip.html android  MED-HIGH  floor 0.98 geom "GEOMETRY OK"
+  L4-oof-layout          filter-effects/backdrop-filter-nested-border-radius-clip-2.html android MED-HIGH  floor 0.98 geom "GEOMETRY OK"
+  L4-oof-layout          filter-effects/backdrop-filter-nested-border-radius-clip-4.html android MED-HIGH  floor 0.98 geom "GEOMETRY OK"
+  L4-oof-layout          css-flexbox/abspos/abspos-autopos-htb-ltr.html android                 HIGH      floor 0.995 geom "GEOMETRY OK"
+  L4-oof-layout          css-flexbox/abspos/abspos-autopos-vlr-ltr.html android                 HIGH      floor 0.995 geom "GEOMETRY OK"
+  L4-oof-layout          css-flexbox/abspos/abspos-autopos-vrl-ltr.html android                 HIGH      floor 0.995 geom "GEOMETRY OK"
+  L4-oof-layout          css-gaps/flex/flex-gap-decorations-033.html ios                        HIGH      floor 0.99 geom "GEOMETRY OK"
+  L4-oof-layout          css-gaps/flex/flex-gap-decorations-033.html android                    HIGH      floor 0.99 geom "GEOMETRY OK"
+  L5-ua-heading-face     css-break/block-in-inline-015-print.html android                       HIGH      floor 0.97 geom "GEOMETRY OK"
+  L6-web-tail            css-ui/box-sizing-007.html web                                         HIGH      floor 0.975 geom "GEOMETRY OK"
+  L6-web-tail            css-ui/box-sizing-008.html web                                         HIGH      floor 0.965 geom "GEOMETRY OK"
+  L6-web-tail            css-ui/box-sizing-022.html web                                         MED-HIGH  floor 0.96 geom "GEOMETRY OK"
+  L6-web-tail            css-text/hyphens/hyphens-out-of-flow-002.html web                      HIGH (branch R) / MED-HIGH (branch H) floor 0.995 geom "GEOMETRY OK"

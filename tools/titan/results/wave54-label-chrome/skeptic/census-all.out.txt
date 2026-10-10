@@ -1,0 +1,14 @@
+wave53-final: 1435 per-test IR documents; carrying an "All" property: 11
+  css-cascade/wpt__css-cascade__all-prop-001.json
+  css-cascade/wpt__css-cascade__all-prop-002.json
+  css-cascade/wpt__css-cascade__all-prop-inherit-color.json
+  css-cascade/wpt__css-cascade__all-prop-initial-color.json
+  css-cascade/wpt__css-cascade__all-prop-initial-visited.json
+  css-cascade/wpt__css-cascade__all-prop-revert-color.json
+  css-cascade/wpt__css-cascade__all-prop-unset-color.json
+  css-display/wpt__css-display__display-contents-button.json
+  css-display/wpt__css-display__display-contents-details.json
+  css-display/wpt__css-display__display-contents-fieldset.json
+  css-ui/wpt__css-ui__appearance-revert-001.tentative.json
+  (raw substring "All" in 11 documents)
+wave53-final vs wave54-open: 1435 vs 1435 documents; identical 1435, differ 0, missing in wave54-open 0, missing in wave53-final 0

@@ -1,0 +1,74 @@
+== base () rc=0
+watchlist.txt: 775 watch lines
+expectations.json: union capture carriers {'web': 44, 'ios': 27, 'android': 51} · wire carriers 23
+predicted f->P flips by tier: {"web": {"HIGH/MED-HIGH": 4, "MED/MED-LOW": 5, "LOW": 0}, "ios": {"HIGH/MED-HIGH": 3, "MED/MED-LOW": 6, "LOW": 0}, "android": {"HIGH/MED-HIGH": 6, "MED/MED-LOW": 4, "LOW": 0}}
+  L4-oof-layout: carriers [0, 7, 21] wire 0 predictions 26 mustNotMove 253 units ['OOF-android', 'OOF-ios', 'CBB-android', 'GAP-android', 'GAP-ios']
+  L6-web-tail: carriers [28, 0, 0] wire 0 predictions 27 mustNotMove 68 units ['RS', 'W1']
+must-not-move exclusions (another lane's carrier on that platform): 3
+    L2-table-body-cell: css-contain/contain-content-004.html android  -> carrier of L4-oof-layout
+    L5-ua-heading-face: css-break/block-in-inline-015-print.html web  -> carrier of L6-web-tail
+    L6-web-tail: css-break/block-in-inline-015-print.html android  -> carrier of L5-ua-heading-face
+   watchlist-check wave53-final:   unmatched 0 · wave54-open:   unmatched 0
+   expectations.json == installed
+   watchlist.txt == installed
+== h1 (tools/titan/results/wave54-oof-layout/hunk-for-orchestrator-1.patch) rc=0
+watchlist.txt: 776 watch lines
+expectations.json: union capture carriers {'web': 44, 'ios': 27, 'android': 54} · wire carriers 23
+predicted f->P flips by tier: {"web": {"HIGH/MED-HIGH": 4, "MED/MED-LOW": 5, "LOW": 0}, "ios": {"HIGH/MED-HIGH": 3, "MED/MED-LOW": 6, "LOW": 0}, "android": {"HIGH/MED-HIGH": 6, "MED/MED-LOW": 4, "LOW": 0}}
+  L4-oof-layout: carriers [0, 7, 24] wire 0 predictions 29 mustNotMove 253 units ['OOF-android', 'OOF-ios', 'CBB-android', 'GAP-android', 'GAP-ios']
+  L6-web-tail: carriers [28, 0, 0] wire 0 predictions 27 mustNotMove 66 units ['RS', 'W1']
+must-not-move exclusions (another lane's carrier on that platform): 5
+    L2-table-body-cell: css-contain/contain-content-004.html android  -> carrier of L4-oof-layout
+    L5-ua-heading-face: css-break/block-in-inline-015-print.html web  -> carrier of L6-web-tail
+    L6-web-tail: css-break/block-in-inline-015-print.html android  -> carrier of L5-ua-heading-face
+    L6-web-tail: css-position/position-absolute-semi-replaced-stretch-input.html android  -> carrier of L4-oof-layout
+    L6-web-tail: css-position/position-absolute-semi-replaced-stretch-other.html android  -> carrier of L4-oof-layout
+   watchlist-check wave53-final:   unmatched 0 · wave54-open:   unmatched 0
+   expectations.json differs from installed
+   watchlist.txt differs from installed
+== h2 (tools/titan/results/wave54-oof-layout/hunk-for-orchestrator-2.patch) rc=0
+watchlist.txt: 775 watch lines
+expectations.json: union capture carriers {'web': 44, 'ios': 27, 'android': 51} · wire carriers 23
+predicted f->P flips by tier: {"web": {"HIGH/MED-HIGH": 4, "MED/MED-LOW": 5, "LOW": 0}, "ios": {"HIGH/MED-HIGH": 3, "MED/MED-LOW": 6, "LOW": 0}, "android": {"HIGH/MED-HIGH": 6, "MED/MED-LOW": 4, "LOW": 0}}
+  L4-oof-layout: carriers [0, 7, 21] wire 0 predictions 26 mustNotMove 253 units ['OOF-android', 'OOF-ios', 'CBB-android', 'GAP-android', 'GAP-ios']
+  L6-web-tail: carriers [28, 0, 0] wire 0 predictions 27 mustNotMove 68 units ['RS', 'W1']
+must-not-move exclusions (another lane's carrier on that platform): 3
+    L2-table-body-cell: css-contain/contain-content-004.html android  -> carrier of L4-oof-layout
+    L5-ua-heading-face: css-break/block-in-inline-015-print.html web  -> carrier of L6-web-tail
+    L6-web-tail: css-break/block-in-inline-015-print.html android  -> carrier of L5-ua-heading-face
+   watchlist-check wave53-final:   unmatched 0 · wave54-open:   unmatched 0
+   expectations.json differs from installed
+   watchlist.txt == installed
+== h1h2 (tools/titan/results/wave54-oof-layout/hunk-for-orchestrator-1.patch tools/titan/results/wave54-oof-layout/hunk-for-orchestrator-2.patch) rc=0
+watchlist.txt: 776 watch lines
+expectations.json: union capture carriers {'web': 44, 'ios': 27, 'android': 54} · wire carriers 23
+predicted f->P flips by tier: {"web": {"HIGH/MED-HIGH": 4, "MED/MED-LOW": 5, "LOW": 0}, "ios": {"HIGH/MED-HIGH": 3, "MED/MED-LOW": 6, "LOW": 0}, "android": {"HIGH/MED-HIGH": 6, "MED/MED-LOW": 4, "LOW": 0}}
+  L4-oof-layout: carriers [0, 7, 24] wire 0 predictions 29 mustNotMove 253 units ['OOF-android', 'OOF-ios', 'CBB-android', 'GAP-android', 'GAP-ios']
+  L6-web-tail: carriers [28, 0, 0] wire 0 predictions 27 mustNotMove 66 units ['RS', 'W1']
+must-not-move exclusions (another lane's carrier on that platform): 5
+    L2-table-body-cell: css-contain/contain-content-004.html android  -> carrier of L4-oof-layout
+    L5-ua-heading-face: css-break/block-in-inline-015-print.html web  -> carrier of L6-web-tail
+    L6-web-tail: css-break/block-in-inline-015-print.html android  -> carrier of L5-ua-heading-face
+    L6-web-tail: css-position/position-absolute-semi-replaced-stretch-input.html android  -> carrier of L4-oof-layout
+    L6-web-tail: css-position/position-absolute-semi-replaced-stretch-other.html android  -> carrier of L4-oof-layout
+   watchlist-check wave53-final:   unmatched 0 · wave54-open:   unmatched 0
+   expectations.json differs from installed
+   watchlist.txt differs from installed
+== h2h1 (tools/titan/results/wave54-oof-layout/hunk-for-orchestrator-2.patch tools/titan/results/wave54-oof-layout/hunk-for-orchestrator-1.patch) rc=0
+watchlist.txt: 776 watch lines
+expectations.json: union capture carriers {'web': 44, 'ios': 27, 'android': 54} · wire carriers 23
+predicted f->P flips by tier: {"web": {"HIGH/MED-HIGH": 4, "MED/MED-LOW": 5, "LOW": 0}, "ios": {"HIGH/MED-HIGH": 3, "MED/MED-LOW": 6, "LOW": 0}, "android": {"HIGH/MED-HIGH": 6, "MED/MED-LOW": 4, "LOW": 0}}
+  L4-oof-layout: carriers [0, 7, 24] wire 0 predictions 29 mustNotMove 253 units ['OOF-android', 'OOF-ios', 'CBB-android', 'GAP-android', 'GAP-ios']
+  L6-web-tail: carriers [28, 0, 0] wire 0 predictions 27 mustNotMove 66 units ['RS', 'W1']
+must-not-move exclusions (another lane's carrier on that platform): 5
+    L2-table-body-cell: css-contain/contain-content-004.html android  -> carrier of L4-oof-layout
+    L5-ua-heading-face: css-break/block-in-inline-015-print.html web  -> carrier of L6-web-tail
+    L6-web-tail: css-break/block-in-inline-015-print.html android  -> carrier of L5-ua-heading-face
+    L6-web-tail: css-position/position-absolute-semi-replaced-stretch-input.html android  -> carrier of L4-oof-layout
+    L6-web-tail: css-position/position-absolute-semi-replaced-stretch-other.html android  -> carrier of L4-oof-layout
+   watchlist-check wave53-final:   unmatched 0 · wave54-open:   unmatched 0
+   expectations.json differs from installed
+   watchlist.txt differs from installed
+order-independent: h1h2 == h2h1 (expectations.json)
+json diff: tools/titan/results/wave54-oof-layout/fix/plan-dry-run.json-diff.txt
+plan dir untouched (sha256 before = after)

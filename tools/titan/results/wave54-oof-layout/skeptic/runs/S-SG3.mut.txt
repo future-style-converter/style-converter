@@ -1,0 +1,11 @@
+label=S-SG3 file=runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/GapDecorationGeometry.swift
+sha256 before=80a314e0c94906c37e85644e7c7240fc131b549952d0480b9eb3e721b286b06e mutated=d28ee9ed4b75716952315c84749597ec61d1ca8f30c792d138df920a684fde21 after=80a314e0c94906c37e85644e7c7240fc131b549952d0480b9eb3e721b286b06e restored=OK
+suite rc=65 (RED)
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.036 (0.202) seconds
+	 Executed 75 tests, with 2 failures (0 unexpected) in 5.143 (5.717) seconds
+	 Executed 75 tests, with 2 failures (0 unexpected) in 5.143 (5.718) seconds
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationGrammarTests.swift:270: error: -[StyleConverterRuntimeTests.GapDecorationGrammarTests testWrapReverseDropsEveryLineGapRule] : XCTAssertTrue failed - known limitation: wrap-reverse yields no row rules
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testWrapReverseDropsEveryLineGapRule]' failed (0.002 seconds).
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift:428: error: -[StyleConverterRuntimeTests.GapDecorationSegmentsTests testOverlappingItemsPositionNoRule] : XCTAssertEqual failed: ("[(0.0, 40.0, 100.0, 10.0)]") is not equal to ("[]")
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testOverlappingItemsPositionNoRule]' failed (0.003 seconds).
+** TEST FAILED **

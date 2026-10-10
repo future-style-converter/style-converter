@@ -1,0 +1,6 @@
+import { extractHyphenateCharacter } from './HyphenateCharacterExtractor.ts';
+import { applyHyphenateCharacter } from './HyphenateCharacterApplier.ts';
+for (const data of [{ type: 'string', value: '' }, { type: 'string', value: '•' }, { type: 'string', value: ' ـ' }, { type: 'string', value: '/-/' }, { type: 'auto' }, { type: 'string', value: '\\2022' }]) {
+  const css = applyHyphenateCharacter(extractHyphenateCharacter([{ type: 'HyphenateCharacter', data }]));
+  console.log(JSON.stringify(data), '->', JSON.stringify(css));
+}

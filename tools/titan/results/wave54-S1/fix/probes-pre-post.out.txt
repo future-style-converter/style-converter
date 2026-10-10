@@ -1,0 +1,73 @@
+== rtl-marker-bake.geometry.py wave53-open wave53-open
+[P] bidi/bidi-lines-001 ref      line starts y117:x29 y159:x273 → GEOMETRY OK
+[P] bidi/bidi-lines-001 web      line starts y117:x29 y159:x273 → GEOMETRY OK
+[P] bidi/bidi-lines-001 ios      line starts y117:x29 y159:x273 → GEOMETRY OK
+[P] bidi/bidi-lines-001 android  line starts y117:x33 y159:x278 → GEOMETRY WRONG (line y117 left x33 vs ref x29±1)
+[P] bidi/bidi-lines-002 ref      line starts y158:x31 y238:x276 → GEOMETRY OK
+[P] bidi/bidi-lines-002 web      line starts y158:x31 y238:x276 → GEOMETRY OK
+[P] bidi/bidi-lines-002 ios      line starts y158:x31 y239:x276 → GEOMETRY OK
+[P] bidi/bidi-lines-002 android  line starts y159:x35 y239:x280 → GEOMETRY WRONG (line y159 left x35 vs ref x31±1)
+[M] counter-suffix ref      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 → GEOMETRY OK
+[M] counter-suffix web      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 no marker ink on text row y214-225)
+[M] counter-suffix ios      text y214-225:x103-126 y238-249:x104-126 y262-273:x103-126 y286-297:x104-126 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 no marker ink on text row y214-225)
+[M] counter-suffix android  text  | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl text rows 0/4 in x95-128 (text at x152-174))
+exit 0
+== rtl-marker-bake.geometry.py wave53-probe wave53-open
+[P] bidi/bidi-lines-001 ref      line starts y117:x29 y159:x273 → GEOMETRY OK
+[P] bidi/bidi-lines-001 web      line starts y117:x29 y159:x273 → GEOMETRY OK
+[P] bidi/bidi-lines-001 ios      line starts y117:x29 y159:x273 → GEOMETRY OK
+[P] bidi/bidi-lines-001 android  line starts y117:x29 y159:x274 → GEOMETRY OK
+[P] bidi/bidi-lines-002 ref      line starts y158:x31 y238:x276 → GEOMETRY OK
+[P] bidi/bidi-lines-002 web      line starts y158:x31 y238:x276 → GEOMETRY OK
+[P] bidi/bidi-lines-002 ios      line starts y158:x31 y239:x276 → GEOMETRY OK
+[P] bidi/bidi-lines-002 android  line starts y159:x31 y239:x276 → GEOMETRY OK
+[M] counter-suffix ref      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 → GEOMETRY OK
+[M] counter-suffix web      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 | rows 0-207 identical to wave53-open → GEOMETRY OK
+[M] counter-suffix ios      text y214-225:x103-126 y238-249:x104-126 y262-273:x103-126 y286-297:x104-126 | rows 0-207 identical to wave53-open → GEOMETRY OK
+[M] counter-suffix android  text y214-225:x104-126 y239-249:x104-126 y262-273:x104-126 y287-297:x104-126 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 no marker ink on text row y214-225 (marker ink y244-245 below the line))
+exit 0
+== rtl-marker-bake.geometry.py wave53-final wave53-open
+[P] bidi/bidi-lines-001 ref      line starts y117:x29 y159:x273 → GEOMETRY OK
+[P] bidi/bidi-lines-001 web      line starts y117:x29 y159:x273 → GEOMETRY OK
+[P] bidi/bidi-lines-001 ios      line starts y117:x29 y159:x273 → GEOMETRY OK
+[P] bidi/bidi-lines-001 android  line starts y117:x33 y159:x278 → GEOMETRY WRONG (line y117 left x33 vs ref x29±1)
+[P] bidi/bidi-lines-002 ref      line starts y158:x31 y238:x276 → GEOMETRY OK
+[P] bidi/bidi-lines-002 web      line starts y158:x31 y238:x276 → GEOMETRY OK
+[P] bidi/bidi-lines-002 ios      line starts y158:x31 y239:x276 → GEOMETRY OK
+[P] bidi/bidi-lines-002 android  line starts y159:x35 y239:x280 → GEOMETRY WRONG (line y159 left x35 vs ref x31±1)
+[M] counter-suffix ref      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 → GEOMETRY OK
+[M] counter-suffix web      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 no marker ink on text row y214-225)
+[M] counter-suffix ios      text y214-225:x103-126 y238-249:x104-126 y262-273:x103-126 y286-297:x104-126 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 no marker ink on text row y214-225)
+[M] counter-suffix android  text  | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl text rows 0/4 in x95-128 (text at x152-174))
+exit 0
+== lists-bakes.geometry.py wave52-ship
+counter-reset-reversed-nested ref      y36-47:x57-117 y56-67:x57-105 y76-87:x97-166 y96-107:x97-147 y116-130:x97-151 y136-147:x57-101 → GEOMETRY OK
+counter-reset-reversed-nested web      y36-47:x57-124 y56-67:x57-108 y76-87:x57-129 y96-107:x57-107 y116-130:x57-111 → GEOMETRY WRONG (rows 5/6)
+counter-reset-reversed-nested ios      y36-47:x57-123 y56-67:x57-86 y76-87:x57-129 y96-107:x57-107 y116-130:x57-111 → GEOMETRY WRONG (rows 5/6)
+counter-reset-reversed-nested android  y37-47:x58-125 y57-67:x58-113 y77-87:x58-130 y96-107:x57-107 y116-130:x57-110 → GEOMETRY WRONG (rows 5/6)
+counter-suffix ref      y214-225:x104-144 y238-249:x104-144 y262-273:x104-145 y286-297:x104-144 → GEOMETRY OK
+counter-suffix web      y214-225:x47-126 y238-249:x47-127 y262-273:x46-126 y286-297:x47-127 → GEOMETRY WRONG (rtl row 1 left x47 vs ref x104)
+counter-suffix ios      y214-225:x103-126 y238-249:x104-126 y262-273:x103-126 y286-297:x104-126 → GEOMETRY WRONG (rtl row 1 right x126 vs ref x144)
+counter-suffix android  y214-225:x152-174 y239-249:x152-174 y262-273:x152-174 y287-297:x152-174 → GEOMETRY WRONG (rtl row 1 left x152 vs ref x104)
+exit 0
+== lists-bakes.geometry.py wave53-probe wave53-open
+counter-reset-reversed-nested ref      y36-47:x57-117 y56-67:x57-105 y76-87:x97-166 y96-107:x97-147 y116-130:x97-151 y136-147:x57-101 → GEOMETRY OK
+counter-reset-reversed-nested web      y36-47:x57-117 y56-67:x57-105 y76-87:x97-166 y96-107:x97-147 y116-130:x97-151 y136-147:x57-101 → GEOMETRY OK
+counter-reset-reversed-nested ios      y36-47:x57-117 y56-67:x57-105 y76-87:x97-165 y96-107:x97-147 y116-130:x97-151 y136-147:x57-100 → GEOMETRY OK
+counter-reset-reversed-nested android  y37-47:x57-116 y56-67:x57-105 y77-87:x98-170 y96-107:x97-147 y116-130:x97-150 y136-147:x58-103 → GEOMETRY OK
+counter-suffix ref      y214-225:x104-144 y238-249:x104-144 y262-273:x104-145 y286-297:x104-144 → GEOMETRY OK
+counter-suffix web      y214-225:x104-144 y238-249:x104-144 y262-273:x104-145 y286-297:x104-144 | rows 0-207 identical to wave53-open → GEOMETRY OK
+counter-suffix ios      y214-225:x103-141 y238-249:x104-145 y262-273:x103-145 y286-297:x104-144 | rows 0-207 identical to wave53-open → GEOMETRY OK
+counter-suffix android  y214-225:x104-126 y239-249:x104-134 y262-273:x104-134 y285-297:x104-145 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 right x126 vs ref x144)
+exit 0
+== lists-bakes.geometry.py wave53-final wave53-open
+counter-reset-reversed-nested ref      y36-47:x57-117 y56-67:x57-105 y76-87:x97-166 y96-107:x97-147 y116-130:x97-151 y136-147:x57-101 → GEOMETRY OK
+counter-reset-reversed-nested web      y36-47:x57-117 y56-67:x57-105 y76-87:x97-166 y96-107:x97-147 y116-130:x97-151 y136-147:x57-101 → GEOMETRY OK
+counter-reset-reversed-nested ios      y36-47:x57-117 y56-67:x57-105 y76-87:x97-165 y96-107:x97-147 y116-130:x97-151 y136-147:x57-100 → GEOMETRY OK
+counter-reset-reversed-nested android  y37-47:x57-116 y56-67:x57-105 y77-87:x98-170 y96-107:x97-147 y116-130:x97-150 y136-147:x58-103 → GEOMETRY OK
+counter-suffix ref      y214-225:x104-144 y238-249:x104-144 y262-273:x104-145 y286-297:x104-144 → GEOMETRY OK
+counter-suffix web      y214-225:x47-126 y238-249:x47-127 y262-273:x46-126 y286-297:x47-127 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 left x47 vs ref x104)
+counter-suffix ios      y214-225:x103-126 y238-249:x104-126 y262-273:x103-126 y286-297:x104-126 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 right x126 vs ref x144)
+counter-suffix android  y214-225:x152-174 y239-249:x152-174 y262-273:x152-174 y287-297:x152-174 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 left x152 vs ref x104)
+exit 0
+PRE == POST over the six invocations: True (72 lines)

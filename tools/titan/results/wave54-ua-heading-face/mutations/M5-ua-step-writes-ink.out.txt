@@ -1,0 +1,9 @@
+[M5-ua-step-writes-ink] file=runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 before=aaceeebf4218d2bca7f2b2017e999f33ff4f06848d415fe7cb1046025aa08c64 mutated=dc8d6a6a718b2b347e001d4ce5315b595449ffd611d0f69fe181f0ac7840adef
+[M5-ua-step-writes-ink] mutated run rc=1
+  com.styleconverter.runtime.typography.UAElementFontRuleTest tests=11 failures=0 errors=0
+  com.styleconverter.runtime.typography.UAHeadingFoldGateTest tests=9 failures=1 errors=0
+    RED: soundness - the fold verdict is the same before and after the UA face (brief 4 D) :: java.lang.AssertionError: text-decoration-inset-005__1__0-069 expected:<class com.styleconverter.runtime.typography.inline.InlineRunFold$Outcome$Folded (Kotlin 
+[M5-ua-step-writes-ink] restored sha256 after=aaceeebf4218d2bca7f2b2017e999f33ff4f06848d415fe7cb1046025aa08c64 BYTE-EXACT
+[M5-ua-step-writes-ink] restored run rc=0
+  com.styleconverter.runtime.typography.UAElementFontRuleTest tests=11 failures=0 errors=0
+  com.styleconverter.runtime.typography.UAHeadingFoldGateTest tests=9 failures=0 errors=0

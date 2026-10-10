@@ -1,0 +1,76 @@
+== W1 runtime files before set-aside
+eb7dcd389591dfd8f046994f09132026a9c92fd5bbd041fd4c7ea352d3eb6a99  runtimes/web/src/renderer/InlineRuns.ts
+69dd160f6296304c929d2fb7d2df00939294323252371bafd7a7e641afae8b7b  runtimes/web/src/renderer/NodeRenderer.ts
+2fbc5571a5a4fe73d7cdf203ee3e6709a5ef189816e3859806f1b6c281f7cd15  runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts
+34d069eddf424366653dc726a06d93377e61b5147bd07d7ea11ad3e9e3123bdf  runtimes/web/tests/renderer/InertOutOfFlowWordJoin.test.tsx
+== W1 runtime files set aside (HEAD versions in place)
+== lock taken 2026-10-08 19:27:00; patch /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-web-tail/seam-2.patch
+== sha256 before
+cc39ab6e98342c493b2404a4d9a52d1fba997063b2d42b2edc89cea7809a4d8e  apps/web-harness/src/sdui/ComponentRenderer.tsx
+== applied; running: ( cd apps/web-harness && npx vitest run tests/sdui/ComponentRenderer.inertSplitBareText.test.tsx tests/sdui/ComponentRenderer.spanInline.test.tsx tests/sdui/RendererParity.test.tsx tests/sdui/ComponentRenderer.interInlineWs.test.tsx ) 2>&1 | grep -E 'Test Files|Tests |FAIL|×'; (cd apps/web-harness && CENSUS_RUN=wave53-final CENSUS_OUT=/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-web-tail/dom-census.branchH.json npx vitest run --config ../../tools/titan/results/wave54-web-tail/vitest.census.config.mts dom-census 2>&1 | grep -E 'Tests '); (cd apps/web-harness && npx tsc --noEmit && echo TSC-OK); for m in H-m1 H-m2 H-m3 H-m4 H-m5; do python3 /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-web-tail/mutate.py /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-web-tail/h-mutations.json $m -- 'cd apps/web-harness && npx vitest run tests/sdui/ComponentRenderer.inertSplitBareText.test.tsx tests/sdui/ComponentRenderer.spanInline.test.tsx tests/sdui/RendererParity.test.tsx tests/sdui/ComponentRenderer.interInlineWs.test.tsx'; echo "[$m] mutate.py exit $?"; done
+ Test Files  4 passed (4)
+      Tests  46 passed (46)
+      Tests  1 passed (1)
+TSC-OK
+[H-m1] file apps/web-harness/src/sdui/InertSplitBareText.ts sha256 before 9a257c3f8a8fa73fae8005a56284df166cb15b3ef28fa3347f1fe136652235ac
+[H-m1] mutated sha256 370631c169328993024994635c84194e90922cac2f3b666fdf70d55d6d5ce84c
+[H-m1] mutated run exit 1 → RED
+    × (H-d) -001 box 4 (hyphens: manual) keeps the wrapper 12ms
+    FAIL  tests/sdui/ComponentRenderer.inertSplitBareText.test.tsx > branch H — bare run text around a mid-word inert member (wave-54 L6 W1) > (H-d) -001 box 4 (hyphens: manual) keeps the wrapper
+    AssertionError: expected '<div data-component-id="wpt__css-text…' to contain '<span>high</span>'
+[H-m1] restored sha256 9a257c3f8a8fa73fae8005a56284df166cb15b3ef28fa3347f1fe136652235ac == before
+[H-m1] restored run exit 0 → GREEN
+[H-m1] mutate.py exit 0
+[H-m2] file apps/web-harness/src/sdui/InertSplitBareText.ts sha256 before 9a257c3f8a8fa73fae8005a56284df166cb15b3ef28fa3347f1fe136652235ac
+[H-m2] mutated sha256 18c40e263902ed0eefe3e20783a17de78cfd0488bba72ad99147004e3dde36eb
+[H-m2] mutated run exit 1 → RED
+    × (H-c) word-edge boxes 2 / 7 and a SPACED split keep the <span> wrapper 22ms
+    FAIL  tests/sdui/ComponentRenderer.inertSplitBareText.test.tsx > branch H — bare run text around a mid-word inert member (wave-54 L6 W1) > (H-c) word-edge boxes 2 / 7 and a SPACED split keep the <span
+    AssertionError: expected '<div data-component-id="wpt__css-text…' to contain '<span>high </span>'
+[H-m2] restored sha256 9a257c3f8a8fa73fae8005a56284df166cb15b3ef28fa3347f1fe136652235ac == before
+[H-m2] restored run exit 0 → GREEN
+[H-m2] mutate.py exit 0
+[H-m3] file apps/web-harness/src/sdui/InertSplitBareText.ts sha256 before 9a257c3f8a8fa73fae8005a56284df166cb15b3ef28fa3347f1fe136652235ac
+[H-m3] mutated sha256 6c8e98414e69e640fbaa3274a34a9c99d5c3fd5421ed3d87133f6f7837a78701
+[H-m3] mutated run exit 1 → RED
+    × (H-e) a member that could paint keeps the wrapper (alpha 1, a background, an <img>) 11ms
+    × (H-g) the restated predicate over the 24 census members gives the same 12 trues as Compose 2ms
+    FAIL  tests/sdui/ComponentRenderer.inertSplitBareText.test.tsx > branch H — bare run text around a mid-word inert member (wave-54 L6 W1) > (H-e) a member that could paint keeps the wrapper (alpha 1, a
+    AssertionError: expected '<div data-component-id="wpt__css-text…' to contain '<span>high</span>'
+    FAIL  tests/sdui/ComponentRenderer.inertSplitBareText.test.tsx > branch H — bare run text around a mid-word inert member (wave-54 L6 W1) > (H-g) the restated predicate over the 24 census members gives
+    AssertionError: expected [ Array(24) ] to deeply equal [ false, false, false, false, …(20) ]
+[H-m3] restored sha256 9a257c3f8a8fa73fae8005a56284df166cb15b3ef28fa3347f1fe136652235ac == before
+[H-m3] restored run exit 0 → GREEN
+[H-m3] mutate.py exit 0
+[H-m4] file apps/web-harness/src/sdui/ComponentRenderer.tsx sha256 before ed988ed961a15ca1ffd9eaa14d1f2e0becd776ed239c38e8a7b5c100c844942f
+[H-m4] mutated sha256 a6840cef20a1db7840ff0811b57637eefed36d05516069f51789721c93e14a8c
+[H-m4] mutated run exit 1 → RED
+    × (H-a) boxes 3-6 render their pieces bare, member at its wire slot 45ms
+    FAIL  tests/sdui/ComponentRenderer.inertSplitBareText.test.tsx > branch H — bare run text around a mid-word inert member (wave-54 L6 W1) > (H-a) boxes 3-6 render their pieces bare, member at its wire 
+    AssertionError: __3-287: expected '<div data-component-id="wpt__css-text…' to contain '>h<span data-component-id="hyphens__h…'
+[H-m4] restored sha256 ed988ed961a15ca1ffd9eaa14d1f2e0becd776ed239c38e8a7b5c100c844942f == before
+[H-m4] restored run exit 0 → GREEN
+[H-m4] mutate.py exit 0
+[H-m5] file apps/web-harness/src/sdui/InertSplitBareText.ts sha256 before 9a257c3f8a8fa73fae8005a56284df166cb15b3ef28fa3347f1fe136652235ac
+[H-m5] mutated sha256 c8eb06c1b51a796344a243e51ef735af944e5fdb61a1eced80b61bddc07c12fc
+[H-m5] mutated run exit 1 → RED
+    × (H-a) boxes 3-6 render their pieces bare, member at its wire slot 31ms
+    × (H-g) the restated predicate over the 24 census members gives the same 12 trues as Compose 2ms
+    FAIL  tests/sdui/ComponentRenderer.inertSplitBareText.test.tsx > branch H — bare run text around a mid-word inert member (wave-54 L6 W1) > (H-a) boxes 3-6 render their pieces bare, member at its wire 
+    AssertionError: __3-287: expected '<div data-component-id="wpt__css-text…' to contain '>h<span data-component-id="hyphens__h…'
+    FAIL  tests/sdui/ComponentRenderer.inertSplitBareText.test.tsx > branch H — bare run text around a mid-word inert member (wave-54 L6 W1) > (H-g) the restated predicate over the 24 census members gives
+    AssertionError: expected [ false, false, false, false, …(20) ] to deeply equal [ false, false, false, false, …(20) ]
+[H-m5] restored sha256 9a257c3f8a8fa73fae8005a56284df166cb15b3ef28fa3347f1fe136652235ac == before
+[H-m5] restored run exit 0 → GREEN
+[H-m5] mutate.py exit 0
+== command exit 0
+== sha256 after restore
+cc39ab6e98342c493b2404a4d9a52d1fba997063b2d42b2edc89cea7809a4d8e  apps/web-harness/src/sdui/ComponentRenderer.tsx
+removed apps/web-harness/src/sdui/InertSplitBareText.ts
+removed apps/web-harness/tests/sdui/ComponentRenderer.inertSplitBareText.test.tsx
+== lock released 2026-10-08 19:28:09
+== W1 runtime files after put-back
+eb7dcd389591dfd8f046994f09132026a9c92fd5bbd041fd4c7ea352d3eb6a99  runtimes/web/src/renderer/InlineRuns.ts
+69dd160f6296304c929d2fb7d2df00939294323252371bafd7a7e641afae8b7b  runtimes/web/src/renderer/NodeRenderer.ts
+2fbc5571a5a4fe73d7cdf203ee3e6709a5ef189816e3859806f1b6c281f7cd15  runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts
+34d069eddf424366653dc726a06d93377e61b5147bd07d7ea11ad3e9e3123bdf  runtimes/web/tests/renderer/InertOutOfFlowWordJoin.test.tsx

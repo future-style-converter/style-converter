@@ -1,0 +1,11 @@
+pre clean counter-suffix__0__4__0 (root counter-suffix__0__4, chain 1): -
+pre clean counter-suffix__0__4__1 (root counter-suffix__0__4, chain 1): -
+pre clean counter-suffix__0__5__0 (root counter-suffix__0__5, chain 1): -
+pre clean counter-suffix__0__5__1 (root counter-suffix__0__5, chain 1): -
+pre: 1435 docs · 4 bidi-baked li boxes in 1 docs {'wpt__css-counter-styles__counter-suffix.json': 4} · 0 with a paint effect on the item→root chain
+post clean counter-suffix__0__4__0 (root counter-suffix__0__4, chain 1): -
+post clean counter-suffix__0__4__1 (root counter-suffix__0__4, chain 1): -
+post clean counter-suffix__0__5__0 (root counter-suffix__0__5, chain 1): -
+post clean counter-suffix__0__5__1 (root counter-suffix__0__5, chain 1): -
+post: 1435 docs · 4 bidi-baked li boxes in 1 docs {'wpt__css-counter-styles__counter-suffix.json': 4} · 0 with a paint effect on the item→root chain
+sanity: paint-effect IR types present on the post wire: {'ClipPath': 52, 'Filter': 10, 'MaskImage': 4, 'MixBlendMode': 2, 'Opacity': 76, 'OverflowX': 1997, 'OverflowY': 2005, 'TextShadow': 2, 'Transform': 138, 'Visibility': 5}

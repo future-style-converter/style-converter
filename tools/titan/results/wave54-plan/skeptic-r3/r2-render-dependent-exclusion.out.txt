@@ -1,0 +1,1 @@
+presence floor 0.02% · carrier captures 150 · min ref coverage 0.425 · under the floor 0 · absence-only today 0

@@ -1,0 +1,152 @@
+# seam-1.patch — wave 54 lane L2 (table-body-cell), revert unit TB-android, Compose seam (PLAN.md §3 row
+#   "`:2653-2697` `TableApplier.Table(…)` call: `val chrome = TableCellHug.chrome(component, fabricatedDefault = <:2670
+#   expression verbatim>)`; `fabricatedCellBorder = chrome.stroke, cellsHugContent = chrome.hug`").
+# Base: campaign/applier-campaign HEAD db6e8aa01dac7ca1209435bdbcc014e3f980dba2 (= dev 7cce3b22 + the committed wave-54 plan);
+#       runtimes/compose/.../core/renderer/ComponentRenderer.kt is byte-identical to 7cce3b22's,
+#       sha256 at base da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db.
+# Line anchor (base): the DisplayType.TABLE arm — `TableApplier.Table(` at :2653, the fabricatedCellBorder expression at
+#       :2670-2674, `modifier = modifier` at :2694. Disjoint from L4's :1925-1940 and L3's :7072 (PLAN §3).
+# Hunks: (1) ComponentRenderer.kt — `val chrome = …TableCellHug.chrome(component, fabricatedDefault = <the wave-38
+#            expression, moved verbatim>)` before the call; `fabricatedCellBorder = chrome.stroke`; `cellsHugContent = chrome.hug`;
+#        (2) NEW runtimes/compose/src/test/…/table/TableCellHugSeamWiringTest.kt — the source pin for (1), patch-borne so the
+#            shared tree never carries a pin red by construction (build-workflow rule 2b; the wave-53 FloatAvoidSeamWiringTest
+#            precedent).
+# Needs (same commit, revert unit TB-android): table/TableBodyForest.kt, table/TableCellHug.kt, table/TableApplier.kt
+#       (the `cellsHugContent` parameter) — without them hunk (1) does not compile.
+# Regenerate: python3 tools/titan/results/wave54-table-body-cell/seam1-hunk.py <base ComponentRenderer.kt> <out>; the test
+#       file's source is tools/titan/results/wave54-table-body-cell/seam1-files/.
+# Apply (PLAN §4 step 3.3, after L1's units): `git apply --check` first.
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+index 570c7e4..4f3a7cd 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -2650,6 +2650,21 @@ object ComponentRenderer {
+                     // which is the pre-wave-34 result byte-for-byte.
+                     sourceTag = if (LocalWptCaptureMode.current) component._tag else null
+                 )
++                // Wave 54 (lane L2, TB-android) — the chrome of the table box
++                // (table/TableCellHug.kt): TableBodyForest's synthetic
++                // ANONYMOUS table paints no demo cell stroke (CSS 2.1
++                // §17.2.1, §17.6.1) and sizes its cells at max-content
++                // (§17.5.2.2). Every other table gets `fabricatedDefault`
++                // back as its stroke — the wave-38 expression below, moved
++                // here verbatim — and hug = false, so it is byte-identical.
++                val chrome = com.styleconverter.runtime.table.TableCellHug.chrome(
++                    component,
++                    fabricatedDefault = !(LocalWptCaptureMode.current &&
++                        component.properties.none { it.type == "Display" } &&
++                        com.styleconverter.runtime.table.TableBoxTree
++                            .uaRoleOf(component._tag) ==
++                            com.styleconverter.runtime.table.TableBoxTree.Role.TABLE)
++                )
+                 TableApplier.Table(
+                     config = tableConfig,
+                     // Wave-38 finish pass — a table this runtime reached
+@@ -2666,12 +2681,10 @@ object ComponentRenderer {
+                     // above makes — role from the tag, no declared `Display`,
+                     // capture-gated — so the border decision and the spacing
+                     // decision can never disagree about where this table box
+-                    // came from.
+-                    fabricatedCellBorder = !(LocalWptCaptureMode.current &&
+-                        component.properties.none { it.type == "Display" } &&
+-                        com.styleconverter.runtime.table.TableBoxTree
+-                            .uaRoleOf(component._tag) ==
+-                            com.styleconverter.runtime.table.TableBoxTree.Role.TABLE),
++                    // came from. (Wave 54: that predicate is `chrome`'s
++                    // fabricatedDefault above; only an anonymous table
++                    // turns it off.)
++                    fabricatedCellBorder = chrome.stroke,
+                     // Wave 39 (lane A6) — CSS 2.1 §17.5.2 auto table width.
+                     // RenderComponent's `isShrinkToFitTable` already keeps
+                     // this box out of the composed-WPT block-fill channel;
+@@ -2691,6 +2704,9 @@ object ComponentRenderer {
+                             ),
+                             composedCapture = LocalWptComposedMode.current
+                         ),
++                    // Wave 54 (lane L2) — §17.5.2.2: the anonymous table's
++                    // columns take their max-content widths (TableCellHug).
++                    cellsHugContent = chrome.hug,
+                     modifier = modifier
+                 ) {
+                     RenderTableContent(component, textColor)
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/table/TableCellHugSeamWiringTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/table/TableCellHugSeamWiringTest.kt
+new file mode 100644
+index 0000000..c244321
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/table/TableCellHugSeamWiringTest.kt
+@@ -0,0 +1,75 @@
++package com.styleconverter.runtime.table
++
++// Wave 54 (lane L2 · table-body-cell, unit TB-android) — the SEAM WIRING pin,
++// shipped INSIDE tools/titan/results/wave54-table-body-cell/seam-1.patch with
++// the ComponentRenderer.kt hunk it pins (the wave-53 FloatAvoidSeamWiringTest
++// precedent), so the shared tree never carries a pin that is red by
++// construction before the seam lands (build-workflow rule 2b).
++//
++// Why: TableCellHugTest pins the pure chrome decision and TableApplier's
++// half of the wiring, but nothing there proves the renderer's
++// `DisplayType.TABLE ->` branch CALLS the decision and spends BOTH halves of
++// it. A @Composable seam cannot execute in this module's plain JVM JUnit
++// tests (the per-cell intrinsic read is first executed on device, PLAN §8
++// risk 1), so this is a SOURCE-level pin — the module's idiom
++// (SeamReachabilityTest, FloatAvoidSeamWiringTest).
++//
++// Mutations, executed with the patch applied and logged in the lane note
++// (tools/titan/results/wave54-table-body-cell/_note.md): the renderer at HEAD
++// bytes (no seam), `fabricatedCellBorder` back to the inline expression, and
++// `cellsHugContent = chrome.hug` dropped — each turns this class red.
++
++import java.io.File
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class TableCellHugSeamWiringTest {
++
++    /** ComponentRenderer.kt, found by walking up to the repo root (the SeamReachabilityTest walk-up). */
++    private val renderer: File by lazy {
++        val anchor = "runtimes/compose/src/main/java/com/styleconverter/runtime/" +
++            "core/renderer/ComponentRenderer.kt"
++        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
++        while (dir != null && !File(dir, anchor).exists()) dir = dir.parentFile
++        File(requireNotNull(dir) { "repo root not found" }, anchor)
++    }
++
++    /** The TABLE branch: from its `DisplayType.TABLE ->` arm to the content lambda it ends in. */
++    private fun branch(): String {
++        val text = renderer.readText()
++        // The display switch's table arm — the only TableApplier.Table caller.
++        val start = text.indexOf("DisplayType.TABLE -> {")
++        assertTrue("the DisplayType.TABLE arm is missing", start >= 0)
++        // The arm ends in the table's row loop; the hunk lives before it.
++        val end = text.indexOf("RenderTableContent(component, textColor)", start)
++        assertTrue("the TABLE arm no longer renders RenderTableContent", end > start)
++        return text.substring(start, end)
++    }
++
++    @Test
++    fun `the arm computes the chrome from today's stroke expression, verbatim`() {
++        val b = branch()
++        // The pure decision (TableCellHug.chrome) is computed BEFORE the call.
++        val decide = b.indexOf("val chrome = com.styleconverter.runtime.table.TableCellHug.chrome(")
++        assertTrue("the arm does not compute TableCellHug.chrome", decide >= 0)
++        assertTrue("chrome is not computed before TableApplier.Table(", decide < b.indexOf("TableApplier.Table("))
++        // The wave-38 predicate rides in as fabricatedDefault, unchanged —
++        // the byte-identity argument for every non-anonymous table.
++        assertTrue(b.contains("fabricatedDefault = !(LocalWptCaptureMode.current &&"))
++        assertTrue(b.contains("component.properties.none { it.type == \"Display\" } &&"))
++        assertTrue(b.contains(".uaRoleOf(component._tag) =="))
++        assertTrue(b.contains("com.styleconverter.runtime.table.TableBoxTree.Role.TABLE)"))
++    }
++
++    @Test
++    fun `the call spends both halves of the chrome and no inline stroke expression is left`() {
++        val b = branch()
++        // D1: the stroke reads the decision, not a second copy of the predicate.
++        assertTrue(b.contains("fabricatedCellBorder = chrome.stroke,"))
++        assertFalse("an inline fabricatedCellBorder expression survived", b.contains("fabricatedCellBorder = !("))
++        // D2: the hug reaches TableApplier.Table, exactly once.
++        assertEquals(1, Regex("""cellsHugContent = chrome\.hug,""").findAll(b).count())
++    }
++}

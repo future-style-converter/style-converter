@@ -1,0 +1,50 @@
+MUT-1 [tools/visual/label-chrome-check.mjs] clause (iv) deleted: a label drawn on an exempt capture is no longer red (brief m1/m2)
+  mutated sha256 c007c9944e857429 (pre fad373782a0de0ed)
+  SUITE mutated: RED  rc=1 tests=148 fail=1 ['exempt mutation: the label drawn ×3 is red on (iv) ×3; drawn on one platform only, (iv) on that one']
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+MUT-2 [tools/visual/label-chrome-check.mjs] exempt stems keep P = name (no "iff"): the wave-53 red (i) 437/369/293 x3 returns post-seed
+  mutated sha256 5d1e632e5695700d (pre fad373782a0de0ed)
+  SUITE mutated: RED  rc=1 tests=148 fail=3 ['exempt: a label-free triplet is green (P = ∅, band byte-identical, (iv) holds)', 'exempt mutation: the label drawn ×3 is red on (iv) ×3; drawn on one platform only, (iv) on that one', 'exempt mutation: a band one LSB off on one platform is still red on (ii)']
+  SIM mutated: RED  rc=1 fail=6 ['exempt: a label-free triplet is green (P = ∅, band byte-identical, (iv) holds)', 'exempt mutation: the label drawn ×3 is red on (iv) ×3; drawn on one platform only, (iv) on that one', 'exempt mutation: a band one LSB off on one platform is still red on (ii)', 'label chrome 001_ATC_PropsThenAll_InGreenParent'] ['#   001_ATC_PropsThenAll_InGreenParent [exempt band-identical, 437 glyph px] RED (i) Android: 437/437 glyph px are ground; (i) iOS: 437/437 glyph px are ground; (i) web: 437/437 glyph px are ground', '#   003_ATC_InitialUnderRedParent [exempt band-identical, 369 glyph px] RED (i) Android: 369/369 glyph px are ground; (i) iOS: 369/369 glyph px are ground; (i) web: 369/369 glyph px are ground', '#   005_ATC_DirectionSurvives [exempt band-identical, 293 glyph px] RED (i) Android: 293/293 glyph px are ground; (i) iOS: 293/293 glyph px are ground; (i) web: 293/293 glyph px are ground']
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+  SIM restored: GREEN  rc=0 fail=0 [] []
+MUT-3 [tools/visual/label-chrome-check.mjs] nodeKind accepts a childless textless node as a container: a leaf entry verifies (brief m4)
+  mutated sha256 f9ff893786aed9ce (pre fad373782a0de0ed)
+  SUITE mutated: RED  rc=1 tests=148 fail=2 ['manifest mutations: a leaf, an empty _text, a kind mismatch, a missing node, a stale / partial entry are red', 'hint (d): a label absent ×3 names the container / text-root candidates — and the stem stays red']
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+MUT-4 [tools/visual/label-chrome-check.mjs] fixtureSeeded always false: a stale entry of a seeded fixture hides as "pending" (brief m5, stale half)
+  mutated sha256 dd9cabace6a9f616 (pre fad373782a0de0ed)
+  SUITE mutated: RED  rc=1 tests=148 fail=1 ['manifest mutations: a leaf, an empty _text, a kind mismatch, a missing node, a stale / partial entry are red']
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+MUT-5 [tools/visual/label-chrome-tripwire.test.mjs] the stem loop ignores the verified manifest (the wave-53 oracle): post-seed 001/003/005 red (i) x3; inert pre-seed
+  mutated sha256 0b060a3277b6972d (pre 9d8f2b22b8b454b6)
+  SIM mutated: RED  rc=1 fail=3 ['label chrome 001_ATC_PropsThenAll_InGreenParent', 'label chrome 003_ATC_InitialUnderRedParent', 'label chrome 005_ATC_DirectionSurvives'] ['#   001_ATC_PropsThenAll_InGreenParent [band-identical, 437 glyph px] RED (i) Android: 437/437 glyph px are ground; (i) iOS: 437/437 glyph px are ground; (i) web: 437/437 glyph px are ground', '#   003_ATC_InitialUnderRedParent [band-identical, 369 glyph px] RED (i) Android: 369/369 glyph px are ground; (i) iOS: 369/369 glyph px are ground; (i) web: 369/369 glyph px are ground', '#   005_ATC_DirectionSurvives [band-identical, 293 glyph px] RED (i) Android: 293/293 glyph px are ground; (i) iOS: 293/293 glyph px are ground; (i) web: 293/293 glyph px are ground']
+  restored sha256 9d8f2b22b8b454b62dc0872d774567bfeca22849ffe434ab9c8647d6a2a23ed5 == pre
+  SIM restored: GREEN  rc=0 fail=0 [] []
+MUT-6 [tools/visual/label-chrome-exempt.json] manifest says 005 is a container: verification names the text root and reds the entry
+  mutated sha256 a08ccf46c3410b9c (pre 5d5ea832eb713aaf)
+  SUITE mutated: RED  rc=1 tests=148 fail=1 ['label chrome exempt-entry 005_ATC_DirectionSurvives']
+  SIM mutated: RED  rc=1 fail=2 ['label chrome exempt-entry 005_ATC_DirectionSurvives', 'label chrome 005_ATC_DirectionSurvives'] ['#   exempt-entry 005_ATC_DirectionSurvives [container, fixtures/combinations/all-then-color.json] RED manifest: "ATC_DirectionSurvives" in fixtures/combinations/all-then-color.json is a text, entry says container', '#   005_ATC_DirectionSurvives [band-identical, 293 glyph px] RED (i) Android: 293/293 glyph px are ground; (i) iOS: 293/293 glyph px are ground; (i) web: 293/293 glyph px are ground']
+  restored sha256 5d5ea832eb713aaf31e83cd38304914b34491c168a8fa727bae0fcfcf1298753 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+  SIM restored: GREEN  rc=0 fail=0 [] []
+MUT-7 [tools/visual/label-chrome-check.mjs] the (d) hint never fires
+  mutated sha256 731a0fc2345a1579 (pre fad373782a0de0ed)
+  SUITE mutated: RED  rc=1 tests=148 fail=1 ['hint (d): a label absent ×3 names the container / text-root candidates — and the stem stays red']
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+MUT-8 [tools/visual/label-chrome-check.mjs] the moved (iii) spread tolerance drifts: R3 verdict objects no longer identical to HEAD
+  mutated sha256 2c86b47d77c0a7d9 (pre fad373782a0de0ed)
+  DUMP mutated: RED  rc=0 lines=136 differing-vs-HEAD=9
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  DUMP restored: GREEN  rc=0 lines=136 differing-vs-HEAD=0
+MUT-9 [tools/visual/label-chrome-check.mjs] an unseeded entry claims "verified": the pending synthetic control goes red
+  mutated sha256 c2f86905b77e74a2 (pre fad373782a0de0ed)
+  SUITE mutated: RED  rc=1 tests=148 fail=1 ['manifest: an entry whose fixture has NO committed baseline yet is pending — it exempts nothing']
+  restored sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65 == pre
+  SUITE restored: GREEN  rc=0 tests=148 fail=0 []
+MUTATIONS OK — every mutation red, every restore byte-exact and green

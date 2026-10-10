@@ -1,0 +1,4 @@
+label=B-compose-census-under-HEAD file=runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/CanvasRootHoist.kt (swapped to HEAD bytes)
+sha256 before=367775501a88ac1742c11cd3b39c7fd191ed29fd7d2f7fd0c7316de877565603 head=53272e0b346090e88d3d32c7bdf5d0d875db55a91c6cfa581d1aee16a0d45bfc after=367775501a88ac1742c11cd3b39c7fd191ed29fd7d2f7fd0c7316de877565603 restored=OK
+suite rc=1 (RED)
+census written under HEAD code == tools/titan/results/wave54-oof-layout/census-compose.base.txt (byte-equal,     1435 lines)

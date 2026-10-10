@@ -1,0 +1,6 @@
+GREEN(seam): rc=0 classes=11 tests=112 red={} compile-errors=[]
+S1: rc=1 classes=4 tests=28 red={'TableCellHugSeamWiringTest': ['the call spends both halves of the chrome and no inline stroke expression is left']} compile-errors=[]
+S2: rc=1 classes=4 tests=28 red={'TableCellHugSeamWiringTest': ['the call spends both halves of the chrome and no inline stroke expression is left']} compile-errors=[]
+S0: rc=1 classes=4 tests=28 red={'TableCellHugSeamWiringTest': ['the call spends both halves of the chrome and no inline stroke expression is left', "the arm computes the chrome from today's stroke expression, verbatim"]} compile-errors=[]
+restored da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db byte-exact ; lock released
+EXIT=0

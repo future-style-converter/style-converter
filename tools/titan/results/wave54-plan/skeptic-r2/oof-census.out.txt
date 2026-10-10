@@ -1,0 +1,33 @@
+android: 9
+   wpt__CSS2__abspos__static-fixed-inside-abspos: 1 box(es) — abspos__static-fixed-inside-abspos__1__0__0 FIXED no-inset hoist true->false rc1 false->false
+   wpt__css-contain__contain-content-003: 2 box(es) — contain-content-003__1__0 ABSOLUTE hoist true->false rc1 false->false; contain-content-003__1__1 ABSOLUTE hoist true->false rc1 false->false
+   wpt__css-contain__contain-content-004: 1 box(es) — contain-content-004__1__1__1__1 ABSOLUTE hoist true->false rc1 false->false
+   wpt__css-contain__contain-content-011: 2 box(es) — contain-content-011__1__0 ABSOLUTE hoist true->false rc1 false->false; contain-content-011__1__1 ABSOLUTE hoist true->false rc1 false->false
+   wpt__css-position__change-insets-inside-strict-containment-nested: 2 box(es) — change-insets-inside-strict-containment-nested__1__0 FIXED hoist true->false rc1 false->false; change-insets-inside-strict-containment-nested__1__0__0__0 FIXED hoist true->false rc1 false->false
+   wpt__css-position__position-fixed-scroll-nested-fixed: 2 box(es) — wpt__css-position__position-fixed-scroll-nested-fixed__0 FIXED no-inset hoist true->false rc1 false->true; position-fixed-scroll-nested-fixed__0__0 FIXED no-inset hoist true->false rc1 false->false
+   wpt__css-position__position-relative-003: 1 box(es) — position-relative-003__1__0__0__0 FIXED no-inset hoist true->false rc1 false->false
+   wpt__css-position__position-relative-004: 1 box(es) — position-relative-004__1__0__0__0 FIXED hoist true->false rc1 false->false
+   wpt__filter-effects__backdrop-filter-containing-block: 2 box(es) — backdrop-filter-containing-block__1__0 FIXED hoist true->false rc1 false->false; backdrop-filter-containing-block__1__1 ABSOLUTE hoist true->false rc1 false->false
+ios: 6
+   wpt__CSS2__abspos__static-fixed-inside-abspos: abspos__static-fixed-inside-abspos__1__0__0
+   wpt__css-position__change-insets-inside-strict-containment-nested: change-insets-inside-strict-containment-nested__1__0, change-insets-inside-strict-containment-nested__1__0__0__0
+   wpt__css-position__position-fixed-scroll-nested-fixed: wpt__css-position__position-fixed-scroll-nested-fixed__0, position-fixed-scroll-nested-fixed__0__0
+   wpt__css-position__position-relative-003: position-relative-003__1__0__0__0
+   wpt__css-position__position-relative-004: position-relative-004__1__0__0__0
+   wpt__filter-effects__backdrop-filter-containing-block: backdrop-filter-containing-block__1__0
+hostFlips: 7
+   wpt__css-contain__contain-content-003 true->false
+   wpt__css-contain__contain-content-004 true->false
+   wpt__css-contain__contain-content-011 true->false
+   wpt__css-position__change-insets-inside-strict-containment-nested true->false
+   wpt__css-position__position-relative-003 true->false
+   wpt__css-position__position-relative-004 true->false
+   wpt__filter-effects__backdrop-filter-containing-block true->false
+boxBranch: 6
+   wpt__css-contain__contain-content-003 wpt__css-contain__contain-content-003__1
+   wpt__css-contain__contain-content-004 contain-content-004__1__1__1
+   wpt__css-contain__contain-content-011 wpt__css-contain__contain-content-011__2
+   wpt__css-position__change-insets-inside-strict-containment-nested wpt__css-position__change-insets-inside-strict-containment-nested__1
+   wpt__css-position__change-insets-inside-strict-containment-nested change-insets-inside-strict-containment-nested__1__0__0
+   wpt__filter-effects__backdrop-filter-containing-block wpt__filter-effects__backdrop-filter-containing-block__1
+fixedUnderPositionedEstablisher: 0

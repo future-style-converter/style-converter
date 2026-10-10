@@ -23,8 +23,9 @@ package com.styleconverter.runtime.columns
  * @param cross      union of the items' cross extents — the span every
  *                   within-line rule on this line is drawn to.
  * @param mainGaps   the empty main-axis intervals between adjacent items
- *                   (margin box to margin box), already filtered of
- *                   degenerate/zero-size entries.
+ *                   (margin box to margin box), filtered of NEGATIVE
+ *                   (overlapping) entries; a zero-width gap between touching
+ *                   items is kept as a rule position (wave 54, L4).
  */
 data class GapFlexLine(
     val items: List<GapRect>,
@@ -137,9 +138,10 @@ object GapDecorationLines {
             for (i in 0 until ordered.size - 1) {
                 val a = mainOf(ordered[i], mainHorizontal)
                 val b = mainOf(ordered[i + 1], mainHorizontal)
-                // Overlapping or touching neighbours open no gap → no rule.
+                // Overlapping neighbours open no gap → no rule. Touching ones
+                // (zero extent) still position one (wave 54, L4: 033).
                 val gap = GapInterval(a.end, b.start)
-                if (!gap.isEmpty) gaps.add(gap)
+                if (gap.isPositionable) gaps.add(gap)
             }
             GapFlexLine(items = ordered, cross = cross, mainGaps = gaps)
         }.sortedBy { it.cross.start }
@@ -158,8 +160,9 @@ object GapDecorationLines {
         val gaps = mutableListOf<GapInterval>()
         for (i in 0 until lines.size - 1) {
             val gap = GapInterval(lines[i].cross.end, lines[i + 1].cross.start)
-            // A zero/negative inter-line gap paints no rule (and cuts nothing).
-            if (!gap.isEmpty) gaps.add(gap)
+            // A negative inter-line gap paints no rule; a zero one positions a
+            // rule (wave 54, L4) and still cuts nothing (union drops it).
+            if (gap.isPositionable) gaps.add(gap)
         }
         return gaps
     }

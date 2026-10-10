@@ -1,0 +1,10 @@
+ok   R1  lost 0; pre-registered 0; outside the list 0
+ok   R2  unmeasured-now 0 (unexpected 0), newly measured 0 (unexpected 0)
+ok   R3  missing sections 0, short columns 0
+  ! L2-table-body-cell  CSS2/css21-errata/s-11-1-1b-006.html android: predicted P 0.9944 DEGENERATE (square 5 px too high: rows 51-70 vs the ref 56-75) → P ≈0.9983 (replay from both the final and the probe picture); square x24-43 rows 56-75, no stroke (MED-HIGH (geometry) / MED (score), gating, floor 0.996) — measured unchanged (not in any list)
+  ! L4-oof-layout  css-flexbox/abspos/abspos-autopos-htb-ltr.html android: predicted P 0.9966 DEGENERATE → P 0.9967 (sim: green repainted 100x100) (HIGH, gating, floor 0.995) — measured unchanged (not in any list)
+  ! L4-oof-layout  css-flexbox/abspos/abspos-autopos-vlr-ltr.html android: predicted P 0.9966 DEGENERATE → P 0.9967 (sim: green repainted 100x100) (HIGH, gating, floor 0.995) — measured unchanged (not in any list)
+  ! L4-oof-layout  css-flexbox/abspos/abspos-autopos-vrl-ltr.html android: predicted P 0.9966 DEGENERATE → P 0.9967 (sim: green repainted 100x100) (HIGH, gating, floor 0.995) — measured unchanged (not in any list)
+FAIL R4  gating predictions 34, missed 4
+ok   R5  must-not-move cells 649, moved 0
+ADJUDICATION: 1 rule(s) broken — do not ship

@@ -1,0 +1,71 @@
+{
+ "run": "wave53-final",
+ "perTestIrDocs": 1435,
+ "runsHosts": 264,
+ "runsTextEntries": 521,
+ "testsWithRunsHosts": 129,
+ "outOfFlowMembersInRuns": 24,
+ "byKindWhere": {
+  "abspos/spaced": 5,
+  "float/spaced": 3,
+  "abspos/word-edge": 8,
+  "abspos/mid-word": 8
+ },
+ "midWordUnderHyphensAuto": 4,
+ "w1ReachUngated": {
+  "members": 8,
+  "tests": [
+   "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+   "css/css-text/hyphens/hyphens-out-of-flow-002.html"
+  ]
+ },
+ "w1ReachHyphensAuto": {
+  "members": 4,
+  "hosts": [
+   "wpt__css-text__hyphens__hyphens-out-of-flow-002__3-287",
+   "wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289",
+   "wpt__css-text__hyphens__hyphens-out-of-flow-002__5-291",
+   "wpt__css-text__hyphens__hyphens-out-of-flow-002__6-293"
+  ],
+  "tests": [
+   "css/css-text/hyphens/hyphens-out-of-flow-002.html"
+  ]
+ },
+ "paintInertOutOfFlowMembers": 12,
+ "w2Reach": {
+  "runsHosts": 264,
+  "tests": 129
+ }
+}
+
+# A. out-of-flow members inside runs (kind/where hyphens lang paintInert | split | web ios android)
+CSS2/abspos/between-float-and-text.html  abspos/spaced MANUAL(initial) - inert=false | ["  ","<? abspos>"," "] | P 0.999 · f 0.922 · f 0.9527
+CSS2/abspos/between-float-and-text.html  float/spaced MANUAL(initial) - inert=false | [" ","<? float>",null] | P 0.999 · f 0.922 · f 0.9527
+CSS2/abspos/hypothetical-inline-alone-on-second-line.html  abspos/spaced MANUAL(initial) - inert=false | [" ","<span abspos>",null] | P 1 · P 0.9922 · P 0.9852
+CSS2/abspos/static-inside-inline-001.html  abspos/spaced MANUAL(initial) - inert=false | [null,"<? abspos>"," X"] | P 0.999 · P 0.9974 · P 0.9967
+CSS2/abspos/static-inside-inline-002.html  abspos/spaced MANUAL(initial) - inert=false | [null,"<? abspos>"," X"] | P 0.963 · P 0.9622 · P 0.9617
+CSS2/abspos/static-inside-inline-003.html  abspos/spaced MANUAL(initial) - inert=false | [null,"<? abspos>"," X"] | P 0.999 · P 0.9974 · P 0.9967
+css-cascade/all-prop-001.html  float/spaced MANUAL(initial) - inert=false | [null,"<bdo float>"," 321"] | P 0.9689 · P 0.9641 · P 0.9642
+css-position/position-absolute-semi-replaced-stretch-other.html  abspos/word-edge MANUAL(initial) - inert=false | [null,"<label abspos>","label"] | f 0.941 · f 0.4623 · f 0.4396
+css-pseudo/first-letter-list-item-dynamic-001.html  abspos/word-edge MANUAL(initial) - inert=false | ["X","<? abspos>",null] | P 0.9999 · P 0.9995 · P 0.9987
+css-pseudo/first-letter-list-item-dynamic-001.html  float/spaced MANUAL(initial) - inert=false | [null,"<? float>",null] | P 0.9999 · P 0.9995 · P 0.9987
+css-tables/abspos-container-change-dynamic-001.html  abspos/word-edge MANUAL(initial) - inert=false | ["B","<? abspos>",null] | P 1 · P 1 · P 0.9654
+css-text/hyphens/hyphens-out-of-flow-001.html  abspos/word-edge MANUAL - inert=true | [null,"<span abspos>","high­way"] | P 1 · P 0.9971 · P 0.9943
+css-text/hyphens/hyphens-out-of-flow-001.html  abspos/mid-word MANUAL - inert=true | ["h","<span abspos>","igh­way"] | P 1 · P 0.9971 · P 0.9943
+css-text/hyphens/hyphens-out-of-flow-001.html  abspos/mid-word MANUAL - inert=true | ["high","<span abspos>","­way"] | P 1 · P 0.9971 · P 0.9943
+css-text/hyphens/hyphens-out-of-flow-001.html  abspos/mid-word MANUAL - inert=true | ["high­","<span abspos>","way"] | P 1 · P 0.9971 · P 0.9943
+css-text/hyphens/hyphens-out-of-flow-001.html  abspos/mid-word MANUAL - inert=true | ["high­wa","<span abspos>","y"] | P 1 · P 0.9971 · P 0.9943
+css-text/hyphens/hyphens-out-of-flow-001.html  abspos/word-edge MANUAL - inert=true | ["high­way","<span abspos>",null] | P 1 · P 0.9971 · P 0.9943
+css-text/hyphens/hyphens-out-of-flow-002.html  abspos/word-edge AUTO en inert=true | [null,"<span abspos>","highway"] | f 0.9411 · P 0.9971 · P 0.9943
+css-text/hyphens/hyphens-out-of-flow-002.html  abspos/mid-word AUTO en inert=true | ["h","<span abspos>","ighway"] | f 0.9411 · P 0.9971 · P 0.9943
+css-text/hyphens/hyphens-out-of-flow-002.html  abspos/mid-word AUTO en inert=true | ["high","<span abspos>","way"] | f 0.9411 · P 0.9971 · P 0.9943
+css-text/hyphens/hyphens-out-of-flow-002.html  abspos/mid-word AUTO en inert=true | ["high","<span abspos>","way"] | f 0.9411 · P 0.9971 · P 0.9943
+css-text/hyphens/hyphens-out-of-flow-002.html  abspos/mid-word AUTO en inert=true | ["highwa","<span abspos>","y"] | f 0.9411 · P 0.9971 · P 0.9943
+css-text/hyphens/hyphens-out-of-flow-002.html  abspos/word-edge AUTO en inert=true | ["highway","<span abspos>",null] | f 0.9411 · P 0.9971 · P 0.9943
+css-values/ch-unit-001.html  abspos/word-edge MANUAL(initial) - inert=false | [null,"<span abspos>","00000"] | P 0.9779 · f 0.8235 · f 0.8229
+
+# B. mid-word children under effective hyphens:auto (any child kind)
+css-text/hyphens/hyphens-out-of-flow-002.html  span en | ["h","<span abspos>","ighway"] | f 0.9411 · P 0.9971 · P 0.9943
+css-text/hyphens/hyphens-out-of-flow-002.html  span en | ["high","<span abspos>","way"] | f 0.9411 · P 0.9971 · P 0.9943
+css-text/hyphens/hyphens-out-of-flow-002.html  span en | ["high","<span abspos>","way"] | f 0.9411 · P 0.9971 · P 0.9943
+css-text/hyphens/hyphens-out-of-flow-002.html  span en | ["highwa","<span abspos>","y"] | f 0.9411 · P 0.9971 · P 0.9943

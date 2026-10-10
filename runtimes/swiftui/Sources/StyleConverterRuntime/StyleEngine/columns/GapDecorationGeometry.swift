@@ -24,6 +24,13 @@ struct GapSpan: Equatable {
     var end: CGFloat
     /// Only non-degenerate intervals can carry ink.
     var isPositive: Bool { end > start }
+    /// Wave 54 (lane L4, GAP-ios) — can this gap still POSITION a rule? A
+    /// zero extent (touching items / lines) can, a negative one (overlap)
+    /// cannot: css-gap-decorations-1 centres a rule of the declared width on
+    /// a 0px gap (WPT flex-gap-decorations-033). `isPositive` keeps its
+    /// meaning for cuts (a zero gap cuts nothing). Kotlin twin:
+    /// GapInterval.isPositionable.
+    var isPositionable: Bool { end >= start }
 }
 
 /// The interval algebra. (Kotlin twin: object GapIntervals.)

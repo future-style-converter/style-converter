@@ -1,0 +1,97 @@
+### S6-m1 (REQUIRED) the decline is disabled at planBidiBake's call site [OK]
+- file: tools/titan/bidi-bake.mjs
+- sha256 before   4d9e5359b3d5bae962019e77163c7e906a75acd42e34128cbe6bb807fde9fe0d
+- sha256 mutated  b88ec2071397cdecf88adad30b191dd0f326727e25745d63cdb3f1ca106b1469
+- sha256 restored 4d9e5359b3d5bae962019e77163c7e906a75acd42e34128cbe6bb807fde9fe0d (byte-exact)
+- mutated run:  # pass 71 # fail 3
+    red: not ok - S6-1 paint decline: verbatim counter-suffix — an item with opacity .5 is DECLINED + stamped, the other three still bake
+    red: not ok - S6-2 paint decline: each read effect on the item or its ::marker declines; the ROOT's own does not
+    red: not ok - S6-4 paint decline: an unmeasured, failed, short or misaligned chain DECLINES — never a silent "clean"
+- restored run: # pass 74 # fail 0
+
+### S6-m2 the chain bound reaches the ROOT (its own effects judged) [OK]
+- file: tools/titan/bidi-marker-paint.mjs
+- sha256 before   9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f
+- sha256 mutated  9504072f28fe75ca68523cb499a1bbcbc1b581236982b5d4baa39ffbd153f4ea
+- sha256 restored 9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f (byte-exact)
+- mutated run:  # pass 72 # fail 2
+    red: not ok - S6-2 paint decline: each read effect on the item or its ::marker declines; the ROOT's own does not
+    red: not ok - S6-3 paint decline: a box BETWEEN the item and its root is read; the root is not
+- restored run: # pass 74 # fail 0
+
+### S6-m3 a box BETWEEN item and root is not read (item only) [OK]
+- file: tools/titan/bidi-marker-paint.mjs
+- sha256 before   9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f
+- sha256 mutated  849075f4941e6de0c0f4f9c1fc3d5fa507f83d94bd7c5d771569b6c1be197f8a
+- sha256 restored 9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f (byte-exact)
+- mutated run:  # pass 73 # fail 1
+    red: not ok - S6-3 paint decline: a box BETWEEN the item and its root is read; the root is not
+- restored run: # pass 74 # fail 0
+
+### S6-m4 an unmeasured chain reads as clean [OK]
+- file: tools/titan/bidi-marker-paint.mjs
+- sha256 before   9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f
+- sha256 mutated  0ca9413ef5a7cf04abe43778714576c3351a8c791f05aa8f90e81d8edef44ba9
+- sha256 restored 9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f (byte-exact)
+- mutated run:  # pass 72 # fail 2
+    red: not ok - S6-4 paint decline: an unmeasured, failed, short or misaligned chain DECLINES — never a silent "clean"
+    red: not ok - S6-5 paint chain read: collectMarkerFacts attaches the REAL in-page chain — ::marker first, item → below <body>; a fault declines
+- restored run: # pass 74 # fail 0
+
+### S6-m5 the tag alignment check is dropped [OK]
+- file: tools/titan/bidi-marker-paint.mjs
+- sha256 before   9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f
+- sha256 mutated  a94c6c9f7e8a6c2dfde382215842188b39f501189192d50a56c9883b7da6341c
+- sha256 restored 9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f (byte-exact)
+- mutated run:  # pass 73 # fail 1
+    red: not ok - S6-4 paint decline: an unmeasured, failed, short or misaligned chain DECLINES — never a silent "clean"
+- restored run: # pass 74 # fail 0
+
+### S6-m6 opacity is not judged [OK]
+- file: tools/titan/bidi-marker-paint.mjs
+- sha256 before   9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f
+- sha256 mutated  3a70bbd81dea4a718a3672e4f4b0c42a266f35d67eee6e5fed757b9b3edfe384
+- sha256 restored 9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f (byte-exact)
+- mutated run:  # pass 71 # fail 3
+    red: not ok - S6-1 paint decline: verbatim counter-suffix — an item with opacity .5 is DECLINED + stamped, the other three still bake
+    red: not ok - S6-2 paint decline: each read effect on the item or its ::marker declines; the ROOT's own does not
+    red: not ok - S6-4 paint decline: an unmeasured, failed, short or misaligned chain DECLINES — never a silent "clean"
+- restored run: # pass 74 # fail 0
+
+### S6-m7 text-shadow is dropped from the read set [OK]
+- file: tools/titan/bidi-marker-paint.mjs
+- sha256 before   9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f
+- sha256 mutated  e8a104e0a6e843c0693ff6a725c77ac9653d91ade3fe5f8748cf8f91a0719ac8
+- sha256 restored 9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f (byte-exact)
+- mutated run:  # pass 72 # fail 2
+    red: not ok - S6-2 paint decline: each read effect on the item or its ::marker declines; the ROOT's own does not
+    red: not ok - S6-5 paint chain read: collectMarkerFacts attaches the REAL in-page chain — ::marker first, item → below <body>; a fault declines
+- restored run: # pass 74 # fail 0
+
+### S6-m8 the in-page reader skips the ::marker pseudo [OK]
+- file: tools/titan/bidi-marker-paint.mjs
+- sha256 before   9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f
+- sha256 mutated  61e796ac3c14bc7fbde08f4b7b8858378b2e07ee6f015f9a337f26ad8b141551
+- sha256 restored 9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f (byte-exact)
+- mutated run:  # pass 73 # fail 1
+    red: not ok - S6-5 paint chain read: collectMarkerFacts attaches the REAL in-page chain — ::marker first, item → below <body>; a fault declines
+- restored run: # pass 74 # fail 0
+
+### S6-m9 collectMarkerFacts stops attaching the chain [OK]
+- file: tools/titan/bidi-marker-bake.mjs
+- sha256 before   c8e530bd3d3aeee615f8b7b01c2e456eef9fb485ff2d0f27c41e3a3a167c47ac
+- sha256 mutated  be3fc78b20ace501f3e69286e0553f8151ff52d219187828a7fb206aa3c3d70e
+- sha256 restored c8e530bd3d3aeee615f8b7b01c2e456eef9fb485ff2d0f27c41e3a3a167c47ac (byte-exact)
+- mutated run:  # pass 73 # fail 1
+    red: not ok - S6-5 paint chain read: collectMarkerFacts attaches the REAL in-page chain — ::marker first, item → below <body>; a fault declines
+- restored run: # pass 74 # fail 0
+
+### S6-m10 the in-page walk does not stop below <body> [OK]
+- file: tools/titan/bidi-marker-paint.mjs
+- sha256 before   9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f
+- sha256 mutated  feb2bcfeeed11805b2896000952d9a205900ec1ed5c71b11b6cb1c86bf83f1da
+- sha256 restored 9a7850a324466bb7c29b9e3c08f753d8378b39d61228d3f3b658e53bc8e0031f (byte-exact)
+- mutated run:  # pass 73 # fail 1
+    red: not ok - S6-5 paint chain read: collectMarkerFacts attaches the REAL in-page chain — ::marker first, item → below <body>; a fault declines
+- restored run: # pass 74 # fail 0
+

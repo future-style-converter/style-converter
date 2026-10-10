@@ -1,0 +1,12 @@
+[P] bidi/bidi-lines-001 ref      line starts y117:x29 y159:x273 → GEOMETRY OK
+[P] bidi/bidi-lines-001 web      line starts y117:x29 y159:x273 → GEOMETRY OK
+[P] bidi/bidi-lines-001 ios      line starts y117:x29 y159:x273 → GEOMETRY OK
+[P] bidi/bidi-lines-001 android  line starts y117:x29 y159:x274 → GEOMETRY OK
+[P] bidi/bidi-lines-002 ref      line starts y158:x31 y238:x276 → GEOMETRY OK
+[P] bidi/bidi-lines-002 web      line starts y158:x31 y238:x276 → GEOMETRY OK
+[P] bidi/bidi-lines-002 ios      line starts y158:x31 y239:x276 → GEOMETRY OK
+[P] bidi/bidi-lines-002 android  line starts y159:x31 y239:x276 → GEOMETRY OK
+[M] counter-suffix ref      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 → GEOMETRY OK
+[M] counter-suffix web      text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 | rows 0-207 identical to wave53-open → GEOMETRY OK
+[M] counter-suffix ios      text y214-225:x103-126 y238-249:x104-126 y262-273:x103-126 y286-297:x104-126 | rows 0-207 identical to wave53-open → GEOMETRY OK
+[M] counter-suffix android  text y214-225:x104-126 y239-249:x104-126 y262-273:x104-126 y287-297:x104-126 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 no marker ink on text row y214-225 (marker ink y244-245 below the line))

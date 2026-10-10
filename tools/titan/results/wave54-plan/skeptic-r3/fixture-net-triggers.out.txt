@@ -1,0 +1,9 @@
+fixtures/visual-test.json                                  table=0 br=0 hyphen=0 gap-rule=0 abs/fixed=0 shy=0 heading=1 contain=0 transform=17 filter=11
+fixtures/composition-test.json                             table=0 br=0 hyphen=0 gap-rule=0 abs/fixed=22 shy=0 heading=0 contain=0 transform=0 filter=6
+fixtures/properties/effects/filter-sepia-amounts.json      table=0 br=0 hyphen=0 gap-rule=0 abs/fixed=0 shy=0 heading=0 contain=0 transform=0 filter=16
+fixtures/combinations/nested-transforms.json               table=0 br=0 hyphen=0 gap-rule=0 abs/fixed=4 shy=0 heading=0 contain=0 transform=18 filter=0
+fixtures/combinations/radius-overflow-transform.json       table=0 br=0 hyphen=0 gap-rule=0 abs/fixed=4 shy=0 heading=0 contain=0 transform=28 filter=0
+fixtures/combinations/transform-abspos-pivot.json          table=0 br=0 hyphen=0 gap-rule=0 abs/fixed=8 shy=0 heading=0 contain=0 transform=23 filter=0
+fixtures/combinations/blend-isolation.json                 table=0 br=0 hyphen=0 gap-rule=0 abs/fixed=6 shy=0 heading=0 contain=0 transform=0 filter=0
+fixtures/combinations/opacity-blend.json                   table=0 br=0 hyphen=0 gap-rule=0 abs/fixed=5 shy=0 heading=0 contain=0 transform=0 filter=0
+fixtures/combinations/all-then-color.json                  table=0 br=0 hyphen=0 gap-rule=0 abs/fixed=0 shy=0 heading=0 contain=0 transform=0 filter=0

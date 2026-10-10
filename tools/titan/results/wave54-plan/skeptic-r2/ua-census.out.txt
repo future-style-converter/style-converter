@@ -1,0 +1,25 @@
+* wpt__css-break__block-in-inline-015-print                              android CARRIER        h1 REACHED, h1 REACHED, h1 REACHED, h1 REACHED
+* wpt__css-lists__counter-list-item                                      android CARRIER        h2 REACHED
+* wpt__css-lists__counter-reset-increment-overflow-underflow             android CARRIER        h3 REACHED, h3 REACHED, h3 REACHED, h3 REACHED, h3 REACHED, h3 REACHED
+* wpt__css-text-decor__text-decoration-color                             android CARRIER        h3 REACHED, sub REACHED, sup REACHED
+  wpt__css-text-decor__text-decoration-inset-001                         android must-not-move  h1 S W
+  wpt__css-text-decor__text-decoration-inset-002                         android must-not-move  h1 S W
+  wpt__css-text-decor__text-decoration-inset-003                         android must-not-move  h1 S W
+  wpt__css-text-decor__text-decoration-inset-004                         android must-not-move  h1 S W
+* wpt__css-text-decor__text-decoration-inset-005                         android CARRIER        h1+kids REACHED, sup REACHED, sub REACHED
+* wpt__css-text-decor__text-decoration-inset-006                         android CARRIER        h1+kids REACHED, sup REACHED, sub REACHED
+  wpt__css-text-decor__text-decoration-inset-007                         android must-not-move  h1 S W
+  wpt__css-text-decor__text-decoration-inset-008                         android must-not-move  h1 S W
+  wpt__css-text-decor__text-decoration-inset-009                         android must-not-move  h1 S W
+* wpt__css-text-decor__text-decoration-inset-011                         android must-not-move  h1+kids REACHED
+  wpt__css-text-decor__text-decoration-inset-012                         android must-not-move  h1 S W
+  wpt__css-text-decor__text-decoration-inset-013                         android must-not-move  h1 S W
+* wpt__css-text-decor__text-decoration-inset-014                         android CARRIER        h1+kids REACHED
+  wpt__css-text-decor__text-decoration-inset-015                         android must-not-move  h1 S W
+  wpt__css-text-decor__text-decoration-inset-016                         android must-not-move  h1 S W
+  wpt__css-text-decor__text-decoration-inset-024                         android must-not-move  h1 S W
+* wpt__css-text-decor__text-decoration-subelements-002                   android must-not-move  sup REACHED, sup REACHED, sup REACHED, sup REACHED
+* wpt__css-text-decor__text-decoration-subelements-003                   android CARRIER        sup REACHED
+* wpt__filter-effects__backdrop-filter-border-radius-change              android CARRIER        h1 S REACHED, h1 S REACHED
+* wpt__filter-effects__backdrop-filter-corner-shape-change               android CARRIER        h1 S REACHED, h1 S REACHED
+documents with h1-h6/sub/sup: 24; reached (some element lacks own size or weight): 12

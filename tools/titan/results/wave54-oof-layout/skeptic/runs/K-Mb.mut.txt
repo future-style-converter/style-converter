@@ -1,0 +1,6 @@
+label=K-Mb file=runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/CanvasRootHoist.kt
+sha256 before=367775501a88ac1742c11cd3b39c7fd191ed29fd7d2f7fd0c7316de877565603 mutated=7cb85c00197b3f8acbb041ce7f5c4c9d892396e69e0b46e04f0c5cc23119a336 after=367775501a88ac1742c11cd3b39c7fd191ed29fd7d2f7fd0c7316de877565603 restored=OK
+suite rc=1 (RED)
+CanvasRootHoistTest tests=29 skipped=0 failures=1 errors=0 FAILED: ['P2 fixed with no inset does NOT hoist — it takes its static position']
+OutOfFlowContainingBlockTest tests=8 skipped=0 failures=2 errors=0 FAILED: ['P3 P4 the corpus moves in exactly the 9 OOF-android carriers and the host in exactly 7', 'P3 the carriers hoist nothing and the M2 hosts stay inactive']
+TOTAL tests=124 skipped=0 failures=3 errors=0

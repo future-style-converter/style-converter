@@ -1,0 +1,118 @@
+[M1-drop-own-size-guard] runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 before=aaceeebf4218 mutated=b6e163be1835
+[M1-drop-own-size-guard] mutated: rc=1
+[M1-drop-own-size-guard] mutated: UAElementFontRuleTest tests=11 failures=1 errors=0
+[M1-drop-own-size-guard] mutated:   RED inset-001 - the extractor-baked h1 (own 32 and 700) comes back as the SAME list :: java.lang.AssertionError: expected same:<[IRProperty(type=Color, data={"srgb":{"r":0,"g":0,"b":0},"original":"black"}), IRProperty(type=Position, data
+[M1-drop-own-size-guard] mutated: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[M1-drop-own-size-guard] restored sha256=aaceeebf4218 BYTE-EXACT
+[M1-drop-own-size-guard] restored: rc=0
+[M1-drop-own-size-guard] restored: UAElementFontRuleTest tests=11 failures=0 errors=0
+[M1-drop-own-size-guard] restored: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[M2-base-16] runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 before=aaceeebf4218 mutated=268d21398193
+[M2-base-16] mutated: rc=1
+[M2-base-16] mutated: UAElementFontRuleTest tests=11 failures=1 errors=0
+[M2-base-16] mutated:   RED inset-014 - the folded monospace h1 resolves 2em against the 13px fixed default :: java.lang.AssertionError: expected:<26.0> but was:<32.0>
+[M2-base-16] mutated: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[M2-base-16] restored sha256=aaceeebf4218 BYTE-EXACT
+[M2-base-16] restored: rc=0
+[M2-base-16] restored: UAElementFontRuleTest tests=11 failures=0 errors=0
+[M2-base-16] restored: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[M3-old-hasChildren-gate] runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAHeadingFoldGate.kt sha256 before=e0e3186dcbd7 mutated=b6c24f568852
+[M3-old-hasChildren-gate] mutated: rc=1
+[M3-old-hasChildren-gate] mutated: UAElementFontRuleTest tests=11 failures=2 errors=0
+[M3-old-hasChildren-gate] mutated:   RED inset-005 and -006 - the folded h1 hosts take 32 and bold :: java.lang.NullPointerException
+[M3-old-hasChildren-gate] mutated:   RED inset-014 - the folded monospace h1 resolves 2em against the 13px fixed default :: java.lang.NullPointerException
+[M3-old-hasChildren-gate] mutated: UAHeadingFoldGateTest tests=9 failures=3 errors=0
+[M3-old-hasChildren-gate] mutated:   RED inset-006 - the folded h1 host applies :: java.lang.AssertionError
+[M3-old-hasChildren-gate] mutated:   RED inset-014 - the folded monospace h1 host applies :: java.lang.AssertionError
+[M3-old-hasChildren-gate] mutated:   RED inset-005 - the folded h1 host applies (Folded, not the stacked stand-down) :: java.lang.AssertionError
+[M3-old-hasChildren-gate] restored sha256=e0e3186dcbd7 BYTE-EXACT
+[M3-old-hasChildren-gate] restored: rc=0
+[M3-old-hasChildren-gate] restored: UAElementFontRuleTest tests=11 failures=0 errors=0
+[M3-old-hasChildren-gate] restored: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[M4-weight-as-double] runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 before=aaceeebf4218 mutated=005085f9ccb4
+[M4-weight-as-double] mutated: rc=1
+[M4-weight-as-double] mutated: UAElementFontRuleTest tests=11 failures=5 errors=0
+[M4-weight-as-double] mutated:   RED block-in-inline-015-print - every leaf h1 takes the UA 2em bold face :: java.lang.AssertionError: expected:<700> but was:<null>
+[M4-weight-as-double] mutated:   RED inset-005 and -006 - the folded h1 hosts take 32 and bold :: java.lang.AssertionError: expected:<700> but was:<null>
+[M4-weight-as-double] mutated:   RED inset-014 - the folded monospace h1 resolves 2em against the 13px fixed default :: java.lang.AssertionError: expected:<700> but was:<null>
+[M4-weight-as-double] mutated:   RED text-decoration-color - the leaf h3 takes 1_17em bold :: java.lang.AssertionError: expected:<700> but was:<null>
+[M4-weight-as-double] mutated:   RED block-in-inline-015-print - TextStyleApplier paints the injected face :: java.lang.AssertionError: expected:<FontWeight(weight=700)> but was:<null>
+[M4-weight-as-double] mutated: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[M4-weight-as-double] restored sha256=aaceeebf4218 BYTE-EXACT
+[M4-weight-as-double] restored: rc=0
+[M4-weight-as-double] restored: UAElementFontRuleTest tests=11 failures=0 errors=0
+[M4-weight-as-double] restored: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[M5-ua-step-writes-color] runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 before=aaceeebf4218 mutated=dc8d6a6a718b
+[M5-ua-step-writes-color] mutated: rc=1
+[M5-ua-step-writes-color] mutated: UAElementFontRuleTest tests=11 failures=0 errors=0
+[M5-ua-step-writes-color] mutated: UAHeadingFoldGateTest tests=9 failures=1 errors=0
+[M5-ua-step-writes-color] mutated:   RED soundness - the fold verdict is the same before and after the UA face (brief 4 D) :: java.lang.AssertionError: text-decoration-inset-005__1__0-069 expected:<class com.styleconverter.runtime.typography.inline.InlineRunFold$Outcome$Folde
+[M5-ua-step-writes-color] restored sha256=aaceeebf4218 BYTE-EXACT
+[M5-ua-step-writes-color] restored: rc=0
+[M5-ua-step-writes-color] restored: UAElementFontRuleTest tests=11 failures=0 errors=0
+[M5-ua-step-writes-color] restored: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[K6-sup-half-gated] runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 before=aaceeebf4218 mutated=a7fd0faa6c4f
+[K6-sup-half-gated] mutated: rc=1
+[K6-sup-half-gated] mutated: UAElementFontRuleTest tests=11 failures=1 errors=0
+[K6-sup-half-gated] mutated:   RED the standsDown verdict withholds the heading half but never the sup half :: java.lang.NullPointerException
+[K6-sup-half-gated] mutated: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[K6-sup-half-gated] restored sha256=aaceeebf4218 BYTE-EXACT
+[K6-sup-half-gated] restored: rc=0
+[K6-sup-half-gated] restored: UAElementFontRuleTest tests=11 failures=0 errors=0
+[K6-sup-half-gated] restored: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[K7-relative-mirror-off] runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAHeadingFoldGate.kt sha256 before=e0e3186dcbd7 mutated=9f89c4fba718
+[K7-relative-mirror-off] mutated: rc=1
+[K7-relative-mirror-off] mutated: UAElementFontRuleTest tests=11 failures=0 errors=0
+[K7-relative-mirror-off] mutated: UAHeadingFoldGateTest tests=9 failures=1 errors=0
+[K7-relative-mirror-off] mutated:   RED a relative heading host stands down even when its runs would fold :: java.lang.AssertionError
+[K7-relative-mirror-off] restored sha256=e0e3186dcbd7 BYTE-EXACT
+[K7-relative-mirror-off] restored: rc=0
+[K7-relative-mirror-off] restored: UAElementFontRuleTest tests=11 failures=0 errors=0
+[K7-relative-mirror-off] restored: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[K8-drop-own-weight-guard] runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 before=aaceeebf4218 mutated=f8dedbb6bcec
+[K8-drop-own-weight-guard] mutated: rc=1
+[K8-drop-own-weight-guard] mutated: UAElementFontRuleTest tests=11 failures=1 errors=0
+[K8-drop-own-weight-guard] mutated:   RED inset-001 - the extractor-baked h1 (own 32 and 700) comes back as the SAME list :: java.lang.AssertionError: expected same:<[IRProperty(type=Color, data={"srgb":{"r":0,"g":0,"b":0},"original":"black"}), IRProperty(type=Position, data
+[K8-drop-own-weight-guard] mutated: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[K8-drop-own-weight-guard] restored sha256=aaceeebf4218 BYTE-EXACT
+[K8-drop-own-weight-guard] restored: rc=0
+[K8-drop-own-weight-guard] restored: UAElementFontRuleTest tests=11 failures=0 errors=0
+[K8-drop-own-weight-guard] restored: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[K9-append-not-substitute] runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 before=aaceeebf4218 mutated=3be56986f8e7
+[K9-append-not-substitute] mutated: rc=1
+[K9-append-not-substitute] mutated: UAElementFontRuleTest tests=11 failures=1 errors=0
+[K9-append-not-substitute] mutated:   RED an inherited size is substituted in place and is the em base :: java.lang.AssertionError: expected:<30.0> but was:<20.0>
+[K9-append-not-substitute] mutated: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[K9-append-not-substitute] restored sha256=aaceeebf4218 BYTE-EXACT
+[K9-append-not-substitute] restored: rc=0
+[K9-append-not-substitute] restored: UAElementFontRuleTest tests=11 failures=0 errors=0
+[K9-append-not-substitute] restored: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[K10-h3-multiplier-1_2] runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 before=aaceeebf4218 mutated=2d1b9e565219
+[K10-h3-multiplier-1_2] mutated: rc=1
+[K10-h3-multiplier-1_2] mutated: UAElementFontRuleTest tests=11 failures=1 errors=0
+[K10-h3-multiplier-1_2] mutated:   RED text-decoration-color - the leaf h3 takes 1_17em bold :: java.lang.AssertionError: expected:<18.72> but was:<19.2>
+[K10-h3-multiplier-1_2] mutated: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[K10-h3-multiplier-1_2] restored sha256=aaceeebf4218 BYTE-EXACT
+[K10-h3-multiplier-1_2] restored: rc=0
+[K10-h3-multiplier-1_2] restored: UAElementFontRuleTest tests=11 failures=0 errors=0
+[K10-h3-multiplier-1_2] restored: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[K11-no-inherited-em-rung] runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 before=aaceeebf4218 mutated=d95a01885091
+[K11-no-inherited-em-rung] mutated: rc=1
+[K11-no-inherited-em-rung] mutated: UAElementFontRuleTest tests=11 failures=1 errors=0
+[K11-no-inherited-em-rung] mutated:   RED an inherited size is substituted in place and is the em base :: java.lang.AssertionError: expected:<30.0> but was:<24.0>
+[K11-no-inherited-em-rung] mutated: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[K11-no-inherited-em-rung] restored sha256=aaceeebf4218 BYTE-EXACT
+[K11-no-inherited-em-rung] restored: rc=0
+[K11-no-inherited-em-rung] restored: UAElementFontRuleTest tests=11 failures=0 errors=0
+[K11-no-inherited-em-rung] restored: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[K12-weight-half-ungated] runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 before=aaceeebf4218 mutated=b1e5521b8e94
+[K12-weight-half-ungated] mutated: rc=1
+[K12-weight-half-ungated] mutated: UAElementFontRuleTest tests=11 failures=2 errors=0
+[K12-weight-half-ungated] mutated:   RED the standsDown verdict withholds the heading half but never the sup half :: java.lang.AssertionError: expected same:<[IRProperty(type=Color, data={"srgb":{"r":0,"g":0,"b":0}})]> was not:<[IRProperty(type=Color, data={"srgb":{"
+[K12-weight-half-ungated] mutated:   RED inset-011 - the bailing h1 host keeps its list untouched (the control) :: java.lang.AssertionError: expected same:<[IRProperty(type=FontFamily, data=["times new roman","serif"]), IRProperty(type=Color, data={"srgb":{"r":0,"g
+[K12-weight-half-ungated] mutated: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[K12-weight-half-ungated] restored sha256=aaceeebf4218 BYTE-EXACT
+[K12-weight-half-ungated] restored: rc=0
+[K12-weight-half-ungated] restored: UAElementFontRuleTest tests=11 failures=0 errors=0
+[K12-weight-half-ungated] restored: UAHeadingFoldGateTest tests=9 failures=0 errors=0
+BATCH-DONE

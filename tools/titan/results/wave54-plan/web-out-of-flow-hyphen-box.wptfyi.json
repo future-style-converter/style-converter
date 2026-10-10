@@ -1,0 +1,103 @@
+{
+ "source": "https://wpt.fyi/api/search?run_ids=6570144515227648,5397765411831808,4871850760077312,6215222040985600&q=css-text/hyphens/",
+ "fetched": "2026-10-08",
+ "runs": [
+  {
+   "id": 6570144515227648,
+   "browser": "chrome",
+   "version": "157.0.8091.0",
+   "os": "linux",
+   "revision": "30d4d7d411",
+   "labels": [
+    "canary",
+    "chrome",
+    "experimental",
+    "master",
+    "taskcluster",
+    "user:chromium-wpt-export-bot"
+   ]
+  },
+  {
+   "id": 5397765411831808,
+   "browser": "edge",
+   "version": "157.0.4322.0",
+   "os": "win",
+   "revision": "30d4d7d411",
+   "labels": [
+    "azure",
+    "dev",
+    "edge",
+    "edgechromium",
+    "experimental",
+    "master"
+   ]
+  },
+  {
+   "id": 4871850760077312,
+   "browser": "firefox",
+   "version": "159.0a1",
+   "os": "linux",
+   "revision": "30d4d7d411",
+   "labels": [
+    "experimental",
+    "firefox",
+    "master",
+    "nightly",
+    "taskcluster",
+    "user:chromium-wpt-export-bot"
+   ]
+  },
+  {
+   "id": 6215222040985600,
+   "browser": "safari",
+   "version": "253 preview",
+   "os": "mac",
+   "revision": "30d4d7d411",
+   "labels": [
+    "experimental",
+    "github-actions",
+    "master",
+    "preview",
+    "safari"
+   ]
+  }
+ ],
+ "results": [
+  {
+   "test": "/css/css-text/hyphens/hyphens-out-of-flow-001.html",
+   "status": {
+    "chrome-linux-157.0.8091.0": "P",
+    "edge-win-157.0.4322.0": "P",
+    "firefox-linux-159.0a1": "P",
+    "safari-mac-253 preview": "P"
+   }
+  },
+  {
+   "test": "/css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "status": {
+    "chrome-linux-157.0.8091.0": "F",
+    "edge-win-157.0.4322.0": "P",
+    "firefox-linux-159.0a1": "F",
+    "safari-mac-253 preview": "P"
+   }
+  },
+  {
+   "test": "/css/css-text/hyphens/hyphens-span-001.html",
+   "status": {
+    "chrome-linux-157.0.8091.0": "P",
+    "edge-win-157.0.4322.0": "P",
+    "firefox-linux-159.0a1": "P",
+    "safari-mac-253 preview": "P"
+   }
+  },
+  {
+   "test": "/css/css-text/hyphens/hyphens-span-002.html",
+   "status": {
+    "chrome-linux-157.0.8091.0": "F",
+    "edge-win-157.0.4322.0": "P",
+    "firefox-linux-159.0a1": "P",
+    "safari-mac-253 preview": "F"
+   }
+  }
+ ]
+}

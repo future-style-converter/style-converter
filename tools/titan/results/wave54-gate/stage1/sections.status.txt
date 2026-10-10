@@ -1,0 +1,4 @@
+CSS2: OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-counter-styles: OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-tables: OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-text: OK attempt=1 web=48/48 android=48/48 ios=48/48 

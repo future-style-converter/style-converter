@@ -1,0 +1,6 @@
+EX-U1 seam-1 applied (+ UAElementFontRuleSeamWiringTest.kt)
+EX-U1 gradle rc=0
+testsuite name="com.styleconverter.runtime.typography.UAElementFontRuleSeamWiringTest" tests="2" skipped="0" failures="0" errors="0"
+testsuite name="com.styleconverter.runtime.typography.UAElementFontRuleTest" tests="10" skipped="0" failures="0" errors="0"
+testsuite name="com.styleconverter.runtime.typography.inline.InlineRunFoldTest" tests="45" skipped="0" failures="0" errors="0"
+EX-U1 compiled renderer: headingStandsDown refs 1 · UAHeadingFoldGate refs 0

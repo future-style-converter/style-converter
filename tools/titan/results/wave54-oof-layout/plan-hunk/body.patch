@@ -1,0 +1,49 @@
+--- a/tools/titan/results/wave54-plan/plan-build.py
++++ b/tools/titan/results/wave54-plan/plan-build.py
+@@ -409,6 +409,14 @@
+ oof_ios = [stem(t) for t in (CHG, PR4, BFCB, SFA, PR3)] + [PFSNF]
+ cbb_tests = sorted({r['test'] for r in lay['cbborder']} - {T('css-images', 'cross-fade-target-alpha')})
+ assert len(cbb_tests) == 10, cbb_tests
++# L4 builder census (2026-10-08; tools/titan/results/wave54-oof-layout/_note.md "CBB-android census"): the BEHAVIOURAL census
++# (DynamicValueResolverTest `CBB census`, wave54-oof-layout/cbb-census.out.txt) finds three more readers of the corrected
++# block that the static cbborder predicate misses (it requires a % child): `top/right/bottom/left: 3px` stretch children
++# (AbsposInsetStretch) of a 3px-bordered content-box parent grow 138x88 -> 144x94. Compose-only, so android only. Pixel
++# replay (wave54-oof-layout/cbb-semi-replaced.replay-score.out.txt): button 0.9739 -> 0.9843, input 0.4117 -> 0.4555,
++# other 0.4396 -> 0.4677; all stay f (button's coverage-ratio veto reads the native button chrome, not this unit's).
++CBB_STRETCH = [T('css-position', f'position-absolute-semi-replaced-stretch-{k}') for k in ('button', 'input', 'other')]
++CBB_REPLAY = {'button': '0.9843', 'input': '0.4555', 'other': '0.4677'}
+ G006, G033 = T('css-gaps', 'flex', 'flex-gap-decorations-006'), T('css-gaps', 'flex', 'flex-gap-decorations-033')
+ APOS = {k: T('css-flexbox', 'abspos', f'abspos-autopos-{k}') for k in ('htb-ltr', 'vlr-ltr', 'vrl-ltr', 'htb-rtl', 'vlr-rtl', 'vrl-rtl')}
+ NBR = {k: T('filter-effects', f'backdrop-filter-nested-border-radius-clip{k}') for k in ('', '-2', '-3', '-4')}
+@@ -419,11 +427,11 @@
+   'dir': 'tools/titan/results/wave54-oof-layout',
+   'briefs': ['oof-containing-block.md', 'compose-wpt-content-box-cb.md', 'flex-zero-gap-rules.md', 'queue-scout-layout.md'],
+   'captureCarriers': caps(ios=oof_ios + [stem(G033)],
+-                          android=oof_android + [stem(t) for t in cbb_tests] + [stem(G006), stem(G033)]),
++                          android=oof_android + [stem(t) for t in cbb_tests + CBB_STRETCH] + [stem(G006), stem(G033)]),
+   'wireCarriers': [],
+   'carrierRule': {
+     'OOF': 'an out-of-flow box whose spec containing block is a non-positioned contain:layout|paint|strict|content / filter / backdrop-filter (or will-change of one) ancestor (M2: 10 boxes in 6 tests), or an all-auto-inset FIXED box (M1: 4 boxes in 3 tests); Compose host activation flips true -> false on exactly the 7 hostFlips documents',
+-    'CBB': 'a content-box (no BoxSizing BORDER_BOX) container with a px/% size, a non-zero padding/border band and an out-of-flow child carrying a % size or inset: 10 containers in 10 tests (+ the in-flow control cross-fade-target-alpha); side reader flex-gap-decorations-006 (VerticalTextFlowLayout budget, watched)',
++    'CBB': 'a content-box (no BoxSizing BORDER_BOX) container with a px/% size, a non-zero padding/border band and an out-of-flow child carrying a % size or inset: 10 containers in 10 tests (+ the in-flow control cross-fade-target-alpha); side reader flex-gap-decorations-006 (VerticalTextFlowLayout budget, watched); + the 3 semi-replaced-stretch px-inset stretch documents found by the L4 builder behavioural census (android)',
+     'GAP': 'a flex container with a rule family on an axis whose gap is 0 or absent AND touching neighbours/lines: 033 only of the 17 gapzero containers',
+   },
+   'probeSections': ['css-position', 'css-contain', 'CSS2', 'filter-effects', 'css-transforms', 'css-flexbox', 'css-images',
+@@ -449,6 +457,8 @@
+     + [pred(f'{APOS[k]} android', CELLS[f'{APOS[k]} android'] + ' DEGENERATE', 'P ≈0.9967 (the rtl static-position arithmetic runs with the corrected size for the first time)', 'degenerate->faithful', 'MED', None, False, ['CBB-android'], GEO_OK) for k in ('htb-rtl', 'vlr-rtl', 'vrl-rtl')]
+     + [pred(f'{G006} android', 'f 0.8223', 'may move, stays f (VerticalTextFlowLayout budget reads LocalContainingBlock)', 'watched side reader', 'LOW', None, False, ['CBB-android'], direction='undirected',
+             directionWhy='a side reader of the corrected containing block; no replay'),
++     ] + [pred(f'{t} android', CELLS[f'{t} android'], f'up, stays f (replay {CBB_REPLAY[t.split("-")[-1][:-5]]}: the stretch box grows 138x88 -> 144x94; the native control chrome is not this unit\'s)',
++               'mover', 'MED', None, False, ['CBB-android']) for t in CBB_STRETCH] + [
+        pred(f'{G033} ios', 'f 0.94', 'P ≈1.000 (sim 1.0000: every non-rule pixel is already ref-exact)', 'flip', 'HIGH', 0.99, True, ['GAP-ios'], GEO_OK),
+        pred(f'{G033} android', 'f 0.94', 'P ≈1.000 (sim 1.0000)', 'flip', 'HIGH', 0.99, True, ['GAP-android'], GEO_OK)],
+   'mustNotMove': [],     # filled below (needs every lane's carriers)
+@@ -487,7 +497,7 @@
+     'OOF-ios': {'commit': 'Swift StyleEngine/layout/position/OutOfFlowContainingBlock.swift (new) + FixedHoist.swift call-site lines :309, :347, :115 + OutOfFlowContainingBlockTests.swift + FixedHoist test rows',
+                 'captures': caps(ios=oof_ios), 'wire': [], 'revertOrder': ['OOF-ios']},
+     'CBB-android': {'commit': 'DynamicValueResolver.kt childContainingBlock(…, wptCaptureMode = false) + one condition (or ContainingBlockBands.kt ≤ 60 lines) + DynamicValueResolverTest rows + ComponentRenderer.kt seam (:1934 one named argument)',
+-                    'captures': caps(android=[stem(t) for t in cbb_tests] + [stem(G006)]), 'wire': [], 'revertOrder': ['CBB-android']},
++                    'captures': caps(android=[stem(t) for t in cbb_tests + CBB_STRETCH] + [stem(G006)]), 'wire': [], 'revertOrder': ['CBB-android']},
+     'GAP-android': {'commit': 'Compose columns/GapDecoration{Lines,Segments,Geometry}.kt (keep a zero-extent gap as a rule position; isPositionable) + GapDecoration*Test rows',
+                     'captures': caps(android=[stem(G033)]), 'wire': [], 'revertOrder': ['GAP-android']},
+     'GAP-ios': {'commit': 'Swift StyleEngine/columns/GapDecoration{Lines,Segments,Geometry}.swift (the byte-parallel twin) + GapDecoration*Tests rows',

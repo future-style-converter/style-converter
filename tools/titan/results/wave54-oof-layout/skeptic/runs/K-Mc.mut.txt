@@ -1,0 +1,5 @@
+label=K-Mc file=runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt
+sha256 before=ed0d29ac7577f7e56a34c7002cddbf662617db144908dfc8f42223b60f1b86d6 mutated=26c3429f967c6deab6ffc64a784cb4a0e1ad600e7899e5cd10361564717d61fd after=ed0d29ac7577f7e56a34c7002cddbf662617db144908dfc8f42223b60f1b86d6 restored=OK
+suite rc=1 (RED)
+OutOfFlowContainingBlockTest tests=8 skipped=0 failures=2 errors=0 FAILED: ['P3 P4 the corpus moves in exactly the 9 OOF-android carriers and the host in exactly 7', 'P1 a positioned establisher withholds the claim and leaves a breadcrumb']
+TOTAL tests=124 skipped=0 failures=2 errors=0

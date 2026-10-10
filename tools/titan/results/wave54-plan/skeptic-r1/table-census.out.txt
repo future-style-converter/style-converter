@@ -1,0 +1,25 @@
+(a) body-root with last Display TABLE|INLINE_TABLE: 1
+  CSS2/wpt__CSS2__css21-errata__s-11-1-1b-006 wpt__CSS2__css21-errata__s-11-1-1b-006__0 TABLE
+(b) documents with any TABLE|INLINE_TABLE component: 22
+  CSS2/wpt__CSS2__css21-errata__s-11-1-1b-006
+  CSS2/wpt__CSS2__css21-errata__s-11-1-1b-009
+  css-break/wpt__css-break__background-image-006
+  css-position/wpt__css-position__position-absolute-center-006
+  css-position/wpt__css-position__position-absolute-center-007
+  css-tables/wpt__css-tables__absolute-tables-007
+  css-tables/wpt__css-tables__absolute-tables-016
+  css-tables/wpt__css-tables__abspos-container-change-dynamic-001
+  css-tables/wpt__css-tables__anonymous-table-cell-margin-collapsing
+  css-tables/wpt__css-tables__anonymous-table-ws-001
+  css-tables/wpt__css-tables__border-collapse-dynamic-col-001
+  css-tables/wpt__css-tables__border-collapse-dynamic-oof
+  css-tables/wpt__css-tables__border-collapse-dynamic-section
+  css-tables/wpt__css-tables__collapsed-border-color-change-with-compositing
+  css-tables/wpt__css-tables__collapsed-border-remove-row-group
+  css-tables/wpt__css-tables__empty-table-height
+  css-tables/wpt__css-tables__height-distribution__percentage-sizing-of-table-cell-children-003
+  css-tables/wpt__css-tables__height-distribution__percentage-sizing-of-table-cell-children-004
+  css-tables/wpt__css-tables__height-distribution__percentage-sizing-of-table-cell-children-005
+  css-tables/wpt__css-tables__height-distribution__percentage-sizing-of-table-cell-children-006
+  css-text/wpt__css-text__hanging-punctuation__hanging-scrollable-001
+  selectors/wpt__selectors__invalidation__nth-child-of-attr-largedom

@@ -1,0 +1,6 @@
+label=K-X1-rc1-fixed-arm file=runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/CanvasRootHoist.kt
+sha256 before=367775501a88ac1742c11cd3b39c7fd191ed29fd7d2f7fd0c7316de877565603 mutated=3fd10a51caeb2add24e9e174a5fb007e238112c41572fe56f07427bd3a8a96df after=367775501a88ac1742c11cd3b39c7fd191ed29fd7d2f7fd0c7316de877565603 restored=OK
+suite rc=1 (RED)
+CanvasRootHoistTest tests=29 skipped=0 failures=1 errors=0 FAILED: ['P2 fixed with no inset does NOT hoist — it takes its static position']
+OutOfFlowContainingBlockTest tests=8 skipped=0 failures=1 errors=0 FAILED: ['P3 P4 the corpus moves in exactly the 9 OOF-android carriers and the host in exactly 7']
+TOTAL tests=124 skipped=0 failures=2 errors=0

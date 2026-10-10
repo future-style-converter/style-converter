@@ -1,0 +1,46 @@
+CSS2/css21-errata/s-11-1-1b-006.html|android                                   P 0.9944  → P 0.9944  → P 0.9906  → P 0.9944 
+CSS2/css21-errata/s-11-1-1b-006.html|ios                                       P 0.9953  → P 0.9992  → P 0.9992  → P 0.9992 
+CSS2/css21-errata/s-11-1-1b-006.html|web                                       P 0.9941  → P 1       → P 1       → P 1      
+css-counter-styles/counter-suffix.html|android                                 P 0.9547  → P 0.9547  → P 0.9793  → P 0.9547 
+css-counter-styles/counter-suffix.html|ios                                     P 0.9802  → P 0.9802  → P 0.9873  → P 0.9802 
+css-counter-styles/counter-suffix.html|web                                     P 0.9818  → P 0.9818  → P 1       → P 0.9818 
+css-flexbox/abspos/abspos-autopos-htb-ltr.html|android                         P 0.9966  → P 0.9966  → P 0.9966  → P 0.9966 
+css-flexbox/abspos/abspos-autopos-htb-ltr.html|ios                             P 0.9974  → P 0.9974  → P 0.9974  → P 0.9974 
+css-flexbox/abspos/abspos-autopos-htb-ltr.html|web                             P 0.999   → P 0.999   → P 0.999   → P 0.999  
+css-flexbox/abspos/abspos-autopos-htb-rtl.html|android                         P 0.9869  → P 0.9869  → P 0.9869  → P 0.9869 
+css-flexbox/abspos/abspos-autopos-htb-rtl.html|ios                             P 0.9974  → P 0.9974  → P 0.9974  → P 0.9974 
+css-flexbox/abspos/abspos-autopos-htb-rtl.html|web                             P 0.999   → P 0.999   → P 0.999   → P 0.999  
+css-flexbox/abspos/abspos-autopos-vlr-ltr.html|android                         P 0.9966  → P 0.9966  → P 0.9966  → P 0.9966 
+css-flexbox/abspos/abspos-autopos-vlr-ltr.html|ios                             P 0.9974  → P 0.9974  → P 0.9974  → P 0.9974 
+css-flexbox/abspos/abspos-autopos-vlr-ltr.html|web                             P 0.999   → P 0.999   → P 0.999   → P 0.999  
+css-flexbox/abspos/abspos-autopos-vlr-rtl.html|android                         P 0.9966  → P 0.9966  → P 0.9966  → P 0.9966 
+css-flexbox/abspos/abspos-autopos-vlr-rtl.html|ios                             P 0.9974  → P 0.9974  → P 0.9974  → P 0.9974 
+css-flexbox/abspos/abspos-autopos-vlr-rtl.html|web                             P 0.999   → P 0.999   → P 0.999   → P 0.999  
+css-flexbox/abspos/abspos-autopos-vrl-ltr.html|android                         P 0.9966  → P 0.9966  → P 0.9966  → P 0.9966 
+css-flexbox/abspos/abspos-autopos-vrl-ltr.html|ios                             P 0.9974  → P 0.9974  → P 0.9974  → P 0.9974 
+css-flexbox/abspos/abspos-autopos-vrl-ltr.html|web                             P 0.999   → P 0.999   → P 0.999   → P 0.999  
+css-flexbox/abspos/abspos-autopos-vrl-rtl.html|android                         P 0.9966  → P 0.9966  → P 0.9966  → P 0.9966 
+css-flexbox/abspos/abspos-autopos-vrl-rtl.html|ios                             P 0.9974  → P 0.9974  → P 0.9974  → P 0.9974 
+css-flexbox/abspos/abspos-autopos-vrl-rtl.html|web                             P 0.999   → P 0.999   → P 0.999   → P 0.999  
+css-images/cross-fade-target-alpha.html|android                                P 0.9957  → P 0.9957  → P 0.9957  → P 0.9957 
+css-multicol/abspos-autopos-contained-by-viewport-000.html|android             P 0.9966  → P 0.9966  → —         → P 0.9966 
+css-multicol/abspos-autopos-contained-by-viewport-000.html|ios                 P 0.9973  → P 0.9973  → —         → P 0.9973 
+css-multicol/abspos-autopos-contained-by-viewport-000.html|web                 P 0.999   → P 0.999   → —         → P 0.999  
+css-multicol/abspos-autopos-contained-by-viewport-001.html|android             P 0.9967  → P 0.9967  → —         → P 0.9967 
+css-multicol/abspos-autopos-contained-by-viewport-001.html|ios                 P 0.988   → P 0.988   → —         → P 0.988  
+css-multicol/abspos-autopos-contained-by-viewport-001.html|web                 P 0.999   → P 0.999   → —         → P 0.999  
+css-overflow/line-clamp/block-ellipsis-002.html|android                        P 0.9884  → P 0.9884  → —         → P 0.9884 
+css-overflow/line-clamp/block-ellipsis-002.html|ios                            P 0.9813  → P 0.9813  → —         → P 0.9813 
+css-overflow/line-clamp/block-ellipsis-002.html|web                            P 0.9868  → P 0.9868  → —         → P 0.9868 
+css-overflow/line-clamp/block-ellipsis-004.html|android                        P 0.9792  → P 0.9792  → —         → P 0.9792 
+css-overflow/line-clamp/block-ellipsis-004.html|ios                            P 0.9713  → P 0.9713  → —         → P 0.9713 
+css-overflow/line-clamp/block-ellipsis-004.html|web                            P 0.9737  → P 0.9737  → —         → P 0.9737 
+css-text/bidi/bidi-lines-001.html|android                                      f 0.8934  → f 0.8934  → P 0.9629  → f 0.8934 
+css-text/bidi/bidi-lines-001.html|ios                                          P 0.9926  → P 0.9926  → P 0.9926  → P 0.9926 
+css-text/bidi/bidi-lines-001.html|web                                          P 0.9998  → P 0.9998  → P 0.9998  → P 0.9998 
+css-text/bidi/bidi-lines-002.html|android                                      P 0.9534  → P 0.9534  → P 0.9818  → P 0.9534 
+css-text/bidi/bidi-lines-002.html|ios                                          P 0.989   → P 0.989   → P 0.989   → P 0.989  
+css-text/bidi/bidi-lines-002.html|web                                          P 0.993   → P 0.993   → P 0.993   → P 0.993  
+css-text/hyphens/hyphens-none-shy-on-2nd-line-001.html|android                 P 0.998   → P 0.998   → P 0.998   → P 0.998  
+css-text/hyphens/hyphens-none-shy-on-2nd-line-001.html|ios                     P 0.9988  → P 0.9988  → P 0.9988  → P 0.9988 
+css-text/hyphens/hyphens-none-shy-on-2nd-line-001.html|web                     P 1       → P 1       → P 1       → P 1      

@@ -1,0 +1,18 @@
+17 documents carry U+00AD on the wire
+css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-014
+css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-028
+css-text/wpt__css-text__hyphens__hyphenate-character-001
+css-text/wpt__css-text__hyphens__hyphenate-character-003
+css-text/wpt__css-text__hyphens__hyphenate-character-004
+css-text/wpt__css-text__hyphens__hyphenate-character-005
+css-text/wpt__css-text__hyphens__hyphens-auto-control
+css-text/wpt__css-text__hyphens__hyphens-manual-011
+css-text/wpt__css-text__hyphens__hyphens-manual-012
+css-text/wpt__css-text__hyphens__hyphens-manual-013
+css-text/wpt__css-text__hyphens__hyphens-manual-inline-011
+css-text/wpt__css-text__hyphens__hyphens-manual-inline-012
+css-text/wpt__css-text__hyphens__hyphens-none-011
+css-text/wpt__css-text__hyphens__hyphens-none-shy-on-2nd-line-001
+css-text/wpt__css-text__hyphens__hyphens-out-of-flow-001
+css-text/wpt__css-text__hyphens__hyphens-span-001
+css-text/wpt__css-text__hyphens__hyphens-vertical-001

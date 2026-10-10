@@ -1,0 +1,4 @@
+1 as planned (P + M′): 0 FAIL
+2 wave-53 shape (runs owned by the li): 6 FAIL — counter-suffix__0__4 root-owned marker runs [".","1",".","2"] (got []) | counter-suffix__0__4__0 keeps exactly ONE child (its text run) | counter-suffix__0__4__1 keeps exactly ONE child (its text run)
+3 M′ without P (root padding kept): 2 FAIL — counter-suffix__0__4 padding: 0 alone (unit P) | counter-suffix__0__5 padding: 0 alone (unit P)
+SELF-TEST HOLDS: the [W1] checks pass on the planned shape and fail on both wrong shapes

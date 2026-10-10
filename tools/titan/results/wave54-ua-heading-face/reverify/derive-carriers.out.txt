@@ -1,0 +1,75 @@
+# wave53-final: documents=1435 tagged=43 in 24 docs; firing=27; rendered-firing=19; All-on-tagged=0 var-on-tagged=0
+# wave53-final: ANDROID CARRIERS (7): css-break__block-in-inline-015-print css-lists__counter-list-item css-lists__counter-reset-increment-overflow-underflow css-text-decor__text-decoration-color css-text-decor__text-decoration-subelements-003 filter-effects__backdrop-filter-border-radius-change filter-effects__backdrop-filter-corner-shape-change
+  text-decoration-inset-001 h1 0-053 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-002 h1 0-057 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-003 h1 0-061 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-004 h1 0-065 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-005 h1 0-069 kids=1 standsDown=True same=True size=[None, None] ownFold=Folded ancestors=[]
+  text-decoration-inset-005 sup 0-071 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-inset-005__1__0-069=Folded', 'text-decoration-inset-005__1__0__0-070=Folded']
+  text-decoration-inset-005 sub 1-072 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-inset-005__1__0-069=Folded', 'text-decoration-inset-005__1__0__0-070=Folded']
+  text-decoration-inset-006 h1 0-076 kids=1 standsDown=True same=True size=[None, None] ownFold=Folded ancestors=[]
+  text-decoration-inset-006 sup 0-078 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-inset-006__1__0-076=Folded', 'text-decoration-inset-006__1__0__0-077=Folded']
+  text-decoration-inset-006 sub 1-079 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-inset-006__1__0-076=Folded', 'text-decoration-inset-006__1__0__0-077=Folded']
+  text-decoration-inset-007 h1 0-083 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-008 h1 0-087 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-009 h1 0-091 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-011 h1 0-095 kids=3 standsDown=True same=True size=[None, None] ownFold=Bailed:member-prop:TextDecorationColor-divergence ancestors=[]
+  text-decoration-inset-012 h1 0-102 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-013 h1 0-106 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-014 h1 0-110 kids=1 standsDown=True same=True size=[None, None] ownFold=Folded ancestors=[]
+  text-decoration-inset-015 h1 0-115 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-016 h1 0-119 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-024 h1 0-123 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-subelements-002 sup 0-257 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-subelements-002__1__0__0-255=Folded', 'text-decoration-subelements-002__1__0__0__0-256=Folded']
+  text-decoration-subelements-002 sup 0-261 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-subelements-002__1__1__0-259=Folded', 'text-decoration-subelements-002__1__1__0__0-260=Folded']
+  text-decoration-subelements-002 sup 1-262 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-subelements-002__1__1__0-259=Folded', 'text-decoration-subelements-002__1__1__0__0-260=Folded']
+  text-decoration-subelements-002 sup 2-263 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-subelements-002__1__1__0-259=Folded', 'text-decoration-subelements-002__1__1__0__0-260=Folded']
+  text-decoration-subelements-003 sup 0-267 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-subelements-003__1__0-266=Bailed:member-prop:TextDecorationColor-divergence']
+# wave54-open: documents=1435 tagged=43 in 24 docs; firing=27; rendered-firing=19; All-on-tagged=0 var-on-tagged=0
+# wave54-open: ANDROID CARRIERS (7): css-break__block-in-inline-015-print css-lists__counter-list-item css-lists__counter-reset-increment-overflow-underflow css-text-decor__text-decoration-color css-text-decor__text-decoration-subelements-003 filter-effects__backdrop-filter-border-radius-change filter-effects__backdrop-filter-corner-shape-change
+  text-decoration-inset-001 h1 0-053 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-002 h1 0-057 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-003 h1 0-061 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-004 h1 0-065 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-005 h1 0-069 kids=1 standsDown=True same=True size=[None, None] ownFold=Folded ancestors=[]
+  text-decoration-inset-005 sup 0-071 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-inset-005__1__0-069=Folded', 'text-decoration-inset-005__1__0__0-070=Folded']
+  text-decoration-inset-005 sub 1-072 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-inset-005__1__0-069=Folded', 'text-decoration-inset-005__1__0__0-070=Folded']
+  text-decoration-inset-006 h1 0-076 kids=1 standsDown=True same=True size=[None, None] ownFold=Folded ancestors=[]
+  text-decoration-inset-006 sup 0-078 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-inset-006__1__0-076=Folded', 'text-decoration-inset-006__1__0__0-077=Folded']
+  text-decoration-inset-006 sub 1-079 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-inset-006__1__0-076=Folded', 'text-decoration-inset-006__1__0__0-077=Folded']
+  text-decoration-inset-007 h1 0-083 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-008 h1 0-087 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-009 h1 0-091 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-011 h1 0-095 kids=3 standsDown=True same=True size=[None, None] ownFold=Bailed:member-prop:TextDecorationColor-divergence ancestors=[]
+  text-decoration-inset-012 h1 0-102 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-013 h1 0-106 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-014 h1 0-110 kids=1 standsDown=True same=True size=[None, None] ownFold=Folded ancestors=[]
+  text-decoration-inset-015 h1 0-115 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-016 h1 0-119 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-inset-024 h1 0-123 kids=0 standsDown=False same=True size=[32.0, 32.0] ownFold=not-a-runs-host ancestors=[]
+  text-decoration-subelements-002 sup 0-257 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-subelements-002__1__0__0-255=Folded', 'text-decoration-subelements-002__1__0__0__0-256=Folded']
+  text-decoration-subelements-002 sup 0-261 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-subelements-002__1__1__0-259=Folded', 'text-decoration-subelements-002__1__1__0__0-260=Folded']
+  text-decoration-subelements-002 sup 1-262 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-subelements-002__1__1__0-259=Folded', 'text-decoration-subelements-002__1__1__0__0-260=Folded']
+  text-decoration-subelements-002 sup 2-263 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-subelements-002__1__1__0-259=Folded', 'text-decoration-subelements-002__1__1__0__0-260=Folded']
+  text-decoration-subelements-003 sup 0-267 kids=0 standsDown=False same=False size=[None, 13.333333] ownFold=not-a-runs-host ancestors=['text-decoration-subelements-003__1__0-266=Bailed:member-prop:TextDecorationColor-divergence']
+# heading hosts with children (all stand down, all SAME list): [('text-decoration-inset-005', True, True), ('text-decoration-inset-006', True, True), ('text-decoration-inset-011', True, True), ('text-decoration-inset-014', True, True)]
+# leaf headings that take the face: 16 ['backdrop-filter-border-radius-change', 'backdrop-filter-corner-shape-change', 'block-in-inline-015-print', 'counter-list-item', 'counter-reset-increment-overflow-underflow', 'text-decoration-color']
+#   RENDERED-FIRING wpt__css-break__block-in-inline-015-print h1 size None→32.0 weight None→{"weight":700}
+#   RENDERED-FIRING wpt__css-break__block-in-inline-015-print h1 size None→32.0 weight None→{"weight":700}
+#   RENDERED-FIRING wpt__css-break__block-in-inline-015-print h1 size None→32.0 weight None→{"weight":700}
+#   RENDERED-FIRING wpt__css-break__block-in-inline-015-print h1 size None→32.0 weight None→{"weight":700}
+#   RENDERED-FIRING wpt__css-lists__counter-list-item h2 size None→24.0 weight None→{"weight":700}
+#   RENDERED-FIRING wpt__css-lists__counter-reset-increment-overflow-underflow h3 size None→18.72 weight None→{"weight":700}
+#   RENDERED-FIRING wpt__css-lists__counter-reset-increment-overflow-underflow h3 size None→18.72 weight None→{"weight":700}
+#   RENDERED-FIRING wpt__css-lists__counter-reset-increment-overflow-underflow h3 size None→18.72 weight None→{"weight":700}
+#   RENDERED-FIRING wpt__css-lists__counter-reset-increment-overflow-underflow h3 size None→18.72 weight None→{"weight":700}
+#   RENDERED-FIRING wpt__css-lists__counter-reset-increment-overflow-underflow h3 size None→18.72 weight None→{"weight":700}
+#   RENDERED-FIRING wpt__css-lists__counter-reset-increment-overflow-underflow h3 size None→18.72 weight None→{"weight":700}
+#   RENDERED-FIRING wpt__css-text-decor__text-decoration-color h3 size None→18.72 weight None→{"weight":700}
+#   RENDERED-FIRING wpt__css-text-decor__text-decoration-color sub size None→13.333333 weight None→None
+#   RENDERED-FIRING wpt__css-text-decor__text-decoration-color sup size None→13.333333 weight None→None
+#   RENDERED-FIRING wpt__css-text-decor__text-decoration-subelements-003 sup size None→13.333333 weight None→None
+#   RENDERED-FIRING wpt__filter-effects__backdrop-filter-border-radius-change h1 size 100.0→100.0 weight None→{"weight":700}
+#   RENDERED-FIRING wpt__filter-effects__backdrop-filter-border-radius-change h1 size 100.0→100.0 weight None→{"weight":700}
+#   RENDERED-FIRING wpt__filter-effects__backdrop-filter-corner-shape-change h1 size 100.0→100.0 weight None→{"weight":700}
+#   RENDERED-FIRING wpt__filter-effects__backdrop-filter-corner-shape-change h1 size 100.0→100.0 weight None→{"weight":700}

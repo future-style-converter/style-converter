@@ -1,0 +1,13 @@
+# Wave 54 single-writer full sweep — tree d64d4c6e (campaign/applier-campaign), started 2026-10-08T21:06:37Z
+# suite | rc | count line (as the tool prints it) | wall
+tooling            | rc=0 | # pass 2325 # fail 0  | 23s
+conformance        | rc=0 | IR conformance: all documents valid (v1 goldens + v2 goldens) | 1s
+web-runtime        | rc=0 |       Tests  1379 passed (1379) | 6s
+web-harness        | rc=0 |       Tests  344 passed (344) | 7s
+converter          | rc=0 | testcases=562 BUILD SUCCESSFUL in 16s | 17s
+compose            | rc=0 | testcases=3491 BUILD SUCCESSFUL in 24s | 24s
+android-app        | rc=0 | testcases=169 BUILD SUCCESSFUL in 1s | 1s
+swiftui            | rc=0 | 	 Executed 2212 tests, with 0 failures (0 unexpected) in 43.980 (67.660) seconds | 135s
+ios-harness        | rc=0 | 	 Executed 30 tests, with 0 failures (0 unexpected) in 0.055 (0.062) seconds | 81s
+# finished 2026-10-08T21:11:32Z
+# tooling: # tests 2329 · # pass 2325 · # skipped 4 (env-gated); android-app task EXECUTED (compile + test, not UP-TO-DATE); raw logs in the session scratchpad (not kept)

@@ -1,0 +1,117 @@
+census over wave53-final: bidiBaked tests 17
+  css/css-anchor-position/anchor-center-safe-rtl.html  (fixture sha1 0ea434db6f40 2026-10-08T13:18; IR comps 14; log 4 roots / 7 runs)  [web unscored · ios unscored · android unscored]
+     root anchor-center-safe-rtl__0 <-> pads {} | IR (no Padding*)
+     root anchor-center-safe-rtl__1 <-> pads {"padding":"10px"} | IR PaddingTop={"px":10} PaddingRight={"px":10} PaddingBottom={"px":10} PaddingLeft={"px":10}
+     root anchor-center-safe-rtl__2 <-> pads {} | IR (no Padding*)
+     root anchor-center-safe-rtl__3 <-> pads {"padding":"10px"} | IR PaddingTop={"px":10} PaddingRight={"px":10} PaddingBottom={"px":10} PaddingLeft={"px":10}
+  css/css-backgrounds/background-attachment-local/attachment-local-positioning-3.html  (fixture sha1 5ed9e5470e9e 2026-10-08T13:21; IR comps 4; log 1 roots / 1 runs)  [web unscored · ios unscored · android unscored]
+     root background-attachment-local__attachment-local-positioning-3__0 <-> pads {} GUARD overflow:hidden | IR (no Padding*)
+  css/css-backgrounds/background-attachment-local/attachment-local-positioning-4.html  (fixture sha1 3e423ab887c5 2026-10-08T13:21; IR comps 4; log 1 roots / 1 runs)  [web unscored · ios unscored · android unscored]
+     root background-attachment-local__attachment-local-positioning-4__0 <-> pads {} GUARD overflow:hidden | IR (no Padding*)
+  css/css-counter-styles/arabic-indic/css3-counter-styles-101.html  (fixture sha1 853e658e2a2b 2026-10-08T13:33; IR comps 21; log 9 roots / 9 runs)  [web P 0.9932 · ios P 0.9943 · android P 0.9736]
+     root arabic-indic__css3-counter-styles-101__1__0__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-101__1__0__1 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-101__1__0__2 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-101__1__0__3 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-101__1__0__4 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-101__1__0__5 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-101__1__0__6 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-101__1__0__7 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-101__1__0__8 <li> pads {} | IR (no Padding*)
+  css/css-counter-styles/arabic-indic/css3-counter-styles-102.html  (fixture sha1 d4ec6ebfb59d 2026-10-08T13:33; IR comps 69; log 24 roots / 24 runs)  [web P 0.9791 · ios unscored · android unscored]
+     root arabic-indic__css3-counter-styles-102__1__0__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__0__1 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__0__2 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__1__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__2__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__3__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__4__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__4__1 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__4__2 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__5__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__6__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__7__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__7__1 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__8__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__9__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__10__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__11__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__12__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__13__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__14__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__15__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__16__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__17__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-102__1__18__0 <li> pads {} | IR (no Padding*)
+  css/css-counter-styles/arabic-indic/css3-counter-styles-103.html  (fixture sha1 b22dab1f573a 2026-10-08T13:33; IR comps 7; log 2 roots / 2 runs)  [web P 0.9986 · ios P 0.9978 · android P 0.9913]
+     root arabic-indic__css3-counter-styles-103__1__0__0 <li> pads {} | IR (no Padding*)
+     root arabic-indic__css3-counter-styles-103__1__0__1 <li> pads {} | IR (no Padding*)
+  css/css-counter-styles/counter-suffix.html  (fixture sha1 6d4ae51bc39e 2026-10-08T13:33; IR comps 23; log 2 roots / 4 runs)  [web P 0.9818 · ios P 0.9802 · android P 0.9547]
+     root counter-suffix__0__4 <ol> pads {"padding":"0 3em"} | IR PaddingTop={"px":0} PaddingRight={"original":{"v":3,"u":"EM"}} PaddingBottom={"px":0} PaddingLeft={"original":{"v":3,"u":"EM"}}
+     root counter-suffix__0__5 <ol> pads {"padding":"0 3em"} | IR PaddingTop={"px":0} PaddingRight={"original":{"v":3,"u":"EM"}} PaddingBottom={"px":0} PaddingLeft={"original":{"v":3,"u":"EM"}}
+     item counter-suffix__0__4__0 <li> in <ol> list-style-type decimal | IR markerText "1." Position ABSOLUTE
+     item counter-suffix__0__4__1 <li> in <ol> list-style-type decimal | IR markerText "2." Position ABSOLUTE
+     item counter-suffix__0__5__0 <li> in <ol> list-style-type hebrew | IR markerText "א." Position ABSOLUTE
+     item counter-suffix__0__5__1 <li> in <ol> list-style-type hebrew | IR markerText "ב." Position ABSOLUTE
+  css/css-text/bidi/bidi-lines-001.html  (fixture sha1 61d8a3ce6af6 2026-10-08T14:07; IR comps 13; log 2 roots / 11 runs)  [web P 0.9998 · ios P 0.9926 · android f 0.8934]
+     root bidi__bidi-lines-001__0 <p> pads {} | IR (no Padding*)
+     root bidi__bidi-lines-001__1 <-> pads {"padding":"0 0.5ch"} | IR PaddingTop={"px":0} PaddingRight={"original":{"v":0.5,"u":"CH"}} PaddingBottom={"px":0} PaddingLeft={"original":{"v":0.5,"u":"CH"}}
+  css/css-text/bidi/bidi-lines-002.html  (fixture sha1 51daea969744 2026-10-08T14:07; IR comps 19; log 1 roots / 7 runs)  [web P 0.993 · ios P 0.989 · android P 0.9534]
+     root bidi__bidi-lines-002__1 <-> pads {"padding":"0 0.5ch"} | IR PaddingTop={"px":0} PaddingRight={"original":{"v":0.5,"u":"CH"}} PaddingBottom={"px":0} PaddingLeft={"original":{"v":0.5,"u":"CH"}}
+  css/css-text/bidi/bidi-tab-001.html  (fixture sha1 82153b4e1d0b 2026-10-08T14:07; IR comps 26; log 8 roots / 8 runs)  [web P 0.9978 · ios P 0.9829 · android P 0.9805]
+     root bidi__bidi-tab-001__1 <-> pads {} | IR (no Padding*)
+     root bidi__bidi-tab-001__2 <-> pads {} | IR (no Padding*)
+     root bidi__bidi-tab-001__3 <-> pads {} | IR (no Padding*)
+     root bidi__bidi-tab-001__4 <-> pads {} | IR (no Padding*)
+     root bidi__bidi-tab-001__6 <-> pads {} | IR (no Padding*)
+     root bidi__bidi-tab-001__7 <-> pads {} | IR (no Padding*)
+     root bidi__bidi-tab-001__8 <-> pads {} | IR (no Padding*)
+     root bidi__bidi-tab-001__9 <-> pads {} | IR (no Padding*)
+  css/css-text/boundary-shaping/boundary-shaping-009.html  (fixture sha1 235e5a1e0317 2026-10-08T14:07; IR comps 33; log 8 roots / 16 runs)  [web f 0.9482 · ios f 0.8919 · android f 0.7531]
+     root boundary-shaping__boundary-shaping-009__0 <-> pads {} | IR (no Padding*)
+     root boundary-shaping__boundary-shaping-009__1 <-> pads {} | IR (no Padding*)
+     root boundary-shaping__boundary-shaping-009__2 <-> pads {} | IR (no Padding*)
+     root boundary-shaping__boundary-shaping-009__3 <-> pads {} | IR (no Padding*)
+     root boundary-shaping__boundary-shaping-009__4 <-> pads {} | IR (no Padding*)
+     root boundary-shaping__boundary-shaping-009__5 <-> pads {} | IR (no Padding*)
+     root boundary-shaping__boundary-shaping-009__6 <-> pads {} | IR (no Padding*)
+     root boundary-shaping__boundary-shaping-009__7 <-> pads {} | IR (no Padding*)
+  css/css-text/hyphens/hyphenate-character-005.html  (fixture sha1 62b2c472e7ce 2026-10-08T14:07; IR comps 14; log 2 roots / 11 runs)  [web P 0.974 · ios f 0.9428 · android f 0.9474]
+     root hyphens__hyphenate-character-005__0 <p> pads {} | IR (no Padding*)
+     root hyphens__hyphenate-character-005__1 <-> pads {} | IR (no Padding*)
+  css/css-writing-modes/bidi-plaintext-br-001.html  (fixture sha1 8095e25e2705 2026-10-08T14:22; IR comps 26; log 6 roots / 16 runs)  [web P 1 · ios P 0.9572 · android f 0.9482]
+     root bidi-plaintext-br-001__0 <-> pads {} | IR (no Padding*)
+     root bidi-plaintext-br-001__1 <-> pads {} | IR (no Padding*)
+     root bidi-plaintext-br-001__2 <-> pads {} | IR (no Padding*)
+     root bidi-plaintext-br-001__3 <-> pads {} | IR (no Padding*)
+     root bidi-plaintext-br-001__4 <-> pads {} | IR (no Padding*)
+     root bidi-plaintext-br-001__5 <-> pads {} | IR (no Padding*)
+  css/selectors/dir-selector-change-003.html  (fixture sha1 261660c47093 2026-10-08T14:28; IR comps 5; log 1 roots / 1 runs)  [web P 1 · ios P 0.9996 · android P 0.9994]
+     root dir-selector-change-003__0 <-> pads {"padding-top":"0px","padding-right":"0px","padding-bottom":"0px","padding-left":"0px"} | IR PaddingTop={"px":0} PaddingRight={"px":0} PaddingBottom={"px":0} PaddingLeft={"px":0}
+  css/selectors/dir-selector-change-004.html  (fixture sha1 57b15cc01cc3 2026-10-08T14:28; IR comps 5; log 1 roots / 1 runs)  [web P 1 · ios P 0.9958 · android P 0.9944]
+     root dir-selector-change-004__0 <-> pads {"padding-top":"0px","padding-right":"0px","padding-bottom":"0px","padding-left":"0px"} | IR PaddingTop={"px":0} PaddingRight={"px":0} PaddingBottom={"px":0} PaddingLeft={"px":0}
+  css/selectors/dir-style-02a.html  (fixture sha1 2e32e283540f 2026-10-08T14:28; IR comps 30; log 6 roots / 17 runs)  [web P 1 · ios f 0.9455 · android f 0.9425]
+     root dir-style-02a__0 <-> pads {"padding-top":"0px","padding-right":"0px","padding-bottom":"0px","padding-left":"0px"} | IR PaddingTop={"px":0} PaddingRight={"px":0} PaddingBottom={"px":0} PaddingLeft={"px":0}
+     root dir-style-02a__1 <-> pads {"padding-top":"0px","padding-right":"0px","padding-bottom":"0px","padding-left":"0px"} | IR PaddingTop={"px":0} PaddingRight={"px":0} PaddingBottom={"px":0} PaddingLeft={"px":0}
+     root dir-style-02a__2 <-> pads {"padding-top":"0px","padding-right":"0px","padding-bottom":"0px","padding-left":"0px"} | IR PaddingTop={"px":0} PaddingRight={"px":0} PaddingBottom={"px":0} PaddingLeft={"px":0}
+     root dir-style-02a__3 <-> pads {"padding-top":"0px","padding-right":"0px","padding-bottom":"0px","padding-left":"0px"} | IR PaddingTop={"px":0} PaddingRight={"px":0} PaddingBottom={"px":0} PaddingLeft={"px":0}
+     root dir-style-02a__4 <-> pads {"padding-top":"0px","padding-right":"0px","padding-bottom":"0px","padding-left":"0px"} | IR PaddingTop={"px":0} PaddingRight={"px":0} PaddingBottom={"px":0} PaddingLeft={"px":0}
+     root dir-style-02a__5 <-> pads {"padding-top":"0px","padding-right":"0px","padding-bottom":"0px","padding-left":"0px"} | IR PaddingTop={"px":0} PaddingRight={"px":0} PaddingBottom={"px":0} PaddingLeft={"px":0}
+  css/selectors/dir-style-03a.html  (fixture sha1 f89da5cd152e 2026-10-08T14:28; IR comps 4; log 1 roots / 2 runs)  [web P 1 · ios P 0.9986 · android P 0.9974]
+     root dir-style-03a__0 <-> pads {} | IR (no Padding*)
+
+P (authored non-zero padding, unguarded): 6 roots in 4 docs
+  css/css-anchor-position/anchor-center-safe-rtl.html anchor-center-safe-rtl__1 {"padding":"10px"} | IR PaddingTop={"px":10} PaddingRight={"px":10} PaddingBottom={"px":10} PaddingLeft={"px":10}
+  css/css-anchor-position/anchor-center-safe-rtl.html anchor-center-safe-rtl__3 {"padding":"10px"} | IR PaddingTop={"px":10} PaddingRight={"px":10} PaddingBottom={"px":10} PaddingLeft={"px":10}
+  css/css-counter-styles/counter-suffix.html counter-suffix__0__4 {"padding":"0 3em"} | IR PaddingTop={"px":0} PaddingRight={"original":{"v":3,"u":"EM"}} PaddingBottom={"px":0} PaddingLeft={"original":{"v":3,"u":"EM"}}
+  css/css-counter-styles/counter-suffix.html counter-suffix__0__5 {"padding":"0 3em"} | IR PaddingTop={"px":0} PaddingRight={"original":{"v":3,"u":"EM"}} PaddingBottom={"px":0} PaddingLeft={"original":{"v":3,"u":"EM"}}
+  css/css-text/bidi/bidi-lines-001.html bidi__bidi-lines-001__1 {"padding":"0 0.5ch"} | IR PaddingTop={"px":0} PaddingRight={"original":{"v":0.5,"u":"CH"}} PaddingBottom={"px":0} PaddingLeft={"original":{"v":0.5,"u":"CH"}}
+  css/css-text/bidi/bidi-lines-002.html bidi__bidi-lines-002__1 {"padding":"0 0.5ch"} | IR PaddingTop={"px":0} PaddingRight={"original":{"v":0.5,"u":"CH"}} PaddingBottom={"px":0} PaddingLeft={"original":{"v":0.5,"u":"CH"}}
+P via UA list padding (no authored padding on an ol/ul root): 0
+M′ (non-root list items with a marker inside a root): 4 in 1 docs
+  css/css-counter-styles/counter-suffix.html counter-suffix__0__4__0 decimal | IR markerText "1." Position ABSOLUTE
+  css/css-counter-styles/counter-suffix.html counter-suffix__0__4__1 decimal | IR markerText "2." Position ABSOLUTE
+  css/css-counter-styles/counter-suffix.html counter-suffix__0__5__0 hebrew | IR markerText "א." Position ABSOLUTE
+  css/css-counter-styles/counter-suffix.html counter-suffix__0__5__1 hebrew | IR markerText "ב." Position ABSOLUTE
+run budget: max runs 24, max with markers 24 (limit 300)
+id shadow: css/css-counter-styles/counter-suffix.html → 15 later tests of css-counter-styles renumbered (+3 per marker item at most; +6 predicted)

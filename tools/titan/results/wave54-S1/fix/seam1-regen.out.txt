@@ -1,0 +1,4 @@
+== for base in db6e8aa0 1cde1f48: git show $base:<ComponentRenderer.kt> | seam1-hunk.py -> compare with the committed seam1-files copy (removed after this check)
+base db6e8aa0: regen sha eaf9111e77596e0c  copy sha eaf9111e77596e0c  BYTE-IDENTICAL
+base 1cde1f48: regen sha eaf9111e77596e0c  copy sha eaf9111e77596e0c  BYTE-IDENTICAL
+copy size 518485 bytes

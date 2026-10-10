@@ -1,0 +1,1 @@
+    val isPositionable: Boolean get() = end > start

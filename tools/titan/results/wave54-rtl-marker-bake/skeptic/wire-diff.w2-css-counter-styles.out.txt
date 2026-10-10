@@ -1,0 +1,17 @@
+CHANGED wpt__css-counter-styles__counter-suffix.json: components 23 -> 29
+  ~ counter-suffix__0__4 props [('PaddingLeft', {'original': {'v': 3, 'u': 'EM'}}, {'px': 0}), ('PaddingRight', {'original': {'v': 3, 'u': 'EM'}}, {'px': 0})] other []
+  ~ counter-suffix__0__4__0 props [('ListStyleType', None, 'none')] other [('meta', {'sourceTag': 'li', 'markerText': '1.'}, {'sourceTag': 'li'})]
+  ~ counter-suffix__0__4__1 props [('ListStyleType', None, 'none')] other [('meta', {'sourceTag': 'li', 'markerText': '2.'}, {'sourceTag': 'li'})]
+  + counter-suffix__0__4__2 parent=counter-suffix__0__4 meta=None Left={'px': 116.3} Top={'px': 2} Width={'type': 'length', 'px': 4.3} Dir=LTR FVN=['TABULAR_NUMS'] text='.'
+  + counter-suffix__0__4__3 parent=counter-suffix__0__4 meta=None Left={'px': 120.59} Top={'px': 2} Width={'type': 'length', 'px': 10.38} Dir=LTR FVN=['TABULAR_NUMS'] text='1'
+  + counter-suffix__0__4__4 parent=counter-suffix__0__4 meta=None Left={'px': 116.3} Top={'px': 26} Width={'type': 'length', 'px': 4.3} Dir=LTR FVN=['TABULAR_NUMS'] text='.'
+  + counter-suffix__0__4__5 parent=counter-suffix__0__4 meta=None Left={'px': 120.59} Top={'px': 26} Width={'type': 'length', 'px': 10.38} Dir=LTR FVN=['TABULAR_NUMS'] text='2'
+  ~ counter-suffix__0__5 props [('PaddingLeft', {'original': {'v': 3, 'u': 'EM'}}, {'px': 0}), ('PaddingRight', {'original': {'v': 3, 'u': 'EM'}}, {'px': 0})] other []
+  ~ counter-suffix__0__5__0 props [('ListStyleType', None, 'none')] other [('meta', {'sourceTag': 'li', 'markerText': 'א.'}, {'sourceTag': 'li'})]
+  ~ counter-suffix__0__5__1 props [('ListStyleType', None, 'none')] other [('meta', {'sourceTag': 'li', 'markerText': 'ב.'}, {'sourceTag': 'li'})]
+  + counter-suffix__0__5__2 parent=counter-suffix__0__5 meta=None Left={'px': 116.3} Top={'px': 2} Width={'type': 'length', 'px': 14.62} Dir=RTL FVN=['TABULAR_NUMS'] text='א.'
+  + counter-suffix__0__5__3 parent=counter-suffix__0__5 meta=None Left={'px': 116.3} Top={'px': 26} Width={'type': 'length', 'px': 13.31} Dir=RTL FVN=['TABULAR_NUMS'] text='ב.'
+  stack-shape parents: base [] -> new []
+identical 32 · renumbered 15 · content-changed 1 · missing-in-base 0
+renumbered: ['wpt__css-counter-styles__cssom__cssom-additive-symbols-setter-invalid', 'wpt__css-counter-styles__cssom__cssom-additive-symbols-setter', 'wpt__css-counter-styles__cssom__cssom-fallback-setter-invalid', 'wpt__css-counter-styles__cssom__cssom-fallback-setter', 'wpt__css-counter-styles__cssom__cssom-name-setter-invalid', 'wpt__css-counter-styles__cssom__cssom-name-setter', 'wpt__css-counter-styles__cssom__cssom-negative-setter-invalid', 'wpt__css-counter-styles__cssom__cssom-negative-setter', 'wpt__css-counter-styles__cssom__cssom-pad-setter-invalid', 'wpt__css-counter-styles__cssom__cssom-pad-setter', 'wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter-invalid', 'wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter', 'wpt__css-counter-styles__cssom__cssom-range-setter-invalid', 'wpt__css-counter-styles__cssom__cssom-range-setter', 'wpt__css-counter-styles__cssom__cssom-symbols-setter-invalid']
+content-changed: ['wpt__css-counter-styles__counter-suffix']

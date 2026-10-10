@@ -1,0 +1,12 @@
+20-px brs on the wire: 130
+parent carries LineHeight/Font on the wire (host reading, before U3): 20 brs in 4 docs
+   wpt__css-text__hyphens__hyphenate-character-001                    5  LineHeight{"multiplier":1.2,"original":"normal"}
+   wpt__css-text__hyphens__hyphenate-character-002                    5  LineHeight{"multiplier":1.2,"original":"normal"}
+   wpt__css-text__hyphens__hyphenate-character-003                    5  LineHeight{"multiplier":1.2,"original":"normal"}
+   wpt__css-text__hyphens__hyphenate-character-004                    5  LineHeight{"multiplier":1.2,"original":"normal"}
+only an ancestor carries it (inherited reading): 23 brs in 4 docs
+   wpt__css-multicol__balance-grid-container                          2  wpt__css-multicol__balance-grid-container__1: LineHeight{"multiplier":1.25,"original":{"type":"number","value":1.25}
+   wpt__css-multicol__baseline-002                                    4  wpt__css-multicol__baseline-002__1: LineHeight{"original":{"type":"length","original":{"v":2,"u":"EM"}}}
+   wpt__css-multicol__baseline-007                                    2  wpt__css-multicol__baseline-007__1: LineHeight{"original":{"type":"length","px":40}}
+   wpt__css-multicol__column-height-009                              15  wpt__css-multicol__column-height-009__0: LineHeight{"original":{"type":"length","px":20}}
+neither: 87 brs in 38 docs

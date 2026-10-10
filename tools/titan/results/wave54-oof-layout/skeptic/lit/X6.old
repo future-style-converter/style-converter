@@ -1,0 +1,1 @@
+        case .fixed?: return !hasPositionedAncestor && !OutOfFlowContainingBlock.declaresAnyInset(component.properties)

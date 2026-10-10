@@ -1,0 +1,145 @@
+record  wave53-final → synthetic-mnm3
+  prev  web 1232/1372  ios 1125/1362  android 1115/1362
+  cur   web 1236/1372  ios 1128/1362  android 1121/1362
+  gained 13  lost 0  newly-measured 0  unmeasured-now 0  movers 4083
+
+ok   R1  lost 0; pre-registered 0; outside the list 0
+ok   R2  unmeasured-now 0 (unexpected 0), newly measured 0 (unexpected 0)
+ok   R3  missing sections 0, short columns 0
+
+predictions (gating ones enforced):
+    L1-rtl-marker-bake  css-text/bidi/bidi-lines-001.html android: predicted f 0.8934 → P ≈0.9629 (device-measured: these hunk bytes at wave53-probe) (HIGH, gating, floor 0.955) — measured P 0.9629
+    L1-rtl-marker-bake  css-text/bidi/bidi-lines-002.html android: predicted P 0.9534 → P ≈0.9818 (device-measured at wave53-probe) (HIGH, gating, floor 0.975) — measured P 0.9818
+    L1-rtl-marker-bake  css-counter-styles/counter-suffix.html android: predicted P 0.9547 DEGENERATE → P ≈0.9815 with P alone (replay); ≈0.989 with M′ on P (replay 0.9894 / 0.9900) (MED-HIGH (P floor) / MED (M′ magnitude, geometry-gated), gating, floor 0.97) — measured P 0.9815
+    L1-rtl-marker-bake  css-counter-styles/counter-suffix.html web: predicted P 0.9818 → P 1 (wave53-probe measured 1 with the same marker geometry) (HIGH, gating, floor 0.999) — measured P 1
+    L1-rtl-marker-bake  css-counter-styles/counter-suffix.html ios: predicted P 0.9802 DEGENERATE → P ≈0.987 (wave53-probe measured 0.9873) (MED-HIGH, gating, floor 0.985) — measured P 0.987
+    L2-table-body-cell  CSS2/css21-errata/s-11-1-1b-006.html android: predicted P 0.9944 DEGENERATE (square 5 px too high: rows 51-70 vs the ref 56-75) → P ≈0.9983 (replay from both the final and the probe picture); square x24-43 rows 56-75, no stroke (MED-HIGH (geometry) / MED (score), gating, floor 0.996) — measured P 0.9983
+    L3-hyphenate-character  css-text/hyphens/hyphenate-character-001.html ios: predicted f 0.9287 → P ≈0.979 (GBd 0.9852 − 0.006) (MED-HIGH, gating, floor 0.965) — measured P 0.979
+    L3-hyphenate-character  css-text/hyphens/hyphenate-character-003.html ios: predicted f 0.9337 → P ≈0.977 (GBd 0.9831 − 0.006) (MED-HIGH, gating, floor 0.965) — measured P 0.977
+    L3-hyphenate-character  css-text/hyphens/hyphenate-character-004.html ios: predicted f 0.9134 → P ≈0.979 (GBd 0.9855 − 0.006; needs the spent-hyphen hunk) (MED) — measured f 0.9134
+    L3-hyphenate-character  css-text/hyphens/hyphenate-character-001.html web: predicted f 0.935 → P ≈0.960 (U3); ≈0.976-0.981 with U3b (MED-LOW) — measured f 0.935
+    L3-hyphenate-character  css-text/hyphens/hyphenate-character-003.html web: predicted f 0.8812 → P ≈0.956 (U3); ≈0.976-0.981 with U3b (MED-LOW) — measured f 0.8812
+    L3-hyphenate-character  css-text/hyphens/hyphenate-character-004.html web: predicted f 0.9249 → 0.947-0.966 (U3; B on own pixels 0.966); ≈0.976-0.981 with U3b (LOW) — measured f 0.9249
+    L3-hyphenate-character  css-text/hyphens/hyphenate-character-001.html android: predicted f 0.9301 → ≈0.957 (U3); ≈0.976-0.981 with U3b (LOW-MED) — measured f 0.9301
+    L3-hyphenate-character  css-text/hyphens/hyphenate-character-003.html android: predicted f 0.9292 → ≈0.953 (U3); ≈0.976-0.981 with U3b (LOW) — measured f 0.9292
+    L3-hyphenate-character  css-text/hyphens/hyphenate-character-004.html android: predicted f 0.905 → ≈0.945 stays f (U3); ≈0.976-0.981 with U3b (LOW) — measured f 0.905
+    L3-hyphenate-character  css-text/hyphens/hyphenate-character-002.html web: predicted f 0.92 → ≈0.96 (Chromium en breaks equal the shys; B alone 0.9426) (LOW-MED) — measured f 0.92
+    L3-hyphenate-character  css-text/hyphens/hyphenate-character-002.html ios: predicted f 0.9261 → mover (LOW) — measured f 0.9261
+    L3-hyphenate-character  css-text/hyphens/hyphenate-character-002.html android: predicted f 0.9223 → stays f (Minikin paints its own dictionary hyphen: a logged wall) (LOW) — measured f 0.9223
+    L3-hyphenate-character  css-text/hyphens/hyphenate-limit-chars-001.html ios: predicted f 0.8919 → mover (U+2010 -> U+002D in the dictionary fold) (LOW) — measured f 0.8919
+    L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-002.html web: predicted P 0.9868 → P ≈1.0 (B replay 1) (MED-HIGH, gating, floor 0.995) — measured P 1
+    L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-002.html ios: predicted P 0.9813 DEGENERATE → P ≈0.993 (B replay 0.9928); stays DEGENERATE (Line 4 painted, no "…") (MED) — measured P 0.9813
+    L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-002.html android: predicted P 0.9884 → identical or up (two lines painted; the clamp interplay is unknown) (LOW) — measured P 0.9884
+    L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-004.html web: predicted P 0.9737 → P ≈0.998 (B replay 0.998) (MED-HIGH, gating, floor 0.99) — measured P 0.998
+    L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-005.html web: predicted P 0.9735 → P ≈0.998 (B replay 0.998) (MED-HIGH, gating, floor 0.99) — measured P 0.998
+    L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-006.html web: predicted P 0.9735 → P ≈0.998 (B replay 0.998) (MED-HIGH, gating, floor 0.99) — measured P 0.998
+    L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-004.html ios: predicted P 0.9713 → byte-identical expected (no stray gap on the natives) (MED) — measured P 0.9713
+    L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-004.html android: predicted P 0.9792 → byte-identical expected (no stray gap on the natives) (MED) — measured P 0.9792
+    L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-005.html ios: predicted P 0.9705 → byte-identical expected (no stray gap on the natives) (MED) — measured P 0.9705
+    L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-005.html android: predicted P 0.9786 → byte-identical expected (no stray gap on the natives) (MED) — measured P 0.9786
+    L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-006.html ios: predicted P 0.9705 → byte-identical expected (no stray gap on the natives) (MED) — measured P 0.9705
+    L3-hyphenate-character  css-overflow/line-clamp/block-ellipsis-006.html android: predicted P 0.9786 → byte-identical expected (no stray gap on the natives) (MED) — measured P 0.9786
+    L3-hyphenate-character  filter-effects/backdrop-filter-clip-rect.html web: predicted P 0.959 → up (MED) — measured P 0.959
+    L3-hyphenate-character  filter-effects/backdrop-filter-clip-rect.html ios: predicted P 0.956 → up (MED) — measured P 0.956
+    L3-hyphenate-character  filter-effects/backdrop-filter-edge-clipping.html web: predicted P 0.9595 → up (MED) — measured P 0.9595
+    L3-hyphenate-character  filter-effects/backdrop-filter-edge-clipping.html ios: predicted P 0.9578 → up (MED) — measured P 0.9578
+    L3-hyphenate-character  filter-effects/backdrop-filter-paint-order.html web: predicted P 0.9595 → up (MED) — measured P 0.9595
+    L3-hyphenate-character  filter-effects/backdrop-filter-paint-order.html ios: predicted P 0.9578 → up (MED) — measured P 0.9578
+    L3-hyphenate-character  filter-effects/backdrop-filter-clip-rect.html android: predicted f 0.9315 → up; a flip is possible (LOW) — measured f 0.9315
+    L3-hyphenate-character  filter-effects/backdrop-filter-edge-clipping.html android: predicted f 0.929 → up; a flip is possible (LOW) — measured f 0.929
+    L3-hyphenate-character  filter-effects/backdrop-filter-paint-order.html android: predicted f 0.929 → up; a flip is possible (LOW) — measured f 0.929
+    L3-hyphenate-character  filter-effects/backdrop-filter-plus-filter.html web: predicted P 1 → stays (the stray br is the <p>'s trailing one; nothing in flow below it) (MED) — measured P 1
+    L3-hyphenate-character  filter-effects/backdrop-filter-plus-filter.html ios: predicted f 0.9499 → stays (the stray br is the <p>'s trailing one; nothing in flow below it) (MED) — measured f 0.9499
+    L3-hyphenate-character  filter-effects/backdrop-filter-plus-filter.html android: predicted P 0.9709 → stays (the stray br is the <p>'s trailing one; nothing in flow below it) (MED) — measured P 0.9709
+    L3-hyphenate-character  css-masking/clip-path/clip-path-filter-order.html web: predicted f 0.8586 → up or unchanged (LOW) — measured f 0.8586
+    L3-hyphenate-character  css-masking/clip-path/clip-path-filter-order.html ios: predicted f 0.8578 → up or unchanged (LOW) — measured f 0.8578
+    L3-hyphenate-character  css-masking/clip-path/clip-path-filter-order.html android: predicted f 0.8406 → up or unchanged (LOW) — measured f 0.8406
+    L3-hyphenate-character  css-multicol/balance-grid-container.html web: predicted f 0.9207 → up or unchanged (LOW) — measured f 0.9207
+    L3-hyphenate-character  css-multicol/balance-grid-container.html ios: predicted f 0.862 → up or unchanged (LOW) — measured f 0.862
+    L3-hyphenate-character  css-multicol/balance-grid-container.html android: predicted f 0.8724 → up or unchanged (LOW) — measured f 0.8724
+    L3-hyphenate-character  css-multicol/column-height-009.html web: predicted f 0.8827 → up or unchanged (LOW) — measured f 0.8827
+    L3-hyphenate-character  css-multicol/column-height-009.html ios: predicted f 0.8072 → up or unchanged (LOW) — measured f 0.8072
+    L3-hyphenate-character  css-multicol/column-height-009.html android: predicted f 0.742 → up or unchanged (LOW) — measured f 0.742
+    L4-oof-layout  css-contain/contain-content-003.html android: predicted f 0.9405 → P ≈0.997 (sim 0.9967) (HIGH, gating, floor 0.99) — measured P 0.997
+    L4-oof-layout  css-contain/contain-content-011.html android: predicted f 0.9284 → P ≈0.985 (sim ≤0.9854, an upper bound) (MED-HIGH, gating, floor 0.97) — measured P 0.985
+    L4-oof-layout  filter-effects/backdrop-filter-containing-block.html ios: predicted f 0.7955 → P (sim bracket 0.9414 … 1.0) (MED) — measured f 0.7955
+    L4-oof-layout  filter-effects/backdrop-filter-containing-block.html android: predicted f 0.7506 → P (sim bracket 0.9414 … 1.0) (MED) — measured f 0.7506
+    L4-oof-layout  css-position/position-relative-004.html ios: predicted P 0.9594 DEGENERATE → P ≈0.9974 (MED-HIGH, gating, floor 0.99) — measured P 0.9974
+    L4-oof-layout  css-position/position-relative-004.html android: predicted P 0.9589 DEGENERATE → P ≈0.9967 (MED-HIGH, gating, floor 0.99) — measured P 0.9967
+    L4-oof-layout  css-position/change-insets-inside-strict-containment-nested.html ios: predicted P 0.9594 DEGENERATE → P ≈0.9974 (MED-HIGH, gating, floor 0.99) — measured P 0.9974
+    L4-oof-layout  css-position/change-insets-inside-strict-containment-nested.html android: predicted P 0.9589 DEGENERATE → P ≈0.9967 (MED-HIGH, gating, floor 0.99) — measured P 0.9967
+    L4-oof-layout  CSS2/abspos/static-fixed-inside-abspos.html ios: predicted P 0.9841 DEGENERATE → P ≈0.9974 (HIGH, gating, floor 0.99) — measured P 0.9974
+    L4-oof-layout  CSS2/abspos/static-fixed-inside-abspos.html android: predicted P 0.9835 DEGENERATE → P ≈0.9967 (via PositionedParentFlowSlot) (MED-HIGH, gating, floor 0.99) — measured P 0.9967
+    L4-oof-layout  css-position/position-relative-003.html ios: predicted P 0.9594 DEGENERATE → P ≈0.9974 (the relpos span chain must net 0) (MED) — measured P 0.9594
+    L4-oof-layout  css-position/position-relative-003.html android: predicted P 0.9589 DEGENERATE → P ≈0.9967 (MED) — measured P 0.9589
+    L4-oof-layout  css-contain/contain-content-004.html android: predicted f 0.8286 → moves, stays f (the table itself renders wrong on both natives) (MED) — measured f 0.8286
+    L4-oof-layout  filter-effects/backdrop-filter-nested-border-radius-clip-3.html android: predicted f 0.9574 → P ≈0.99 (iOS twin of the same geometry 0.9921) (MED-HIGH, gating, floor 0.96) — measured P 0.99
+    L4-oof-layout  filter-effects/backdrop-filter-nested-border-radius-clip.html android: predicted P 0.9649 → P ≈0.99 (iOS twin 0.9936 / 0.9998 / 0.9981) (MED-HIGH, gating, floor 0.98) — measured P 0.99
+    L4-oof-layout  filter-effects/backdrop-filter-nested-border-radius-clip-2.html android: predicted P 0.9689 → P ≈0.99 (iOS twin 0.9936 / 0.9998 / 0.9981) (MED-HIGH, gating, floor 0.98) — measured P 0.99
+    L4-oof-layout  filter-effects/backdrop-filter-nested-border-radius-clip-4.html android: predicted P 0.977 → P ≈0.99 (iOS twin 0.9936 / 0.9998 / 0.9981) (MED-HIGH, gating, floor 0.98) — measured P 0.99
+    L4-oof-layout  css-flexbox/abspos/abspos-autopos-htb-ltr.html android: predicted P 0.9966 DEGENERATE → P 0.9967 (sim: green repainted 100x100) (HIGH, gating, floor 0.995) — measured P 0.9967
+    L4-oof-layout  css-flexbox/abspos/abspos-autopos-vlr-ltr.html android: predicted P 0.9966 DEGENERATE → P 0.9967 (sim: green repainted 100x100) (HIGH, gating, floor 0.995) — measured P 0.9967
+    L4-oof-layout  css-flexbox/abspos/abspos-autopos-vrl-ltr.html android: predicted P 0.9966 DEGENERATE → P 0.9967 (sim: green repainted 100x100) (HIGH, gating, floor 0.995) — measured P 0.9967
+    L4-oof-layout  css-flexbox/abspos/abspos-autopos-htb-rtl.html android: predicted P 0.9869 DEGENERATE → P ≈0.9967 (the rtl static-position arithmetic runs with the corrected size for the first time) (MED) — measured P 0.9869
+    L4-oof-layout  css-flexbox/abspos/abspos-autopos-vlr-rtl.html android: predicted P 0.9966 DEGENERATE → P ≈0.9967 (the rtl static-position arithmetic runs with the corrected size for the first time) (MED) — measured P 0.9966
+    L4-oof-layout  css-flexbox/abspos/abspos-autopos-vrl-rtl.html android: predicted P 0.9966 DEGENERATE → P ≈0.9967 (the rtl static-position arithmetic runs with the corrected size for the first time) (MED) — measured P 0.9966
+    L4-oof-layout  css-gaps/flex/flex-gap-decorations-006.html android: predicted f 0.8223 → may move, stays f (VerticalTextFlowLayout budget reads LocalContainingBlock) (LOW) — measured f 0.8223
+    L4-oof-layout  css-gaps/flex/flex-gap-decorations-033.html ios: predicted f 0.94 → P ≈1.000 (sim 1.0000: every non-rule pixel is already ref-exact) (HIGH, gating, floor 0.99) — measured P 1
+    L4-oof-layout  css-gaps/flex/flex-gap-decorations-033.html android: predicted f 0.94 → P ≈1.000 (sim 1.0000) (HIGH, gating, floor 0.99) — measured P 1
+    L5-ua-heading-face  css-break/block-in-inline-015-print.html android: predicted f 0.9489 → P ≈0.989 (the identical rule on iOS gives P 0.9894 on the same IR) (HIGH, gating, floor 0.97) — measured P 0.989
+    L5-ua-heading-face  css-text-decor/text-decoration-inset-005.html android: predicted f 0.9 → P ≈0.98 (anchors inset-001…004 android 0.984-0.9859) (MED) — measured f 0.9
+    L5-ua-heading-face  css-text-decor/text-decoration-inset-006.html android: predicted f 0.8993 → P ≈0.98 (MED) — measured f 0.8993
+    L5-ua-heading-face  css-text-decor/text-decoration-inset-005.html ios: predicted f 0.8995 → P ≈0.965 (anchors ios 0.9634-0.9707) (MED) — measured f 0.8995
+    L5-ua-heading-face  css-text-decor/text-decoration-inset-006.html ios: predicted f 0.8987 → P ≈0.965 (MED) — measured f 0.8987
+    L5-ua-heading-face  css-text-decor/text-decoration-inset-014.html ios: predicted f 0.9238 → P (no monospace anchor; the probe decides) (MED-LOW) — measured f 0.9238
+    L5-ua-heading-face  css-text-decor/text-decoration-inset-014.html android: predicted f 0.923 → P (no monospace anchor; the probe decides) (MED-LOW) — measured f 0.923
+    L5-ua-heading-face  css-text-decor/text-decoration-color.html android: predicted f 0.6164 → ≈0.67 (the iOS anchor with the rule is f 0.674) (LOW) — measured f 0.6164
+    L5-ua-heading-face  css-lists/counter-list-item.html android: predicted f 0.7307 → moves (iOS with the rule: f 0.7864) (LOW) — measured f 0.7307
+    L5-ua-heading-face  css-lists/counter-reset-increment-overflow-underflow.html android: predicted f 0.8699 → direction unknown (iOS with the rule f 0.857; its digits are a counter defect) (LOW) — measured f 0.8699
+    L5-ua-heading-face  css-text-decor/text-decoration-subelements-003.html android: predicted f 0.9084 → moves (stacked sup -> smaller) (LOW) — measured f 0.9084
+    L5-ua-heading-face  filter-effects/backdrop-filter-border-radius-change.html android: predicted f 0.5977 → moves (bold half only) (LOW) — measured f 0.5977
+    L5-ua-heading-face  filter-effects/backdrop-filter-corner-shape-change.html android: predicted f 0.4904 → moves (bold half only) (LOW) — measured f 0.4904
+    L6-web-tail  css-ui/box-sizing-007.html web: predicted f 0.9036 → P 0.985 (simulated separator 0.9852) (HIGH, gating, floor 0.975) — measured P 0.985
+    L6-web-tail  css-ui/box-sizing-008.html web: predicted f 0.8943 → P 0.974 (0.9736) (HIGH, gating, floor 0.965) — measured P 0.974
+    L6-web-tail  css-ui/box-sizing-022.html web: predicted f 0.9442 → P 0.970 (0.9704) (MED-HIGH, gating, floor 0.96) — measured P 0.97
+    L6-web-tail  css-position/position-absolute-semi-replaced-stretch-other.html web: predicted f 0.941 → P 0.967 (0.9667) (MED) — measured f 0.941
+    L6-web-tail  css-ui/box-sizing-010.html web: predicted P 0.9713 DEGENERATE → ≈0.982 (simulated 0.9822) (MED) — measured P 0.9713
+    L6-web-tail  css-ui/box-sizing-011.html web: predicted P 0.9713 DEGENERATE → ≈0.982 (simulated 0.9822) (MED) — measured P 0.9713
+    L6-web-tail  css-ui/box-sizing-014.html web: predicted P 0.9713 DEGENERATE → ≈0.982 (simulated 0.9822) (MED) — measured P 0.9713
+    L6-web-tail  css-ui/box-sizing-015.html web: predicted P 0.9713 DEGENERATE → ≈0.982 (simulated 0.9822) (MED) — measured P 0.9713
+    L6-web-tail  css-ui/box-sizing-016.html web: predicted P 0.9713 DEGENERATE → ≈0.982 (simulated 0.9822) (MED) — measured P 0.9713
+    L6-web-tail  css-ui/box-sizing-017.html web: predicted P 0.9713 DEGENERATE → ≈0.982 (simulated 0.9822) (MED) — measured P 0.9713
+    L6-web-tail  css-ui/box-sizing-018.html web: predicted P 0.9713 DEGENERATE → ≈0.982 (simulated 0.9822) (MED) — measured P 0.9713
+    L6-web-tail  css-ui/box-sizing-019.html web: predicted P 0.9713 DEGENERATE → ≈0.982 (simulated 0.9822) (MED) — measured P 0.9713
+    L6-web-tail  css-ui/box-sizing-020.html web: predicted P 0.9599 DEGENERATE → ≈0.982 (simulated 0.9822) (MED) — measured P 0.9599
+    L6-web-tail  css-ui/box-sizing-021.html web: predicted P 0.9599 DEGENERATE → ≈0.982 (simulated 0.9822) (MED) — measured P 0.9599
+    L6-web-tail  css-ui/box-sizing-024.html web: predicted P 0.9599 DEGENERATE → ≈0.982 (simulated 0.9822) (MED) — measured P 0.9599
+    L6-web-tail  css-ui/box-sizing-025.html web: predicted P 0.9599 DEGENERATE → ≈0.982 (simulated 0.9822) (MED) — measured P 0.9599
+    L6-web-tail  css-ui/box-sizing-013.html web: predicted P 0.9538 DEGENERATE → ≈0.970 (simulated 0.9704) (MED) — measured P 0.9538
+    L6-web-tail  css-position/position-absolute-semi-replaced-stretch-input.html web: predicted P 0.9596 DEGENERATE → ≈0.966 (simulated 0.9664) (MED) — measured P 0.9596
+    L6-web-tail  css-cascade/scope-pseudo-element.html web: predicted f 0.9353 → up (box lefts to x16/123/229; its B/Foo wrap defect remains) (LOW) — measured f 0.9353
+    L6-web-tail  css-display/display-flow-root-list-item-001.html web: predicted f 0.8003 → mover (LOW) — measured f 0.8003
+    L6-web-tail  CSS2/abspos/static-inside-inline-block.html web: predicted P 0.9803 → stays or rises (the separator replays a space the SOURCE had) (MED) — measured P 0.9803
+    L6-web-tail  css-break/block-in-inline-015-print.html web: predicted P 1 → stays or rises (the separator replays a space the SOURCE had) (MED) — measured P 1
+    L6-web-tail  css-ui/appearance-auto-input-non-widget-001.html web: predicted P 0.9873 → stays or rises (the separator replays a space the SOURCE had) (MED) — measured P 0.9873
+    L6-web-tail  css-values/attr-style-sharing-1.html web: predicted P 0.9939 → stays or rises (the separator replays a space the SOURCE had) (MED) — measured P 0.9939
+    L6-web-tail  css-writing-modes/baseline-with-orthogonal-flow-001.html web: predicted P 0.9854 → stays or rises (the separator replays a space the SOURCE had) (MED) — measured P 0.9854
+    L6-web-tail  css-ui/box-sizing-009.html web: predicted P 0.9811 → stays or rises (the separator replays a space the SOURCE had) (MED) — measured P 0.9811
+    L6-web-tail  css-text/hyphens/hyphens-out-of-flow-002.html web: predicted f 0.9411 → P 1 (replay W1-exact: ssim 1, 0 mismatched px) (HIGH (branch R) / MED-HIGH (branch H), gating, floor 0.995) — measured P 1
+  L7-label-chrome  tripwire: 001_ATC_PropsThenAll_InGreenParent / 003_ATC_InitialUnderRedParent / 005_ATC_DirectionSurvives RED -> green (exempt: container / container / text root; band rows 0..15 byte-identical x3) — HIGH (replay R1 on the same bytes): - → - (not a corpus cell — read elsewhere)
+  L7-label-chrome  tripwire: 000_ATC_AllThenProps / 002_reset / 004_span green with glyph px 224 / 80 / 65 — HIGH (R0/R1): - → - (not a corpus cell — read elsewhere)
+  L7-label-chrome  tripwire: the 130 committed stems green with verdict objects identical 130/130 — HIGH (R3): - → - (not a corpus cell — read elsewhere)
+  L7-label-chrome  tripwire: mutations m1-m5 red — HIGH (R2): - → - (not a corpus cell — read elsewhere)
+  L7-label-chrome  fixture net: fixtures/combinations/all-then-color.json exit 0 against committed baselines, "no regressions vs baseline (18 platform-comparisons ran)" — MED-HIGH, floor exit 0: - → - (not a corpus cell — read elsewhere)
+  L7-label-chrome  fresh seed byte-identical to label-chrome-all-reset.seeded-77fe41e8/ on 18/18 — MED (a wave-54 lane may legitimately move a pixel: then it is named and looked at, never waved through): - → - (not a corpus cell — read elsewhere)
+ok   R4  gating predictions 34, missed 0
+    must-not-move MOVED (L4-oof-layout): CSS2/abspos/static-fixed-inside-abspos.html web  0.999 → 0.996 [movers]
+FAIL R5  must-not-move cells 651, moved 1
+
+DEGENERATE-BY-CONSTRUCTION gains (not fixes): 2
+    css-text/hyphens/hyphenate-character-001.html ios  0.9287 → 0.979
+    css-text/hyphens/hyphenate-character-003.html ios  0.9337 → 0.977
+
+gained 13: web 4  ios 3  android 6
+
+ADJUDICATION: 1 rule(s) broken — do not ship

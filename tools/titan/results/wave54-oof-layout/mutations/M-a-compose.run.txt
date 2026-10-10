@@ -1,0 +1,55 @@
+> Task :runtime:preBuild UP-TO-DATE
+> Task :runtime:preDebugBuild UP-TO-DATE
+> Task :runtime:generateDebugResources UP-TO-DATE
+> Task :runtime:packageDebugResources UP-TO-DATE
+> Task :runtime:processDebugNavigationResources UP-TO-DATE
+> Task :runtime:parseDebugLocalResources UP-TO-DATE
+> Task :runtime:generateDebugRFile UP-TO-DATE
+> Task :runtime:javaPreCompileDebug UP-TO-DATE
+> Task :runtime:preDebugUnitTestBuild UP-TO-DATE
+> Task :runtime:generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :runtime:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :runtime:compileDebugKotlin
+> Task :runtime:compileDebugJavaWithJavac NO-SOURCE
+> Task :runtime:processDebugJavaRes UP-TO-DATE
+> Task :runtime:bundleLibRuntimeToJarDebug
+> Task :runtime:bundleLibCompileToJarDebug
+> Task :runtime:compileDebugUnitTestKotlin UP-TO-DATE
+> Task :runtime:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :runtime:processDebugUnitTestJavaRes UP-TO-DATE
+
+> Task :runtime:testDebugUnitTest
+
+CanvasRootHoistTest > P2 fixed with Top under a contain-strict ancestor does not hoist FAILED
+    java.lang.AssertionError at CanvasRootHoistTest.kt:283
+
+CanvasRootHoistTest > P2 absolute with Top under a static contain-content parent does not hoist FAILED
+    java.lang.AssertionError at CanvasRootHoistTest.kt:293
+
+OutOfFlowContainingBlockTest > P3 P4 the corpus moves in exactly the 9 OOF-android carriers and the host in exactly 7 FAILED
+    java.lang.AssertionError at OutOfFlowContainingBlockTest.kt:172
+
+OutOfFlowContainingBlockTest > P3 the carriers hoist nothing and the M2 hosts stay inactive FAILED
+    java.lang.AssertionError at OutOfFlowContainingBlockTest.kt:114
+
+OutOfFlowContainingBlockTest > P1 contain layout, paint, strict and content establish FAILED
+    java.lang.AssertionError at OutOfFlowContainingBlockTest.kt:46
+
+OutOfFlowContainingBlockTest > P1 a positioned establisher withholds the claim and leaves a breadcrumb FAILED
+    java.lang.AssertionError at OutOfFlowContainingBlockTest.kt:80
+
+37 tests completed, 6 failed
+
+> Task :runtime:testDebugUnitTest FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':runtime:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/compose/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 5s
+15 actionable tasks: 4 executed, 11 up-to-date

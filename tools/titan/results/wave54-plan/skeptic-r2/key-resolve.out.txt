@@ -1,0 +1,3 @@
+score rows 4096, distinct adjudicate keys 4096 (collisions 0)
+must-not-move 651, unresolved 0
+prediction cells 118, unresolved 0

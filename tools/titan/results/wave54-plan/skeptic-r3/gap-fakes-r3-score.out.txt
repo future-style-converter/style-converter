@@ -1,0 +1,7 @@
+skeptic-r2/fake-gap            ssim 0.9919  >= floor 0.99
+fix-r2/fake-gap-blue           ssim 0.9913  >= floor 0.99
+fix-r2/fake-gap-line3          ssim 0.9899  < floor 0.99
+skeptic-r3/fake-gap-vshift5    ssim 0.9995  >= floor 0.99
+skeptic-r3/fake-gap-short6     ssim 0.9995  >= floor 0.99
+skeptic-r3/fake-gap-line1-short4 ssim 0.9993  >= floor 0.99
+skeptic-r3/fake-gap-line2-short4 ssim 0.9996  >= floor 0.99

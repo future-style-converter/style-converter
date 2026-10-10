@@ -1,0 +1,111 @@
+[W1-m1] file runtimes/web/src/renderer/InlineRuns.ts sha256 before eb7dcd389591dfd8f046994f09132026a9c92fd5bbd041fd4c7ea352d3eb6a99
+[W1-m1] mutated sha256 07cea076683ff243e331d6400f76238ece0336ff9a7374b9247e7efc6e2d8dfa
+[W1-m1] mutated run exit 1 → RED
+    × (a) box 4 high|M|way → [text "highway", child], joined 1 23ms
+    × (b) boxes 3 (h|M|ighway), 5 and 6 (highwa|M|y) → the same box-7 shape 3ms
+    × (e) a member that could paint is refused: alpha 1, a background, a border colour, relative, an <img> 5ms
+    × (f) package-default render of box 4: `highway` then ONE member element, no split text 7ms
+    × several members in one word all move after it, in order (joined 2) 1ms
+    × a continuation with white space lands the member at the WORD end, not the run end 1ms
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (a) box 4 high|M|way → [text "highway", child], joined 1
+    AssertionError: expected [ Array(3) ] to deeply equal [ …(2) ]
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (b) boxes 3 (h|M|ighway), 5 and 6 (highwa|M|y) → the same box-7 shape
+    AssertionError: __3-287: expected [ { kind: 'text', text: 'h' }, …(2) ] to deeply equal [ …(2) ]
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (e) a member that could paint is refused: alpha 1, a background, a border co
+    AssertionError: expected +0 to be 1 // Object.is equality
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (f) package-default render of box 4: `highway` then ONE member element, no s
+    AssertionError: expected '<div data-component-id="wpt__css-text…' to contain '>highway<span'
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — join mechanics beyond the corpus shapes (wave-54 L6) > several members in one word all move after it, in order (joined 2)
+    AssertionError: expected [ { kind: 'text', text: 'h' }, …(4) ] to deeply equal [ …(3) ]
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — join mechanics beyond the corpus shapes (wave-54 L6) > a continuation with white space lands the member at the WORD end, not the run end
+    AssertionError: expected [ …(3) ] to deeply equal [ { kind: 'text', …(1) }, …(2) ]
+[W1-m1] restored sha256 eb7dcd389591dfd8f046994f09132026a9c92fd5bbd041fd4c7ea352d3eb6a99 == before
+[W1-m1] restored run exit 0 → GREEN
+[W1-m1] mutate.py exit 0
+[W1-m2] file runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 before 21389d5a4e92738d744a3a5806d2eea50b5bd405732b334525431f6faa0a512e
+[W1-m2] mutated sha256 785dab8895e028759a5f9c64d6acb960af5216d4b93a29fcc4abb3444b249951
+[W1-m2] mutated run exit 1 → RED
+    × (b) boxes 3 (h|M|ighway), 5 and 6 (highwa|M|y) → the same box-7 shape 11ms
+    × several members in one word all move after it, in order (joined 2) 1ms
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (b) boxes 3 (h|M|ighway), 5 and 6 (highwa|M|y) → the same box-7 shape
+    AssertionError: __3-287: expected [ { kind: 'text', text: 'h' }, …(2) ] to deeply equal [ …(2) ]
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — join mechanics beyond the corpus shapes (wave-54 L6) > several members in one word all move after it, in order (joined 2)
+    AssertionError: expected [ { kind: 'text', text: 'h' }, …(3) ] to deeply equal [ …(3) ]
+[W1-m2] restored sha256 21389d5a4e92738d744a3a5806d2eea50b5bd405732b334525431f6faa0a512e == before
+[W1-m2] restored run exit 0 → GREEN
+[W1-m2] mutate.py exit 0
+[W1-m3] file runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 before 21389d5a4e92738d744a3a5806d2eea50b5bd405732b334525431f6faa0a512e
+[W1-m3] mutated sha256 4a878a6f1b945f141c5be729064a52bd38b206f887ce0d4746ace62b951c5343
+[W1-m3] mutated run exit 1 → RED
+    × (c) word-edge boxes 2 / 7 and SPACED splits are unchanged, 0 joined 6ms
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (c) word-edge boxes 2 / 7 and SPACED splits are unchanged, 0 joined
+    AssertionError: expected [ 'high way', '<M>' ] to deeply equal [ 'high ', '<M>', 'way' ]
+[W1-m3] restored sha256 21389d5a4e92738d744a3a5806d2eea50b5bd405732b334525431f6faa0a512e == before
+[W1-m3] restored run exit 0 → GREEN
+[W1-m3] mutate.py exit 0
+[W1-m4] file runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 before 21389d5a4e92738d744a3a5806d2eea50b5bd405732b334525431f6faa0a512e
+[W1-m4] mutated sha256 d8508e5d4c0a81e57b48839f233fac72f286d5e1ae1da35a9f16cdab966577ee
+[W1-m4] mutated run exit 1 → RED
+    × (d) -001 box 4 (hyphens: manual) is unchanged — the U+00AD point lives inside the text 9ms
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (d) -001 box 4 (hyphens: manual) is unchanged — the U+00AD point lives insid
+    AssertionError: expected [ { kind: 'text', …(1) }, …(1) ] to deeply equal [ Array(3) ]
+[W1-m4] restored sha256 21389d5a4e92738d744a3a5806d2eea50b5bd405732b334525431f6faa0a512e == before
+[W1-m4] restored run exit 0 → GREEN
+[W1-m4] mutate.py exit 0
+[W1-m5] file runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 before 21389d5a4e92738d744a3a5806d2eea50b5bd405732b334525431f6faa0a512e
+[W1-m5] mutated sha256 a1b2be5a39e6893d1cc48178ddedee3149112b569232aeba615ca047a8798424
+[W1-m5] mutated run exit 1 → RED
+    × (e) a member that could paint is refused: alpha 1, a background, a border colour, relative, an <img> 8ms
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (e) a member that could paint is refused: alpha 1, a background, a border co
+    AssertionError: no Color: expected 1 to be +0 // Object.is equality
+[W1-m5] restored sha256 21389d5a4e92738d744a3a5806d2eea50b5bd405732b334525431f6faa0a512e == before
+[W1-m5] restored run exit 0 → GREEN
+[W1-m5] mutate.py exit 0
+[W1-m5b] file runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 before 21389d5a4e92738d744a3a5806d2eea50b5bd405732b334525431f6faa0a512e
+[W1-m5b] mutated sha256 f3234be5810f69a8d9d93eaabfe5b64a9d7f4f92fd8fad67b9811c54a1d6e0ef
+[W1-m5b] mutated run exit 1 → RED
+    × (e) a member that could paint is refused: alpha 1, a background, a border colour, relative, an <img> 5ms
+    × (g) the predicate over the 24 census members gives the same 12 trues as Compose 2ms
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (e) a member that could paint is refused: alpha 1, a background, a border co
+    AssertionError: alpha 1: expected 1 to be +0 // Object.is equality
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (g) the predicate over the 24 census members gives the same 12 trues as Comp
+    AssertionError: expected [ Array(24) ] to deeply equal [ false, false, false, false, …(20) ]
+[W1-m5b] restored sha256 21389d5a4e92738d744a3a5806d2eea50b5bd405732b334525431f6faa0a512e == before
+[W1-m5b] restored run exit 0 → GREEN
+[W1-m5b] mutate.py exit 0
+[W1-m6] file runtimes/web/src/renderer/NodeRenderer.ts sha256 before 69dd160f6296304c929d2fb7d2df00939294323252371bafd7a7e641afae8b7b
+[W1-m6] mutated sha256 8fc1dbf65931b32ad27983682c9efd56bf418897d8ca0eb390e3cace46ffd036
+[W1-m6] mutated run exit 1 → RED
+    × (f) package-default render of box 4: `highway` then ONE member element, no split text 16ms
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (f) package-default render of box 4: `highway` then ONE member element, no s
+    AssertionError: expected '<div data-component-id="wpt__css-text…' to contain '>highway<span'
+[W1-m6] restored sha256 69dd160f6296304c929d2fb7d2df00939294323252371bafd7a7e641afae8b7b == before
+[W1-m6] restored run exit 0 → GREEN
+[W1-m6] mutate.py exit 0
+[W1-m7] file runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 before 21389d5a4e92738d744a3a5806d2eea50b5bd405732b334525431f6faa0a512e
+[W1-m7] mutated sha256 150731efeadffdd1a3d9290ad4bb7c683dae087b4e3c2dd6bc2dd2c4cc8d354c
+[W1-m7] mutated run exit 1 → RED
+    × (a) box 4 high|M|way → [text "highway", child], joined 1 28ms
+    × (b) boxes 3 (h|M|ighway), 5 and 6 (highwa|M|y) → the same box-7 shape 3ms
+    × (e) a member that could paint is refused: alpha 1, a background, a border colour, relative, an <img> 11ms
+    × (f) package-default render of box 4: `highway` then ONE member element, no split text 7ms
+    × (g) the predicate over the 24 census members gives the same 12 trues as Compose 1ms
+    × several members in one word all move after it, in order (joined 2) 1ms
+    × a continuation with white space lands the member at the WORD end, not the run end 2ms
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (a) box 4 high|M|way → [text "highway", child], joined 1
+    AssertionError: expected [ Array(3) ] to deeply equal [ …(2) ]
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (b) boxes 3 (h|M|ighway), 5 and 6 (highwa|M|y) → the same box-7 shape
+    AssertionError: __3-287: expected [ { kind: 'text', text: 'h' }, …(2) ] to deeply equal [ …(2) ]
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (e) a member that could paint is refused: alpha 1, a background, a border co
+    AssertionError: expected +0 to be 1 // Object.is equality
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (f) package-default render of box 4: `highway` then ONE member element, no s
+    AssertionError: expected '<div data-component-id="wpt__css-text…' to contain '>highway<span'
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — the inert out-of-flow word join on verbatim wire (wave-54 L6) > (g) the predicate over the 24 census members gives the same 12 trues as Comp
+    AssertionError: expected [ false, false, false, false, …(20) ] to deeply equal [ false, false, false, false, …(20) ]
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — join mechanics beyond the corpus shapes (wave-54 L6) > several members in one word all move after it, in order (joined 2)
+    AssertionError: expected [ { kind: 'text', text: 'h' }, …(4) ] to deeply equal [ …(3) ]
+    FAIL  tests/renderer/InertOutOfFlowWordJoin.test.tsx > W1 — join mechanics beyond the corpus shapes (wave-54 L6) > a continuation with white space lands the member at the WORD end, not the run end
+    AssertionError: expected [ …(3) ] to deeply equal [ { kind: 'text', …(1) }, …(2) ]
+[W1-m7] restored sha256 21389d5a4e92738d744a3a5806d2eea50b5bd405732b334525431f6faa0a512e == before
+[W1-m7] restored run exit 0 → GREEN
+[W1-m7] mutate.py exit 0

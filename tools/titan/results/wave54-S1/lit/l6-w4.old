@@ -1,0 +1,1 @@
+  if (!hyphensAuto) return { entries, joined: 0 };

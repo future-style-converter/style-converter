@@ -1,0 +1,1 @@
+red-square census /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave54-probe: scored cells 3527 | PASSING red 147 (web 21 / ios 61 / android 65) over 79 tests | FAILING red 57 (web 10 / ios 25 / android 22) over 33 tests | predicate strict-red r>200&g<80&b<80, cap>0.5%, ref<=0%

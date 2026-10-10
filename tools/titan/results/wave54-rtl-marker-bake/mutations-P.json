@@ -1,0 +1,66 @@
+[
+ {
+  "label": "P-1 remove the `padding: 0` line (rootProperties)",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "  if (paddingIsSpent(el)) props.padding = '0';\n",
+  "new": "",
+  "expectRed": [
+   "V3 unit P: verbatim counter-suffix__0__4"
+  ]
+ },
+ {
+  "label": "P-2 drop the content-box guard",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "  if (/content-box/.test(`${el.backgroundClip ?? ''} ${el.backgroundOrigin ?? ''}`)) return false;\n",
+  "new": "",
+  "expectRed": [
+   "V3 unit P: a padding that paints"
+  ]
+ },
+ {
+  "label": "P-3 drop the NON-zero guard (any padding array counts)",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "  if (!Array.isArray(el?.padding) || !el.padding.some((v) => v !== 0)) return false;",
+  "new": "  if (!Array.isArray(el?.padding)) return false;",
+  "expectRed": [
+   "V3b unit P: VERBATIM zero-padding roots"
+  ]
+ },
+ {
+  "label": "P-4 drop the overflow guard",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "  return !(el.overflow ?? []).some((v) => v && v !== 'visible');",
+  "new": "  return true;",
+  "expectRed": [
+   "V3 unit P: a clipping / scrolling root keeps its padding"
+  ]
+ },
+ {
+  "label": "P-5 drop the padding-* longhand delete loop (applyBidiBakePlan)",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "      for (const k of Object.keys(cmp.properties ?? {})) if (k.startsWith('padding-')) delete cmp.properties[k];\n",
+  "new": "",
+  "expectRed": [
+   "V3 unit P: verbatim counter-suffix__0__4"
+  ]
+ },
+ {
+  "label": "P-6 planBidiBake stops passing the walk record (the pre-P call)",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "rootProperties(e.rect, e.position, e) });",
+  "new": "rootProperties(e.rect, e.position) });",
+  "expectRed": [
+   "V3 unit P: verbatim counter-suffix__0__4",
+   "V3 unit P: verbatim bidi-lines-002"
+  ]
+ },
+ {
+  "label": "P-7 the walker stops recording the resolved padding",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "        padding: [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft].map((v) => parseFloat(v) || 0),\n",
+  "new": "",
+  "expectRed": [
+   "unit P wiring"
+  ]
+ }
+]

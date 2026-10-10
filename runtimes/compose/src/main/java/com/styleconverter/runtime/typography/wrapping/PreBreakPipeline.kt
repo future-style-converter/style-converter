@@ -135,6 +135,11 @@ object PreBreakPipeline {
      *   overflow decision instead (ComponentRenderer.placeholderOverflow,
      *   wave 52 F3) — one owner per case, and the 19 passing soft-wrapped
      *   Android clamp hosts keep the wrap positions their captures froze.
+     * @param hyphenChar wave 54 (lane L3, U2-android) — the css-text-4
+     *   §6.3 `hyphenate-character` string a taken soft hyphen paints
+     *   ([HyphenateCharacterApplier.preBreakString]); it enters the fold, so
+     *   its WIDTH decides the breaks. The default is the UA hyphen the fold
+     *   always used, so every run that declares nothing is byte-identical.
      * @param measure single-line advance of a candidate string, in the
      *   SAME px space as [wrapWidthPx], built over the SAME resolved
      *   style the run renders with.
@@ -149,6 +154,7 @@ object PreBreakPipeline {
         preservesSpaces: Boolean,
         dictionaryHyphenation: Boolean = false,
         clampLines: Int? = null,
+        hyphenChar: String = WordBreakOpportunities.DEFAULT_HYPHEN_CHARACTER,
         measure: (String) -> Float
     ): Result {
         // Every decline returns the SAME instance — see Result.text.
@@ -182,7 +188,8 @@ object PreBreakPipeline {
 
         // Reproduce the CSS line breaking, then ask whether any committed
         // line is an unbreakable overflow (the rule-B trigger).
-        val lines = GreedyLineBreaker.lines(text, wrapWidthPx, measure)
+        // (wave 54: measured WITH the run's hyphenate-character string.)
+        val lines = GreedyLineBreaker.lines(text, wrapWidthPx, measure, hyphenChar)
         val unbreakableOverflow = GreedyLineBreaker.hasUnbreakableOverflowingLine(
             lines, wrapWidthPx,
             dictionaryHyphenation = dictionaryHyphenation, measure = measure)
@@ -199,7 +206,8 @@ object PreBreakPipeline {
         // hyphenChar at a line end), so firing hands Minikin exactly the
         // measured string. `hyphens: auto` runs stay out: their
         // opportunities belong to Minikin's dictionary (AutoHyphenation).
-        val tookSoftHyphen = !dictionaryHyphenation && tookSoftHyphenBreak(text, lines)
+        // Wave 54: the walk in SoftHyphenCuts sees a `""` cut too (a count cannot).
+        val tookSoftHyphen = !dictionaryHyphenation && SoftHyphenCuts.took(text, lines, hyphenChar)
         if (!unbreakableOverflow && !tookSoftHyphen) {
             // The platform's own greedy breaking already agrees with CSS
             // here — leave the frozen behaviour alone.
@@ -211,29 +219,10 @@ object PreBreakPipeline {
         // `text` rides along so the clamp can hide at line N's soft hyphens
         // (block-ellipsis-028 — the fold's display lines dropped them).
         val clamped = clampLines?.let {
-            GreedyLineBreaker.clampLines(lines, GreedyLineBreaker.Clamp(it), wrapWidthPx, measure, source = text)
+            GreedyLineBreaker.clampLines(lines, GreedyLineBreaker.Clamp(it), wrapWidthPx, measure, source = text, hyphenChar = hyphenChar)
         } ?: lines
         // Fires. Hard newlines carry OUR break positions; the caller pairs
         // this with softWrap = false.
         return Result(clamped.joinToString("\n"), true)
-    }
-
-    /**
-     * Wave 52 (lane L9, F5) — did the fold take a soft-hyphen break? A
-     * taken U+00AD materialises one [hyphenChar] at a line end
-     * (WordBreakOpportunities.split via [GreedyLineBreaker.lines]); a taken
-     * literal `-`/U+2010 break-after adds nothing. So the fold took a soft
-     * hyphen exactly when the display lines carry MORE hyphenChars than
-     * the input had, and the input carried a U+00AD to spend. Pure string
-     * arithmetic — no re-fold, no measurer.
-     */
-    private fun tookSoftHyphenBreak(
-        text: String,
-        lines: List<String>,
-        hyphenChar: String = WordBreakOpportunities.DEFAULT_HYPHEN_CHARACTER
-    ): Boolean {
-        if (text.indexOf('\u00AD') < 0) return false
-        fun count(s: String): Int = if (hyphenChar.isEmpty()) 0 else s.windowed(hyphenChar.length, 1).count { it == hyphenChar }
-        return lines.sumOf { count(it) } > count(text)
     }
 }

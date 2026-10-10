@@ -1,0 +1,2 @@
+            .map { GapSpan(start: $0.end, end: $1.start) }
+            .filter(\.isPositive)

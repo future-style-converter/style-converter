@@ -1,0 +1,6 @@
+css-text/bidi/bidi-lines-002                 [P] android floor 0.975: down1 0.957 · down2 0.8804 · down3 0.83 · down4 0.8106 · down6 0.785
+css-break/block-in-inline-015-print          U1-android  floor 0.97: down1 0.9928 (>= floor) · down2 0.9783 (>= floor) · down3 0.9685 · down4 0.9597 · down6 0.9533
+css-ui/box-sizing-007                        RS          floor 0.975: down1 0.9628 · down2 0.9213 · down3 0.8603 · down4 0.8408 · down6 0.7965
+css-ui/box-sizing-008                        RS          floor 0.965: down1 0.966 (>= floor) · down2 0.9242 · down3 0.876 · down4 0.8601 · down6 0.8204
+css-ui/box-sizing-022                        RS          floor 0.96: down1 0.9769 (>= floor) · down2 0.946 · down3 0.9179 · down4 0.9087 · down6 0.8841
+css-text/hyphens/hyphens-out-of-flow-002     W1          floor 0.995: down1 0.958 · down2 0.8848 · down3 0.8398 · down4 0.8212 · down6 0.8034

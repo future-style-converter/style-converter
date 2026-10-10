@@ -1,0 +1,5 @@
+label=K-CBB3-wpt-never-subtract file=runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt
+sha256 before=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 mutated=43ede169fb7ffb450608ffc68d18c6c39779161a7a34cc9528e0c7787f290b6d after=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 restored=OK
+suite rc=1 (RED)
+DynamicValueResolverTest tests=32 skipped=0 failures=1 errors=0 FAILED: ['CBB an explicit border-box under WPT still subtracts its bands']
+TOTAL tests=124 skipped=0 failures=1 errors=0

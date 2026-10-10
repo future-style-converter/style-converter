@@ -1,0 +1,2 @@
+EX-B seam-2 applied
+EX-B xcodebuild rc=0 	 Executed 25 tests, with 0 failures (0 unexpected) in 0.030 (0.038) seconds

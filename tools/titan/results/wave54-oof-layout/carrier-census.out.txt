@@ -1,0 +1,41 @@
+== OOF-android android: 9 captures (9 in expectations.json)
+   P 0.9835   CSS2/abspos/static-fixed-inside-abspos.html
+   f 0.9405   css-contain/contain-content-003.html
+   f 0.8286   css-contain/contain-content-004.html
+   f 0.9284   css-contain/contain-content-011.html
+   P 0.9589   css-position/change-insets-inside-strict-containment-nested.html
+   unscored   css-position/position-fixed-scroll-nested-fixed.html
+   P 0.9589   css-position/position-relative-003.html
+   P 0.9589   css-position/position-relative-004.html
+   f 0.7506   filter-effects/backdrop-filter-containing-block.html
+   -> pass today 4 · fail 4 · unscored 1
+== OOF-ios ios: 6 captures (6 in expectations.json)
+   P 0.9841   CSS2/abspos/static-fixed-inside-abspos.html
+   P 0.9594   css-position/change-insets-inside-strict-containment-nested.html
+   unscored   css-position/position-fixed-scroll-nested-fixed.html
+   P 0.9594   css-position/position-relative-003.html
+   P 0.9594   css-position/position-relative-004.html
+   f 0.7955   filter-effects/backdrop-filter-containing-block.html
+   -> pass today 4 · fail 1 · unscored 1
+== CBB-android android: 14 captures (11 in expectations.json + 3 from the L4 census, hunk-for-orchestrator-1)
+   P 0.9966   css-flexbox/abspos/abspos-autopos-htb-ltr.html
+   P 0.9869   css-flexbox/abspos/abspos-autopos-htb-rtl.html
+   P 0.9966   css-flexbox/abspos/abspos-autopos-vlr-ltr.html
+   P 0.9966   css-flexbox/abspos/abspos-autopos-vlr-rtl.html
+   P 0.9966   css-flexbox/abspos/abspos-autopos-vrl-ltr.html
+   P 0.9966   css-flexbox/abspos/abspos-autopos-vrl-rtl.html
+   f 0.8223   css-gaps/flex/flex-gap-decorations-006.html
+   P 0.9649   filter-effects/backdrop-filter-nested-border-radius-clip.html
+   P 0.9689   filter-effects/backdrop-filter-nested-border-radius-clip-2.html
+   f 0.9574   filter-effects/backdrop-filter-nested-border-radius-clip-3.html
+   P 0.977    filter-effects/backdrop-filter-nested-border-radius-clip-4.html
+   f 0.9739   css-position/position-absolute-semi-replaced-stretch-button.html   [L4 census]
+   f 0.4117   css-position/position-absolute-semi-replaced-stretch-input.html   [L4 census]
+   f 0.4396   css-position/position-absolute-semi-replaced-stretch-other.html   [L4 census]
+   -> pass today 9 · fail 5 · unscored 0
+== GAP-android android: 1 captures (1 in expectations.json)
+   f 0.94     css-gaps/flex/flex-gap-decorations-033.html
+   -> pass today 0 · fail 1 · unscored 0
+== GAP-ios ios: 1 captures (1 in expectations.json)
+   f 0.94     css-gaps/flex/flex-gap-decorations-033.html
+   -> pass today 0 · fail 1 · unscored 0

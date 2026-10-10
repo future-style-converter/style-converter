@@ -1,0 +1,2 @@
+            out = substituting(out, WEIGHT_TYPE, JsonObject(mapOf("weight" to JsonPrimitive(BOLD))))
+            out = substituting(out, "Color", JsonObject(mapOf("srgb" to JsonObject(mapOf("r" to JsonPrimitive(1), "g" to JsonPrimitive(0), "b" to JsonPrimitive(0))))))

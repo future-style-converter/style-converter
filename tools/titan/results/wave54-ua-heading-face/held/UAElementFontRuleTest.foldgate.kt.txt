@@ -1,0 +1,150 @@
+package com.styleconverter.runtime.typography
+
+// Wave 54 (lane L5, U1-android) — pins the Compose UA element-font rule on
+// the VERBATIM wave53-final per-test IR (UAHeadingFaceWire), replaying
+// seam-1's cascade step (UAHeadingFaceReplay). PLAN §2 L5 "Unit pins":
+//   • the block-in-inline h1 → 32 / 700 (the HIGH target's whole mechanism);
+//   • inset-001's h1 (extractor-baked 32/700) → the SAME list instance —
+//     mutation: drop the own-declaration guard;
+//   • inset-014 → 26 — mutation: base 16 instead of MonospaceUAFontSize;
+//   • the text-decoration-color `sup` → 13.333;
+//   • an untagged component → identity.
+// Plus the end-to-end read: TextStyleApplier must PAINT the injected face
+// (a `{"weight": 700.0}` payload would read as null there — intOrNull).
+
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import com.styleconverter.runtime.core.ir.IRProperty
+import com.styleconverter.runtime.core.types.ValueExtractors
+import com.styleconverter.runtime.core.variables.DynamicValueResolver
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
+import org.junit.Test
+
+class UAElementFontRuleTest {
+
+    /** The first FontSize px — DynamicValueResolver's own (first-wins) read. */
+    private fun sizePx(list: List<IRProperty>): Float? = DynamicValueResolver.fontSizePxOf(list)
+
+    /** The FontWeight the converter's shape decodes to (intOrNull read). */
+    private fun weight(list: List<IRProperty>): Int? =
+        list.firstOrNull { it.type == "FontWeight" }?.let { ValueExtractors.extractFontWeight(it.data) }
+
+    // The four leaf <h1>s of block-in-inline-015-print (author margin: 0,
+    // no font declaration) — the android f 0.9489 target.
+    private val blockInInlineH1s = listOf(
+        "block-in-inline-015-print__0__0-190",
+        "block-in-inline-015-print__2__0-194",
+        "block-in-inline-015-print__4__0-198",
+        "block-in-inline-015-print__6__0-202",
+    )
+
+    @Test
+    fun `block-in-inline-015-print - every leaf h1 takes the UA 2em bold face`() {
+        for (id in blockInInlineH1s) {
+            val site = UAHeadingFaceReplay.site(UAHeadingFaceWire.BLOCK_IN_INLINE_015_PRINT, id)
+            // The verbatim h1 declares only its four margins — no face.
+            assertNull("$id carries no own size", sizePx(site.own))
+            val out = UAHeadingFaceReplay.seam(site)
+            // 2 × the 16px medium (no ancestor size, no monospace family).
+            assertEquals(32f, sizePx(out)!!, 1e-4f)
+            assertEquals(700, weight(out))
+            // Exactly one entry each — first-wins and last-wins readers agree.
+            assertEquals(1, out.count { it.type == "FontSize" })
+            assertEquals(1, out.count { it.type == "FontWeight" })
+        }
+    }
+
+    @Test
+    fun `block-in-inline-015-print - TextStyleApplier paints the injected face`() {
+        val site = UAHeadingFaceReplay.site(UAHeadingFaceWire.BLOCK_IN_INLINE_015_PRINT, blockInInlineH1s[0])
+        val style = TextStyleApplier.extractTextStyle(UAHeadingFaceReplay.seam(site))
+        // The paragraph pipeline's own reads: 32sp, bold.
+        assertEquals(32f.sp, style.fontSize)
+        assertEquals(FontWeight.Bold, style.fontWeight)
+    }
+
+    @Test
+    fun `inset-001 - the extractor-baked h1 (own 32 and 700) comes back as the SAME list`() {
+        val site = UAHeadingFaceReplay.site(UAHeadingFaceWire.INSET_001, "text-decoration-inset-001__1__0-053")
+        // The author (here the extractor's UA_H1_PROPS bake) declared both.
+        assertEquals(32f, sizePx(site.own)!!, 1e-4f)
+        // Both halves stand down: identity, so every remember key holds.
+        assertSame(site.mergedPreUa, UAHeadingFaceReplay.seam(site))
+    }
+
+    @Test
+    fun `inset-014 - the folded monospace h1 resolves 2em against the 13px fixed default`() {
+        val site = UAHeadingFaceReplay.site(UAHeadingFaceWire.INSET_014, "text-decoration-inset-014__1__0-110")
+        val out = UAHeadingFaceReplay.seam(site)
+        // 2 × 13 = 26 — the ref's 15.58px-per-ch face — not 2 × 16.
+        assertEquals(26f, sizePx(out)!!, 1e-4f)
+        assertEquals(700, weight(out))
+    }
+
+    @Test
+    fun `inset-005 and -006 - the folded h1 hosts take 32 and bold`() {
+        for ((doc, id) in listOf(
+            UAHeadingFaceWire.INSET_005 to "text-decoration-inset-005__1__0-069",
+            UAHeadingFaceWire.INSET_006 to "text-decoration-inset-006__1__0-076",
+        )) {
+            val out = UAHeadingFaceReplay.seam(UAHeadingFaceReplay.site(doc, id))
+            assertEquals(32f, sizePx(out)!!, 1e-4f)
+            assertEquals(700, weight(out))
+        }
+    }
+
+    @Test
+    fun `inset-011 - the bailing h1 host keeps its list untouched (the control)`() {
+        val site = UAHeadingFaceReplay.site(UAHeadingFaceWire.INSET_011, "text-decoration-inset-011__1__0-095")
+        // The gate stands the heading half down and h1 has no sup half.
+        assertSame(site.mergedPreUa, UAHeadingFaceReplay.seam(site))
+    }
+
+    @Test
+    fun `text-decoration-color - the stacked sup leaf takes smaller (16 over 1_2)`() {
+        val site = UAHeadingFaceReplay.site(UAHeadingFaceWire.TEXT_DECORATION_COLOR, "text-decoration-color__9__0__1-033")
+        val out = UAHeadingFaceReplay.seam(site)
+        assertEquals(16f / 1.2f, sizePx(out)!!, 1e-3f)
+        // sup/sub carry no UA weight.
+        assertNull(weight(out))
+    }
+
+    @Test
+    fun `text-decoration-color - the leaf h3 takes 1_17em bold`() {
+        val site = UAHeadingFaceReplay.site(UAHeadingFaceWire.TEXT_DECORATION_COLOR, "wpt__css-text-decor__text-decoration-color__0-021")
+        val out = UAHeadingFaceReplay.seam(site)
+        assertEquals(18.72f, sizePx(out)!!, 1e-3f)
+        assertEquals(700, weight(out))
+    }
+
+    @Test
+    fun `an untagged component is returned as the SAME list`() {
+        // inset-005's relative div: no meta.sourceTag on the wire.
+        val site = UAHeadingFaceReplay.site(UAHeadingFaceWire.INSET_005, "wpt__css-text-decor__text-decoration-inset-005__2-068")
+        assertNull(site.component._tag)
+        assertSame(site.mergedPreUa, UAHeadingFaceReplay.seam(site))
+    }
+
+    @Test
+    fun `an inherited size is substituted in place and is the em base`() {
+        // Synthetic: an inherited 20px FontSize ahead of Color.
+        val inherited = IRProperty("FontSize", kotlinx.serialization.json.Json.parseToJsonElement("""{"px":20}"""))
+        val color = IRProperty("Color", kotlinx.serialization.json.Json.parseToJsonElement("""{"srgb":{"r":0,"g":0,"b":0}}"""))
+        val out = UAElementFontRule.apply("h2", emptyList(), listOf(inherited, color))
+        // 1.5 × 20, at the inherited entry's position, one entry only.
+        assertEquals(30f, sizePx(out)!!, 1e-4f)
+        assertEquals("FontSize", out.first().type)
+        assertEquals(1, out.count { it.type == "FontSize" })
+    }
+
+    @Test
+    fun `the standsDown verdict withholds the heading half but never the sup half`() {
+        val merged = listOf(IRProperty("Color", kotlinx.serialization.json.Json.parseToJsonElement("""{"srgb":{"r":0,"g":0,"b":0}}""")))
+        // A stacked heading: identity.
+        assertSame(merged, UAElementFontRule.apply("h1", emptyList(), merged, standsDown = true))
+        // A sup ignores the flag (its half is never gated).
+        assertEquals(16f / 1.2f, sizePx(UAElementFontRule.apply("sup", emptyList(), merged, standsDown = true))!!, 1e-3f)
+    }
+}

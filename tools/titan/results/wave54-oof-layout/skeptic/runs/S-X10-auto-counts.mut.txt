@@ -1,0 +1,9 @@
+label=S-X10-auto-counts file=runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift
+sha256 before=2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8 mutated=512f32ca5ab6d59c908b6534916ffdfb9a733b73db174ab2ef631194638c2a6e after=2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8 restored=OK
+suite rc=65 (RED)
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.141 (0.283) seconds
+	 Executed 75 tests, with 1 failure (0 unexpected) in 5.644 (6.197) seconds
+	 Executed 75 tests, with 1 failure (0 unexpected) in 5.644 (6.198) seconds
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:79: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1DeclaredInsets] : XCTAssertFalse failed
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1DeclaredInsets]' failed (0.003 seconds).
+** TEST FAILED **

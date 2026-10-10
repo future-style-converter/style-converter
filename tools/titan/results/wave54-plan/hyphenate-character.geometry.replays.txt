@@ -1,0 +1,65 @@
+== --replay GB
+hyphenate-character-001 ref      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-001 web      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-001 ios      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-001 android  groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-003 ref      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-003 web      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-003 ios      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-003 android  groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-004 ref      groups 4 4 4 3   → GEOMETRY OK
+hyphenate-character-004 web      groups 4 4 4 3   → GEOMETRY OK
+hyphenate-character-004 ios      groups 4 4 4 3   → GEOMETRY OK
+hyphenate-character-004 android  groups 4 4 4 3   → GEOMETRY OK
+== --replay GBd
+hyphenate-character-001 ref      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-001 web      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-001 ios      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-001 android  groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-003 ref      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-003 web      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-003 ios      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-003 android  groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-004 ref      groups 4 4 4 3   → GEOMETRY OK
+hyphenate-character-004 web      groups 4 4 4 3   → GEOMETRY OK
+hyphenate-character-004 ios      groups 4 4 4 3   → GEOMETRY OK
+hyphenate-character-004 android  groups 4 4 4 3   → GEOMETRY OK
+== --replay G
+hyphenate-character-001 ref      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-001 web      groups 5 4 3 3   → GEOMETRY WRONG (offset: group 3 line 1 top y342 vs ref y320)
+hyphenate-character-001 ios      groups 5 4 3 3   → GEOMETRY WRONG (offset: group 3 line 1 top y340 vs ref y320)
+hyphenate-character-001 android  groups 5 4 3 3   → GEOMETRY WRONG (offset: group 3 line 1 top y343 vs ref y320)
+hyphenate-character-003 ref      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-003 web      groups 5 4 3 3   → GEOMETRY WRONG (offset: group 3 line 1 top y322 vs ref y300)
+hyphenate-character-003 ios      groups 5 4 3 3   → GEOMETRY WRONG (offset: group 3 line 1 top y320 vs ref y300)
+hyphenate-character-003 android  groups 5 4 3 3   → GEOMETRY WRONG (offset: group 3 line 1 top y323 vs ref y300)
+hyphenate-character-004 ref      groups 4 4 4 3   → GEOMETRY OK
+hyphenate-character-004 web      groups 4 4 4 3   → GEOMETRY WRONG (offset: group 3 line 1 top y303 vs ref y281)
+hyphenate-character-004 ios      groups 4 4 4 3   → GEOMETRY WRONG (offset: group 3 line 1 top y301 vs ref y281)
+hyphenate-character-004 android  groups 4 4 4 3   → GEOMETRY WRONG (offset: group 3 line 1 top y304 vs ref y281)
+== --replay B
+hyphenate-character-001 ref      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-001 web      groups 5 4 4 3   → GEOMETRY WRONG (lines: groups [5, 4, 4, 3] lines vs ref [5, 4, 3, 3]; glyph: group 1 line 1 ink x18-42 end-cell 2px vs ref x18-34 end-cell 9px; offset: group 4 line 1 top y414 vs ref y396)
+hyphenate-character-001 ios      groups 5 5 4 3   → GEOMETRY WRONG (lines: groups [5, 5, 4, 3] lines vs ref [5, 4, 3, 3]; glyph: group 1 line 1 ink x17-41 end-cell 2px vs ref x18-34 end-cell 9px; offset: group 2 line 3 top y270 vs ref y263)
+hyphenate-character-001 android  groups 5 4 4 3   → GEOMETRY WRONG (lines: groups [5, 4, 4, 3] lines vs ref [5, 4, 3, 3]; glyph: group 1 line 1 ink x18-41 end-cell 1px vs ref x18-34 end-cell 9px; offset: group 4 line 1 top y415 vs ref y396)
+hyphenate-character-003 ref      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-003 web      groups 5 4 4 3   → GEOMETRY WRONG (lines: groups [5, 4, 4, 3] lines vs ref [5, 4, 3, 3]; glyph: group 1 line 1 ink x18-81 end-cell 12px vs ref x18-42 end-cell 5px; offset: group 4 line 1 top y397 vs ref y376)
+hyphenate-character-003 ios      groups 5 4 3 3   → GEOMETRY WRONG (glyph: group 1 line 1 ink x17-41 end-cell 2px vs ref x18-42 end-cell 5px)
+hyphenate-character-003 android  groups 5 4 3 3   → GEOMETRY WRONG (glyph: group 1 line 1 ink x18-41 end-cell 1px vs ref x18-42 end-cell 5px)
+hyphenate-character-004 ref      groups 4 4 4 3   → GEOMETRY OK
+hyphenate-character-004 web      groups 4 4 4 3   → GEOMETRY OK
+hyphenate-character-004 ios      groups 3 4 3 3   → GEOMETRY WRONG (lines: groups [3, 4, 3, 3] lines vs ref [4, 4, 4, 3]; glyph: group 1 line 1 ink x17-70 end-cell 2px vs ref x18-62 end-cell 11px; offset: group 2 line 1 top y167 vs ref y186)
+hyphenate-character-004 android  groups 3 4 3 3   → GEOMETRY WRONG (lines: groups [3, 4, 3, 3] lines vs ref [4, 4, 4, 3]; glyph: group 1 line 1 ink x18-70 end-cell 1px vs ref x18-62 end-cell 11px; offset: group 2 line 1 top y168 vs ref y186)
+== --replay GW
+hyphenate-character-001 ref      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-001 web      groups 5 4 3 3   → GEOMETRY WRONG (offset: group 3 line 1 top y342 vs ref y320)
+hyphenate-character-001 ios      groups 5 4 3 3   → GEOMETRY WRONG (offset: group 3 line 1 top y340 vs ref y320)
+hyphenate-character-001 android  groups 5 4 3 3   → GEOMETRY WRONG (offset: group 3 line 1 top y343 vs ref y320)
+hyphenate-character-003 ref      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-003 web      groups 5 4 3 3   → GEOMETRY WRONG (offset: group 3 line 1 top y322 vs ref y300)
+hyphenate-character-003 ios      groups 5 4 3 3   → GEOMETRY WRONG (offset: group 3 line 1 top y320 vs ref y300)
+hyphenate-character-003 android  groups 5 4 3 3   → GEOMETRY WRONG (offset: group 3 line 1 top y323 vs ref y300)
+hyphenate-character-004 ref      groups 4 4 4 3   → GEOMETRY OK
+hyphenate-character-004 web      groups 4 4 4 3   → GEOMETRY WRONG (offset: group 3 line 1 top y303 vs ref y281)
+hyphenate-character-004 ios      groups 4 4 4 3   → GEOMETRY WRONG (offset: group 3 line 1 top y301 vs ref y281)
+hyphenate-character-004 android  groups 4 4 4 3   → GEOMETRY WRONG (offset: group 3 line 1 top y304 vs ref y281)

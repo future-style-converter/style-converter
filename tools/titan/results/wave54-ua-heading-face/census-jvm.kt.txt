@@ -1,0 +1,79 @@
+package com.styleconverter.runtime.typography
+
+// TEMPORARY census harness (wave 54 lane L5) — NOT part of the unit: it reads
+// the gitignored tools/titan/runs/<run>/ tree, writes its read-out under
+// tools/titan/results/wave54-ua-heading-face/, and is moved out of the test
+// tree (kept as census-jvm.kt.txt) right after it runs.
+
+import com.styleconverter.runtime.core.ir.IRComponent
+import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.core.ir.IRProperty
+import com.styleconverter.runtime.core.renderer.ComponentRenderer
+import com.styleconverter.runtime.core.renderer.InlineRunPlan
+import com.styleconverter.runtime.core.renderer.SlotComposer
+import com.styleconverter.runtime.core.types.ValueExtractors
+import com.styleconverter.runtime.core.variables.DynamicValueResolver
+import com.styleconverter.runtime.lists.ListStyleUaRule
+import com.styleconverter.runtime.typography.inline.InlineRunFold
+import org.junit.Test
+import java.io.File
+
+class UAHeadingFaceCensusTest {
+
+    private val root = File(System.getProperty("user.dir")).let { d ->
+        generateSequence(d) { it.parentFile }.first { File(it, "tools/titan/runs").isDirectory }
+    }
+
+    private fun folds(c: IRComponent, props: List<IRProperty>): Boolean {
+        if (c.children.isNullOrEmpty() || c.runs.isNullOrEmpty()) return false
+        val pos = props.firstOrNull { it.type == "Position" }
+        if (ValueExtractors.extractKeyword(pos?.data)?.uppercase() == "RELATIVE") return false
+        val plan = InlineRunPlan.resolve(c.runs, c.children) ?: return false
+        return InlineRunFold.fold(plan.entries, c.children!!, props, c.lang) is InlineRunFold.Outcome.Folded
+    }
+
+    @Test
+    fun census() {
+        val run = System.getenv("L5_CENSUS_RUN") ?: "wave53-final"
+        val out = StringBuilder()
+        val tags = setOf("h1", "h2", "h3", "h4", "h5", "h6", "sub", "sup")
+        var docs = 0; var tagged = 0; var firing = 0
+        val sections = File(root, "tools/titan/runs/$run/sections").listFiles()!!.sortedBy { it.name }
+        for (sec in sections) {
+            val dir = File(sec, "per-test-ir"); if (!dir.isDirectory) continue
+            for (f in dir.listFiles()!!.filter { it.name.endsWith(".json") }.sortedBy { it.name }) {
+                docs++
+                val roots = try { SlotComposer.compose(IRDocumentDecoder.decode(f.readText())) } catch (e: Exception) { out.append("DECODE-FAIL ${sec.name}/${f.name} ${e.message}\n"); continue }
+                val rows = mutableListOf<String>()
+                fun walk(node: IRComponent, inherited: List<IRProperty>, consumed: Boolean) {
+                    val own = node.properties
+                    val pre = ListStyleUaRule.apply(node._tag, own, ComponentRenderer.mergeInherited(own, inherited))
+                    val stands = UAHeadingFoldGate.standsDown(node, pre)
+                    val post = UAElementFontRule.apply(node._tag, own, pre, stands)
+                    val tag = node._tag?.lowercase()
+                    if (tag in tags) {
+                        tagged++
+                        val fires = post !== pre
+                        if (fires) firing++
+                        val shape = when { node.children.isNullOrEmpty() -> "leaf"; node.runs.isNullOrEmpty() -> "stacked"; else -> "runs-host" }
+                        val oldFlagIos = !node.children.isNullOrEmpty()
+                        val iosHeadingFlip = UAElementFontRule.isBold(tag) && oldFlagIos != stands
+                        rows += "  $tag ${node.id} shape=$shape rendered=${!consumed} fires=$fires" +
+                            " size=${DynamicValueResolver.fontSizePxOf(pre)}→${DynamicValueResolver.fontSizePxOf(post)}" +
+                            " weight=${pre.firstOrNull { it.type == "FontWeight" }?.data}→${post.firstOrNull { it.type == "FontWeight" }?.data}" +
+                            " standsDown=$stands iosHeadingFlagFlip=$iosHeadingFlip" +
+                            (if (own.any { it.type == "All" }) " ALL" else "") +
+                            (if (own.any { "var(" in it.data.toString() }) " VAR" else "")
+                    }
+                    val childInherited = post.filter { it.type in ComponentRenderer.INHERITED_PROPERTY_TYPES }
+                    val consumesKids = consumed || folds(node, post)
+                    node.children.orEmpty().forEach { walk(it, childInherited, consumesKids) }
+                }
+                roots.forEach { walk(it, emptyList(), false) }
+                if (rows.isNotEmpty()) out.append("${sec.name}/${f.name}\n").append(rows.joinToString("\n")).append("\n")
+            }
+        }
+        out.append("run=$run documents=$docs tagged-components=$tagged firing-components=$firing\n")
+        File(root, "tools/titan/results/wave54-ua-heading-face/census-jvm.$run.out.txt").writeText(out.toString())
+    }
+}

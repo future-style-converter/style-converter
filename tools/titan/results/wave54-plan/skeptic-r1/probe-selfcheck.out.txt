@@ -1,0 +1,12 @@
+rc=0 lines=12 ref-rows=5 ref-OK=3 WRONG-lines=5 :: rtl-marker-bake.geometry.py wave53-final wave53-open
+rc=0 lines=8 ref-rows=5 ref-OK=2 WRONG-lines=3 :: lists-bakes.geometry.py wave53-final wave53-open
+rc=0 lines=4 ref-rows=1 ref-OK=1 WRONG-lines=1 :: compose-table-body-cell.geometry.py wave53-final
+rc=0 lines=4 ref-rows=1 ref-OK=1 WRONG-lines=1 :: display-table-body.geometry.py wave53-final 006
+rc=0 lines=12 ref-rows=12 ref-OK=3 WRONG-lines=9 :: hyphenate-character.geometry.py wave53-final
+rc=0 lines=16 ref-rows=5 ref-OK=4 WRONG-lines=1 :: soft-hyphen.geometry.py wave53-final
+rc=0 lines=28 ref-rows=19 ref-OK=7 WRONG-lines=12 :: oof-containing-block.geometry.py wave53-final
+rc=0 lines=40 ref-rows=23 ref-OK=10 WRONG-lines=13 :: compose-wpt-content-box-cb.geometry.py wave53-final
+rc=0 lines=4 ref-rows=3 ref-OK=1 WRONG-lines=2 :: flex-zero-gap-rules.geometry.py wave53-final
+rc=0 lines=20 ref-rows=10 ref-OK=5 WRONG-lines=7 :: ua-heading-face.geometry.py wave53-final
+rc=0 lines=28 ref-rows=20 ref-OK=7 WRONG-lines=13 :: web-root-separator.geometry.py wave53-final
+rc=0 lines=12 ref-rows=4 ref-OK=3 WRONG-lines=1 :: web-out-of-flow-hyphen-box.geometry.py wave53-final

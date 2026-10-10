@@ -1,0 +1,4 @@
+ChildContainingBlockSeamWiringTest tests=1 skipped=0 failures=1 errors=0 FAILED: ['the child containing block is computed with the WPT capture mode']
+DynamicValueResolverTest tests=32 skipped=0 failures=0 errors=0
+TOTAL tests=33 skipped=0 failures=1 errors=0
+gradle rc=1

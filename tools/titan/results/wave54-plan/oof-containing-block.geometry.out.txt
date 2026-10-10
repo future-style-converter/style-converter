@@ -1,0 +1,28 @@
+position-relative-003 ref      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'red': None, 'redPx': 0} → GEOMETRY OK
+position-relative-003 web      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'red': None, 'redPx': 0} → GEOMETRY OK
+position-relative-003 ios      {'green': (16, 16, 115, 115), 'greenPx': 10000, 'red': (16, 116, 115, 187), 'redPx': 7200} → GEOMETRY WRONG (green (16, 16, 115, 115) vs ref (16, 88, 115, 187))
+position-relative-003 android  {'green': (16, 16, 115, 115), 'greenPx': 10000, 'red': (16, 116, 115, 187), 'redPx': 7200} → GEOMETRY WRONG (green (16, 16, 115, 115) vs ref (16, 88, 115, 187))
+abspos/static-fixed-inside-abspos ref      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'red': None, 'redPx': 0} → GEOMETRY OK
+abspos/static-fixed-inside-abspos web      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'red': None, 'redPx': 0} → GEOMETRY OK
+abspos/static-fixed-inside-abspos ios      {'green': (16, 16, 115, 187), 'greenPx': 10000, 'red': (66, 138, 115, 187), 'redPx': 2500} → GEOMETRY WRONG (green (16, 16, 115, 187) vs ref (16, 88, 115, 187))
+abspos/static-fixed-inside-abspos android  {'green': (16, 16, 115, 187), 'greenPx': 10000, 'red': (66, 138, 115, 187), 'redPx': 2500} → GEOMETRY WRONG (green (16, 16, 115, 187) vs ref (16, 88, 115, 187))
+position-relative-004 ref      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'red': None, 'redPx': 0} → GEOMETRY OK
+position-relative-004 web      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'red': None, 'redPx': 0} → GEOMETRY OK
+position-relative-004 ios      {'green': (16, 16, 115, 115), 'greenPx': 10000, 'red': (16, 116, 115, 187), 'redPx': 7200} → GEOMETRY WRONG (green (16, 16, 115, 115) vs ref (16, 88, 115, 187))
+position-relative-004 android  {'green': (16, 16, 115, 115), 'greenPx': 10000, 'red': (16, 116, 115, 187), 'redPx': 7200} → GEOMETRY WRONG (green (16, 16, 115, 115) vs ref (16, 88, 115, 187))
+change-insets-inside-strict-containment-nested ref      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'red': None, 'redPx': 0} → GEOMETRY OK
+change-insets-inside-strict-containment-nested web      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'red': None, 'redPx': 0} → GEOMETRY OK
+change-insets-inside-strict-containment-nested ios      {'green': (16, 16, 115, 115), 'greenPx': 10000, 'red': (16, 116, 115, 187), 'redPx': 7200} → GEOMETRY WRONG (green (16, 16, 115, 115) vs ref (16, 88, 115, 187))
+change-insets-inside-strict-containment-nested android  {'green': (16, 16, 115, 115), 'greenPx': 10000, 'red': (16, 116, 115, 187), 'redPx': 7200} → GEOMETRY WRONG (green (16, 16, 115, 115) vs ref (16, 88, 115, 187))
+contain-content-003 ref      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'red': None, 'redPx': 0} → GEOMETRY OK
+contain-content-003 web      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'red': None, 'redPx': 0} → GEOMETRY OK
+contain-content-003 ios      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'red': None, 'redPx': 0} → GEOMETRY OK
+contain-content-003 android  {'green': (274, 16, 373, 583), 'greenPx': 10000, 'red': (16, 88, 115, 187), 'redPx': 10000} → GEOMETRY WRONG (green (274, 16, 373, 583) vs ref (16, 88, 115, 187))
+contain-content-011 ref      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'red': None, 'redPx': 0} → GEOMETRY OK
+contain-content-011 web      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'red': None, 'redPx': 0} → GEOMETRY OK
+contain-content-011 ios      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'red': None, 'redPx': 0} → GEOMETRY OK
+contain-content-011 android  {'green': (274, 16, 373, 583), 'greenPx': 10000, 'red': (16, 88, 115, 187), 'redPx': 10000} → GEOMETRY WRONG (green (274, 16, 373, 583) vs ref (16, 88, 115, 187))
+backdrop-filter-containing-block ref      {'green': (16, 88, 215, 287), 'greenPx': 40000, 'red': (226, 88, 373, 287), 'redPx': 29600} → GEOMETRY OK
+backdrop-filter-containing-block web      {'green': (16, 88, 215, 287), 'greenPx': 40000, 'red': (226, 88, 373, 287), 'redPx': 29600} → GEOMETRY OK
+backdrop-filter-containing-block ios      {'green': (16, 16, 373, 215), 'greenPx': 71600, 'red': (226, 216, 373, 287), 'redPx': 10656} → GEOMETRY WRONG (green (16, 16, 373, 215) vs ref (16, 88, 215, 287))
+backdrop-filter-containing-block android  {'green': (16, 16, 225, 215), 'greenPx': 42000, 'red': (226, 16, 373, 215), 'redPx': 29600} → GEOMETRY WRONG (green (16, 16, 225, 215) vs ref (16, 88, 215, 287))

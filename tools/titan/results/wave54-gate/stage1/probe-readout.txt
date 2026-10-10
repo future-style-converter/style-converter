@@ -1,0 +1,38 @@
+probe-readout  wave54-open → wave54-pre   (Δ = wave54-pre − wave54-open; a gain prints +, a fall −)
+  sections read (4, stage 1): CSS2,css-counter-styles,css-tables,css-text
+  lanes that decide: L1,L2
+
+rule 1 — lost carriers (P on the base, f on the probe):
+  none
+
+rules 2 / 3 — prediction rows:
+  ok        L1-rtl-marker-bake  css-text/bidi/bidi-lines-001.html android  f 0.8934 → P 0.9629 Δ+0.0695  (predicted P ≈0.9629 (device-measured: these hunk bytes at wave53-probe); HIGH, gating floor 0.955)
+  ok        L1-rtl-marker-bake  css-text/bidi/bidi-lines-002.html android  P 0.9534 → P 0.9818 Δ+0.0284  (predicted P ≈0.9818 (device-measured at wave53-probe); HIGH, gating floor 0.975)
+  ok        L1-rtl-marker-bake  css-counter-styles/counter-suffix.html android  P 0.9547 → P 0.989 Δ+0.0343  (predicted P ≈0.9815 with P alone (replay); ≈0.989 with M′ on P (replay 0.9894 / 0.9900); MED-HIGH (P floor) / MED (M′ magnitude, geometry-gated), gating floor 0.97)
+  ok        L1-rtl-marker-bake  css-counter-styles/counter-suffix.html web  P 0.9818 → P 1 Δ+0.0182  (predicted P 1 (wave53-probe measured 1 with the same marker geometry); HIGH, gating floor 0.999)
+  ok        L1-rtl-marker-bake  css-counter-styles/counter-suffix.html ios  P 0.9802 → P 0.9873 Δ+0.0071  (predicted P ≈0.987 (wave53-probe measured 0.9873); MED-HIGH, gating floor 0.985)
+  ok        L2-table-body-cell  CSS2/css21-errata/s-11-1-1b-006.html android  P 0.9944 → P 0.9983 Δ+0.0039  (predicted P ≈0.9983 (replay from both the final and the probe picture); square x24-43 rows 56-75, no stroke; MED-HIGH (geometry) / MED (score), gating floor 0.996)
+  recorded  L3-hyphenate-character  css-text/hyphens/hyphenate-character-001.html ios  f 0.9287 → P 0.9611 Δ+0.0324  (predicted P ≈0.979 (GBd 0.9852 − 0.006); MED-HIGH, gating floor 0.965)
+  recorded  L3-hyphenate-character  css-text/hyphens/hyphenate-character-003.html ios  f 0.9337 → P 0.957 Δ+0.0233  (predicted P ≈0.977 (GBd 0.9831 − 0.006); MED-HIGH, gating floor 0.965)
+  recorded  L3-hyphenate-character  css-text/hyphens/hyphenate-character-004.html ios  f 0.9134 → f 0.9477 Δ+0.0343  (predicted P ≈0.979 (GBd 0.9855 − 0.006; needs the spent-hyphen hunk); MED)
+  recorded  L3-hyphenate-character  css-text/hyphens/hyphenate-character-001.html web  f 0.935 → P 0.985 Δ+0.05  (predicted P ≈0.960 (U3); ≈0.976-0.981 with U3b; MED-LOW)
+  recorded  L3-hyphenate-character  css-text/hyphens/hyphenate-character-003.html web  f 0.8812 → P 0.9825 Δ+0.1013  (predicted P ≈0.956 (U3); ≈0.976-0.981 with U3b; MED-LOW)
+  recorded  L3-hyphenate-character  css-text/hyphens/hyphenate-character-004.html web  f 0.9249 → P 0.9832 Δ+0.0583  (predicted 0.947-0.966 (U3; B on own pixels 0.966); ≈0.976-0.981 with U3b; LOW)
+  recorded  L3-hyphenate-character  css-text/hyphens/hyphenate-character-001.html android  f 0.9301 → P 0.9802 Δ+0.0501  (predicted ≈0.957 (U3); ≈0.976-0.981 with U3b; LOW-MED)
+  recorded  L3-hyphenate-character  css-text/hyphens/hyphenate-character-003.html android  f 0.9292 → P 0.9792 Δ+0.05  (predicted ≈0.953 (U3); ≈0.976-0.981 with U3b; LOW)
+  recorded  L3-hyphenate-character  css-text/hyphens/hyphenate-character-004.html android  f 0.905 → P 0.9774 Δ+0.0724  (predicted ≈0.945 stays f (U3); ≈0.976-0.981 with U3b; LOW)
+  recorded  L3-hyphenate-character  css-text/hyphens/hyphenate-character-002.html web  f 0.92 → f 0.9344 Δ+0.0144  (predicted ≈0.96 score-only read (B alone 0.9426; the dictionary reason is REFUTED by the capture); LOW-MED)
+  recorded  L3-hyphenate-character  css-text/hyphens/hyphenate-character-002.html ios  f 0.9261 → P 0.9534 Δ+0.0273  (predicted mover; LOW, undirected)
+  recorded  L3-hyphenate-character  css-text/hyphens/hyphenate-character-002.html android  f 0.9223 → f 0.9249 Δ+0.0026  (predicted stays f (Minikin paints its own dictionary hyphen: a logged wall); LOW)
+  recorded  L3-hyphenate-character  css-text/hyphens/hyphenate-limit-chars-001.html ios  f 0.8919 → f 0.8919 Δ+0  (predicted mover (U+2010 -> U+002D in the dictionary fold); LOW, undirected)
+  recorded  L4-oof-layout  CSS2/abspos/static-fixed-inside-abspos.html ios  P 0.9841 → P 0.9974 Δ+0.0133  (predicted P ≈0.9974; HIGH, gating floor 0.99)
+  recorded  L4-oof-layout  CSS2/abspos/static-fixed-inside-abspos.html android  P 0.9835 → P 0.9967 Δ+0.0132  (predicted P ≈0.9967 (via PositionedParentFlowSlot); MED-HIGH, gating floor 0.99)
+  recorded  L6-web-tail  CSS2/abspos/static-inside-inline-block.html web  P 0.9803 → P 0.999 Δ+0.0187  (predicted stays or rises (the separator replays a space the SOURCE had); MED)
+  recorded  L6-web-tail  css-text/hyphens/hyphens-out-of-flow-002.html web  f 0.9411 → P 1 Δ+0.0589  (predicted P 1 (replay W1-exact: ssim 1, 0 mismatched px); HIGH (branch R) / MED-HIGH (branch H), gating floor 0.995)
+
+leak signals (score side of rule 5) — non-carrier cells that moved at all:
+  525 non-carrier cells read (205 of them must-not-move lines); 0 leak signal(s)
+
+summary: rule 1 fired 0 · rule 2 fired 0 · rule 3 fired 0 · leak signals 0 · undirected falls read 0 · unmeasured 0 · recorded for another stage 17
+
+PROBE: rules 1, 2, 3 and the must-not-move read hold

@@ -183,6 +183,12 @@ struct TypographyAggregate: Equatable {
     /// nil / "manual" leave both off, i.e. every legacy document renders
     /// byte-identically.
     var hyphensMode: String? = nil
+    /// Wave 54 (lane L3, U2-ios) — css-text-4 §6.3 `hyphenate-character`:
+    /// the author's string VERBATIM (`""` included), nil for `auto` / no
+    /// declaration. Mirrored into TextConfig by StyleBuilder; PlaceholderLabel
+    /// paints it at taken hyphenation points and treats it as SPENT in the
+    /// overflow check (SpentHyphen). nil = byte-identical to wave 53.
+    var hyphenateCharacter: String? = nil
     /// `line-clamp` / `max-lines` — the smaller of the two wins when both set.
     var lineLimit: Int? = nil
     /// `text-overflow: ellipsis` → `.truncationMode(.tail)`. When nil we
