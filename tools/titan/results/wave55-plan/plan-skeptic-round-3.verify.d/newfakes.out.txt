@@ -1,0 +1,158 @@
+L1 fixed        ghost+0+7y  hyphen-ios-linebox 001 ios                                     FAIL
+L1 fixed        ghost+0+7y  hyphen-ios-linebox 003 ios                                     FAIL
+L1 fixed        ghost+0+7y  hyphen-ios-linebox 004 ios                                     FAIL
+L1 fixed        ghost+5x    hyphen-ios-linebox 001 ios                                     FAIL
+L1 fixed        ghost+5x    hyphen-ios-linebox 003 ios                                     FAIL
+L1 fixed        ghost+5x    hyphen-ios-linebox 004 ios                                     FAIL
+L1 fixed        ghost-12y   hyphen-ios-linebox 001 ios                                     FAIL
+L1 fixed        ghost-12y   hyphen-ios-linebox 003 ios                                     FAIL
+L1 fixed        ghost-12y   hyphen-ios-linebox 004 ios                                     FAIL
+L2 U1-fixed     ghost+0+7y  abspos/abspos-autopos-htb-ltr android                          FAIL
+L2 U1-fixed     ghost+0+7y  abspos/abspos-autopos-vlr-ltr android                          FAIL
+L2 U1-fixed     ghost+0+7y  abspos/abspos-autopos-vrl-ltr android                          FAIL
+L2 U1-fixed     ghost+0+7y  backdrop-filter-nested-border-radius-clip android              FAIL
+L2 U1-fixed     ghost+0+7y  backdrop-filter-nested-border-radius-clip-2 android            FAIL
+L2 U1-fixed     ghost+0+7y  backdrop-filter-nested-border-radius-clip-4 android            FAIL
+L2 U1-fixed     ghost+5x    abspos/abspos-autopos-htb-ltr android                          FAIL
+L2 U1-fixed     ghost+5x    abspos/abspos-autopos-vlr-ltr android                          FAIL
+L2 U1-fixed     ghost+5x    abspos/abspos-autopos-vrl-ltr android                          FAIL
+L2 U1-fixed     ghost+5x    backdrop-filter-nested-border-radius-clip android              FAIL
+L2 U1-fixed     ghost+5x    backdrop-filter-nested-border-radius-clip-2 android            FAIL
+L2 U1-fixed     ghost+5x    backdrop-filter-nested-border-radius-clip-4 android            FAIL
+L2 U1-fixed     ghost-12y   abspos/abspos-autopos-htb-ltr android                          FAIL
+L2 U1-fixed     ghost-12y   abspos/abspos-autopos-vlr-ltr android                          FAIL
+L2 U1-fixed     ghost-12y   abspos/abspos-autopos-vrl-ltr android                          FAIL
+L2 U1-fixed     ghost-12y   backdrop-filter-nested-border-radius-clip android              FAIL
+L2 U1-fixed     ghost-12y   backdrop-filter-nested-border-radius-clip-2 android            FAIL
+L2 U1-fixed     ghost-12y   backdrop-filter-nested-border-radius-clip-4 android            FAIL
+L2 U2-fixed     ghost+0+7y  backdrop-filter-nested-border-radius-clip-3 android            FAIL
+L2 U2-fixed     ghost+0+7y  backdrop-filter-nested-border-radius-clip-3 android            FAIL
+L2 U2-fixed     ghost+5x    backdrop-filter-nested-border-radius-clip-3 android            FAIL
+L2 U2-fixed     ghost+5x    backdrop-filter-nested-border-radius-clip-3 android            FAIL
+L2 U2-fixed     ghost-12y   backdrop-filter-nested-border-radius-clip-3 android            FAIL
+L2 U2-fixed     ghost-12y   backdrop-filter-nested-border-radius-clip-3 android            FAIL
+L3 dir-row6-fixed ghost+0+7y  [S] dir-style-02a android row6                                 PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 116, 153, 135) dot 4px profile 0.93@+0 rows 0.71@+0 → GEOMETRY OK
+L3 dir-row6-fixed ghost+5x    [S] dir-style-02a android row6                                 FAIL
+L3 dir-row6-fixed ghost-12y   [S] dir-style-02a android row6                                 FAIL
+L3 dir-row7-fixed ghost+0+7y  [S] dir-style-02a android row7                                 PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 136, 243, 155) dot 4px profile 0.91@+0 rows 0.76@+0 → GEOMETRY OK
+L3 dir-row7-fixed ghost+5x    [S] dir-style-02a android row7                                 FAIL
+L3 dir-row7-fixed ghost-12y   [S] dir-style-02a android row7                                 PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 136, 243, 155) dot 7px profile 0.91@+0 rows 0.72@+0 → GEOMETRY OK
+L3 dir-row9-fixed ghost+0+7y  [S] dir-style-02a android row9                                 PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 176, 153, 195) dot 4px profile 0.93@+0 rows 0.71@+0 → GEOMETRY OK
+L3 dir-row9-fixed ghost+5x    [S] dir-style-02a android row9                                 FAIL
+L3 dir-row9-fixed ghost-12y   [S] dir-style-02a android row9                                 FAIL
+L3 bidi-fixed   ghost+0+7y  [S] bidi-tab-001 android rtl-rows                              FAIL
+L3 bidi-fixed   ghost+5x    [S] bidi-tab-001 android rtl-rows                              FAIL
+L3 bidi-fixed   ghost-12y   [S] bidi-tab-001 android rtl-rows                              FAIL
+L3 stack-fixed  ghost+0+7y  [W] anchor-position-multicol-nested-001 android stack          FAIL
+L3 stack-fixed  ghost+5x    [W] anchor-position-multicol-nested-001 android stack          FAIL
+L3 stack-fixed  ghost-12y   [W] anchor-position-multicol-nested-001 android stack          FAIL
+L3 001-fixed    ghost+0+7y  [S] dynamic-offset-rtl-001 android                             FAIL
+L3 001-fixed    ghost+5x    [S] dynamic-offset-rtl-001 android                             FAIL
+L3 001-fixed    ghost-12y   [S] dynamic-offset-rtl-001 android                             FAIL
+L3 002-fixed    ghost+0+7y  [W] dynamic-offset-rtl-002 android                             FAIL
+L3 002-fixed    ghost+5x    [W] dynamic-offset-rtl-002 android                             FAIL
+L3 002-fixed    ghost-12y   [W] dynamic-offset-rtl-002 android                             FAIL
+L4 C-fixed      ghost+0+7y  [M] text-decoration-inset-005 ios                              FAIL
+L4 C-fixed      ghost+0+7y  [M] text-decoration-inset-005 android                          FAIL
+L4 C-fixed      ghost+0+7y  [M] text-decoration-inset-006 ios                              FAIL
+L4 C-fixed      ghost+0+7y  [M] text-decoration-inset-006 android                          FAIL
+L4 C-fixed      ghost+0+7y  [M] text-decoration-inset-014 ios                              FAIL
+L4 C-fixed      ghost+0+7y  [M] text-decoration-inset-014 android                          FAIL
+L4 C-fixed      ghost+0+7y  [M] text-decoration-inset-011 ios                              FAIL
+L4 C-fixed      ghost+0+7y  [M] text-decoration-inset-011 android                          FAIL
+L4 C-fixed      ghost+0+7y  [F] text-decoration-inset-005 ios                              FAIL
+L4 C-fixed      ghost+0+7y  [F] text-decoration-inset-006 ios                              FAIL
+L4 C-fixed      ghost+0+7y  [F] text-decoration-inset-014 ios                              FAIL
+L4 C-fixed      ghost+0+7y  [F] text-decoration-inset-014 android                          FAIL
+L4 C-fixed      ghost+5x    [M] text-decoration-inset-005 ios                              FAIL
+L4 C-fixed      ghost+5x    [M] text-decoration-inset-005 android                          FAIL
+L4 C-fixed      ghost+5x    [M] text-decoration-inset-006 ios                              FAIL
+L4 C-fixed      ghost+5x    [M] text-decoration-inset-006 android                          FAIL
+L4 C-fixed      ghost+5x    [M] text-decoration-inset-014 ios                              FAIL
+L4 C-fixed      ghost+5x    [M] text-decoration-inset-014 android                          FAIL
+L4 C-fixed      ghost+5x    [M] text-decoration-inset-011 ios                              FAIL
+L4 C-fixed      ghost+5x    [M] text-decoration-inset-011 android                          FAIL
+L4 C-fixed      ghost+5x    [F] text-decoration-inset-005 ios                              FAIL
+L4 C-fixed      ghost+5x    [F] text-decoration-inset-006 ios                              FAIL
+L4 C-fixed      ghost+5x    [F] text-decoration-inset-014 ios                              FAIL
+L4 C-fixed      ghost+5x    [F] text-decoration-inset-014 android                          FAIL
+L4 C-fixed      ghost-12y   [M] text-decoration-inset-005 ios                              FAIL
+L4 C-fixed      ghost-12y   [M] text-decoration-inset-005 android                          FAIL
+L4 C-fixed      ghost-12y   [M] text-decoration-inset-006 ios                              FAIL
+L4 C-fixed      ghost-12y   [M] text-decoration-inset-006 android                          FAIL
+L4 C-fixed      ghost-12y   [M] text-decoration-inset-014 ios                              FAIL
+L4 C-fixed      ghost-12y   [M] text-decoration-inset-014 android                          FAIL
+L4 C-fixed      ghost-12y   [M] text-decoration-inset-011 ios                              FAIL
+L4 C-fixed      ghost-12y   [M] text-decoration-inset-011 android                          FAIL
+L4 C-fixed      ghost-12y   [F] text-decoration-inset-005 ios                              FAIL
+L4 C-fixed      ghost-12y   [F] text-decoration-inset-006 ios                              FAIL
+L4 C-fixed      ghost-12y   [F] text-decoration-inset-014 ios                              FAIL
+L4 C-fixed      ghost-12y   [F] text-decoration-inset-014 android                          FAIL
+L4 U1-fixed     ghost+0+7y  [M] text-decoration-inset-005 ios                              FAIL
+L4 U1-fixed     ghost+0+7y  [M] text-decoration-inset-005 android                          FAIL
+L4 U1-fixed     ghost+0+7y  [M] text-decoration-inset-006 ios                              FAIL
+L4 U1-fixed     ghost+0+7y  [M] text-decoration-inset-006 android                          FAIL
+L4 U1-fixed     ghost+0+7y  [M] text-decoration-inset-014 ios                              FAIL
+L4 U1-fixed     ghost+0+7y  [M] text-decoration-inset-014 android                          FAIL
+L4 U1-fixed     ghost+0+7y  [M] text-decoration-inset-011 ios                              FAIL
+L4 U1-fixed     ghost+0+7y  [M] text-decoration-inset-011 android                          FAIL
+L4 U1-fixed     ghost+5x    [M] text-decoration-inset-005 ios                              FAIL
+L4 U1-fixed     ghost+5x    [M] text-decoration-inset-005 android                          FAIL
+L4 U1-fixed     ghost+5x    [M] text-decoration-inset-006 ios                              FAIL
+L4 U1-fixed     ghost+5x    [M] text-decoration-inset-006 android                          FAIL
+L4 U1-fixed     ghost+5x    [M] text-decoration-inset-014 ios                              FAIL
+L4 U1-fixed     ghost+5x    [M] text-decoration-inset-014 android                          FAIL
+L4 U1-fixed     ghost+5x    [M] text-decoration-inset-011 ios                              FAIL
+L4 U1-fixed     ghost+5x    [M] text-decoration-inset-011 android                          FAIL
+L4 U1-fixed     ghost-12y   [M] text-decoration-inset-005 ios                              FAIL
+L4 U1-fixed     ghost-12y   [M] text-decoration-inset-005 android                          FAIL
+L4 U1-fixed     ghost-12y   [M] text-decoration-inset-006 ios                              FAIL
+L4 U1-fixed     ghost-12y   [M] text-decoration-inset-006 android                          FAIL
+L4 U1-fixed     ghost-12y   [M] text-decoration-inset-014 ios                              FAIL
+L4 U1-fixed     ghost-12y   [M] text-decoration-inset-014 android                          FAIL
+L4 U1-fixed     ghost-12y   [M] text-decoration-inset-011 ios                              FAIL
+L4 U1-fixed     ghost-12y   [M] text-decoration-inset-011 android                          FAIL
+L5 fixed        ghost+0+7y  [H] counter-suffix ios                                         FAIL
+L5 fixed        ghost+0+7y  [C] counter-suffix ios                                         FAIL
+L5 fixed        ghost+0+7y  [C] counter-suffix android                                     FAIL
+L5 fixed        ghost+0+7y  [T] counter-suffix ios                                         FAIL
+L5 fixed        ghost+0+7y  [I] cjk-decimal/css3-counter-styles-005 ios                    FAIL
+L5 fixed        ghost+0+7y  [I] cjk-decimal/css3-counter-styles-005 android                FAIL
+L5 fixed        ghost+0+7y  [K] counter-suffix ios                                         FAIL
+L5 fixed        ghost+0+7y  [K] counter-suffix android                                     FAIL
+L5 fixed        ghost+5x    [H] counter-suffix ios                                         FAIL
+L5 fixed        ghost+5x    [C] counter-suffix ios                                         FAIL
+L5 fixed        ghost+5x    [C] counter-suffix android                                     FAIL
+L5 fixed        ghost+5x    [T] counter-suffix ios                                         FAIL
+L5 fixed        ghost+5x    [I] cjk-decimal/css3-counter-styles-005 ios                    FAIL
+L5 fixed        ghost+5x    [I] cjk-decimal/css3-counter-styles-005 android                FAIL
+L5 fixed        ghost+5x    [K] counter-suffix ios                                         FAIL
+L5 fixed        ghost+5x    [K] counter-suffix android                                     FAIL
+L5 fixed        ghost-12y   [H] counter-suffix ios                                         FAIL
+L5 fixed        ghost-12y   [C] counter-suffix ios                                         FAIL
+L5 fixed        ghost-12y   [C] counter-suffix android                                     FAIL
+L5 fixed        ghost-12y   [T] counter-suffix ios                                         FAIL
+L5 fixed        ghost-12y   [I] cjk-decimal/css3-counter-styles-005 ios                    FAIL
+L5 fixed        ghost-12y   [I] cjk-decimal/css3-counter-styles-005 android                FAIL
+L5 fixed        ghost-12y   [K] counter-suffix ios                                         FAIL
+L5 fixed        ghost-12y   [K] counter-suffix android                                     FAIL
+L6 X-fixed      ghost+0+7y  [X] flex-abspos-staticpos-align-self-safe-001 android          FAIL
+L6 X-fixed      ghost+0+7y  [X] grid-abspos-staticpos-align-self-001 android               FAIL
+L6 X-fixed      ghost+0+7y  [X] grid-abspos-staticpos-justify-self-001 android             FAIL
+L6 X-fixed      ghost+0+7y  [X] grid-abspos-staticpos-align-self-vertWM-001 android        FAIL
+L6 X-fixed      ghost+0+7y  [X] grid-abspos-staticpos-align-self-rtl-001 android           FAIL
+L6 X-fixed      ghost+5x    [X] flex-abspos-staticpos-align-self-safe-001 android          FAIL
+L6 X-fixed      ghost+5x    [X] grid-abspos-staticpos-align-self-001 android               FAIL
+L6 X-fixed      ghost+5x    [X] grid-abspos-staticpos-justify-self-001 android             FAIL
+L6 X-fixed      ghost+5x    [X] grid-abspos-staticpos-align-self-vertWM-001 android        FAIL
+L6 X-fixed      ghost+5x    [X] grid-abspos-staticpos-align-self-rtl-001 android           FAIL
+L6 X-fixed      ghost-12y   [X] flex-abspos-staticpos-align-self-safe-001 android          FAIL
+L6 X-fixed      ghost-12y   [X] grid-abspos-staticpos-align-self-001 android               FAIL
+L6 X-fixed      ghost-12y   [X] grid-abspos-staticpos-justify-self-001 android             FAIL
+L6 X-fixed      ghost-12y   [X] grid-abspos-staticpos-align-self-vertWM-001 android        FAIL
+L6 X-fixed      ghost-12y   [X] grid-abspos-staticpos-align-self-rtl-001 android           FAIL
+L6 PO-fixed     ghost+0+7y  [PO] backdrop-filter-clip-rect android                         FAIL
+L6 PO-fixed     ghost+5x    [PO] backdrop-filter-clip-rect android                         FAIL
+L6 PO-fixed     ghost-12y   [PO] backdrop-filter-clip-rect android                         FAIL
+
+156 key reads on 15 fixed pictures x 3 added-ink transforms; ACCEPTED 4

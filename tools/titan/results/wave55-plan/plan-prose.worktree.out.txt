@@ -1,0 +1,29 @@
+# plan-prose.worktree — 2026-10-11T13:17:43Z: plan-prose.py on a CLEAN checkout (git worktree add --detach <scratch> HEAD; HEAD 640276a0)
+git worktree add exit 0: Preparing worktree (detached HEAD 640276a0)
+copied the six untracked inputs (sha256 prefix):
+  PLAN.md                    865649f11b15cbc2
+  plan-prose.py              643332d59d146fac
+  expectations.json          cd3936d0eb8ca54b
+  cells-wave54-final.json    c9c148e7727f7137
+  plan-build.out.txt         90cb829902ae38ab
+  landing-manifest.json      0b46b9b2b67304ac
+
+## W1 --check in the worktree, run from another cwd
+plan-prose --check <scratch>/wt55plan/tools/titan/results/wave55-plan/PLAN.md against expectations.json sha256 cd3936d0eb8ca54b…: 34 gen blocks · 22 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
+plan-prose --check: HOLDS
+exit 0
+
+## W2 --fill in the worktree is idempotent (byte-identical PLAN.md)
+plan-prose --fill: 34 blocks rendered from expectations.json sha256 cd3936d0eb8ca54b… into <scratch>/wt55plan/tools/titan/results/wave55-plan/PLAN.md
+PLAN.md 865649f11b15cbc2 -> 865649f11b15cbc2: byte-identical
+
+## W3 the worktree's git status (only the six copied files may show)
+  ?? tools/titan/results/wave55-plan/PLAN.md
+  ?? tools/titan/results/wave55-plan/cells-wave54-final.json
+  ?? tools/titan/results/wave55-plan/expectations.json
+  ?? tools/titan/results/wave55-plan/landing-manifest.json
+  ?? tools/titan/results/wave55-plan/plan-build.out.txt
+  ?? tools/titan/results/wave55-plan/plan-prose.py
+git worktree remove exit 0
+worktree removed: yes
+worktree list entries left for wt55plan: 0

@@ -55,7 +55,7 @@ census wave54-final: 1435 per-test IR documents, 10719 components
       TARGET css-text/hyphens/hyphenate-character-002.html                            ios P 0.9534  dejavu@16      multi-line pre-break, pitch 18.625 → 19
       TARGET css-text/hyphens/hyphenate-character-003.html                            ios P 0.957   dejavu@16      multi-line pre-break, pitch 18.625 → 19
       TARGET css-text/hyphens/hyphenate-character-004.html                            ios f 0.9477  dejavu@16      multi-line pre-break, pitch 18.625 → 19
-      SAME   css-text/hyphens/hyphens-vertical-001.html                               ios f 0.8801  dejavu@16      1 line: box ceil(18.625) = 19 → 19
+      SAME   css-text/hyphens/hyphens-vertical-001.html                               ios f 0.8801  dejavu@16      vertical writing mode: declined by the NB-ios horizontal guard (TextKit draws several lines; the singleLineText proxy would have pinned it to one)
     tally: TARGET 4 · MOVES 10 · SAME 5 (documents); web 0 · android 0 · wire 0 carriers
 (5) capture carriers: ios 14 · web 0 · android 0; wire carriers 0; in-radius must-not-move ios 5
       carrier ios wpt__css-text-decor__text-decoration-dotted-001.png

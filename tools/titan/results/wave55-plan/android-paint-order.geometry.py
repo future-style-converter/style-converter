@@ -16,7 +16,10 @@
 #        <= 8 blue; guards: the navbar band OUTSIDE the menus (same rows, x120-159 / x270-309) keeps >= 312/320 blue
 #        (a "fix" that drops or moves the parent border fails), the backdrop inversion stays 10000 +-100 pink px in
 #        x116-315 y168-217, and the red bbox is (163,134,266,371) +-1 with 1552 +-16 red px (menus neither dropped
-#        nor overdrawn into the navbar's interior).
+#        nor overdrawn into the navbar's interior; round 3: pink and red ±2 — added red beside a menu passed ±16).
+#        Plan-skeptic round 1 (instrument-teeth M6): the 320 sampled navbar
+#        px are not the band — a picture with 531 of the band's 851 blue px erased passed. Added: the navbar's WHOLE blue
+#        (+ the overlap rows' red, − the ref's 416 there) ≥ 0.95 × the ref's 866 blue px (U1 replay 851; the fake 320).
 #   [FO] clip-path-filter-order — 0 reddish px below y115; green box bbox (16,128,215,327) +-1 with >= 39600 px; no
 #        halo: min channel >= 250 in the 45-px strips right of and below the box. This is a CONTROL: a correct
 #        filter→clip order and a DROPPED drop-shadow paint the same picture here (the ref shows no shadow anywhere:
@@ -25,6 +28,17 @@
 #   [X]  <legacy-route carrier> — "crossings": runs of 1..4 dark px (sum < 150) with the SAME saturated fill on both
 #        ends (horizontal or vertical) = a dark parent band painted over a child's fill; must be <= 4, AND the
 #        child-fill count (teal / yellow) >= 0.90 x the ref's (a dropped child cannot pass by having no crossings).
+#        Round 1 (instrument-teeth M6) added three reads against the BASE capture of the same platform (U2 changes WHICH
+#        paint wins, never where a box is): the child-fill bbox equals the base's ±1 (a child moved 3 px or scrambled is
+#        WRONG), the child fill is ≥ 0.98 × the base's (a shortened child), and the dark band px are ≥ 0.9 × min(base,
+#        ref) (an erased border passed with 0 crossings: the band must still be there; on the flex pair the base band is
+#        twice the ref's — its crossings — so the floor is the smaller of the two).
+#        Round 2 (instrument-teeth M5): the bbox is the UNION of 22-26 children (8×6 px each), so ONE child moved 3 px
+#        inside it passed. Added a subset read against the base, pixel for pixel: `lost` = base child-fill px the capture
+#        no longer fills ≤ 4, and `extra` = capture child-fill px outside dilate₁(base fill ∪ base band) ≤ 4 (U2 only
+#        REVEALS fill where the band was). The six U2 replays read 0 / 0; one child moved 3 px 18-263 lost; round 1's
+#        child +3x 359-1034, scrambled ≈ 900-11 400, shrunk 76-1369 (plan-skeptic-round-2.instrument-teeth.d/
+#        fixcheck6.L5L6.out.txt). The bbox, fill, crossings and band reasons stay.
 #   [ID] <raster control> — the capture is decoded-pixel IDENTICAL to the same capture in --base (the units must
 #        not change a band nothing overlaps: the behind-content painter must rasterise exactly like androidx).
 #
@@ -65,6 +79,8 @@ reddish = lambda a: (a[..., 0] > 150) & (a[..., 0] - np.maximum(a[..., 1], a[...
 teal = lambda a: (a[..., 0] <= 40) & (a[..., 1] >= 100) & (a[..., 1] <= 160) & (a[..., 2] >= 100) & (a[..., 2] <= 160)
 yellow = lambda a: (a[..., 0] >= 200) & (a[..., 1] >= 200) & (a[..., 2] <= 80)
 OVERLAP_ROWS = (166, 167, 218, 219)
+REF_BLUE, REF_OVERLAP_RED = 866, 416      # the clip-rect ref: navbar blue px in the whole picture, menus' red in the overlap rows
+dark_px = lambda a: a.sum(axis=2) < 150     # the [X] band ink (the crossings scan's own dark class)
 
 
 def po(a):
@@ -74,6 +90,7 @@ def po(a):
     G = np.concatenate([a[list(OVERLAP_ROWS), 120:160], a[list(OVERLAP_ROWS), 270:310]], axis=1)
     g_b = int(blue(G).sum())
     pk = int(pink(a[168:218, 116:316]).sum())
+    navbar = int(blue(a).sum()) + r_o - REF_OVERLAP_RED      # the band's blue, counting the overlap px the menus now own
     ys, xs = np.nonzero(red(a))
     bb = (int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())) if len(xs) else None
     why = []
@@ -81,11 +98,16 @@ def po(a):
         why.append(f'paint order: overlap rows red {r_o} / blue {b_o} of 416 (parent border over positioned children, CSS 2.1 App. E)')
     if g_b < 312:
         why.append(f'navbar band outside the menus blue {g_b}/320 (parent border dropped or moved)')
-    if abs(pk - 10000) > 100:
-        why.append(f'backdrop inversion {pk} pink px vs 10000')
-    if bb is None or any(abs(u - v) > 1 for u, v in zip(bb, (163, 134, 266, 371))) or abs(len(xs) - 1552) > 16:
-        why.append(f'menus: red bbox {bb} n {len(xs)} vs (163,134,266,371) n 1552')
-    return f'overlap red {r_o} blue {b_o} | navbar band blue {g_b}/320 | pink {pk} | red n {len(xs)}', why
+    if navbar < 0.95 * REF_BLUE:
+        why.append(f'navbar band {navbar} blue px vs ref {REF_BLUE} (< 95 %: the parent border partly erased)')
+    # round 3 (verify M2 sweep): pink ±2 (was ±100) and red n ±2 (was ±16) — a 2×2 / 3×3 red blob beside a menu passed (1556 /
+    # 1561); ref, web and iOS read pink 10000 / red 1552 on every run, the U1 replay 10000 / 1552, android today 10000 / 1136
+    # (= 1552 − the 416 overlap px the blue band covers): 0 px apart
+    if abs(pk - 10000) > 2:
+        why.append(f'backdrop inversion {pk} pink px vs 10000 ±2')
+    if bb is None or any(abs(u - v) > 1 for u, v in zip(bb, (163, 134, 266, 371))) or abs(len(xs) - 1552) > 2:
+        why.append(f'menus: red bbox {bb} n {len(xs)} vs (163,134,266,371) n 1552 ±2')
+    return f'overlap red {r_o} blue {b_o} | navbar band blue {g_b}/320 whole {navbar} | pink {pk} | red n {len(xs)}', why
 
 
 def fo(a):
@@ -126,8 +148,20 @@ def crossings(a):
     return n
 
 
-def x_rule(a, fill, ref_fill):
-    """[X] measurements + reasons."""
+def fill_box(a, fill):
+    """(x0, y0, x1, y1) of the child fill, or None."""
+    ys, xs = np.nonzero(fill(a))
+    return (int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())) if len(xs) else None
+
+
+def dilate1(m):
+    """4-neighbour dilation by one pixel (round 2: where U2 may reveal fill — the base band's own pixels and their edge)."""
+    o = m.copy(); o[1:] |= m[:-1]; o[:-1] |= m[1:]; o[:, 1:] |= m[:, :-1]; o[:, :-1] |= m[:, 1:]
+    return o
+
+
+def x_rule(a, fill, ref_fill, base=None, ref_dark=None):
+    """[X] measurements + reasons; `base` is the same platform's capture in --base (round 1), `ref_dark` the ref's band px."""
     c = crossings(a)
     f = int(fill(a).sum())
     why = []
@@ -135,7 +169,33 @@ def x_rule(a, fill, ref_fill):
         why.append(f'{c} crossing px (a parent border painted over its child, CSS 2.1 App. E)')
     if f < 0.90 * ref_fill:
         why.append(f'child fill {f} px < 0.90 x ref {ref_fill}')
-    return f'crossings {c} | child fill {f} (ref {ref_fill})', why
+    meas = f'crossings {c} | child fill {f} (ref {ref_fill})'
+    if base is not None:
+        bb, ab = fill_box(base, fill), fill_box(a, fill)
+        bf, d, bd = int(fill(base).sum()), int(dark_px(a).sum()), int(dark_px(base).sum())
+        floor = min(bd, ref_dark if ref_dark is not None else bd)
+        if bb is None or ab is None or any(abs(u - v) > 1 for u, v in zip(ab, bb)):
+            why.append(f'child fill bbox {ab} vs base {bb} ±1 (U2 changes which paint wins, never where a box is)')
+        if f < 0.98 * bf:
+            why.append(f'child fill {f} px < 0.98 x base {bf}')
+        if d < 0.9 * floor:
+            why.append(f'band {d} dark px < 0.9 x min(base, ref) {floor} (the parent border dropped)')
+        if a.shape != base.shape:
+            why.append(f'canvas {a.shape[1]}x{a.shape[0]} vs base {base.shape[1]}x{base.shape[0]}')
+            lost = extra = None
+        else:
+            # round 2 (M5): pixel subset against the base — every child keeps its pixels; new fill only where the band was
+            fa, fb = fill(a), fill(base)
+            lost = int((fb & ~fa).sum())
+            extra = int((fa & ~dilate1(fb | dark_px(base))).sum())
+            if lost > 4:
+                why.append(f'lost {lost} base child-fill px (> 4: a child moved / shrunk / erased — U2 never moves a box)')
+            if extra > 1:
+                # round 3 (verify M2 sweep): ≤ 1 (was 4) — a 2×2 blob of child fill beside a child read extra 4 and passed;
+                # the six U2 replays and every base-identical picture read extra 0 (U2 adds fill only where the band was)
+                why.append(f'extra {extra} child-fill px outside the base fill + band (> 1: a child drawn where none was)')
+        meas += f' base {bf} | bbox {ab} | band {d} (floor {floor}) | lost {lost} extra {extra}'
+    return meas, why
 
 
 PO_CASES = [('filter-effects', 'backdrop-filter-clip-rect'), ('filter-effects', 'backdrop-filter-clip-rect-zoom')]
@@ -191,13 +251,16 @@ def main(run, base):
         print(line('[FO] clip-path-filter-order', label, meas, why))
     for sec, test, fill in X_CASES:
         r = arr(path(run, sec, test, 'ref'))
-        ref_fill = int(fill(r).sum())
+        ref_fill, ref_dark = int(fill(r).sum()), int(dark_px(r).sum())
         name = test.split('/')[-1]
         for label, _ in DIRS:
             a = arr(path(run, sec, test, label))
             if a is None:
                 print(f'[X] {name} {label:<8} MISSING → GEOMETRY WRONG (no capture)'); continue
-            meas, why = x_rule(a, fill, ref_fill)
+            b = r if label == 'ref' else arr(path(base, sec, test, label))
+            if b is None:
+                print(f'[X] {name} {label:<8} MISSING → GEOMETRY WRONG (no {label} capture in base {base})'); continue
+            meas, why = x_rule(a, fill, ref_fill, b, ref_dark)
             ref_failed |= label == 'ref' and bool(why)
             print(line(f'[X] {name}', label, meas, why))
     for sec, test in ID_CASES:
@@ -283,9 +346,10 @@ def fakes():
         px[int(x), int(y)] = (255, 255, 255)
     h['X-children-dropped'] = im
     h['X-today-android'] = Image.open(path('wave54-final', 'css-grid', 'abspos/grid-abspos-staticpos-align-self-001', 'android')).convert('RGB')
+    xa = np.asarray(xr).astype(np.int16)                 # the fakes are built on the ref's pixels: the ref is their base
     for tag, im in h.items():
         im.save(f'{out}/{tag}.png')
-        meas, why = x_rule(np.asarray(im).astype(np.int16), teal, rf)
+        meas, why = x_rule(np.asarray(im).astype(np.int16), teal, rf, xa, int(dark_px(xa).sum()))
         rows.append(line(f'[X] fake {tag}', 'fake', meas, why))
     print('\n'.join(rows))
     return 0
@@ -299,9 +363,9 @@ def replays():
     meas, why = po(a)
     print(line('[PO] replay backdrop-filter-clip-rect', 'U1', meas, why))
     for sec, test, fill in X_CASES:
-        ref_fill = int(fill(arr(path('wave54-final', sec, test, 'ref'))).sum())
+        r = arr(path('wave54-final', sec, test, 'ref'))
         a = arr(f'{rd}/{test.replace("/", "__")}-android-U2.png')
-        meas, why = x_rule(a, fill, ref_fill)
+        meas, why = x_rule(a, fill, int(fill(r).sum()), arr(path('wave54-final', sec, test, 'android')), int(dark_px(r).sum()))
         print(line(f'[X] replay {test.split("/")[-1]}', 'U2', meas, why))
     return 0
 

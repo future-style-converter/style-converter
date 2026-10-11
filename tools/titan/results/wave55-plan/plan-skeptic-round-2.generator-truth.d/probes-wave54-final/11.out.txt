@@ -1,0 +1,46 @@
+[PO] backdrop-filter-clip-rect ref      | overlap red 416 blue 0 | navbar band blue 320/320 whole 866 | pink 10000 | red n 1552 → GEOMETRY OK
+[PO] backdrop-filter-clip-rect web      | overlap red 416 blue 0 | navbar band blue 320/320 whole 866 | pink 10000 | red n 1552 → GEOMETRY OK
+[PO] backdrop-filter-clip-rect ios      | overlap red 416 blue 0 | navbar band blue 320/320 whole 878 | pink 10000 | red n 1552 → GEOMETRY OK
+[PO] backdrop-filter-clip-rect android  | overlap red 0 blue 416 | navbar band blue 320/320 whole 851 | pink 10000 | red n 1136 → GEOMETRY WRONG (paint order: overlap rows red 0 / blue 416 of 416 (parent border over positioned children, CSS 2.1 App. E); menus: red bbox (163, 134, 266, 371) n 1136 vs (163,134,266,371) n 1552)
+[PO] backdrop-filter-clip-rect-zoom ref      | n/a (ref rendered at zoom 5; captures unzoomed, unscored) → GEOMETRY OK
+[PO] backdrop-filter-clip-rect-zoom web      | overlap red 416 blue 0 | navbar band blue 320/320 whole 866 | pink 10000 | red n 1552 → GEOMETRY OK
+[PO] backdrop-filter-clip-rect-zoom ios      | overlap red 416 blue 0 | navbar band blue 320/320 whole 878 | pink 10000 | red n 1552 → GEOMETRY OK
+[PO] backdrop-filter-clip-rect-zoom android  | overlap red 0 blue 416 | navbar band blue 320/320 whole 851 | pink 10000 | red n 1136 → GEOMETRY WRONG (paint order: overlap rows red 0 / blue 416 of 416 (parent border over positioned children, CSS 2.1 App. E); menus: red bbox (163, 134, 266, 371) n 1136 vs (163,134,266,371) n 1552)
+[FO] clip-path-filter-order ref      | reddish 0 | green (16, 128, 215, 327) n 40000 | halo min 255 → GEOMETRY OK
+[FO] clip-path-filter-order web      | reddish 0 | green (16, 128, 215, 327) n 40000 | halo min 255 → GEOMETRY OK
+[FO] clip-path-filter-order ios      | reddish 0 | green (16, 128, 215, 327) n 40000 | halo min 255 → GEOMETRY OK
+[FO] clip-path-filter-order android  | reddish 0 | green (16, 128, 215, 327) n 40000 | halo min 254 → GEOMETRY OK
+[X] flex-abspos-staticpos-align-self-safe-001 ref      | crossings 0 | child fill 17956 (ref 17956) base 17956 | bbox (20, 39, 107, 335) | band 1308 (floor 1308) → GEOMETRY OK
+[X] flex-abspos-staticpos-align-self-safe-001 web      | crossings 0 | child fill 17956 (ref 17956) base 17956 | bbox (20, 39, 107, 335) | band 1308 (floor 1308) → GEOMETRY OK
+[X] flex-abspos-staticpos-align-self-safe-001 ios      | crossings 0 | child fill 17828 (ref 17956) base 17828 | bbox (20, 39, 107, 335) | band 1308 (floor 1308) → GEOMETRY OK
+[X] flex-abspos-staticpos-align-self-safe-001 android  | crossings 1152 | child fill 16560 (ref 17956) base 16560 | bbox (20, 39, 107, 335) | band 2544 (floor 1308) → GEOMETRY WRONG (1152 crossing px (a parent border painted over its child, CSS 2.1 App. E))
+[X] flex-abspos-staticpos-align-self-safe-002 ref      | crossings 0 | child fill 17066 (ref 17066) base 17066 | bbox (16, 44, 112, 340) | band 1372 (floor 1372) → GEOMETRY OK
+[X] flex-abspos-staticpos-align-self-safe-002 web      | crossings 0 | child fill 17066 (ref 17066) base 17066 | bbox (16, 44, 112, 340) | band 1372 (floor 1372) → GEOMETRY OK
+[X] flex-abspos-staticpos-align-self-safe-002 ios      | crossings 0 | child fill 16960 (ref 17066) base 16960 | bbox (16, 44, 112, 340) | band 1372 (floor 1372) → GEOMETRY OK
+[X] flex-abspos-staticpos-align-self-safe-002 android  | crossings 980 | child fill 15852 (ref 17066) base 15852 | bbox (16, 44, 112, 340) | band 2448 (floor 1372) → GEOMETRY WRONG (980 crossing px (a parent border painted over its child, CSS 2.1 App. E))
+[X] grid-abspos-staticpos-align-self-001 ref      | crossings 0 | child fill 1056 (ref 1056) base 1056 | bbox (22, 20, 161, 239) | band 1541 (floor 1541) → GEOMETRY OK
+[X] grid-abspos-staticpos-align-self-001 web      | crossings 0 | child fill 1056 (ref 1056) base 1056 | bbox (22, 20, 161, 230) | band 1541 (floor 1541) → GEOMETRY OK
+[X] grid-abspos-staticpos-align-self-001 ios      | crossings 0 | child fill 1056 (ref 1056) base 1056 | bbox (19, 30, 158, 230) | band 1486 (floor 1486) → GEOMETRY OK
+[X] grid-abspos-staticpos-align-self-001 android  | crossings 79 | child fill 914 (ref 1056) base 914 | bbox (19, 30, 158, 230) | band 1628 (floor 1541) → GEOMETRY WRONG (79 crossing px (a parent border painted over its child, CSS 2.1 App. E); child fill 914 px < 0.90 x ref 1056)
+[X] grid-abspos-staticpos-justify-self-001 ref      | crossings 0 | child fill 1248 (ref 1248) base 1248 | bbox (16, 22, 195, 221) | band 1823 (floor 1823) → GEOMETRY OK
+[X] grid-abspos-staticpos-justify-self-001 web      | crossings 0 | child fill 1248 (ref 1248) base 1248 | bbox (16, 22, 195, 216) | band 1823 (floor 1823) → GEOMETRY OK
+[X] grid-abspos-staticpos-justify-self-001 ios      | crossings 0 | child fill 1248 (ref 1248) base 1248 | bbox (16, 19, 203, 213) | band 1754 (floor 1754) → GEOMETRY OK
+[X] grid-abspos-staticpos-justify-self-001 android  | crossings 117 | child fill 1118 (ref 1248) base 1118 | bbox (18, 19, 203, 213) | band 1924 (floor 1823) → GEOMETRY WRONG (117 crossing px (a parent border painted over its child, CSS 2.1 App. E); child fill 1118 px < 0.90 x ref 1248)
+[X] grid-abspos-staticpos-align-self-vertWM-001 ref      | crossings 0 | child fill 1200 (ref 1200) base 1200 | bbox (16, 22, 187, 221) | band 1828 (floor 1828) → GEOMETRY OK
+[X] grid-abspos-staticpos-align-self-vertWM-001 web      | crossings 0 | child fill 1200 (ref 1200) base 1200 | bbox (16, 22, 187, 216) | band 1828 (floor 1828) → GEOMETRY OK
+[X] grid-abspos-staticpos-align-self-vertWM-001 ios      | crossings 0 | child fill 1248 (ref 1200) base 1248 | bbox (18, 19, 179, 213) | band 1796 (floor 1796) → GEOMETRY OK
+[X] grid-abspos-staticpos-align-self-vertWM-001 android  | crossings 116 | child fill 1120 (ref 1200) base 1120 | bbox (18, 19, 179, 213) | band 1924 (floor 1828) → GEOMETRY WRONG (116 crossing px (a parent border painted over its child, CSS 2.1 App. E))
+[X] grid-abspos-staticpos-align-self-rtl-001 ref      | crossings 0 | child fill 1152 (ref 1152) base 1152 | bbox (16, 20, 169, 239) | band 1828 (floor 1828) → GEOMETRY OK
+[X] grid-abspos-staticpos-align-self-rtl-001 web      | crossings 0 | child fill 1152 (ref 1152) base 1152 | bbox (16, 20, 169, 230) | band 1828 (floor 1828) → GEOMETRY OK
+[X] grid-abspos-staticpos-align-self-rtl-001 ios      | crossings 0 | child fill 1224 (ref 1152) base 1224 | bbox (16, 18, 172, 230) | band 1786 (floor 1786) → GEOMETRY OK
+[X] grid-abspos-staticpos-align-self-rtl-001 android  | crossings 112 | child fill 1110 (ref 1152) base 1110 | bbox (19, 18, 172, 230) | band 1924 (floor 1828) → GEOMETRY WRONG (112 crossing px (a parent border painted over its child, CSS 2.1 App. E))
+[ID] borders-008 android  | identical to wave54-final → GEOMETRY OK
+[ID] clip-path-borderBox-1e android  | identical to wave54-final → GEOMETRY OK
+[ID] clip-path-contentBox-1e android  | identical to wave54-final → GEOMETRY OK
+[ID] clip-path-paddingBox-1e android  | identical to wave54-final → GEOMETRY OK
+[ID] backdrop-filter-clip-rect-2 android  | identical to wave54-final → GEOMETRY OK
+[ID] background-clip-002 android  | identical to wave54-final → GEOMETRY OK
+[ID] s-11-1-1b-001 android  | identical to wave54-final → GEOMETRY OK
+[ID] backdrop-filter-clip-radius-zoom android  | identical to wave54-final → GEOMETRY OK
+[ID] grid-abspos-staticpos-align-items-center android  | identical to wave54-final → GEOMETRY OK
+[ID] flex-abspos-staticpos-align-self-safe-003 android  | identical to wave54-final → GEOMETRY OK

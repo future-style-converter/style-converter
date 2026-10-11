@@ -1,0 +1,103 @@
+# fix-r3.teeth-before-after — 2026-10-11T19:04:57Z; HEAD 640276a0; throwaway wave55-fix-r3-teeth-wt; expectations.json 490dc5b9a8b33ef3…
+# probes-teeth.py cc706a5b4e29b2aa… · -r2 b7f302a9e5c46978… · -r3 668d0c542cb1a7ac… · added_ink.py 5c3fecdbe82346af…
+
+## BEFORE: the round-2 probe bytes (every round-3 added-ink case should be a VIOLATION: the fake accepted)
+  positioned-parent-slot.geometry.py 96832289b0424735…
+  compose-wpt-content-box-cb.geometry.py 7c83a63eaa3d9c2a…
+  cbb-android.geometry.py 1fa595a11152a03a…
+  counter-suffix-rows.geometry.py 532358161f48c3f5…
+  ua-heading-margin.geometry.py 08024cf0319b8509…
+  android-paint-order.geometry.py dd06fcae0700a713…
+  hyphen-ios-linebox.geometry.py cb2864bbbc801e2e…
+  probes-teeth.py exit 1 — 215 cases; violations 77; gating + tally keys with ≥ 1 rejected fake 48 / 48
+  violations: 77 (round-3 cases: 77; rounds 1-2: 0)
+    VIOLATION L2 r3-L2-U1-core-corner-blob3: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip android printed PASS, pre-registered FAIL
+    VIOLATION L2 r3-L2-U1-core-corner-blob3: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-2 android printed PASS, pre-registered FAIL
+    VIOLATION L2 r3-L2-U1-core-corner-blob3: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-4 android printed PASS, pre-registered FAIL
+    VIOLATION L2 r3-L2-U1-core-hole3: compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-htb-ltr android printed PASS, pre-registered FAIL
+    VIOLATION L2 r3-L2-U1-core-hole3: compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vlr-ltr android printed PASS, pre-registered FAIL
+    VIOLATION L2 r3-L2-U1-core-hole3: compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vrl-ltr android printed PASS, pre-registered FAIL
+    VIOLATION L2 r3-L2-U1-core-hole3: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip android printed PASS, pre-registered FAIL
+    VIOLATION L2 r3-L2-U1-core-hole3: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-2 android printed PASS, pre-registered FAIL
+    VIOLATION L2 r3-L2-U1-core-hole3: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-4 android printed PASS, pre-registered FAIL
+    VIOLATION L2 r3-L2-U2-core-corner-blob3: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-3 android printed PASS, pre-registered FAIL
+    VIOLATION L2 r3-L2-U2-core-hole3: cbb-android.geometry.py backdrop-filter-nested-border-radius-clip-3 android printed PASS, pre-registered FAIL
+    VIOLATION L2 r3-L2-U2-core-hole3: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-3 android printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row6-band-ghost+3y: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row6-band-ghost+5y: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row6-band-ghost+7y: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row6-band-ghost-3y: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row6-band-hdup+1x: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row6-band-hdup+2x: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row6-band-hdup-2x: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row6-dot2-left: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row6-stray2-gap: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row6-stray3-gap: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row6-stray3-above: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row6-stray3-inside: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row7-band-ghost+3y: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row7-band-ghost+5y: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row7-band-ghost+7y: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row7-band-ghost-3y: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row7-band-hdup+1x: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row7-band-hdup+2x: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row7-band-hdup-2x: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row7-dot2-left: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row7-stray2-gap: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row7-stray3-gap: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row7-stray3-above: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row7-stray3-inside: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row9-band-ghost+3y: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row9-band-ghost+5y: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row9-band-ghost+7y: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row9-band-ghost-3y: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row9-band-hdup+1x: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row9-band-hdup+2x: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row9-band-hdup-2x: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row9-dot2-left: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row9-stray2-gap: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row9-stray3-gap: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row9-stray3-above: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-row9-stray3-inside: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-rows679-band-ghost+3y: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-rows679-band-ghost+3y: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-rows679-band-ghost+3y: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-rows679-band-ghost+5y: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-rows679-band-ghost+5y: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-rows679-band-ghost+5y: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-rows679-band-ghost+7y: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-rows679-band-ghost+7y: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-rows679-band-ghost+7y: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-whole-ghost+7y: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-whole-ghost+7y: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-whole-ghost+7y: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-whole-ghost-12y: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-whole-hdup+1x: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-whole-hdup+1x: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-whole-hdup+1x: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-whole-hdup+2x: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-whole-hdup+2x: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-whole-hdup+2x: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-whole-hdup-2x: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-whole-hdup-2x: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-dir-whole-hdup-2x: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-bidi-stray2-touch-glyph: positioned-parent-slot.geometry.py [S] bidi-tab-001 android rtl-rows printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-bidi-stray2-touch-box: positioned-parent-slot.geometry.py [S] bidi-tab-001 android rtl-rows printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-stack-stray2-2px-off: positioned-parent-slot.geometry.py [W] anchor-position-multicol-nested-001 android stack printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-stack-stray3-free: positioned-parent-slot.geometry.py [W] anchor-position-multicol-nested-001 android stack printed PASS, pre-registered FAIL
+    VIOLATION L3 r3-L3-stack-stray2-touch: positioned-parent-slot.geometry.py [W] anchor-position-multicol-nested-001 android stack printed PASS, pre-registered FAIL
+    VIOLATION L5 r3-fixed-hdup+2x: counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 android printed PASS, pre-registered FAIL
+    VIOLATION L5 r3-fixed-hdup+2x: counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 ios printed PASS, pre-registered FAIL
+
+## AFTER: the current probe bytes (0 violations)
+  positioned-parent-slot.geometry.py 134d16f229b1bd84…
+  compose-wpt-content-box-cb.geometry.py c52fe610cb166a1e…
+  cbb-android.geometry.py 76abeb24470b3cf2…
+  counter-suffix-rows.geometry.py 7582245029da6f2c…
+  ua-heading-margin.geometry.py 13fc864b2df369de…
+  android-paint-order.geometry.py 57cb351c3a366d96…
+  hyphen-ios-linebox.geometry.py 191cd7bbf5e8efea…
+  probes-teeth.py exit 0 — 215 cases; violations 0; gating + tally keys with ≥ 1 rejected fake 48 / 48
+  violations: 0 (round-3 cases: 0; rounds 1-2: 0)
+
+throwaway removed (0 left)

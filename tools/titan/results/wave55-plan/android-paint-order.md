@@ -394,6 +394,17 @@ on DEVICE is W1's question.
   backdrop-filter-clip-rect-2 / -clip-rect-zoom / -clip-rect.
 - **legacy 1428.**
 
+**Plan-skeptic round 1 amendment (generator-truth M2; PLAN §9 D21).** The counts above are the EXPLICIT-px census (a
+band only when `Border*Width.px > 0`). Compose paints more: `BorderSideExtractor.extractBorderConfig` resolves logical
+sides and the `BorderWidth` / `BorderStyle` shorthands, reads width keywords, and `applyMediumDefault` (`:158-171`) paints
+a visible style with NO width at 3 dp, on the painting path (`BordersFacade.kt:72`, `StyleApplier.kt:879`).
+`android-paint-order.maymove-medium.py` → `.maymove-medium.out.txt` mirrors that resolution: **1973** bordered components
+under Compose's rule (1438 explicit + 535 style-only / logical / shorthand), so the legacy route holds 1963; the
+may-move set is **278 documents** (252 + 26: floats-clear-multicol ×8, anchor-center-overflow ×4, attachment-local-
+positioning-2/-3/-4, box-decoration-break-clone-001/-002 (logical sides), all-prop-001, bidi-lines-001/-002,
+hyphens-out-of-flow-001/-002, hyphens-span-001/-002, direction-upright-001/-002). The crossing excess of all 26 is no
+carrier (android − ref ≤ 0 on every one), so the 25 carriers stand; `plan-build.py` adds the 26 to `mayMove` by rule.
+
 **U1 (IR census (1)).** 2 parents in 2 documents, 4 `abspos-band` children: clip-rect and clip-rect-zoom.
 - Capture carriers: android `{wpt__filter-effects__backdrop-filter-clip-rect, wpt__filter-effects__backdrop-filter-clip-rect-zoom}`;
   web and iOS none.

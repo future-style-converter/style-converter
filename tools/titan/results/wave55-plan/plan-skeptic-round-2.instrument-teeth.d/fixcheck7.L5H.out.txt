@@ -1,0 +1,3 @@
+  [H] ok-ios                   letter identity vs wave54-final ios: row3 0.76 row4 0.779
+  [H] H-letters-swapped-3-4    letter identity vs wave54-final ios: row3 0.466 row4 0.448
+  [H] r1:H-letter-block        letter identity vs wave54-final ios: row3 0.713 row4 0.674

@@ -1,0 +1,13 @@
+L6 picked: {'abspos/flex-abspos-staticpos-align-self-safe-001': 'child@39,39 -3,+0', 'abspos/flex-abspos-staticpos-align-self-safe-002': 'child@44,272 -3,+0', 'abspos/grid-abspos-staticpos-align-self-001': 'child@19,30 +3,+0', 'abspos/grid-abspos-staticpos-justify-self-001': 'child@30,19 +3,+0', 'abspos/grid-abspos-staticpos-align-self-vertWM-001': 'child@18,19 +3,+0', 'abspos/grid-abspos-staticpos-align-self-rtl-001': 'child@33,18 +3,+0'}
+L6-X-one-child-moved-3px                   gate-exit 1  [X] flex-abspos-staticpos-align-self-safe-001 android      FAIL   rejected
+      17748 (ref 17956) base 16560 | bbox (20, 39, 107, 335) | band 1257 (floor 1308) → GEOMETRY WRONG (40 crossing px (a parent border painted over its child, CSS 2.1 App. E))
+L6-X-one-child-moved-3px                   gate-exit 1  [X] grid-abspos-staticpos-align-self-001 android           PASS   ACCEPTED (defect)
+      [X] grid-abspos-staticpos-align-self-001 android | crossings 0 | child fill 1000 (ref 1056) base 914 | bbox (19, 30, 158, 230) | band 1542 (floor 1541) → GEOMETRY OK
+L6-X-one-child-moved-3px                   gate-exit 1  [X] grid-abspos-staticpos-align-self-rtl-001 android       PASS   ACCEPTED (defect)
+      [X] grid-abspos-staticpos-align-self-rtl-001 android | crossings 0 | child fill 1234 (ref 1152) base 1110 | bbox (19, 18, 172, 230) | band 1794 (floor 1828) → GEOMETRY OK
+L6-X-one-child-moved-3px                   gate-exit 1  [X] grid-abspos-staticpos-align-self-vertWM-001 android    PASS   ACCEPTED (defect)
+       grid-abspos-staticpos-align-self-vertWM-001 android | crossings 0 | child fill 1248 (ref 1200) base 1120 | bbox (18, 19, 179, 213) | band 1796 (floor 1828) → GEOMETRY OK
+L6-X-one-child-moved-3px                   gate-exit 1  [X] grid-abspos-staticpos-justify-self-001 android         PASS   ACCEPTED (defect)
+      [X] grid-abspos-staticpos-justify-self-001 android | crossings 0 | child fill 1248 (ref 1248) base 1118 | bbox (18, 19, 203, 213) | band 1794 (floor 1823) → GEOMETRY OK
+
+5 (fake, key) reads; ACCEPTED 4; rejected 1; other 0

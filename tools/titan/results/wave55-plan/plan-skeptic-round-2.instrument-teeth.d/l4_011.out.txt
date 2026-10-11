@@ -1,0 +1,4 @@
+  arm C: [M] text-decoration-inset-011 ios (gating): PASS —  [(158, 172, 57, 184), (190, 207, 85, 183), (229, 229, 170, 185), (286, 303, 39, 184)] → GEOMETRY OK
+  arm C: [M] text-decoration-inset-011 android (gating): PASS —  [(157, 176, 57, 184), (189, 208, 80, 184), (230, 230, 166, 180), (286, 304, 41, 184)] → GEOMETRY OK
+  arm U1: [M] text-decoration-inset-011 ios (gating): PASS —  [(158, 172, 57, 184), (190, 207, 85, 183), (229, 229, 170, 185), (286, 303, 39, 184)] → GEOMETRY OK
+  arm U1: [M] text-decoration-inset-011 android (gating): PASS —  [(157, 176, 57, 184), (189, 208, 80, 184), (230, 230, 166, 180), (286, 304, 41, 184)] → GEOMETRY OK

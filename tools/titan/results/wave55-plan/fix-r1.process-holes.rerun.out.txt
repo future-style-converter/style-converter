@@ -1,0 +1,73 @@
+
+## E1 plan-prose.py --check on the shared tree
+plan-prose --check tools/titan/results/wave55-plan/PLAN.md against expectations.json sha256 a1fdca7126867267…: 36 gen blocks · 30 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
+plan-prose --check: HOLDS
+exit=0
+
+## E2 the generator reproduces its outputs (plan-build.py --out <scratch>)
+exit=0
+expectations.json byte-identical
+watchlist.txt byte-identical
+plan-build.out.txt byte-identical
+
+## E4 an L6 U2 revert does not withdraw the may-move class (M4) and keeps its arm (S8)
+plan-build exit=0
+unionMayMoveCaptures.android 240 -> 0 (after L6 U2 reverted; want 0)
+lanes.L6.mayMove.android     0
+carriersWithdrawn.android    25
+abArms after the revert      [('drop-NB-ios', 'L1', 'closing gate'), ('drop-L4-U2', 'L4', 'probe time: right after the wave55-pre read-out, BEFORE any stage-1 revert or swap commit (HEAD == the wave55-pre tree, proved by its hash block; ab-arms55.sh refuses otherwise — round 1, S5)')] (the L6 drop-U2 arm is still listed)
+88:const mayMoveSrc = lane ? (lane.mayMove || {}) : (EXP.unionMayMoveCaptures || {});
+
+## E5 SeamReachabilityTest.kt: five module lines from three lanes (M1)
+  (a) END, each cut on HEAD          land: L4s1 ok L3s1 FAIL L5s4 FAIL
+                                     revert latest-first: L5s4 FAIL L3s1 FAIL L4s1 ok
+  (b) re-cut chain: git apply -R --check c_L4s3  on the full stack: FAIL
+  (b) re-cut chain: git apply -R --check c_L4s1  on the full stack: FAIL
+  (b) re-cut chain: git apply -R --check c_L3U2  on the full stack: FAIL
+  (b) re-cut chain: 3-way revert of L4 seam 3 (git revert's merge) on the full stack: CONFLICT
+  (c) pinned anchors, §4 order      land: A_L4 ok A_L3 ok A_L5 ok
+                                     revert latest-first: A_L5 ok A_L3 ok A_L4 ok
+  (c) pinned anchors, reversed order land: A_L5 ok A_L3 ok A_L4 ok
+                                     revert latest-first: A_L4 ok A_L3 ok A_L5 ok
+
+## E6 land-units.sh --check on a synthetic limit-killed lane (M3) — one throwaway worktree
+throwaway 640276a0
+  note with NO STATUS line, no TREES: line                   exit=1  SUMMARY  5 error(s), 0 warning(s) — NOT landable as is (--
+  note ending STATUS: PARTIAL                                exit=1  SUMMARY  5 error(s), 0 warning(s) — NOT landable as is (--
+  note names 2 U1 paths + a sha; the patch carries 1, another sha exit=1  SUMMARY  3 error(s), 0 warning(s) — NOT landable as is (--
+  (throwaway removed)
+
+## E7 a D13 re-probe read with the stage-1 strings, run id substituted (S2)
+  order     writes stdout only — no record path
+  records   writes stdout only — no record path
+  abDiff    writes ['tools/titan/results/wave55-gate/stage1/wave55-pre-r1/abdiff.txt']
+  score     writes ['tools/titan/results/wave55-gate/stage1/wave55-pre-r1/score.json', 'tools/titan/results/wave55-gate/stage1/wave55-pre-r1/score.movers0.txt']
+  floors    writes ['tools/titan/results/wave55-gate/stage1/wave55-pre-r1/floors.txt']
+  controls  writes ['tools/titan/results/wave55-gate/stage1/wave55-pre-r1/controls.json', 'tools/titan/results/wave55-gate/stage1/wave55-pre-r1/controls.txt']
+  geometry  writes ['tools/titan/results/wave55-gate/stage1/wave55-pre-r1/geometry.json', 'tools/titan/results/wave55-gate/stage1/wave55-pre-r1/geometry.txt']
+
+## E8 a stage-2 regeneration given only the new decision file drops the stage-1 decision (S3)
+plan-build exit=0
+  stage-1 JSON probeDecisions: [('L6', 'U2')]
+  stage-2 JSON probeDecisions: [('L2', 'U2'), ('L2', 'U1')] — L6 U2 gone; L6 [X] gating keys back: 6
+  the generator records its inputs: no
+E9 calibration literal after the L2 pair revert: gating f→P rows 8; adjudicateCalibrations[0].expect = 'FAIL R4: the 8 gating flip rows missed (nothing landed)'
+
+## E10 prose numbers outside the gen blocks survive a regeneration (S7)
+plan-prose --check: HOLDS
+check exit=0
+331:**16 in full · 0 in part · 0 paint order only (never counted) · 6 withdrawn by probe decisions.**
+
+## E11 installed-build hash reads named in PLAN.md (M2)
+169:    `until grep 'attempt 1 starting' <driver log>` wait, by `tools/titan/results/wave55-gate/installed-build-hash.sh
+1999:- `hashRead` (while the devices are up): `` until grep -q 'attempt 1 starting' tools/titan/runs/wave55-pre/gate-dri
+2012:  - `hashRead`: `` until grep -q 'attempt 1 starting' tools/titan/runs/wave55-pre-r1/gate-driver/driver.log 2>/dev/
+2020:  - `hashRead`: `` until grep -q 'attempt 1 starting' tools/titan/runs/wave55-pre-r2/gate-driver/driver.log 2>/dev/
+2029:- `hashRead` (while the devices are up): `` until grep -q 'attempt 1 starting' tools/titan/runs/wave55-probe/gate-d
+2331:       - run `tools/titan/results/wave55-gate/installed-build-hash.sh 'wave55-final corpus launch …'`;
+  wave-54 record labels:
+21:== wave54-pre (stage-1 probe: CSS2, css-counter-styles, css-tables, css-text; tree 9d7f
+27:== wave54-probe (stage-2 probe, 26 sections; tree 206d71d9 = the stage-1 tree, docs onl
+
+## Z the shared tree is unchanged (HEAD + status outside the two plan dirs)
+  unchanged

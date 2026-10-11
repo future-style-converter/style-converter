@@ -1,0 +1,60 @@
+# readers-selfcheck.txt — 2026-10-11T19:14:32Z; shared tree HEAD 640276a0; worktree HEAD 640276a0 (detached, throwaway)
+# worktree links: tools/titan/runs -> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs, tools/wpt -> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/wpt
+
+## A. plan-build.py in the worktree
+  snapshot-cells.mjs in the worktree reproduces cells-wave54-final.json byte-for-byte
+  plan-build.py --out (dry run) exit 0
+  expectations.json: byte-identical to the installed one
+  watchlist.txt: byte-identical to the installed one
+  RED as required  M1 a prediction's from disagrees with the run of record  (exit 1: AssertionError: css-text/hyphens/hyphenate-character-001.html ios: brief says "P 0.9612", wave54-final says "P 0.9611")
+  RED as required  M2 a probe cmd off the pinned interpreter (C14)  (exit 1:     assert cmd.startswith(PY + ' '), f'probe cmd not on the pinned interpreter (C14): {cmd}')
+  RED as required  M3 a carrier slips into a must-not-move list  (exit 1:     assert len(named) + len(complement) + len(carrier_cells) + len(ring_cells) == len(CELLS), 'the complement does not partition the scored cells')
+  RED as required  M4 an expect key without its section (C15)  (exit 1:     assert set(keyCells) == set(expect), f'{script_of(cmd)}: keyCells {sorted(set(expect) ^ set(keyCells))[:4]}')
+  RED as required  M5 a gating floor set from a replay magnitude  (exit 1:     assert not gating or floor == PASS, f'{line}: a gating floor is the pass threshold {PASS} (the magnitude is `to`)')
+  RED as required  M6 the ring-fenced test leaks into the complement  (exit 1:     assert len(named) + len(complement) + len(carrier_cells) + len(ring_cells) == len(CELLS), 'the complement does not partition the scored cells')
+  hooks:
+    --reverted (L2 U2 + U1, the pair) exit 0: 2 decisions; probe decision L2-cbb-android U1: withdrawn predictions 14, demoted [], geometry keys ['compose-wpt-content-box-cb.geometry.py abspos/abspos
+    … geometry-gate.py on that regenerated JSON, --lanes L2: exit 0 (0 = no gating key left), 8 WITHDRAWN key line(s); geometry-gate wave54-final (base wave54-final): 33 keys — PASS 22 · FAIL 11 (gating 0) · UNMEASURED 0 (gating 0) · 
+    --contingency NB-ios-b exit 0: revert units (commits): 29 (+ contingency 1); NB-ios revertOrder ['NB-ios-b', 'NB-ios']
+    --go-small exit 0:   L4-ua-heading-margin: carriers [0, 4, 4] wire 0 predictions 8 mustNotMove 46 units ['U1-android', 'U1-ios', 'U2-ios'] probeSections 3
+
+## B. geometry-gate.py
+  B1 the pre-fix run (base wave54-open), no --self-test: exit 1 (1 required) — geometry-gate wave54-final (base wave54-open): 230 keys — PASS 149 · FAIL 81 (gating 43) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  B2 wave54-pre (4 sections) without --sections: gating UNMEASURED 33; with --sections CSS2,css-counter-styles,css-tables,css-text: gating UNMEASURED / NOT PROBED = 0 160
+     as required: the filter turns every unprobed gating key from UNMEASURED into NOT PROBED
+  B3 MUTATION (filter disabled) with --sections: gating UNMEASURED 33 — RED as required: the filter is load-bearing
+  RED as required  B4 an off-interpreter cmd is refused (C14)  (exit 2: REFUSED — probe cmds off the pinned interpreter `/opt/homebrew/bin/python3.12 -B` or keys without a section (C14 / C15):)
+  RED as required  B5 a STALE expectations.json is refused  (exit 2: STALE expectations.json — gating keys of reverted units (re-run plan-build.py):)
+  RED as required  B6 a control that no longer holds turns the self-test red  (exit 1: self-test: FAILS — 1 violation(s), 0 self-check failure(s))
+  as required     B7 --base equal to the run, without --self-test, is refused (round 2, S2)  (exit 2: REFUSED — --base wave54-final is the run itself: every base-relative read (L1 glyphs, L6 [X], L3 / L5 [C] / [K], L4 crop) would compare th)
+  as required     B8 a flag given without its value (--lanes) is a usage error, not an IndexError (S5)  (exit 2:   REFUSED — --lanes given without a value)
+  as required     B9 an EMPTY --lanes entry ('L1,') is refused, never widened to every lane (S5)  (exit 2: REFUSED — unknown scope: --sections - (neither a key's section nor a section of wave54-final); --lanes [''] (a prefix of no lane in ['L1-h)
+  as required     B10 a --base run with no sections/ is refused (S2)  (exit 2: REFUSED — --base wave55-nope has no sections/ directory under tools/titan/runs: no base capture can be read)
+  as required     B11 MUTATION (the base check removed): --base = the run is read (exit 1) — the refusal is load-bearing
+
+## C. probe-readout.mjs
+  RED as required  C1 a record whose prev is not the base  (exit 2: ORDER: this record is score-gate.mjs wave54-final → wave54-final; the probe read needs wave55-open FIRST (score-gate.mjs wave55-open <probe> --mover)
+  RED as required  C2 a thresholded (--movers 0.005) record  (exit 2: NOT A --movers 0 RECORD: 81 cells listed (gained + lost + movers + unmeasured-now) vs 4096 scored on wave54-open; a cell absent from every list would )
+  RED as required  C3 the identity record: the 9 gating flip rows fire rule 3  (exit 1: summary: rule 1 fired 0 · rule 2 fired 0 · rule 3 fired 9 · leak signals 0 · undirected falls read 0 · unmeasured 0 · recorded for another lane )
+  RED as required  C4 the wave-54 pair: wave 54's landed changes are leak signals here  (exit 1: summary: rule 1 fired 0 · rule 2 fired 0 · rule 3 fired 9 · leak signals 62 · undirected falls read 0 · unmeasured 0 · recorded for another lane)
+  as required     C10 probe-readout --lanes without a value is a usage error (round 2, S5; was a TypeError, exit 1)  (exit 2:   REFUSED — --lanes given without a value)
+  as required     C11 probe-readout --exp without a value is a usage error  (exit 2:   REFUSED — --exp given without a value)
+  as required     C12 probe-readout an empty --sections entry ('css-text,') is refused  (exit 2:   REFUSED — an empty --sections entry ("css-text,"): it would silently read every section)
+  as required     C5 a 4-section record read --stage1 lists the 7 absent stage-1 sections MISSING; with --sections css-counter-styles,css-text none (summary: rule 1 fired 0 · rule 2 fired 0 · rule 3 fired 1 · leak signals 12 · undirect)
+  synthetic: may-move +0.001 on CSS2/abspos/static-inside-inline-002.html android, ring-fenced basic-blur android −0.01, -005 android −0.003 (ok: within its pre-registered band); may-move +0.003 on CSS2/abspos/static-inside-inline-003.html, -005 android −0.0039, complement CSS2/abspos/between-float-and-text.html android +0.0001 (red)
+  as required     C6 synthetic OK case (--lanes L5,L6): exit 0, a may-move move within the band, the ring-fence printed, no rule 2 on -005 android at −0.003 — exit 0, may-move within band 1, ring-fenced 1, -005 fires 0
+  as required     C7 synthetic RED case: exit 1, may-move beyond the band named, rule 2 at −0.0039, a complement move of +0.0001 is a leak — exit 1, MAY-MOVE 1, rule 2 1, complement LEAK 1
+  as required     C8 MUTATION (D5 bar ignored) turns the OK case red — exit 1, rule 2 on -005 android 1
+  as required     C9 MUTATION (may-move class removed) turns the OK case red — exit 1, LEAK lines 1
+
+## D. probes-selfcheck.py can fail: a control that can never fail promoted to GATING
+  RED as required  D1 a gating key with no failing picture (today OK, no fake) is reported CANNOT FAIL  (exit 1:   CANNOT FAIL: flex-zero-gap-rules.geometry.py flex/flex-gap-decorations-033 ios)
+
+## E. round 1: the probe-decision mechanism (M4 / S8 / S3) and the standing fakes (M9) can fail
+  as required     E1 regenerated with L6 U2 reverted: unionMayMoveCaptures.android empty, the class recorded as withdrawn, drop-L6-U2 withdrawn — exit 0, union may-move 0, withdrawn 240, arms drop-NB-ios,drop-L4-U2, abArmsWithdrawn drop-L6-U2
+  as required     E2 with the withdrawal installed, the nudged may-move capture (wpt__CSS2__abspos__static-inside-inline-002) is a LEAK — exit 1
+  as required     E3 MUTATION (the withdrawal disabled in the generator): the same nudge reads may-move and HOLDS — exit 0
+  RED as required  E4 a regeneration fed only a newer decision file refuses to drop the installed L6 U2 row (append-only, S3)  (exit 1: AssertionError: decision row dropped: L6-android-paint-order U2 at wave55-pre is in the installed expectations.json but not in ../rsc/rev-l2only.json )
+  as required     E5 probes-teeth.py on a JSON whose L2 probe is the pre-round-1 wave-54 rule: red (hollow / corners2 / stripe30 accepted) — exit 1, 49 violation(s)
+
+readers-selfcheck: every check behaved as required

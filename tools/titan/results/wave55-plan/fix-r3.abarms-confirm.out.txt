@@ -1,0 +1,22 @@
+# fix-r3.abarms-confirm.out.txt — expectations.json sha256 490dc5b9a8b33ef3…: the A/B arms formerly both named drop-U2, rendered per arm
+arms ['drop-NB-ios', 'drop-L4-U2', 'drop-L6-U2']: names unique True; run ids ['wave55-ab-drop-NB-ios', 'wave55-ab-drop-L4-U2', 'wave55-ab-drop-L6-U2']: unique True; any arm still named drop-U2: False
+
+drop-NB-ios (L1-hyphen-ios-linebox; when: closing gate…)
+  units ['NB-ios'] · drops ['NB-ios-S1*', 'NB-ios'] · against wave55-final · platforms ['ios']
+  run id   wave55-ab-drop-NB-ios
+  runner   tools/titan/results/wave55-gate/ab-arms55.sh <arms-file> --run --against wave55-final
+  read-out node tools/titan/results/wave52-gate/ab-diff.mjs wave55-ab-drop-NB-ios wave55-final --threshold 0.002 --platforms ios
+
+drop-L4-U2 (L4-ua-heading-margin; when: probe time: right after the wave55-pre read-out, BEFORE any …)
+  units ['U2-ios', 'U2-android'] · drops ['U2-ios-S1*', 'U2-android-S1*', 'U2-ios', 'U2-android'] · against wave55-pre · platforms ['ios', 'android']
+  run id   wave55-ab-drop-L4-U2
+  runner   tools/titan/results/wave55-gate/ab-arms55.sh <arms-file> --run --against wave55-pre
+  read-out node tools/titan/results/wave52-gate/ab-diff.mjs wave55-ab-drop-L4-U2 wave55-pre --threshold 0.002 --platforms ios,android
+
+drop-L6-U2 (L6-android-paint-order; when: closing gate…)
+  units ['U2'] · drops ['U2-S1*', 'U2'] · against wave55-final · platforms ['android']
+  run id   wave55-ab-drop-L6-U2
+  runner   tools/titan/results/wave55-gate/ab-arms55.sh <arms-file> --run --against wave55-final
+  read-out node tools/titan/results/wave52-gate/ab-diff.mjs wave55-ab-drop-L6-U2 wave55-final --threshold 0.002 --platforms android
+
+every arm's runner line carries --against <its own against>, and its read-out (ab-diff) reads <its run id> against it; drop-L4-U2 is read against wave55-pre, drop-NB-ios / drop-L6-U2 against wave55-final (one arms file per against: ab-arms55.sh takes one --against per invocation)

@@ -93,9 +93,15 @@ for (const sec of fs.readdirSync(path.join(runDir, 'sections')).sort()) {
       }
       const text = textOf(c);
       if (!text.trim()) continue;
+      // Plan-skeptic round 1 (generator-truth M1): a vertical run is DECLINED by NB-ios's horizontal-writing-mode guard
+      // (usedLineHeight returns nil when the run is not horizontal, ComponentRenderer.swift's horizontalWritingMode at
+      // :3220) — its line count is not what singleLineText says: hyphens-vertical-001's space-less 'hyphen\xadation' is
+      // "one line" to the whitespace proxy (lineCountIsExact, renderedLineCount 1) while TextKit draws 3 lines.
+      const wm = eff(c, 'WritingMode');
+      const vertical = typeof wm === 'string' && /^(VERTICAL|SIDEWAYS)/.test(wm);
       const cell = cellsByIr.get(f) ?? { test: `${sec}/${f}`, cells: {} };
       rows.push({ sec, ir: f, test: cell.test, comp: c.id, own, face, families: famList.join(','), px,
-        boxes: boxes(face, px), chars: text.length, ios: cell.cells.ios ?? '—', cells: cell.cells,
+        boxes: boxes(face, px), chars: text.length, ios: cell.cells.ios ?? '—', cells: cell.cells, vertical,
         // A run of the hyphenate-character family is a multi-line U+00AD pre-break (its N is measured in the pictures);
         // every other radius run is one line (no internal wrap at its box width — read off the captures).
         multiLine: /hyphenate-character-00[1-4]/.test(f) });
@@ -143,8 +149,9 @@ console.log('(4) iOS carrier classification per document (TARGET / MOVES = captu
 const cls = new Map();
 for (const r of rows) {
   const b = r.boxes; const one = b ? Math.ceil(b.raw - 1e-9) : null;
-  const v = r.multiLine ? 'TARGET' : (b && b.chrome !== one ? 'MOVES' : 'SAME');
-  const why = r.multiLine ? `multi-line pre-break, pitch ${b.raw} → ${b.chrome}` : `1 line: box ceil(${b.raw}) = ${one} → ${b.chrome}`;
+  const v = r.vertical ? 'SAME' : r.multiLine ? 'TARGET' : (b && b.chrome !== one ? 'MOVES' : 'SAME');
+  const why = r.vertical ? 'vertical writing mode: declined by the NB-ios horizontal guard (TextKit draws several lines; the singleLineText proxy would have pinned it to one)'
+    : r.multiLine ? `multi-line pre-break, pitch ${b.raw} → ${b.chrome}` : `1 line: box ceil(${b.raw}) = ${one} → ${b.chrome}`;
   const prev = cls.get(r.ir);
   const rank = { TARGET: 2, MOVES: 1, SAME: 0 };
   if (!prev || rank[v] > rank[prev.v]) cls.set(r.ir, { v, why, test: r.test, ios: r.ios, face: `${r.face}@${r.px}` });

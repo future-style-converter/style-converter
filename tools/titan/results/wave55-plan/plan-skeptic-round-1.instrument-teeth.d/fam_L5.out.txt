@@ -1,0 +1,48 @@
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix android | fixed | PASS | [C] counter-suffix android row5:x33-46,x49-52|item x65 row6:x34-45,x49-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix ios | fixed | PASS | [C] counter-suffix ios row5:x33-46,x50-52|item x64 row6:x33-46,x50-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [H] counter-suffix ios | fixed | PASS | [H] counter-suffix ios row3:x46-53,x57-57 row4:x47-53,x57-57 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 android | fixed | PASS | [I] cjk-decimal/css3-counter-styles-005 android y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 ios | fixed | PASS | [I] cjk-decimal/css3-counter-styles-005 ios y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [T] counter-suffix ios | fixed | PASS | [T] counter-suffix ios row9 digit (139, 145) → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix android | I-comma-removed | PASS | [C] counter-suffix android row5:x33-46,x49-52|item x65 row6:x34-45,x49-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix ios | I-comma-removed | PASS | [C] counter-suffix ios row5:x33-46,x50-52|item x64 row6:x33-46,x50-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [H] counter-suffix ios | I-comma-removed | PASS | [H] counter-suffix ios row3:x46-53,x57-57 row4:x47-53,x57-57 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 android | I-comma-removed | PASS | [I] cjk-decimal/css3-counter-styles-005 android y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 ios | I-comma-removed | PASS | [I] cjk-decimal/css3-counter-styles-005 ios y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [T] counter-suffix ios | I-comma-removed | PASS | [T] counter-suffix ios row9 digit (139, 145) → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix android | I-marker-block | PASS | [C] counter-suffix android row5:x33-46,x49-52|item x65 row6:x34-45,x49-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix ios | I-marker-block | PASS | [C] counter-suffix ios row5:x33-46,x50-52|item x64 row6:x33-46,x50-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [H] counter-suffix ios | I-marker-block | PASS | [H] counter-suffix ios row3:x46-53,x57-57 row4:x47-53,x57-57 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 android | I-marker-block | PASS | [I] cjk-decimal/css3-counter-styles-005 android y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 ios | I-marker-block | PASS | [I] cjk-decimal/css3-counter-styles-005 ios y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [T] counter-suffix ios | I-marker-block | PASS | [T] counter-suffix ios row9 digit (139, 145) → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix android | T-1-down3 | PASS | [C] counter-suffix android row5:x33-46,x49-52|item x65 row6:x34-45,x49-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix ios | T-1-down3 | PASS | [C] counter-suffix ios row5:x33-46,x50-52|item x64 row6:x33-46,x50-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [H] counter-suffix ios | T-1-down3 | PASS | [H] counter-suffix ios row3:x46-53,x57-57 row4:x47-53,x57-57 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 android | T-1-down3 | PASS | [I] cjk-decimal/css3-counter-styles-005 android y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 ios | T-1-down3 | PASS | [I] cjk-decimal/css3-counter-styles-005 ios y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [T] counter-suffix ios | T-1-down3 | PASS | [T] counter-suffix ios row9 digit (139, 145) → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix android | T-1-bar7 | PASS | [C] counter-suffix android row5:x33-46,x49-52|item x65 row6:x34-45,x49-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix ios | T-1-bar7 | PASS | [C] counter-suffix ios row5:x33-46,x50-52|item x64 row6:x33-46,x50-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [H] counter-suffix ios | T-1-bar7 | PASS | [H] counter-suffix ios row3:x46-53,x57-57 row4:x47-53,x57-57 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 android | T-1-bar7 | PASS | [I] cjk-decimal/css3-counter-styles-005 android y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 ios | T-1-bar7 | PASS | [I] cjk-decimal/css3-counter-styles-005 ios y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [T] counter-suffix ios | T-1-bar7 | PASS | [T] counter-suffix ios row9 digit (139, 145) → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix android | C-ideograph-gutted | PASS | [C] counter-suffix android row5:x33-33,x49-52|item x65 row6:x34-34,x49-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix ios | C-ideograph-gutted | PASS | [C] counter-suffix ios row5:x33-33,x50-52|item x64 row6:x33-33,x50-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [H] counter-suffix ios | C-ideograph-gutted | PASS | [H] counter-suffix ios row3:x46-53,x57-57 row4:x47-53,x57-57 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 android | C-ideograph-gutted | PASS | [I] cjk-decimal/css3-counter-styles-005 android y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 ios | C-ideograph-gutted | PASS | [I] cjk-decimal/css3-counter-styles-005 ios y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [T] counter-suffix ios | C-ideograph-gutted | PASS | [T] counter-suffix ios row9 digit (139, 145) → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix android | H-letter-block | PASS | [C] counter-suffix android row5:x33-46,x49-52|item x65 row6:x34-45,x49-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix ios | H-letter-block | PASS | [C] counter-suffix ios row5:x33-46,x50-52|item x64 row6:x33-46,x50-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [H] counter-suffix ios | H-letter-block | PASS | [H] counter-suffix ios row3:x46-53,x57-57 row4:x47-53,x57-57 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 android | H-letter-block | PASS | [I] cjk-decimal/css3-counter-styles-005 android y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 ios | H-letter-block | PASS | [I] cjk-decimal/css3-counter-styles-005 ios y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [T] counter-suffix ios | H-letter-block | PASS | [T] counter-suffix ios row9 digit (139, 145) → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix android | H-item-text-gone | PASS | [C] counter-suffix android row5:x33-46,x49-52|item x65 row6:x34-45,x49-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [C] counter-suffix ios | H-item-text-gone | PASS | [C] counter-suffix ios row5:x33-46,x50-52|item x64 row6:x33-46,x50-52|item x65 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [H] counter-suffix ios | H-item-text-gone | PASS | [H] counter-suffix ios row3:x46-53,x57-57 row4:x47-53,x57-57 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 android | H-item-text-gone | PASS | [I] cjk-decimal/css3-counter-styles-005 android y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [I] cjk-decimal/css3-counter-styles-005 ios | H-item-text-gone | PASS | [I] cjk-decimal/css3-counter-styles-005 ios y95:marker x217 item x267 y121:marker x218 item x268 → GEOMETRY OK
+L5 | counter-suffix-rows.geometry.py | [T] counter-suffix ios | H-item-text-gone | PASS | [T] counter-suffix ios row9 digit (139, 145) → GEOMETRY OK

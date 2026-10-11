@@ -1,0 +1,9 @@
+adjudicate <no args> -> exit 2 :: usage: adjudicate.mjs <score.json> [--geometry <geometry.json>] [--base wave55-open] [--exp <expectations.json>] 
+adjudicate order-wrong.json -> exit 2 :: ORDER: this record is score-gate.mjs wave54-final → wave55-open; adjudication needs wave55-open FIRST (node tools/titan/score-gate.mjs wave55-open wave55-final --watch  
+adjudicate thresholded-final.json -> exit 2 :: NOT A --movers 0 RECORD: 3596 cells listed against 4096 scored on wave55-open (3596 against 4096 on wave55-final); a same-verdict cell below the record's mover threshold  
+adjudicate allmet-final-curmismatch.json -> exit 2 :: NOT A --movers 0 RECORD: 4096 cells listed against 4096 scored on wave55-open (4097 against 4096 on wave55-final); a same-verdict cell below the record's mover threshold  
+adjudicate allmet-final.json -> exit 0 :: ADJUDICATION: R1–R5 hold 
+adjudicate allmet-final.json --geometry ../out/L1-fixed.json -> exit 2 :: GEOMETRY PAIR: ../out/L1-fixed.json is geometry-gate.py ../../../../../../../../../../../private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-w 
+adjudicate allmet-final.json --geometry geo-final-pair.json -> exit 0 :: ADJUDICATION: R1–R5 hold 
+adjudicate allmet-pre.json -> exit 0 :: ADJUDICATION: R1–R5 hold 
+adjudicate allmet-pre.json --base wave55-open -> exit 0 :: ADJUDICATION: R1–R5 hold 

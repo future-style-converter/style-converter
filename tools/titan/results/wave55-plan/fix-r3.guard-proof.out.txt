@@ -1,0 +1,35 @@
+# fix-r3.guard-proof.out.txt — 2026-10-11T19:05:46Z; expectations.json sha256 490dc5b9a8b33ef3… (round 2: 56dbcfc021c3ae60…); plan-build.py 22a178e5ad6cbe4d…; HEAD 640276a0
+
+## the round-3 string (expectations.json beforeEveryDeviceRun)
+export PROJECT_ROOT=/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf; [[ -z "$(git --no-optional-locks -C "$PROJECT_ROOT" status --porcelain --untracked-files=all -- runtimes apps converter tools/titan Package.swift ':(exclude)tools/titan/results' ':(exclude)*.md')" ]] || { echo "the tree differs from HEAD in code (tracked, staged or untracked): a device run would build it (round-1 S9, round-2 S1)"; exit 2; }; (( $(df -g "$PROJECT_ROOT" | awk 'NR==2{print $4}') >= 20 )) || { echo "disk < 20 GiB free (round-2 S5)"; exit 2; }; source "$PROJECT_ROOT/tools/titan/own-processes.sh" && kill_own_gradle_daemons "$PROJECT_ROOT" $(sed -n 's/^TREES: *\([^ ]*\).*/\1/p' "$PROJECT_ROOT"/tools/titan/results/wave55-*/_note.md 2>/dev/null) $(git --no-optional-locks -C "$PROJECT_ROOT" worktree list --porcelain | sed -n 's/^worktree //p' | grep -E '/wave55-')
+
+## its note (beforeEveryDeviceRunNote)
+Run the string verbatim with bash from any directory — e.g. bash -c "$(jq -r .beforeEveryDeviceRun /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave55-plan/expectations.json)" — exit 2 = refused (code differs from HEAD, or under 20 GiB free), exit 0 = both checks hold and the Gradle daemons of the shared tree, of every TREES: line and of every registered /wave55- worktree are stopped. Never ./gradlew --stop: the /wave55- filter keeps other sessions' worktrees out, and kill_own_gradle_daemons leaves (and names on stderr) any daemon that also served an unlisted checkout, so no foreign process is stopped. Bash only (it uses [[ ]] and (( )); not sh).
+
+## 1. bash -n (noexec) on each string
+/dev/fd/63: line 1: syntax error near unexpected token `('
+/dev/fd/63: line 1: `[[ -z "$(git --no-optional-locks status --porcelain --untracked-files=all -- runtimes apps converter tools/titan Package.swift ':(exclude)tools/titan/results' ':(exclude)*.md')" ]] || { echo "the tree differs from HEAD in code (tracked, staged or untracked): a device run would build it (round-1 S9, round-2 S1)"; exit 2; }; (( $(df -g . | awk 'NR==2{print $4}') >= 20 )) || { echo "disk < 20 GiB free (round-2 S5)"; exit 2; }; source tools/titan/own-processes.sh && kill_own_gradle_daemons "$PROJECT_ROOT" $(sed -n 's/^TREES: *\([^ ]*\).*/\1/p' tools/titan/results/wave55-*/_note.md) $(git worktree list --porcelain | sed -n 's/^worktree //p' | grep -E '/wave55-')   (never ./gradlew --stop; the /wave55- filter keeps other sessions' worktrees out, so no foreign process is stopped)'
+  round-2 string: bash -n exit 2   (want 2: the trailing prose note)
+  round-3 string: bash -n exit 0   (want 0)
+
+## 2. the round-3 string run verbatim
+  Gradle daemons on the host before: []
+[own-processes] kill_own_gradle_daemons roots=[/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/tba2/wave55-fix-r3-teeth-wt /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/wave55-fix-r3-wt]: stopped [] left []
+  from the shared tree's root: exit 0   (want 0)
+[own-processes] kill_own_gradle_daemons roots=[/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/tba2/wave55-fix-r3-teeth-wt /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/wave55-fix-r3-wt]: stopped [] left []
+  from /: exit 0   (want 0)
+  Gradle daemons on the host after: []
+
+## 3. red: the same string can refuse
+  throwaway wave55-fix-r3-guard-wt at 640276a0
+the tree differs from HEAD in code (tracked, staged or untracked): a device run would build it (round-1 S9, round-2 S1)
+  PROJECT_ROOT = the throwaway + one untracked runtime source: exit 2   (want 2)
+  the same throwaway, source removed: exit 0   (want 0: the refusal was the untracked file)
+disk < 20 GiB free (round-2 S5)
+  the shared tree, the disk floor at 100000 GiB: exit 2   (want 2)
+
+## 4. red: the generator refuses a string carrying prose (its bash -n assertion), in the throwaway
+  mutant: the round-2 trailing note re-appended to the string
+  mutant plan-build.py: exit 1   (want 1) — AssertionError: beforeEveryDeviceRun does not parse as bash (bash -n exit 2): bash: line 1: syntax error near unexpected token `(' …
+  unmutated plan-build.py in the throwaway: exit 0 (want 0), its expectations.json byte-identical to the installed one: yes
+  throwaway removed (0 left)

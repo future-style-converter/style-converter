@@ -12,7 +12,14 @@
 #   drift  — the group offsets are non-decreasing and each is 0 or +1 (the U3b <br> is 19.2 px against the ref's 19 px
 #            blank line, so three of them accumulate at most +0.6 px by group 4);
 #   lines  — the per-group line counts equal the ref's (gating rows only; -002's emergency-broken groups are compared on
-#            glyph-identical lines only — ink width within ±2 px — and are a report row).
+#            glyph-identical lines only — ink width within ±2 px — and are a report row);
+#   glyphs — (plan-skeptic round 1, instrument-teeth M7) NB-ios moves LINE BOXES, never glyphs: every line's ink crop
+#            (x < 140, its own rows −3..+4) equals the SAME line of the base run's capture of the same platform
+#            (wave55-open = wave54-final byte-identical), translated by whole rows only — the same line count and a
+#            normalised correlation ≥ 0.97 per line. Text 2-3 px sideways, one line shifted, a missing hyphenate-character
+#            (003 •, 004 /-/) or two lines swapped read ≤ 0.80 or a different count; the line-box move itself reads 1.000.
+#            Round 3 (verify M2 sweep): + each line's ink MASK = the base line's ±INK_TOL px — a blob in a line or a doubled
+#            glyph kept the correlation ≥ 0.99 (see glyph_identity).
 # Each row ends in "→ LINEBOX OK" or "→ LINEBOX WRONG (<reasons>)". A second family of rows reads the unit's radius on two
 # other faces, where Blink ROUNDS DOWN: the stacked boxes of boundary-shaping-001…008 (three one-line runs of Linux
 # Libertine 36 px: iOS box ceil(41.04) = 42 today, Blink 41 — what web and Android stack) and of text-decoration-dotted-
@@ -20,7 +27,8 @@
 # prediction is a DISPLACEMENT: box k's ink top moves up by exactly k−1 rows against the frozen wave54-final iOS capture
 # (each box above it is one row shorter): "→ STACK OK" / "→ STACK WRONG (displacement … want …)".
 #
-# Usage: python3 hyphen-ios-linebox.geometry.py <run>             (rows for ref/web/ios/android of 001/002/003/004 + stack)
+# Usage: python3 hyphen-ios-linebox.geometry.py <run> [--base <run>] (rows for ref/web/ios/android of 001/002/003/004 + stack;
+#                                                                  --base default wave55-open: the glyph-identity reference)
 #        python3 hyphen-ios-linebox.geometry.py --replay <arm>    (ios rows read hyphen-ios-linebox-replay/<t>-ios-<arm>.png;
 #                                                                  arm U = the radius replay, stack rows only)
 #        python3 hyphen-ios-linebox.geometry.py --fakes           (the rejection set; every fake row must print WRONG)
@@ -106,8 +114,53 @@ def verdict(ref_g, got_g, strict):
     return f'group-first {firsts} in-group spread {spread}', why
 
 
-def row(key, ref_im, cap_im, y0, strict):
+def crop(im, ln):
+    """Ink weights (255 − min channel) of one line's rows top−3 … bottom+3 over x < 140, row-major."""
+    px = im.load(); w = min(im.size[0], 140)
+    return [[255 - min(px[x, y]) for x in range(w)] for y in range(ln[0] - 3, ln[1] + 4)]
+
+
+INK_TOL = 2     # round 3 (verify M2 sweep): ink-mask XOR per line, px
+
+
+def glyph_identity(cap_im, base_im, y0):
+    """(worst per-line correlation, reason or None): the capture's lines are the base's, translated by whole rows only.
+    Round 3 (plan-skeptic-round-3.verify.md M2; fix-r3.done.md): the correlation (≥ 0.97) is blind to ADDED ink — a 2×2 / 3×3
+    blob in a line or a glyph painted twice moves it by < 0.01. Each line's INK MASK (255 − min channel > 55, i.e. min < 200)
+    must also equal the base line's within INK_TOL px (XOR, same crop): the replays read 0, and iOS / web / the ref render
+    the same string on different lines pixel-identically (hyphenate-character-001 / -003 / -004 'tion' and 'iza/-/' twins:
+    XOR 0) — the line-box move is a whole-row translation."""
+    la, lb = lines(cap_im, y0), lines(base_im, y0)
+    if len(la) != len(lb):
+        return 0.0, f'{len(la)} lines vs base {len(lb)} (NB-ios moves line boxes, never breaks or glyphs)'
+    worst, wx, at, ax = 1.0, 0, 1, 1
+    for k, (a, b) in enumerate(zip(la, lb)):
+        p, q = crop(cap_im, a), crop(base_im, b)
+        h = min(len(p), len(q))
+        fp = [v for r in p[:h] for v in r]; fq = [v for r in q[:h] for v in r]
+        den = (sum(v * v for v in fp) * sum(v * v for v in fq)) ** 0.5
+        c = sum(u * v for u, v in zip(fp, fq)) / den if den else 0.0
+        x = sum(1 for u, v in zip(fp, fq) if (u > 55) != (v > 55))
+        x += sum(1 for r in (p[h:] if len(p) > h else q[h:]) for v in r if v > 55)        # rows one crop has and the other lacks
+        if c < worst:
+            worst, at = c, k + 1
+        if x > wx:
+            wx, ax = x, k + 1
+    why = []
+    if worst < 0.97:
+        why.append(f'line {at} correlation {worst:.3f} with the base\'s line (< 0.97: glyphs moved, not only the line box)')
+    if wx > INK_TOL:
+        why.append(f'ink: line {ax} differs from the base\'s line by {wx} px (> {INK_TOL}: added / lost ink, not a line-box move)')
+    return worst, ('; '.join(why) or None)
+
+
+def row(key, ref_im, cap_im, y0, strict, base_im=None):
     s, why = verdict(groups(lines(ref_im, y0)), groups(lines(cap_im, y0)), strict)
+    if base_im is not None:
+        corr, g = glyph_identity(cap_im, base_im, y0)
+        s += f' glyphs {corr:.3f}'
+        if g:
+            why['glyphs'] = g
     v = 'LINEBOX OK' if not why else 'LINEBOX WRONG (' + '; '.join(f'{k}: {m}' for k, m in why.items()) + ')'
     print(f'{key} {s} → {v}')
     return not why
@@ -129,6 +182,9 @@ STACKS = [('css-text', f'boundary-shaping__boundary-shaping-00{i}', 15, 8) for i
          [('css-text-decor', f'text-decoration-dotted-00{i}', 75, 30) for i in (1, 2)]
 
 args = sys.argv[1:]
+base = 'wave55-open'
+if '--base' in args:
+    i = args.index('--base'); base = args[i + 1]; del args[i:i + 2]
 mode = 'fakes' if args[:1] == ['--fakes'] else 'replay' if args[:1] == ['--replay'] else 'run'
 arm = args[1] if mode == 'replay' else None
 run = 'wave54-final' if mode != 'run' or not args else args[0]
@@ -158,7 +214,8 @@ if mode == 'fakes':
         if not row(f'hyphen-ios-linebox {t} ref', ref, ref, DIV0[t], True):
             ref_fail += 1
         for name, make in FAKES.items():
-            if row(f'hyphen-ios-linebox {t} fake:{name}', ref, make(ref, DIV0[t]), DIV0[t], True):
+            # the fakes are built from the REF's pixels, so the ref is their glyph-identity base
+            if row(f'hyphen-ios-linebox {t} fake:{name}', ref, make(ref, DIV0[t]), DIV0[t], True, ref):
                 fake_fail += 1
     if ref_fail or fake_fail:
         print(f'SELF-CHECK FAILED (ref rows not OK: {ref_fail}; fakes accepted: {fake_fail})'); sys.exit(1)
@@ -174,7 +231,11 @@ for t in ('001', '002', '003', '004'):
              else f'{ROOT}/tools/titan/runs/{run}/sections/css-text/{d}/wpt__css-text__hyphens__hyphenate-character-{t}.png')
         if not os.path.exists(p):
             print(f'hyphen-ios-linebox {t} {label} MISSING → LINEBOX WRONG (no capture)'); continue
-        row(f'hyphen-ios-linebox {t} {label}', ref, Image.open(p).convert('RGB'), DIV0[t], strict)
+        # glyph identity against the same platform's capture in the base run (a replay is built from wave54-final's)
+        bp = f'{ROOT}/tools/titan/runs/{"wave54-final" if mode == "replay" and label == "ios" else base}/sections/css-text/{d}/wpt__css-text__hyphens__hyphenate-character-{t}.png'
+        if not os.path.exists(bp):
+            print(f'hyphen-ios-linebox {t} {label} MISSING → LINEBOX WRONG (no base capture {bp.split("/runs/")[1]})'); continue
+        row(f'hyphen-ios-linebox {t} {label}', ref, Image.open(p).convert('RGB'), DIV0[t], strict, Image.open(bp).convert('RGB'))
 
 if mode == 'run' or arm == 'U':
     for sec, stem, y0, gap in STACKS:

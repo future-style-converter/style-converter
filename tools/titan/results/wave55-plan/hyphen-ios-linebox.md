@@ -271,6 +271,28 @@ red → restore → green and records sha256 before / after.
 | P6 | drift guard: for (16, `.default`, nil), (16, `.monospaced`, nil) and (16, `.serif`, nil), `ascender − descender + leading` of `faceMetrics` == `LineBoxMetrics.contentHeight(…)` | M7 resolve every design to Inter in `faceMetrics` (red on `.monospaced` / `.serif`) |
 | P7 | verbatim wire: `StyleBuilder.build(from: <the -001 host's properties, verbatim from tools/titan/runs/wave54-final/sections/css-text/per-test-ir/wpt__css-text__hyphens__hyphenate-character-001.json>).text` has `lineHeightIsNormal == true`, `fontDesign == .monospaced`, and `ComponentRenderer.effectiveLineHeight(declared:…, declaredNormal: true, fontSizePx: 16, wptCaptureMode: true) == nil`: the exact inputs seam 1 hands `usedLineHeight` | — (input pin; held green) |
 
+**Plan-skeptic round 1 amendment (generator-truth M1; PLAN §9 D22) — binding on the builder.** As written above,
+NB-ios would MOVE `css-text/hyphens/hyphens-vertical-001.html ios`, a stage-1 byte-identity control. Its box `__2-320`
+(`'hyphen\xadation'`, `WritingMode VERTICAL_RL`, `Hyphens MANUAL`, Width 3em, `LineHeight {original: normal}`) has no
+whitespace, and `SoftHyphenPolicy.admitsPreBreak` declines a vertical space-less run (`SoftHyphenPolicy.swift:159-167`),
+so `singleLineText` is true (`ComponentRenderer.swift:5082`), `lineCountIsExact` is true (`:5151`) and
+`renderedLineCount` is 1 (`LineBoxMetrics.swift:114`), while TextKit draws THREE lines (wave54-final iOS: hyph / ena- /
+tion). Today `pinnedBoxHeight` is nil only because a declared `normal` has `lineHeightPx == nil` (`:179`); with the
+Blink box it would pin box 1 to 1 × 19 px. Therefore:
+- `usedLineHeight` gains a `horizontalWritingMode: Bool` parameter and returns nil when it is false (CSS Writing Modes 4
+  §7: in a vertical mode the line box is the inline-axis column — the horizontal line-count proxy does not describe it).
+  Seam 1 hunk (ii) passes PlaceholderLabel's own stored `horizontalWritingMode` (`:4868`, set at `:3220` from
+  `WritingModeExtractor.extract(from: resolvedProperties)?.isVertical != true`).
+- **P8** (verbatim wire): `usedLineHeight(…)` on hyphens-vertical-001 `__2-320`'s properties, verbatim from
+  `tools/titan/runs/wave54-final/sections/css-text/per-test-ir/wpt__css-text__hyphens__hyphens-vertical-001.json`
+  (`declaredNormal: true, lineCountIsExact: true, wptCapture: true, horizontalWritingMode: false`) `== nil`; the same
+  call with `horizontalWritingMode: true` is non-nil. Mutation **M8**: drop the guard → red.
+- The Catalyst pin LOGS `lineCountIsExact` / `renderedLineCount` for the five SAME controls (all-prop-001's `'321'` in a
+  0.5em box is the other space-less run): the census asserts them, it does not derive them. The note records the log.
+- The census line for the cell now reads "vertical writing mode: declined by the NB-ios horizontal guard"
+  (`hyphen-ios-linebox.census.mjs` re-run; `.census.json` byte-identical: the cell stays a SAME control and a stage-1
+  byte-identity row).
+
 Notes on the pins:
 - **Catalyst cannot see the defect.** On Mac Catalyst `UIFont` metrics are already integral (`LineBoxMetrics.swift:151`),
   so P1–P5 are arithmetic on explicit metrics, as wave 30's `LineBoxPinTests` are.

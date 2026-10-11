@@ -1,0 +1,15 @@
+# round-3 verifier: reader refusal probes beyond readers-selfcheck / readers-calibration (shared tree, read-only)
+[control-check: nonexistent post run] exit 2 :: usage: control-check.mjs <preRun> <postRun> [--lane <id>] [--sections a,b] [--json out]|
+[control-check: nonexistent pre run] exit 2 :: usage: control-check.mjs <preRun> <postRun> [--lane <id>] [--sections a,b] [--json out]|
+[control-check: unknown --lane L9] exit 2 :: no lane L9 in expectations.json (have L1-hyphen-ios-linebox, L2-cbb-android, L3-positioned-parent-slot, L4-ua-heading-margin, L5-counter-suffix-rows, L6-android-paint-order, L7-instruments)|
+[control-check: an extra positional argument (NIT: ignored)] exit 0 :: CONTROL HOLDS: every changed capture and wire document is a carrier the plan named|
+[geometry-gate: --lanes L7 --sections css-grid (0 keys)] exit 2 :: REFUSED — 0 keys in scope (lanes L7, sections css-grid): nothing was gated, and that is not a pass|
+[geometry-gate: nonexistent run (UNMEASURED, exit 3)] exit 3 :: geometry-gate wave55-nope (base wave54-final): 24 keys — PASS 0 · FAIL 0 (gating 0) · UNMEASURED 24 (gating 6) · probe self-check failures 0|
+[geometry-gate: two positionals] exit 2 :: usage: geometry-gate.py <run> [--base wave55-open] [--lanes L1,L4] [--sections a,b] [--json out.json] [--exp file] [--self-test]|
+[geometry-gate: --json without a value] exit 2 :: usage: geometry-gate.py <run> [--base wave55-open] [--lanes L1,L4] [--sections a,b] [--json out.json] [--exp file] [--self-test]|  REFUSED — --json given without a value|
+[geometry-gate: --exp a missing file (NIT: exit 1 = 'gating FAIL')] exit 1 :: FileNotFoundError: [Errno 2] No such file or directory: '/nonexistent.json'|
+[probe-readout: --lanes L9] exit 2 :: UNKNOWN --lanes "L9": a prefix of no lane in L1-hyphen-ios-linebox, L2-cbb-android, L3-positioned-parent-slot, L4-ua-heading-margin, L5-counter-suffix-rows, L6-android-paint-order, L7-instruments — |
+[probe-readout: no arguments] exit 2 :: usage: probe-readout.mjs <score.json> [--stage1] [--sections a,b] [--lanes L1,L2] [--base wave55-open] [--exp expectations.json]|
+[probe-readout: a missing record (NIT: exit 1 = 'a rule fired')] exit 1 :: Error: ENOENT: no such file or directory, open '/nonexistent.json'|
+[adjudicate: a missing record (exit 1 = fail-closed)] exit 1 :: Error: ENOENT: no such file or directory, open '/nonexistent.json'|
+[adjudicate: an extra positional] exit 2 :: usage: adjudicate.mjs <score.json> [--geometry <geometry.json>] [--base wave55-open] [--exp <expectations.json>]|

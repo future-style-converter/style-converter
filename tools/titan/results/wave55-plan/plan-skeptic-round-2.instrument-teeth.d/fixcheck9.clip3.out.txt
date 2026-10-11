@@ -1,0 +1,6 @@
+## L2 clip-3: green-mask XOR vs the ref, fail ink
+  web                              xor 25 bad 0
+  ios                              xor 23 bad 0
+  fixed-android                    xor 23 bad 0
+  c3-pink-sliver-off-scanlines     xor 23 bad 80
+  c3-notch-off-scanlines           xor 72 bad 0

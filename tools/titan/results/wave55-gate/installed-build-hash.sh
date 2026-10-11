@@ -12,6 +12,11 @@
 #          the sha1 of the APK provision-devices.sh built.
 # iOS:     a digest over every file of the installed .app container vs the
 #          same digest over the built .app (simctl install copies the bundle).
+# Plan-skeptic round 2: (process-holes S1) "+ uncommitted" is read with `git status --porcelain --untracked-files=all` over the
+# code paths (runtimes, apps, converter, tools/titan outside results, root Package.swift; *.md excluded) — an UNTRACKED source
+# the build compiles was invisible to `git diff --quiet`; (S9) every block prints `asset sha1 ios=… android=…`: BOTH bundles
+# embed the last test-all IR (the apk's assets/tmpOutput.json, the .app's tmpOutput.json — test-all.sh syncs both on every
+# fixture), so a digest / sha1 compares across launches only with the same asset line.
 # Appends one block to build-hashes.txt next to this script (wave 55 copy of the
 # wave-52 tool — a per-wave copy, because the wave-53 opening-gate blocks first
 # landed in wave52-gate/build-hashes.txt by running the wave-52 one); exit 1 on a
@@ -34,9 +39,10 @@ bundle_digest() { ( cd "$1" && find . -type f -print0 | sort -z | xargs -0 shasu
 rc=0
 {
   # Documentation under the build trees (*.md) never reaches a build, so it is not "uncommitted changes" here.
-  echo "== $LABEL — $(date -u +%Y-%m-%dT%H:%M:%SZ) — HEAD $(git -C "$ROOT" rev-parse --short HEAD)$(git -C "$ROOT" diff --quiet -- runtimes apps converter ':(exclude)*.md' || echo ' + uncommitted runtime/app code changes')"
-  # Which uncommitted source files the build contains (an exclude arm lists its patch here).
-  git -C "$ROOT" diff --stat -- runtimes apps converter ':(exclude)*.md' | sed 's/^/   /'
+  DIRTY="$(git -C "$ROOT" --no-optional-locks status --porcelain --untracked-files=all -- runtimes apps converter tools/titan Package.swift ':(exclude)tools/titan/results' ':(exclude)*.md')"
+  echo "== $LABEL — $(date -u +%Y-%m-%dT%H:%M:%SZ) — HEAD $(git -C "$ROOT" rev-parse --short HEAD)$( [[ -z "$DIRTY" ]] || echo ' + uncommitted code changes (tracked or untracked)')"
+  # Which uncommitted source files the build contains (an exclude arm lists its patch here), untracked ones included.
+  [[ -z "$DIRTY" ]] || sed 's/^/   /' <<<"$DIRTY"
   built_apk="$(shasum -a 1 "$APK" 2>/dev/null | cut -d' ' -f1)"
   on_device="$("$ADB" -s "$SERIAL" shell "sha1sum \$(pm path $PKG | head -1 | sed 's/^package://')" 2>/dev/null | cut -d' ' -f1 | tr -d '\r')"
   echo "android  serial=${SERIAL:-none}  built app-debug.apk sha1=${built_apk:-MISSING}  installed base.apk sha1=${on_device:-MISSING}"
@@ -46,6 +52,9 @@ rc=0
   on_sim="$( [[ -d "$container" ]] && bundle_digest "$container" )"
   echo "ios      udid=${UDID:-none}  built .app digest=${built_app:-MISSING}  installed .app digest=${on_sim:-MISSING}"
   if [[ -n "$built_app" && "$built_app" == "$on_sim" ]]; then echo "ios      MATCH"; else echo "ios      MISMATCH"; rc=1; fi
+  asset_ios="$( [[ -f "$APP/tmpOutput.json" ]] && shasum -a 1 "$APP/tmpOutput.json" | cut -d' ' -f1 )"
+  asset_and="$( [[ -f "$APK" ]] && unzip -l "$APK" assets/tmpOutput.json >/dev/null 2>&1 && unzip -p "$APK" assets/tmpOutput.json | shasum -a 1 | cut -d' ' -f1 )"
+  echo "asset    sha1 ios=${asset_ios:-MISSING} android=${asset_and:-MISSING}  (the last test-all IR both bundles embed: compare digests only with the same asset line)"
   echo
 } | tee -a "$OUT"
 exit $rc

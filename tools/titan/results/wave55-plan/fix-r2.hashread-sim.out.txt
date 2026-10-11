@@ -1,0 +1,13 @@
+# fix-r2.hashread-sim.out.txt — process-holes S10: expectations.json stage1Probe.hashRead (sha256 56dbcfc021c3ae60…) executed
+# on a SCRATCH sandbox: tools/titan/runs/wave55-pre/gate-driver/driver.log pre-seeded with a first launch, a stub installed-build-hash.sh;
+# the 15-s poll and the 1800-s bound shortened to 1 s / 3 s for the simulation (string substitution printed below)
+BEFORE: n=$(grep -c 'attempt [0-9]* starting' tools/titan/runs/wave55-pre/gate-driver/driver.log 2>/dev/null); n=${n:-0}
+AFTER : t=0; until m=$(grep -c 'attempt [0-9]* starting' tools/titan/runs/wave55-pre/gate-driver/driver.log 2>/dev/null); (( ${m:-0} > n || t >= 1800 )); do sleep 15; t=$((t+15)); done; if (( ${m:-0} > n )); then tools/titan/results/wave55-gate/installed-build-hash.sh "wave55-pre corpus launch (stage-1 probe, launch $((n+1)))"; else echo 'no new launch within 1800 s: no hash read — record why'; fi
+## (a) a --resume / second launch of the same run id (the log already holds attempt 1; attempt 2 is appended after 2 s):
+  HASH READ: wave55-pre corpus launch (stage-1 probe, launch 2)
+  (waited 3s)
+## (b) no new launch: the bounded wait ends without a read:
+  no new launch within 3 s: no hash read — record why
+  (waited 3s)
+## (c) the round-1 one-shot wait on the same pre-seeded log:
+  round-1 wait returned after 0s — before the new launch provisioned (the defect)

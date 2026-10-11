@@ -1,0 +1,37 @@
+L2: geometry-gate exit 0; gating keys 8: PASS 8 FAIL 0 UNMEASURED 0
+    PASS  abspos/abspos-autopos-htb-ltr android
+    PASS  abspos/abspos-autopos-vlr-ltr android
+    PASS  abspos/abspos-autopos-vrl-ltr android
+    PASS  backdrop-filter-nested-border-radius-clip android
+    PASS  backdrop-filter-nested-border-radius-clip-2 android
+    PASS  backdrop-filter-nested-border-radius-clip-3 android
+    PASS  backdrop-filter-nested-border-radius-clip-4 android
+    PASS  backdrop-filter-nested-border-radius-clip-3 android
+L3: geometry-gate exit 0; gating keys 7: PASS 7 FAIL 0 UNMEASURED 0
+    PASS  [S] dir-style-02a android row6
+    PASS  [S] dir-style-02a android row7
+    PASS  [S] dir-style-02a android row9
+    PASS  [S] bidi-tab-001 android rtl-rows
+    PASS  [W] anchor-position-multicol-nested-001 android stack
+    PASS  [S] dynamic-offset-rtl-001 android
+    PASS  [W] dynamic-offset-rtl-002 android
+L4: geometry-gate exit 0; gating keys 12: PASS 12 FAIL 0 UNMEASURED 0
+    PASS  [M] text-decoration-inset-005 ios
+    PASS  [M] text-decoration-inset-005 android
+    PASS  [M] text-decoration-inset-006 ios
+    PASS  [M] text-decoration-inset-006 android
+    PASS  [M] text-decoration-inset-014 ios
+    PASS  [M] text-decoration-inset-014 android
+    PASS  [M] text-decoration-inset-011 ios
+    PASS  [M] text-decoration-inset-011 android
+    PASS  [F] text-decoration-inset-005 ios
+    PASS  [F] text-decoration-inset-006 ios
+    PASS  [F] text-decoration-inset-014 ios
+    PASS  [F] text-decoration-inset-014 android
+L5: geometry-gate exit 0; gating keys 6: PASS 6 FAIL 0 UNMEASURED 0
+    PASS  [H] counter-suffix ios
+    PASS  [C] counter-suffix ios
+    PASS  [C] counter-suffix android
+    PASS  [T] counter-suffix ios
+    PASS  [I] cjk-decimal/css3-counter-styles-005 ios
+    PASS  [I] cjk-decimal/css3-counter-styles-005 android

@@ -1,0 +1,40 @@
+# plan-prose.selfcheck — 2026-10-11T18:52:57Z; HEAD 640276a0; scratch copies only
+installed before: PLAN.md e302eeb867c78fe5 · expectations.json 490dc5b9a8b33ef3 · cells-wave54-final.json c9c148e7727f7137 · landing-manifest.json f6716e2f80f112dd
+
+## G0 the installed PLAN.md (must HOLD)
+plan-prose --check tools/titan/results/wave55-plan/PLAN.md against expectations.json sha256 490dc5b9a8b33ef3…: 36 gen blocks · 39 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
+plan-prose --check: HOLDS
+exit 0
+
+## mutations of PLAN.md (copies)
+RED as required  M2  a planDecisions id (C7) missing from §9  (exit 1: RED  2. §9 has no hand-written row for planDecisions C7)
+RED as required  M3  a cited wave54-final cell with a wrong score  (exit 1: RED  3. cited cell disagrees with cells-wave54-final.json: 'wave54-final css-text/hyphens/hyphenate-character-004 ios f 0.9478' vs 'f 0.9477')
+RED as required  M3b a cited cell that is not scored  (exit 1: RED  3. cited cell not scored at wave54-final: 'wave54-final selectors/dir-style-02b android f 0.9425')
+RED as required  M4  L3 U1 landed before L4 U1-android (C10)  (exit 1: RED  4. L4 U1-ios must land before L3 U1 (C10: SeamReachabilityTest lines land L4 → L3 → L5))
+RED as required  M5  a revert unit (L5 D) missing from the landing order  (exit 1: RED  4. landing-order lists L5-counter-suffix-rows D 0 times (want exactly 1))
+RED as required  M6  L2 U2 landed before U1 (revertOrder)  (exit 1: RED  4. L2 U1 must land before L2 U2 (revertOrder of U1 is ['U2', 'U1']: U2 is reverted first, so it lands after))
+RED as required  M8  L5 U3-ios before L1 NB-ios (seam 6 re-anchor)  (exit 1: RED  4. L1 NB-ios must land before L5 U3-ios (seam 6 is re-anchored by content after L1's seam 1))
+RED as required  M9  L5 D before U2o-android (C7)  (exit 1: RED  4. L5 U2o-android must land before L5 D (C7: the SUFFIX NOTE lands after U2o))
+RED as required  M14 the manifest and expectations.json disagree on a revertOrder (check 6)  (exit 1: RED  6. L6 U1: revertOrder ['U1'] in landing-manifest.json vs ['U2', 'U1'] in expectations.json)
+RED as required  M15 a manifest unit that expectations.json does not know (check 6)  (exit 1: RED  6. landing-manifest unit L6 U9 is neither a revert unit nor a contingency unit of expectations.json)
+RED as required  M7  a hand edit inside a generated block  (exit 1: RED  1. block gen:L1-predictions differs from its rendering (first differing line 2: PLAN '| `css-text/hyphens/hyphenate-character-001.html ios` | P 0.9611 → P ≈0.988)
+RED as required  M12 a generated block deleted  (exit 1: RED  1. block gen:union present 0 times (want exactly 1))
+RED as required  M13 a lane heading renamed  (exit 1: RED  5. no "### L5 · counter-suffix-rows" heading)
+RED as required  M16 a hand-typed regenerable count outside the gen blocks (the E10 shape, round 1 S7)  (exit 1: RED  7. a regenerable count typed by hand outside the gen blocks: '- L6: 7 —' in '- L6: 7 — clip-rect [PO] and the six [X] rows (a hand-typed count, round-1 E10)' —)
+RED as required  M17 a hand-typed unit count outside the gen blocks (round 1 S7)  (exit 1: RED  7. a regenerable count typed by hand outside the gen blocks: '28 revert units' in '- 28 revert units (+1 contingency), each one commit.' — render it, or cite the g)
+
+## mutations of the generated inputs (copies), against the installed PLAN.md
+RED as required  M1  a prediction regenerated (L2 clip-3 to), PLAN.md not re-filled  (exit 1: RED  1. block gen:L2-predictions differs from its rendering (first differing line 2: PLAN "| `filter-effects/backdrop-filter-nested-border-radius-clip-3.html android` | f)
+RED as required  M10 the run of record disagrees with a cited cell  (exit 1: RED  3. cited cell disagrees with cells-wave54-final.json: 'wave54-final css-text/hyphens/hyphenate-character-001 ios P 0.9611' vs 'P 0.9612')
+
+## M11 a real regeneration that PLAN.md has not followed: plan-build.py --go-small --out <scratch>
+plan-build --go-small exit 0
+RED as required  M11 the GO-SMALL JSON (L4 U2-android held) against the GO plan  (exit 1: RED  4. landing-order lists L4-ua-heading-margin U2-android, which is not a revert unit of expectations.json)
+
+## G1 restore: the installed files are untouched and still HOLD
+installed after:  PLAN.md e302eeb867c78fe5 · expectations.json 490dc5b9a8b33ef3 · cells-wave54-final.json c9c148e7727f7137 · landing-manifest.json f6716e2f80f112dd
+plan-prose --check tools/titan/results/wave55-plan/PLAN.md against expectations.json sha256 490dc5b9a8b33ef3…: 36 gen blocks · 39 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
+plan-prose --check: HOLDS
+exit 0
+
+plan-prose.selfcheck: every mutation turned the check red
