@@ -1,0 +1,7 @@
+[PO] replay backdrop-filter-clip-rect U1       | overlap red 416 blue 0 | navbar band blue 320/320 | pink 10000 | red n 1552 → GEOMETRY OK
+[X] replay flex-abspos-staticpos-align-self-safe-001 U2       | crossings 0 | child fill 17748 (ref 17956) → GEOMETRY OK
+[X] replay flex-abspos-staticpos-align-self-safe-002 U2       | crossings 50 | child fill 16826 (ref 17066) → GEOMETRY WRONG (50 crossing px (a parent border painted over its child, CSS 2.1 App. E))
+[X] replay grid-abspos-staticpos-align-self-001 U2       | crossings 0 | child fill 1000 (ref 1056) → GEOMETRY OK
+[X] replay grid-abspos-staticpos-justify-self-001 U2       | crossings 0 | child fill 1248 (ref 1248) → GEOMETRY OK
+[X] replay grid-abspos-staticpos-align-self-vertWM-001 U2       | crossings 0 | child fill 1248 (ref 1200) → GEOMETRY OK
+[X] replay grid-abspos-staticpos-align-self-rtl-001 U2       | crossings 0 | child fill 1234 (ref 1152) → GEOMETRY OK

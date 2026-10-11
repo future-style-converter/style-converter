@@ -1,0 +1,22 @@
+hyphen-ios-linebox 001 ref group-first [0, 0, 0, 0] in-group spread [0, 0, 0, 0] → LINEBOX OK
+hyphen-ios-linebox 001 fake:white no ink → LINEBOX WRONG (lines: no line found)
+hyphen-ios-linebox 001 fake:whole+1 group-first [1, 1, 1, 1] in-group spread [0, 0, 0, 0] → LINEBOX WRONG (anchor: group 1 line 1 offset 1 (want 0))
+hyphen-ios-linebox 001 fake:u3b-today group-first [0, -1, -2, -2] in-group spread [1, 1, 0, 0] → LINEBOX WRONG (pitch: group 1 line 4 offset -1 vs its line 1 0 (run pitch ≠ the ref line box); drift: group-first offsets [0, -1, -2, -2] (want non-decreasing, each 0 or +1))
+hyphen-ios-linebox 001 fake:drop-u3b group-first [0, 0, 0, 0] in-group spread [1, 1, 0, 0] → LINEBOX WRONG (pitch: group 1 line 4 offset -1 vs its line 1 0 (run pitch ≠ the ref line box))
+hyphen-ios-linebox 001 fake:no-u3b group-first [0, 1, 2, 3] in-group spread [0, 0, 0, 0] → LINEBOX WRONG (drift: group-first offsets [0, 1, 2, 3] (want non-decreasing, each 0 or +1))
+hyphen-ios-linebox 001 fake:g4+2 group-first [0, 0, 0, 2] in-group spread [0, 0, 0, 0] → LINEBOX WRONG (drift: group-first offsets [0, 0, 0, 2] (want non-decreasing, each 0 or +1))
+hyphen-ios-linebox 003 ref group-first [0, 0, 0, 0] in-group spread [0, 0, 0, 0] → LINEBOX OK
+hyphen-ios-linebox 003 fake:white no ink → LINEBOX WRONG (lines: no line found)
+hyphen-ios-linebox 003 fake:whole+1 group-first [1, 1, 1, 1] in-group spread [0, 0, 0, 0] → LINEBOX WRONG (anchor: group 1 line 1 offset 1 (want 0))
+hyphen-ios-linebox 003 fake:u3b-today group-first [0, -1, -2, -2] in-group spread [1, 1, 0, 0] → LINEBOX WRONG (pitch: group 1 line 4 offset -1 vs its line 1 0 (run pitch ≠ the ref line box); drift: group-first offsets [0, -1, -2, -2] (want non-decreasing, each 0 or +1))
+hyphen-ios-linebox 003 fake:drop-u3b group-first [0, 0, 0, 0] in-group spread [1, 1, 0, 0] → LINEBOX WRONG (pitch: group 1 line 4 offset -1 vs its line 1 0 (run pitch ≠ the ref line box))
+hyphen-ios-linebox 003 fake:no-u3b group-first [0, 1, 2, 3] in-group spread [0, 0, 0, 0] → LINEBOX WRONG (drift: group-first offsets [0, 1, 2, 3] (want non-decreasing, each 0 or +1))
+hyphen-ios-linebox 003 fake:g4+2 group-first [0, 0, 0, 2] in-group spread [0, 0, 0, 0] → LINEBOX WRONG (drift: group-first offsets [0, 0, 0, 2] (want non-decreasing, each 0 or +1))
+hyphen-ios-linebox 004 ref group-first [0, 0, 0, 0] in-group spread [0, 0, 0, 0] → LINEBOX OK
+hyphen-ios-linebox 004 fake:white no ink → LINEBOX WRONG (lines: no line found)
+hyphen-ios-linebox 004 fake:whole+1 group-first [1, 1, 1, 1] in-group spread [0, 0, 0, 0] → LINEBOX WRONG (anchor: group 1 line 1 offset 1 (want 0))
+hyphen-ios-linebox 004 fake:u3b-today group-first [0, -1, -2, -2] in-group spread [1, 1, 1, 0] → LINEBOX WRONG (pitch: group 1 line 4 offset -1 vs its line 1 0 (run pitch ≠ the ref line box); drift: group-first offsets [0, -1, -2, -2] (want non-decreasing, each 0 or +1))
+hyphen-ios-linebox 004 fake:drop-u3b group-first [0, 0, 0, 0] in-group spread [1, 1, 1, 0] → LINEBOX WRONG (pitch: group 1 line 4 offset -1 vs its line 1 0 (run pitch ≠ the ref line box))
+hyphen-ios-linebox 004 fake:no-u3b group-first [0, 1, 2, 3] in-group spread [0, 0, 0, 0] → LINEBOX WRONG (drift: group-first offsets [0, 1, 2, 3] (want non-decreasing, each 0 or +1))
+hyphen-ios-linebox 004 fake:g4+2 group-first [0, 0, 0, 2] in-group spread [0, 0, 0, 0] → LINEBOX WRONG (drift: group-first offsets [0, 0, 0, 2] (want non-decreasing, each 0 or +1))
+fakes: every fake rejected, every ref row OK

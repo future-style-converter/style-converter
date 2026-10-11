@@ -1,0 +1,7307 @@
+{
+ "run": "wave54-final",
+ "docs": 1435,
+ "docsHostInactive": 1221,
+ "pairs": [],
+ "parents": [
+  {
+   "section": "CSS2",
+   "stem": "wpt__CSS2__abspos__static-fixed-inside-abspos",
+   "id": "abspos__static-fixed-inside-abspos__1__0-017",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 50,
+   "height": 50,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "abspos__static-fixed-inside-abspos__1__0__0-018"
+   ],
+   "oofInsets": [
+    "none"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 50,
+     "h": 50,
+     "top": null,
+     "left": null
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-center-safe-rtl",
+   "id": "wpt__css-anchor-position__anchor-center-safe-rtl__1-473",
+   "hostActivates": true,
+   "position": "FIXED",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 54.72,
+   "height": 30,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "anchor-center-safe-rtl__0__0-474"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "Anchor"
+   ],
+   "oofGeom": [
+    {
+     "w": 54.72,
+     "h": 20,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": null,
+    "ios": null,
+    "android": null
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-center-safe-rtl",
+   "id": "wpt__css-anchor-position__anchor-center-safe-rtl__2-475",
+   "hostActivates": true,
+   "position": "FIXED",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 281.41,
+   "height": 74,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "anchor-center-safe-rtl__1__0-476"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 259.41,
+     "h": 20,
+     "top": 26,
+     "left": 10
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": null,
+    "ios": null,
+    "android": null
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-center-safe-rtl",
+   "id": "anchor-center-safe-rtl__1__0-476",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 259.41,
+   "height": 20,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "anchor-center-safe-rtl__1__0__0-477"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "Anchored element with ju"
+   ],
+   "oofGeom": [
+    {
+     "w": 259.41,
+     "h": 20,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": null,
+    "ios": null,
+    "android": null
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-center-safe-rtl",
+   "id": "wpt__css-anchor-position__anchor-center-safe-rtl__3-478",
+   "hostActivates": true,
+   "position": "FIXED",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 30,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "anchor-center-safe-rtl__2__0-479"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "Anchor"
+   ],
+   "oofGeom": [
+    {
+     "w": 54.72,
+     "h": 20,
+     "top": 0,
+     "left": 45.28
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": null,
+    "ios": null,
+    "android": null
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-center-safe-rtl",
+   "id": "wpt__css-anchor-position__anchor-center-safe-rtl__4-480",
+   "hostActivates": true,
+   "position": "FIXED",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 95.58,
+   "height": 134,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "anchor-center-safe-rtl__3__0-481"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 73.58,
+     "h": 80,
+     "top": 26,
+     "left": 10
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": null,
+    "ios": null,
+    "android": null
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-center-safe-rtl",
+   "id": "anchor-center-safe-rtl__3__0-481",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 73.58,
+   "height": 80,
+   "children": 4,
+   "oofChildren": 4,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "anchor-center-safe-rtl__3__0__0-482",
+    "anchor-center-safe-rtl__3__0__1-483",
+    "anchor-center-safe-rtl__3__0__2-484",
+    "anchor-center-safe-rtl__3__0__3-485"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left",
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "oofTexts": [
+    "Anchored",
+    "element",
+    "with",
+    "align-self"
+   ],
+   "oofGeom": [
+    {
+     "w": 73.58,
+     "h": 20,
+     "top": 0,
+     "left": 0
+    },
+    {
+     "w": 60.56,
+     "h": 20,
+     "top": 20,
+     "left": 13.02
+    },
+    {
+     "w": 31.67,
+     "h": 20,
+     "top": 40,
+     "left": 41.91
+    },
+    {
+     "w": 70.94,
+     "h": 20,
+     "top": 60,
+     "left": 2.64
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": null,
+    "ios": null,
+    "android": null
+   },
+   "classes": [
+    "STACK"
+   ]
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-name-006",
+   "id": "wpt__css-anchor-position__anchor-name-006__1-547",
+   "hostActivates": true,
+   "position": "FIXED",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 0,
+   "height": 0,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "anchor-name-006__1__0-548"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 72,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-name-007",
+   "id": "wpt__css-anchor-position__anchor-name-007__1-552",
+   "hostActivates": true,
+   "position": "FIXED",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 0,
+   "height": 0,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "anchor-name-007__1__0-553"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 0,
+     "h": 0,
+     "top": 72,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-name-007",
+   "id": "anchor-name-007__1__0-553",
+   "hostActivates": true,
+   "position": "FIXED",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 0,
+   "height": 0,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "anchor-name-007__1__0__0-554"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 72,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-position-multicol-004",
+   "id": "anchor-position-multicol-004__1__0__1__3-663",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 20,
+   "height": 90,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "anchor-position-multicol-004__1__0__1__3__0-664",
+    "anchor-position-multicol-004__1__0__1__3__1-665"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 20,
+     "h": 35,
+     "top": 45,
+     "left": 0
+    },
+    {
+     "w": 10,
+     "h": 10,
+     "top": 80,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9897",
+    "ios": "P 0.9712",
+    "android": "P 0.9686"
+   },
+   "classes": [
+    "STACK"
+   ]
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-position-multicol-nested-001",
+   "id": "anchor-position-multicol-nested-001__1__1__0__2-771",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 90,
+   "height": 132,
+   "children": 4,
+   "oofChildren": 4,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "anchor-position-multicol-nested-001__1__1__0__2__0-772",
+    "anchor-position-multicol-nested-001__1__1__0__2__1-773",
+    "anchor-position-multicol-nested-001__1__1__0__2__2-774",
+    "anchor-position-multicol-nested-001__1__1__0__2__3-775"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left",
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 10,
+     "h": 10,
+     "top": 0,
+     "left": 0
+    },
+    {
+     "w": 10,
+     "h": 10,
+     "top": 0,
+     "left": 80
+    },
+    {
+     "w": 10,
+     "h": 10,
+     "top": 122,
+     "left": 0
+    },
+    {
+     "w": 10,
+     "h": 10,
+     "top": 122,
+     "left": 80
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9742",
+    "ios": "f 0.9703",
+    "android": "f 0.9573"
+   },
+   "classes": [
+    "STACK"
+   ]
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-position-multicol-nested-001",
+   "id": "anchor-position-multicol-nested-001__1__2-776",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 180,
+   "height": 100,
+   "children": 4,
+   "oofChildren": 4,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "anchor-position-multicol-nested-001__1__2__0-777",
+    "anchor-position-multicol-nested-001__1__2__1-778",
+    "anchor-position-multicol-nested-001__1__2__2-779",
+    "anchor-position-multicol-nested-001__1__2__3-780"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left",
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 10,
+     "h": 10,
+     "top": 0,
+     "left": 0
+    },
+    {
+     "w": 10,
+     "h": 10,
+     "top": 0,
+     "left": 170
+    },
+    {
+     "w": 10,
+     "h": 10,
+     "top": 90,
+     "left": 0
+    },
+    {
+     "w": 10,
+     "h": 10,
+     "top": 90,
+     "left": 170
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9742",
+    "ios": "f 0.9703",
+    "android": "f 0.9573"
+   },
+   "classes": [
+    "STACK"
+   ]
+  },
+  {
+   "section": "css-backgrounds",
+   "stem": "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3",
+   "id": "background-attachment-local__attachment-local-positioning-3__0__0-080",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 250,
+   "height": 370,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "background-attachment-local__attachment-local-positioning-3__0__0__0-081"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 250,
+     "h": 120,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": null,
+    "ios": null,
+    "android": null
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-backgrounds",
+   "stem": "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3",
+   "id": "background-attachment-local__attachment-local-positioning-3__0__0__0-081",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 250,
+   "height": 120,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "background-attachment-local__attachment-local-positioning-3__0__0__0__0-082"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "Lorem ipsum dolor sit am"
+   ],
+   "oofGeom": [
+    {
+     "w": 205.34,
+     "h": 20,
+     "top": 100,
+     "left": 44.66
+    }
+   ],
+   "padding": [
+    100,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": null,
+    "ios": null,
+    "android": null
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-backgrounds",
+   "stem": "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4",
+   "id": "background-attachment-local__attachment-local-positioning-4__0__0-084",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 250,
+   "height": 370,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "background-attachment-local__attachment-local-positioning-4__0__0__0-085"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 250,
+     "h": 120,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": null,
+    "ios": null,
+    "android": null
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-backgrounds",
+   "stem": "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4",
+   "id": "background-attachment-local__attachment-local-positioning-4__0__0__0-085",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 250,
+   "height": 120,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "background-attachment-local__attachment-local-positioning-4__0__0__0__0-086"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "Lorem ipsum dolor sit am"
+   ],
+   "oofGeom": [
+    {
+     "w": 205.34,
+     "h": 20,
+     "top": 100,
+     "left": 44.66
+    }
+   ],
+   "padding": [
+    100,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": null,
+    "ios": null,
+    "android": null
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-break",
+   "stem": "wpt__css-break__block-end-aligned-abspos-nested",
+   "id": "block-end-aligned-abspos-nested__2__0__0-094",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 0,
+   "height": 0,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "block-end-aligned-abspos-nested__2__0__0__0-095"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 50,
+     "h": 50,
+     "top": -50,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "css-color",
+   "stem": "wpt__css-color__composited-filters-under-opacity",
+   "id": "wpt__css-color__composited-filters-under-opacity__1-244",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": null,
+   "height": null,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "composited-filters-under-opacity__0__0-245",
+    "composited-filters-under-opacity__0__1-246"
+   ],
+   "oofInsets": [
+    "Left",
+    "Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 150,
+     "top": null,
+     "left": 0
+    },
+    {
+     "w": 100,
+     "h": 150,
+     "top": null,
+     "left": 50
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9991",
+    "android": "P 0.9982"
+   },
+   "classes": [
+    "STACK",
+    "AUTO-H"
+   ]
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__4__0-624",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 64,
+   "height": 24,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "counter-suffix__0__4__0__0-625"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "foo"
+   ],
+   "oofGeom": [
+    {
+     "w": 24.64,
+     "h": 20,
+     "top": 2,
+     "left": 39.36
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9873",
+    "android": "P 0.989"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__4__1-626",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 64,
+   "height": 24,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "counter-suffix__0__4__1__0-627"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "bar"
+   ],
+   "oofGeom": [
+    {
+     "w": 24.97,
+     "h": 20,
+     "top": 2,
+     "left": 39.03
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9873",
+    "android": "P 0.989"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__5__0-633",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 64,
+   "height": 24,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "counter-suffix__0__5__0__0-634"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "foo"
+   ],
+   "oofGeom": [
+    {
+     "w": 24.64,
+     "h": 20,
+     "top": 2,
+     "left": 39.36
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9873",
+    "android": "P 0.989"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__5__1-635",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 64,
+   "height": 24,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "counter-suffix__0__5__1__0-636"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "bar"
+   ],
+   "oofGeom": [
+    {
+     "w": 24.97,
+     "h": 20,
+     "top": 2,
+     "left": 39.03
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9873",
+    "android": "P 0.989"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-flexbox",
+   "stem": "wpt__css-flexbox__abspos__position-absolute-containing-block-001",
+   "id": "wpt__css-flexbox__abspos__position-absolute-containing-block-001__0-348",
+   "hostActivates": true,
+   "position": "FIXED",
+   "boxBranch": false,
+   "display": "FLEX",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 200,
+   "height": 200,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "abspos__position-absolute-containing-block-001__0__0-349"
+   ],
+   "oofInsets": [
+    "none"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": null,
+     "left": null
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-flexbox",
+   "stem": "wpt__css-flexbox__abspos__position-absolute-containing-block-002",
+   "id": "wpt__css-flexbox__abspos__position-absolute-containing-block-002__0-350",
+   "hostActivates": true,
+   "position": "FIXED",
+   "boxBranch": false,
+   "display": "FLEX",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 180,
+   "height": 180,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "abspos__position-absolute-containing-block-002__0__0-351"
+   ],
+   "oofInsets": [
+    "none"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": null,
+     "left": null
+    }
+   ],
+   "padding": [
+    15,
+    0,
+    0,
+    15
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-gaps",
+   "stem": "wpt__css-gaps__flex__flex-gap-decorations-020",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-020__1-157",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 80,
+   "height": 80,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "flex__flex-gap-decorations-020__0__0-158"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 110,
+     "h": 110,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "css-gaps",
+   "stem": "wpt__css-gaps__flex__flex-gap-decorations-021",
+   "id": "wpt__css-gaps__flex__flex-gap-decorations-021__1-164",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 80,
+   "height": 80,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "flex__flex-gap-decorations-021__0__0-165"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 110,
+     "h": 110,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__conic-gradient-line-height-relative-units-003",
+   "id": "wpt__css-images__conic-gradient-line-height-relative-units-003__0-009",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 200,
+   "height": 200,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "conic-gradient-line-height-relative-units-003__0__0-010",
+    "conic-gradient-line-height-relative-units-003__0__1-011"
+   ],
+   "oofInsets": [
+    "none",
+    "none"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 200,
+     "h": 200,
+     "top": null,
+     "left": null
+    },
+    {
+     "w": 200,
+     "h": null,
+     "top": null,
+     "left": null
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "STACK"
+   ]
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__conic-gradient-line-height-relative-units-004",
+   "id": "wpt__css-images__conic-gradient-line-height-relative-units-004__0-012",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 200,
+   "height": 200,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "conic-gradient-line-height-relative-units-004__0__0-013",
+    "conic-gradient-line-height-relative-units-004__0__1-014"
+   ],
+   "oofInsets": [
+    "none",
+    "none"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 200,
+     "h": 200,
+     "top": null,
+     "left": null
+    },
+    {
+     "w": 200,
+     "h": null,
+     "top": null,
+     "left": null
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "STACK"
+   ]
+  },
+  {
+   "section": "css-masking",
+   "stem": "wpt__css-masking__clip-path__clip-path-circle-closest-corner",
+   "id": "wpt__css-masking__clip-path__clip-path-circle-closest-corner__2-027",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 350,
+   "height": 450,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "clip-path__clip-path-circle-closest-corner__1__0-028"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 520,
+     "h": 520,
+     "top": -60,
+     "left": -110
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "f 0.7445",
+    "ios": "f 0.7609",
+    "android": "f 0.7429"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "css-masking",
+   "stem": "wpt__css-masking__clip-path__clip-path-circle-farthest-corner",
+   "id": "wpt__css-masking__clip-path__clip-path-circle-farthest-corner__2-031",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 200,
+   "height": 300,
+   "children": 2,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "clip-path__clip-path-circle-farthest-corner__1__0-032"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 600,
+     "h": 520,
+     "top": -110,
+     "left": -100
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 1,
+   "cells": {
+    "web": "f 0.6544",
+    "ios": "f 0.6843",
+    "android": "f 0.6527"
+   },
+   "classes": [
+    "CLAMP",
+    "INFLOW"
+   ]
+  },
+  {
+   "section": "css-masking",
+   "stem": "wpt__css-masking__clip-path__clip-path-ellipse-closest-farthest-corner",
+   "id": "wpt__css-masking__clip-path__clip-path-ellipse-closest-farthest-corner__1-066",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 250,
+   "height": 275,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "clip-path__clip-path-ellipse-closest-farthest-corner__1__0-067"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 550,
+     "h": 420,
+     "top": -60,
+     "left": -110
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "f 0.856",
+    "ios": "f 0.8709",
+    "android": "f 0.8543"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "css-position",
+   "stem": "wpt__css-position__absolute-pos-box-inside-fixed-pos-box-with-changing-height",
+   "id": "wpt__css-position__absolute-pos-box-inside-fixed-pos-box-with-changing-height__2-003",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 0,
+   "height": 0,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "absolute-pos-box-inside-fixed-pos-box-with-changing-height__1__0-004"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 300,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "css-position",
+   "stem": "wpt__css-position__absolute-pos-box-inside-fixed-pos-box-with-changing-height",
+   "id": "absolute-pos-box-inside-fixed-pos-box-with-changing-height__1__0-004",
+   "hostActivates": true,
+   "position": "FIXED",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 300,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "absolute-pos-box-inside-fixed-pos-box-with-changing-height__1__0__0-005"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 50,
+     "h": 50,
+     "top": 250,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-position",
+   "stem": "wpt__css-position__hypothetical-dynamic-change-001",
+   "id": "wpt__css-position__hypothetical-dynamic-change-001__0-020",
+   "hostActivates": true,
+   "position": "FIXED",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "hypothetical-dynamic-change-001__0__0-021"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 100
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "css-position",
+   "stem": "wpt__css-position__hypothetical-dynamic-change-002",
+   "id": "wpt__css-position__hypothetical-dynamic-change-002__0-022",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "hypothetical-dynamic-change-002__0__0-023"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 100
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "css-position",
+   "stem": "wpt__css-position__position-absolute-scrollable-overflow-zero",
+   "id": "position-absolute-scrollable-overflow-zero__1__0-132",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 0,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "position-absolute-scrollable-overflow-zero__1__0__0-133"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 0,
+     "top": 1,
+     "left": 100
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "css-position",
+   "stem": "wpt__css-position__position-fixed-scroll-nested-fixed",
+   "id": "wpt__css-position__position-fixed-scroll-nested-fixed__0-185",
+   "hostActivates": true,
+   "position": "FIXED",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 2,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "position-fixed-scroll-nested-fixed__0__0-186"
+   ],
+   "oofInsets": [
+    "none"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 200,
+     "h": 100,
+     "top": null,
+     "left": null
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 1,
+   "cells": {
+    "web": null,
+    "ios": null,
+    "android": null
+   },
+   "classes": [
+    "CLAMP",
+    "INFLOW"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-lines-002",
+   "id": "bidi__bidi-lines-002__1__0-016",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 9.2,
+   "height": 39,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "bidi__bidi-lines-002__1__0__0-017"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "!"
+   ],
+   "oofGeom": [
+    {
+     "w": 9.2,
+     "h": 39,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.993",
+    "ios": "P 0.989",
+    "android": "P 0.9818"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-lines-002",
+   "id": "bidi__bidi-lines-002__1__2-019",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 9.2,
+   "height": 39,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "bidi__bidi-lines-002__1__2__0-020"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "!"
+   ],
+   "oofGeom": [
+    {
+     "w": 9.2,
+     "h": 39,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.993",
+    "ios": "P 0.989",
+    "android": "P 0.9818"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-lines-002",
+   "id": "bidi__bidi-lines-002__1__4-022",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 9.2,
+   "height": 39,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "bidi__bidi-lines-002__1__4__0-023"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "!"
+   ],
+   "oofGeom": [
+    {
+     "w": 9.2,
+     "h": 39,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.993",
+    "ios": "P 0.989",
+    "android": "P 0.9818"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-lines-002",
+   "id": "bidi__bidi-lines-002__1__6-025",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 9.2,
+   "height": 39,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "bidi__bidi-lines-002__1__6__0-026"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "!"
+   ],
+   "oofGeom": [
+    {
+     "w": 9.2,
+     "h": 39,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.993",
+    "ios": "P 0.989",
+    "android": "P 0.9818"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-lines-002",
+   "id": "bidi__bidi-lines-002__1__8-028",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 9.2,
+   "height": 39,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "bidi__bidi-lines-002__1__8__0-029"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "!"
+   ],
+   "oofGeom": [
+    {
+     "w": 9.2,
+     "h": 39,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.993",
+    "ios": "P 0.989",
+    "android": "P 0.9818"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-tab-001",
+   "id": "bidi__bidi-tab-001__1__0-035",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 108.38,
+   "height": 24,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "bidi__bidi-tab-001__1__0__0-036"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "0"
+   ],
+   "oofGeom": [
+    {
+     "w": 12.05,
+     "h": 24,
+     "top": 0,
+     "left": 96.33
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9978",
+    "ios": "P 0.9829",
+    "android": "P 0.9805"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-tab-001",
+   "id": "bidi__bidi-tab-001__2__0-038",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "RTL",
+   "composeRtl": true,
+   "width": 108.38,
+   "height": 24,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "bidi__bidi-tab-001__2__0__0-039"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "0"
+   ],
+   "oofGeom": [
+    {
+     "w": 12.05,
+     "h": 24,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9978",
+    "ios": "P 0.9829",
+    "android": "P 0.9805"
+   },
+   "classes": [
+    "RTL"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-tab-001",
+   "id": "bidi__bidi-tab-001__3__0-041",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "RTL",
+   "composeRtl": true,
+   "width": 108.38,
+   "height": 24,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "bidi__bidi-tab-001__3__0__0-042"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "0"
+   ],
+   "oofGeom": [
+    {
+     "w": 12.05,
+     "h": 24,
+     "top": 0,
+     "left": 96.33
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9978",
+    "ios": "P 0.9829",
+    "android": "P 0.9805"
+   },
+   "classes": [
+    "RTL"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-tab-001",
+   "id": "bidi__bidi-tab-001__4__0-044",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 108.38,
+   "height": 24,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "bidi__bidi-tab-001__4__0__0-045"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "0"
+   ],
+   "oofGeom": [
+    {
+     "w": 12.05,
+     "h": 24,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9978",
+    "ios": "P 0.9829",
+    "android": "P 0.9805"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-tab-001",
+   "id": "bidi__bidi-tab-001__6__0-048",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 108.38,
+   "height": 24,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "bidi__bidi-tab-001__6__0__0-049"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "0"
+   ],
+   "oofGeom": [
+    {
+     "w": 12.05,
+     "h": 24,
+     "top": 0,
+     "left": 96.33
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9978",
+    "ios": "P 0.9829",
+    "android": "P 0.9805"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-tab-001",
+   "id": "bidi__bidi-tab-001__7__0-051",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "RTL",
+   "composeRtl": true,
+   "width": 108.38,
+   "height": 24,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "bidi__bidi-tab-001__7__0__0-052"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "0"
+   ],
+   "oofGeom": [
+    {
+     "w": 12.05,
+     "h": 24,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9978",
+    "ios": "P 0.9829",
+    "android": "P 0.9805"
+   },
+   "classes": [
+    "RTL"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-tab-001",
+   "id": "bidi__bidi-tab-001__8__0-054",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 108.38,
+   "height": 24,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "bidi__bidi-tab-001__8__0__0-055"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "0"
+   ],
+   "oofGeom": [
+    {
+     "w": 12.05,
+     "h": 24,
+     "top": 0,
+     "left": 96.33
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9978",
+    "ios": "P 0.9829",
+    "android": "P 0.9805"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-tab-001",
+   "id": "bidi__bidi-tab-001__9__0-057",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "RTL",
+   "composeRtl": true,
+   "width": 108.38,
+   "height": 24,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "bidi__bidi-tab-001__9__0__0-058"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "0"
+   ],
+   "oofGeom": [
+    {
+     "w": 12.05,
+     "h": 24,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9978",
+    "ios": "P 0.9829",
+    "android": "P 0.9805"
+   },
+   "classes": [
+    "RTL"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__boundary-shaping__boundary-shaping-009",
+   "id": "boundary-shaping__boundary-shaping-009__0__0-124",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 75.11,
+   "height": 41,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "boundary-shaping__boundary-shaping-009__0__0__0-125"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "عليكم"
+   ],
+   "oofGeom": [
+    {
+     "w": 65.11,
+     "h": 41,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    10,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "f 0.9482",
+    "ios": "f 0.8919",
+    "android": "f 0.7531"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__boundary-shaping__boundary-shaping-009",
+   "id": "boundary-shaping__boundary-shaping-009__1__0-128",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 82.27,
+   "height": 41,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "boundary-shaping__boundary-shaping-009__1__0__0-129"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "السلام"
+   ],
+   "oofGeom": [
+    {
+     "w": 82.27,
+     "h": 41,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "f 0.9482",
+    "ios": "f 0.8919",
+    "android": "f 0.7531"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__boundary-shaping__boundary-shaping-009",
+   "id": "boundary-shaping__boundary-shaping-009__2__0-132",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 76.67,
+   "height": 41,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "boundary-shaping__boundary-shaping-009__2__0__0-133"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "عليكم"
+   ],
+   "oofGeom": [
+    {
+     "w": 66.67,
+     "h": 41,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    10,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "f 0.9482",
+    "ios": "f 0.8919",
+    "android": "f 0.7531"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__boundary-shaping__boundary-shaping-009",
+   "id": "boundary-shaping__boundary-shaping-009__3__0-136",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 81.11,
+   "height": 41,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "boundary-shaping__boundary-shaping-009__3__0__0-137"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "السلام"
+   ],
+   "oofGeom": [
+    {
+     "w": 81.11,
+     "h": 41,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "f 0.9482",
+    "ios": "f 0.8919",
+    "android": "f 0.7531"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__boundary-shaping__boundary-shaping-009",
+   "id": "boundary-shaping__boundary-shaping-009__4__0-140",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 76.67,
+   "height": 41,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "boundary-shaping__boundary-shaping-009__4__0__0-141"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "عليكم"
+   ],
+   "oofGeom": [
+    {
+     "w": 66.67,
+     "h": 41,
+     "top": 0,
+     "left": 10
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    10
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "f 0.9482",
+    "ios": "f 0.8919",
+    "android": "f 0.7531"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__boundary-shaping__boundary-shaping-009",
+   "id": "boundary-shaping__boundary-shaping-009__5__0-144",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 81.11,
+   "height": 41,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "boundary-shaping__boundary-shaping-009__5__0__0-145"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "السلام"
+   ],
+   "oofGeom": [
+    {
+     "w": 81.11,
+     "h": 41,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "f 0.9482",
+    "ios": "f 0.8919",
+    "android": "f 0.7531"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__boundary-shaping__boundary-shaping-009",
+   "id": "boundary-shaping__boundary-shaping-009__6__0-148",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 75.11,
+   "height": 41,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "boundary-shaping__boundary-shaping-009__6__0__0-149"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "عليكم"
+   ],
+   "oofGeom": [
+    {
+     "w": 65.11,
+     "h": 41,
+     "top": 0,
+     "left": 10
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    10
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "f 0.9482",
+    "ios": "f 0.8919",
+    "android": "f 0.7531"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__boundary-shaping__boundary-shaping-009",
+   "id": "boundary-shaping__boundary-shaping-009__7__0-152",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 82.27,
+   "height": 41,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "boundary-shaping__boundary-shaping-009__7__0__0-153"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "السلام"
+   ],
+   "oofGeom": [
+    {
+     "w": 82.27,
+     "h": 41,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "f 0.9482",
+    "ios": "f 0.8919",
+    "android": "f 0.7531"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__hyphens__hyphenate-character-005",
+   "id": "hyphens__hyphenate-character-005__0__0-209",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "RTL",
+   "composeRtl": true,
+   "width": 7.75,
+   "height": 20,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "hyphens__hyphenate-character-005__0__0__0-210"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "ـ"
+   ],
+   "oofGeom": [
+    {
+     "w": 3.25,
+     "h": 20,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.974",
+    "ios": "f 0.9428",
+    "android": "f 0.9474"
+   },
+   "classes": [
+    "RTL"
+   ]
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-subelements-002",
+   "id": "text-decoration-subelements-002__1__0-254",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": null,
+   "height": null,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "text-decoration-subelements-002__1__0__0-255"
+   ],
+   "oofInsets": [
+    "none"
+   ],
+   "oofWidthAuto": [
+    true
+   ],
+   "oofTexts": [
+    "Einstein said that ."
+   ],
+   "oofGeom": [
+    {
+     "w": null,
+     "h": null,
+     "top": null,
+     "left": null
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9988",
+    "ios": "f 0.7975",
+    "android": "f 0.9047"
+   },
+   "classes": [
+    "AUTO-W",
+    "AUTO-H"
+   ]
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-subelements-002",
+   "id": "text-decoration-subelements-002__1__1-258",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": null,
+   "height": null,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "text-decoration-subelements-002__1__1__0-259"
+   ],
+   "oofInsets": [
+    "none"
+   ],
+   "oofWidthAuto": [
+    true
+   ],
+   "oofTexts": [
+    "Is ever true for n > 2."
+   ],
+   "oofGeom": [
+    {
+     "w": null,
+     "h": null,
+     "top": null,
+     "left": null
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9988",
+    "ios": "f 0.7975",
+    "android": "f 0.9047"
+   },
+   "classes": [
+    "AUTO-W",
+    "AUTO-H"
+   ]
+  },
+  {
+   "section": "css-transforms",
+   "stem": "wpt__css-transforms__backface-visibility-hidden-004",
+   "id": "backface-visibility-hidden-004__1__1-056",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backface-visibility-hidden-004__1__1__0-057"
+   ],
+   "oofInsets": [
+    "none"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": null,
+     "left": null
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "f 0.998"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-transforms",
+   "stem": "wpt__css-transforms__backface-visibility-hidden-animated-001",
+   "id": "backface-visibility-hidden-animated-001__0__0-066",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 200,
+   "height": 200,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backface-visibility-hidden-animated-001__0__0__0-067"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "Text"
+   ],
+   "oofGeom": [
+    {
+     "w": 32.3281,
+     "h": 20,
+     "top": 180,
+     "left": 167.672
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9646",
+    "android": "P 0.9985"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-transforms",
+   "stem": "wpt__css-transforms__backface-visibility-hidden-animated-002",
+   "id": "backface-visibility-hidden-animated-002__0__0-069",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 200,
+   "height": 200,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backface-visibility-hidden-animated-002__0__0__0-070"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "Text"
+   ],
+   "oofGeom": [
+    {
+     "w": 32.3281,
+     "h": 20,
+     "top": 180,
+     "left": 167.672
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9999",
+    "ios": "P 0.9646",
+    "android": "P 0.9985"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-transforms",
+   "stem": "wpt__css-transforms__css-scale-nested-001",
+   "id": "wpt__css-transforms__css-scale-nested-001__1-101",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "css-scale-nested-001__1__0-102"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 50,
+     "h": 50,
+     "top": 25,
+     "left": 25
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.999",
+    "android": "P 0.9981"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-transforms",
+   "stem": "wpt__css-transforms__css-transform-3d-transform-style",
+   "id": "wpt__css-transforms__css-transform-3d-transform-style__1-148",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 400,
+   "height": 100,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "css-transform-3d-transform-style__1__0-149",
+    "css-transform-3d-transform-style__1__1-150"
+   ],
+   "oofInsets": [
+    "Left",
+    "none"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 200,
+     "h": 100,
+     "top": null,
+     "left": 100
+    },
+    {
+     "w": 400,
+     "h": 100,
+     "top": null,
+     "left": null
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9841",
+    "ios": "P 0.9574",
+    "android": "P 0.9577"
+   },
+   "classes": [
+    "STACK"
+   ]
+  },
+  {
+   "section": "css-transforms",
+   "stem": "wpt__css-transforms__css-transform-3d-transform-style",
+   "id": "css-transform-3d-transform-style__1__1-150",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 400,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "css-transform-3d-transform-style__1__1__0-151"
+   ],
+   "oofInsets": [
+    "none"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 400,
+     "h": 100,
+     "top": null,
+     "left": null
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9841",
+    "ios": "P 0.9574",
+    "android": "P 0.9577"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-transforms",
+   "stem": "wpt__css-transforms__css-transform-inherit-scale",
+   "id": "css-transform-inherit-scale__1__1-155",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 50,
+   "height": 50,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "css-transform-inherit-scale__1__1__0-156"
+   ],
+   "oofInsets": [
+    "none"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 50,
+     "h": 50,
+     "top": null,
+     "left": null
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-transforms",
+   "stem": "wpt__css-transforms__css-transform-scale-001-manual",
+   "id": "wpt__css-transforms__css-transform-scale-001-manual__1-158",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 0,
+   "height": 0,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "css-transform-scale-001-manual__1__0-159",
+    "css-transform-scale-001-manual__1__1-160"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 98,
+     "h": 98,
+     "top": 100,
+     "left": 100
+    },
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "f 0.9067",
+    "ios": "f 0.9053",
+    "android": "f 0.9039"
+   },
+   "classes": [
+    "STACK",
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "css-transforms",
+   "stem": "wpt__css-transforms__css-transform-scale-002",
+   "id": "wpt__css-transforms__css-transform-scale-002__1-162",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": null,
+   "height": null,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "css-transform-scale-002__1__0-163",
+    "css-transform-scale-002__1__1-164"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 98,
+     "h": 98,
+     "top": 100,
+     "left": 100
+    },
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.999",
+    "android": "P 0.9977"
+   },
+   "classes": [
+    "STACK",
+    "AUTO-H"
+   ]
+  },
+  {
+   "section": "css-ui",
+   "stem": "wpt__css-ui__box-sizing-001",
+   "id": "wpt__css-ui__box-sizing-001__1-281",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 2,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "box-sizing-001__1__0-282"
+   ],
+   "oofInsets": [
+    "Top+Right"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 70,
+     "h": 70,
+     "top": 25,
+     "left": null
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 1,
+   "cells": {
+    "web": "P 0.9779",
+    "ios": "P 0.9769",
+    "android": "P 0.9761"
+   },
+   "classes": [
+    "INFLOW"
+   ]
+  },
+  {
+   "section": "css-ui",
+   "stem": "wpt__css-ui__box-sizing-003",
+   "id": "wpt__css-ui__box-sizing-003__1-285",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "box-sizing-003__1__0-286"
+   ],
+   "oofInsets": [
+    "Top+Right+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 70,
+     "h": 70,
+     "top": 25,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9779",
+    "ios": "P 0.9769",
+    "android": "P 0.9761"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-ui",
+   "stem": "wpt__css-ui__box-sizing-005",
+   "id": "wpt__css-ui__box-sizing-005__1-288",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "box-sizing-005__1__0-289"
+   ],
+   "oofInsets": [
+    "Top+Right+Bottom+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 70,
+     "h": 70,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9779",
+    "ios": "P 0.9769",
+    "android": "P 0.9761"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__3d-transform-incoming",
+   "id": "3d-transform-incoming__vt__1-006",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "3d-transform-incoming__vt__1__0-007"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9328",
+    "android": "P 1"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__3d-transform-outgoing",
+   "id": "3d-transform-outgoing__vt__1-014",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "3d-transform-outgoing__vt__1__0-015"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9488",
+    "android": "P 0.9504"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__capture-with-offscreen-child-translated",
+   "id": "capture-with-offscreen-child-translated__vt__1-042",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "capture-with-offscreen-child-translated__vt__1__0-043"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.986",
+    "ios": "P 0.986",
+    "android": "P 0.986"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__capture-with-offscreen-child",
+   "id": "capture-with-offscreen-child__vt__1-048",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "capture-with-offscreen-child__vt__1__0-049"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__capture-with-opacity-zero-child",
+   "id": "capture-with-opacity-zero-child__vt__1-054",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "capture-with-opacity-zero-child__vt__1__0-055"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__capture-with-visibility-hidden-child",
+   "id": "capture-with-visibility-hidden-child__vt__1-060",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "capture-with-visibility-hidden-child__vt__1__0-061"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__content-smaller-than-box-size",
+   "id": "content-smaller-than-box-size__vt__0-076",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 358,
+   "height": 568,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "content-smaller-than-box-size__vt__0__0-077"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 358,
+     "h": 568,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__content-smaller-than-box-size",
+   "id": "content-smaller-than-box-size__vt__1-078",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "content-smaller-than-box-size__vt__1__0-079"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 10,
+     "h": 10,
+     "top": 10,
+     "left": 10
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__content-visibility-auto-shared-element",
+   "id": "content-visibility-auto-shared-element__vt__1-095",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 500,
+   "children": 5,
+   "oofChildren": 5,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "content-visibility-auto-shared-element__vt__1__0-096",
+    "content-visibility-auto-shared-element__vt__1__1-097",
+    "content-visibility-auto-shared-element__vt__1__2-098",
+    "content-visibility-auto-shared-element__vt__1__3-099",
+    "content-visibility-auto-shared-element__vt__1__4-100"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left",
+    "Top+Left",
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 1,
+     "top": 0,
+     "left": 0
+    },
+    {
+     "w": 100,
+     "h": 1,
+     "top": 499,
+     "left": 0
+    },
+    {
+     "w": 1,
+     "h": 498,
+     "top": 1,
+     "left": 0
+    },
+    {
+     "w": 1,
+     "h": 498,
+     "top": 1,
+     "left": 99
+    },
+    {
+     "w": 98,
+     "h": 498,
+     "top": 1,
+     "left": 1
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "STACK"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__content-visibility-auto-shared-element",
+   "id": "content-visibility-auto-shared-element__vt__2-101",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 500,
+   "children": 5,
+   "oofChildren": 5,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "content-visibility-auto-shared-element__vt__2__0-102",
+    "content-visibility-auto-shared-element__vt__2__1-103",
+    "content-visibility-auto-shared-element__vt__2__2-104",
+    "content-visibility-auto-shared-element__vt__2__3-105",
+    "content-visibility-auto-shared-element__vt__2__4-106"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left",
+    "Top+Left",
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 1,
+     "top": 0,
+     "left": 0
+    },
+    {
+     "w": 100,
+     "h": 1,
+     "top": 499,
+     "left": 0
+    },
+    {
+     "w": 1,
+     "h": 498,
+     "top": 1,
+     "left": 0
+    },
+    {
+     "w": 1,
+     "h": 498,
+     "top": 1,
+     "left": 99
+    },
+    {
+     "w": 98,
+     "h": 498,
+     "top": 1,
+     "left": 1
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "STACK"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__content-with-transparent-background",
+   "id": "wpt__css-view-transitions__content-with-transparent-background__0-121",
+   "hostActivates": true,
+   "position": "FIXED",
+   "boxBranch": false,
+   "display": "NONE",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "content-with-transparent-background__0__0-122",
+    "content-with-transparent-background__0__1-123"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 25,
+     "h": 50,
+     "top": 0,
+     "left": 25
+    },
+    {
+     "w": 25,
+     "h": 50,
+     "top": 0,
+     "left": 50
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "STACK"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__content-with-transparent-background",
+   "id": "content-with-transparent-background__vt__0-126",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 358,
+   "height": 568,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "content-with-transparent-background__vt__0__0-127"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 358,
+     "h": 568,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__content-with-transparent-background",
+   "id": "content-with-transparent-background__vt__1-128",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "content-with-transparent-background__vt__1__0-129",
+    "content-with-transparent-background__vt__1__1-130"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 25,
+     "h": 50,
+     "top": 0,
+     "left": 25
+    },
+    {
+     "w": 25,
+     "h": 50,
+     "top": 0,
+     "left": 50
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "STACK"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__css-tags-paint-order-with-entry",
+   "id": "css-tags-paint-order-with-entry__vt__1-137",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "css-tags-paint-order-with-entry__vt__1__0-138"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9791",
+    "ios": "P 0.9791",
+    "android": "P 0.9791"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__css-tags-paint-order-with-entry",
+   "id": "css-tags-paint-order-with-entry__vt__2-139",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "css-tags-paint-order-with-entry__vt__2__0-140"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9791",
+    "ios": "P 0.9791",
+    "android": "P 0.9791"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__css-tags-paint-order-with-entry",
+   "id": "css-tags-paint-order-with-entry__vt__3-141",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "css-tags-paint-order-with-entry__vt__3__0-142"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9791",
+    "ios": "P 0.9791",
+    "android": "P 0.9791"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__css-tags-paint-order-with-entry",
+   "id": "css-tags-paint-order-with-entry__vt__4-143",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "css-tags-paint-order-with-entry__vt__4__0-144"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9791",
+    "ios": "P 0.9791",
+    "android": "P 0.9791"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__css-tags-paint-order",
+   "id": "css-tags-paint-order__vt__1-152",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "css-tags-paint-order__vt__1__0-153"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9791",
+    "ios": "P 0.9791",
+    "android": "P 0.9791"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__css-tags-paint-order",
+   "id": "css-tags-paint-order__vt__2-154",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "css-tags-paint-order__vt__2__0-155"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9791",
+    "ios": "P 0.9791",
+    "android": "P 0.9791"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__css-tags-paint-order",
+   "id": "css-tags-paint-order__vt__3-156",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "css-tags-paint-order__vt__3__0-157"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9791",
+    "ios": "P 0.9791",
+    "android": "P 0.9791"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__css-tags-shared-element",
+   "id": "css-tags-shared-element__vt__1-164",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "css-tags-shared-element__vt__1__0-165"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__css-tags-shared-element",
+   "id": "css-tags-shared-element__vt__2-166",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 50,
+   "height": 50,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "css-tags-shared-element__vt__2__0-167"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 50,
+     "h": 50,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__element-is-grouping-during-animation",
+   "id": "element-is-grouping-during-animation__0-174",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "element-is-grouping-during-animation__0__0-175"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__element-is-grouping-during-animation",
+   "id": "element-is-grouping-during-animation__vt__1-178",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "element-is-grouping-during-animation__vt__1__0-179"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__element-stops-grouping-after-animation",
+   "id": "element-stops-grouping-after-animation__0-181",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "element-stops-grouping-after-animation__0__0-182"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9639",
+    "ios": "P 0.9639",
+    "android": "P 0.9639"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__fractional-box-new",
+   "id": "fractional-box-new__vt__1-214",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100.13,
+   "height": 50.88,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "fractional-box-new__vt__1__0-215"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 51,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9206",
+    "android": "f 0.8658"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__fractional-box-new",
+   "id": "fractional-box-new__vt__2-216",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100.13,
+   "height": 50.88,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "fractional-box-new__vt__2__0-217"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 101,
+     "h": 51,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9206",
+    "android": "f 0.8658"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__fractional-box-old",
+   "id": "fractional-box-old__vt__1-223",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100.13,
+   "height": 50.88,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "fractional-box-old__vt__1__0-224"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 51,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9206",
+    "android": "f 0.8658"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__fractional-box-old",
+   "id": "fractional-box-old__vt__2-225",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100.13,
+   "height": 50.88,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "fractional-box-old__vt__2__0-226"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 101,
+     "h": 51,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9206",
+    "android": "f 0.8658"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__fragmented-at-start-ignored",
+   "id": "fragmented-at-start-ignored__vt__1-255",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": true,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "fragmented-at-start-ignored__vt__1__0-256"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9684",
+    "ios": "P 0.9684",
+    "android": "P 0.9684"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-writing-modes",
+   "stem": "wpt__css-writing-modes__dynamic-offset-rtl-001",
+   "id": "wpt__css-writing-modes__dynamic-offset-rtl-001__1-752",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "RTL",
+   "composeRtl": true,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dynamic-offset-rtl-001__0__0-753"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 10,
+     "h": 10,
+     "top": 10,
+     "left": 70
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9955",
+    "android": "P 0.9952"
+   },
+   "classes": [
+    "RTL"
+   ]
+  },
+  {
+   "section": "css-writing-modes",
+   "stem": "wpt__css-writing-modes__dynamic-offset-rtl-002",
+   "id": "wpt__css-writing-modes__dynamic-offset-rtl-002__1-755",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "RTL",
+   "composeRtl": true,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dynamic-offset-rtl-002__0__0-756"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 10,
+     "h": 10,
+     "top": 10,
+     "left": 10
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9956",
+    "ios": "P 0.9966",
+    "android": "P 0.9953"
+   },
+   "classes": [
+    "RTL"
+   ]
+  },
+  {
+   "section": "css-writing-modes",
+   "stem": "wpt__css-writing-modes__dynamic-offset-vrl-001",
+   "id": "wpt__css-writing-modes__dynamic-offset-vrl-001__1-758",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dynamic-offset-vrl-001__0__0-759"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 10,
+     "h": 10,
+     "top": 10,
+     "left": 70
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-writing-modes",
+   "stem": "wpt__css-writing-modes__dynamic-offset-vrl-002",
+   "id": "wpt__css-writing-modes__dynamic-offset-vrl-002__1-761",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dynamic-offset-vrl-002__0__0-762"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 10,
+     "h": 10,
+     "top": 10,
+     "left": 10
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9956",
+    "ios": "P 0.9956",
+    "android": "P 0.9956"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "css-writing-modes",
+   "stem": "wpt__css-writing-modes__dynamic-offset-vrl-rtl-001",
+   "id": "wpt__css-writing-modes__dynamic-offset-vrl-rtl-001__1-764",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "RTL",
+   "composeRtl": true,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dynamic-offset-vrl-rtl-001__0__0-765"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 10,
+     "h": 10,
+     "top": 10,
+     "left": 70
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9955",
+    "android": "P 0.9952"
+   },
+   "classes": [
+    "RTL"
+   ]
+  },
+  {
+   "section": "css-writing-modes",
+   "stem": "wpt__css-writing-modes__dynamic-offset-vrl-rtl-002",
+   "id": "wpt__css-writing-modes__dynamic-offset-vrl-rtl-002__1-767",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "RTL",
+   "composeRtl": true,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dynamic-offset-vrl-rtl-002__0__0-768"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 10,
+     "h": 10,
+     "top": 80,
+     "left": 70
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 0.9955",
+    "ios": "P 0.9955",
+    "android": "P 0.9952"
+   },
+   "classes": [
+    "RTL"
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-basic-blur",
+   "id": "wpt__filter-effects__backdrop-filter-basic-blur__1-009",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 200,
+   "height": 200,
+   "children": 3,
+   "oofChildren": 3,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backdrop-filter-basic-blur__1__0-010",
+    "backdrop-filter-basic-blur__1__1-011",
+    "backdrop-filter-basic-blur__1__2-012"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 150,
+     "h": 100,
+     "top": -50,
+     "left": 100
+    },
+    {
+     "w": 150,
+     "h": 100,
+     "top": 150,
+     "left": 100
+    },
+    {
+     "w": 150,
+     "h": 100,
+     "top": 50,
+     "left": -100
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9526",
+    "android": "f 0.904"
+   },
+   "classes": [
+    "STACK",
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-basic-opacity",
+   "id": "wpt__filter-effects__backdrop-filter-basic-opacity__1-019",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backdrop-filter-basic-opacity__1__0-020"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 50,
+     "left": 50
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9987"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-basic",
+   "id": "wpt__filter-effects__backdrop-filter-basic__1-024",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backdrop-filter-basic__1__0-025"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 50,
+     "left": 50
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9981",
+    "android": "P 0.9861"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-clip-rect-zoom",
+   "id": "wpt__filter-effects__backdrop-filter-clip-rect-zoom__2-064",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 300,
+   "height": 50,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backdrop-filter-clip-rect-zoom__1__0-065",
+    "backdrop-filter-clip-rect-zoom__1__1-066"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 150,
+     "top": 50,
+     "left": 95
+    },
+    {
+     "w": 100,
+     "h": 30,
+     "top": -34,
+     "left": 95
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": null,
+    "ios": null,
+    "android": null
+   },
+   "classes": [
+    "STACK",
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-clip-rect",
+   "id": "wpt__filter-effects__backdrop-filter-clip-rect__2-073",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 300,
+   "height": 50,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backdrop-filter-clip-rect__2__0-074",
+    "backdrop-filter-clip-rect__2__1-075"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 150,
+     "top": 50,
+     "left": 95
+    },
+    {
+     "w": 100,
+     "h": 30,
+     "top": -34,
+     "left": 95
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9961",
+    "android": "P 0.9559"
+   },
+   "classes": [
+    "STACK",
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-clipped",
+   "id": "wpt__filter-effects__backdrop-filter-clipped__2-085",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backdrop-filter-clipped__2__0-086"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9995",
+    "android": "P 0.9991"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-edge-clipping",
+   "id": "wpt__filter-effects__backdrop-filter-edge-clipping__4-114",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 4,
+   "oofChildren": 4,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backdrop-filter-edge-clipping__4__0-115",
+    "backdrop-filter-edge-clipping__4__1-116",
+    "backdrop-filter-edge-clipping__4__2-117",
+    "backdrop-filter-edge-clipping__4__3-118"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left",
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false,
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null,
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 30,
+     "h": 30,
+     "top": -31,
+     "left": 35
+    },
+    {
+     "w": 30,
+     "h": 30,
+     "top": 101,
+     "left": 35
+    },
+    {
+     "w": 30,
+     "h": 30,
+     "top": 35,
+     "left": 101
+    },
+    {
+     "w": 30,
+     "h": 30,
+     "top": 35,
+     "left": -31
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9975",
+    "android": "P 0.9533"
+   },
+   "classes": [
+    "STACK",
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-fixed-clip",
+   "id": "wpt__filter-effects__backdrop-filter-fixed-clip__1-133",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 200,
+   "height": 200,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backdrop-filter-fixed-clip__1__0-134"
+   ],
+   "oofInsets": [
+    "none"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 200,
+     "h": 200,
+     "top": null,
+     "left": null
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9733",
+    "android": "f 0.9481"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-fixed-clip",
+   "id": "backdrop-filter-fixed-clip__1__0-134",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 200,
+   "height": 200,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backdrop-filter-fixed-clip__1__0__0-135",
+    "backdrop-filter-fixed-clip__1__0__1-136"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 200,
+     "h": 200,
+     "top": 150,
+     "left": 50
+    },
+    {
+     "w": 200,
+     "h": 200,
+     "top": 90,
+     "left": 90
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9733",
+    "android": "f 0.9481"
+   },
+   "classes": [
+    "STACK",
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-isolation-fixed",
+   "id": "wpt__filter-effects__backdrop-filter-isolation-fixed__1-155",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backdrop-filter-isolation-fixed__1__0-156"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 110,
+     "left": 130
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9975",
+    "android": "P 0.9729"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-isolation-fixed",
+   "id": "backdrop-filter-isolation-fixed__1__0-156",
+   "hostActivates": true,
+   "position": "FIXED",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backdrop-filter-isolation-fixed__1__0__0-157"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 160,
+     "h": 160,
+     "top": 30,
+     "left": -90
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9975",
+    "android": "P 0.9729"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-isolation-isolate",
+   "id": "wpt__filter-effects__backdrop-filter-isolation-isolate__1-161",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backdrop-filter-isolation-isolate__1__0-162"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 0,
+     "left": 120
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9975",
+    "android": "P 0.9729"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-isolation-isolate",
+   "id": "backdrop-filter-isolation-isolate__1__0-162",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 100,
+   "height": 100,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backdrop-filter-isolation-isolate__1__0__0-163"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 160,
+     "h": 160,
+     "top": 30,
+     "left": -90
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9975",
+    "android": "P 0.9729"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-plus-filter",
+   "id": "wpt__filter-effects__backdrop-filter-plus-filter__1-202",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 200,
+   "height": 200,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backdrop-filter-plus-filter__1__0-203",
+    "backdrop-filter-plus-filter__1__1-204"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 50,
+     "left": 10
+    },
+    {
+     "w": 100,
+     "h": 100,
+     "top": 110,
+     "left": 60
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9499",
+    "android": "P 0.9709"
+   },
+   "classes": [
+    "STACK"
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-zero-size",
+   "id": "wpt__filter-effects__backdrop-filter-zero-size__2-228",
+   "hostActivates": true,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": null,
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 0,
+   "height": 0,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "backdrop-filter-zero-size__2__0-229"
+   ],
+   "oofInsets": [
+    "Top"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 100,
+     "h": 100,
+     "top": 100,
+     "left": null
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9993",
+    "android": "P 0.9988"
+   },
+   "classes": [
+    "CLAMP"
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-selector-change-003",
+   "id": "dir-selector-change-003__0__0-037",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 358,
+   "height": 20,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dir-selector-change-003__0__0__0-038",
+    "dir-selector-change-003__0__0__1-039"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 358,
+     "h": 0,
+     "top": 0,
+     "left": 0
+    },
+    {
+     "w": 281.08,
+     "h": 20,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9996",
+    "android": "P 0.9994"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-selector-change-003",
+   "id": "dir-selector-change-003__0__0__1-039",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "INLINE",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 281.08,
+   "height": 20,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dir-selector-change-003__0__0__1__0-040"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "The background color sho"
+   ],
+   "oofGeom": [
+    {
+     "w": 281.07,
+     "h": 20,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9996",
+    "android": "P 0.9994"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-selector-change-004",
+   "id": "dir-selector-change-004__0__0-042",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 358,
+   "height": 20,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dir-selector-change-004__0__0__0-043",
+    "dir-selector-change-004__0__0__1-044"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    null,
+    null
+   ],
+   "oofGeom": [
+    {
+     "w": 358,
+     "h": 0,
+     "top": 0,
+     "left": 0
+    },
+    {
+     "w": 121.02,
+     "h": 20,
+     "top": 0,
+     "left": 236.98
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9958",
+    "android": "P 0.9944"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-selector-change-004",
+   "id": "dir-selector-change-004__0__0__1-044",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "INLINE",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 121.02,
+   "height": 20,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dir-selector-change-004__0__0__1__0-045"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "מקור השם עברית"
+   ],
+   "oofGeom": [
+    {
+     "w": 121.02,
+     "h": 20,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9958",
+    "android": "P 0.9944"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-style-02a",
+   "id": "dir-style-02a__3__0-088",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 358,
+   "height": 20,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dir-style-02a__3__0__0-089"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "This element should inhe"
+   ],
+   "oofGeom": [
+    {
+     "w": 227.78,
+     "h": 20,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9455",
+    "android": "f 0.9425"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-style-02a",
+   "id": "dir-style-02a__3__1-090",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 358,
+   "height": 20,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dir-style-02a__3__1__0-091"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "This element is ltr."
+   ],
+   "oofGeom": [
+    {
+     "w": 137.47,
+     "h": 20,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9455",
+    "android": "f 0.9425"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-style-02a",
+   "id": "dir-style-02a__3__2-092",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "RTL",
+   "composeRtl": true,
+   "width": 358,
+   "height": 20,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dir-style-02a__3__2__0-093",
+    "dir-style-02a__3__2__1-094"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    "This element is rtl",
+    "."
+   ],
+   "oofGeom": [
+    {
+     "w": 133.88,
+     "h": 20,
+     "top": 0,
+     "left": 4.61
+    },
+    {
+     "w": 4.61,
+     "h": 20,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9455",
+    "android": "f 0.9425"
+   },
+   "classes": [
+    "STACK",
+    "RTL"
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-style-02a",
+   "id": "dir-style-02a__4__0-096",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 358,
+   "height": 20,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dir-style-02a__4__0__0-097",
+    "dir-style-02a__4__0__1-098"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    "This element should inhe",
+    "."
+   ],
+   "oofGeom": [
+    {
+     "w": 224.19,
+     "h": 20,
+     "top": 0,
+     "left": 4.61
+    },
+    {
+     "w": 4.61,
+     "h": 20,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9455",
+    "android": "f 0.9425"
+   },
+   "classes": [
+    "STACK"
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-style-02a",
+   "id": "dir-style-02a__4__1-099",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "LTR",
+   "composeRtl": false,
+   "width": 358,
+   "height": 20,
+   "children": 1,
+   "oofChildren": 1,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dir-style-02a__4__1__0-100"
+   ],
+   "oofInsets": [
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false
+   ],
+   "oofTexts": [
+    "This element is ltr."
+   ],
+   "oofGeom": [
+    {
+     "w": 137.47,
+     "h": 20,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9455",
+    "android": "f 0.9425"
+   },
+   "classes": [
+    "identity"
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-style-02a",
+   "id": "dir-style-02a__4__2-101",
+   "hostActivates": false,
+   "position": "ABSOLUTE",
+   "boxBranch": false,
+   "display": "BLOCK",
+   "direction": "RTL",
+   "composeRtl": true,
+   "width": 358,
+   "height": 20,
+   "children": 2,
+   "oofChildren": 2,
+   "inFlowBeforeOof": 0,
+   "oofIds": [
+    "dir-style-02a__4__2__0-102",
+    "dir-style-02a__4__2__1-103"
+   ],
+   "oofInsets": [
+    "Top+Left",
+    "Top+Left"
+   ],
+   "oofWidthAuto": [
+    false,
+    false
+   ],
+   "oofTexts": [
+    "This element is rtl",
+    "."
+   ],
+   "oofGeom": [
+    {
+     "w": 133.88,
+     "h": 20,
+     "top": 0,
+     "left": 4.61
+    },
+    {
+     "w": 4.61,
+     "h": 20,
+     "top": 0,
+     "left": 0
+    }
+   ],
+   "padding": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "inFlowAfterFirstOof": 0,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9455",
+    "android": "f 0.9425"
+   },
+   "classes": [
+    "STACK",
+    "RTL"
+   ]
+  }
+ ]
+}

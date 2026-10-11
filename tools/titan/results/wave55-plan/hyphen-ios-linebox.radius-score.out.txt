@@ -1,0 +1,10 @@
+css-text/boundary-shaping__boundary-shaping-001 · web 0.9787 · android 0.9791 · ios 0.9792 · ios-U 0.9792
+css-text/boundary-shaping__boundary-shaping-002 · web 0.9685 · android 0.9694 · ios 0.9695 · ios-U 0.9694
+css-text/boundary-shaping__boundary-shaping-003 · web 0.9777 · android 0.978 · ios 0.9781 · ios-U 0.9781
+css-text/boundary-shaping__boundary-shaping-004 · web 0.9769 · android 0.9774 · ios 0.9774 · ios-U 0.9774
+css-text/boundary-shaping__boundary-shaping-005 · web 0.9769 · android 0.9774 · ios 0.9774 · ios-U 0.9774
+css-text/boundary-shaping__boundary-shaping-006 · web 0.9708 · android 0.9715 · ios 0.9714 · ios-U 0.9714
+css-text/boundary-shaping__boundary-shaping-007 · web 0.976 · android 0.9763 · ios 0.9764 · ios-U 0.9764
+css-text/boundary-shaping__boundary-shaping-008 · web 0.9785 · android 0.9788 · ios 0.9789 · ios-U 0.9789
+css-text-decor/text-decoration-dotted-001 · web 0.9027 · android 0.5459 · ios 0.5318 · ios-U 0.5355
+css-text-decor/text-decoration-dotted-002 · web 1 · android 0.5924 · ios 0.5426 · ios-U 0.5472

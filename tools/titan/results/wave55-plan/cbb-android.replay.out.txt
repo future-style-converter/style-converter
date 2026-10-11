@@ -1,0 +1,6 @@
+base (wave54-final, neither unit)        gate f 0.9574     | ssim 0.9574 wptPass undefined pixelMismatchedPct 4.27
+U1 only (wave54-probe, 5b333c8a)         gate P 0.9668     | ssim 0.9668 wptPass undefined pixelMismatchedPct 2.389
+U1+U2 replay (Android pixels re-laid)    gate (prediction) | ssim 0.9999 wptPass undefined pixelMismatchedPct 0
+F3 fake: requiredSize centring           gate (fake)       | ssim 0.9414 wptPass undefined pixelMismatchedPct 2.309
+F4 fake: #outer clip missing             gate (fake)       | ssim 0.9841 wptPass undefined pixelMismatchedPct 0
+F6 fake: band added twice                gate (fake)       | ssim 0.9956 wptPass undefined pixelMismatchedPct 0.161

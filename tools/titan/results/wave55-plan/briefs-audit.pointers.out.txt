@@ -1,0 +1,171 @@
+=== hyphen-ios-linebox.md
+  L33 PATH-MISSING hyphen-ios-linebox.look-001…004.png
+  L80 PATH-MISSING css-text/hyphens__hyphenate-character-001.png
+  L125 PATH-MISSING per-test-ir/wpt__css-text__hyphens__hyphenate-character-001.json
+  L181 NEW-ABSENT(ok) runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift
+  L183 NEW-ABSENT(ok) runtimes/swiftui/Tests/StyleConverterRuntimeTests/NormalLineBoxTests.swift
+  L184 AMBIGUOUS(16) seam-1.patch → tools/titan/results/wave52-all-reset-postload-colour/seam-1.patch, tools/titan/results/wave52-counters-and-lists/seam-1.patch, tools/titan/results/wave52-failure-ink/seam-1.patch, tools/titan/results/wave52-flex-nowrap-gaps/seam-1.patch
+  L217 AMBIGUOUS(3) integrate-seams.sh → tools/titan/results/wave52-plan/integrate-seams.sh, tools/titan/results/wave53-plan/integrate-seams.sh, tools/titan/results/wave54-plan/integrate-seams.sh
+  L219 PATH-MISSING NormalLineBox.swift
+  L225 NEW-ABSENT(ok) NormalLineBox.swift
+  L225 NEW-ABSENT(ok) NormalLineBoxTests.swift
+  L225 NOTE NEW-but-exists runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+  L225 AMBIGUOUS(16) seam-1.patch → tools/titan/results/wave52-all-reset-postload-colour/seam-1.patch, tools/titan/results/wave52-counters-and-lists/seam-1.patch, tools/titan/results/wave52-failure-ink/seam-1.patch, tools/titan/results/wave52-flex-nowrap-gaps/seam-1.patch
+  L414 NOTE NEW-but-exists tools/titan/results/wave54-plan/hyphenate-character.geometry.py
+  L432 AMBIGUOUS(13) expectations.json → tools/titan/results/wave53-plan/expectations.json, tools/titan/results/wave54-oof-layout/plan-hunk/out-base/expectations.json, tools/titan/results/wave54-oof-layout/plan-hunk/out-patched/expectations.json, tools/titan/results/wave54-oof-layout/skeptic/plan-hunk-dry/base/expectations.json
+  L432 AMBIGUOUS(2) geometry-gate.py → tools/titan/results/wave54-plan/geometry-gate.py, tools/titan/results/wave54-plan/skeptic-r1/regen/hook/geometry-gate.py
+  L447 PATH-MISSING hyphen-ios-linebox.replays.out.txt
+  L447 PATH-MISSING hyphen-ios-linebox.fakes.out.txt
+  L538 AMBIGUOUS(3) integrate-seams.sh → tools/titan/results/wave52-plan/integrate-seams.sh, tools/titan/results/wave53-plan/integrate-seams.sh, tools/titan/results/wave54-plan/integrate-seams.sh
+=== cbb-android.md
+  L25 NOTE NEW-but-exists tools/titan/results/wave55-plan/cbb-android.reused-geometry.out.txt
+  L25 NOTE NEW-but-exists tools/titan/results/wave55-plan/cbb-android.geometry.py
+  L109 PATH-MISSING wave54-final/sections/filter-effects/per-test-ir/wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3.json
+  L182 NEW-ABSENT(ok) runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt
+  L193 NEW-ABSENT(ok) runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt
+  L197 NEW-ABSENT(ok) runtimes/compose/src/test/java/com/styleconverter/runtime/sizing/PercentContentBoxBandTest.kt
+  L206 NEW-ABSENT(ok) runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/ChildContainingBlockSeamWiringTest.kt
+  L208 PATH-MISSING tools/titan/results/wave55-cbb-android/seam-1.patch
+  L279 AMBIGUOUS(3) mutate.sh → tools/titan/results/wave53-lists-bakes/mutate.sh, tools/titan/results/wave54-hyphenate-character/mutate.sh, tools/titan/results/wave54-oof-layout/mutate.sh
+  L330 AMBIGUOUS(13) expectations.json → tools/titan/results/wave53-plan/expectations.json, tools/titan/results/wave54-oof-layout/plan-hunk/out-base/expectations.json, tools/titan/results/wave54-oof-layout/plan-hunk/out-patched/expectations.json, tools/titan/results/wave54-oof-layout/skeptic/plan-hunk-dry/base/expectations.json
+  L510 AMBIGUOUS(2) geometry-gate.py → tools/titan/results/wave54-plan/geometry-gate.py, tools/titan/results/wave54-plan/skeptic-r1/regen/hook/geometry-gate.py
+=== positioned-parent-slot.md
+  L75 PATH-MISSING selectors/dir-style-02a.png
+  L225 NEW-ABSENT(ok) runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt
+  L226 NEW-ABSENT(ok) runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt
+  L228 NEW-ABSENT(ok) runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGateTest.kt
+  L229 NEW-ABSENT(ok) runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOriginTest.kt
+  L230 PATH-MISSING layout/position/PositionedParentSlotGate.kt
+  L230 PATH-MISSING PositionedParentRtlOrigin.kt
+  L240 NEW-ABSENT(ok) runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/PositionedParentSlotSeamWiringTest.kt
+  L422 AMBIGUOUS(2) cells.mjs → tools/titan/results/wave50-S6/cells.mjs, tools/titan/results/wave52-gate/cells.mjs
+  L496 AMBIGUOUS(2) geometry-gate.py → tools/titan/results/wave54-plan/geometry-gate.py, tools/titan/results/wave54-plan/skeptic-r1/regen/hook/geometry-gate.py
+  L528 AMBIGUOUS(2) geometry-gate.py → tools/titan/results/wave54-plan/geometry-gate.py, tools/titan/results/wave54-plan/skeptic-r1/regen/hook/geometry-gate.py
+=== ua-heading-margin.md
+  L323 NEW-ABSENT(ok) runtimes/compose/src/main/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMargin.kt
+  L324 NEW-ABSENT(ok) runtimes/compose/src/test/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMarginTest.kt
+  L325 NEW-ABSENT(ok) runtimes/compose/src/test/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMarginSeamWiringTest.kt
+  L341 PATH-MISSING runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAHeadingFoldGate.kt
+  L342 PATH-MISSING runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAHeadingFoldGateTest.kt
+  L346 NEW-ABSENT(ok) runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/spacing/UAPositionedHeadingMargin.swift
+  L347 NEW-ABSENT(ok) runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift
+  L348 NEW-ABSENT(ok) runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginSeamWiringTests.swift
+  L359 PATH-MISSING runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift
+  L360 PATH-MISSING runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAHeadingFoldGateTests.swift
+  L389 PATH-MISSING UaPositionedHeadingMargin.kt
+  L390 PATH-MISSING UAPositionedHeadingMargin.swift
+  L391 PATH-MISSING UAHeadingFoldGate.kt
+  L392 PATH-MISSING UAHeadingFoldGate.swift
+  L511 AMBIGUOUS(2) geometry-gate.py → tools/titan/results/wave54-plan/geometry-gate.py, tools/titan/results/wave54-plan/skeptic-r1/regen/hook/geometry-gate.py
+  L656 AMBIGUOUS(2) UAElementFontRuleSeamWiringTest.kt → runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt, tools/titan/results/wave54-ua-heading-face/seam1-files/UAElementFontRuleSeamWiringTest.kt
+  L657 PATH-MISSING UaPositionedHeadingMarginSeamWiringTest.kt
+  L667 NEW-ABSENT(ok) UAPositionedHeadingMarginSeamWiringTests.swift
+  L671 AMBIGUOUS(2) UAElementFontRuleSeamWiringTest.kt → runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt, tools/titan/results/wave54-ua-heading-face/seam1-files/UAElementFontRuleSeamWiringTest.kt
+=== counter-suffix-rows.md
+  L12 PATH-MISSING counter-suffix-rows.wave54-open.out.txt
+  L55 AMBIGUOUS(13) expectations.json → tools/titan/results/wave53-plan/expectations.json, tools/titan/results/wave54-oof-layout/plan-hunk/out-base/expectations.json, tools/titan/results/wave54-oof-layout/plan-hunk/out-patched/expectations.json, tools/titan/results/wave54-oof-layout/skeptic/plan-hunk-dry/base/expectations.json
+  L141 PATH-MISSING counter-suffix-ref.html
+  L241 NEW-ABSENT(ok) Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerBidi.swift
+  L242 NEW-ABSENT(ok) Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerSuffixGap.swift
+  L252 NEW-ABSENT(ok) Tests/StyleConverterRuntimeTests/ListMarkerBidiTests.swift
+  L252 NEW-ABSENT(ok) ListMarkerSuffixGapTests.swift
+  L253 PATH-MISSING FontVariantNumericTabularTests.swift
+  L257 NEW-ABSENT(ok) main/java/com/styleconverter/runtime/lists/ListMarkerSuffixGap.kt
+  L260 NEW-ABSENT(ok) test/java/com/styleconverter/runtime/lists/ListMarkerSuffixGapTest.kt
+  L314 PATH-MISSING lists/ListMarkerBidi.swift
+  L314 PATH-MISSING ListMarkerBidiTests.swift
+  L315 PATH-MISSING lists/ListMarkerSuffixGap.swift
+  L315 PATH-MISSING ListMarkerSuffixGapTests.swift
+  L317 PATH-MISSING lists/ListMarkerSuffixGap.kt
+  L317 PATH-MISSING ListMarkerSuffixGapTest.kt
+  L319 PATH-MISSING FontVariantNumericTabularTests.swift
+  L329 PATH-MISSING DerivedBidiClass.txt
+  L377 AMBIGUOUS(2) geometry-gate.py → tools/titan/results/wave54-plan/geometry-gate.py, tools/titan/results/wave54-plan/skeptic-r1/regen/hook/geometry-gate.py
+  L378 AMBIGUOUS(13) expectations.json → tools/titan/results/wave53-plan/expectations.json, tools/titan/results/wave54-oof-layout/plan-hunk/out-base/expectations.json, tools/titan/results/wave54-oof-layout/plan-hunk/out-patched/expectations.json, tools/titan/results/wave54-oof-layout/skeptic/plan-hunk-dry/base/expectations.json
+  L380 AMBIGUOUS(8) hunk-for-orchestrator-1.patch → tools/titan/results/wave52-all-reset-postload-colour/hunk-for-orchestrator-1.patch, tools/titan/results/wave52-failure-ink/hunk-for-orchestrator-1.patch, tools/titan/results/wave52-instrument-and-calibration/hunk-for-orchestrator-1.patch, tools/titan/results/wave52-small-fixes/hunk-for-orchestrator-1.patch
+  L458 NOTE NEW-but-exists tools/titan/results/wave53-plan/lists-bakes.geometry.py
+  L482 AMBIGUOUS(13) expectations.json → tools/titan/results/wave53-plan/expectations.json, tools/titan/results/wave54-oof-layout/plan-hunk/out-base/expectations.json, tools/titan/results/wave54-oof-layout/plan-hunk/out-patched/expectations.json, tools/titan/results/wave54-oof-layout/skeptic/plan-hunk-dry/base/expectations.json
+  L510 PATH-MISSING counter-suffix-rows.wave54-open.out.txt
+  L593 NOTE NEW-but-exists tools/visual/doc-staleness-check.sh
+  L593 NOTE NEW-but-exists tools/visual/coverage-audit.mjs
+=== android-paint-order.md
+  L4 AMBIGUOUS(50) _note.md → tools/titan/results/wave50-B1/_note.md, tools/titan/results/wave50-B10/_note.md, tools/titan/results/wave50-B11/_note.md, tools/titan/results/wave50-B3/_note.md
+  L75 AMBIGUOUS(2) cells.mjs → tools/titan/results/wave50-S6/cells.mjs, tools/titan/results/wave52-gate/cells.mjs
+  L276 NEW-ABSENT(ok) runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt
+  L278 NEW-ABSENT(ok) runtimes/compose/src/test/java/com/styleconverter/runtime/borders/BehindContentBorderTest.kt
+  L283 NEW-ABSENT(ok) runtimes/compose/src/test/java/com/styleconverter/runtime/borders/sides/BorderSidesBehindContentTest.kt
+  L284 NEW-ABSENT(ok) runtimes/compose/src/test/java/com/styleconverter/runtime/effects/EffectsClipFilterOrderTest.kt
+  L296 PATH-MISSING tools/titan/results/wave55-android-paint-order/u2-styleapplier.patch
+  L304 NEW-ABSENT(ok) BehindContentBorder.kt
+  L461 AMBIGUOUS(2) geometry-gate.py → tools/titan/results/wave54-plan/geometry-gate.py, tools/titan/results/wave54-plan/skeptic-r1/regen/hook/geometry-gate.py
+  L474 AMBIGUOUS(13) expectations.json → tools/titan/results/wave53-plan/expectations.json, tools/titan/results/wave54-oof-layout/plan-hunk/out-base/expectations.json, tools/titan/results/wave54-oof-layout/plan-hunk/out-patched/expectations.json, tools/titan/results/wave54-oof-layout/skeptic/plan-hunk-dry/base/expectations.json
+  L509 AMBIGUOUS(2) geometry-gate.py → tools/titan/results/wave54-plan/geometry-gate.py, tools/titan/results/wave54-plan/skeptic-r1/regen/hook/geometry-gate.py
+  L554 AMBIGUOUS(2) geometry-gate.py → tools/titan/results/wave54-plan/geometry-gate.py, tools/titan/results/wave54-plan/skeptic-r1/regen/hook/geometry-gate.py
+=== instruments.md
+  L10 AMBIGUOUS(2) flex-zero-gap-rules.geometry.py → tools/titan/results/wave54-plan/flex-zero-gap-rules.geometry.py, tools/titan/results/wave55-plan/flex-zero-gap-rules.geometry.py
+  L11 AMBIGUOUS(2) flex-zero-gap-rules.geometry.out.txt → tools/titan/results/wave54-plan/flex-zero-gap-rules.geometry.out.txt, tools/titan/results/wave55-plan/flex-zero-gap-rules.geometry.out.txt
+  L13 NOTE NEW-but-exists tools/titan/results/wave55-plan/instruments-flex-gap-fakes/make-fakes.py
+  L13 AMBIGUOUS(2) score-fakes.mjs → tools/titan/results/wave54-plan/verify-r3/gap/score-fakes.mjs, tools/titan/results/wave55-plan/instruments-flex-gap-fakes/score-fakes.mjs
+  L13 AMBIGUOUS(2) score-fakes.out.txt → tools/titan/results/wave54-plan/verify-r3/gap/score-fakes.out.txt, tools/titan/results/wave55-plan/instruments-flex-gap-fakes/score-fakes.out.txt
+  L16 PATH-MISSING instruments.out.txt
+  L18 PATH-MISSING instruments.out.txt
+  L53 PATH-MISSING tools/titan/wl3-wire-differential.sh
+  L55 NEW-ABSENT(ok) tools/titan/wire-differential.sh
+  L160 AMBIGUOUS(4) installed-build-hash.sh → tools/titan/results/wave52-gate/installed-build-hash.sh, tools/titan/results/wave53-gate/installed-build-hash.sh, tools/titan/results/wave54-gate/installed-build-hash.sh, tools/titan/results/wave55-gate/installed-build-hash.sh
+  L161 PATH-MISSING HERE/build-hashes.txt
+  L163 AMBIGUOUS(4) build-hashes.txt → tools/titan/results/wave52-gate/build-hashes.txt, tools/titan/results/wave53-gate/build-hashes.txt, tools/titan/results/wave54-gate/build-hashes.txt, tools/titan/results/wave55-gate/build-hashes.txt
+  L237 AMBIGUOUS(2) flex-zero-gap-rules.geometry.out.txt → tools/titan/results/wave54-plan/flex-zero-gap-rules.geometry.out.txt, tools/titan/results/wave55-plan/flex-zero-gap-rules.geometry.out.txt
+  L238 AMBIGUOUS(2) make-fakes.py → tools/titan/results/wave54-plan/verify-r3/gap/make-fakes.py, tools/titan/results/wave55-plan/instruments-flex-gap-fakes/make-fakes.py
+  L238 AMBIGUOUS(2) score-fakes.mjs → tools/titan/results/wave54-plan/verify-r3/gap/score-fakes.mjs, tools/titan/results/wave55-plan/instruments-flex-gap-fakes/score-fakes.mjs
+  L238 AMBIGUOUS(2) score-fakes.out.txt → tools/titan/results/wave54-plan/verify-r3/gap/score-fakes.out.txt, tools/titan/results/wave55-plan/instruments-flex-gap-fakes/score-fakes.out.txt
+  L239 NEW-ABSENT(ok) tools/titan/wire-differential.sh
+  L239 NEW-ABSENT(ok) tools/titan/wire-differential.mjs
+  L239 NEW-ABSENT(ok) tools/titan/wire-differential.test.mjs
+  L240 NEW-ABSENT(ok) tools/titan/results/wave55-gate/ab-arms55.sh
+  L240 NEW-ABSENT(ok) ab-arms55.selftest.sh
+  L240 NEW-ABSENT(ok) ab-arms55.selftest.out.txt
+  L241 AMBIGUOUS(4) installed-build-hash.sh → tools/titan/results/wave52-gate/installed-build-hash.sh, tools/titan/results/wave53-gate/installed-build-hash.sh, tools/titan/results/wave54-gate/installed-build-hash.sh, tools/titan/results/wave55-gate/installed-build-hash.sh
+  L247 NEW-ABSENT(ok) runtimes/web/tests/renderer/InlineRunsLatitudeCitation.test.ts
+  L255 NEW-ABSENT(ok) typography/wrapping/PreBreakPipelineClampHyphenTest.kt
+  L256 NEW-ABSENT(ok) typography/wrapping/SoftHyphenCutsTest.kt
+  L257 NEW-ABSENT(ok) layout/position/OutOfFlowContainingBlockBranchesTest.kt
+  L258 NEW-ABSENT(ok) runtimes/swiftui/Tests/StyleConverterRuntimeTests/HyphenateCharacterCascadeTests.swift
+  L259 PATH-MISSING OutOfFlowContainingBlockBranchesTests.swift
+  L260 NEW-ABSENT(ok) runtimes/web/tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx
+  L261 NEW-ABSENT(ok) tools/visual/label-chrome-check.test.mjs
+  L262 PATH-MISSING tools/titan/results/wave55-instruments/_note.md
+  L288 NOTE NEW-but-exists runtimes/swiftui/Tests/StyleConverterRuntimeTests/TypographyTests.swift
+  L288 NOTE NEW-but-exists runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift
+  L308 AMBIGUOUS(2) flex-zero-gap-rules.geometry.out.txt → tools/titan/results/wave54-plan/flex-zero-gap-rules.geometry.out.txt, tools/titan/results/wave55-plan/flex-zero-gap-rules.geometry.out.txt
+  L309 AMBIGUOUS(13) expectations.json → tools/titan/results/wave53-plan/expectations.json, tools/titan/results/wave54-oof-layout/plan-hunk/out-base/expectations.json, tools/titan/results/wave54-oof-layout/plan-hunk/out-patched/expectations.json, tools/titan/results/wave54-oof-layout/skeptic/plan-hunk-dry/base/expectations.json
+  L332 PATH-MISSING wire-differential.mjs
+  L352 PATH-MISSING wire-differential.test.mjs
+  L381 PATH-MISSING wire-differential.mjs
+  L389 PATH-MISSING ab-arms55.sh
+  L393 PATH-MISSING ab-arms55.sh
+  L402 AMBIGUOUS(4) build-hashes.txt → tools/titan/results/wave52-gate/build-hashes.txt, tools/titan/results/wave53-gate/build-hashes.txt, tools/titan/results/wave54-gate/build-hashes.txt, tools/titan/results/wave55-gate/build-hashes.txt
+  L404 PATH-MISSING instruments.driver.txt
+  L405 AMBIGUOUS(4) installed-build-hash.sh → tools/titan/results/wave52-gate/installed-build-hash.sh, tools/titan/results/wave53-gate/installed-build-hash.sh, tools/titan/results/wave54-gate/installed-build-hash.sh, tools/titan/results/wave55-gate/installed-build-hash.sh
+  L405 PATH-MISSING instruments.hash.txt
+  L412 AMBIGUOUS(4) build-hashes.txt → tools/titan/results/wave52-gate/build-hashes.txt, tools/titan/results/wave53-gate/build-hashes.txt, tools/titan/results/wave54-gate/build-hashes.txt, tools/titan/results/wave55-gate/build-hashes.txt
+  L414 AMBIGUOUS(4) build-hashes.txt → tools/titan/results/wave52-gate/build-hashes.txt, tools/titan/results/wave53-gate/build-hashes.txt, tools/titan/results/wave54-gate/build-hashes.txt, tools/titan/results/wave55-gate/build-hashes.txt
+  L415 PATH-MISSING instruments.driver.txt
+  L421 PATH-MISSING ab-arms55.selftest.sh
+  L427 AMBIGUOUS(4) build-hashes.txt → tools/titan/results/wave52-gate/build-hashes.txt, tools/titan/results/wave53-gate/build-hashes.txt, tools/titan/results/wave54-gate/build-hashes.txt, tools/titan/results/wave55-gate/build-hashes.txt
+  L433 PATH-MISSING final/ab-drop-U.txt
+  L433 PATH-MISSING instruments.driver.txt
+  L473 NEW-ABSENT(ok) InlineRunsLatitudeCitation.test.ts
+  L512 NEW-ABSENT(ok) PreBreakPipelineClampHyphenTest.kt
+  L513 NEW-ABSENT(ok) SoftHyphenCutsTest.kt
+  L514 NEW-ABSENT(ok) HyphenateCharacterCascadeTests.swift
+  L515 NEW-ABSENT(ok) OutOfFlowContainingBlockBranchesTest.kt
+  L519 NEW-ABSENT(ok) OutOfFlowContainingBlockBranchesTests.swift
+  L522 NEW-ABSENT(ok) InertOutOfFlowWordJoin.branches.test.tsx
+  L528 NEW-ABSENT(ok) tools/visual/label-chrome-check.test.mjs
+  L541 PATH-MISSING ContainingBlockBands.kt
+  L618 AMBIGUOUS(2) flex-zero-gap-rules.geometry.out.txt → tools/titan/results/wave54-plan/flex-zero-gap-rules.geometry.out.txt, tools/titan/results/wave55-plan/flex-zero-gap-rules.geometry.out.txt
+  L653 AMBIGUOUS(2) geometry-gate.py → tools/titan/results/wave54-plan/geometry-gate.py, tools/titan/results/wave54-plan/skeptic-r1/regen/hook/geometry-gate.py
+
+paths checked 812 · ok 761 · fail 51
+cells checked 44 · ok 44 · mismatch 0
+runs loaded: wave54-final, wave54-open, wave54-probe, wave54-ab-drop-U3b, wave53-final

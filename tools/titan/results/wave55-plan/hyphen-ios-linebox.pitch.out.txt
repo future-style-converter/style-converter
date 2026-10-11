@@ -1,0 +1,28 @@
+== hyphenate-character-001  ref group-first centroid gaps [114.02, 94.72, 76.4]  (lines/group [5, 4, 3, 3])
+   wave54-ab-drop-U3b   web      group-first offset [+0.00 +1.00 +2.00 +3.00]   in-group slope px/line [-0.000 +0.000 +0.001 +0.000]
+   wave54-ab-drop-U3b   ios      group-first offset [+0.02 +0.02 +0.02 -0.02]   in-group slope px/line [-0.306 -0.306 -0.010 +0.007]
+   wave54-ab-drop-U3b   android  group-first offset [+0.13 +1.19 +2.11 +3.09]   in-group slope px/line [+0.008 -0.012 +0.021 +0.015]
+   wave54-final         web      group-first offset [+0.00 -0.00 -0.00 +1.00]   in-group slope px/line [-0.000 +0.000 +0.001 +0.000]
+   wave54-final         ios      group-first offset [+0.02 -0.98 -1.98 -2.02]   in-group slope px/line [-0.306 -0.306 -0.010 +0.007]
+   wave54-final         android  group-first offset [+0.13 +0.19 +0.11 +0.09]   in-group slope px/line [+0.008 -0.012 +0.021 +0.015]
+== hyphenate-character-002  ref group-first centroid gaps [114.02, 94.72, 76.4]  (lines/group [5, 4, 3, 3])
+   wave54-ab-drop-U3b   web      lines/group [4, 4, 3, 3] ≠ ref — not compared
+   wave54-ab-drop-U3b   ios      lines/group [5, 4, 3, 4] ≠ ref — not compared
+   wave54-ab-drop-U3b   android  lines/group [5, 4, 4, 4] ≠ ref — not compared
+   wave54-final         web      lines/group [4, 4, 3, 3] ≠ ref — not compared
+   wave54-final         ios      lines/group [5, 4, 3, 4] ≠ ref — not compared
+   wave54-final         android  lines/group [5, 4, 4, 4] ≠ ref — not compared
+== hyphenate-character-003  ref group-first centroid gaps [114.05, 94.81, 76.27]  (lines/group [5, 4, 3, 3])
+   wave54-ab-drop-U3b   web      group-first offset [+0.00 +1.00 +2.00 +3.00]   in-group slope px/line [+0.000 +0.000 +0.001 +0.000]
+   wave54-ab-drop-U3b   ios      group-first offset [+0.00 +0.01 +0.01 -0.03]   in-group slope px/line [-0.303 -0.303 -0.006 +0.012]
+   wave54-ab-drop-U3b   android  group-first offset [+0.06 +1.13 +2.08 +3.03]   in-group slope px/line [+0.019 +0.005 +0.037 +0.047]
+   wave54-final         web      group-first offset [+0.00 -0.00 -0.00 +1.00]   in-group slope px/line [+0.000 +0.000 +0.001 +0.000]
+   wave54-final         ios      group-first offset [+0.00 -0.99 -1.99 -2.03]   in-group slope px/line [-0.303 -0.303 -0.006 +0.012]
+   wave54-final         android  group-first offset [+0.06 +0.13 +0.08 +0.03]   in-group slope px/line [+0.019 +0.005 +0.037 +0.047]
+== hyphenate-character-004  ref group-first centroid gaps [95.03, 94.84, 95.21]  (lines/group [4, 4, 4, 3])
+   wave54-ab-drop-U3b   web      group-first offset [+0.00 +1.00 +2.00 +3.00]   in-group slope px/line [+0.001 +0.000 +0.000 +0.000]
+   wave54-ab-drop-U3b   ios      group-first offset [+0.05 +0.05 +0.07 +0.04]   in-group slope px/line [-0.319 -0.312 -0.317 -0.020]
+   wave54-ab-drop-U3b   android  group-first offset [+0.19 +1.22 +2.17 +3.17]   in-group slope px/line [-0.015 -0.017 -0.004 -0.022]
+   wave54-final         web      group-first offset [+0.00 -0.00 +0.00 +1.00]   in-group slope px/line [+0.001 +0.000 +0.000 +0.000]
+   wave54-final         ios      group-first offset [+0.05 -0.95 -1.93 -1.96]   in-group slope px/line [-0.319 -0.312 -0.317 -0.020]
+   wave54-final         android  group-first offset [+0.19 +0.22 +0.17 +0.17]   in-group slope px/line [-0.015 -0.017 -0.004 -0.022]

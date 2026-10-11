@@ -1,0 +1,317 @@
+#!/usr/bin/env python3
+# tools/titan/results/wave55-plan/android-paint-order.geometry.py — GEOMETRY probe for wave-55 lane L6
+# (android-paint-order; BACKLOG obligation 0(k)). One line per (key, platform), each ending in the exact verdict
+# "→ GEOMETRY OK" or "→ GEOMETRY WRONG (<why>)", read by geometry-gate.py through `lanes.L6-*.geometryProbes`.
+#
+# Why: the lane's units change WHICH paint wins where a parent's border band and a descendant overlap (CSS 2.1
+# Appendix E: a box's borders paint before its descendants — in-flow ones at steps 4/7, positioned ones at step 8 —
+# so the descendant wins). Compose paints every border band AFTER drawContent() (androidx foundation 1.11.4
+# BorderModifierNode: every outline branch's onDrawWithContent lambda calls drawContent() first; BorderSideApplier's
+# slow path likewise), so the parent's band overpaints its children. SSIM barely sees it (416 px on clip-rect,
+# +0.0015 in the replay), so these keys gate on the pixels themselves.
+#
+# Keys (platforms ref / web / ios / android; the ref row is the self-check and must print OK, exit 1 otherwise):
+#   [PO] backdrop-filter-clip-rect / -zoom — the 416 overlap pixels (rows 166-167 and 218-219, x163-266: the red
+#        .menu2 bottom border and .menu top border crossing the blue .navbar border) must be red (>= 400) with
+#        <= 8 blue; guards: the navbar band OUTSIDE the menus (same rows, x120-159 / x270-309) keeps >= 312/320 blue
+#        (a "fix" that drops or moves the parent border fails), the backdrop inversion stays 10000 +-100 pink px in
+#        x116-315 y168-217, and the red bbox is (163,134,266,371) +-1 with 1552 +-16 red px (menus neither dropped
+#        nor overdrawn into the navbar's interior).
+#   [FO] clip-path-filter-order — 0 reddish px below y115; green box bbox (16,128,215,327) +-1 with >= 39600 px; no
+#        halo: min channel >= 250 in the 45-px strips right of and below the box. This is a CONTROL: a correct
+#        filter→clip order and a DROPPED drop-shadow paint the same picture here (the ref shows no shadow anywhere:
+#        the shadow lies under the opaque 400x400 box inside the 200x200 clip), so no pixel key on this test can
+#        prove the shadow was rendered-then-clipped; the order is pinned in the JVM suite instead (brief §4 U3).
+#   [X]  <legacy-route carrier> — "crossings": runs of 1..4 dark px (sum < 150) with the SAME saturated fill on both
+#        ends (horizontal or vertical) = a dark parent band painted over a child's fill; must be <= 4, AND the
+#        child-fill count (teal / yellow) >= 0.90 x the ref's (a dropped child cannot pass by having no crossings).
+#   [ID] <raster control> — the capture is decoded-pixel IDENTICAL to the same capture in --base (the units must
+#        not change a band nothing overlaps: the behind-content painter must rasterise exactly like androidx).
+#
+# Usage: python3 android-paint-order.geometry.py <run> [--base wave55-open]
+#        python3 android-paint-order.geometry.py --fakes      (runs the rules on synthesized wrong pictures)
+#        python3 android-paint-order.geometry.py --replays    (the planning replays must print OK on their keys)
+import os
+import sys
+import numpy as np
+from PIL import Image, ImageChops, ImageFilter
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..', '..'))
+REFS = (f'{ROOT}/tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/'
+        'white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin')
+DIRS = [('ref', None), ('web', 'screenshots'), ('ios', 'ios-screenshots'), ('android', 'android-screenshots')]
+
+
+def path(run, section, test, label):
+    """Frozen ref or composed capture of <section>/<test>.html."""
+    flat = test.replace('/', '__')
+    if label == 'ref':
+        return f'{REFS}/{section}/{flat}.png'
+    d = dict(DIRS)[label]
+    return f'{ROOT}/tools/titan/runs/{run}/sections/{section}/{d}/wpt__{section}__{flat}.png'
+
+
+def arr(p):
+    """RGB int16 array, or None when the PNG is missing (printed as MISSING → WRONG)."""
+    return np.asarray(Image.open(p).convert('RGB')).astype(np.int16) if os.path.exists(p) else None
+
+
+red = lambda a: (a[..., 0] >= 200) & (a[..., 1] <= 60) & (a[..., 2] <= 60)
+blue = lambda a: (a[..., 2] >= 200) & (a[..., 0] <= 60) & (a[..., 1] <= 60)
+pink = lambda a: (a[..., 0] >= 240) & (a[..., 1] >= 100) & (a[..., 1] <= 150) & (a[..., 2] >= 240)
+green = lambda a: (a[..., 1] >= 100) & (a[..., 0] <= 40) & (a[..., 2] <= 40)
+reddish = lambda a: (a[..., 0] > 150) & (a[..., 0] - np.maximum(a[..., 1], a[..., 2]) > 40)
+teal = lambda a: (a[..., 0] <= 40) & (a[..., 1] >= 100) & (a[..., 1] <= 160) & (a[..., 2] >= 100) & (a[..., 2] <= 160)
+yellow = lambda a: (a[..., 0] >= 200) & (a[..., 1] >= 200) & (a[..., 2] <= 80)
+OVERLAP_ROWS = (166, 167, 218, 219)
+
+
+def po(a):
+    """[PO] measurements + reasons for one picture."""
+    O = a[list(OVERLAP_ROWS), 163:267]
+    r_o, b_o = int(red(O).sum()), int(blue(O).sum())
+    G = np.concatenate([a[list(OVERLAP_ROWS), 120:160], a[list(OVERLAP_ROWS), 270:310]], axis=1)
+    g_b = int(blue(G).sum())
+    pk = int(pink(a[168:218, 116:316]).sum())
+    ys, xs = np.nonzero(red(a))
+    bb = (int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())) if len(xs) else None
+    why = []
+    if r_o < 400 or b_o > 8:
+        why.append(f'paint order: overlap rows red {r_o} / blue {b_o} of 416 (parent border over positioned children, CSS 2.1 App. E)')
+    if g_b < 312:
+        why.append(f'navbar band outside the menus blue {g_b}/320 (parent border dropped or moved)')
+    if abs(pk - 10000) > 100:
+        why.append(f'backdrop inversion {pk} pink px vs 10000')
+    if bb is None or any(abs(u - v) > 1 for u, v in zip(bb, (163, 134, 266, 371))) or abs(len(xs) - 1552) > 16:
+        why.append(f'menus: red bbox {bb} n {len(xs)} vs (163,134,266,371) n 1552')
+    return f'overlap red {r_o} blue {b_o} | navbar band blue {g_b}/320 | pink {pk} | red n {len(xs)}', why
+
+
+def fo(a):
+    """[FO] measurements + reasons for one picture."""
+    h, w, _ = a.shape
+    nred = int(reddish(a[115:]).sum())
+    ys, xs = np.nonzero(green(a[115:]))
+    why = []
+    if not len(xs):
+        return 'no green box', ['green box missing']
+    bb = (int(xs.min()), int(ys.min()) + 115, int(xs.max()), int(ys.max()) + 115)
+    x1, y1 = bb[2], bb[3]
+    right = a[bb[1]:min(h, y1 + 46), x1 + 1:min(w, x1 + 46)]
+    below = a[y1 + 1:min(h, y1 + 46), bb[0]:min(w, x1 + 46)]
+    halo = int(min(right.min(), below.min()))
+    if nred:
+        why.append(f'{nred} reddish px (a shadow outside the clip: filter applied after clip-path)')
+    if any(abs(u - v) > 1 for u, v in zip(bb, (16, 128, 215, 327))) or len(xs) < 39600:
+        why.append(f'green box {bb} n {len(xs)} vs (16,128,215,327) n 40000')
+    if halo < 250:
+        why.append(f'halo: min channel {halo} beside the box (blurred / unclipped edge)')
+    return f'reddish {nred} | green {bb} n {len(xs)} | halo min {halo}', why
+
+
+def crossings(a):
+    """Dark 1..4-px runs with the same saturated fill on both ends, horizontal + vertical (the scan's rule)."""
+    dark = a.sum(axis=2) < 150
+    fill = (a.max(axis=2) - a.min(axis=2) > 60) & ~dark
+    n = 0
+    for A, D, F in ((a, dark, fill), (a.transpose(1, 0, 2), dark.T, fill.T)):
+        W = A.shape[1]
+        for k in range(1, 5):
+            run_dark = np.ones((A.shape[0], W - k - 1), dtype=bool)
+            for j in range(k):
+                run_dark &= D[:, 1 + j:W - k + j]
+            same = (np.abs(A[:, :W - k - 1] - A[:, k + 1:]).max(axis=2) <= 8) & F[:, :W - k - 1] & F[:, k + 1:]
+            n += int((run_dark & same).sum()) * k
+    return n
+
+
+def x_rule(a, fill, ref_fill):
+    """[X] measurements + reasons."""
+    c = crossings(a)
+    f = int(fill(a).sum())
+    why = []
+    if c > 4:
+        why.append(f'{c} crossing px (a parent border painted over its child, CSS 2.1 App. E)')
+    if f < 0.90 * ref_fill:
+        why.append(f'child fill {f} px < 0.90 x ref {ref_fill}')
+    return f'crossings {c} | child fill {f} (ref {ref_fill})', why
+
+
+PO_CASES = [('filter-effects', 'backdrop-filter-clip-rect'), ('filter-effects', 'backdrop-filter-clip-rect-zoom')]
+X_CASES = [
+    ('css-flexbox', 'abspos/flex-abspos-staticpos-align-self-safe-001', yellow),
+    ('css-flexbox', 'abspos/flex-abspos-staticpos-align-self-safe-002', yellow),
+    ('css-grid', 'abspos/grid-abspos-staticpos-align-self-001', teal),
+    ('css-grid', 'abspos/grid-abspos-staticpos-justify-self-001', teal),
+    ('css-grid', 'abspos/grid-abspos-staticpos-align-self-vertWM-001', teal),
+    ('css-grid', 'abspos/grid-abspos-staticpos-align-self-rtl-001', teal),
+]
+# Raster controls (android): U1's self-paint bands nothing overlaps; U2's legacy bands (solid fast path, dotted /
+# dashed slow path, radius-clip legacy route) nothing overlaps — no child component and no own text.
+ID_CASES = [
+    ('css-break', 'borders-008'), ('css-masking', 'clip-path/clip-path-borderBox-1e'),
+    ('css-masking', 'clip-path/clip-path-contentBox-1e'), ('css-masking', 'clip-path/clip-path-paddingBox-1e'),
+    ('filter-effects', 'backdrop-filter-clip-rect-2'),
+    ('css-backgrounds', 'background-clip-002'), ('CSS2', 'css21-errata/s-11-1-1b-001'),
+    ('filter-effects', 'backdrop-filter-clip-radius-zoom'),
+    # U2 controls INSIDE the probe sections: bordered positioned parents whose abspos children do NOT reach the band
+    # (crossings 0 on ref / web / ios / android at wave54-final) — the band moves under them and must not change a px
+    ('css-grid', 'abspos/grid-abspos-staticpos-align-items-center'),
+    ('css-flexbox', 'abspos/flex-abspos-staticpos-align-self-safe-003'),
+]
+
+
+def line(key, label, meas, why):
+    """One verdict line; the key's tokens lead the line so geometry-gate.py's find_line matches it."""
+    return f'{key} {label:<8} | {meas} → ' + ('GEOMETRY OK' if not why else f'GEOMETRY WRONG ({"; ".join(why)})')
+
+
+def main(run, base):
+    ref_failed = False
+    for sec, test in PO_CASES:
+        for label, _ in DIRS:
+            if label == 'ref' and test.endswith('-zoom'):
+                # the -zoom ref is rendered at `html { zoom: 5 }` while the composed captures are not (the cell is
+                # scoreEligible false); its rows are read against the unzoomed geometry, so no ref self-check here
+                print(f'[PO] {test} ref      | n/a (ref rendered at zoom 5; captures unzoomed, unscored) → GEOMETRY OK')
+                continue
+            a = arr(path(run, sec, test, label))
+            if a is None:
+                print(f'[PO] {test} {label:<8} MISSING → GEOMETRY WRONG (no capture)'); continue
+            meas, why = po(a)
+            ref_failed |= label == 'ref' and bool(why)
+            print(line(f'[PO] {test}', label, meas, why))
+    for label, _ in DIRS:
+        a = arr(path(run, 'css-masking', 'clip-path/clip-path-filter-order', label))
+        if a is None:
+            print(f'[FO] clip-path-filter-order {label:<8} MISSING → GEOMETRY WRONG (no capture)'); continue
+        meas, why = fo(a)
+        ref_failed |= label == 'ref' and bool(why)
+        print(line('[FO] clip-path-filter-order', label, meas, why))
+    for sec, test, fill in X_CASES:
+        r = arr(path(run, sec, test, 'ref'))
+        ref_fill = int(fill(r).sum())
+        name = test.split('/')[-1]
+        for label, _ in DIRS:
+            a = arr(path(run, sec, test, label))
+            if a is None:
+                print(f'[X] {name} {label:<8} MISSING → GEOMETRY WRONG (no capture)'); continue
+            meas, why = x_rule(a, fill, ref_fill)
+            ref_failed |= label == 'ref' and bool(why)
+            print(line(f'[X] {name}', label, meas, why))
+    for sec, test in ID_CASES:
+        name = test.split('/')[-1]
+        p, q = path(run, sec, test, 'android'), path(base, sec, test, 'android')
+        if not (os.path.exists(p) and os.path.exists(q)):
+            print(f'[ID] {name} android  MISSING → GEOMETRY WRONG (no capture in {run} or {base})'); continue
+        A, B = Image.open(p).convert('RGB'), Image.open(q).convert('RGB')
+        bb = 'size' if A.size != B.size else ImageChops.difference(A, B).getbbox()
+        print(line(f'[ID] {name}', 'android', f'identical to {base}' if bb is None else f'vs {base}',
+                   [] if bb is None else [f'differs from {base} in {bb}']))
+    return 1 if ref_failed else 0
+
+
+def fakes():
+    """Synthesized wrong pictures: every rule must print WRONG on its fakes (and the documented blind spot OK)."""
+    out = os.path.join(HERE, 'android-paint-order-fakes')
+    os.makedirs(out, exist_ok=True)
+    rows = []
+    ref = Image.open(path('wave54-final', 'filter-effects', 'backdrop-filter-clip-rect', 'ref')).convert('RGB')
+    and_ = Image.open(path('wave54-final', 'filter-effects', 'backdrop-filter-clip-rect', 'android')).convert('RGB')
+    f = {}
+    f['PO-today-android'] = and_
+    im = ref.copy(); px = im.load()                       # parent border dropped where the menus cross it
+    for y in OVERLAP_ROWS:
+        for x in list(range(66, 163)) + list(range(267, 370)):
+            if px[x, y][2] >= 200 and px[x, y][0] <= 60:
+                px[x, y] = (255, 128, 255) if y in (167, 218) else (0, 128, 0)
+    f['PO-parent-border-dropped'] = im
+    im = ref.copy(); px = im.load()                       # menus dropped: their red → what lies under them
+    for y in range(600):
+        for x in range(390):
+            if px[x, y][0] >= 200 and px[x, y][1] <= 60 and px[x, y][2] <= 60:
+                px[x, y] = (0, 0, 255) if y in OVERLAP_ROWS else (0, 128, 0) if 116 <= x <= 315 and 116 <= y <= 315 else (255, 255, 255)
+    f['PO-menus-dropped'] = im
+    im = ref.copy(); px = im.load()                       # menus' side borders drawn through the navbar interior
+    for y in range(168, 218):
+        for x in (163, 164, 265, 266):
+            px[x, y] = (255, 0, 0)
+    f['PO-menus-through-navbar'] = im
+    im = ref.copy(); px = im.load()                       # backdrop inversion lost (green instead of pink)
+    for y in range(168, 218):
+        for x in range(116, 316):
+            if px[x, y][0] >= 240 and px[x, y][2] >= 240:
+                px[x, y] = (0, 128, 0)
+    f['PO-backdrop-lost'] = im
+    for tag, im in f.items():
+        im.save(f'{out}/{tag}.png')
+        meas, why = po(np.asarray(im).astype(np.int16))
+        rows.append(line(f'[PO] fake {tag}', 'fake', meas, why))
+    fo_ref = Image.open(path('wave54-final', 'css-masking', 'clip-path/clip-path-filter-order', 'ref')).convert('RGB')
+    g = {}
+    # filter AFTER clip: the clipped 200x200 square casts drop-shadow(16px 16px 20px red) (sigma = r/2 = 10) under it
+    sh = Image.new('L', fo_ref.size, 0)
+    sh.paste(255, (16 + 16, 128 + 16, 216 + 16, 328 + 16))
+    sh = sh.filter(ImageFilter.GaussianBlur(10))
+    im = Image.composite(Image.new('RGB', fo_ref.size, (255, 0, 0)), fo_ref, sh)
+    im.paste((0, 128, 0), (16, 128, 216, 328))
+    g['FO-filter-after-clip'] = im
+    # the box's edge blurred (sigma 2) below the text block: an unclipped / softened edge
+    blurred = fo_ref.copy(); box = fo_ref.crop((0, 115, 390, 600)).filter(ImageFilter.GaussianBlur(2)); blurred.paste(box, (0, 115))
+    g['FO-blurred-edge'] = blurred
+    shifted = Image.new('RGB', fo_ref.size, (255, 255, 255)); shifted.paste(fo_ref.crop((0, 0, 390, 115)), (0, 0))
+    shifted.paste((0, 128, 0), (16, 148, 216, 348))
+    g['FO-box-20px-low'] = shifted
+    g['FO-shadow-dropped-(blind-spot:expect OK)'] = fo_ref
+    for tag, im in g.items():
+        im.save(f'{out}/{tag.split("(")[0].rstrip("-")}.png')
+        meas, why = fo(np.asarray(im).astype(np.int16))
+        rows.append(line(f'[FO] fake {tag}', 'fake', meas, why))
+    xr = Image.open(path('wave54-final', 'css-grid', 'abspos/grid-abspos-staticpos-align-self-001', 'ref')).convert('RGB')
+    rf = int(teal(np.asarray(xr).astype(np.int16)).sum())
+    h = {}
+    im = xr.copy(); px = im.load()                        # a 1-px black line drawn across every teal child
+    a = np.asarray(xr).astype(np.int16)
+    ys, xs = np.nonzero(teal(a))
+    for y, x in zip(ys, xs):
+        if (y % 7) == 3:
+            px[int(x), int(y)] = (0, 0, 0)
+    h['X-border-across-children'] = im
+    im = xr.copy(); px = im.load()                        # children dropped: no crossings, but no fill either
+    for y, x in zip(ys, xs):
+        px[int(x), int(y)] = (255, 255, 255)
+    h['X-children-dropped'] = im
+    h['X-today-android'] = Image.open(path('wave54-final', 'css-grid', 'abspos/grid-abspos-staticpos-align-self-001', 'android')).convert('RGB')
+    for tag, im in h.items():
+        im.save(f'{out}/{tag}.png')
+        meas, why = x_rule(np.asarray(im).astype(np.int16), teal, rf)
+        rows.append(line(f'[X] fake {tag}', 'fake', meas, why))
+    print('\n'.join(rows))
+    return 0
+
+
+def replays():
+    """The planning replays (android-paint-order.replay.py) must print OK on the keys their unit gates: a rule
+    that rejects the modelled fixed picture would gate the unit out even when it is right."""
+    rd = os.path.join(HERE, 'android-paint-order-replay')
+    a = arr(f'{rd}/backdrop-filter-clip-rect-android-U1.png')
+    meas, why = po(a)
+    print(line('[PO] replay backdrop-filter-clip-rect', 'U1', meas, why))
+    for sec, test, fill in X_CASES:
+        ref_fill = int(fill(arr(path('wave54-final', sec, test, 'ref'))).sum())
+        a = arr(f'{rd}/{test.replace("/", "__")}-android-U2.png')
+        meas, why = x_rule(a, fill, ref_fill)
+        print(line(f'[X] replay {test.split("/")[-1]}', 'U2', meas, why))
+    return 0
+
+
+if __name__ == '__main__':
+    argv = sys.argv[1:]
+    if '--fakes' in argv:
+        sys.exit(fakes())
+    if '--replays' in argv:
+        sys.exit(replays())
+    b = argv[argv.index('--base') + 1] if '--base' in argv else 'wave55-open'
+    pos = [x for i, x in enumerate(argv) if not x.startswith('--') and (i == 0 or argv[i - 1] != '--base')]
+    sys.exit(main(pos[0] if pos else 'wave54-final', b))

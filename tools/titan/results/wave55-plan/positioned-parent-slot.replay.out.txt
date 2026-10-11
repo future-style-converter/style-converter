@@ -1,0 +1,7 @@
+dir-style-02a                          | web 1 ink 5.248%/5.253% | ios 0.9455 ink 4.897%/5.253% | android 0.9425 ink 4.736%/5.253% | android-U1 0.9428 ink 4.739%/5.253% | android-U1U2 0.9866 ink 4.754%/5.253% | android-PLAIN 0.9663 ink 4.141%/5.253%
+bidi-tab-001                           | web 0.9978 ink 9.447%/9.447% | ios 0.9829 ink 9.38%/9.447% | android 0.9805 ink 9.418%/9.447% | android-U1U2 0.9901 ink 9.372%/9.447% | android-PLAIN 0.977 ink 9.7%/9.447%
+anchor-position-multicol-nested-001    | web 0.9742 ink 1.128%/2.239% | ios 0.9703/coverage ink 1.104%/2.239% | android 0.9573/coverage ink 1.079%/2.239% | android-U1 0.9688/coverage ink 1.079%/2.239%
+dynamic-offset-rtl-001                 | web 1 ink 4.233%/4.233% | ios 0.9955 ink 4.233%/4.233% | android 0.9952 ink 4.275%/4.233% | android-U2 1 ink 4.233%/4.233%
+dynamic-offset-vrl-rtl-001             | web 1 ink 4.233%/4.233% | ios 0.9955 ink 4.233%/4.233% | android 0.9952 ink 4.275%/4.233% | android-U2 1 ink 4.233%/4.233%
+dynamic-offset-rtl-002                 | web 0.9956 ink 4.233%/4.233% | ios 0.9966 ink 4.233%/4.233% | android 0.9953 ink 4.275%/4.233% | android-U2 0.9956 ink 4.233%/4.233%
+dynamic-offset-vrl-rtl-002             | web 0.9955 ink 4.233%/4.233% | ios 0.9955 ink 4.233%/4.233% | android 0.9952 ink 4.275%/4.233% | android-U2 0.9955 ink 4.233%/4.233%

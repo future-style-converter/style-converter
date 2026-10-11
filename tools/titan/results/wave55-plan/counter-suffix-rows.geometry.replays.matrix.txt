@@ -1,0 +1,13 @@
+# counter-suffix-rows.geometry.py on the replay fakes (base wave54-final); i/a/w = ios/android/web; W = GEOMETRY WRONG
+# derived from counter-suffix-rows.geometry.replays.txt by the snippet in counter-suffix-rows.md §7
+tag            [H]i  [H]a  [C]i  [C]a  [T]i  [T]a  [I]i  [I]a  [K]w  [K]i  [K]a  [L]i  [L]a 
+ok-all         OK    OK    OK    OK    OK    OK    OK    OK    OK    OK    OK    W     W    
+H-broken       W     W     W     W     W     OK    W     W     OK    OK    W     W     W    
+H-nodot        W     OK    OK    OK    OK    OK    OK    OK    OK    OK    OK    W     W    
+H-flush        W     OK    OK    OK    OK    OK    OK    OK    OK    OK    OK    W     W    
+H-low          W     OK    OK    OK    OK    OK    OK    OK    OK    OK    OK    W     W    
+C-shift8       W     OK    W     W     W     OK    W     W     OK    OK    OK    W     W    
+C-nocomma      OK    OK    OK    W     OK    OK    OK    OK    OK    OK    OK    W     W    
+C-space-only   W     OK    W     W     W     OK    W     W     OK    OK    OK    W     W    
+I-wholeline    OK    OK    OK    OK    OK    OK    W     OK    OK    OK    OK    W     W    
+K-leak         OK    OK    OK    OK    OK    OK    OK    OK    OK    W     OK    W     W    

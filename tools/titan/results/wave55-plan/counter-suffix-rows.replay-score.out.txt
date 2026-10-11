@@ -1,0 +1,14 @@
+wave54-final counter-suffix web (capture)                      ssim 1
+wave54-final counter-suffix ios (capture)                      ssim 0.9873
+wave54-final counter-suffix android (capture)                  ssim 0.989
+wave54-final cjk-decimal__css3-counter-styles-005 web (capture) ssim 1
+wave54-final cjk-decimal__css3-counter-styles-005 ios (capture) ssim 0.993
+wave54-final cjk-decimal__css3-counter-styles-005 android (capture) ssim 0.9759
+arm counter-suffix ios U1 (rows 3-4 order)                     ssim 0.9897
+arm counter-suffix ios U2o (rows 5-6 +4)                       ssim 0.9903
+arm counter-suffix ios U3 (row 9 tabular 1)                    ssim 0.9875
+arm counter-suffix ios U1+U2o                                  ssim 0.9927
+arm counter-suffix ios U1+U2o+U3                               ssim 0.993
+arm counter-suffix android U2o (rows 5-6 +4)                   ssim 0.9924
+arm css3-counter-styles-005 ios U2i (item -4)                  ssim 0.9971
+arm css3-counter-styles-005 android U2i (item -4)              ssim 0.9741
