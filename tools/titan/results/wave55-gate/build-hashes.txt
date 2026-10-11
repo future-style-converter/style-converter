@@ -4,3 +4,9 @@ android  MATCH
 ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=38ea8fdca14f780335b00c9d38b459b2e5d348b7  installed .app digest=38ea8fdca14f780335b00c9d38b459b2e5d348b7
 ios      MATCH
 
+== wave55-open net launch (fixture net, BASELINE=1 --gate-set; tree 0d0d3a3d — a NET-launch read, annotated per the wave-53/54 lesson: test-all rebuilds the iOS .app per fixture and rewrites the android asset, so a MISSING / changed side here is the race, not evidence; the record of value is the corpus launch's block above) — 2026-10-11T12:04:38Z — HEAD a2a37a8e
+android  serial=emulator-5554  built app-debug.apk sha1=62384c7ec87860601abdd542a4d39d605ac41107  installed base.apk sha1=62384c7ec87860601abdd542a4d39d605ac41107
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=MISSING  installed .app digest=38ea8fdca14f780335b00c9d38b459b2e5d348b7
+ios      MISMATCH
+

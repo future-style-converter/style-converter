@@ -23,3 +23,23 @@ launch's `3e6173df…` and the arms' / today's `62384c7e…` differ by that ASSE
 an irreproducible build: with unchanged sources and the same asset Gradle reuses the apk byte-for-byte, and a sha1 change does
 signal an input change. For the WPT corpus the asset is irrelevant (titan feeds the per-test IR at run time), so across launches
 the apk sha1 is comparable only when the last-net fixture is the same; built == installed MATCH remains the record's check.
+
+**Corpus half: 30 / 30 sections OK on attempt 1** (10:41 → 11:52 UTC; css-cascade 43/43/43, every other section 48/48/48;
+css-view-transitions on the first attempt despite the swap). **Read-out** (`open55-readout.sh` → `score-open.*`,
+`control-open.*`, `watchlist-check.wave55-open.txt`, `sections-open.status.txt`): `score-gate.mjs wave54-final wave55-open` =
+**0 gained / 0 lost / 0 movers (at ≥ 0.005 AND at any Δ) / 0 newly measured / 0 unmeasured-now over 4096 cells** — the totals are
+corpus-v6.20's exactly (web 1243/1372 · iOS 1131/1362 · Android 1128/1362); the byte-identity control (`wave54-gate/control-check.mjs
+wave54-final wave55-open`, no carriers): **web 1435 / 1435 identical · iOS 1435 / 1435 · Android 1435 / 1435 · wire 1435 / 1435**
+(0 content-changed, 0 renumbered); watchlist unmatched 0. So the shipped tree — the wave-54 gate tree plus the post-gate regex
+rewrite in `InertOutOfFlowWordJoin.ts` — reproduces the gate of record byte-for-byte on this host: the rewrite moved no pixel,
+as its language-equivalence proof said it could not. The wave-55 opening obligation is DISCHARGED on the corpus; the fixture net
+follows (its installed-build read is annotated as a net launch).
+
+**Fixture-net half** (12:00 → 12:23 UTC; `--skip-corpus`; installed-build read at 12:04:38 annotated as a net-launch read — android
+MATCH on the corpus launch's apk, ios "built .app digest=MISSING" = the race): **exit 0 on all 9 gate fixtures**
+(`tools/titan/runs/wave55-open/gate-driver/fixture-net.log`): visual-test "no regressions vs baseline (327 platform-comparisons
+ran)", filter-sepia-amounts 24 oracle checks · 2 waived · no regressions (24 comparisons), the five gate-only combinations 0 oracle
+violations (12 / 12 / 12 / 9 / 15), composition-test gate-only, and all-then-color against its committed baselines "no regressions vs
+baseline (18 platform-comparisons ran)", 12 oracle checks, 0 violations. **The wave-55 opening obligation is DISCHARGED** on the
+corpus (0/0/0/0/0, 1435/1435 ×3 + wire) and on the net (exit 0 ×9). The net's only side effect on the tree is the regenerated
+`tools/visual/baseline-stats.json` (same classification as committed; the timestamp-only churn was discarded).
