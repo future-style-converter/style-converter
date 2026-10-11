@@ -1,0 +1,11 @@
+self-paint bordered components (StyleApplier inputs: backgroundClipInsets = a non-border-box BackgroundClip): 10
+    _css-break__borders-003 _0-325 children 0
+    _css-break__borders-004 _0-328 children 0
+    _css-break__borders-005 _0-331 children 0
+    _css-break__borders-008 _0-340 children 0
+    _css-masking__clip-path__clip-path-borderBox-1e _0-006 children 0
+    _css-masking__clip-path__clip-path-contentBox-1e _1-043 children 1
+    _css-masking__clip-path__clip-path-paddingBox-1e _1-094 children 0
+    _filter-effects__backdrop-filter-clip-rect-2 _1-060 children 0
+    _filter-effects__backdrop-filter-clip-rect-zoom _2-064 children 2
+    _filter-effects__backdrop-filter-clip-rect _2-073 children 2

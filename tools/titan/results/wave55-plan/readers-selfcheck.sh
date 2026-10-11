@@ -30,8 +30,9 @@ OUT="$SH/$P/readers-selfcheck.txt"
 exec > >(sed -u -E "s#$S#<scratch>#g; s#$WT#<worktree>#g; s#(/private)?/tmp/claude-[^ ]*#<scratch path>#g" | tee "$OUT") 2>&1   # scratch / worktree paths redacted (PLAN §8 step 18 greps for scratchpad paths)
 echo "# readers-selfcheck.txt — $(date -u +%Y-%m-%dT%H:%M:%SZ); shared tree HEAD $(git -C "$SH" rev-parse --short HEAD); worktree HEAD $(git -C "$WT" rev-parse --short HEAD) (detached, throwaway)"
 echo "# worktree links: tools/titan/runs -> $(readlink "$WT/tools/titan/runs"), tools/wpt -> $(readlink "$WT/tools/wpt")"
-cp "$SH/$P"/{plan-build.py,snapshot-cells.mjs,geometry-gate.py,probe-readout.mjs,probes-selfcheck.py,probes-teeth.py,probes-teeth-r2.py,probes-teeth-r3.py} "$WT/$P/"
+cp "$SH/$P"/{plan-build.py,snapshot-cells.mjs,geometry-gate.py,probe-readout.mjs,probes-selfcheck.py,probes-teeth.py,probes-teeth-r2.py,probes-teeth-r3.py,probes-teeth-r4.py} "$WT/$P/"
 mkdir -p "$WT/$P/plan-skeptic-round-3.fakes"; cp "$SH/$P"/plan-skeptic-round-3.fakes/{added_ink.py,sweep.py} "$WT/$P/plan-skeptic-round-3.fakes/"   # round 3 (M2): §T3
+mkdir -p "$WT/$P/plan-skeptic-round-4.fakes"; cp "$SH/$P"/plan-skeptic-round-4.fakes/{added_ink4.py,fakes4.py,zones4.py} "$WT/$P/plan-skeptic-round-4.fakes/"   # round 4 (M1-M4): §T / §T4
 cp "$SH/$P"/*.geometry.py "$WT/$P/"                                  # the round-1 probes (and the wave-55 L2 copy)
 mkdir -p "$WT/$P/probe-decisions"; cp "$SH/$P"/probe-decisions/*.json "$WT/$P/probe-decisions/"
 # every input the generator hashes into generatedWith, so the dry run reproduces the installed JSON byte-for-byte

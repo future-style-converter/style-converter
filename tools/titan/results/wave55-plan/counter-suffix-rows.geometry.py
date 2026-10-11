@@ -50,10 +50,28 @@
 #       ideograph replaced by line 2's, or the marker 3 px low, is WRONG.
 # Plan-skeptic round 3 (verify M2 sweep): [C] (natives) and [I] (natives) also read `ink:` against the base capture — rows
 # 5-6's marker zone / 005's item zone translated by one whole-px dx, 005's marker zone unmoved, XOR ≤ 2 (see INK_TOL).
+# Plan-skeptic round 4 (plan-skeptic-round-4.verify.md M3 / M4 / §2.3; fix-r4.done.md): strictly-additive ink still passed
+# [H] ios (rows 3-4 had no ink read: the zone copied 1 px down +11 px, 1 px right +8, a doubled-glyph sliver +3, whole-picture
+# 1-px copies +7 … +33 in its zone) and [T] ios (ink added INSIDE the digit window: copied 1 px down +7, a 2×2 / 3×3 blob
+# beside the '1' +4 / +9), and [I] summed 4 px of added ink as 1-2 per zone under a per-zone ±2. Round 4 adds (twins_of()):
+#   [H] (natives) `ink:` rows 3-4's whole marker zone x0-63 = the zone's two glyphs (letter, period) as a native ALREADY paints
+#       them in --base (iOS: its own — U1-ios reorders the glyphs, it never redraws them — or Android's: the ok-all model grafts
+#       Android's rows, the bundled Noto Hebrew both natives share), each moved by its own whole-px offset, XOR ≤ INK_TOL in all;
+#   [T] (natives) `ink:` the digit window x136-150 of row 9 = the tabular '1' as Android already paints it in --base (the
+#       ok-all model's graft; U3-ios draws that glyph, nothing else, in the window), at the best whole-px offset, XOR ≤ INK_TOL;
+#   [C] / [I] `ink:` reads the SUM over the key's zones against INK_TOL (round 3 tested each zone alone), [C]'s zone widens to
+#       x0-63 and [I] (natives) also reads 005 outside its line windows (rows 0-94, 152-599, x0-199 of 95-151) = the base.
+# Every `ink:` read (round 3's re-based too) compares the ink LEVEL — (min channel < 200) + (RGB sum < 300), two nested masks —
+# so an antialiased edge darkened to a core pixel counts (see inkmask). Measured (fix-r4.measure.out.txt §3): ok-all reads 0 on
+# every new read; every IN-ZONE fake of the round-4 verifier's sweep is rejected (probes-selfcheck.txt §T4). TWIN_RUN (None;
+# `--twin-run <run>`) adds that run's same-platform capture as a twin: the stage-1 step-8 edit sets 'wave55-pre' once the
+# device pictures are decided (PLAN §7, D39) — a device '1' / face drawn by another rasterizer is never matched by widening
+# INK_TOL (never widened to pass a fake of probes-teeth-r4.py).
 # Every line ends in "→ GEOMETRY OK" or "→ GEOMETRY WRONG (<why>)". The ref rows must print OK (exit 1 otherwise): the
-# rule must describe the picture the test asks for. Pure PIL (geometry_common), 8 PNGs (+6 with a base run).
+# rule must describe the picture the test asks for. PIL (geometry_common) + numpy (round 4's twin reads), 8 PNGs (+6 with a
+# base run, +2 with TWIN_RUN).
 #
-# Usage: python3 tools/titan/results/wave55-plan/counter-suffix-rows.geometry.py <run-id> [base-run-id]
+# Usage: python3 tools/titan/results/wave55-plan/counter-suffix-rows.geometry.py <run-id> [base-run-id] [--twin-run <run>]
 #        python3 … counter-suffix-rows.geometry.py replay:<tag> [base-run-id]   (reads counter-suffix-rows-replay/<tag>/)
 import os
 import sys
@@ -63,8 +81,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.join(HERE, '..', 'wave53-plan'))
 from geometry_common import paths, load, dark, bands, near  # noqa: E402  (shared helpers: refs path, PNG decode, bands)
+import numpy as np  # noqa: E402  (round 4: the twin glyph reads)
 
 args = sys.argv[1:]
+TWIN_RUN_DEFAULT = None    # round 4 (D39): the stage-1 step-8 edit sets 'wave55-pre' (the decided device pictures) as an extra twin
+TWIN_RUN = args[args.index('--twin-run') + 1] if '--twin-run' in args else TWIN_RUN_DEFAULT
+args = [a for i, a in enumerate(args) if a != '--twin-run' and (i == 0 or args[i - 1] != '--twin-run')]
 run = args[0] if args else 'wave54-final'
 base = args[1] if len(args) > 1 else None
 ref_failed = False
@@ -225,25 +247,114 @@ INK_TOL = 2
 
 
 def inkmask(px, box):
-    """[[bool]] min-channel < 200 over box (x0, y0, x1, y1), x1 / y1 exclusive."""
+    """[[int]] the ink LEVEL over box (x0, y0, x1, y1), x1 / y1 exclusive: (min channel < 200) + (RGB sum < 300). Round 4: two
+    nested masks — an antialiased pixel darkened to a core pixel (a 1-px copy over the glyph's own edge) changes the level
+    even where the min-channel mask alone does not (plan-skeptic-round-4.verify.d fakes4 "any mask")."""
     x0, y0, x1, y1 = box
-    return [[min(px[x, y]) < 200 for x in range(x0, x1)] for y in range(y0, y1)]
+    return [[(min(px[x, y]) < 200) + (sum(px[x, y]) < 300) for x in range(x0, x1)] for y in range(y0, y1)]
 
 
 def xor_shift(m, b, dx):
-    """|m XOR (b shifted right by dx, blank-filled)| over m's box."""
+    """Σ |m − (b shifted right by dx, blank-filled)| over m's box (= the XOR of both nested masks, round 4)."""
     w = len(m[0]) if m else 0
-    return sum(1 for r, rb in zip(m, b) for x in range(w) if r[x] != (rb[x - dx] if 0 <= x - dx < w else False))
+    return sum(abs(r[x] - (rb[x - dx] if 0 <= x - dx < w else 0)) for r, rb in zip(m, b) for x in range(w))
 
 
-def ink_check(px, bpx, zones, moves):
-    """None, or the first zone whose ink is not the base's (moves=True: at its best whole-px dx in −8 … +8)."""
+def ink_sum(px, bpx, zones, moves):
+    """(Σ best XOR, [(name, xor, dx)]) of every zone against the base (moves=True: each at its best whole-px dx in −8 … +8).
+    Round 4 (verify §2.3): the key's zones are summed — 4 px of added ink spread 1-2 per zone passed a per-zone ±2."""
+    out = []
     for name, box in zones:
         m, b = inkmask(px, box), inkmask(bpx, box)
         best = min((xor_shift(m, b, dx), dx) for dx in (range(-8, 9) if moves else (0,)))
-        if best[0] > INK_TOL:
-            return f'ink: {name} differs from {base}\'s by {best[0]} px at its best dx {best[1]:+d} (> {INK_TOL}: added / lost ink — the unit moves ink, it adds none)'
+        out.append((name, best[0], best[1]))
+    return sum(n for _, n, _ in out), out
+
+
+def ink_check(px, bpx, zone_sets):
+    """None, or why the key's zones (a list of (zones, moves)) differ from the base by more than INK_TOL px IN ALL."""
+    tot, det = 0, []
+    for zones, moves in zone_sets:
+        n, d = ink_sum(px, bpx, zones, moves); tot += n; det += d
+    if tot > INK_TOL:
+        worst = max(det, key=lambda t: t[1])
+        return (f'ink: {len(det)} zone(s) differ from {base}\'s by {tot} px in all (worst {worst[0]} {worst[1]} at dx {worst[2]:+d}) '
+                f'(> {INK_TOL}: added / lost ink — the unit moves ink, it adds none)')
     return None
+
+
+def inkarr(im):
+    """Round 4: the ink LEVEL (min channel < 200) + (RGB sum < 300) of a whole picture as an int array [y, x] (see inkmask)."""
+    a = np.asarray(im.convert('RGB'), dtype=np.int16)
+    return (a.min(axis=2) < 200).astype(np.int8) + (a.sum(axis=2) < 300).astype(np.int8)
+
+
+def moved(m, dx, dy):
+    """Mask m translated by (dx, dy), blank-filled."""
+    h, w = m.shape; o = np.zeros_like(m)
+    o[max(0, dy):min(h, h + dy), max(0, dx):min(w, w + dx)] = m[max(0, -dy):min(h, h - dy), max(0, -dx):min(w, w - dx)]
+    return o
+
+
+def two_glyphs(px, k):
+    """Row k's marker blobs (letter, period) in x30-63, sorted left to right, or None unless exactly one of each."""
+    _, letters, dots = h_rows(px)[k - 3]
+    return sorted(letters + dots) if len(letters) == 1 and len(dots) == 1 else None
+
+
+def h_ink(cm, cpx, twins):
+    """Round 4 [H]: (Σ XOR over rows 3-4, twin) — each row's zone x0-63 against a twin's two glyphs, each glyph moved by its own
+    whole-px offset (dx: blob-aligned ±2, dy ±1). The zone's ink outside the two predicted glyphs counts in full."""
+    best = None
+    for tname, tm, tpx in twins:
+        tot = 0
+        for k in (3, 4):
+            y0, y1 = ROW[k]; Z = np.zeros(cm.shape, bool); Z[y0:y1, 0:CONTENT_X] = True
+            cg, tg = two_glyphs(cpx, k), two_glyphs(tpx, k)
+            if cg is None or tg is None:
+                tot = None; break
+            # each twin glyph = the twin's zone ink on its side of the gap between its two blobs; matched by the glyph kind
+            kind = lambda g: 'dot' if g[1] - g[0] <= 2 else 'letter'
+            tsplit = (tg[0][1] + tg[1][0]) // 2 + 1
+            parts = {}
+            for i, g in enumerate(tg):
+                side = np.zeros(cm.shape, bool); side[y0:y1, (0 if i == 0 else tsplit):(tsplit if i == 0 else CONTENT_X)] = True
+                parts[kind(g)] = (np.where(side, tm, 0), g)
+            cgk = {kind(g): g for g in cg}
+            (lm, lg), (dm, dg) = parts['letter'], parts['dot']
+            ldx0, ddx0 = cgk['letter'][0] - lg[0], cgk['dot'][0] - dg[0]
+            cz = np.where(Z, cm, 0).astype(np.int16)
+            lcands = [moved(lm, ldx0 + a, c) for a in (-2, -1, 0, 1, 2) for c in (-1, 0, 1)]
+            dcands = [moved(dm, ddx0 + a, c) for a in (-2, -1, 0, 1, 2) for c in (-1, 0, 1)]
+            tot += min(int(np.abs(cz - np.where(Z, np.maximum(l, d), 0)).sum()) for l in lcands for d in dcands)
+        if tot is not None and (best is None or tot < best[0]):
+            best = (tot, tname)
+    return best
+
+
+def t_ink(cm, twins):
+    """Round 4 [T]: (XOR, twin) of row 9's digit window x136-150 against a twin's window at its best whole-px offset (±2, ±1)."""
+    y0, y1 = ROW[9]; W = np.zeros(cm.shape, bool); W[y0:y1, 136:151] = True
+    best = None
+    cw = np.where(W, cm, 0).astype(np.int16)
+    for tname, tm, _ in twins:
+        n = min(int(np.abs(cw - np.where(W, moved(np.where(W, tm, 0), a, c), 0)).sum()) for a in (-2, -1, 0, 1, 2) for c in (-1, 0, 1))
+        if best is None or n < best[0]:
+            best = (n, tname)
+    return best
+
+
+def twins_of(label, own):
+    """Round 4: [(name, ink mask, px)] of the twins a native row is read against: the base's same-platform capture (with `own`:
+    [H] — U1-ios reorders iOS's own glyphs; not for [T] ios, whose base '1' is the proportional glyph U3-ios replaces), Android's
+    base capture (the ok-all graft source on iOS; Android's own base on Android) and TWIN_RUN's same-platform capture (stage 1 on)."""
+    out, want = [], ([(base, label)] if own or label == 'android' else []) + ([(base, 'android')] if label != 'android' else []) + ([(TWIN_RUN, label)] if TWIN_RUN else [])
+    for rid, plat in want:
+        nm = f'{rid} {plat}'
+        tim, tpx = load(dict(paths(rid, 'css-counter-styles', 'counter-suffix'))[plat])
+        if tim is not None:
+            out.append((nm, inkarr(tim), tpx))
+    return out
 
 
 def digit_ink(px, k, x0, x1):
@@ -313,6 +424,9 @@ ZONES = {'web': [(0, 0, None, 600)], 'android': [(0, 0, None, 112), (0, 160, Non
          'ios': [(0, 0, None, 64), (0, 160, None, 208), (0, 232, None, 600), (64, 64, 390, 160), (0, 208, 136, 232), (151, 208, None, 232)]}
 
 
+I_OUT = [(0, 0, None, 95), (0, 152, None, 600), (0, 95, 200, 152)]     # round 4: 005 outside [I]'s line windows (natives = base)
+
+
 def zone_name(z):
     x0, y0, x1, y1 = z
     if x0 == 0 and x1 is None:
@@ -351,8 +465,17 @@ for label, p in capture_paths(run, 'css-counter-styles', 'counter-suffix'):
     t, l1 = digit_ink(px, 9, 136, 151), digit_ink(px, 1, 40, 56)
     if label == 'ref':
         refs = {'h': h, 'c': c, 't': t, 'l': l1}
+    h_why = h_check(h, refs['h'])
+    h_x = ''
+    if h_why is None and base and label not in ('ref', 'web'):
+        # round 4 (M3): rows 3-4's whole marker zone = a native's own two glyphs, moved (no added ink)
+        hi = h_ink(inkarr(im), px, twins_of(label, True))
+        h_why = ('ink: rows 3-4 marker zone: no twin with one letter + one period' if hi is None else
+                 f'ink: rows 3-4 marker zone x0-63 differs from the glyphs of {hi[1]} (each moved by whole px) by {hi[0]} px '
+                 f'(> {INK_TOL}: added / lost ink — U1 reorders the marker\'s glyphs, it draws none)' if hi[0] > INK_TOL else None)
+        h_x = f' ink {hi[0]} vs {hi[1]}' if hi else ''
     emit('[H] counter-suffix', label,
-         ' '.join(f"row{k}:" + ','.join(f'x{b[0]}-{b[1]}' for b in sorted(L + D)) for k, L, D in h), h_check(h, refs['h']))
+         ' '.join(f"row{k}:" + ','.join(f'x{b[0]}-{b[1]}' for b in sorted(L + D)) for k, L, D in h) + h_x, h_why)
     if label == 'ref':
         ref_letter['done'] = True                  # round 2: the ref letters are read; every later row is compared to them
     bim = bpx = None
@@ -361,14 +484,23 @@ for label, p in capture_paths(run, 'css-counter-styles', 'counter-suffix'):
     c_why = c_check(c, refs['c'])
     if c_why is None and base and label not in ('ref', 'web'):
         # round 3: rows 5-6's marker zone is the base's, translated (no added ink beside the marker)
-        c_why = 'base capture missing' if bim is None else ink_check(px, bpx, [(f'row{k} marker x20-63', (20, ROW[k][0], CONTENT_X, ROW[k][1])) for k in (5, 6)], True)
+        # round 4: the zone widened to x0-63 and the two rows summed (verify §2.3)
+        c_why = 'base capture missing' if bim is None else ink_check(px, bpx, [([(f'row{k} marker x0-63', (0, ROW[k][0], CONTENT_X, ROW[k][1])) for k in (5, 6)], True)])
     emit('[C] counter-suffix', label,
          ' '.join(f"row{k}:" + ','.join(f'x{b[0]}-{b[1]}' for b in bl) + f'|item x{it}|strokes {st[0]} y{st[1]}' for k, bl, it, st in c), c_why)
     t_why = t_check(t, refs['t'], label)
     if t_why is None and base and label != 'ref':
         # round 2 (M3): the row's other ink — item text erased or moved 3 px kept every digit read
         t_why = 'base capture missing' if bim is None else zones_equal(bim, im, ROW9_OUT)
-    emit('[T] counter-suffix', label, f'row9 digit {t[:4] if t else None}', t_why)
+    t_x = ''
+    if t_why is None and base and label not in ('ref', 'web'):
+        # round 4 (M4): the digit window holds the tabular '1' a native already paints, and nothing else
+        ti = t_ink(inkarr(im), twins_of(label, False))
+        t_why = ('ink: no twin capture' if ti is None else
+                 f'ink: row 9 digit window x136-150 differs from {ti[1]}\'s tabular \'1\' by {ti[0]} px at its best whole-px offset '
+                 f'(> {INK_TOL}: added / lost ink in the window)' if ti[0] > INK_TOL else None)
+        t_x = f' ink {ti[0]} vs {ti[1]}' if ti else ''
+    emit('[T] counter-suffix', label, f'row9 digit {t[:4] if t else None}' + t_x, t_why)
     emit('[L] counter-suffix', label, f'row1 digit {l1[:4] if l1 else None}', t_check(l1, refs['l'], label))
     if base and label != 'ref':
         why = 'base capture missing' if bim is None else zones_equal(bim, im, ZONES[label])
@@ -392,9 +524,11 @@ for label, p in capture_paths(run, 'css-counter-styles', 'cjk-decimal/css3-count
     if base and label != 'ref' and brows is None:
         why = why or f'base capture missing ({base})'
     if why is None and base and label not in ('ref', 'web'):
-        # round 3: the marker unmoved, the item text translated — per line window, no added ink
-        why = (ink_check(px, bpx, [(f'line y{y0} marker x200-253', (200, y0, 254, y1)) for y0, y1 in ((95, 121), (121, 152))], False)
-               or ink_check(px, bpx, [(f'line y{y0} item x254-389', (254, y0, 390, y1)) for y0, y1 in ((95, 121), (121, 152))], True))
+        # round 3: the marker unmoved, the item text translated — per line window, no added ink; round 4: summed over the four
+        # zones (verify §2.3), and the rest of the capture (the prose, x0-199, below the list) pixel-identical to the base
+        why = (ink_check(px, bpx, [([(f'line y{y0} marker x200-253', (200, y0, 254, y1)) for y0, y1 in ((95, 121), (121, 152))], False),
+                                   ([(f'line y{y0} item x254-389', (254, y0, 390, y1)) for y0, y1 in ((95, 121), (121, 152))], True)])
+               or zones_equal(bim, im, I_OUT))
     emit('[I] cjk-decimal/css3-counter-styles-005', label,
          ' '.join(f'y{y}:marker x{m}-{mr} ({nm}, fill {f}, strokes {st[0]} y{st[1]}) item x{i}' for y, m, i, nm, mr, f, st in rows), why)
 sys.exit(1 if ref_failed else 0)

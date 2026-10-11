@@ -39,6 +39,13 @@
 #        REVEALS fill where the band was). The six U2 replays read 0 / 0; one child moved 3 px 18-263 lost; round 1's
 #        child +3x 359-1034, scrambled ≈ 900-11 400, shrunk 76-1369 (plan-skeptic-round-2.instrument-teeth.d/
 #        fixcheck6.L5L6.out.txt). The bbox, fill, crossings and band reasons stay.
+#        Round 4 (plan-skeptic-round-4.verify.md M2; fix-r4.done.md): `extra` read fill outside dilate₁(base fill ∪ base band), so
+#        a child fill drawn a second time 1 px off (+24 … +500 px), a child smeared 1 px (+6 … +125) or a 1×4 bar of fill in
+#        a gap (+4) read extra 0 on all five testable keys. `extra` now counts fill outside base fill ∪ base band ∪ the band's
+#        own 1-px ring where the BASE is not white canvas (the band's antialiased edge, which U2 may also reveal) — never a
+#        ring around the base FILL. Measured (fix-r4.measure.out.txt, l6-extra): the six U2 replays read 0; every round-4 fake
+#        ≥ 4 except a 1-px dot of fill in the open (extra 1: the 1-px floor, ≤ 1 kept); a ring around the band alone (no AA
+#        condition) still passed the child copied 1 px left (104 px) — rejected.
 #   [ID] <raster control> — the capture is decoded-pixel IDENTICAL to the same capture in --base (the units must
 #        not change a band nothing overlaps: the behind-content painter must rasterise exactly like androidx).
 #
@@ -187,7 +194,9 @@ def x_rule(a, fill, ref_fill, base=None, ref_dark=None):
             # round 2 (M5): pixel subset against the base — every child keeps its pixels; new fill only where the band was
             fa, fb = fill(a), fill(base)
             lost = int((fb & ~fa).sum())
-            extra = int((fa & ~dilate1(fb | dark_px(base))).sum())
+            # round 4 (M2): no dilation of the base FILL — only the band's 1-px antialiased ring (base not white) may turn to fill
+            band = dark_px(base)
+            extra = int((fa & ~(fb | band | (dilate1(band) & (base.min(axis=2) < 250)))).sum())
             if lost > 4:
                 why.append(f'lost {lost} base child-fill px (> 4: a child moved / shrunk / erased — U2 never moves a box)')
             if extra > 1:

@@ -1,0 +1,15 @@
+M0-identity                        exit 0 GREEN  
+M1-from+0.0001                     exit 1 RED     FROM L2-cbb-android filter-effects/backdrop-filter-nested-border-radius-clip-3.html android: 'f 0.9575' vs cells.mjs f 0.9574
+M2-complement-hole                 exit 1 RED     HOLE 1 ['CSS2/abspos/between-float-and-text.html android'] EXTRA 0
+M3-carrier-in-named                exit 1 RED     NAMED is a carrier: css-text/hyphens/hyphenate-character-001.html ios ({'L7-instruments'})
+M4-floor-0.9574                    exit 1 RED     FLOOR L1-hyphen-ios-linebox css-text/hyphens/hyphenate-character-001.html ios gating floor 0.9574
+M5-watch-line-7-cells              exit 1 RED     WATCH 'css-text/hyphens/hyphenate-character-00 ios' matches 5
+M6-android-carrier-may-move        exit 1 RED     MAYMOVE contains android carriers ['wpt__css-text__bidi__bidi-tab-001']
+M7-key-requires-wrong-unit         exit 1 RED     KEY L2-cbb-android abspos/abspos-autopos-htb-ltr android cell css-flexbox/abspos/abspos-autopos-htb-ltr.html android is not a capture of ['U2']
+M8-complement-cell-into-ring       exit 1 RED     OVERLAP complement∩ring 1 e.g. ['CSS2/abspos/between-float-and-text.html android']
+M9-pred-unknown-unit               exit 1 RED     PRED L1-hyphen-ios-linebox css-text/hyphens/hyphenate-character-001.html ios names unit U9 that does not exist
+K0-identity                        exit 0 GREEN  wrong-class outcomes on wave54-final (gating/report should FAIL, control PASS): 0
+K1-control-expect-mutated          exit 0 RED  wrong-class outcomes on wave54-final (gating/report should FAIL, control PASS): 1
+K2-gating-demoted-to-control       exit 0 RED  wrong-class outcomes on wave54-final (gating/report should FAIL, control PASS): 1
+K3-control-promoted-to-report      exit 0 RED  wrong-class outcomes on wave54-final (gating/report should FAIL, control PASS): 1
+installed expectations.json / watchlist.txt unchanged: True a1fdca712686 4b1a9cd5bb42

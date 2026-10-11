@@ -1,0 +1,4 @@
+  suffix: css-flexbox/abspos/abspos-autopos-htb-ltr.html android 'DEGENERATE'
+  suffix: css-flexbox/abspos/abspos-autopos-vlr-ltr.html android 'DEGENERATE'
+  suffix: css-flexbox/abspos/abspos-autopos-vrl-ltr.html android 'DEGENERATE'
+prediction cells checked 76 (unique 76 ) from-vs-cells.mjs(wave54-final) mismatches 0

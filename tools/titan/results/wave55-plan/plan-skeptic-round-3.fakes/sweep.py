@@ -63,12 +63,10 @@ def variants(gid, repl):
 
 # NAMED residuals (pre-registered, each with its reason; a later round may close one, never add one silently): a faked capture
 # listed here is reported RESIDUAL, not HOLE. Keyed (lane, group, variant, '<test basename> <platform>').
-RESIDUALS = {
-    ('L4', 'C-fixed', 'stray2-mid', 'text-decoration-inset-014 ios'): 'face-present branch: a 2×2 blob TOUCHING a glyph of band 1 '
-        '(no new component, +4 of ~1500 dark px, band bottom +1 inside ±1); no device 2em face exists to compare with pixel for '
-        'pixel — FACE_INK_TOL is re-set at stage 1 (PLAN D33); the same blob on the today\'s-face (U1) branch is rejected (`ink:`)',
-    ('L4', 'C-fixed', 'stray2-mid', 'text-decoration-inset-014 android'): 'the same, on the Compose face-present rows',
-}
+# Round 4 (fix-r4.done.md): the two round-3 residuals — ('L4', 'C-fixed', 'stray2-mid', 'text-decoration-inset-014 ios' /
+# 'android'), a 2×2 blob touching a face-present 014 glyph — are CLOSED by ua-heading-margin.geometry.py's `face xor:` (the
+# band's ink = the face reference's, XOR ≤ 2: the blob reads 4+) and pinned FAIL in probes-teeth-r4.py; none is left.
+RESIDUALS = {}
 
 
 def reads(key, sec, plat, test):

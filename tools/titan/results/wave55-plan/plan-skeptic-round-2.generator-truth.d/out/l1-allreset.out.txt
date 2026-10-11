@@ -1,0 +1,2 @@
+declared-normal text components after the iOS all-reset: 58 docs 18
+stripped by all: initial: [('wpt__css-cascade__all-prop-001', 'wpt__css-cascade__all-prop-001__1-002'), ('wpt__css-cascade__all-prop-001', 'all-prop-001__1__0-003')]

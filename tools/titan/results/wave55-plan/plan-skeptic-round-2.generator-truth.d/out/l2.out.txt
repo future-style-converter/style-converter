@@ -1,0 +1,48 @@
+L2 U1 my census: boxes 33 docs 14
+wpt__css-flexbox__abspos__abspos-autopos-htb-ltr
+    _0-003 ['oof-x', 'oof-y'] (70.0, 80.0) -> (100.0, 100.0)
+wpt__css-flexbox__abspos__abspos-autopos-htb-rtl
+    _0-006 ['oof-x', 'oof-y'] (70.0, 80.0) -> (100.0, 100.0)
+wpt__css-flexbox__abspos__abspos-autopos-vlr-ltr
+    _0-009 ['oof-x', 'oof-y'] (70.0, 80.0) -> (100.0, 100.0)
+wpt__css-flexbox__abspos__abspos-autopos-vlr-rtl
+    _0-012 ['oof-x', 'oof-y'] (70.0, 80.0) -> (100.0, 100.0)
+wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr
+    _0-015 ['oof-x', 'oof-y'] (70.0, 80.0) -> (100.0, 100.0)
+wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl
+    _0-018 ['oof-x', 'oof-y'] (70.0, 80.0) -> (100.0, 100.0)
+wpt__css-gaps__flex__flex-gap-decorations-006
+    _0-045 ['vtext'] (296.0, 296.0) -> (300.0, 300.0)
+    _1-046 ['vtext'] (296.0, 296.0) -> (300.0, 300.0)
+    _2-047 ['vtext'] (296.0, 296.0) -> (300.0, 300.0)
+    _3-048 ['vtext'] (296.0, 296.0) -> (300.0, 300.0)
+    _4-049 ['vtext'] (296.0, 296.0) -> (300.0, 300.0)
+    _5-050 ['vtext'] (296.0, 296.0) -> (300.0, 300.0)
+wpt__css-position__position-absolute-semi-replaced-stretch-button
+    _0-136 ['oof-x', 'oof-y'] (144.0, 94.0) -> (150.0, 100.0)
+wpt__css-position__position-absolute-semi-replaced-stretch-input
+    _0-138 ['oof-x', 'oof-y'] (144.0, 94.0) -> (150.0, 100.0)
+    _0-140 ['oof-x', 'oof-y'] (144.0, 94.0) -> (150.0, 100.0)
+    _0-142 ['oof-x', 'oof-y'] (144.0, 94.0) -> (150.0, 100.0)
+    _0-144 ['oof-x', 'oof-y'] (144.0, 94.0) -> (150.0, 100.0)
+    _0-146 ['oof-x', 'oof-y'] (344.0, 94.0) -> (350.0, 100.0)
+    _0-148 ['oof-x', 'oof-y'] (344.0, 94.0) -> (350.0, 100.0)
+    _0-150 ['oof-x', 'oof-y'] (344.0, 94.0) -> (350.0, 100.0)
+    _0-152 ['oof-x', 'oof-y'] (344.0, 94.0) -> (350.0, 100.0)
+    _0-154 ['oof-x', 'oof-y'] (344.0, 94.0) -> (350.0, 100.0)
+wpt__css-position__position-absolute-semi-replaced-stretch-other
+    _0-156 ['oof-x', 'oof-y'] (144.0, 94.0) -> (150.0, 100.0)
+    _0-159 ['oof-x', 'oof-y'] (144.0, 94.0) -> (150.0, 100.0)
+    _0-161 ['oof-x', 'oof-y'] (144.0, 94.0) -> (150.0, 100.0)
+    _0-163 ['oof-x', 'oof-y'] (144.0, 94.0) -> (150.0, 100.0)
+    _0-165 ['oof-x', 'oof-y'] (344.0, 94.0) -> (350.0, 100.0)
+    _0-167 ['oof-x', 'oof-y'] (344.0, 94.0) -> (350.0, 100.0)
+    _0-169 ['oof-x', 'oof-y'] (344.0, 94.0) -> (350.0, 100.0)
+wpt__filter-effects__backdrop-filter-nested-border-radius-clip
+    _1-184 ['oof-x', 'oof-y'] (180.0, 80.0) -> (200.0, 100.0)
+wpt__filter-effects__backdrop-filter-nested-border-radius-clip-2
+    _1-170 ['oof-x', 'oof-y'] (180.0, 80.0) -> (200.0, 100.0)
+wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3
+    _1-175 ['oof-x', 'oof-y'] (160.0, 60.0) -> (200.0, 100.0)
+wpt__filter-effects__backdrop-filter-nested-border-radius-clip-4
+    _1-180 ['oof-x', 'oof-y'] (144.0, 64.0) -> (160.0, 80.0)

@@ -1,0 +1,19 @@
+predictions 87 (scored-cell rows 76); gating rows 44
+scored 4096 = carrier 76 + named 665 + complement 3352 + ring 3 = 4096
+watch lines 746; watched cells 746; extra watched (complement) ['css-anchor-position/anchor-position-multicol-007.html android', 'css-writing-modes/dynamic-offset-rtl-001.html ios']
+may-move android stems 240; scored 215 (complement 180, named 34, ring 1); unscored 25
+named lanes of may-move cells: Counter({'L1-hyphen-ios-linebox': 27, 'L3-positioned-parent-slot': 4, 'L7-instruments': 4, 'L6-android-paint-order': 3})
+ring test referenced in: []
+non-cell prediction rows 11
+    L5-counter-suffix-rows: css-counter-styles/cjk-decimal/css3-counter-styles-001.html ios / andr
+    L5-counter-suffix-rows: css-counter-styles/cjk-decimal/css3-counter-styles-004.html ios / andr
+    L6-android-paint-order: filter-effects/backdrop-filter-clip-rect-zoom.html android: unscored (
+    L6-android-paint-order: U3 FO-pin: EffectsClipFilterOrderTest red under both mutations (clip b
+    L6-android-paint-order: [W1] optional evidence window: Filter_DropShadow_NoBlur android #111-c
+    L7-instruments: U2 wire-differential: calibration on the parked wave-54 trees prints `
+    L7-instruments: U2 pins P1-P6 green; mutations M1-M5 each red then restored — HIGH
+    L7-instruments: U3 ab-arms55.selftest.sh: exit 0, HEAD restored, the hash block presen
+    L7-instruments: U4: node schema/conformance/run.mjs 39/39 valid, byte-identical; Inlin
+    L7-instruments: U5 [W-L7a] (Chromium + converter, no device): `::marker` and chain mas
+    L7-instruments: U6: 21 pins (C1-C7, S1-S6, W1-W6, T1-T2), each mutation red → restore 
+FAILS 0

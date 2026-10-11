@@ -1,0 +1,9 @@
+gt-checks.py on scratch copies (installed expectations.json / watchlist.txt sha256 unchanged before/after: shasum -c OK):
+m1-from     FINDING F L1 hyphenate-character-001 ios from=P 0.9612 run=P 0.9611 -> RED
+m2-hole     FINDING P hole 1 (a complement cell removed) -> RED
+m3-overlap  FINDING P overlap carrier&named (an L1 carrier added to L7 mustNotMove) -> RED
+m4-floor    FINDING G clip-3 android floor=0.9574 -> RED
+m5-ring     FINDING P overlap complement&ring -> RED
+m6-watch    FINDING W 'css-text/hyphens/hyphens-manual- android' matches 7 -> RED
+keys-check.py on a copy: a control expect mutated to 'GEOMETRY OKAY' and a gating key demoted to control -> 2 wrong-class outcomes (RED); installed -> 0
+l6mm-explicit.py (the brief's explicit-px rule) reproduces the published raw set exactly: 252 == 252

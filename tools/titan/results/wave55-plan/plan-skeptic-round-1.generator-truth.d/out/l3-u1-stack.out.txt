@@ -1,0 +1,4 @@
+== narrow host predicate: STACK docs 2
+   wpt__css-anchor-position__anchor-position-multicol-nested-001                  android f 0.9573  [('_2-771', '_1-773'), ('_2-771', '_2-774'), ('_2-771', '_3-775')]
+   wpt__selectors__dir-style-02a                                                  android f 0.9425  [('_0-096', '_1-098')]
+== broad host predicate: STACK docs 0

@@ -43,3 +43,15 @@ violations (12 / 12 / 12 / 9 / 15), composition-test gate-only, and all-then-col
 baseline (18 platform-comparisons ran)", 12 oracle checks, 0 violations. **The wave-55 opening obligation is DISCHARGED** on the
 corpus (0/0/0/0/0, 1435/1435 ×3 + wire) and on the net (exit 0 ×9). The net's only side effect on the tree is the regenerated
 `tools/visual/baseline-stats.json` (same classification as committed; the timestamp-only churn was discarded).
+
+## [W-L7a] — L7's Chromium + converter window (2026-10-12, before the landing, no gate on the host; records in `wl7a/`)
+
+Run as the lane's note prescribes (`wave55-instruments/_note.md` "ORCHESTRATOR WINDOW REQUESTS"; `wl7a/window-run.txt`):
+the two patches' sha256 equal the note's `patch:` lines (`wl7a/step1-patch-sha256.txt`); three throwaways at 611c9f93 with
+U5 on `post` and U2 on `diff`; **step 3** `wl7a-marker-paint-probe.mjs` → `WL7A MARKER PAINT: every value none / normal`
+and the wave-54 marker probe from the post tree → `PASS baked — 2 roots, 10 runs` / `MARKER PROBE: ALL PASS`; **step 4**
+`wire-differential.sh` (U2) pre vs post over css-anchor-position, css-backgrounds, css-counter-styles, css-text,
+css-writing-modes, selectors → 12 status rows `0 0 0 0 extracted=48 fail=0`, **identical 288 · content-changed 0 ·
+renumbered 0 · one-sided 0 · renumbered-anomalous 0, verdict exit 0**; **step 5** the instrument fails when it must:
+`--classify-only` against an expect file naming counter-suffix as CONTENT-CHANGED → exit 5, `MISSING CONTENT-CHANGED …
+(expected, not observed)`. **Decision (PLAN §8 step 5): U5 lands at seq 9; no `--hold L7:U5`.** Throwaways removed.

@@ -1,0 +1,51 @@
+# fix-r4.expectations-diff.txt — the structural diff of expectations.json, round-3 bytes (fix-r3, HEAD 611c9f93) → the round-4 regeneration (plan-build.py, never hand-edited)
+# before sha256 490dc5b9a8b33ef38d2b1e3a1cd9094c71ca6322fa45ec281b427798c89acacf · after sha256 980542d01c1755007c5409a9b07d5d398508dcaf9687078b4437855502103839 (plan-build.py 67833a1dac86bbc5…)
+# 10 difference(s); every other value identical (the JSON is the indent-1 rendering both times)
+
+~ /lanes/L1-hyphen-ios-linebox/geometryProbes[0]/teeth
+  common prefix: 825 chars (…ject a cut last cell / a missing hyphen (probes-teeth-r2.py))
+  before (rest): ''
+  after  (rest): . Round 3 (verify M2, D38): `ink:` — each line's ink mask = the base line's ±2 px (XOR, same crop): a blob in a line or a glyph painted twice is WRONG (probes-teeth-r3.py). Round 4 (D39): that XOR counts both nested masks (min < 200 and the core, min < 100) and is summed over the lines — a 1-px smear that only darkens a glyph's edge is WRONG (probes-selfcheck.txt §T4)
+
+~ /lanes/L2-cbb-android/geometryProbes[1]/teeth
+  common prefix: 692 chars (…above row 80 and a 7×7 hole clear of the scanlines are WRONG)
+  before (rest): ''
+  after  (rest): . Round 3 (verify M2, D38; both L2 probes): `core:` — green outside the ref mask's 1-px AA band ≤ 1 and ref green missing inside it ≤ 1: a blob in a rounded corner's cut-out and a 3×3 hole under the 40-px XOR are WRONG (probes-teeth-r3.py)
+
+~ /lanes/L3-positioned-parent-slot/geometryProbes[0]/teeth
+  common prefix: 1246 chars (…genta inside it ±1 %: erased / +3x WRONG; vrl-rtl twins too))
+  before (rest): ''
+  after  (rest): . Round 3 (verify M2, D38): dir rows `rows:` peak ≥ 0.97, `mass:` text ink = the base's row 3 (rows 6 / 9) / row 7 ±2, `lead:` the dot ±1, `yext:` the ink rows ±1; bidi `ink:` per RTL band against the base's blue components; stack `others:` = web ±2 — row ghosts, horizontal copies, doubled dots / glyphs and 2×2 / 3×3 strays are WRONG (probes-teeth-r3.py; probes-selfcheck.txt §T3)
+
+~ /lanes/L4-ua-heading-margin/geometryProbes[0]/teeth
+  common prefix: 1103 chars (… from the device faces; probes-teeth-r2.py names it, §9 D33))
+  before (rest): ''
+  after  (rest): . Round 3 (verify M2, D38): today's face / 011 `ink:` (each band's ink mask = the base band + the margin, XOR ≤ 2) and face-present `face ink:` (the ref's component count, dark px ±6 %). Round 4 (verify M1, D39): face-present natives `face xor:` — every band's ink (two nested masks) = the face reference's at its best whole-px shift (±3 x, ±1 y), XOR ≤ 2 over the band's rows ±2 and the whole width; the Compose no-wrap rows read every band when the picture wraps and, when it does not, line 1 left of the ref's right edge plus "fox" against the ref's line 2 moved there; the reference is the frozen ref until the stage-1 step-8 edit sets FACE_RUN = wave55-pre — "brownn", the heading copied 1 px, "fox" copied 5 px right, round 3's named 2×2 blob on a 014 glyph and D33's clip-10 are WRONG (probes-teeth-r4.py)
+
+~ /lanes/L4-ua-heading-margin/stage1Decision
+  common prefix: 699 chars (…ainst arm M. css-break / CSS2 controls: read at wave55-probe)
+  before (rest): ''
+  after  (rest): . Round 4 (D39): a face-present native line whose only reason is `face xor:` (against Chromium's ref: a device face sits 1768-2510 px level-XOR from it) is decided by the recorded look of PLAN §7 stage 1 step 8, never by widening FACE_XOR_TOL; the same probe edit sets FACE_RUN_DEFAULT = 'wave55-pre' for the face keys kept
+
+~ /lanes/L5-counter-suffix-rows/geometryProbes[0]/teeth
+  common prefix: 1008 chars (…stroke count = the ref's and the marker rows = the BASE's ±1)
+  before (rest): ''
+  after  (rest): . Round 3 (verify M2, D38): [C] / [I] natives `ink:` against the base (rows 5-6 marker zone / 005 item zone translated, 005 marker zone unmoved, XOR ≤ 2). Round 4 (verify M3 / M4, D39): every `ink:` read counts both nested masks; [H] natives — rows 3-4 x0-63 = a native's own two glyphs (iOS's, or Android's: the ok-all graft), each moved by whole px; [T] natives — the digit window = Android's tabular '1' (TWIN_RUN = wave55-pre added from stage 1); [C] (x0-63) and [I] summed over their zones; [I] 005 outside its line windows = the base — the [H] zone copied 1 px, a doubled-glyph sliver, the [T] window copied 1 px down and a 2×2 / 3×3 blob beside the '1' are WRONG (probes-teeth-r4.py)
+
+~ /lanes/L5-counter-suffix-rows/stage1Decision
+  common prefix: 908 chars (…oth fail → revert U1-ios (after U1-ios-LRM: its revertOrder))
+  before (rest): ''
+  after  (rest): . Round 4 (D39): an [H] / [T] native line whose only reason is the twin `ink:` (another rasterizer's glyph) is decided by the recorded look of PLAN §7 stage 1 step 8, never by widening INK_TOL; the same probe edit sets TWIN_RUN_DEFAULT = 'wave55-pre'
+
+~ /lanes/L6-android-paint-order/geometryProbes[0]/teeth
+  common prefix: 949 chars (… of 22-26 children moved 3 px inside the union bbox is WRONG)
+  before (rest): ''
+  after  (rest): . Round 3 (verify M2, D38): [X] `extra` ≤ 1, [PO] red n and pink ±2. Round 4 (verify M2, D39): `extra` counts fill outside base fill ∪ base band ∪ the band's 1-px ring where the base is not white (no ring around the base FILL) — a child fill drawn again 1 px off (+24 … +500 px), a 1-px smear and a 1×4 bar of fill are WRONG (probes-teeth-r4.py); one stray fill px reads 1 (the 2-px floor)
+
++ /planDecisions[id=D38]
+  after:  {"id": "D38", "conflict": "verify round 3 M2: a fifth class, ADDED ink (a row painted twice, a horizontal copy, a doubled glyph, a 2×2 / 3×3 blob in the band), passed the L3 dir-style rows and, swept over every lane, 112 faked captures of L1 / L4 / L5 / L6", "resolution": "every lane probe reads how MUCH ink against a same-renderer reference (L1 `ink:`; L2 `core:`; L3 rows / mass / lead / yext, bidi `ink:`, stack `others:`; L4 `ink:` and `face ink:`; L5 [C] / [I] `ink:`; L6 `extra` ≤ 1, [PO] ±2); probes-teeth-r3.py pins the class and probes-selfcheck.txt §T3 sweeps it over every fixed picture (plan-skeptic-round-3.fakes/sweep.py: exit 1 on a HOLE)"}
+
++ /planDecisions[id=D39]
+  after:  {"id": "D39", "conflict": "verify round 4 M1-M4 / S1 / S2: STRICTLY-additive ink (nothing moved or erased) passed 17 gating keys inside their own read zones — L4 face-present ×10 (FACE_INK_TOL 6 %; the Compose no-wrap rows never read below band 1), L6 [X] ×5 (`extra` dilated by 1 px), L5 [H] ios (no ink read), L5 [T] ios (ink inside its digit window); the 2-px floor was unnamed", "resolution": "L4 `face xor:` (face-present natives: every band = the face reference, two nested masks, XOR ≤ FACE_XOR_TOL 2; the reference is the frozen ref until the stage-1 step-8 edit sets FACE_RUN = wave55-pre, because a device 2em face sits 1768-2510 px level-XOR / −14 … +9 % dark px from Chromium's, so a re-set ref tolerance would re-open the class); L6 `extra` without a ring around the base fill; L5 [H] / [T] twin-glyph `ink:` (TWIN_RUN = wave55-pre from stage 1), [C] / [I] summed, two nested masks; L1 `ink:` summed, two nested masks; probes-teeth-r4.py pins every variant the verifier recorded IN-ZONE and probes-selfcheck.txt §T4 re-runs its generator over every lane (exit 1 on an IN-ZONE acceptance); a fake adding ≤ 2 px under a probe's own mask is the NAMED 2-px floor (the passing pictures read 0: a 0-px tolerance is a stage-1 device question); round 3's named 014 residual and D33's clip-10 exception are closed"}
+
+# top-level keys: before 37 · after 37; planDecisions ids: before 39 · after 41

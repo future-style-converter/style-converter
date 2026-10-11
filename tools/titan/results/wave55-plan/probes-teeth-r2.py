@@ -17,6 +17,9 @@
 # stage 1 re-sets it from the device faces, PLAN §7 / §10). Its expectation is read from the probe's X1_TOL: PASS (the
 # blind spot, PLAN §9 D33) while X1_TOL ≥ 10, FAIL once X1_TOL ≤ 9 — except the two Compose no-wrap [M] rows, which read
 # band 1's position and glyphs over the ref's line-1 columns and never its right edge (PASS either way, named).
+# Round 4 (fix-r4.done.md, D39): the face-present native rows read `face xor:` (every band's ink = the face reference's, XOR ≤
+# FACE_XOR_TOL, the no-wrap rows' band 1 included), and a 10-px clip removes ≥ 10 px of line-1 ink — so while FACE_XOR_TOL < 10
+# the clip is pre-registered FAIL on all ten keys: the D33 blind spot is closed (face_xor_tol() reads the switch).
 # Writes nothing itself: probes-teeth.py writes the fake runs under its --scratch dir.
 import os, re
 import numpy as np
@@ -46,6 +49,12 @@ def x1_tol():
     m = re.search(r'^TOP_TOL, X0_TOL, X1_TOL = (\d+), (\d+), (\d+)', open(os.path.join(HERE, 'ua-heading-margin.geometry.py')).read(), re.M)
     assert m, 'ua-heading-margin.geometry.py: no X1_TOL line'
     return int(m.group(3))
+
+
+def face_xor_tol():
+    """ua-heading-margin.geometry.py's round-4 `face xor:` tolerance, or None before round 4 (the clip-10 case's second switch)."""
+    m = re.search(r'^INK_TOL, FACE_INK_TOL, FACE_XOR_TOL = (\d+), (\d+), (\d+)', open(os.path.join(HERE, 'ua-heading-margin.geometry.py')).read(), re.M)
+    return int(m.group(3)) if m else None
 
 
 def cases(pt, lane):
@@ -174,11 +183,12 @@ def cases(pt, lane):
             case('css-text-decor', f'L4-C-{name}', {('css-text-decor', p, t): f(png(f'ua-heading-margin-replay/{t}-{p}-C.png'), t) for t in T3 for p in ('ios', 'android')}, face_keys)
             case('css-text-decor', f'L4-U1-{name}', {('css-text-decor', p, t): f(png(f'ua-heading-margin-replay/{t}-{p}-U1.png'), t) for t in T3 for p in ('ios', 'android')},
                  [MK(t, p) for t in T3 for p in ('ios', 'android')])
-        # the S1 named exception: PASS (blind spot) while X1_TOL ≥ 10; FAIL once stage 1 tightens it — the no-wrap rows always PASS
-        tol = x1_tol()
+        # the S1 named exception: PASS (blind spot) while X1_TOL ≥ 10; FAIL once stage 1 tightens it — the no-wrap rows always PASS;
+        # round 4: FAIL on every face key while `face xor:` reads (FACE_XOR_TOL < 10: the clip removes ≥ 10 px of ink)
+        tol, xtol = x1_tol(), face_xor_tol()
         repl = {('css-text-decor', p, t): clip(png(f'ua-heading-margin-replay/{t}-{p}-C.png'), t) for t in T3 for p in ('ios', 'android')}
         out.append((lane, 'css-text-decor', 'r2-L4-C-line1-clipped-10px', repl,
-                    {k: ('PASS' if tol >= 10 or k in nowrap else 'FAIL') for k in face_keys}))
+                    {k: ('FAIL' if xtol is not None and xtol < 10 else 'PASS' if tol >= 10 or k in nowrap else 'FAIL') for k in face_keys}))
         t11 = 'text-decoration-inset-011'
         def mirror_band(a, k):      # count-preserving: 011's band k mirrored inside its own x extent
             top, bot, x0, x1 = pt.bands(pt._dk(a), 112, 400)[k]; o = a.copy(); o[top - 1:bot + 2, x0:x1 + 1] = a[top - 1:bot + 2, x0:x1 + 1][:, ::-1]; return o

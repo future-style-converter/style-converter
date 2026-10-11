@@ -1,5 +1,5 @@
-# toolkit-proofs.txt — 2026-10-11T18:34:40Z; shared tree HEAD 640276a0; throwaway worktree /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/wave55-fix-r3-tk-wt at 640276a0
-# sha256: expectations.json 490dc5b9a8b33ef3… adjudicate.mjs 262d22c32a66ec30… control-check.mjs cba40eb567f11105… ab-arms55.sh 5cd6fccbc928768d… ab-arms55.selftest.sh 72ca276afc0562f9… make-snapshot55.mjs df37730dd3c70f54…
+# toolkit-proofs.txt — 2026-10-11T22:26:52Z; shared tree HEAD 611c9f93; throwaway worktree /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/wave55-plan-r4-toolkit at 611c9f93
+# sha256: expectations.json 980542d01c175500… adjudicate.mjs 262d22c32a66ec30… control-check.mjs cba40eb567f11105… ab-arms55.sh 5cd6fccbc928768d… ab-arms55.selftest.sh 72ca276afc0562f9… make-snapshot55.mjs df37730dd3c70f54…
 
 ## A. adjudicate.mjs (tools/titan/results/wave55-gate)
   A0 repointing audit (the wave-54 file → this copy):
@@ -99,7 +99,7 @@
      as required  T1 the reusable T1 check set reads 0 failures on the real runner
      as required  T2 M-L18 is RED: 4 T1 check(s) fail (exit 7; drop-U blocks 0, drop-V blocks 0)
      as required  T2 … and the read-outs survived (untracked), exactly as in wave 54
-     as required  T3 M-per-arm is RED: 4 T1 check(s) fail (exit 6; arm drop-V: the tree is not at ecdbe78, clean, on main before the arm — stopping (records in /private/tmp/
+     as required  T3 M-per-arm is RED: 4 T1 check(s) fail (exit 6; arm drop-V: the tree is not at bfba05e, clean, on main before the arm — stopping (records in /private/tmp/
      as required  T4 no mode flag = the dry run: exit 0, 'DRY RUN OK', refs + files identical
      as required  T4 --dry-run: exit 0, refs + files identical, the pool markers untouched
      as required  T4 the dry run printed the driver's own --plan for both arms
@@ -108,15 +108,15 @@
      as required  T5b an UNTRACKED file outside the code paths does not block — exit 0
      as required  T5b2 an UNTRACKED file under a code path (runtimes/) refuses — a device run would build it — exit 2, 'code differs from HEAD (tracked, staged or UNTRACKE
      as required  T5c detached HEAD, --run — exit 2, 'detached HEAD: there is no branch to restore to'
-     as required  T5d a sha that is not an ancestor of HEAD — exit 2, 'arm drop-S: 997eaef is not an ancestor of HEAD (nothing to revert on this branch)'
-     as required  T5e shas parent first (must be child first) — exit 2, 'arm drop-UV: 98418f5 is not older than the sha before it (list the shas child first)'
+     as required  T5d a sha that is not an ancestor of HEAD — exit 2, 'arm drop-S: 1946fb3 is not an ancestor of HEAD (nothing to revert on this branch)'
+     as required  T5e shas parent first (must be child first) — exit 2, 'arm drop-UV: f1a2f1f is not older than the sha before it (list the shas child first)'
      as required  T5f a duplicate arm name (expectations abArms has two drop-U2) — exit 2, 'arm 2: duplicate arm name drop-U (its run dir, branch, read-out and hash label wo
      as required  T5g a section the driver does not know — exit 2, 'arm drop-U: section css-nope is not one of gate-driver.sh's corpus sections'
      as required  T5h a platform that is not web / ios / android — exit 2, 'arm drop-U: platform mac is not web / ios / android'
      as required  T5i the arm's run dir already exists (never overwrite a capture) — exit 2, 'arm drop-U: tools/titan/runs/wave55-ab-drop-U already exists (never overwrite a
-     as required  T5j a revert that does not apply to HEAD (W rewrote U's line) — exit 2, 'arm drop-U: the revert of c406fed does not apply to 1aa1eae: error: patch failed: 
+     as required  T5j a revert that does not apply to HEAD (W rewrote U's line) — exit 2, 'arm drop-U: the revert of e8c3ef8 does not apply to 113311c: error: patch failed: 
      as required  T5k a branch with the arm's run name already exists — exit 2, 'arm drop-U: branch wave55-ab-drop-U already exists (checkout -B would reset it)'
-     as required  T5l 'drop-UW W U' (child first; W rewrites U's line; not a chain) dry-runs exit 0 — revert check: arm drop-UW — the reverse of 1aa1eae c406fed applies to
+     as required  T5l 'drop-UW W U' (child first; W rewrites U's line; not a chain) dry-runs exit 0 — revert check: arm drop-UW — the reverse of 113311c e8c3ef8 applies to
      as required  T5m 'drop-NB B N' (N creates n.txt, B extends it; not a chain) dry-runs exit 0
      as required  T5m M-onebyone is RED on 'drop-NB B N' (each reverse alone: N's deletion does not apply over B) — exit 2
      as required  T5l M-onebyone is RED on 'drop-UW W U' — exit 2
@@ -127,17 +127,17 @@
   as required  C1 ab-arms55.selftest.sh: every check as required, M-L18 / M-per-arm / M-dry RED (record: ab-arms55.selftest.out.txt; exit 0)
   as required  C2 --dry-run in the throwaway worktree (detached HEAD) → REFUSED — exit 2:   - detached HEAD: there is no branch to restore to
   as required  C2 … and it reports: 6e1c2d5e is not an ancestor of HEAD
-  as required  C2 … and it reports: revert check: arm drop-gaterecs — the reverse of 640276a0 a2a37a8e applies
+  as required  C2 … and it reports: revert check: arm drop-gaterecs — the reverse of 611c9f93 640276a0 applies
   as required  C2 … and it reports: driver --plan | run-id: wave55-ab-drop-gaterecs
   as required  C2 … and it reports: driver --plan | sections (1): css-text
   as required  C2 … and the worktree, its refs and this repo's refs / stash are byte-identical after it
-  as required  C3a --dry-run on a scratch clone on campaign/applier-campaign at 640276a0 (tracked-clean) → DRY RUN OK — exit 0: DRY RUN OK — nothing written; --run would start the 1 arm(s) above
+  as required  C3a --dry-run on a scratch clone on campaign/applier-campaign at 611c9f93 (tracked-clean) → DRY RUN OK — exit 0: DRY RUN OK — nothing written; --run would start the 1 arm(s) above
   as required  C3a … the clone's refs, HEAD, status, build-hashes.txt and gate dir unchanged
-  as required  C3b --dry-run on the shared tree, tracked-dirty (11 uncommitted tracked records) → REFUSED for that — exit 2:   - tracked changes in the tree (git status --porcelain --untracked-files=no):  M tools/titan/results/wave55-gate/installed-build-hash.sh  M tools/titan/results/wave55-pl
+  as required  C3b --dry-run on the shared tree, tracked-dirty (16 uncommitted tracked records) → REFUSED for that — exit 2:   - tracked changes in the tree (git status --porcelain --untracked-files=no):  M tools/titan/results/wave55-gate/final55-analysis.sh  M tools/titan/results/wave55-gate/r
   as required  C3b … refs, stash, HEAD, tracked status, build-hashes.txt and final/ unchanged
 
 ## D. make-snapshot55.mjs
-  as required  D1 the wave-54 inputs → a scratch snapshot — exit 0: wrote /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/t
+  as required  D1 the wave-54 inputs → a scratch snapshot — exit 0: wrote /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r4tk
      totals: scratch {"web":{"passing":1243,"measured":1372},"ios":{"passing":1131,"measured":1362},"android":{"passing":1128,"measured":1362}} · corpus-v6-20 {"web":{"passing":1243,"measured":1372},"ios":{"passing":1131,"measured":1362},"android":{"passing":1128,"measured":1362}}
   as required  D1a its totals equal corpus-v6-20.json's
   as required  D1b … and the whole file is byte-identical to corpus-v6-20.json (sections, perCellDiff, installedBuilds, probeReverts, degenerateGains, reproduce)

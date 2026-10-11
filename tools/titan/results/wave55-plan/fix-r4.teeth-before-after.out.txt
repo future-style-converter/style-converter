@@ -1,0 +1,171 @@
+# fix-r4.teeth-before-after — 2026-10-11T22:00:11Z; HEAD 611c9f93; throwaway wave55-plan-r4-teeth; expectations.json 980542d01c175500…
+# probes-teeth.py 79af7c0e378add8c… · -r2 590a1858f748ee8a… · -r3 668d0c542cb1a7ac… · -r4 686e21fe3deec95a… · added_ink4.py 6608eff7c0221d40…
+
+## BEFORE: the round-3 probe bytes (every round-4 strictly-additive case should be a VIOLATION: the fake accepted)
+  positioned-parent-slot.geometry.py 134d16f229b1bd84…
+  compose-wpt-content-box-cb.geometry.py c52fe610cb166a1e…
+  cbb-android.geometry.py 76abeb24470b3cf2…
+  counter-suffix-rows.geometry.py 7582245029da6f2c…
+  ua-heading-margin.geometry.py 13fc864b2df369de…
+  android-paint-order.geometry.py 57cb351c3a366d96…
+  hyphen-ios-linebox.geometry.py 191cd7bbf5e8efea…
+  probes-teeth.py exit 1 — 265 cases; violations 145; gating + tally keys with ≥ 1 rejected fake 48 / 48
+  violations: 145 (round-4 cases: 145; the r2 clip-10 case: 0; other rounds 1-3: 0)
+    VIOLATION L4 r4-C-fixed-c0_dg-first-adj: ua-heading-margin.geometry.py [F] text-decoration-inset-005 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-first-adj: ua-heading-margin.geometry.py [F] text-decoration-inset-006 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-first-adj: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-first-adj: ua-heading-margin.geometry.py [M] text-decoration-inset-005 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-first-adj: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-first-adj: ua-heading-margin.geometry.py [M] text-decoration-inset-006 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-last-adj: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-last-adj: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-mid-smear: ua-heading-margin.geometry.py [F] text-decoration-inset-005 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-mid-smear: ua-heading-margin.geometry.py [F] text-decoration-inset-006 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-mid-smear: ua-heading-margin.geometry.py [F] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-mid-smear: ua-heading-margin.geometry.py [F] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-mid-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-mid-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-005 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-mid-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-mid-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-006 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-mid-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-mid-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-first-smear: ua-heading-margin.geometry.py [F] text-decoration-inset-005 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-first-smear: ua-heading-margin.geometry.py [F] text-decoration-inset-006 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-first-smear: ua-heading-margin.geometry.py [F] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-first-smear: ua-heading-margin.geometry.py [F] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-first-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-first-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-005 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-first-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-first-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-006 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-first-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-first-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_st-dash: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_st-dash: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_st-vbar: ua-heading-margin.geometry.py [F] text-decoration-inset-005 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_st-vbar: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_st-vbar: ua-heading-margin.geometry.py [M] text-decoration-inset-005 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-band0-last: ua-heading-margin.geometry.py [F] text-decoration-inset-005 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-band0-last: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-band0-last: ua-heading-margin.geometry.py [M] text-decoration-inset-005 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-band0-last: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_st2-band0-end3: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_st2-band0-end3: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_hd-band1@+2: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_hd-band1@+2: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_hd-band1@+5: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_hd-band1@+5: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-band1-last: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_dg-band1-last: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_st2-band1-end3: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c0_st2-band1-end3: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt+1: ua-heading-margin.geometry.py [F] text-decoration-inset-005 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt+1: ua-heading-margin.geometry.py [F] text-decoration-inset-006 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt+1: ua-heading-margin.geometry.py [F] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt+1: ua-heading-margin.geometry.py [F] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt+1: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt+1: ua-heading-margin.geometry.py [M] text-decoration-inset-005 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt+1: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt+1: ua-heading-margin.geometry.py [M] text-decoration-inset-006 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt+1: ua-heading-margin.geometry.py [M] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt+1: ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt-1: ua-heading-margin.geometry.py [F] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt-1: ua-heading-margin.geometry.py [F] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt-1: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt-1: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt-1: ua-heading-margin.geometry.py [M] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt-1: ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt+2: ua-heading-margin.geometry.py [F] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt+2: ua-heading-margin.geometry.py [F] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt+2: ua-heading-margin.geometry.py [M] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-tgt+2: ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_hd-tgt+1: ua-heading-margin.geometry.py [F] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_hd-tgt+1: ua-heading-margin.geometry.py [F] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_hd-tgt+1: ua-heading-margin.geometry.py [M] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_hd-tgt+1: ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_hd-tgt-1: ua-heading-margin.geometry.py [F] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_hd-tgt-1: ua-heading-margin.geometry.py [F] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_hd-tgt-1: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_hd-tgt-1: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_hd-tgt-1: ua-heading-margin.geometry.py [M] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_hd-tgt-1: ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_dg-last-adj: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_dg-last-adj: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_dg-mid-smear: ua-heading-margin.geometry.py [F] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_dg-mid-smear: ua-heading-margin.geometry.py [F] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_dg-mid-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_dg-mid-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_dg-first-smear: ua-heading-margin.geometry.py [F] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_dg-first-smear: ua-heading-margin.geometry.py [F] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_dg-first-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_dg-first-smear: ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_st2-band1-end3: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-band2@-3: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_vd-band2@-3: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_hd-band2@+2: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_hd-band2@+2: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_hd-band2@+5: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_hd-band2@+5: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_dg-band2-last: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_dg-band2-last: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_st2-band2-end3: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-c1_st2-band2-end3: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-r3-residual-stray2-mid-014: ua-heading-margin.geometry.py [F] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-r3-residual-stray2-mid-014: ua-heading-margin.geometry.py [F] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-r3-residual-stray2-mid-014: ua-heading-margin.geometry.py [M] text-decoration-inset-014 android printed PASS, pre-registered FAIL
+    VIOLATION L4 r4-C-fixed-r3-residual-stray2-mid-014: ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios printed PASS, pre-registered FAIL
+    VIOLATION L5 r4-fixed-c0_hd-tgt+1: counter-suffix-rows.geometry.py [H] counter-suffix ios printed PASS, pre-registered FAIL
+    VIOLATION L5 r4-fixed-c0_hd-tgt+1: counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 ios printed PASS, pre-registered FAIL
+    VIOLATION L5 r4-fixed-c0_dg-first-adj: counter-suffix-rows.geometry.py [H] counter-suffix ios printed PASS, pre-registered FAIL
+    VIOLATION L5 r4-fixed-c0_hd-band0@+2: counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 android printed PASS, pre-registered FAIL
+    VIOLATION L5 r4-fixed-c0_st2-band6-end3: counter-suffix-rows.geometry.py [T] counter-suffix ios printed PASS, pre-registered FAIL
+    VIOLATION L5 r4-fixed-vd-whole-min+1: counter-suffix-rows.geometry.py [H] counter-suffix ios printed PASS, pre-registered FAIL
+    VIOLATION L5 r4-fixed-vd-whole-min-1: counter-suffix-rows.geometry.py [H] counter-suffix ios printed PASS, pre-registered FAIL
+    VIOLATION L5 r4-fixed-c0_vd-tgt+1: counter-suffix-rows.geometry.py [H] counter-suffix ios printed PASS, pre-registered FAIL
+    VIOLATION L5 r4-fixed-c0_vd-tgt-1: counter-suffix-rows.geometry.py [H] counter-suffix ios printed PASS, pre-registered FAIL
+    VIOLATION L5 r4-fixed-c0_hd-tgt-1: counter-suffix-rows.geometry.py [H] counter-suffix ios printed PASS, pre-registered FAIL
+    VIOLATION L5 r4-L5-zone-H-zone+1y: counter-suffix-rows.geometry.py [H] counter-suffix ios printed PASS, pre-registered FAIL
+    VIOLATION L5 r4-L5-zone-H-zone+1x: counter-suffix-rows.geometry.py [H] counter-suffix ios printed PASS, pre-registered FAIL
+    VIOLATION L5 r4-L5-zone-T-window+1y: counter-suffix-rows.geometry.py [T] counter-suffix ios printed PASS, pre-registered FAIL
+    VIOLATION L5 r4-L5-zone-T-blob2: counter-suffix-rows.geometry.py [T] counter-suffix ios printed PASS, pre-registered FAIL
+    VIOLATION L5 r4-L5-zone-T-blob3: counter-suffix-rows.geometry.py [T] counter-suffix ios printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_vd-tgt+1: android-paint-order.geometry.py [X] flex-abspos-staticpos-align-self-safe-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_vd-tgt+1: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_vd-tgt+1: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-rtl-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_vd-tgt+1: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-vertWM-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_vd-tgt+1: android-paint-order.geometry.py [X] grid-abspos-staticpos-justify-self-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_vd-tgt-1: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_vd-tgt-1: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-rtl-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_vd-tgt-1: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-vertWM-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_vd-tgt-1: android-paint-order.geometry.py [X] grid-abspos-staticpos-justify-self-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_hd-tgt+1: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_hd-tgt+1: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-rtl-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_hd-tgt+1: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-vertWM-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_hd-tgt+1: android-paint-order.geometry.py [X] grid-abspos-staticpos-justify-self-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_hd-tgt-1: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_hd-tgt-1: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-rtl-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_hd-tgt-1: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-vertWM-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_hd-tgt-1: android-paint-order.geometry.py [X] grid-abspos-staticpos-justify-self-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_dg-mid-smear: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_dg-mid-smear: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-rtl-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_dg-mid-smear: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-vertWM-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_dg-mid-smear: android-paint-order.geometry.py [X] grid-abspos-staticpos-justify-self-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_dg-first-smear: android-paint-order.geometry.py [X] flex-abspos-staticpos-align-self-safe-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_dg-first-smear: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_dg-first-smear: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-rtl-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_dg-first-smear: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-vertWM-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_dg-first-smear: android-paint-order.geometry.py [X] grid-abspos-staticpos-justify-self-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_st-vbar: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-001 android printed PASS, pre-registered FAIL
+    VIOLATION L6 r4-X-fixed-c0_st-vbar: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-rtl-001 android printed PASS, pre-registered FAIL
+
+## AFTER: the current probe bytes (0 violations)
+  positioned-parent-slot.geometry.py 134d16f229b1bd84…
+  compose-wpt-content-box-cb.geometry.py c52fe610cb166a1e…
+  cbb-android.geometry.py 76abeb24470b3cf2…
+  counter-suffix-rows.geometry.py bd2f001ae6a8ea5b…
+  ua-heading-margin.geometry.py 50344dc6ba6d2ccf…
+  android-paint-order.geometry.py 360e6e288f908434…
+  hyphen-ios-linebox.geometry.py 0dc54c73924e205e…
+  probes-teeth.py exit 0 — 265 cases; violations 0; gating + tally keys with ≥ 1 rejected fake 48 / 48
+  violations: 0 (round-4 cases: 0; the r2 clip-10 case: 0; other rounds 1-3: 0)
+
+throwaway removed (0 left)

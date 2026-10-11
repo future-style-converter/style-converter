@@ -312,7 +312,9 @@ L1 = {
                  'Round 1 (instrument-teeth M7) added `glyphs:` — every line\'s ink crop equals the base capture\'s same line, translated by whole rows only (correlation ≥ 0.97, same count): '
                  'text ±2/±3x, one line +3x, a missing hyphenate-character (003 / 004) and two swapped lines are WRONG; the standing fakes are probes-selfcheck.txt §T. '
                  'Round 2: four new fakes (one hyphen removed, one cell cut, one run +1x, all +1x) are all WRONG; the tally\'s hyphenate-character-001 / -003 ios controls '
-                 'pass the fixed pictures and reject a cut last cell / a missing hyphen (probes-teeth-r2.py)')),
+                 'pass the fixed pictures and reject a cut last cell / a missing hyphen (probes-teeth-r2.py). '
+                 'Round 3 (verify M2, D38): `ink:` — each line\'s ink mask = the base line\'s ±2 px (XOR, same crop): a blob in a line or a glyph painted twice is WRONG (probes-teeth-r3.py). '
+                 'Round 4 (D39): that XOR counts both nested masks (min < 200 and the core, min < 100) and is summed over the lines — a 1-px smear that only darkens a glyph\'s edge is WRONG (probes-selfcheck.txt §T4)')),
     probe(f'{PY} {P54}/hyphenate-character.geometry.py <run>',
           {f'hyphenate-character-00{n} {p}': GEO_OK for n in (1, 3, 4) for p in PLATS},
           {f'hyphenate-character-00{n} {p}': f'{HC[n]} {p}' for n in (1, 3, 4) for p in PLATS},
@@ -434,7 +436,8 @@ L2 = {
           teeth=('adds `bands:` and `corner:` to the bbox rule: rejects F3 centered / F4 unclipped / F6 double (F4 and F6 PASS the re-used rule at P 0.9841 / 0.9956), accepts the U1+U2 replay; wave54-probe (U1 only) FAILs (probes-selfcheck.txt §L2). '
                  'Round 1 (instrument-teeth M2): `corner:` counts all FOUR 20×20 corner squares (ref [251, 250, 252, 252], each ±8) and the green mass is read — '
                  'gut-cross (957 px) and square-3-corners ([400, 400, 400, 254]) are WRONG (probes-selfcheck.txt §T). Round 2 (M2): the mass is REPLACED by `mask:` '
-                 '(|green XOR ref| ≤ 40 px pixelwise) and the fail ink (pink / red) must equal the ref\'s ±2 — a 2×40 pink sliver above row 80 and a 7×7 hole clear of the scanlines are WRONG')),
+                 '(|green XOR ref| ≤ 40 px pixelwise) and the fail ink (pink / red) must equal the ref\'s ±2 — a 2×40 pink sliver above row 80 and a 7×7 hole clear of the scanlines are WRONG. '
+                 'Round 3 (verify M2, D38; both L2 probes): `core:` — green outside the ref mask\'s 1-px AA band ≤ 1 and ref green missing inside it ≤ 1: a blob in a rounded corner\'s cut-out and a 3×3 hole under the 40-px XOR are WRONG (probes-teeth-r3.py)')),
   ],
   'revertUnits': {
     'U1': {'commit': 'CBB-android re-landed (5b333c8a, the revert of 8deddc19): NEW core/variables/ContainingBlockBands.kt + DynamicValueResolver.kt (defaulted wptCaptureMode + one condition) + DynamicValueResolverTest rows (census path → wave54-final; C8: + the `ContainingBlock[dark-stage-content-box-bands]` breadcrumb-assertion row, mutation: delete its markUnhandled) + tools/titan/results/wave55-cbb-android/seam-1.patch (ComponentRenderer.kt :1950-1951 `wptCaptureMode = wptCaptureModeForStretch`, patch-borne ChildContainingBlockSeamWiringTest.kt)',
@@ -541,7 +544,9 @@ L3 = {
                  '[S] dynamic-offset the magenta count ±5, [W] dynamic-offset the full bbox = web\'s ±1 and 100 ±5 px (vrl-rtl twins too) — gut / mirror / ±2-3x / grown / slab / stacked / hollow / ±3y / wider are WRONG (probes-selfcheck.txt §T). '
                  'Round 2 (M1): dir rows `rows:` (the ink-row profile peaks at shift 0 ±1: text ±2y / upside down WRONG), bidi `order:` (each RTL band\'s blue column profile at shift 0 ≥ 0.80: a mirrored run WRONG) and '
                  '`boxes:` (the yellow inline-blocks = the ref ±1: erased WRONG), stack `red:` (0) and `others:` (green outside the cells = web ±10 %: the other squares erased WRONG), '
-                 'dynamic-offset `parent:` (the yellow parent bbox = the ref / web ±1 and yellow + magenta inside it ±1 %: erased / +3x WRONG; vrl-rtl twins too)')),
+                 'dynamic-offset `parent:` (the yellow parent bbox = the ref / web ±1 and yellow + magenta inside it ±1 %: erased / +3x WRONG; vrl-rtl twins too). '
+                 'Round 3 (verify M2, D38): dir rows `rows:` peak ≥ 0.97, `mass:` text ink = the base\'s row 3 (rows 6 / 9) / row 7 ±2, `lead:` the dot ±1, `yext:` the ink rows ±1; bidi `ink:` per RTL band against the base\'s blue components; '
+                 'stack `others:` = web ±2 — row ghosts, horizontal copies, doubled dots / glyphs and 2×2 / 3×3 strays are WRONG (probes-teeth-r3.py; probes-selfcheck.txt §T3)')),
   ],
   'revertUnits': {
     'U1': {'commit': 'NEW layout/position/PositionedParentSlotGate.kt (engages + slotModifier + breadcrumbs) + PositionedParentFlowSlot.kt :87-89 comment + NEW PositionedParentSlotGateTest.kt + tools/titan/results/wave55-positioned-parent-slot/seam-1.patch (ComponentRenderer.kt :3633-3661 → PositionedParentSlotGate.slotModifier(…), patch-borne PositionedParentSlotSeamWiringTest.kt and the SeamReachabilityTest U1 line, inserted after `"transforms/TransformInheritance.kt",` (:182), cut on HEAD)',
@@ -642,7 +647,11 @@ L4 = {
                  'with today\'s face every band = wave54-final + the margin ±1 and x ±1; [F] gains the same band rule (tops ±1, was ±3) — +12x, +3y, −2y, line 2 removed and line 1 cut to 40 % are WRONG (probes-selfcheck.txt §T). '
                  'Round 2 (M4): today\'s face and 011 `crop:` (every band\'s ink = the BASE capture\'s band + the margin, correlation ≥ 0.97; --base), the 2em face and [F] `profile:` (line 1\'s '
                  'column profile = the ref\'s at |shift| ≤ 12, ≥ 0.95) — line 1 mirrored / thirds swapped and 011 band 1 mirrored are WRONG; a 10-px clip of line 1\'s last glyph still passes '
-                 'while X1_TOL = 12 (S1: re-set at stage 1 from the device faces; probes-teeth-r2.py names it, §9 D33)')),
+                 'while X1_TOL = 12 (S1: re-set at stage 1 from the device faces; probes-teeth-r2.py names it, §9 D33). '
+                 'Round 3 (verify M2, D38): today\'s face / 011 `ink:` (each band\'s ink mask = the base band + the margin, XOR ≤ 2) and face-present `face ink:` (the ref\'s component count, dark px ±6 %). '
+                 'Round 4 (verify M1, D39): face-present natives `face xor:` — every band\'s ink (two nested masks) = the face reference\'s at its best whole-px shift (±3 x, ±1 y), XOR ≤ 2 over the band\'s rows ±2 and the whole width; '
+                 'the Compose no-wrap rows read every band when the picture wraps and, when it does not, line 1 left of the ref\'s right edge plus "fox" against the ref\'s line 2 moved there; the reference is the frozen ref until the stage-1 step-8 edit sets FACE_RUN = wave55-pre — '
+                 '"brownn", the heading copied 1 px, "fox" copied 5 px right, round 3\'s named 2×2 blob on a 014 glyph and D33\'s clip-10 are WRONG (probes-teeth-r4.py)')),
     probe(UAF, {k: GEO_OK for k in uaf_keys}, uaf_keys,
           report=[f'text-decoration-inset-{n} {p}' for n in ('005', '006', '014') for p in ('ios', 'android')],
           dropped={f'text-decoration-inset-011 {p}': ('C4: superseded by `[M] text-decoration-inset-011 ' + p + '` (gating U1-' + p + '): U1 moves 011 by 21 px by design, '
@@ -667,7 +676,10 @@ L4 = {
                      '(instrument-teeth S1): read `Δx1` on every face-present [M] / [F] native line and set X1_TOL = max |Δ| + 2 (today ±12, which '
                      'rests on WEB\'s face) by a probe edit committed with named paths and a regeneration BEFORE wave55-probe, recorded in §10 — '
                      'a decision on the face keys is taken only after that re-read. Then the probe-time A/B arm drop-L4-U2 (abArms) on '
-                     'css-text-decor, read against arm M. css-break / CSS2 controls: read at wave55-probe'),
+                     'css-text-decor, read against arm M. css-break / CSS2 controls: read at wave55-probe. Round 4 (D39): a face-present native line '
+                     'whose only reason is `face xor:` (against Chromium\'s ref: a device face sits 1768-2510 px level-XOR from it) is decided by the '
+                     'recorded look of PLAN §7 stage 1 step 8, never by widening FACE_XOR_TOL; the same probe edit sets FACE_RUN_DEFAULT = \'wave55-pre\' '
+                     'for the face keys kept'),
 }
 if L4_GO_SMALL:      # D1's alternative: hold U2-android (no DEGENERATE pass carried); Android +0, the four Android rows rise f→f
     L4['heldUnits'] = {'U2-android': 'HELD (GO-SMALL, ua-heading-margin §4): the Compose relative-parent abspos shrink-to-fit is not on the tree, so 005 / 006 android would pass DEGENERATE'}
@@ -748,7 +760,11 @@ L5 = {
                  'Round 1 (instrument-teeth M5): [I] ≥ 2 marker blobs ending at the ref ±2 and the ideograph\'s fill ≤ the ref\'s + 0.25, [C] the ideograph width ±2, [T] the digit rows ±1 and fill ≤ 60 %, '
                  '[H] the letter fill ≤ 60 %, [K] the natives\' item-text box x64-389 × y64-159 — the 、 erased, a block marker, a gutted ideograph, a bar / low \'1\', block letters and erased item text are WRONG (probes-selfcheck.txt §T). '
                  'Round 2 (M3): [C] the ideograph\'s stroke count and ink rows = the ref\'s (rows 5 / 6 trading 一 / 二, or 3 px low, WRONG), [H] each letter nearest the SAME row\'s ref letter and the period\'s rows ±1 '
-                 '(swapped letters / a low period WRONG), [T] and [K] ios row 9 outside the digit window = the base (erased / moved item text WRONG), [I] the stroke count = the ref\'s and the marker rows = the BASE\'s ±1')),
+                 '(swapped letters / a low period WRONG), [T] and [K] ios row 9 outside the digit window = the base (erased / moved item text WRONG), [I] the stroke count = the ref\'s and the marker rows = the BASE\'s ±1. '
+                 'Round 3 (verify M2, D38): [C] / [I] natives `ink:` against the base (rows 5-6 marker zone / 005 item zone translated, 005 marker zone unmoved, XOR ≤ 2). '
+                 'Round 4 (verify M3 / M4, D39): every `ink:` read counts both nested masks; [H] natives — rows 3-4 x0-63 = a native\'s own two glyphs (iOS\'s, or Android\'s: the ok-all graft), each moved by whole px; '
+                 '[T] natives — the digit window = Android\'s tabular \'1\' (TWIN_RUN = wave55-pre added from stage 1); [C] (x0-63) and [I] summed over their zones; [I] 005 outside its line windows = the base — '
+                 'the [H] zone copied 1 px, a doubled-glyph sliver, the [T] window copied 1 px down and a 2×2 / 3×3 blob beside the \'1\' are WRONG (probes-teeth-r4.py)')),
     probe(f'{PY} {P54}/rtl-marker-bake.geometry.py <run> <base>',
           {f'[M] counter-suffix {p}': GEO_OK for p in PLATS}, {f'[M] counter-suffix {p}': f'{CS} {p}' for p in PLATS},
           contains={'[M] counter-suffix web': 'rows 0-207 identical to <base>'},
@@ -790,7 +806,9 @@ L5 = {
                      '48 documents byte-identical. A gating key not OK reverts ITS unit (U2i before U2o); a [K] FAIL is diagnosed in the picture (U1 first); '
                      'U2i-android kept iff [I] android OK and ≥ 0.95; [H] ios WRONG or H-low-shaped → the LRM fallback re-cut of U1 (contingencyUnits '
                      'U1-ios-LRM: an appended probe-decisions/contingency.json row, landed by land-units.sh --contingency L5:U1-ios-LRM), re-probe '
-                     '(a pre-registered stage1Probe.reprobes id); both fail → revert U1-ios (after U1-ios-LRM: its revertOrder)'),
+                     '(a pre-registered stage1Probe.reprobes id); both fail → revert U1-ios (after U1-ios-LRM: its revertOrder). Round 4 (D39): an [H] / [T] '
+                     'native line whose only reason is the twin `ink:` (another rasterizer\'s glyph) is decided by the recorded look of PLAN §7 stage 1 step 8, '
+                     'never by widening INK_TOL; the same probe edit sets TWIN_RUN_DEFAULT = \'wave55-pre\''),
   # Round 2 (process-holes S2): the stage-1 swap between "keep U1-ios" and "revert U1-ios" is pre-registered like L1 NB-ios-b,
   # so it has a generator encoding and a landing row before stage 1 (never improvised at the probe).
   'contingencyUnits': {
@@ -900,7 +918,10 @@ L6 = {
           teeth=('--fakes: PO-today / band-dropped / menus-dropped / menus-through-navbar / backdrop-lost, FO-filter-after-clip / blurred-edge / box-20px-low, X-border-across-children / children-dropped / today all WRONG on their reason; --replays: U1 [PO] OK, U2 [X] OK on 5 of 6 (safe-002\'s replay keeps 50 crossing px: a replay artifact, the row\'s lower bound) — probes-selfcheck.txt §L6. '
                  'Round 1 (instrument-teeth M6): [X] also reads the child-fill bbox (= the BASE capture\'s ±1), the fill (≥ 0.98 × base) and the band (dark px ≥ 0.9 × min(base, ref)) — '
                  'border-erased, child ±3, child-shrunk and child-scrambled are WRONG; [PO] reads the navbar\'s whole blue (+ overlap red − 416) ≥ 0.95 × 866 — navbar-sides-erased (320) is WRONG (probes-selfcheck.txt §T). '
-                 'Round 2 (M5): [X] reads the child fill against the base pixel for pixel — `lost` ≤ 4 and `extra` (outside dilate₁(base fill ∪ base band)) ≤ 4: one of 22-26 children moved 3 px inside the union bbox is WRONG')),
+                 'Round 2 (M5): [X] reads the child fill against the base pixel for pixel — `lost` ≤ 4 and `extra` (outside dilate₁(base fill ∪ base band)) ≤ 4: one of 22-26 children moved 3 px inside the union bbox is WRONG. '
+                 'Round 3 (verify M2, D38): [X] `extra` ≤ 1, [PO] red n and pink ±2. '
+                 'Round 4 (verify M2, D39): `extra` counts fill outside base fill ∪ base band ∪ the band\'s 1-px ring where the base is not white (no ring around the base FILL) — '
+                 'a child fill drawn again 1 px off (+24 … +500 px), a 1-px smear and a 1×4 bar of fill are WRONG (probes-teeth-r4.py); one stray fill px reads 1 (the 2-px floor)')),
   ],
   'revertUnits': {
     'U1': {'commit': 'PO-selfpaint-android: NEW borders/BehindContentBorder.kt (behindContentBorder + drawInOrder + the androidx band arithmetic) + BorderRadiusApplier.kt :207 + kdoc + NEW BehindContentBorderTest.kt (P1, P2) + BorderRadiusSelfPaintTest.kt :158-185',
@@ -1645,6 +1666,11 @@ expectations['planDecisions'] = [
    'resolution': 'L5 contingencyUnits U1-ios-LRM (land-units.sh row 30, --contingency <L:U>, prepended to every revertOrder holding its base); fix-S1-<U>.patch is a known lane-dir patch (still sha-named); GO-SMALL is a before-landing decision only (a U2-android revert row with goSmall.held is refused) and narrows drop-L4-U2 to U2-ios'},
   {'id': 'D37', 'conflict': 'process-holes S8-S12: final55-analysis.sh drifted silently on a regeneration; the iOS .app embeds the test-all IR like the apk; the hash wait fired on a resumed launch; two §6 caveats went false; a killed fix lane or mutation was not resumable',
    'resolution': 'the generated read-out refuses a foreign expectations sha (exit 2) and §7 step 6 / stage 2 regenerate it with readers-calibration; installed-build-hash.sh prints both asset sha1s and reads untracked code; HASH_READ counts launches (bounded 1800 s, label `<run> corpus launch (…, launch k)`); the false caveats are deleted; fix lanes write STATUS: PARTIAL first and every pin mutation is bracketed by MUTATING / RESTORED sha256 lines'},
+  # ── plan-skeptic rounds 3 and 4 (fix-r3.done.md, fix-r4.done.md): the added-ink class ──
+  {'id': 'D38', 'conflict': 'verify round 3 M2: a fifth class, ADDED ink (a row painted twice, a horizontal copy, a doubled glyph, a 2×2 / 3×3 blob in the band), passed the L3 dir-style rows and, swept over every lane, 112 faked captures of L1 / L4 / L5 / L6',
+   'resolution': 'every lane probe reads how MUCH ink against a same-renderer reference (L1 `ink:`; L2 `core:`; L3 rows / mass / lead / yext, bidi `ink:`, stack `others:`; L4 `ink:` and `face ink:`; L5 [C] / [I] `ink:`; L6 `extra` ≤ 1, [PO] ±2); probes-teeth-r3.py pins the class and probes-selfcheck.txt §T3 sweeps it over every fixed picture (plan-skeptic-round-3.fakes/sweep.py: exit 1 on a HOLE)'},
+  {'id': 'D39', 'conflict': 'verify round 4 M1-M4 / S1 / S2: STRICTLY-additive ink (nothing moved or erased) passed 17 gating keys inside their own read zones — L4 face-present ×10 (FACE_INK_TOL 6 %; the Compose no-wrap rows never read below band 1), L6 [X] ×5 (`extra` dilated by 1 px), L5 [H] ios (no ink read), L5 [T] ios (ink inside its digit window); the 2-px floor was unnamed',
+   'resolution': 'L4 `face xor:` (face-present natives: every band = the face reference, two nested masks, XOR ≤ FACE_XOR_TOL 2; the reference is the frozen ref until the stage-1 step-8 edit sets FACE_RUN = wave55-pre, because a device 2em face sits 1768-2510 px level-XOR / −14 … +9 % dark px from Chromium\'s, so a re-set ref tolerance would re-open the class); L6 `extra` without a ring around the base fill; L5 [H] / [T] twin-glyph `ink:` (TWIN_RUN = wave55-pre from stage 1), [C] / [I] summed, two nested masks; L1 `ink:` summed, two nested masks; probes-teeth-r4.py pins every variant the verifier recorded IN-ZONE and probes-selfcheck.txt §T4 re-runs its generator over every lane (exit 1 on an IN-ZONE acceptance); a fake adding ≤ 2 px under a probe\'s own mask is the NAMED 2-px floor (the passing pictures read 0: a 0-px tolerance is a stage-1 device question); round 3\'s named 014 residual and D33\'s clip-10 exception are closed'},
 ]
 # Round 1 (process-holes S3): what produced this file — the argv (minus --out, which never changes the content) and the
 # sha256 of every input the generator read (the committed decision files included), so the committed tree reproduces it.

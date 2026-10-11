@@ -16,6 +16,11 @@
 # in the band), and §T3 runs plan-skeptic-round-3.fakes/sweep.py — the added-ink class over every fixed picture, each faked
 # capture judged by the rows that read it; exit 1 on a HOLE. (verify N3) the per-key table's `fixed OK` column counts §T's
 # fixed pictures too (it read the §L replays only, and so under-counted the keys whose fixed picture is a §T case).
+# Plan-skeptic round 4 (verify M1-M4, S2): §T also holds probes-teeth-r4.py (STRICTLY-additive ink, the verifier's builders), and
+# §T4 runs the round-4 verifier's own generator (plan-skeptic-round-4.fakes/fakes4.py — its plan-dir path made relative — and
+# zones4.py) over every lane: a gating key that PASSes a fake adding > 2 new-ink px inside its OWN read zone (under its probe's
+# own mask) is IN-ZONE, exit 1; a fake adding ≤ 2 px is the NAMED 2-px floor (PLAN §0 / D39), listed with its count. The file is
+# written atomically (a temp file beside it, then os.replace): lanes read this directory while it is regenerated.
 # Read-only over runs, refs and the replay folders beside this file. Three steps write, never into this tree (§T: fake runs
 # and gate JSONs under --scratch):
 #   - android-paint-order.geometry.py --fakes RE-WRITES its fake PNGs beside the script it runs. It is therefore run from the
@@ -273,6 +278,33 @@ for r in sweep.residual:                                    # pre-registered in 
 say('')
 teeth_ok = teeth_ok and not s_holes
 
+# ── §T4 the round-4 STRICTLY-ADDITIVE sweep (plan-skeptic-round-4.verify.md §2): the verifier's generator over every lane ─────
+say('## §T4 the round-4 strictly-additive sweep (plan-skeptic-round-4.fakes/fakes4.py + zones4.py, the verifier\'s own generator and '
+    'zone adjudication): every fixed picture of the standing set with class ink copied ±1 / ±2 / +4 / +9 y and ±1 … +10 x, a glyph '
+    'doubled / smeared / below itself, 1-px … 3×3 strays and whole-picture min() ghosts — written only where the destination is not '
+    'already ink — through the real gate; a gating key that PASSes > 2 new-ink px inside its own zone is IN-ZONE (exit 1)')
+import re as _re
+F4 = os.path.join(HERE, 'plan-skeptic-round-4.fakes')
+t4_in, t4_floor, t4_big = 0, 0, 0
+for L in (T_ONLY or ['L1', 'L2', 'L3', 'L4', 'L5', 'L6']):
+    sc4, fo4, zo4 = os.path.join(SCRATCH, 'sweep4', L), os.path.join(SCRATCH, f'fakes4.{L}.out.txt'), os.path.join(SCRATCH, f'zones4.{L}.out.txt')
+    shutil.rmtree(sc4, ignore_errors=True)
+    subprocess.run(['nice', '-n', '19'] + PY + [os.path.join(F4, 'fakes4.py'), '--scratch', sc4, '--groups', L, '--out', fo4], cwd=ROOT, capture_output=True, text=True)
+    zt = subprocess.run(['nice', '-n', '19'] + PY + [os.path.join(F4, 'zones4.py'), sc4, fo4], cwd=ROOT, capture_output=True, text=True).stdout
+    open(zo4, 'w').write(zt)
+    summ = next((l for l in open(fo4) if 'fake runs;' in l), '(no summary: the generator failed)').strip() if os.path.exists(fo4) else '(no output: the generator failed)'
+    nin = int((_re.search(r'## IN-ZONE: (\d+)', zt) or [0, -1])[1]); nben = int((_re.search(r'## benign: (\d+)', zt) or [0, 0])[1])
+    big = int((_re.search(r'HOLES \d+ \((\d+) with > 2', summ) or [0, 0])[1])
+    t4_in += max(nin, 0) + (1 if nin < 0 else 0); t4_floor += nben; t4_big += big
+    say(f'  {L}: {summ}', f'      zones4: IN-ZONE {nin if nin >= 0 else "(no adjudication)"} · benign (≤ 2 px in the key\'s own zone, or the ink in a sibling\'s zone) {nben}')
+    for l in zt.split('## benign')[0].splitlines()[1:]:
+        if l.strip():
+            say(f'  IN-ZONE ACCEPTANCE: {l.strip()}')
+say(f'  §T4: IN-ZONE acceptances {t4_in}; fakes4 HOLES with > 2 new-ink px (any mask) {t4_big}; benign / floor acceptances {t4_floor} — the '
+    f'2-px floor is a NAMED residual class (PLAN §0, D39): a fake adding ≤ 2 px under the probe\'s own mask passes every ±2 / XOR ≤ 2 '
+    f'read by construction; the passing pictures read 0, so closing it is a 0-px tolerance, a stage-1 device question', '')
+teeth_ok = teeth_ok and t4_in == 0 and t4_big == 0
+
 # ── the per-gating-key table ──────────────────────────────────────────────────────────────────────────────────────
 say('## Every GATING key: today on wave54-final | fakes its rule rejected | fixed pictures it accepted')
 bad = []
@@ -284,11 +316,13 @@ for (script, key), g in sorted(GATING.items(), key=lambda kv: (kv[1]['lane'], kv
         f' | fixed OK {", ".join(g["fixedOk"]) or "—"}' + (f' | fixed WRONG {", ".join(g["fixedWrong"])}' if g['fixedWrong'] else ''))
 say('', f'gating keys {len(GATING)}: able to fail {len(GATING) - len(bad)} (today FAIL on device, or a fake rejected); with a fixed picture accepted '
     f'{sum(1 for g in GATING.values() if g["fixedOk"])}; §T standing rejection set {"HOLDS" if teeth_ok else "FAILS"} '
-    f'({len(t_cov)} / {len(t_gating)} gating + tally keys reject a plausible fake, {len(t_viol)} violation(s); §T3 added-ink holes {len(s_holes)}); '
+    f'({len(t_cov)} / {len(t_gating)} gating + tally keys reject a plausible fake, {len(t_viol)} violation(s); §T3 added-ink holes {len(s_holes)}; '
+    f'§T4 strictly-additive IN-ZONE {t4_in}, > 2-px holes {t4_big}); '
     f'geometry-gate self-test {"HOLDS" if selftest_ok else "FAILS"}')
 for b in bad:
     say(f'  CANNOT FAIL: {b}')
 OUT_TXT = args[args.index('--out') + 1] if '--out' in args else os.path.join(HERE, 'probes-selfcheck.txt')
-open(OUT_TXT, 'w').write('\n'.join(out) + '\n')
+_tmp = OUT_TXT + '.tmp-' + str(os.getpid())                # round 4: atomic — never a half-written record under a reading lane
+open(_tmp, 'w').write('\n'.join(out) + '\n'); os.replace(_tmp, OUT_TXT)
 print('\n'.join(out[-12:]))
 sys.exit(1 if bad or not selftest_ok or not teeth_ok else 0)

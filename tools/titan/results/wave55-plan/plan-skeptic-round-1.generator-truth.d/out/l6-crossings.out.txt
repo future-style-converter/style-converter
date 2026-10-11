@@ -1,0 +1,4 @@
+own crossing counter (l6x.py) over MY 276 may-move documents (medium default honoured), carrier rule android excess >= 20, web/ios within 5:
+docs scanned 276 carriers 25 — the same 25 stems as expectations.json lanes.L6-android-paint-order.captureCarriers U2 (7 flex-abspos-staticpos, 15 grid-abspos-staticpos, 3 gradient-powerless-hue hsl/hwb/lch)
+l6x2.py over the 24 documents missing from mayMove: every one ref == android (0/0, 32/32, 432/0 ...): carriers 0
+teeth: synthetic teal square clean -> 0 crossings; the same square with a 2-px black band across -> 80

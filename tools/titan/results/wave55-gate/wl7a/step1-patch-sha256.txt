@@ -1,0 +1,2 @@
+6a9d7edf795c0b0e34d572e925ff701f0b43e347ae484e3a092d4c931d516251  /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave55-instruments/unit-U2.patch
+0ff38b3b35750ad5577b5f731d301601a99e1a5a605255d553602b0e7d378421  /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave55-instruments/unit-U5.patch

@@ -1,0 +1,22 @@
+components 60 docs 19 own 40 inherited 20 line-break boxes with normal LH 25
+  SAME   css-cascade/all-prop-001.html                                               ios P 0.9641  [('dejavu', 20, 23.2812, 24, 24)] fam=[['monospace']] br=False
+  SAME   css-counter-styles/counter-style-at-rule/disclosure-styles.html             ios f 0.6127  [('inter', 16, 19.3594, 20, 20)] fam=[['system-ui']] br=False
+  SAME   css-tables/anonymous-table-ws-001.html                                      ios P 0.9988  [('dejavu', 16, 18.625, 19, 19)] fam=[['monospace']] br=False
+  MOVES  css-text-decor/text-decoration-dotted-001.html                              ios f 0.5318  [('inter', 92, 111.3164, 112, 111)] fam=[['arial']] br=False
+  MOVES  css-text-decor/text-decoration-dotted-002.html                              ios f 0.5426  [('inter', 92, 111.3164, 112, 111)] fam=[['arial']] br=False
+  MOVES  css-text/boundary-shaping/boundary-shaping-001.html                         ios P 0.9792  [('libertine', 36, 41.04, 42, 41)] fam=[['test']] br=False
+  MOVES  css-text/boundary-shaping/boundary-shaping-002.html                         ios P 0.9695  [('libertine', 36, 41.04, 42, 41)] fam=[['test']] br=False
+  MOVES  css-text/boundary-shaping/boundary-shaping-003.html                         ios P 0.9781  [('libertine', 36, 41.04, 42, 41)] fam=[['test']] br=False
+  MOVES  css-text/boundary-shaping/boundary-shaping-004.html                         ios P 0.9774  [('libertine', 36, 41.04, 42, 41)] fam=[['test']] br=False
+  MOVES  css-text/boundary-shaping/boundary-shaping-005.html                         ios P 0.9774  [('libertine', 36, 41.04, 42, 41)] fam=[['test']] br=False
+  MOVES  css-text/boundary-shaping/boundary-shaping-006.html                         ios P 0.9714  [('libertine', 36, 41.04, 42, 41)] fam=[['test']] br=False
+  MOVES  css-text/boundary-shaping/boundary-shaping-007.html                         ios P 0.9764  [('libertine', 36, 41.04, 42, 41)] fam=[['test']] br=False
+  MOVES  css-text/boundary-shaping/boundary-shaping-008.html                         ios P 0.9789  [('libertine', 36, 41.04, 42, 41)] fam=[['test']] br=False
+  SAME   css-text/boundary-shaping/boundary-shaping-010.html                         ios P 0.965   [('inter', 36, 43.5586, 44, 44)] fam=[['sans-serif']] br=False
+  TARGET css-text/hyphens/hyphenate-character-001.html                               ios P 0.9611  [('dejavu', 16, 18.625, 19, 19)] fam=[['monospace']] br=True
+  TARGET css-text/hyphens/hyphenate-character-002.html                               ios P 0.9534  [('dejavu', 16, 18.625, 19, 19)] fam=[['monospace']] br=True
+  TARGET css-text/hyphens/hyphenate-character-003.html                               ios P 0.957   [('dejavu', 16, 18.625, 19, 19)] fam=[['monospace']] br=True
+  TARGET css-text/hyphens/hyphenate-character-004.html                               ios f 0.9477  [('dejavu', 16, 18.625, 19, 19)] fam=[['monospace']] br=True
+  TARGET css-text/hyphens/hyphens-vertical-001.html                                  ios f 0.8801  [('dejavu', 16, 18.625, 19, 19)] fam=[['monospace']] br=True
+carriers ios 15
+same 4

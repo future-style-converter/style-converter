@@ -1,0 +1,11 @@
+('css-break__borders-003', '1__0-325', '', '', 0)
+('css-break__borders-004', '1__0-328', '', '', 0)
+('css-break__borders-005', '1__0-331', '', '', 0)
+('css-break__borders-008', '1__0-340', '', '', 0)
+('css-masking__clip-path__clip-path-borderBox-1e', 'e__0-006', '', 'clip', 0)
+('css-masking__clip-path__clip-path-contentBox-1e', 'e__1-043', '', 'clip', 1)
+('css-masking__clip-path__clip-path-paddingBox-1e', 'e__1-094', '', 'clip', 0)
+('filter-effects__backdrop-filter-clip-rect-2', '2__1-060', '', '', 0)
+('filter-effects__backdrop-filter-clip-rect-zoom', 'm__2-064', '', '', 2)
+('filter-effects__backdrop-filter-clip-rect', 't__2-073', '', '', 2)
+10

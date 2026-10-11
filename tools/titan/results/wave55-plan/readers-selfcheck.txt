@@ -1,4 +1,4 @@
-# readers-selfcheck.txt — 2026-10-11T19:14:32Z; shared tree HEAD 640276a0; worktree HEAD 640276a0 (detached, throwaway)
+# readers-selfcheck.txt — 2026-10-11T22:22:04Z; shared tree HEAD 611c9f93; worktree HEAD 611c9f93 (detached, throwaway)
 # worktree links: tools/titan/runs -> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs, tools/wpt -> /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/wpt
 
 ## A. plan-build.py in the worktree
@@ -54,7 +54,7 @@
   as required     E1 regenerated with L6 U2 reverted: unionMayMoveCaptures.android empty, the class recorded as withdrawn, drop-L6-U2 withdrawn — exit 0, union may-move 0, withdrawn 240, arms drop-NB-ios,drop-L4-U2, abArmsWithdrawn drop-L6-U2
   as required     E2 with the withdrawal installed, the nudged may-move capture (wpt__CSS2__abspos__static-inside-inline-002) is a LEAK — exit 1
   as required     E3 MUTATION (the withdrawal disabled in the generator): the same nudge reads may-move and HOLDS — exit 0
-  RED as required  E4 a regeneration fed only a newer decision file refuses to drop the installed L6 U2 row (append-only, S3)  (exit 1: AssertionError: decision row dropped: L6-android-paint-order U2 at wave55-pre is in the installed expectations.json but not in ../rsc/rev-l2only.json )
+  RED as required  E4 a regeneration fed only a newer decision file refuses to drop the installed L6 U2 row (append-only, S3)  (exit 1: AssertionError: decision row dropped: L6-android-paint-order U2 at wave55-pre is in the installed expectations.json but not in ../r4rs/rev-l2only.json)
   as required     E5 probes-teeth.py on a JSON whose L2 probe is the pre-round-1 wave-54 rule: red (hollow / corners2 / stripe30 accepted) — exit 1, 49 violation(s)
 
 readers-selfcheck: every check behaved as required

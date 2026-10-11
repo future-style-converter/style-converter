@@ -120,7 +120,7 @@ def crop(im, ln):
     return [[255 - min(px[x, y]) for x in range(w)] for y in range(ln[0] - 3, ln[1] + 4)]
 
 
-INK_TOL = 2     # round 3 (verify M2 sweep): ink-mask XOR per line, px
+INK_TOL = 2     # round 3 (verify M2 sweep): ink-mask XOR per line, px; round 4: summed over the lines, two nested masks (below)
 
 
 def glyph_identity(cap_im, base_im, y0):
@@ -129,28 +129,33 @@ def glyph_identity(cap_im, base_im, y0):
     blob in a line or a glyph painted twice moves it by < 0.01. Each line's INK MASK (255 − min channel > 55, i.e. min < 200)
     must also equal the base line's within INK_TOL px (XOR, same crop): the replays read 0, and iOS / web / the ref render
     the same string on different lines pixel-identically (hyphenate-character-001 / -003 / -004 'tion' and 'iza/-/' twins:
-    XOR 0) — the line-box move is a whole-row translation."""
+    XOR 0) — the line-box move is a whole-row translation.
+    Round 4 (plan-skeptic-round-4.verify.md §2.3 / its fakes4 "any mask"; fix-r4.done.md): a 1-px smear of a glyph over its own
+    antialiased edge darkens edge pixels without changing the min < 200 mask (+3 … +8 core px, XOR 0-2), and 2 px in each of
+    several lines passed a per-line ±2. The XOR now counts BOTH nested masks (u > 55, i.e. min < 200, and u > 155, i.e. min <
+    100: the core) and is SUMMED over the lines against INK_TOL; the replays read 0 on both (fix-r4.measure.out.txt)."""
     la, lb = lines(cap_im, y0), lines(base_im, y0)
     if len(la) != len(lb):
         return 0.0, f'{len(la)} lines vs base {len(lb)} (NB-ios moves line boxes, never breaks or glyphs)'
-    worst, wx, at, ax = 1.0, 0, 1, 1
+    worst, wx, at, ax, tx = 1.0, 0, 1, 1, 0
     for k, (a, b) in enumerate(zip(la, lb)):
         p, q = crop(cap_im, a), crop(base_im, b)
         h = min(len(p), len(q))
         fp = [v for r in p[:h] for v in r]; fq = [v for r in q[:h] for v in r]
         den = (sum(v * v for v in fp) * sum(v * v for v in fq)) ** 0.5
         c = sum(u * v for u, v in zip(fp, fq)) / den if den else 0.0
-        x = sum(1 for u, v in zip(fp, fq) if (u > 55) != (v > 55))
-        x += sum(1 for r in (p[h:] if len(p) > h else q[h:]) for v in r if v > 55)        # rows one crop has and the other lacks
+        x = sum(((u > 55) != (v > 55)) + ((u > 155) != (v > 155)) for u, v in zip(fp, fq))   # round 4: both nested masks
+        x += sum((v > 55) + (v > 155) for r in (p[h:] if len(p) > h else q[h:]) for v in r)     # rows one crop has and the other lacks
         if c < worst:
             worst, at = c, k + 1
         if x > wx:
             wx, ax = x, k + 1
+        tx += x                                       # round 4: summed over the lines
     why = []
     if worst < 0.97:
         why.append(f'line {at} correlation {worst:.3f} with the base\'s line (< 0.97: glyphs moved, not only the line box)')
-    if wx > INK_TOL:
-        why.append(f'ink: line {ax} differs from the base\'s line by {wx} px (> {INK_TOL}: added / lost ink, not a line-box move)')
+    if tx > INK_TOL:
+        why.append(f'ink: the lines differ from the base\'s by {tx} px in all (worst line {ax}: {wx}) (> {INK_TOL}: added / lost ink, not a line-box move)')
     return worst, ('; '.join(why) or None)
 
 

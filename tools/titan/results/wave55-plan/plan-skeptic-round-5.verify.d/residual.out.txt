@@ -1,0 +1,20 @@
+L2 U1-fixed                     abspos-autopos-htb-ltr                               android  diff vs wave54-final  4400 px; outside strict green (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L2 U1-fixed                     abspos-autopos-vlr-ltr                               android  diff vs wave54-final  4400 px; outside strict green (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L2 U1-fixed                     abspos-autopos-vrl-ltr                               android  diff vs wave54-final  4400 px; outside strict green (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L2 U1-fixed                     backdrop-filter-nested-border-radius-clip            android  diff vs wave54-final  5249 px; outside strict green (fixed ∪ base) grown 0/1/2 px: 103 / 0 / 0
+L2 U1-fixed                     backdrop-filter-nested-border-radius-clip-2          android  diff vs wave54-final  5267 px; outside strict green (fixed ∪ base) grown 0/1/2 px: 69 / 0 / 0
+L2 U1-fixed                     backdrop-filter-nested-border-radius-clip-4          android  diff vs wave54-final  3435 px; outside strict green (fixed ∪ base) grown 0/1/2 px: 53 / 0 / 0
+L2 U2-fixed                     backdrop-filter-nested-border-radius-clip-3          android  diff vs wave54-final 10656 px; outside strict green (fixed ∪ base) grown 0/1/2 px: 708 / 573 / 494
+L3 dir-row6-fixed               dir-style-02a                                        android  diff vs wave54-final  2988 px; outside ink (min < 200) (fixed ∪ base) grown 0/1/2 px: 723 / 0 / 0
+L3 bidi-fixed                   bidi-tab-001                                         android  diff vs wave54-final  1048 px; outside blue (fixed ∪ base) grown 0/1/2 px: 587 / 93 / 24
+L3 stack-fixed                  anchor-position-multicol-nested-001                  android  diff vs wave54-final  1000 px; outside green (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L3 001-fixed                    dynamic-offset-rtl-001                               android  diff vs wave54-final   200 px; outside magenta + yellow (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L3 002-fixed                    dynamic-offset-rtl-002                               android  diff vs wave54-final   200 px; outside magenta + yellow (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L3 r2-L3-vrl-rtl-001-fixed      dynamic-offset-vrl-rtl-001                           android  diff vs wave54-final   200 px; outside magenta + yellow (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L6 X-fixed                      flex-abspos-staticpos-align-self-safe-001            android  diff vs wave54-final  1188 px; outside yellow fill + dark band (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L6 X-fixed                      flex-abspos-staticpos-align-self-safe-002            android  diff vs wave54-final  1016 px; outside yellow fill + dark band (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L6 X-fixed                      grid-abspos-staticpos-align-self-001                 android  diff vs wave54-final    86 px; outside teal fill + dark band (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L6 X-fixed                      grid-abspos-staticpos-justify-self-001               android  diff vs wave54-final   130 px; outside teal fill + dark band (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L6 X-fixed                      grid-abspos-staticpos-align-self-vertWM-001          android  diff vs wave54-final   128 px; outside teal fill + dark band (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L6 X-fixed                      grid-abspos-staticpos-align-self-rtl-001             android  diff vs wave54-final   124 px; outside teal fill + dark band (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L6 PO-fixed                     backdrop-filter-clip-rect                            android  diff vs wave54-final   416 px; outside red + blue (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0

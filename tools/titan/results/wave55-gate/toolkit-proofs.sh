@@ -144,15 +144,19 @@ echo; echo "## C. ab-arms55.sh"
 bash $G/ab-arms55.selftest.sh "$S/abst" >/dev/null 2>&1; strc=$?
 grep -E '^  (as required|!! NOT)' $G/ab-arms55.selftest.out.txt | sed 's/^  /     /' | cut -c1-175
 check "C1 ab-arms55.selftest.sh: every check as required, M-L18 / M-per-arm / M-dry RED (record: ab-arms55.selftest.out.txt; exit $strc)" test "$strc" = 0
-printf '# the toolkit-proofs arms: a valid child-first chain (the two wave-55 record commits) and a sha that is not on this branch\ndrop-gaterecs  css-text  web  640276a0 a2a37a8e\ndrop-old       css-text  ios  6e1c2d5e\n' >"$S/arms.wt.txt"
+# Round 4 (fix-r4.done.md): the valid child-first chain is the branch's two NEWEST commits, read at run time — the hard-coded
+# pair (640276a0 a2a37a8e, the two wave-55 record commits) stopped reverse-applying once the plan commit 611c9f93 edited their
+# files on top of them (C2 / C3a went red on HEAD, not on any instrument); reversing HEAD then HEAD~1 always applies on HEAD.
+GR="$(git --no-optional-locks rev-parse --short=8 HEAD) $(git --no-optional-locks rev-parse --short=8 HEAD~1)"
+printf '# the toolkit-proofs arms: a valid child-first chain (the branch'"'"'s two newest commits) and a sha that is not on this branch\ndrop-gaterecs  css-text  web  %s\ndrop-old       css-text  ios  6e1c2d5e\n' "$GR" >"$S/arms.wt.txt"
 wt_state() { { git -C "$SH" for-each-ref; git -C "$SH" stash list; git -C "$WT" rev-parse HEAD; git -C "$WT" status --porcelain --untracked-files=all; shasum -a 256 "$WT/$G/build-hashes.txt"; ls -la "$WT/$G" "$WT/tools/titan/runs" 2>&1 | grep -v ' \.\.$'; } | shasum -a 1 | cut -d' ' -f1; }
 b="$(wt_state)"
 want "C2 --dry-run in the throwaway worktree (detached HEAD) → REFUSED" 2 "detached HEAD: there is no branch to restore to" env AB_ROOT="$WT" bash $G/ab-arms55.sh "$S/arms.wt.txt" --dry-run
-for t in "6e1c2d5e is not an ancestor of HEAD" "revert check: arm drop-gaterecs — the reverse of 640276a0 a2a37a8e applies" "driver --plan | run-id: wave55-ab-drop-gaterecs" "driver --plan | sections (1): css-text"; do
+for t in "6e1c2d5e is not an ancestor of HEAD" "revert check: arm drop-gaterecs — the reverse of $GR applies" "driver --plan | run-id: wave55-ab-drop-gaterecs" "driver --plan | sections (1): css-text"; do
   check "C2 … and it reports: $t" grep -qF -- "$t" "$S/last.out"
 done
 check "C2 … and the worktree, its refs and this repo's refs / stash are byte-identical after it" test "$(wt_state)" = "$b"
-printf 'drop-gaterecs  css-text  web  640276a0 a2a37a8e\n' >"$S/arms.sh.txt"
+printf 'drop-gaterecs  css-text  web  %s\n' "$GR" >"$S/arms.sh.txt"
 sh_state() { { git --no-optional-locks for-each-ref; git --no-optional-locks stash list; git --no-optional-locks rev-parse HEAD; git --no-optional-locks status --porcelain --untracked-files=no; shasum -a 256 "$G/build-hashes.txt"; ls -la "$G/final" tools/titan/runs/wave55-ab-drop-gaterecs 2>&1; } | shasum -a 1 | cut -d' ' -f1; }
 b="$(sh_state)"
 # Plan-skeptic round 3 (fix-r3, S1): the shared tree carries the wave's UNCOMMITTED plan records (tracked edits under

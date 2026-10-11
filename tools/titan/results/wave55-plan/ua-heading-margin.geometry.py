@@ -50,19 +50,22 @@
 # of line 1's last glyph passes (probes-teeth.py names it: a known in-tolerance blind spot, PLAN §9 D33).
 # The ref rows must print OK (exit 1 otherwise).
 #
-# Usage: python3 ua-heading-margin.geometry.py [run-id=wave54-final] [--base <run>] [--arm TAG]
+# Usage: python3 ua-heading-margin.geometry.py [run-id=wave54-final] [--base <run>] [--arm TAG] [--face-run <run>]
 #   --arm TAG reads the NATIVE captures of 005/006/014/011 from ./ua-heading-margin-replay/<test>-<plat>-<TAG>.png
 #   (the replay / fake pictures; a missing arm file prints MISSING) — the self-test of the rules.
 import os
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'wave53-plan'))
 from geometry_common import paths, load, dark, bands  # noqa: E402
+import numpy as np  # noqa: E402  (round 4: the `face xor:` masks)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 args = sys.argv[1:]
 arm = args[args.index('--arm') + 1] if '--arm' in args else None
 base_run = args[args.index('--base') + 1] if '--base' in args else 'wave54-final'     # round 2: the crop / base-band source
-run = next((a for i, a in enumerate(args) if not a.startswith('--') and (i == 0 or args[i - 1] not in ('--arm', '--base'))), 'wave54-final')
+FACE_RUN_DEFAULT = None    # round 4 (D39): None = the frozen ref is the face reference; the stage-1 step-8 edit sets 'wave55-pre'
+FACE_RUN = args[args.index('--face-run') + 1] if '--face-run' in args else FACE_RUN_DEFAULT     # round 4: `face xor:` reference run
+run = next((a for i, a in enumerate(args) if not a.startswith('--') and (i == 0 or args[i - 1] not in ('--arm', '--base', '--face-run'))), 'wave54-final')
 ref_failed = False
 CROP_MIN, PROF_MIN, PROF_SPAN = 0.97, 0.95, 12           # round 2 (M4): measured — fixed 1.000 / ≥ 0.999, fakes ≤ 0.646 / ≤ 0.844
 # Round 3 (plan-skeptic-round-3.verify.md M2 sweep; fix-r3.done.md): ADDED ink — a 2×2 / 3×3 blob in a heading band, one glyph
@@ -74,9 +77,28 @@ CROP_MIN, PROF_MIN, PROF_SPAN = 0.97, 0.95, 12           # round 2 (M4): measure
 #           connected glyph components (over the ref's line-1 columns on the Compose no-wrap rows) and its dark px within
 #           ±FACE_INK_TOL % of the ref's. The C arms are the ref's own pixels (0 / 0 %), web reads 0 / ≤ 1 %; no device face
 #           exists yet, so FACE_INK_TOL is re-set at stage 1 from the device faces exactly as X1_TOL is (PLAN §7 L4 decision,
-#           D33): max |Δ %| + 2, never widened to pass a fake of probes-teeth-r3.py. Residual (named): a blob touching a glyph
-#           inside a face-present band adds no component and < FACE_INK_TOL % of dark px.
-INK_TOL, FACE_INK_TOL = 2, 6
+#           D33): max |Δ %| + 2, never widened to pass a fake of probes-teeth-r3.py.
+# Round 4 (plan-skeptic-round-4.verify.md M1; fix-r4.done.md): ADDED ink still passed 10 face-present native keys — FACE_INK_TOL
+# 6 % is ±~100 dark px per band and a copy that touches the glyphs adds no component ("brownn" +158 px, the whole heading
+# copied 1 px down +75 … +126, "fox" copied 5 px right +335), and the Compose no-wrap rows never read the ink below band 1.
+# One read closes it (natives only; the web rows are controls and keep the round-3 reads):
+#   `face xor:` every face-present heading band's ink (two nested masks: min channel < 200, RGB sum < 300) equals the FACE
+#           REFERENCE's band translated by the best whole px within the band rule's own tolerances (dx ±X0_TOL, dy ±TOP_TOL),
+#           XOR ≤ FACE_XOR_TOL over the band's rows ±2 across the WHOLE width (so ink beside the heading counts too); the
+#           today's-face / 011 `ink:` of round 3 reads the same two masks, summed over the bands. The Compose no-wrap rows read every band
+#           when the picture wraps like the ref (the C arm), and when it does not (the D arm) band 1 left of the ref's line-1
+#           right edge + X0_TOL + 1 against the ref's band 1 and the ink right of it against the ref's LINE 2 ("fox") moved
+#           there (best whole-px offset of the two ink boxes ±2, clipped at the canvas). Measured (fix-r4.measure.out.txt §1):
+#           the C / D arms read 0 on every band (the U1 arm's `ink:` 0); web (not judged) reads 1 … 101 per band, Chromium vs
+#           the harness's own underline; every IN-ZONE fake of the round-4 verifier's sweep is rejected (probes-selfcheck.txt
+#           §T4). The FACE REFERENCE is the frozen ref (Chromium's 2em face: the only one that exists) unless
+#           FACE_RUN names a run (`--face-run <run>`, or FACE_RUN_DEFAULT): then it is that run's SAME-platform capture — the
+#           stage-1 edit (PLAN §7 stage-1 step 8, D39) pins FACE_RUN = 'wave55-pre' once the device face is decided, because a
+#           device face sits 1768-2510 px level-XOR / −14 … +9 % dark px from Chromium's (the inset-001…004 anchors the natives
+#           already paint, fix-r4.measure.out.txt §2), so a ref tolerance re-set to it would re-open added ink up to that
+#           distance. FACE_XOR_TOL is never widened
+#           to pass a fake of probes-teeth-r4.py.
+INK_TOL, FACE_INK_TOL, FACE_XOR_TOL = 2, 6, 2         # FACE_RUN: FACE_RUN_DEFAULT / --face-run, parsed with the arguments above
 
 # wave54-final native heading bands, scanned from y96 (== wave54-open: the opening gate measured every capture identical).
 BASE_BANDS = {'text-decoration-inset-005': {'ios': [(109, 130, 16, 191)], 'android': [(107, 131, 17, 191)]},
@@ -136,20 +158,28 @@ def crop_check(px, w, h, bpx, bw, bh, b, base_b, margin):
             return f'crop: band {k + 1} outside the canvas'
         p_, q_ = ink_rows(px, w, ya + margin, yb + margin), ink_rows(bpx, bw, ya, yb)
         cs.append(cos(p_, q_))
-        xs.append(sum(1 for u, v in zip(p_, q_) if (u > 55) != (v > 55)))     # round 3: ink-mask XOR (min channel < 200)
+        # round 3: ink-mask XOR (min channel < 200); round 4: + the core mask (sum < 300) — a 1-px smear that only darkens a
+        # glyph's antialiased edge (+3 … +6 core px, min-mask XOR ≤ 2) — and summed over the bands (2 px per band passed)
+        pl, ql = level_rows(px, w, ya + margin, yb + margin), level_rows(bpx, bw, ya, yb)
+        xs.append(sum(abs(u - v) for u, v in zip(pl, ql)))
     CROP_SEEN.append(min(cs) if cs else 0.0)
-    XOR_SEEN.append(max(xs) if xs else 0)
+    XOR_SEEN.append(sum(xs) if xs else 0)
     for k, c in enumerate(cs):
         if c < CROP_MIN:
             return f'crop: band {k + 1} ink {c:.3f} vs {base_run} + {margin} px (want ≥ {CROP_MIN}: the glyphs changed, not only the block position)'
-    for k, x in enumerate(xs):
-        if x > INK_TOL:
-            return f'ink: band {k + 1} differs from {base_run} + {margin} px by {x} px (> {INK_TOL}: added / lost ink — the margin only translates)'
+    if sum(xs) > INK_TOL:
+        k = max(range(len(xs)), key=lambda i: xs[i])
+        return f'ink: the bands differ from {base_run} + {margin} px by {sum(xs)} px in all (worst band {k + 1}: {xs[k]}) (> {INK_TOL}: added / lost ink — the margin only translates)'
     return None
 
 
+def level_rows(px, w, y0, y1):
+    """Round 4: the ink LEVEL (min channel < 200) + (RGB sum < 300) of rows [y0, y1) across the width, flattened."""
+    return [(min(px[x, y]) < 200) + (sum(px[x, y]) < 300) for y in range(y0, y1) for x in range(w)]
+
+
 CROP_SEEN = []          # the last crop read's minimum correlation (printed on the line)
-XOR_SEEN = []           # round 3: the last crop read's largest ink-mask XOR (printed on the line)
+XOR_SEEN = []           # round 3: the last crop read's ink-mask XOR (printed on the line; round 4: both masks, summed over the bands)
 
 
 def col_profile(px, w, top, bot, x_hi=None):
@@ -204,6 +234,60 @@ def face_ink(px, b, rpx, rb, x_hi=None):
 
 
 FACE_SEEN = []          # round 3: (band, components, ref components, dark-px Δ %) of the last face-ink read
+XOR_FACE_SEEN = []      # round 4: the per-band `face xor:` counts of the last read (printed on the line: stage 1 reads them)
+
+
+def dark_np(im):
+    """The ink LEVEL of a whole picture as an int array [y, x]: (min channel < 200) + (RGB sum < 300 — geometry_common.dark).
+    Two nested masks, so an antialiased pixel added or darkened to a core pixel counts (the XOR of both masks)."""
+    a = np.asarray(im, dtype=np.int16)
+    return (a.min(axis=2) < 200).astype(np.int16) + (a.sum(axis=2) < 300).astype(np.int16)
+
+
+def moved(m, dx, dy):
+    """Mask m translated by (dx, dy), blank-filled (pixels leaving the canvas are dropped: the Compose clip at x390)."""
+    h, w = m.shape; o = np.zeros_like(m)
+    o[max(0, dy):min(h, h + dy), max(0, dx):min(w, w + dx)] = m[max(0, -dy):min(h, h - dy), max(0, -dx):min(w, w - dx)]
+    return o
+
+
+def rows_of(m, t, bt):
+    """m with every row outside [t, bt] blanked (one band of the reference)."""
+    o = np.zeros_like(m); o[t:bt + 1] = m[t:bt + 1]; return o
+
+
+def best_xor(cm, pred, y0, y1, x0, x1, shifts):
+    """min over (dx, dy) in shifts of Σ |cm − pred moved| (the XOR of both nested ink masks) inside rows [y0, y1) × [x0, x1)."""
+    return min(int(np.abs(cm[y0:y1, x0:x1] - moved(pred, dx, dy)[y0:y1, x0:x1]).sum()) for dx, dy in shifts)
+
+
+def face_xor(cm, b, fm, fb, nowrap_rx1=None):
+    """None, or why a face-present heading band's dark ink is not the face reference's (round 4): per band, XOR ≤ FACE_XOR_TOL
+    at the best whole-px shift (dx ±X0_TOL, dy ±TOP_TOL) over the band's rows ±2 and the whole width. nowrap_rx1 (a Compose
+    no-wrap picture: one band where the reference wraps): band 1 left of rx1 + X0_TOL + 1 against the reference's band 1, the
+    ink right of it against the reference's LAST line moved there ("fox" stays on line 1, clipped at the canvas)."""
+    XOR_FACE_SEEN.clear()
+    h, w = cm.shape
+    near = [(dx, dy) for dx in range(-X0_TOL, X0_TOL + 1) for dy in range(-TOP_TOL, TOP_TOL + 1)]
+    for k, ((t, bt, _, _), (rt, rbt, _, _)) in enumerate(zip(b, fb)):
+        # the band's rows ±2 on both sides: the antialiased rows of the min-channel mask lie outside the dark band's rows
+        y0, y1 = max(0, min(t, rt) - 2), min(h, max(bt, rbt) + 3)
+        if nowrap_rx1 is None:
+            n = best_xor(cm, rows_of(fm, rt - 2, rbt + 2), y0, y1, 0, w, near)
+        else:
+            split = nowrap_rx1 + X0_TOL + 1
+            n = best_xor(cm, rows_of(fm, rt - 2, rbt + 2), y0, y1, 0, split, near)
+            ys, xs = np.nonzero(cm[y0:y1, split:])
+            if len(xs):                                    # the no-wrap run right of line 1: the reference's last line moved here
+                lt, lb = fb[-1][0], fb[-1][1]
+                fys, fxs = np.nonzero(fm[lt - 2:lb + 3]); fys = fys - 2
+                ox, oy = split + int(xs.min()) - int(fxs.min()), y0 + int(ys.min()) - (lt + int(fys.min()))
+                n += best_xor(cm, rows_of(fm, lt - 2, lb + 2), y0, y1, split, w, [(ox + a, oy + c) for a in (-2, -1, 0, 1, 2) for c in (-2, -1, 0, 1, 2)])
+        XOR_FACE_SEEN.append(n)
+        if n > FACE_XOR_TOL:
+            return (f'face xor: band {k + 1} ink differs from the face reference ({FACE_RUN or "ref"}) by {n} px at its best whole-px shift '
+                    f'(> {FACE_XOR_TOL}: added / doubled / lost ink — the face and the margin move glyphs, they add none)')
+    return None
 
 
 def native_path(test, label, default):
@@ -307,7 +391,7 @@ def emit(key, label, b, why, extra=''):
 # [M] and [F] — the four target documents.
 for test in ('text-decoration-inset-005', 'text-decoration-inset-006', 'text-decoration-inset-014', 'text-decoration-inset-011'):
     y0 = 112 if test.endswith('011') else 96
-    rb = rprof = rpx = None
+    rb = rprof = rpx = rim = None
     base_paths = dict(paths(base_run, 'css-text-decor', test))
     for label, p in paths(run, 'css-text-decor', test):
         im, px = load(native_path(test, label, p))
@@ -317,7 +401,7 @@ for test in ('text-decoration-inset-005', 'text-decoration-inset-006', 'text-dec
         w, h = im.size
         b = bands(px, 0, w, y0 if label in ('ios', 'android') or not test.endswith('011') else 96, min(h, 400), dark, gap=2)
         if label == 'ref':
-            rb, rpx = b, px                    # round 3: the ref's pixels (face ink)
+            rb, rpx, rim = b, px, im           # round 3: the ref's pixels (face ink); round 4: its image (face xor)
         crop = None
         if label in ('ios', 'android'):
             # round 2: the base capture's own bands and pixels (today's face: the margin translates them, nothing else)
@@ -346,9 +430,24 @@ for test in ('text-decoration-inset-005', 'text-decoration-inset-006', 'text-dec
             if label != 'ref' and (len(b) == len(rb) or x_hi is not None):
                 FACE_SEEN.clear()
                 # round 3: the face-present heading's ink against the ref's (components, dark px); the no-wrap rows read band 1
-                fi = face_ink(px, b[:1] if x_hi is not None else b, rpx, rb[:1] if x_hi is not None else rb, x_hi)
+                # round 4 (M1 a): ... unless the picture wraps like the ref (the C arm) — then every band, full width
+                wraps = len(b) == len(rb)
+                fi = face_ink(px, b if wraps else b[:1], rpx, rb if wraps else rb[:1], None if wraps else x_hi)
                 prof_why = prof_why or fi
                 extra += ' ink ' + ','.join(f'b{k}:{n}/{rn}c{dd:+.1f}%' for k, n, rn, dd in FACE_SEEN)
+                if label in ('ios', 'android') and (b[0][1] - b[0][0] + 1 >= FACE_MIN[test]):
+                    # round 4 (M1): the face-present native heading's dark ink = the face reference's band(s), XOR ≤ FACE_XOR_TOL
+                    if FACE_RUN:
+                        # the decided device face (stage 1 on): the SAME platform's capture in FACE_RUN, band for band (a Compose
+                        # no-wrap face is compared with its own no-wrap face: no split)
+                        fim, _ = load(dict(paths(FACE_RUN, 'css-text-decor', test))[label])
+                        fbands = bands(fim.load(), 0, fim.size[0], 96, min(fim.size[1], 400), dark, gap=2) if fim is not None else []
+                        fx = (f'face xor: face reference {FACE_RUN} {label}: capture missing or {len(fbands)} band(s) vs {len(b)}'
+                              if fim is None or len(fbands) != len(b) else face_xor(dark_np(im), b, dark_np(fim), fbands))
+                    else:
+                        fx = face_xor(dark_np(im), b if wraps else b[:1], dark_np(rim), rb, None if wraps else rb[0][3])
+                    prof_why = prof_why or fx
+                    extra += ' xor ' + ','.join(f'b{k + 1}:{n}' for k, n in enumerate(XOR_FACE_SEEN))
         CROP_SEEN.clear(); XOR_SEEN.clear()
         why_m = verdict_margin(test, label, b, rb, prof_why, crop)
         face = label in ('ref', 'web') or (b and b[0][1] - b[0][0] + 1 >= FACE_MIN[test])

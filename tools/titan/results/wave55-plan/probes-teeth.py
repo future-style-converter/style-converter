@@ -20,6 +20,9 @@
 # Plan-skeptic round 3 (verify M2): a fifth class, ADDED INK (the target painted twice, a glyph doubled, stray ink in the band),
 # passed the three L3 dir-style-02a row keys. probes-teeth-r3.py holds those cases (builders in
 # plan-skeptic-round-3.fakes/added_ink.py) and run_all() appends them after round 2's.
+# Plan-skeptic round 4 (verify M1-M4): STRICTLY-additive ink (nothing moved or erased) still passed 17 gating keys of L4 / L5 / L6
+# inside their own read zones. probes-teeth-r4.py pins every such variant (builders: plan-skeptic-round-4.fakes/added_ink4.py,
+# the verifier's own) and run_all() appends them after round 3's.
 import json, os, shutil, subprocess
 import numpy as np
 from PIL import Image
@@ -424,6 +427,8 @@ def run_all(scratch, exp_path, py, say, lanes=None, fixed_ok=None):
     r2 = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(r2)
     _spec3 = importlib.util.spec_from_file_location('probes_teeth_r3', os.path.join(HERE, 'probes-teeth-r3.py'))   # round 3 (M2)
     r3 = importlib.util.module_from_spec(_spec3); _spec3.loader.exec_module(r3)
+    _spec4 = importlib.util.spec_from_file_location('probes_teeth_r4', os.path.join(HERE, 'probes-teeth-r4.py'))   # round 4 (M1-M4)
+    r4 = importlib.util.module_from_spec(_spec4); _spec4.loader.exec_module(r4)
     pt = _self()
     # Round 2 (M6): every pictureCorrectTally key (gating or not) must reject at least one plausible fake too.
     key_lane = {(os.path.basename(next(t for t in pr['cmd'].split() if t.endswith('.py'))), k): lid.split('-')[0]
@@ -431,7 +436,7 @@ def run_all(scratch, exp_path, py, say, lanes=None, fixed_ok=None):
     tally = {tuple(k.split(' ', 1)) for part in ('full', 'part', 'paintOrderOnly') for e in exp.get('pictureCorrectTally', {}).get(part, [])
              for k in e['keys']}
     gating = gating | {k for k in tally if not lanes or key_lane.get(k) in lanes}
-    for lane, secs, fid, repl, want in [c for L, b in builders.items() if not lanes or L in lanes for c in b() + r2.cases(pt, L) + r3.cases(pt, L)]:
+    for lane, secs, fid, repl, want in [c for L, b in builders.items() if not lanes or L in lanes for c in b() + r2.cases(pt, L) + r3.cases(pt, L) + r4.cases(pt, L)]:
         n += 1
         rid = make_run(scratch, f'{lane}-{fid}', repl)
         rc, rows = gate(rid, lane, secs, exp_path, py, os.path.join(scratch, f'gate-{lane}-{fid}.json'))

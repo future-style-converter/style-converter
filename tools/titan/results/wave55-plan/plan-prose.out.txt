@@ -1,8 +1,8 @@
-# plan-prose.selfcheck — 2026-10-11T18:52:57Z; HEAD 640276a0; scratch copies only
-installed before: PLAN.md e302eeb867c78fe5 · expectations.json 490dc5b9a8b33ef3 · cells-wave54-final.json c9c148e7727f7137 · landing-manifest.json f6716e2f80f112dd
+# plan-prose.selfcheck — 2026-10-11T22:20:14Z; HEAD 611c9f93; scratch copies only
+installed before: PLAN.md 35639d61a07fdfa8 · expectations.json 980542d01c175500 · cells-wave54-final.json c9c148e7727f7137 · landing-manifest.json f6716e2f80f112dd
 
 ## G0 the installed PLAN.md (must HOLD)
-plan-prose --check tools/titan/results/wave55-plan/PLAN.md against expectations.json sha256 490dc5b9a8b33ef3…: 36 gen blocks · 39 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
+plan-prose --check tools/titan/results/wave55-plan/PLAN.md against expectations.json sha256 980542d01c175500…: 36 gen blocks · 41 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
 plan-prose --check: HOLDS
 exit 0
 
@@ -32,8 +32,8 @@ plan-build --go-small exit 0
 RED as required  M11 the GO-SMALL JSON (L4 U2-android held) against the GO plan  (exit 1: RED  4. landing-order lists L4-ua-heading-margin U2-android, which is not a revert unit of expectations.json)
 
 ## G1 restore: the installed files are untouched and still HOLD
-installed after:  PLAN.md e302eeb867c78fe5 · expectations.json 490dc5b9a8b33ef3 · cells-wave54-final.json c9c148e7727f7137 · landing-manifest.json f6716e2f80f112dd
-plan-prose --check tools/titan/results/wave55-plan/PLAN.md against expectations.json sha256 490dc5b9a8b33ef3…: 36 gen blocks · 39 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
+installed after:  PLAN.md 35639d61a07fdfa8 · expectations.json 980542d01c175500 · cells-wave54-final.json c9c148e7727f7137 · landing-manifest.json f6716e2f80f112dd
+plan-prose --check tools/titan/results/wave55-plan/PLAN.md against expectations.json sha256 980542d01c175500…: 36 gen blocks · 41 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
 plan-prose --check: HOLDS
 exit 0
 
