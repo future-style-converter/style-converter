@@ -12,8 +12,11 @@
 #      patch editing a seam file; manifest drift; an ORDER violation; the --check mutation guard (exit 70); a busy tree
 #   C  stacked series (L4 four units + L2 pair): alone-fails-but-cumulative-applies, C12 revert dry-runs OK, 7 commits
 #      in order; then a fake L2 seam inside L4's context turns the L4 revert dry-run red
-#   D  L7: an optional unit with no patch needs its planning files tracked; a loose copy blocks a delivered patch; the
-#      records commit force-adds the six gitignored wave-54 out/ files
+#   D  L7 against the CURRENT HEAD (U1's / U3's planning files tracked since a2a37a8e / 611c9f93, so the real lane delivers
+#      U3 as a patch that MODIFIES them): an optional unit with no patch is clean when its files are tracked, red when one
+#      is untracked (a scratch copy of the script names a loose file), warned when one differs on disk; a creation patch
+#      over a tracked file is refused (on disk, and absent from disk); U3 as a modifying patch lands records → U2 → U3 with
+#      the manifest's subjects, seqs, note and forceAdd list (the six gitignored wave-54 out/ files)
 #   E  (plan-skeptic round 1, process-holes M3; --check only) a limit-killed lane never lands: no STATUS, STATUS: PARTIAL, no
 #      TREES: line, a patch whose sha256 differs from the note's, a stale patch the note does not name — each red
 #   F  (round 1, M1; --check only) SeamReachabilityTest.kt's three writers (L4 seams 1 → 3, L3 seam 1 → unit-U2, L5 seam 4),
@@ -57,6 +60,7 @@ mkpatch() { # <out.patch> <relpath> <anchor-substring | NEW> <line(s) to insert 
 import sys
 a, b, anc, txt = sys.argv[1:5]; L = open(a).read().split('\n')
 i = next(k for k, l in enumerate(L) if anc in l); L[i+1:i+1] = txt.split('\n'); open(b, 'w').write('\n'.join(L))
+import shutil; shutil.copymode(a, b)   # the cut keeps the file's mode (section D edits two 100755 runners)
 PY
     (cd "$d" && git diff --no-index --no-prefix --full-index "a/$rel" "b/$rel") >> "$out"; fi
   mkdir -p "$MODEL/$(dirname "$rel")"; cp "$d/b/$rel" "$MODEL/$rel"; rm -rf "$d"; }
@@ -83,6 +87,7 @@ enum NormalLineBox {}"
 
 echo "land-units.selftest.sh — $(date -u '+%Y-%m-%d %H:%M:%S UTC') — shared tree $SHARED at $(git -C "$SHARED" rev-parse --short HEAD) (never touched)"
 echo "script under test: $LU (sha256 $(shasum -a 256 "$LU" | cut -c1-16)…)"
+echo "sha256 (full): land-units.sh $(shasum -a 256 "$LU" | cut -c1-64) · land-units.selftest.sh $(shasum -a 256 "$HERE/land-units.selftest.sh" | cut -c1-64) · landing-manifest.json $(shasum -a 256 "$HERE/landing-manifest.json" | cut -c1-64) · HEAD $(git -C "$SHARED" rev-parse HEAD)"   # verify-r4 N1: the record cites its own script too
 SHARED_BEFORE="$S/shared.before"; snap "$SHARED" "$SHARED_BEFORE"
 
 want_sec A && {
@@ -307,30 +312,85 @@ rmwt "$WC"
 
 want_sec D && {
 # ═══ D ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
-echo; echo "═══ D: L7 — optional units (U1 / U3 written at planning) and the records commit's six force-added wave-54 files"
+# Re-premised on the current HEAD (land-units fix, after 55dd4cd9): L7 U1's planning copy is tracked since a2a37a8e and U3's
+# runner (wave55-gate/ab-arms55.{sh,selftest.sh,selftest.out.txt}) since 611c9f93, so the real lane delivers U3 as a patch that
+# MODIFIES those tracked files (wave55-instruments/unit-U3.patch). The old premise (U3's files UNTRACKED) is simulated where a
+# guard needs it: a scratch copy of land-units.sh names one extra, loose, untracked file in its OPTIONAL-files row.
+echo; echo "═══ D: L7 — optional units against HEAD (U1 / U3's planning files tracked), a creation patch over a tracked file, and the records commit's six force-added wave-54 files"
 WD="$(mkwt wt-D)"; BASED="$(git -C "$WD" rev-parse HEAD)"; L7d="$WD/$R/wave55-instruments"; mkdir -p "$L7d"
-HOLD7="L7:U4,L7:U6-compose,L7:U6-swift,L7:U6-web,L7:U6-tooling,L7:U5"; AB="$R/wave55-gate/ab-arms55"
-while IFS= read -r f; do mkdir -p "$WD/$(dirname "$f")"; cp "$SHARED/$f" "$WD/$f"; done < <(sed -n '/^FORCE_ADD="/,/"$/p' "$LU" | sed 's/^FORCE_ADD="//; s/"$//')
-model_init D "$WD"
+HOLD7="L7:U4,L7:U6-compose,L7:U6-swift,L7:U6-web,L7:U6-tooling,L7:U5"; AB="$R/wave55-gate/ab-arms55"; ABX=".sh .selftest.sh .selftest.out.txt"
+MAN="$HERE/landing-manifest.json"    # the manifest's expectations: subjects, seqs, forceAdd, trackedAtHeadIfNoPatch
+mq() { node -e 'const m=require(process.argv[1]); const f=new Function("m","return ("+process.argv[2]+")"); const v=f(m); console.log(Array.isArray(v)?v.join("\n"):v)' "$MAN" "$1"; }
+mq 'm.records.forceAdd' > "$S/D.force"; while IFS= read -r f; do mkdir -p "$WD/$(dirname "$f")"; cp "$SHARED/$f" "$WD/$f"; done < "$S/D.force"
+model_init D "$WD" "$AB.sh" "$AB.selftest.sh" "$AB.selftest.out.txt"      # HEAD's bytes of U3's three tracked files
 mkpatch "$L7d/unit-U2.patch" "tools/titan/wire-differential.sh" NEW "# SYNTHETIC (L7 U2) — never shipped"
-note "$L7d" "U2 U3"; backdate "$L7d"
-bash "$LU" --check --only L7 --hold "$HOLD7" --root "$WD" > "$S/D1.txt" 2>&1; rc=$?; rc_is 1 "$rc" "D1 L7 U3 with no patch while its planning files are untracked: --check goes red"
-has "$S/D1.txt" "L7:U3 delivered no patch and $AB.sh is NOT tracked at HEAD" "D2 …naming each untracked file"
+note "$L7d" "U2"; backdate "$L7d"
+# D1-D3: an optional unit with no patch whose files ARE tracked at HEAD is clean (the real L7 U1; U3 when undelivered)
+bash "$LU" --check --only L7 --hold "$HOLD7" --root "$WD" > "$S/D1.txt" 2>&1; rc=$?; rc_is 0 "$rc" "D1 L7 U1 and U3 with no patch, their planning files tracked at HEAD: --check clean"
+n=0; for x in $ABX; do grep -qF "ok      L7:U3 (optional, no patch): $AB$x tracked at HEAD" "$S/D1.txt" && n=$((n+1)); done
+[[ "$n" == 3 && "$(mq 'm.units.find(u=>u.lane==="L7"&&u.unit==="U3").trackedAtHeadIfNoPatch.length')" == 3 ]] && ok "D2 …each of U3's three manifest files (trackedAtHeadIfNoPatch) read 'tracked at HEAD'" || bad "D2 U3 tracked lines: $n of 3"
 has "$S/D1.txt" "L7:U1 (optional, no patch): tools/titan/results/wave55-plan/flex-zero-gap-rules.geometry.py tracked at HEAD" "D3 L7 U1 with no patch passes: its copy is tracked since a2a37a8e"
-for x in .sh .selftest.sh .selftest.out.txt; do mkpatch_copy "$L7d/unit-U3.patch" "$AB$x" "$SHARED/$AB$x"; done; note "$L7d" "U2 U3"; backdate "$L7d"
-cp "$SHARED/$AB.sh" "$WD/$AB.sh"     # a loose copy beside the delivered patch
-bash "$LU" --check --only L7 --hold "$HOLD7" --root "$WD" > "$S/D4.txt" 2>&1; rc=$?; rc_is 1 "$rc" "D4 a delivered unit-U3.patch with a loose untracked copy on disk: red"
-has "$S/D4.txt" "$AB.sh exists on disk, but its first patch CREATES it" "D5 …naming the loose copy"
-rm -f "$WD/$AB.sh"
-bash "$LU" --check --only L7 --hold "$HOLD7" --root "$WD" > "$S/D6.txt" 2>&1; rc=$?; rc_is 0 "$rc" "D6 U3 delivered as a patch (no loose copy): clean"
-bash "$LU" --only L7 --hold "$HOLD7" --root "$WD" > "$S/D7.txt" 2>&1; rc=$?; rc_is 0 "$rc" "D7 the real path lands L7 (records, U2, U3)"
-git -C "$WD" log --reverse --format=%s "$BASED..HEAD" | cut -d: -f1 | tr '\n' '|' > "$S/D7.order"
-[[ "$(cat "$S/D7.order")" == "wave55 lane records|wave55 L7 U2|wave55 L7 U3|" ]] && ok "D8 three commits in order: records, L7 U2, L7 U3" || bad "D8 order: $(cat "$S/D7.order")"
-fa=0; while IFS= read -r f; do git -C "$WD" cat-file -e "HEAD:$f" 2>/dev/null && fa=$((fa+1)); done < <(sed -n '/^FORCE_ADD="/,/"$/p' "$LU" | sed 's/^FORCE_ADD="//; s/"$//')
-[[ "$fa" == 6 ]] && git -C "$WD" show --name-only --format= HEAD~2 | grep -q "wave54-oof-layout/fix/dry/h1h2/out/expectations.json" && ok "D9 the records commit force-added the six gitignored wave-54 out/ files (instruments.md:300)" || bad "D9 force-add: $fa of 6 tracked"
-same=1; for x in .sh .selftest.sh .selftest.out.txt; do git -C "$WD" show "HEAD:$AB$x" | cmp -s - "$SHARED/$AB$x" || same=0; done
-(( same )) && ok "D10 the U3 commit carries the runner byte-equal to the toolkit stage's files" || bad "D10 U3 bytes"
-[[ -z "$(git -C "$WD" --no-optional-locks status --short --untracked-files=all)" ]] && ok "D11 the throwaway is clean after landing" || { bad "D11 not clean"; git -C "$WD" status --short | head; }
+# D4-D5: the guard can fail — a scratch copy of the script whose OPTIONAL-files row also names a loose, UNTRACKED file
+CD="$S/lu-copy-D"; rm -rf "$CD"; mkdir -p "$CD"; cp "$LU" "$HERE/expectations.json" "$CD/"; UNTR="$R/wave55-gate/ab-arms55.SYNTHETIC-untracked.txt"
+python3 -I - "$CD/land-units.sh" "$UNTR" <<'PY'
+import sys
+p, extra = sys.argv[1:3]; s = open(p).read()
+a = "L7:U3 | tools/titan/results/wave55-gate/ab-arms55.sh tools/titan/results/wave55-gate/ab-arms55.selftest.sh tools/titan/results/wave55-gate/ab-arms55.selftest.out.txt\n"
+assert s.count(a) == 1; open(p, 'w').write(s.replace(a, a[:-1] + ' ' + extra + '\n', 1))
+PY
+bash "$CD/land-units.sh" --emit-manifest > "$S/D4.emit.txt" 2>&1     # the copy's own manifest, written beside the copy (scratch)
+printf 'SYNTHETIC loose planning file (land-units D4) — never shipped\n' > "$WD/$UNTR"
+bash "$CD/land-units.sh" --check --only L7 --hold "$HOLD7" --root "$WD" > "$S/D4.txt" 2>&1; rc=$?; rc_is 1 "$rc" "D4 L7 U3 with no patch while one of its planning files is UNTRACKED: --check goes red"
+has "$S/D4.txt" "L7:U3 delivered no patch and $UNTR is NOT tracked at HEAD" "D5 …naming the untracked file (the three tracked ones still read ok: $(grep -c "ok      L7:U3 (optional, no patch): " "$S/D4.txt"))"
+rm -f "$WD/$UNTR"
+# D6-D7: a tracked optional file that differs on disk (a re-execution not delivered) is a WARNING, not silence
+cp "$WD/$AB.sh" "$S/D.ab.aside"; printf '# SYNTHETIC re-execution not delivered (land-units D6)\n' >> "$WD/$AB.sh"
+bash "$LU" --check --only L7 --hold "$HOLD7" --root "$WD" > "$S/D6.txt" 2>&1; rc=$?; rc_is 0 "$rc" "D6 L7 U3 with no patch whose tracked $AB.sh differs on disk: --check still exits 0 (a warning)"
+has "$S/D6.txt" "WARN    L7:U3 delivered no patch but $AB.sh differs from HEAD on disk" "D7 …and warns, naming the file"
+cp "$S/D.ab.aside" "$WD/$AB.sh"                                        # restore by copy (no git command; the mode is kept)
+# D8-D11: a unit-U3.patch that CREATES files which are tracked at HEAD — the refusals the tool prints
+: > "$S/D.create.patch"; for x in $ABX; do mkpatch_copy "$S/D.create.patch" "$AB$x" "$MODEL/$AB$x"; done; cp "$S/D.create.patch" "$L7d/unit-U3.patch"
+note "$L7d" "U2 U3"; backdate "$L7d"
+bash "$LU" --check --only L7 --hold "$HOLD7" --root "$WD" > "$S/D8.txt" 2>&1; rc=$?; rc_is 1 "$rc" "D8 a delivered unit-U3.patch that CREATES U3's three files, tracked at HEAD and on disk: red"
+n=0; for x in $ABX; do grep -qF "$AB$x exists on disk, but its first patch CREATES it" "$S/D8.txt" && n=$((n+1)); done
+[[ "$n" == 3 ]] && ok "D9 …each of the three named: 'exists on disk, but its first patch CREATES it'" || bad "D9 creation refusals: $n of 3"
+mv "$WD/$AB.sh" "$S/D.ab.moved"                                         # the tracked file absent from disk (no git command)
+snap "$WD" "$S/D10.before"
+bash "$LU" --check --only L7 --hold "$HOLD7" --root "$WD" > "$S/D10.txt" 2>&1; rc=$?; rc_is 1 "$rc" "D10 …with $AB.sh absent from disk: still red"
+has "$S/D10.txt" "$AB.sh is tracked at HEAD, but its first patch CREATES it (cut on the wrong base)" "D11 …naming it (cut on the wrong base)"
+bash "$LU" --only L7 --hold "$HOLD7" --root "$WD" > "$S/D12.txt" 2>&1; rc=$?; rc_is 1 "$rc" "D12 the real path lands nothing on a creation patch over a tracked file"
+snap "$WD" "$S/D10.after"; cmp -s "$S/D10.before" "$S/D10.after" && grep -q "the preflight found" "$S/D12.txt" && ok "D13 …refused at the preflight, HEAD, index and status unchanged" || bad "D13 the refusal changed the throwaway"
+mv "$S/D.ab.moved" "$WD/$AB.sh"
+# D14-D22: U3 delivered the way the real lane delivers it — a patch that MODIFIES its three tracked files, cut on HEAD —
+# then the real path: the records, U2, U3 in the manifest's order with its subjects, seqs and forceAdd list
+rm -f "$L7d/unit-U3.patch"
+mkpatch "$L7d/unit-U3.patch" "$AB.sh" "# tools/titan/results/wave55-gate/ab-arms55.sh — " "# SYNTHETIC (land-units D, L7 U3) — never shipped"
+mkpatch "$L7d/unit-U3.patch" "$AB.selftest.sh" "# tools/titan/results/wave55-gate/ab-arms55.selftest.sh — " "# SYNTHETIC (land-units D, L7 U3) — never shipped"
+mkpatch "$L7d/unit-U3.patch" "$AB.selftest.out.txt" "## T1. --run, two arms" "SYNTHETIC (land-units D, L7 U3) — never shipped"
+note "$L7d" "U2 U3"; backdate "$L7d"
+[[ -z "$(git -C "$WD" --no-optional-locks status --short --untracked-files=no)" ]] || { bad "D14 precondition: tracked changes in the throwaway"; git -C "$WD" status --short | head; }
+snap "$WD" "$S/D14.before"
+bash "$LU" --check --only L7 --hold "$HOLD7" --root "$WD" > "$S/D14.txt" 2>&1; rc=$?; rc_is 0 "$rc" "D14 U3 delivered as a patch that MODIFIES its three tracked files (the real lane's shape): --check clean"
+n=0; for x in $ABX; do grep -qE "^ +~ $AB$x\$" "$S/D14.txt" && n=$((n+1)); done; nf=$(grep -c "^  ok      force-add " "$S/D14.txt")
+snap "$WD" "$S/D14.after"; [[ "$n" == 3 && "$nf" == 6 ]] && cmp -s "$S/D14.before" "$S/D14.after" && ok "D15 …the three listed as modified (~), the six force-add files found, and --check touched nothing" || bad "D15 modified $n of 3, force-add $nf of 6, or --check changed the throwaway"
+bash "$LU" --only L7 --hold "$HOLD7" --root "$WD" > "$S/D16.txt" 2>&1; rc=$?; rc_is 0 "$rc" "D16 the real path lands L7 (records, U2, U3)"
+git -C "$WD" log --reverse --format=%s "$BASED..HEAD" > "$S/D16.subjects"
+{ mq 'm.records.subject'; mq 'm.units.filter(u=>u.lane==="L7"&&["U2","U3"].includes(u.unit)).sort((a,b)=>a.seq-b.seq).map(u=>u.subject)'; } > "$S/D16.subjects.want"
+cmp -s "$S/D16.subjects" "$S/D16.subjects.want" && ok "D17 three commits in the manifest's order with its subjects: records, L7 U2 (seq $(mq 'm.units.find(u=>u.lane==="L7"&&u.unit==="U2").seq')), L7 U3 (seq $(mq 'm.units.find(u=>u.lane==="L7"&&u.unit==="U3").seq'))" || { bad "D17 order / subjects"; diff "$S/D16.subjects.want" "$S/D16.subjects"; }
+git -C "$WD" show --name-only --format= HEAD~2 | sort > "$S/D18.paths"; { (cd "$WD" && find "$R/wave55-instruments" -type f); cat "$S/D.force"; } | sort > "$S/D18.want"
+fa=0; while IFS= read -r f; do git -C "$WD" cat-file -e "HEAD:$f" 2>/dev/null && fa=$((fa+1)); done < "$S/D.force"
+cmp -s "$S/D18.paths" "$S/D18.want" && [[ "$fa" == 6 ]] && ok "D18 the records commit holds exactly the lane dir + the manifest's six forceAdd files (gitignored wave-54 out/, instruments.md:300), now tracked" || { bad "D18 records commit paths (force-added tracked: $fa of 6)"; diff "$S/D18.want" "$S/D18.paths"; }
+[[ "$(git -C "$WD" show --name-only --format= HEAD~1)" == "tools/titan/wire-differential.sh" ]] && ok "D19 the U2 commit holds exactly its one created path" || bad "D19 U2 commit paths"
+git -C "$WD" show --name-only --format= HEAD | sort > "$S/D20.paths"; for x in $ABX; do echo "$AB$x"; done | sort > "$S/D20.want"
+same=1; for x in $ABX; do git -C "$WD" show "HEAD:$AB$x" | cmp -s - "$MODEL/$AB$x" || same=0; cmp -s "$WD/$AB$x" "$MODEL/$AB$x" || same=0; done
+modes="$(git -C "$WD" ls-tree HEAD -- "$AB.sh" "$AB.selftest.sh" "$AB.selftest.out.txt" | awk '{print $1}' | tr '\n' ' ')"
+cmp -s "$S/D20.paths" "$S/D20.want" && (( same )) && [[ "$modes" == "$(git -C "$WD" ls-tree "$BASED" -- "$AB.sh" "$AB.selftest.sh" "$AB.selftest.out.txt" | awk '{print $1}' | tr '\n' ' ')" ]] \
+  && ok "D20 the U3 commit holds exactly U3's three paths, committed and on-disk bytes equal the model (HEAD + the patch), modes kept ($modes)" || bad "D20 U3 commit paths / bytes / modes ($modes)"
+b2="$(git -C "$WD" show -s --format=%B HEAD~1)"; b3="$(git -C "$WD" show -s --format=%B HEAD)"
+grep -q "(seq 02) from unit-U2.patch sha256 $(shasum -a 256 "$L7d/unit-U2.patch" | cut -c1-16)" <<<"$b2" && grep -q "(seq 03) from unit-U3.patch sha256 $(shasum -a 256 "$L7d/unit-U3.patch" | cut -c1-16)" <<<"$b3" \
+  && grep -q "^Co-Authored-By: Claude Opus 5.5" <<<"$b3" && grep -qF "$(mq 'm.units.find(u=>u.lane==="L7"&&u.unit==="U3").note')" <<<"$b3" \
+  && ok "D21 the unit commit bodies cite their seq, their patch's sha256 and the manifest's note, and end with the trailer" || bad "D21 commit bodies"
+[[ -z "$(git -C "$WD" --no-optional-locks status --short --untracked-files=all)" ]] && ok "D22 the throwaway is clean after landing" || { bad "D22 not clean"; git -C "$WD" status --short | head; }
 rmwt "$WD"
 }
 

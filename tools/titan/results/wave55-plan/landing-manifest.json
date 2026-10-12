@@ -779,7 +779,7 @@
    ],
    "group": null,
    "subject": "wave55 L5 U1-ios-LRM: CONTINGENCY — the LRM fallback re-cut: the painted marker is wrapped in LRM … LRM instead of LRI … PDI (no isolate run, so no fallback face grows the marker's line box)",
-   "note": "Lands only with --contingency L5:U1-ios-LRM, after the stage-1 probe prints [H] counter-suffix ios WRONG (or H-low-shaped) while [C] / [T] / [K] ios are OK; it edits the file U1-ios creates, so U1-ios's revertOrder then becomes [U1-ios-LRM, U1-ios]."
+   "note": "Lands only with --contingency L5:U1-ios-LRM, and only on precedence (ii) of expectations.json lanes.L5-counter-suffix-rows.stage1Decision: the stage-1 probe's [H] counter-suffix ios line carries a GEOMETRY reason (blob count, the period before the letter, the letter or the period off the ref's x ±2 / rows ±1, the letter fill), or the recorded look shows the H-low shape — never on a twin-only `ink:` or `residual:` line (such a line goes to the PLAN §7 stage-1 step-8 recorded look first, precedence (i); only a wrong look there counts as the GEOMETRY reason). It edits the file U1-ios creates, so U1-ios's revertOrder then becomes [U1-ios-LRM, U1-ios]."
   }
  ],
  "orderConstraints": [

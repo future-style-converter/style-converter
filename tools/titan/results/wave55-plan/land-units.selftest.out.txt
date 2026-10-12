@@ -1,5 +1,6 @@
-land-units.selftest.sh — 2026-10-11 18:26:46 UTC — shared tree /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf at 640276a0 (never touched)
-script under test: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave55-plan/land-units.sh (sha256 817c96779eec8db2…)
+land-units.selftest.sh — 2026-10-12 09:59:17 UTC — shared tree /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf at 55dd4cd9 (never touched)
+script under test: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave55-plan/land-units.sh (sha256 6a3e2b7e772bee29…)
+sha256 (full): land-units.sh 6a3e2b7e772bee298facbbc42df44b573ba917f77e66ff1109c1d918e8ee2634 · land-units.selftest.sh 1391719c0721f3521a7f85b2ceca1a556645f75e41868437b6f020151c338e83 · landing-manifest.json f7050c387f06728c325be132a33d4cd74981393087a914361c6903dd939aacc9 · HEAD 55dd4cd93b902142f87e3555e7f5706ce775d18d
 
 ═══ A: the real path, one unit + one seam (L1 NB-ios), in a throwaway worktree
       synthetic patches:
@@ -15,8 +16,8 @@ PASS  A7 the real path REFUSES while lane files are < 120 s old (freshness guard
 PASS  A8 the refusal touched nothing
 PASS  A9 the real path lands (exit 0)
       commits (newest first):
-        049e5044 wave55 L1 NB-ios: a declared-normal WPT run on iOS lays out on Blink's rounded line box (NormalLineBox; CSS 2.1 §10.8.1) — device-gated at stage 1
-        1f8031ef wave55 lane records: the lanes' notes, skeptic reports, fix passes, unit and seam patches, censuses and mutation logs (L1 hyphen-ios-linebox, L2 cbb-android, L3 positioned-parent-slot, L4 ua-heading-margin, L5 counter-suffix-rows, L6 android-paint-order, L7 instruments)
+        00d3c516 wave55 L1 NB-ios: a declared-normal WPT run on iOS lays out on Blink's rounded line box (NormalLineBox; CSS 2.1 §10.8.1) — device-gated at stage 1
+        62aecc86 wave55 lane records: the lanes' notes, skeptic reports, fix passes, unit and seam patches, censuses and mutation logs (L1 hyphen-ios-linebox, L2 cbb-android, L3 positioned-parent-slot, L4 ua-heading-margin, L5 counter-suffix-rows, L6 android-paint-order, L7 instruments)
 PASS  A10 exactly two commits, in order: the records, then L1 NB-ios
 PASS  A11 the records commit holds exactly the lane dir (3 files)
 PASS  A12 the NB-ios commit holds exactly its 3 code paths (2 created + the seam file)
@@ -38,7 +39,7 @@ PASS  A17 …seam-1b.patch among them
 PASS  A18 --contingency --check with both patches is clean (needs NB-ios: found in HEAD's history) (exit 0)
 PASS  A19 --contingency lands (exit 0)
 PASS  A20 …as the new lane records (the two patches) then NB-ios-b; tree clean: yes
-      (throwaway /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/lu/wt-A removed)
+      (throwaway <scratch>/wave55-lu-selftest-2/wt-A removed)
 
 ═══ B: failure paths (each guard turned red, then restored), throwaway worktrees
 PASS  B1 a fault after NB-ios's patches are staged stops the landing (exit 3)
@@ -48,7 +49,7 @@ PASS  B4 re-running without --from refuses an EMPTY records commit (exit 3)
 PASS  B5 …and changed nothing
 PASS  B6 --from L1:NB-ios resumes (exit 0)
 PASS  B7 …landing NB-ios on top of the records; tree clean
-      (throwaway /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/lu/wt-B removed)
+      (throwaway <scratch>/wave55-lu-selftest-2/wt-B removed)
 PASS  B8 --check flags a dirty touched path (exit 1)
 PASS  B9 …naming it
 PASS  B10 the real path lands nothing on a dirty path (exit 1)
@@ -84,7 +85,7 @@ PASS  B39 a unit patch writing into its lane records dir is an error (exit 1)
 PASS  B40 …named
 PASS  B41 a unit patch and its own seam patch on one path is an error (exit 1)
 PASS  B42 …named
-      (throwaway /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/lu/wt-B2 removed)
+      (throwaway <scratch>/wave55-lu-selftest-2/wt-B2 removed)
 
 ═══ C: a stacked series (L4 four units + the L2 pair) and the C12 revert dry-runs
 PASS  C1 --check on the stacked 6-unit series is clean (exit 0)
@@ -102,34 +103,45 @@ PASS  C7 the real path lands the stacked series (exit 0)
 PASS  C8 seven commits in the table's order: records, L4 U1-android, U1-ios, U2-android, U2-ios, L2 U1, U2
 PASS  C9 the five stacked shared files land byte-equal to the model
 PASS  C10 the throwaway is clean after landing
-        bd2fab54 wave55 lane records: the lanes' notes, skeptic reports, fix passes, unit and seam patches, censuses a…  [13 paths]
-        f37ae512 wave55 L4 U1-android: the UA .67em-family block margin of an out-of-flow heading under WPT capture on…  [6 paths]
-        37844897 wave55 L4 U1-ios: the SwiftUI twin of the out-of-flow heading's UA block margin (UAPositionedHeadingM…  [2 paths]
-        93fb48e9 wave55 L4 U2-android: the held folded-host heading face restored on Compose (UAHeadingFoldGate) — 0…  [4 paths]
-        76c5d56d wave55 L4 U2-ios: the held folded-host heading face restored on SwiftUI (UAHeadingFoldGate.swift; sea…  [2 paths]
-        2a8df462 wave55 L2 U1: CBB-android re-landed (5b333c8a): under WPT capture a content-box box publishes its dec…  [2 paths]
-        e4a81547 wave55 L2 U2: the in-flow percentage of a content-box box gets its containing block's content band at…  [1 paths]
-      (throwaway /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/lu/wt-C removed)
+        33b593aa wave55 lane records: the lanes' notes, skeptic reports, fix passes, unit and seam patches, censuses a…  [13 paths]
+        38f949fe wave55 L4 U1-android: the UA .67em-family block margin of an out-of-flow heading under WPT capture on…  [6 paths]
+        9ef298d5 wave55 L4 U1-ios: the SwiftUI twin of the out-of-flow heading's UA block margin (UAPositionedHeadingM…  [2 paths]
+        5cb714c5 wave55 L4 U2-android: the held folded-host heading face restored on Compose (UAHeadingFoldGate) — 0…  [4 paths]
+        c586f9db wave55 L4 U2-ios: the held folded-host heading face restored on SwiftUI (UAHeadingFoldGate.swift; sea…  [2 paths]
+        afc29caa wave55 L2 U1: CBB-android re-landed (5b333c8a): under WPT capture a content-box box publishes its dec…  [2 paths]
+        15061118 wave55 L2 U2: the in-flow percentage of a content-box box gets its containing block's content band at…  [1 paths]
+      (throwaway <scratch>/wave55-lu-selftest-2/wt-C removed)
 PASS  C11 a later lane's hunk inside an earlier unit's context: --check goes red (exit 1)
 PASS  C12 …although the forward series applies
 PASS  C13 …because the L4 revert dry-run FAILS on the landed series (the C12 instrument can fail)
 PASS  C14 the real path lands nothing when a revert dry-run fails (exit 1)
 PASS  C15 …HEAD unchanged
-      (throwaway /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/lu/wt-C2 removed)
+      (throwaway <scratch>/wave55-lu-selftest-2/wt-C2 removed)
 
-═══ D: L7 — optional units (U1 / U3 written at planning) and the records commit's six force-added wave-54 files
-PASS  D1 L7 U3 with no patch while its planning files are untracked: --check goes red (exit 1)
-PASS  D2 …naming each untracked file
+═══ D: L7 — optional units against HEAD (U1 / U3's planning files tracked), a creation patch over a tracked file, and the records commit's six force-added wave-54 files
+PASS  D1 L7 U1 and U3 with no patch, their planning files tracked at HEAD: --check clean (exit 0)
+PASS  D2 …each of U3's three manifest files (trackedAtHeadIfNoPatch) read 'tracked at HEAD'
 PASS  D3 L7 U1 with no patch passes: its copy is tracked since a2a37a8e
-PASS  D4 a delivered unit-U3.patch with a loose untracked copy on disk: red (exit 1)
-PASS  D5 …naming the loose copy
-PASS  D6 U3 delivered as a patch (no loose copy): clean (exit 0)
-PASS  D7 the real path lands L7 (records, U2, U3) (exit 0)
-PASS  D8 three commits in order: records, L7 U2, L7 U3
-PASS  D9 the records commit force-added the six gitignored wave-54 out/ files (instruments.md:300)
-PASS  D10 the U3 commit carries the runner byte-equal to the toolkit stage's files
-PASS  D11 the throwaway is clean after landing
-      (throwaway /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/lu/wt-D removed)
+PASS  D4 L7 U3 with no patch while one of its planning files is UNTRACKED: --check goes red (exit 1)
+PASS  D5 …naming the untracked file (the three tracked ones still read ok: 3)
+PASS  D6 L7 U3 with no patch whose tracked tools/titan/results/wave55-gate/ab-arms55.sh differs on disk: --check still exits 0 (a warning) (exit 0)
+PASS  D7 …and warns, naming the file
+PASS  D8 a delivered unit-U3.patch that CREATES U3's three files, tracked at HEAD and on disk: red (exit 1)
+PASS  D9 …each of the three named: 'exists on disk, but its first patch CREATES it'
+PASS  D10 …with tools/titan/results/wave55-gate/ab-arms55.sh absent from disk: still red (exit 1)
+PASS  D11 …naming it (cut on the wrong base)
+PASS  D12 the real path lands nothing on a creation patch over a tracked file (exit 1)
+PASS  D13 …refused at the preflight, HEAD, index and status unchanged
+PASS  D14 U3 delivered as a patch that MODIFIES its three tracked files (the real lane's shape): --check clean (exit 0)
+PASS  D15 …the three listed as modified (~), the six force-add files found, and --check touched nothing
+PASS  D16 the real path lands L7 (records, U2, U3) (exit 0)
+PASS  D17 three commits in the manifest's order with its subjects: records, L7 U2 (seq 2), L7 U3 (seq 3)
+PASS  D18 the records commit holds exactly the lane dir + the manifest's six forceAdd files (gitignored wave-54 out/, instruments.md:300), now tracked
+PASS  D19 the U2 commit holds exactly its one created path
+PASS  D20 the U3 commit holds exactly U3's three paths, committed and on-disk bytes equal the model (HEAD + the patch), modes kept (100644 100755 100755 )
+PASS  D21 the unit commit bodies cite their seq, their patch's sha256 and the manifest's note, and end with the trailer
+PASS  D22 the throwaway is clean after landing
+      (throwaway <scratch>/wave55-lu-selftest-2/wt-D removed)
 
 ═══ E: a limit-killed lane never lands (note guards; --check only, read-only)
 PASS  E0 control: a COMPLETE note with TREES: and the three patch lines is clean (exit 0)
@@ -150,7 +162,7 @@ PASS  E15 a fix patch for a unit the lane does not have (U9) is refused (exit 1)
 PASS  E15 …named
 PASS  E11 restored: clean again (the guards fire on the defect, not on the lane) (exit 0)
 PASS  E12 the nine --check runs left HEAD, the index and status byte-identical
-      (throwaway /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/lu/wt-E removed)
+      (throwaway <scratch>/wave55-lu-selftest-2/wt-E removed)
 
 ═══ F: SeamReachabilityTest.kt — five module lines from three lanes, each cut on HEAD (--check only)
 PASS  F1 PINNED anchors, each cut on HEAD: --check clean (L4 → L3 → L5, §4 order) (exit 0)
@@ -161,10 +173,10 @@ PASS  F3 revert dry-run OK on the landed series: L3:U1 [U2 U1]
 PASS  F3 revert dry-run OK on the landed series: L3:U2 [U2]
 PASS  F3 revert dry-run OK on the landed series: L5:U2o-android [U2o-android]
 PASS  F4 --check touched nothing
-      (throwaway /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/lu/wt-F removed)
+      (throwaway <scratch>/wave55-lu-selftest-2/wt-F removed)
 PASS  F5 the same writers at the list END, each cut on HEAD: --check goes red (exit 1)
 PASS  F6 …the cumulative series stops (L3 / L5 cannot apply after L4)
-      (throwaway /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/lu/wt-F2 removed)
+      (throwaway <scratch>/wave55-lu-selftest-2/wt-F2 removed)
 
 ═══ G: --contingency <L:U> (argument and dependency refusals; --check only)
 PASS  G1 --contingency with no unit is refused (exit 2)
@@ -177,9 +189,9 @@ PASS  G3 …named
 PASS  G4 --print-order (exit 0)
 PASS  G4 …row 30: L5 U1-ios-LRM, needs U1-ios, a contingency
 PASS  G5 the G runs left HEAD, the index and status byte-identical
-      (throwaway /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/lu/wt-G removed)
+      (throwaway <scratch>/wave55-lu-selftest-2/wt-G removed)
 
 PASS  Z1 the shared tree's HEAD, index and status are byte-identical before / after the whole self-test
 PASS  Z2 no throwaway worktree left registered
 
-SELFTEST  133 passed, 0 failed
+SELFTEST  144 passed, 0 failed
