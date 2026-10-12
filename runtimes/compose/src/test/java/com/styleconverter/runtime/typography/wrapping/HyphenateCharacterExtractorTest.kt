@@ -98,4 +98,13 @@ class HyphenateCharacterExtractorTest {
         // A bare primitive is no reader shape: breadcrumb + auto, never a guess.
         assertEquals(HyphenateCharacterConfig(null), HyphenateCharacterExtractor.extract(prop("\"x\"")))
     }
+
+    @Test
+    fun ofTwoDeclarationsInOneBlockTheLastWins() {
+        // Wave 55 (L7 U6-compose, pin C1 — wave-54 L3 SK-X1; mutation `lastOrNull` → `firstOrNull`
+        // executed, tools/titan/results/wave55-instruments/_note.md): css-cascade-4 §6.1 sorts equal
+        // declarations by order of appearance, so the later one wins — -004's "/-/" then -003's "•".
+        val both = prop("""{"type":"string","value":"/-/"}""") + prop("""{"type":"string","value":"•"}""")
+        assertEquals(HyphenateCharacterConfig("•"), HyphenateCharacterExtractor.extract(both))
+    }
 }
