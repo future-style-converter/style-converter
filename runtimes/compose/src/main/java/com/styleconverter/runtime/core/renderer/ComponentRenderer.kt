@@ -3664,24 +3664,28 @@ object ComponentRenderer {
                         // apart). The zero-footprint anchor is the RC1 mount
                         // (CanvasRootHoist.zeroFlowAnchor) applied one level
                         // deeper; the decision table and the documented
-                        // limits live in PositionedParentFlowSlot. Host-gated
-                        // exactly like RC1, so hostless paths (dark stage,
-                        // every committed baseline) keep the identity
-                        // modifier here — and a `relative`/transform-CB
-                        // parent never reaches this loop (its children take
-                        // the positioned-container Box branch above).
+                        // limits live in PositionedParentFlowSlot. Wave 55
+                        // (lane L3): engaged by PositionedParentSlotGate on the
+                        // composed capture itself, not only an ACTIVE canvas
+                        // host (a host-inactive capture stacked dir-style-02a's
+                        // row-7 dot out of its 20-px row); an RTL parent's
+                        // slot is the gate's own case. Hostless paths (dark
+                        // stage, every committed baseline) see no composed
+                        // capture and keep the identity modifier — and a
+                        // `relative`/transform-CB parent never reaches this
+                        // loop (its children take the Box branch above).
+                        // `parentRtl` is read HERE, in the parent's content
+                        // scope, never in the child's measure scope.
                         val outOfFlowSlotMount: Modifier =
-                            if (com.styleconverter.runtime.layout.position.CanvasRootHoist
-                                    .LocalActive.current &&
-                                com.styleconverter.runtime.layout.position
-                                    .PositionedParentFlowSlot
-                                    .applies(child.properties, component.properties)
-                            ) {
-                                com.styleconverter.runtime.layout.position
-                                    .PositionedParentFlowSlot.mount(child.properties)
-                            } else {
-                                Modifier
-                            }
+                            com.styleconverter.runtime.layout.position.PositionedParentSlotGate
+                                .slotModifier(
+                                    child.properties,
+                                    component.properties,
+                                    hostActive = com.styleconverter.runtime.layout.position
+                                        .CanvasRootHoist.LocalActive.current,
+                                    composedCapture = LocalWptComposedMode.current,
+                                    parentRtl = LocalLayoutDirection.current == LayoutDirection.Rtl,
+                                )
                         // The child's style chain, with the margin override
                         // when one applies (§8.3.1 plan or §9.5.2 clearance —
                         // both ride the same LocalCollapsedMargin channel).

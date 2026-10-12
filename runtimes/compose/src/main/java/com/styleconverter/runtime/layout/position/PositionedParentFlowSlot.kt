@@ -84,9 +84,14 @@ package com.styleconverter.runtime.layout.position
 //    also shrink the static parent's auto height — an unmeasured change on
 //    four currently-passing Android cells.
 //
-// Host-gated like RC1: only the composed WPT capture (CanvasRootHoist.Host)
-// activates it, so the dark-stage per-component canvas and every committed
-// baseline keep the byte-identical legacy Column footprint.
+// Gated by PositionedParentSlotGate (wave 55, lane L3). Until wave 55 it
+// was host-gated like RC1 (CanvasRootHoist.LocalActive), which left every
+// composed capture whose host stayed inactive on the stacking Column
+// footprint (selectors/dir-style-02a's missing row-7 dot). The gate now
+// engages on the composed WPT capture itself for an LTR parent, keeps every
+// active-host mount, and owns the RTL parent's case (see its header). The
+// dark-stage per-component canvas and every committed baseline see no
+// composed capture, so they keep the byte-identical legacy Column footprint.
 //
 // Pure decisions live here (JVM-pinned by PositionedParentFlowSlotTest —
 // no Robolectric in this suite); the measurement itself is

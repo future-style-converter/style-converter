@@ -186,6 +186,7 @@ class SeamReachabilityTest {
             // dead runtime code (the wave-49 S5 class).
             "transforms/BackfaceCull.kt",
             "transforms/TransformInheritance.kt",
+            "layout/position/PositionedParentSlotGate.kt", // wave 55 L3 U1: called only by seam 1
         )
         val dead = modules.filterNot { File(runtimeTree, it) in reachable }
         assertTrue(
