@@ -92,8 +92,16 @@ s = open(sys.argv[1]).read(); old = "      if (!existsSync(fb)) { r.changed.push
 assert s.count(old) == 1; open(sys.argv[2], 'w').write(s.replace(old, "      if (!existsSync(fb)) continue;   // MUTATION: the pre side not read"))
 EOF3
 want "K12 MUTATION (the pre side not read, worktree copy): K9's vanished capture HOLDS again" 0 "CONTROL HOLDS" bash -c "cd '$WT' && nice -n 19 node $G/control-check.mjs wave54-final '$CG' --sections css-text"
-# Round 2 (S3): a CARRIER capture that vanished — hyphenate-character-001 ios (an L1 carrier) removed from a css-text post run
-CARG=$(mkpost cargone); unlink_one "$CARG" ios-screenshots "wpt__css-text__hyphens__hyphenate-character-001.png"
+# Round 2 (S3): a CARRIER capture that vanished — a css-text carrier removed from a css-text post run. Stage 1: the carrier is READ
+# from expectations.json's unionCaptureCarriers (the planning tree used hyphenate-character-001 ios, an L1 carrier; NB-ios was
+# reverted at wave55-pre and its carriers withdrawn, so a hard-coded stem would now be a complement LEAK, exit 1, not a vanished
+# carrier, exit 2). The first android css-text carrier is taken (L3 U2's bidi-tab-001 after stage 1).
+read -r CAR_PLAT CAR_STEM < <($PY -c "import json;e=json.load(open('$SH/$P/expectations.json'));u=e['unionCaptureCarriers']
+for pl in ('android','ios','web'):
+    st=[s for s in u.get(pl,[]) if s.startswith('wpt__css-text__')]
+    if st: print(pl, st[0]); break")
+echo "  K13's vanished carrier: $CAR_STEM $CAR_PLAT (from unionCaptureCarriers)"
+CARG=$(mkpost cargone); unlink_one "$CARG" "$CAR_PLAT-screenshots" "$CAR_STEM.png"
 want "K13 a CARRIER capture that DISAPPEARS refuses the read (a carrier may change, never vanish)" 2 "carrier capture(s) present on one side only" bash -c "cd '$SH' && nice -n 19 $CC wave54-final '$CARG' --sections css-text"
 $PY - "$SH/$G/control-check.mjs" "$WT/$G/control-check.mjs" <<'EOF4'
 import sys
@@ -125,10 +133,14 @@ def build(name, extra=None):
     d['movers'] = keep
     json.dump(d, open(f'{S}/adj-{name}.json', 'w'))
 build('allmet'); build('mnm3', extra=e['mustNotMoveComplement']['cells'][0])
-print('  synthetic records: allmet (the 9 gating f→P rows at P 0.97), mnm3 (allmet + complement', e['mustNotMoveComplement']['cells'][0], '+0.003)')
+print(f'  synthetic records: allmet (the {sum(1 for k, g in gate.items() if g["to"].startswith("P"))} gating rows predicted P set to P 0.97), mnm3 (allmet + complement', e['mustNotMoveComplement']['cells'][0], '+0.003)')
 EOF
 d=$($PY -c "import json;d=json.load(open('$S/adj-id.json'));d['prev'],d['cur']='wave55-open','wave55-final';json.dump(d,open('$S/adj-relab.json','w'))")
-want "J1 the identity record (nothing landed): the 9 gating flip rows are missed" 1 "gating predictions 44, missed 9" bash -c "cd '$SH' && $AD '$S/adj-relab.json'"
+# Stage 1: the gating-prediction count and its f→P flips are COMPUTED from expectations.json (44 / 9 on the planning tree; the
+# regeneration after wave55-pre withdrew L1's and L4's rows)
+read -r GN GM < <($PY -c "import json;e=json.load(open('$SH/$P/expectations.json'));rows=[p for l in e['lanes'].values() for p in l['predictions'] if p.get('gating')]
+print(len(rows), sum(1 for p in rows if not str(p.get('from','')).startswith('P') and str(p.get('to','')).startswith('P')))")
+want "J1 the identity record (nothing landed): the $GM gating flip rows are missed" 1 "gating predictions $GN, missed $GM" bash -c "cd '$SH' && $AD '$S/adj-relab.json'"
 want "J2 all-met synthetic: R1-R5 hold" 0 "ADJUDICATION: R1–R5 hold" bash -c "cd '$SH' && $AD '$S/adj-allmet.json'"
 want "J3 all-met + one complement cell +0.003: R5 FAIL, labelled complement" 1 "must-not-move MOVED (complement)" bash -c "cd '$SH' && $AD '$S/adj-mnm3.json'"
 want "J4 a record whose prev is not the base is refused" 2 "ORDER" bash -c "cd '$SH' && $AD '$S/adj-thr.json'"
@@ -158,8 +170,15 @@ json.dump({'prev': 'wave55-open', 'cur': 'wave55-final', 'totals': tot, 'gained'
 rows = [{'script': 'ua-heading-margin.geometry.py', 'key': f'[F] text-decoration-inset-005 {p}', 'verdict': 'PASS', 'line': f'[F] text-decoration-inset-005 {p} bands … → GEOMETRY OK'} for p in ('android', 'ios')]
 json.dump({'run': 'wave55-final', 'base': 'wave55-open', 'rows': rows}, open(f'{out}/adj-r6.geo.json', 'w'))
 EOF6
+L4_REVERTED=$($PY -c "import json;e=json.load(open('$SH/$P/expectations.json'));print(int(any(r['lane']=='L4-ua-heading-margin' and r['unit'] in ('U2-ios','U1-ios') for r in (e.get('probeDecisions') or {}).get('reverted',[]))))")
 o=$(cd "$SH" && $AD "$S/adj-r6.json" --geometry "$S/adj-r6.geo.json" 2>&1)
-if grep -q "text-decoration-inset-005.html android .*stays degenerate (stayDegenerateEvenIfPass)" <<<"$o" && grep -q "^RETIRED from degenerateByConstruction (degenerateRetirement holds — gains): 1$" <<<"$o" && grep -q "text-decoration-inset-005.html ios .*units U1-ios, U2-ios on the tree" <<<"$o"
+if [ "$L4_REVERTED" = 1 ]; then
+  # Stage 1 (PLAN §10 item 14): U1-ios / U2-ios are reverted, their inset-005 rows withdrawn — a synthetic gain on them is a
+  # DEGENERATE-BY-CONSTRUCTION gain that nothing retires (the retirement needs the units on the tree), on both platforms
+  if grep -q "DEGENERATE-BY-CONSTRUCTION gains (not fixes): 2" <<<"$o" && ! grep -q "^RETIRED from degenerateByConstruction (degenerateRetirement holds — gains): [1-9]" <<<"$o"
+  then echo "  as required  J6 (after stage 1: L4 reverted) the R6 synthetic: neither inset-005 gain is RETIRED — $(grep -E 'DEGENERATE-BY-CONSTRUCTION gains' <<<"$o" | head -1 | cut -c1-120)"
+  else echo "  !! NOT as required  J6 (after stage 1) — $(grep -E 'RETIRED|stays degenerate|DEGENERATE-BY' <<<"$o" | tr '\n' '|' | cut -c1-200)"; FAILS=$((FAILS+1)); fi
+elif grep -q "text-decoration-inset-005.html android .*stays degenerate (stayDegenerateEvenIfPass)" <<<"$o" && grep -q "^RETIRED from degenerateByConstruction (degenerateRetirement holds — gains): 1$" <<<"$o" && grep -q "text-decoration-inset-005.html ios .*units U1-ios, U2-ios on the tree" <<<"$o"
 then echo "  as required  J6 the R6 synthetic: inset-005 ios RETIRED (a gain), inset-005 android stays DEGENERATE (stayDegenerateEvenIfPass) — $(grep -c 'stays degenerate' <<<"$o") line"
 else echo "  !! NOT as required  J6 — $(grep -E 'RETIRED|stays degenerate|DEGENERATE-BY' <<<"$o" | tr '\n' '|' | cut -c1-200)"; FAILS=$((FAILS+1)); fi
 $PY - "$SH/$G/adjudicate.mjs" "$WT/$G/adjudicate.mjs" <<'EOF7'
@@ -167,7 +186,14 @@ import sys
 s = open(sys.argv[1]).read(); old = "  if (stayDegenerate.has(`${test} ${c.platform}`)) return"
 assert s.count(old) == 1; open(sys.argv[2], 'w').write(s.replace(old, "  if (false) return   // MUTATION: the honesty list not read —"))
 EOF7
+if [ "$L4_REVERTED" = 1 ]; then
+  # the honesty-list branch is not load-bearing on this synthetic once the retirement is blocked upstream by the withdrawal:
+  # its proof is the planning-tree record (readers-calibration.txt at 7566fb03, J6b RETIRED 2 on the mutated copy); here the
+  # mutated copy must read the same as the installed reader
+  want "J6b (after stage 1) MUTATION copy reads as the installed reader: neither gain RETIRED (the branch's proof is the planning-tree record)" 1 "DEGENERATE-BY-CONSTRUCTION gains (not fixes): 2" bash -c "cd '$WT' && $AD '$S/adj-r6.json' --geometry '$S/adj-r6.geo.json'"
+else
 want "J6b MUTATION (stayDegenerateEvenIfPass not read, worktree copy): both inset-005 gains RETIRED (the generator-truth S2 defect)" 1 "RETIRED from degenerateByConstruction (degenerateRetirement holds — gains): 2" bash -c "cd '$WT' && $AD '$S/adj-r6.json' --geometry '$S/adj-r6.geo.json'"
+fi
 want "J7 adjudicate --exp without a value is a usage error" 2 "given without a value" bash -c "cd '$SH' && $AD '$S/adj-r6.json' --exp"
 rm -f "$WT/$G/control-check.mjs" "$WT/$G/adjudicate.mjs"
 
