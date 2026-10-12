@@ -32,29 +32,16 @@
 //  declares a `korean-*` list-style-type: counter-suffix's fourth `<ol>`
 //  (`counter-suffix__0__3`). No other cell can move.
 //
-//  ## TWIN DIVERGENCE — stated, not hidden
-//  ListMarkerText's header calls itself a byte-for-byte twin of Compose
-//  `lists/ListStyleApplier.getMarker`, and that twin has NO korean arm
-//  either — its counter-style enum stops at `KATAKANA_IROHA`, same as
-//  this package did. This lane owns the iOS half only, so after it the
-//  two natives ANSWER DIFFERENTLY for `korean-hangul-formal`: iOS "일,",
-//  Compose "1.". That is tracked work, not a silent divergence — the
-//  lane reports it for the backlog, and the port is this file plus three
-//  edits in runtimes/compose/src/main/java/com/styleconverter/runtime/
-//  lists/ (sites named by SYMBOL, since line numbers rot; each verified
-//  present by wave-50 skeptic S4 and re-grepped by fix lane F2):
-//
-//   1. `ListStyleConfig.kt` — the `ListStyleType` enum: add
-//      `KOREAN_HANGUL_FORMAL` after `KATAKANA_IROHA`.
-//   2. `ListStyleExtractor.kt` — `typeFromKeyword`'s `when`: the key must
-//      be the UNDERSCORED `"korean_hangul_formal"`, NOT the hyphenated
-//      wire spelling, because that function normalises with
-//      `rawKeyword.lowercase().replace("-", "_")` before matching. (The
-//      wire value the converter emits really is `"korean-hangul-formal"`
-//      — the hyphen is removed by the normaliser, not by the author.)
-//   3. `ListStyleApplier.kt` — `getMarker`'s `when`: one arm beside
-//      `ListStyleType.KATAKANA_IROHA`, returning this file's `expand`
-//      plus `suffix` rather than the `"$n."` the other arms use.
+//  ## TWIN — closed in wave 52 (lane L6 T1, cdb8a845)
+//  Compose `lists/KoreanHangulFormal.kt` is the byte-parallel twin, wired
+//  through its three arms (named by SYMBOL, since line numbers rot):
+//  `ListStyleConfig.ListStyleType.KOREAN_HANGUL_FORMAL`,
+//  `ListStyleExtractor.typeFromKeyword`'s `"korean_hangul_formal"` (the
+//  UNDERSCORED key — that function normalises the wire's hyphens first)
+//  and `ListStyleApplier.getMarker`'s `expand` + `SUFFIX` arm. Device
+//  evidence: wave54-final counter-suffix android rows 7–8 read "일," /
+//  "이," within 1 px of the ref (marker ink x41-57 against the ref's
+//  x42-58, both rows).
 //
 //  ## Scope boundary (no silent fallthrough)
 //  Only `korean-hangul-formal` is modelled. Its two siblings

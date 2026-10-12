@@ -33,13 +33,19 @@ package com.styleconverter.runtime.lists
 // item's size and places the marker outside the bounds — the one shape
 // that satisfies "content edge unchanged" and "marker visible" at once.
 //
-// ## RTL (BACKLOG (c⁴): RTL markers are BLOCKED UPSTREAM)
-// css-lists-3 §3.5 hangs an `outside` marker on the inline-END side under
-// `direction: rtl`. `Placeable.place` is NOT mirrored by Compose (unlike
-// `placeRelative`), so the mirror is spelled here from the ambient
-// LayoutDirection. The corpus's RTL rows still lack markers for an
-// UPSTREAM reason (no `meta.markerText` reaches them), so this branch is
-// pinned but does not move a cell this wave — stated, not hidden.
+// ## RTL
+// css-lists-3 §3.5 hangs an `outside` marker before the item's START edge,
+// which for an rtl item is the physical RIGHT. `Placeable.place` is NOT
+// mirrored by Compose (unlike `placeRelative`), so the mirror is spelled
+// here from the ambient LayoutDirection. No corpus `<li>` both inherits
+// `direction: rtl` and hangs outside (census tools/titan/results/
+// wave55-counter-suffix-rows/census-l5.out.txt): counter-suffix's two
+// `dir=rtl` lists are bidi-baked (bake root `direction: ltr`, items
+// absolutely positioned, markers baked as glyph runs owned by the root
+// since wave-54 M′, tools/titan/bidi-marker-bake.mjs), and the only rtl
+// items left (counter-style-at-rule/disclosure-styles, 6 `<li>`) are
+// `list-style-position: inside`. So this branch is pinned but moves no
+// corpus cell — stated, not hidden.
 //
 // Staged as a DEVICE A/B: the renderer seam that swaps the Row for this
 // Layout is `tools/titan/results/wave52-counters-and-lists/seam-1.patch`,
@@ -73,13 +79,14 @@ object ListMarkerOutsideHang {
      * @param markerBaseline the marker's FirstBaseline, null if it exposes
      *   none; [itemBaseline] likewise for the item's principal box.
      * @param gapPx the inline gap between marker and item — the caller
-     *   hands in [ListMarkerRow.gapDp] resolved to px, so the two
-     *   placements share ONE gap constant.
+     *   hands in [ListMarkerSuffixGap.gapDp] resolved to px: the
+     *   [ListMarkerRow.gapDp] stand-in for the suffix's trimmed space, 0
+     *   after a U+3001 suffix.
      * @param alignsByBaseline the row's per-item decision
      *   ([ListMarkerRow.alignsByBaseline]); false ⇒ both boxes stack by
      *   their tops (the baseline-less items and the snapped-grid case).
-     * @param rtl hang on the inline-END side instead (css-lists-3 §3.5
-     *   under `direction: rtl`).
+     * @param rtl hang on the physical right instead — an rtl item's
+     *   inline-START side (css-lists-3 §3.5 under `direction: rtl`).
      * @param itemIsEmpty [ListMarkerEmptyItem.isEmpty]: the item has no
      *   content, so the marker's line is the item's only line box and the
      *   pair is at least the marker's height (header of that file).
@@ -92,8 +99,8 @@ object ListMarkerOutsideHang {
     ): Placement {
         // Inline: the marker's END edge sits `gap` before the item's START
         // edge — `markerX + markerWidth + gap == 0` is the pinned identity.
-        // Under RTL the mirror image: the marker's START edge sits `gap`
-        // after the item's END edge.
+        // Under RTL the mirror image: the marker's physical left edge sits
+        // `gap` right of the item's physical right (its inline-start) edge.
         val markerX = if (rtl) itemWidth + gapPx else -(markerWidth + gapPx)
         // Block: share the first line's baseline when the row aligns by
         // baseline and BOTH boxes expose one (css-lists-3 §3.5 — the marker

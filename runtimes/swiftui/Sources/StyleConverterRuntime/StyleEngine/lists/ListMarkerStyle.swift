@@ -42,9 +42,9 @@ enum ListMarkerType: String, Equatable {
     case hiraganaIroha, katakanaIroha
     // §7.1 longhand East Asian — the ONLY member modelled (wave 50, lane B4:
     // counter-suffix's fourth `<ol>` is its one corpus carrier; the hanja
-    // siblings keep the documented nil path). It has NO Compose twin yet, so
-    // the 1:1 claim above holds for every case but this one — tracked work,
-    // not drift (KoreanHangulFormal.swift's TWIN DIVERGENCE banner).
+    // siblings keep the documented nil path). Its Compose twin
+    // `ListStyleType.KOREAN_HANGUL_FORMAL` landed in wave 52 (lane L6 T1),
+    // so the 1:1 claim above holds here too (KoreanHangulFormal.swift).
     case koreanHangulFormal
 }
 
