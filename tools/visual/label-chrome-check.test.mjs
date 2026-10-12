@@ -1,0 +1,51 @@
+// tools/visual/label-chrome-check.test.mjs — wave-55 lane L7 (unit U6-tooling, BACKLOG 0(o)): pins T1–T2 on the
+// label-chrome exemption checker (tools/visual/label-chrome-check.mjs; contract docs/DYNAMIC_CAPTURE.md §5 "Harness
+// label chrome"), the two wave-54 L7 skeptic findings that no test reached:
+//   T1 (X1 / S4) verifyExemptEntry checks EVERY node of the stem's name: a manifest entry "container" for a name that is
+//      a container under one parent and a childless, textless LEAF under another must go red — a leaf IS labelled
+//      (§5 "When"), so exempting its stem would hide a missing label;
+//   T2 (X8 / N2) checkExempt clause (iv) fires only when EVERY would-be glyph pixel of one platform carries paint: the
+//      component's own paint reaching SOME glyph cells is not a label (brief §9 R2: "every", not "any", so no false red).
+// Synthetic inputs only (a fixture object and RGBA buffers): no PNG file, no device, no runtime.
+// EXECUTED MUTATIONS (red → restore → green, sha256 in tools/titan/results/wave55-instruments/_note.md), each in
+// tools/visual/label-chrome-check.mjs: T1 `for (const node of hits.slice(0, 1))` (only the first same-named node is
+// checked) · T2 `lit === wouldBe.length` → `lit > 0` (any lit glyph pixel reads as a drawn label).
+import test from 'node:test';                                  // the tooling suite's runner (node --test)
+import assert from 'node:assert/strict';                       // strict: a status is a string, a problem list an array
+import { verifyExemptEntry, checkExempt, glyphPixels, GROUND, PLATFORMS } from './label-chrome-check.mjs';
+
+// The three committed platform PNGs of the stem, so verifyExemptEntry reaches its structural check (not "pending").
+const BASELINES = PLATFORMS.map((p) => `${p}__001_Box.png`);
+
+test('T1 a name that is a container under P1 but a leaf under P2 cannot be exempted as "container" (X1)', () => {
+  // Pre-order: P1's Box (a container: it has a child) is the FIRST hit, P2's Box (childless, textless) the second.
+  const fixtureDoc = { components: { P1: { children: { Box: { children: { Kid: {} } } } }, P2: { children: { Box: {} } } } };
+  const r = verifyExemptEntry('001_Box', { fixture: 'fixtures/t1.json', why: 'container' }, { fixtureDoc, baselineFiles: BASELINES });
+  assert.equal(r.status, 'red', r.problems.join('\n'));
+  assert.ok(r.problems.some((p) => /is a leaf, entry says container/.test(p)), r.problems.join('\n'));
+  // Control: the same fixture with P2's Box a container too verifies (the red above is the leaf alone).
+  const both = { components: { P1: { children: { Box: { children: { Kid: {} } } } }, P2: { children: { Box: { children: { K2: {} } } } } } };
+  assert.equal(verifyExemptEntry('001_Box', { fixture: 'fixtures/t1.json', why: 'container' }, { fixtureDoc: both, baselineFiles: BASELINES }).status, 'verified');
+});
+
+// A ground-filled RGBA buffer (#1A1A2E, opaque) of the capture shape checkTriplet reads.
+const groundPng = (width, height) => {
+  const data = new Uint8Array(width * height * 4);             // RGBA bytes
+  for (let i = 0; i < width * height; i++) data.set([...GROUND, 255], i * 4);   // every pixel the canvas ground
+  return { width, height, data };
+};
+// Paint the listed pixels mid-grey (any non-ground colour: (iv) is positional, never colour — review C39).
+const paint = (png, pixels) => { for (const [x, y] of pixels) png.data.set([128, 128, 128, 255], (y * png.width + x) * 4); return png; };
+
+test('T2 clause (iv): paint on SOME would-be glyph pixels is not a label; paint on ALL of them is (X8)', () => {
+  const W = 390, H = 40;                                       // the default capture width; 40 rows hold the band
+  const wouldBe = glyphPixels('Box', W);                       // where the label "BOX" would sit if it were drawn
+  assert.ok(wouldBe.length > 10, `the would-be label has pixels (${wouldBe.length})`);
+  // Android: the component's own paint covers the first half of the would-be glyph cells; iOS and web are ground.
+  const some = [paint(groundPng(W, H), wouldBe.slice(0, Math.floor(wouldBe.length / 2))), groundPng(W, H), groundPng(W, H)];
+  const r = checkExempt(some, 'Box');
+  assert.deepEqual(r.problems.filter((p) => p.startsWith('(iv)')), [], r.problems.join('\n'));
+  // Control: EVERY would-be glyph pixel lit on Android is a drawn label on a label-exempt capture → (iv) fires.
+  const all = [paint(groundPng(W, H), wouldBe), groundPng(W, H), groundPng(W, H)];
+  assert.ok(checkExempt(all, 'Box').problems.some((p) => /^\(iv\) Android: \d+\/\d+ label px drawn/.test(p)));
+});
