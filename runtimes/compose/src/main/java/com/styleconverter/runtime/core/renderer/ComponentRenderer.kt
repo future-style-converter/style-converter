@@ -4504,9 +4504,14 @@ object ComponentRenderer {
             val hangAligns = ListMarkerRow.alignsByBaseline(
                 exposesBaseline, markerSharesSnappedLineGrid)
             com.styleconverter.runtime.lists.ListMarkerOutsideHang.Hang(
-                // ONE gap constant for both placements: the Row's
-                // `padding(end = gapDp)` becomes the hang's offset.
-                gapPx = with(markerSnapDensity) { ListMarkerRow.gapDp.roundToPx() },
+                // The Row's end padding becomes the hang's offset. Wave 55
+                // (lane L5, U2o-android): it is the stand-in for the
+                // suffix's trimmed space, keyed on the RAW marker string —
+                // 0 after a U+3001 suffix (css-counter-styles-3 §6.1), else
+                // ListMarkerRow.gapDp (ListMarkerSuffixGap).
+                gapPx = with(markerSnapDensity) {
+                    com.styleconverter.runtime.lists.ListMarkerSuffixGap.gapDp(marker).roundToPx()
+                },
                 alignsByBaseline = hangAligns,
                 // An EMPTY item's one line box is the marker's (seam-3's
                 // ListMarkerEmptyItem rule, outside half).
