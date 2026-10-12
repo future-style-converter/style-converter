@@ -1160,25 +1160,9 @@ object ComponentRenderer {
             listUaProperties,
             standsDown = com.styleconverter.runtime.typography.UAElementFontRule.headingStandsDown(component),
         )
-        // Wave 55 (lane L4, U1-android) - the THIRD tag-keyed UA step: an
-        // OUT-OF-FLOW h1…h6 takes its UA `margin-block` (HTML §15.3, .67em
-        // for h1) over its UA-cascade face (the PRE-font-step list's em
-        // base, so the face gate cannot move it). Neither the §8.3.1 child
-        // plan (it bails on an out-of-flow child) nor the harness root stack
-        // reaches a NESTED abspos box, and CSS 2.1 §10.6.4 puts its static
-        // position at the margin edge - so the two longhands it appends paint
-        // like any declared margin. Author edges win (css-cascade-4 §6.1);
-        // identity outside WPT capture, so no committed capture moves.
-        val uaMarginProperties = com.styleconverter.runtime.spacing.UaPositionedHeadingMargin.apply(
-            component._tag,
-            allReset.own,
-            listUaProperties,
-            rawProperties,
-            enabled = LocalWptCaptureMode.current,
-        )
         // The `all` reset already ran above (AllReset, before the merge); the
         // post-merge drop-everything it replaced is gone.
-        val unresolvedProperties = uaMarginProperties
+        val unresolvedProperties = rawProperties
 
         // ── Wave-6 dynamic-value resolution ────────────────────────────
         // Merge this component's custom-property definitions (the decoded
