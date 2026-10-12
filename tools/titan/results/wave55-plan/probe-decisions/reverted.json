@@ -5,7 +5,7 @@
   "run": "wave55-pre",
   "commit": "b7108a42",
   "revertCommit": "22c51ee9",
-  "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7"
+  "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13"
  },
  {
   "lane": "L4-ua-heading-margin",
@@ -13,7 +13,7 @@
   "run": "wave55-pre",
   "commit": "1dc521c1",
   "revertCommit": "131cd6e1",
-  "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 8"
+  "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 14"
  },
  {
   "lane": "L4-ua-heading-margin",
@@ -21,7 +21,7 @@
   "run": "wave55-pre",
   "commit": "cac1d6a3",
   "revertCommit": "adc05081",
-  "rule": "3 / 4 on the same rows as U2-ios (revertOrder U2-ios → U1-ios): the UA margin places the out-of-flow heading 5 px high on iOS ('the' cap top y138 vs the ref's y143); PLAN §10 item 8"
+  "rule": "3 / 4 on the same rows as U2-ios (revertOrder U2-ios → U1-ios): the UA margin places the out-of-flow heading 5 px high on iOS ('the' cap top y138 vs the ref's y143); PLAN §10 item 14"
  },
  {
   "lane": "L4-ua-heading-margin",
@@ -29,7 +29,7 @@
   "run": "wave55-pre",
   "commit": "69f95267",
   "revertCommit": "db7b2417",
-  "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 8"
+  "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 14"
  },
  {
   "lane": "L4-ua-heading-margin",
@@ -37,6 +37,6 @@
   "run": "wave55-pre",
   "commit": "85afc360",
   "revertCommit": "2b0e0b2b",
-  "rule": "3 / 4 on the same rows as U2-android (revertOrder U2-android → U1-android): the UA .67em-family block margin places the out-of-flow heading 5 px high on Compose ('the' cap top y138 vs y143); PLAN §10 item 8"
+  "rule": "3 / 4 on the same rows as U2-android (revertOrder U2-android → U1-android): the UA .67em-family block margin places the out-of-flow heading 5 px high on Compose ('the' cap top y138 vs y143); PLAN §10 item 14"
  }
 ]

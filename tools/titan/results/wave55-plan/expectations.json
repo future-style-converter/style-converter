@@ -19,7 +19,7 @@
    "tools/titan/results/wave55-plan/probe-decisions/contingency.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
    "tools/titan/results/wave55-plan/probe-decisions/holds.json": "46f3918f5e6eb1cccd109ada475a11cd5cf1a135516bbdabd03d89ee68a735ea",
    "tools/titan/results/wave55-plan/probe-decisions/restate.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
-   "tools/titan/results/wave55-plan/probe-decisions/reverted.json": "9ed66190a224de34471e1ba7430e33d061517b9de2fcd4d8c4612f318f97ccfe",
+   "tools/titan/results/wave55-plan/probe-decisions/reverted.json": "996aff9a993ee3ca866f4d6d7a36aa056cf922081f16152502e3b1fc48e25afd",
    "tools/titan/results/wave55-plan/ua-heading-margin.census.json": "d7b1990061efd20c3aa92c0cffa85190ad031ac30bcea6e25c9f5132c2025a98",
    "tools/titan/results/wave55-plan/ua-heading-margin.census.out.txt": "502694246e8e6f930aee80ed78e3c2fd750b8df9b772b01769e926181275bdad"
   }
@@ -4216,7 +4216,7 @@
       "direction": "up-or-stay",
       "unit": "NB-ios",
       "run": "wave55-pre",
-      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7",
+      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13",
       "withdrawn": true
      }
     },
@@ -4243,7 +4243,7 @@
       "direction": "up-or-stay",
       "unit": "NB-ios",
       "run": "wave55-pre",
-      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7",
+      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13",
       "withdrawn": true
      }
     },
@@ -4270,7 +4270,7 @@
       "direction": "up-or-stay",
       "unit": "NB-ios",
       "run": "wave55-pre",
-      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7",
+      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13",
       "withdrawn": true
      }
     },
@@ -4297,7 +4297,7 @@
       "direction": "up-or-stay",
       "unit": "NB-ios",
       "run": "wave55-pre",
-      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7",
+      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13",
       "withdrawn": true
      }
     },
@@ -4324,7 +4324,7 @@
       "direction": "up-or-stay",
       "unit": "NB-ios",
       "run": "wave55-pre",
-      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7",
+      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13",
       "withdrawn": true
      }
     },
@@ -4351,7 +4351,7 @@
       "direction": "up-or-stay",
       "unit": "NB-ios",
       "run": "wave55-pre",
-      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7",
+      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13",
       "withdrawn": true
      }
     },
@@ -4378,7 +4378,7 @@
       "direction": "up-or-stay",
       "unit": "NB-ios",
       "run": "wave55-pre",
-      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7",
+      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13",
       "withdrawn": true
      }
     },
@@ -4405,7 +4405,7 @@
       "direction": "up-or-stay",
       "unit": "NB-ios",
       "run": "wave55-pre",
-      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7",
+      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13",
       "withdrawn": true
      }
     },
@@ -4432,7 +4432,7 @@
       "direction": "up-or-stay",
       "unit": "NB-ios",
       "run": "wave55-pre",
-      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7",
+      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13",
       "withdrawn": true
      }
     },
@@ -4459,7 +4459,7 @@
       "direction": "up-or-stay",
       "unit": "NB-ios",
       "run": "wave55-pre",
-      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7",
+      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13",
       "withdrawn": true
      }
     },
@@ -4486,7 +4486,7 @@
       "direction": "up-or-stay",
       "unit": "NB-ios",
       "run": "wave55-pre",
-      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7",
+      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13",
       "withdrawn": true
      }
     },
@@ -4513,7 +4513,7 @@
       "direction": "up-or-stay",
       "unit": "NB-ios",
       "run": "wave55-pre",
-      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7",
+      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13",
       "withdrawn": true
      }
     },
@@ -4541,7 +4541,7 @@
       "direction": "up-or-stay",
       "unit": "NB-ios",
       "run": "wave55-pre",
-      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7",
+      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13",
       "withdrawn": true
      }
     },
@@ -4569,7 +4569,7 @@
       "direction": "up-or-stay",
       "unit": "NB-ios",
       "run": "wave55-pre",
-      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7",
+      "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13",
       "withdrawn": true
      }
     }
@@ -4779,9 +4779,9 @@
      "onWave54Final": "3 gating rows WRONG (pitch: group 1 line 4 offset -1; drift [0, -1, -2, -2]); 6 web/android controls OK; 002 ios and the 10 stack rows WRONG (report); every ref row OK; exit 0",
      "teeth": "--fakes (6 fakes built from the REF's own pixels: white, whole+1, u3b-today, drop-u3b, no-u3b, g4+2) all rejected on 001/003/004; --replay Rm/Rw/R0 print the 3 gating rows OK; R1 prints the NB-ios-b `anchor:` trigger; Rd prints drift (probes-selfcheck.txt §L1). Round 1 (instrument-teeth M7) added `glyphs:` — every line's ink crop equals the base capture's same line, translated by whole rows only (correlation ≥ 0.97, same count): text ±2/±3x, one line +3x, a missing hyphenate-character (003 / 004) and two swapped lines are WRONG; the standing fakes are probes-selfcheck.txt §T. Round 2: four new fakes (one hyphen removed, one cell cut, one run +1x, all +1x) are all WRONG; the tally's hyphenate-character-001 / -003 ios controls pass the fixed pictures and reject a cut last cell / a missing hyphen (probes-teeth-r2.py). Round 3 (verify M2, D38): `ink:` — each line's ink mask = the base line's ±2 px (XOR, same crop): a blob in a line or a glyph painted twice is WRONG (probes-teeth-r3.py). Round 4 (D39): that XOR counts both nested masks (min < 200 and the core, min < 100) and is summed over the lines — a 1-px smear that only darkens a glyph's edge is WRONG (probes-selfcheck.txt §T4). Round 6 (verify-r5 M4, D40): geometry-gate.py's RESIDUAL read (residual-read.py) on the 3 gating keys and the 2 tally controls — outside the lines' crop rows (the probe's own core bands ±3, x < 140, capture ∪ base) the capture = the base pixel for pixel, the vacated rows white, every changed px inside a grey: a faint 3×3 between word groups and a faint 30-px line below the text are WRONG (probes-teeth-r5.py; probes-selfcheck.txt §T5)",
      "withdrawn": {
-      "hyphen-ios-linebox 001 ios": "was gating -> NB-ios; unit NB-ios reverted at wave55-pre (rule 1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7)",
-      "hyphen-ios-linebox 003 ios": "was gating -> NB-ios; unit NB-ios reverted at wave55-pre (rule 1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7)",
-      "hyphen-ios-linebox 004 ios": "was gating -> NB-ios; unit NB-ios reverted at wave55-pre (rule 1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7)"
+      "hyphen-ios-linebox 001 ios": "was gating -> NB-ios; unit NB-ios reverted at wave55-pre (rule 1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13)",
+      "hyphen-ios-linebox 003 ios": "was gating -> NB-ios; unit NB-ios reverted at wave55-pre (rule 1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13)",
+      "hyphen-ios-linebox 004 ios": "was gating -> NB-ios; unit NB-ios reverted at wave55-pre (rule 1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13)"
      }
     },
     {
@@ -6217,7 +6217,7 @@
       "direction": "up-or-stay",
       "unit": "U2-ios",
       "run": "wave55-pre",
-      "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 8",
+      "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 14",
       "withdrawn": true
      }
     },
@@ -6246,7 +6246,7 @@
       "direction": "up-or-stay",
       "unit": "U2-ios",
       "run": "wave55-pre",
-      "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 8",
+      "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 14",
       "withdrawn": true
      }
     },
@@ -6275,7 +6275,7 @@
       "direction": "up-or-stay",
       "unit": "U2-ios",
       "run": "wave55-pre",
-      "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 8",
+      "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 14",
       "withdrawn": true
      }
     },
@@ -6304,7 +6304,7 @@
       "direction": "up-or-stay",
       "unit": "U2-android",
       "run": "wave55-pre",
-      "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 8",
+      "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 14",
       "withdrawn": true
      }
     },
@@ -6333,7 +6333,7 @@
       "direction": "up-or-stay",
       "unit": "U2-android",
       "run": "wave55-pre",
-      "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 8",
+      "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 14",
       "withdrawn": true
      }
     },
@@ -6362,7 +6362,7 @@
       "direction": "up-or-stay",
       "unit": "U2-android",
       "run": "wave55-pre",
-      "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 8",
+      "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 14",
       "withdrawn": true
      }
     },
@@ -6390,7 +6390,7 @@
       "direction": "up-or-stay",
       "unit": "U1-ios",
       "run": "wave55-pre",
-      "rule": "3 / 4 on the same rows as U2-ios (revertOrder U2-ios → U1-ios): the UA margin places the out-of-flow heading 5 px high on iOS ('the' cap top y138 vs the ref's y143); PLAN §10 item 8",
+      "rule": "3 / 4 on the same rows as U2-ios (revertOrder U2-ios → U1-ios): the UA margin places the out-of-flow heading 5 px high on iOS ('the' cap top y138 vs the ref's y143); PLAN §10 item 14",
       "withdrawn": true
      }
     },
@@ -6418,7 +6418,7 @@
       "direction": "up-or-stay",
       "unit": "U1-android",
       "run": "wave55-pre",
-      "rule": "3 / 4 on the same rows as U2-android (revertOrder U2-android → U1-android): the UA .67em-family block margin places the out-of-flow heading 5 px high on Compose ('the' cap top y138 vs y143); PLAN §10 item 8",
+      "rule": "3 / 4 on the same rows as U2-android (revertOrder U2-android → U1-android): the UA .67em-family block margin places the out-of-flow heading 5 px high on Compose ('the' cap top y138 vs y143); PLAN §10 item 14",
       "withdrawn": true
      }
     }
@@ -6586,18 +6586,18 @@
      "onWave54Final": "all 8 [M] native rows WRONG; all 6 [F] native rows WRONG; every [C], ref and web row OK (exit 0): gating 14 FAIL, report 2 FAIL, controls PASS",
      "teeth": "--arm T / R (painted basis) / X2 (double margin) / B (face, no margin) / C4 (4 px low) all WRONG on [M]; U1 / C / D OK on [M] ×8; [F] OK only on C and D (D keeps 005 / 006 android WRONG: the report rows) — probes-selfcheck.txt §L4. Round 1 (instrument-teeth M4 + S4): [M] with the 2em face reads the heading's band LIST against the ref (tops / bottoms ±1, left ±3, line-1 right ±12, same count; 005 / 006 android band 1 only: Compose does not wrap), with today's face every band = wave54-final + the margin ±1 and x ±1; [F] gains the same band rule (tops ±1, was ±3) — +12x, +3y, −2y, line 2 removed and line 1 cut to 40 % are WRONG (probes-selfcheck.txt §T). Round 2 (M4): today's face and 011 `crop:` (every band's ink = the BASE capture's band + the margin, correlation ≥ 0.97; --base), the 2em face and [F] `profile:` (line 1's column profile = the ref's at |shift| ≤ 12, ≥ 0.95) — line 1 mirrored / thirds swapped and 011 band 1 mirrored are WRONG; a 10-px clip of line 1's last glyph still passes while X1_TOL = 12 (S1: re-set at stage 1 from the device faces; probes-teeth-r2.py names it, §9 D33). Round 3 (verify M2, D38): today's face / 011 `ink:` (each band's ink mask = the base band + the margin, XOR ≤ 2) and face-present `face ink:` (the ref's component count, dark px ±6 %). Round 4 (verify M1, D39): face-present natives `face xor:` — every band's ink (two nested masks) = the face reference's at its best whole-px shift (±3 x, ±1 y), XOR ≤ 2 over the band's rows ±2 and the whole width; the Compose no-wrap rows read every band when the picture wraps and, when it does not, line 1 left of the ref's right edge plus \"fox\" against the ref's line 2 moved there; the reference is the frozen ref until the stage-1 step-8 edit sets FACE_RUN = wave55-pre — \"brownn\", the heading copied 1 px, \"fox\" copied 5 px right, round 3's named 2×2 blob on a 014 glyph and D33's clip-10 are WRONG (probes-teeth-r4.py). Round 6 (verify-r5 M3, D40): the RESIDUAL read on all 12 keys — outside the dark bands' rows ±2 (capture ∪ base, from y96 / 011 y112 to y399: the rows `face xor:` / `ink:` read) the capture = the base, the vacated rows white, every changed px inside a grey: a faint 3×3 below the heading and a faint or iOS-grey (127,127,127) 30-px line at y276-368 are WRONG (probes-teeth-r5.py)",
      "withdrawn": {
-      "[F] text-decoration-inset-005 ios": "was gating -> U2-ios; unit U2-ios reverted at wave55-pre (rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 8)",
-      "[F] text-decoration-inset-006 ios": "was gating -> U2-ios; unit U2-ios reverted at wave55-pre (rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 8)",
-      "[F] text-decoration-inset-014 ios": "was gating -> U2-ios; unit U2-ios reverted at wave55-pre (rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 8)",
-      "[M] text-decoration-inset-005 ios": "was gating -> U1-ios; unit U1-ios reverted at wave55-pre (rule 3 / 4 on the same rows as U2-ios (revertOrder U2-ios → U1-ios): the UA margin places the out-of-flow heading 5 px high on iOS ('the' cap top y138 vs the ref's y143); PLAN §10 item 8)",
-      "[M] text-decoration-inset-006 ios": "was gating -> U1-ios; unit U1-ios reverted at wave55-pre (rule 3 / 4 on the same rows as U2-ios (revertOrder U2-ios → U1-ios): the UA margin places the out-of-flow heading 5 px high on iOS ('the' cap top y138 vs the ref's y143); PLAN §10 item 8)",
-      "[M] text-decoration-inset-011 ios": "was gating -> U1-ios; unit U1-ios reverted at wave55-pre (rule 3 / 4 on the same rows as U2-ios (revertOrder U2-ios → U1-ios): the UA margin places the out-of-flow heading 5 px high on iOS ('the' cap top y138 vs the ref's y143); PLAN §10 item 8)",
-      "[M] text-decoration-inset-014 ios": "was gating -> U1-ios; unit U1-ios reverted at wave55-pre (rule 3 / 4 on the same rows as U2-ios (revertOrder U2-ios → U1-ios): the UA margin places the out-of-flow heading 5 px high on iOS ('the' cap top y138 vs the ref's y143); PLAN §10 item 8)",
-      "[F] text-decoration-inset-014 android": "was gating -> U2-android; unit U2-android reverted at wave55-pre (rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 8)",
-      "[M] text-decoration-inset-005 android": "was gating -> U1-android; unit U1-android reverted at wave55-pre (rule 3 / 4 on the same rows as U2-android (revertOrder U2-android → U1-android): the UA .67em-family block margin places the out-of-flow heading 5 px high on Compose ('the' cap top y138 vs y143); PLAN §10 item 8)",
-      "[M] text-decoration-inset-006 android": "was gating -> U1-android; unit U1-android reverted at wave55-pre (rule 3 / 4 on the same rows as U2-android (revertOrder U2-android → U1-android): the UA .67em-family block margin places the out-of-flow heading 5 px high on Compose ('the' cap top y138 vs y143); PLAN §10 item 8)",
-      "[M] text-decoration-inset-011 android": "was gating -> U1-android; unit U1-android reverted at wave55-pre (rule 3 / 4 on the same rows as U2-android (revertOrder U2-android → U1-android): the UA .67em-family block margin places the out-of-flow heading 5 px high on Compose ('the' cap top y138 vs y143); PLAN §10 item 8)",
-      "[M] text-decoration-inset-014 android": "was gating -> U1-android; unit U1-android reverted at wave55-pre (rule 3 / 4 on the same rows as U2-android (revertOrder U2-android → U1-android): the UA .67em-family block margin places the out-of-flow heading 5 px high on Compose ('the' cap top y138 vs y143); PLAN §10 item 8)"
+      "[F] text-decoration-inset-005 ios": "was gating -> U2-ios; unit U2-ios reverted at wave55-pre (rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 14)",
+      "[F] text-decoration-inset-006 ios": "was gating -> U2-ios; unit U2-ios reverted at wave55-pre (rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 14)",
+      "[F] text-decoration-inset-014 ios": "was gating -> U2-ios; unit U2-ios reverted at wave55-pre (rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 14)",
+      "[M] text-decoration-inset-005 ios": "was gating -> U1-ios; unit U1-ios reverted at wave55-pre (rule 3 / 4 on the same rows as U2-ios (revertOrder U2-ios → U1-ios): the UA margin places the out-of-flow heading 5 px high on iOS ('the' cap top y138 vs the ref's y143); PLAN §10 item 14)",
+      "[M] text-decoration-inset-006 ios": "was gating -> U1-ios; unit U1-ios reverted at wave55-pre (rule 3 / 4 on the same rows as U2-ios (revertOrder U2-ios → U1-ios): the UA margin places the out-of-flow heading 5 px high on iOS ('the' cap top y138 vs the ref's y143); PLAN §10 item 14)",
+      "[M] text-decoration-inset-011 ios": "was gating -> U1-ios; unit U1-ios reverted at wave55-pre (rule 3 / 4 on the same rows as U2-ios (revertOrder U2-ios → U1-ios): the UA margin places the out-of-flow heading 5 px high on iOS ('the' cap top y138 vs the ref's y143); PLAN §10 item 14)",
+      "[M] text-decoration-inset-014 ios": "was gating -> U1-ios; unit U1-ios reverted at wave55-pre (rule 3 / 4 on the same rows as U2-ios (revertOrder U2-ios → U1-ios): the UA margin places the out-of-flow heading 5 px high on iOS ('the' cap top y138 vs the ref's y143); PLAN §10 item 14)",
+      "[F] text-decoration-inset-014 android": "was gating -> U2-android; unit U2-android reverted at wave55-pre (rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 14)",
+      "[M] text-decoration-inset-005 android": "was gating -> U1-android; unit U1-android reverted at wave55-pre (rule 3 / 4 on the same rows as U2-android (revertOrder U2-android → U1-android): the UA .67em-family block margin places the out-of-flow heading 5 px high on Compose ('the' cap top y138 vs y143); PLAN §10 item 14)",
+      "[M] text-decoration-inset-006 android": "was gating -> U1-android; unit U1-android reverted at wave55-pre (rule 3 / 4 on the same rows as U2-android (revertOrder U2-android → U1-android): the UA .67em-family block margin places the out-of-flow heading 5 px high on Compose ('the' cap top y138 vs y143); PLAN §10 item 14)",
+      "[M] text-decoration-inset-011 android": "was gating -> U1-android; unit U1-android reverted at wave55-pre (rule 3 / 4 on the same rows as U2-android (revertOrder U2-android → U1-android): the UA .67em-family block margin places the out-of-flow heading 5 px high on Compose ('the' cap top y138 vs y143); PLAN §10 item 14)",
+      "[M] text-decoration-inset-014 android": "was gating -> U1-android; unit U1-android reverted at wave55-pre (rule 3 / 4 on the same rows as U2-android (revertOrder U2-android → U1-android): the UA .67em-family block margin places the out-of-flow heading 5 px high on Compose ('the' cap top y138 vs y143); PLAN §10 item 14)"
      }
     },
     {
@@ -8911,7 +8911,7 @@
     "NB-ios"
    ],
    "expect": "exactly 6 cells differ (ab-diff lists a flip or |Δ| ≥ 0.002): hyphenate-character-001 / -002 / -003 / -004 ios, Δ (final − arm) ≈ +0.017 / +0.016 / +0.019 / +0.027 (-004 a flip), and text-decoration-dotted-001 / -002 ios ≈ +0.004 / +0.005; boundary-shaping-001…008 ios within 0.0002 (not listed); hyphens-vertical-001 ios byte-identical (D22: the vertical guard declines it); any other differing iOS cell is a leak. With NB-ios-b landed the arm drops NB-ios-b, then NB-ios: the same 6 cells",
-   "withdrawnBy": "NB-ios reverted at wave55-pre (rule 1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7)"
+   "withdrawnBy": "NB-ios reverted at wave55-pre (rule 1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13)"
   },
   {
    "arm": "drop-L4-U2",
@@ -8936,7 +8936,7 @@
     "U2-android"
    ],
    "expect": "the arm is U1 alone (arm M): 005 ios ≈0.9167 / android ≈0.9121; 006 ≈0.9164 / ≈0.9117; 014 ≈0.9336 / ≈0.9328 — every one up from wave55-open and f (MED-HIGH); read against wave55-pre, Δ (pre − arm) on those six cells is U2's own contribution; the inset-011 natives are identical (U2 stands down on 011)",
-   "withdrawnBy": "U2-ios reverted at wave55-pre (rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 8); U2-android reverted at wave55-pre (rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 8)"
+   "withdrawnBy": "U2-ios reverted at wave55-pre (rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 14); U2-android reverted at wave55-pre (rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 14)"
   }
  ],
  "probeDecisions": {
@@ -8947,7 +8947,7 @@
     "run": "wave55-pre",
     "commit": "b7108a42",
     "revertCommit": "22c51ee9",
-    "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 7",
+    "rule": "1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13",
     "withdrawnPredictions": [
      "css-text/hyphens/hyphenate-character-001.html ios",
      "css-text/hyphens/hyphenate-character-003.html ios",
@@ -9016,7 +9016,7 @@
     "run": "wave55-pre",
     "commit": "1dc521c1",
     "revertCommit": "131cd6e1",
-    "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 8",
+    "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 14",
     "withdrawnPredictions": [
      "css-text-decor/text-decoration-inset-005.html ios",
      "css-text-decor/text-decoration-inset-006.html ios",
@@ -9052,7 +9052,7 @@
     "run": "wave55-pre",
     "commit": "cac1d6a3",
     "revertCommit": "adc05081",
-    "rule": "3 / 4 on the same rows as U2-ios (revertOrder U2-ios → U1-ios): the UA margin places the out-of-flow heading 5 px high on iOS ('the' cap top y138 vs the ref's y143); PLAN §10 item 8",
+    "rule": "3 / 4 on the same rows as U2-ios (revertOrder U2-ios → U1-ios): the UA margin places the out-of-flow heading 5 px high on iOS ('the' cap top y138 vs the ref's y143); PLAN §10 item 14",
     "withdrawnPredictions": [
      "css-text-decor/text-decoration-inset-005.html ios",
      "css-text-decor/text-decoration-inset-006.html ios",
@@ -9092,7 +9092,7 @@
     "run": "wave55-pre",
     "commit": "69f95267",
     "revertCommit": "db7b2417",
-    "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 8",
+    "rule": "3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 14",
     "withdrawnPredictions": [
      "css-text-decor/text-decoration-inset-014.html android",
      "css-text-decor/text-decoration-inset-005.html android",
@@ -9126,7 +9126,7 @@
     "run": "wave55-pre",
     "commit": "85afc360",
     "revertCommit": "2b0e0b2b",
-    "rule": "3 / 4 on the same rows as U2-android (revertOrder U2-android → U1-android): the UA .67em-family block margin places the out-of-flow heading 5 px high on Compose ('the' cap top y138 vs y143); PLAN §10 item 8",
+    "rule": "3 / 4 on the same rows as U2-android (revertOrder U2-android → U1-android): the UA .67em-family block margin places the out-of-flow heading 5 px high on Compose ('the' cap top y138 vs y143); PLAN §10 item 14",
     "withdrawnPredictions": [
      "css-text-decor/text-decoration-inset-014.html android",
      "css-text-decor/text-decoration-inset-005.html android",

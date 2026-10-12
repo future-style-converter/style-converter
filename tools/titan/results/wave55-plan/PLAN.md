@@ -38,7 +38,7 @@ regeneration is followed by `plan-prose.py --fill` and `--check` in the same com
 
 <!-- gen:header (plan-prose.py; do not edit by hand) -->
 - Run of record **`wave54-final`**: web 1243/1372 · ios 1131/1362 · android 1128/1362, 4096 scored cells (`cells-wave54-final.json` `totals`, written by `snapshot-cells.mjs` with the scorer's own `loadRun`).
-- `expectations.json` sha256 `b773904f788d023d651977e381e36c72865c94019925ba5f9b25607db709f5c6`: readAgainst `wave54-final`, base `wave55-open`, interpreter `/opt/homebrew/bin/python3.12 -B`.
+- `expectations.json` sha256 `e65366b69eebf74555835a88dff1024c35d54380f6d5b9fc68a9fe0c141e46e3`: readAgainst `wave54-final`, base `wave55-open`, interpreter `/opt/homebrew/bin/python3.12 -B`.
 - Opening gate (`expectations.json` `openingGate.recorded`): tools/titan/results/wave55-gate/_note.md and score-open.* / control-open.* (commit 640276a0): 0 gained / 0 lost / 0 movers at any Δ / 0 newly measured / 0 unmeasured-now over 4096 cells; control identity 1435/1435 on web, iOS, Android and the wire; fixture net exit 0 ×9 — so every "from" this generator verified against wave54-final holds against wave55-open; no restatement is needed (§10 empty)
 <!-- /gen:header -->
 
@@ -438,32 +438,32 @@ prints OK on the closing run (`geometry-final.json`); a multi-key entry is all o
 <!-- gen:tally (plan-prose.py; do not edit by hand) -->
 Rule (`expectations.json` `pictureCorrectTally.rule`): a cell is counted picture-correct at the closing gate ONLY when EVERY one of its keys prints "→ GEOMETRY OK" / "→ LINEBOX OK" on the closing run (geometry-gate.py); a pass whose keys are not all OK stays DEGENERATE and is not counted — round 6 (D40): every key's geometry-gate.py row PASS, i.e. its probe line OK AND its residual read 0 / 0 / 0 (outside the cell's declared change zone the capture = wave55-open)
 
-**18 in full · 0 in part · 4 paint order only (never counted) · 0 withdrawn by probe decisions.**
+**16 in full · 0 in part · 4 paint order only (never counted) · 2 withdrawn by probe decisions.**
 
 | # | cell | its key(s) (every one must print OK on the closing run) |
 |---|---|---|
-| 1 | `css-text/hyphens/hyphenate-character-001.html ios` | hyphen-ios-linebox.geometry.py hyphen-ios-linebox 001 ios; hyphenate-character.geometry.py hyphenate-character-001 ios |
-| 2 | `css-text/hyphens/hyphenate-character-003.html ios` | hyphen-ios-linebox.geometry.py hyphen-ios-linebox 003 ios; hyphenate-character.geometry.py hyphenate-character-003 ios |
-| 3 | `css-flexbox/abspos/abspos-autopos-htb-ltr.html android` | compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-htb-ltr android |
-| 4 | `css-flexbox/abspos/abspos-autopos-vlr-ltr.html android` | compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vlr-ltr android |
-| 5 | `css-flexbox/abspos/abspos-autopos-vrl-ltr.html android` | compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vrl-ltr android |
-| 6 | `filter-effects/backdrop-filter-nested-border-radius-clip.html android` | compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip android |
-| 7 | `filter-effects/backdrop-filter-nested-border-radius-clip-2.html android` | compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-2 android |
-| 8 | `filter-effects/backdrop-filter-nested-border-radius-clip-4.html android` | compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-4 android |
-| 9 | `css-text/bidi/bidi-tab-001.html android` | positioned-parent-slot.geometry.py [S] bidi-tab-001 android rtl-rows |
-| 10 | `css-writing-modes/dynamic-offset-rtl-001.html android` | positioned-parent-slot.geometry.py [S] dynamic-offset-rtl-001 android |
-| 11 | `css-writing-modes/dynamic-offset-vrl-rtl-001.html android` | positioned-parent-slot.geometry.py [S] dynamic-offset-vrl-rtl-001 android |
-| 12 | `css-counter-styles/counter-suffix.html ios` | counter-suffix-rows.geometry.py [H] counter-suffix ios; counter-suffix-rows.geometry.py [C] counter-suffix ios; counter-suffix-rows.geometry.py [T] counter-suffix ios; counter-suffix-rows.geometry.py [K] counter-suffix ios |
-| 13 | `css-counter-styles/counter-suffix.html android` | counter-suffix-rows.geometry.py [C] counter-suffix android; counter-suffix-rows.geometry.py [K] counter-suffix android |
-| 14 | `css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios` | counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 ios |
-| 15 | `css-counter-styles/cjk-decimal/css3-counter-styles-005.html android` | counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 android |
-| 16 | `filter-effects/backdrop-filter-clip-rect.html android` | android-paint-order.geometry.py [PO] backdrop-filter-clip-rect android |
-| 17 | `css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html android` | android-paint-order.geometry.py [X] flex-abspos-staticpos-align-self-safe-001 android |
-| 18 | `css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html android` | android-paint-order.geometry.py [X] flex-abspos-staticpos-align-self-safe-002 android |
+| 1 | `css-flexbox/abspos/abspos-autopos-htb-ltr.html android` | compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-htb-ltr android |
+| 2 | `css-flexbox/abspos/abspos-autopos-vlr-ltr.html android` | compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vlr-ltr android |
+| 3 | `css-flexbox/abspos/abspos-autopos-vrl-ltr.html android` | compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vrl-ltr android |
+| 4 | `filter-effects/backdrop-filter-nested-border-radius-clip.html android` | compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip android |
+| 5 | `filter-effects/backdrop-filter-nested-border-radius-clip-2.html android` | compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-2 android |
+| 6 | `filter-effects/backdrop-filter-nested-border-radius-clip-4.html android` | compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-4 android |
+| 7 | `css-text/bidi/bidi-tab-001.html android` | positioned-parent-slot.geometry.py [S] bidi-tab-001 android rtl-rows |
+| 8 | `css-writing-modes/dynamic-offset-rtl-001.html android` | positioned-parent-slot.geometry.py [S] dynamic-offset-rtl-001 android |
+| 9 | `css-writing-modes/dynamic-offset-vrl-rtl-001.html android` | positioned-parent-slot.geometry.py [S] dynamic-offset-vrl-rtl-001 android |
+| 10 | `css-counter-styles/counter-suffix.html ios` | counter-suffix-rows.geometry.py [H] counter-suffix ios; counter-suffix-rows.geometry.py [C] counter-suffix ios; counter-suffix-rows.geometry.py [T] counter-suffix ios; counter-suffix-rows.geometry.py [K] counter-suffix ios |
+| 11 | `css-counter-styles/counter-suffix.html android` | counter-suffix-rows.geometry.py [C] counter-suffix android; counter-suffix-rows.geometry.py [K] counter-suffix android |
+| 12 | `css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios` | counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 ios |
+| 13 | `css-counter-styles/cjk-decimal/css3-counter-styles-005.html android` | counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 android |
+| 14 | `filter-effects/backdrop-filter-clip-rect.html android` | android-paint-order.geometry.py [PO] backdrop-filter-clip-rect android |
+| 15 | `css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html android` | android-paint-order.geometry.py [X] flex-abspos-staticpos-align-self-safe-001 android |
+| 16 | `css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html android` | android-paint-order.geometry.py [X] flex-abspos-staticpos-align-self-safe-002 android |
 | paint order only | `css-grid/abspos/grid-abspos-staticpos-align-self-001.html android` | android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-001 android |
 | paint order only | `css-grid/abspos/grid-abspos-staticpos-justify-self-001.html android` | android-paint-order.geometry.py [X] grid-abspos-staticpos-justify-self-001 android |
 | paint order only | `css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html android` | android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-vertWM-001 android |
 | paint order only | `css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html android` | android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-rtl-001 android |
+| withdrawn | `css-text/hyphens/hyphenate-character-001.html ios` | {"cell": "css-text/hyphens/hyphenate-character-001.html ios", "keys": ["hyphen-ios-linebox.geometry.py hyphen-ios-linebox 001 ios", "hyphenate-character.geometry.py hyphenate-character-001 ios"]} |
+| withdrawn | `css-text/hyphens/hyphenate-character-003.html ios` | {"cell": "css-text/hyphens/hyphenate-character-003.html ios", "keys": ["hyphen-ios-linebox.geometry.py hyphen-ios-linebox 003 ios", "hyphenate-character.geometry.py hyphenate-character-003 ios"]} |
 
 `paintOrderOnlyRule`: paint order corrected; static-position residue: these cells are NEVER counted picture-correct — their [X] key certifies only that the parent band paints behind the child (CSS 2.1 App. E); the abspos children sit 3-22 px off the ref in the lane's own U2 replay (grid static-position alignment, not this lane). With every key OK the PR may say "paint order corrected" for them, nothing more (round-1 M8, D23)
 <!-- /gen:tally -->
@@ -474,7 +474,7 @@ Rule (`expectations.json` `pictureCorrectTally.rule`): a cell is counted picture
 <!-- gen:tally-by-lane (plan-prose.py; do not edit by hand) -->
 | lane | in full | paint order only (never counted) | withdrawn by probe decisions | cells (in full) |
 |---|---|---|---|---|
-| L1-hyphen-ios-linebox | 2 | 0 | 0 | `css-text/hyphens/hyphenate-character-001.html ios`, `css-text/hyphens/hyphenate-character-003.html ios` |
+| L1-hyphen-ios-linebox | 0 | 0 | 2 | — |
 | L2-cbb-android | 6 | 0 | 0 | `css-flexbox/abspos/abspos-autopos-htb-ltr.html android`, `css-flexbox/abspos/abspos-autopos-vlr-ltr.html android`, `css-flexbox/abspos/abspos-autopos-vrl-ltr.html android`, `filter-effects/backdrop-filter-nested-border-radius-clip.html android`, `filter-effects/backdrop-filter-nested-border-radius-clip-2.html android`, `filter-effects/backdrop-filter-nested-border-radius-clip-4.html android` |
 | L3-positioned-parent-slot | 3 | 0 | 0 | `css-text/bidi/bidi-tab-001.html android`, `css-writing-modes/dynamic-offset-rtl-001.html android`, `css-writing-modes/dynamic-offset-vrl-rtl-001.html android` |
 | L5-counter-suffix-rows | 4 | 0 | 0 | `css-counter-styles/counter-suffix.html ios`, `css-counter-styles/counter-suffix.html android`, `css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios`, `css-counter-styles/cjk-decimal/css3-counter-styles-005.html android` |
@@ -623,10 +623,10 @@ must-not-move exclusions (another lane's carrier on that platform, or the ring-f
 <!-- gen:union (plan-prose.py; do not edit by hand) -->
 | lane | captures web / ios / android | wire | may-move (android) | named must-not-move | predictions | gating rows | revert units |
 |---|---|---|---|---|---|---|---|
-| L1-hyphen-ios-linebox | 0 / 14 / 0 | 0 | 0 | 132 | 14 | 11 | 1 (+ 1 contingency) |
+| L1-hyphen-ios-linebox | 0 / 14 / 0 | 0 | 0 | 132 | 14 | 0 | 1 (+ 1 contingency) |
 | L2-cbb-android | 0 / 0 / 14 | 0 | 0 | 119 | 14 | 10 | 2 |
 | L3-positioned-parent-slot | 0 / 0 / 9 | 0 | 0 | 187 | 9 | 6 | 2 |
-| L4-ua-heading-margin | 0 / 4 / 4 | 0 | 0 | 46 | 8 | 6 | 4 |
+| L4-ua-heading-margin | 0 / 4 / 4 | 0 | 0 | 46 | 8 | 0 | 4 |
 | L5-counter-suffix-rows | 0 / 5 / 4 | 0 | 0 | 116 | 7 | 4 | 7 (+ 1 contingency) |
 | L6-android-paint-order | 0 / 0 / 27 | 0 | 241 | 65 | 29 | 7 | 3 |
 | L7-instruments | 0 / 0 / 0 | 0 | 0 | 42 | 6 | 0 | 9 |
@@ -756,18 +756,18 @@ SwiftUI seam hunk, and a pre-registered contingency (NB-ios-b).**
 <!-- gen:L1-predictions (plan-prose.py; do not edit by hand) -->
 | cell | from → to | tier | floor · gating | direction | units | geometry |
 |---|---|---|---|---|---|---|
-| `css-text/hyphens/hyphenate-character-001.html ios` | P 0.9611 → P ≈0.978 (replay Rm 0.978; drop-U3b arm 0.9778; ceiling R0 0.9803; §9 R1 risk arm 0.9628) | MED | **0.95** · gating | up-or-stay | NB-ios | LINEBOX OK |
-| `css-text/hyphens/hyphenate-character-003.html ios` | P 0.957 → P ≈0.976 (Rm 0.9759; arm 0.9758; R0 0.9785; R1 0.9592) | MED | **0.95** · gating | up-or-stay | NB-ios | LINEBOX OK |
-| `css-text/hyphens/hyphenate-character-004.html ios` | f 0.9477 → P ≈0.975 (Rm 0.975; arm 0.9742; R0 0.9782; R1 0.9556) | MED | **0.95** · gating | up-or-stay | NB-ios | LINEBOX OK |
+| `css-text/hyphens/hyphenate-character-001.html ios` | P 0.9611 → P ≈0.978 (replay Rm 0.978; drop-U3b arm 0.9778; ceiling R0 0.9803; §9 R1 risk arm 0.9628) | MED | — · not gating | up-or-stay | NB-ios | LINEBOX OK |
+| `css-text/hyphens/hyphenate-character-003.html ios` | P 0.957 → P ≈0.976 (Rm 0.9759; arm 0.9758; R0 0.9785; R1 0.9592) | MED | — · not gating | up-or-stay | NB-ios | LINEBOX OK |
+| `css-text/hyphens/hyphenate-character-004.html ios` | f 0.9477 → P ≈0.975 (Rm 0.975; arm 0.9742; R0 0.9782; R1 0.9556) | MED | — · not gating | up-or-stay | NB-ios | LINEBOX OK |
 | `css-text/hyphens/hyphenate-character-002.html ios` | P 0.9534 → P ≈0.969 (Rm 0.9691; arm 0.9692); the TextKit emergency breaks stay | MED | — · not gating | up-or-stay | NB-ios | LINEBOX OK (report key) |
-| `css-text/boundary-shaping/boundary-shaping-001.html ios` | P 0.9792 → P, the same to ±0.0001 (radius replay U 0.9792) | MED-HIGH | **0.95** · gating | up-or-stay | NB-ios | STACK OK (report key) |
-| `css-text/boundary-shaping/boundary-shaping-002.html ios` | P 0.9695 → P, the same to ±0.0001 (radius replay U 0.9694) | MED-HIGH | **0.95** · gating | up-or-stay | NB-ios | STACK OK (report key) |
-| `css-text/boundary-shaping/boundary-shaping-003.html ios` | P 0.9781 → P, the same to ±0.0001 (radius replay U 0.9781) | MED-HIGH | **0.95** · gating | up-or-stay | NB-ios | STACK OK (report key) |
-| `css-text/boundary-shaping/boundary-shaping-004.html ios` | P 0.9774 → P, the same to ±0.0001 (radius replay U 0.9774) | MED-HIGH | **0.95** · gating | up-or-stay | NB-ios | STACK OK (report key) |
-| `css-text/boundary-shaping/boundary-shaping-005.html ios` | P 0.9774 → P, the same to ±0.0001 (radius replay U 0.9774) | MED-HIGH | **0.95** · gating | up-or-stay | NB-ios | STACK OK (report key) |
-| `css-text/boundary-shaping/boundary-shaping-006.html ios` | P 0.9714 → P, the same to ±0.0001 (radius replay U 0.9714) | MED-HIGH | **0.95** · gating | up-or-stay | NB-ios | STACK OK (report key) |
-| `css-text/boundary-shaping/boundary-shaping-007.html ios` | P 0.9764 → P, the same to ±0.0001 (radius replay U 0.9764) | MED-HIGH | **0.95** · gating | up-or-stay | NB-ios | STACK OK (report key) |
-| `css-text/boundary-shaping/boundary-shaping-008.html ios` | P 0.9789 → P, the same to ±0.0001 (radius replay U 0.9789) | MED-HIGH | **0.95** · gating | up-or-stay | NB-ios | STACK OK (report key) |
+| `css-text/boundary-shaping/boundary-shaping-001.html ios` | P 0.9792 → P, the same to ±0.0001 (radius replay U 0.9792) | MED-HIGH | — · not gating | up-or-stay | NB-ios | STACK OK (report key) |
+| `css-text/boundary-shaping/boundary-shaping-002.html ios` | P 0.9695 → P, the same to ±0.0001 (radius replay U 0.9694) | MED-HIGH | — · not gating | up-or-stay | NB-ios | STACK OK (report key) |
+| `css-text/boundary-shaping/boundary-shaping-003.html ios` | P 0.9781 → P, the same to ±0.0001 (radius replay U 0.9781) | MED-HIGH | — · not gating | up-or-stay | NB-ios | STACK OK (report key) |
+| `css-text/boundary-shaping/boundary-shaping-004.html ios` | P 0.9774 → P, the same to ±0.0001 (radius replay U 0.9774) | MED-HIGH | — · not gating | up-or-stay | NB-ios | STACK OK (report key) |
+| `css-text/boundary-shaping/boundary-shaping-005.html ios` | P 0.9774 → P, the same to ±0.0001 (radius replay U 0.9774) | MED-HIGH | — · not gating | up-or-stay | NB-ios | STACK OK (report key) |
+| `css-text/boundary-shaping/boundary-shaping-006.html ios` | P 0.9714 → P, the same to ±0.0001 (radius replay U 0.9714) | MED-HIGH | — · not gating | up-or-stay | NB-ios | STACK OK (report key) |
+| `css-text/boundary-shaping/boundary-shaping-007.html ios` | P 0.9764 → P, the same to ±0.0001 (radius replay U 0.9764) | MED-HIGH | — · not gating | up-or-stay | NB-ios | STACK OK (report key) |
+| `css-text/boundary-shaping/boundary-shaping-008.html ios` | P 0.9789 → P, the same to ±0.0001 (radius replay U 0.9789) | MED-HIGH | — · not gating | up-or-stay | NB-ios | STACK OK (report key) |
 | `css-text-decor/text-decoration-dotted-001.html ios` | f 0.5318 → f ≈0.5355 (radius replay U), stays f | LOW-MED | floorNA · not gating | up-or-stay | NB-ios | STACK OK (report key) |
 | `css-text-decor/text-decoration-dotted-002.html ios` | f 0.5426 → f ≈0.5472 (radius replay U), stays f | LOW-MED | floorNA · not gating | up-or-stay | NB-ios | STACK OK (report key) |
 <!-- /gen:L1-predictions -->
@@ -780,12 +780,9 @@ SwiftUI seam hunk, and a pre-registered contingency (NB-ios-b).**
   changes the gate's exit, but it does stop the picture-correct claim.
 
 <!-- gen:L1-geometry (plan-prose.py; do not edit by hand) -->
-- `/opt/homebrew/bin/python3.12 -B tools/titan/results/wave55-plan/hyphen-ios-linebox.geometry.py <run> --base <base>` — 20 keys: gating 3 · report 11 · control 6
-  - GATING `hyphen-ios-linebox 001 ios` → `LINEBOX OK` reverts **NB-ios**
-  - GATING `hyphen-ios-linebox 003 ios` → `LINEBOX OK` reverts **NB-ios**
-  - GATING `hyphen-ios-linebox 004 ios` → `LINEBOX OK` reverts **NB-ios**
+- `/opt/homebrew/bin/python3.12 -B tools/titan/results/wave55-plan/hyphen-ios-linebox.geometry.py <run> --base <base>` — 20 keys: gating 0 · report 11 · control 9
   - report: `hyphen-ios-linebox 002 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-001 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-002 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-003 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-004 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-005 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-006 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-007 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-008 ios`, `hyphen-ios-linebox stack text-decoration-dotted-001 ios`, `hyphen-ios-linebox stack text-decoration-dotted-002 ios`
-  - control: `hyphen-ios-linebox 001 web`, `hyphen-ios-linebox 001 android`, `hyphen-ios-linebox 003 web`, `hyphen-ios-linebox 003 android`, `hyphen-ios-linebox 004 web`, `hyphen-ios-linebox 004 android`
+  - control: `hyphen-ios-linebox 001 web`, `hyphen-ios-linebox 001 ios`, `hyphen-ios-linebox 001 android`, `hyphen-ios-linebox 003 web`, `hyphen-ios-linebox 003 ios`, `hyphen-ios-linebox 003 android`, `hyphen-ios-linebox 004 web`, `hyphen-ios-linebox 004 ios`, `hyphen-ios-linebox 004 android`
   - `reasonToUnit`: `pitch:` → NB-ios (or the wave-54 U3b reverted underneath it); `drift:` → NB-ios (or U3b reverted underneath it); `anchor:` → alone: swap in the contingency NB-ios-b (revertRule 8), re-probe css-text; `lines:` → not this lane (wave-54 U2-ios / U3); `glyphs:` → NB-ios (a line-box unit moved glyphs or broke lines: read the picture against wave55-open)
   - `onWave54Final`: 3 gating rows WRONG (pitch: group 1 line 4 offset -1; drift [0, -1, -2, -2]); 6 web/android controls OK; 002 ios and the 10 stack rows WRONG (report); every ref row OK; exit 0
   - `teeth`: --fakes (6 fakes built from the REF's own pixels: white, whole+1, u3b-today, drop-u3b, no-u3b, g4+2) all rejected on 001/003/004; --replay Rm/Rw/R0 print the 3 gating rows OK; R1 prints the NB-ios-b `anchor:` trigger; Rd prints drift (probes-selfcheck.txt §L1). Round 1 (instrument-teeth M7) added `glyphs:` — every line's ink crop equals the base capture's same line, translated by whole rows only (correlation ≥ 0.97, same count): text ±2/±3x, one line +3x, a missing hyphenate-character (003 / 004) and two swapped lines are WRONG; the standing fakes are probes-selfcheck.txt §T. Round 2: four new fakes (one hyphen removed, one cell cut, one run +1x, all +1x) are all WRONG; the tally's hyphenate-character-001 / -003 ios controls pass the fixed pictures and reject a cut last cell / a missing hyphen (probes-teeth-r2.py). Round 3 (verify M2, D38): `ink:` — each line's ink mask = the base line's ±2 px (XOR, same crop): a blob in a line or a glyph painted twice is WRONG (probes-teeth-r3.py). Round 4 (D39): that XOR counts both nested masks (min < 200 and the core, min < 100) and is summed over the lines — a 1-px smear that only darkens a glyph's edge is WRONG (probes-selfcheck.txt §T4). Round 6 (verify-r5 M4, D40): geometry-gate.py's RESIDUAL read (residual-read.py) on the 3 gating keys and the 2 tally controls — outside the lines' crop rows (the probe's own core bands ±3, x < 140, capture ∪ base) the capture = the base pixel for pixel, the vacated rows white, every changed px inside a grey: a faint 3×3 between word groups and a faint 30-px line below the text are WRONG (probes-teeth-r5.py; probes-selfcheck.txt §T5)
@@ -1202,12 +1199,12 @@ U2-android.**
 <!-- gen:L4-predictions (plan-prose.py; do not edit by hand) -->
 | cell | from → to | tier | floor · gating | direction | units | geometry |
 |---|---|---|---|---|---|---|
-| `css-text-decor/text-decoration-inset-005.html ios` | f 0.8995 → P ≈0.966 (arm C 0.9976 minus the iOS raster allowance: 0.9631-0.9695) | MED | **0.95** · gating | up-or-stay | U1-ios, U2-ios | GEOMETRY OK |
-| `css-text-decor/text-decoration-inset-006.html ios` | f 0.8987 → P ≈0.966 (0.9632-0.9696) | MED | **0.95** · gating | up-or-stay | U1-ios, U2-ios | GEOMETRY OK |
-| `css-text-decor/text-decoration-inset-014.html ios` | f 0.9238 → P ≈0.967 (0.9635-0.9699; no monospace anchor, R6) | MED-LOW | **0.95** · gating | up-or-stay | U1-ios, U2-ios | GEOMETRY OK |
-| `css-text-decor/text-decoration-inset-014.html android` | f 0.923 → P ≈0.985 (0.9832-0.9861) | MED | **0.95** · gating | up-or-stay | U1-android, U2-android | GEOMETRY OK |
-| `css-text-decor/text-decoration-inset-005.html android` | f 0.9 → P ≈0.967 (0.9655-0.9684) | MED-LOW | **0.95** · gating | up-or-stay | U1-android, U2-android | [M] GEOMETRY OK; [F] report (1 heading line band vs ref 2) |
-| `css-text-decor/text-decoration-inset-006.html android` | f 0.8993 → P ≈0.967 (0.9656-0.9685) | MED-LOW | **0.95** · gating | up-or-stay | U1-android, U2-android | [M] GEOMETRY OK; [F] report (1 heading line band vs ref 2) |
+| `css-text-decor/text-decoration-inset-005.html ios` | f 0.8995 → P ≈0.966 (arm C 0.9976 minus the iOS raster allowance: 0.9631-0.9695) | MED | — · not gating | up-or-stay | U1-ios, U2-ios | GEOMETRY OK |
+| `css-text-decor/text-decoration-inset-006.html ios` | f 0.8987 → P ≈0.966 (0.9632-0.9696) | MED | — · not gating | up-or-stay | U1-ios, U2-ios | GEOMETRY OK |
+| `css-text-decor/text-decoration-inset-014.html ios` | f 0.9238 → P ≈0.967 (0.9635-0.9699; no monospace anchor, R6) | MED-LOW | — · not gating | up-or-stay | U1-ios, U2-ios | GEOMETRY OK |
+| `css-text-decor/text-decoration-inset-014.html android` | f 0.923 → P ≈0.985 (0.9832-0.9861) | MED | — · not gating | up-or-stay | U1-android, U2-android | GEOMETRY OK |
+| `css-text-decor/text-decoration-inset-005.html android` | f 0.9 → P ≈0.967 (0.9655-0.9684) | MED-LOW | — · not gating | up-or-stay | U1-android, U2-android | [M] GEOMETRY OK; [F] report (1 heading line band vs ref 2) |
+| `css-text-decor/text-decoration-inset-006.html android` | f 0.8993 → P ≈0.967 (0.9656-0.9685) | MED-LOW | — · not gating | up-or-stay | U1-android, U2-android | [M] GEOMETRY OK; [F] report (1 heading line band vs ref 2) |
 | `css-text-decor/text-decoration-inset-011.html ios` | f 0.6999 → f ≈0.712 (arm M 0.7106-0.714) | MED | floorNA · not gating | up-or-stay | U1-ios | GEOMETRY OK |
 | `css-text-decor/text-decoration-inset-011.html android` | f 0.6852 → f ≈0.691 (arm M 0.6896-0.6933) | MED | floorNA · not gating | up-or-stay | U1-android | GEOMETRY OK |
 <!-- /gen:L4-predictions -->
@@ -1221,21 +1218,9 @@ U2-android.**
   retires a degenerate gain on. If the stage-1 iOS picture needs ±2, the measured row is recorded and decided in §10.
 
 <!-- gen:L4-geometry (plan-prose.py; do not edit by hand) -->
-- `/opt/homebrew/bin/python3.12 -B tools/titan/results/wave55-plan/ua-heading-margin.geometry.py <run> --base <base>` — 41 keys: gating 12 · report 2 · control 27
-  - GATING `[M] text-decoration-inset-005 ios` → `GEOMETRY OK` reverts **U1-ios**
-  - GATING `[M] text-decoration-inset-006 ios` → `GEOMETRY OK` reverts **U1-ios**
-  - GATING `[M] text-decoration-inset-014 ios` → `GEOMETRY OK` reverts **U1-ios**
-  - GATING `[M] text-decoration-inset-011 ios` → `GEOMETRY OK` reverts **U1-ios**
-  - GATING `[M] text-decoration-inset-005 android` → `GEOMETRY OK` reverts **U1-android**
-  - GATING `[M] text-decoration-inset-006 android` → `GEOMETRY OK` reverts **U1-android**
-  - GATING `[M] text-decoration-inset-014 android` → `GEOMETRY OK` reverts **U1-android**
-  - GATING `[M] text-decoration-inset-011 android` → `GEOMETRY OK` reverts **U1-android**
-  - GATING `[F] text-decoration-inset-005 ios` → `GEOMETRY OK` reverts **U2-ios**
-  - GATING `[F] text-decoration-inset-006 ios` → `GEOMETRY OK` reverts **U2-ios**
-  - GATING `[F] text-decoration-inset-014 ios` → `GEOMETRY OK` reverts **U2-ios**
-  - GATING `[F] text-decoration-inset-014 android` → `GEOMETRY OK` reverts **U2-android**
+- `/opt/homebrew/bin/python3.12 -B tools/titan/results/wave55-plan/ua-heading-margin.geometry.py <run> --base <base>` — 41 keys: gating 0 · report 2 · control 39
   - report: `[F] text-decoration-inset-005 android`, `[F] text-decoration-inset-006 android`
-  - control: `[M] text-decoration-inset-005 web`, `[M] text-decoration-inset-006 web`, `[M] text-decoration-inset-014 web`, `[M] text-decoration-inset-011 web`, `[F] text-decoration-inset-005 web`, `[F] text-decoration-inset-006 web`, `[F] text-decoration-inset-014 web`, `[C] text-decoration-inset-001 ios`, `[C] text-decoration-inset-001 android`, `[C] text-decoration-inset-002 ios`, `[C] text-decoration-inset-002 android`, `[C] text-decoration-inset-003 ios`, `[C] text-decoration-inset-003 android`, `[C] text-decoration-inset-004 ios`, `[C] text-decoration-inset-004 android`, `[C] text-decoration-inset-009 ios`, `[C] text-decoration-inset-009 android`, `[C] text-decoration-inset-015 ios`, `[C] text-decoration-inset-015 android`, `[C] text-decoration-inset-016 ios`, `[C] text-decoration-inset-016 android`, `[C] text-decoration-inset-024 ios`, `[C] text-decoration-inset-024 android`, `[C] block-in-inline-015-print ios`, `[C] block-in-inline-015-print android`, `[C] s-11-1-1b-005 ios`, `[C] s-11-1-1b-005 android`
+  - control: `[M] text-decoration-inset-005 web`, `[M] text-decoration-inset-005 ios`, `[M] text-decoration-inset-005 android`, `[M] text-decoration-inset-006 web`, `[M] text-decoration-inset-006 ios`, `[M] text-decoration-inset-006 android`, `[M] text-decoration-inset-014 web`, `[M] text-decoration-inset-014 ios`, `[M] text-decoration-inset-014 android`, `[M] text-decoration-inset-011 web`, `[M] text-decoration-inset-011 ios`, `[M] text-decoration-inset-011 android`, `[F] text-decoration-inset-005 web`, `[F] text-decoration-inset-005 ios`, `[F] text-decoration-inset-006 web`, `[F] text-decoration-inset-006 ios`, `[F] text-decoration-inset-014 web`, `[F] text-decoration-inset-014 ios`, `[F] text-decoration-inset-014 android`, `[C] text-decoration-inset-001 ios`, `[C] text-decoration-inset-001 android`, `[C] text-decoration-inset-002 ios`, `[C] text-decoration-inset-002 android`, `[C] text-decoration-inset-003 ios`, `[C] text-decoration-inset-003 android`, `[C] text-decoration-inset-004 ios`, `[C] text-decoration-inset-004 android`, `[C] text-decoration-inset-009 ios`, `[C] text-decoration-inset-009 android`, `[C] text-decoration-inset-015 ios`, `[C] text-decoration-inset-015 android`, `[C] text-decoration-inset-016 ios`, `[C] text-decoration-inset-016 android`, `[C] text-decoration-inset-024 ios`, `[C] text-decoration-inset-024 android`, `[C] block-in-inline-015-print ios`, `[C] block-in-inline-015-print android`, `[C] s-11-1-1b-005 ios`, `[C] s-11-1-1b-005 android`
   - `onWave54Final`: all 8 [M] native rows WRONG; all 6 [F] native rows WRONG; every [C], ref and web row OK (exit 0): gating 14 FAIL, report 2 FAIL, controls PASS
   - `teeth`: --arm T / R (painted basis) / X2 (double margin) / B (face, no margin) / C4 (4 px low) all WRONG on [M]; U1 / C / D OK on [M] ×8; [F] OK only on C and D (D keeps 005 / 006 android WRONG: the report rows) — probes-selfcheck.txt §L4. Round 1 (instrument-teeth M4 + S4): [M] with the 2em face reads the heading's band LIST against the ref (tops / bottoms ±1, left ±3, line-1 right ±12, same count; 005 / 006 android band 1 only: Compose does not wrap), with today's face every band = wave54-final + the margin ±1 and x ±1; [F] gains the same band rule (tops ±1, was ±3) — +12x, +3y, −2y, line 2 removed and line 1 cut to 40 % are WRONG (probes-selfcheck.txt §T). Round 2 (M4): today's face and 011 `crop:` (every band's ink = the BASE capture's band + the margin, correlation ≥ 0.97; --base), the 2em face and [F] `profile:` (line 1's column profile = the ref's at |shift| ≤ 12, ≥ 0.95) — line 1 mirrored / thirds swapped and 011 band 1 mirrored are WRONG; a 10-px clip of line 1's last glyph still passes while X1_TOL = 12 (S1: re-set at stage 1 from the device faces; probes-teeth-r2.py names it, §9 D33). Round 3 (verify M2, D38): today's face / 011 `ink:` (each band's ink mask = the base band + the margin, XOR ≤ 2) and face-present `face ink:` (the ref's component count, dark px ±6 %). Round 4 (verify M1, D39): face-present natives `face xor:` — every band's ink (two nested masks) = the face reference's at its best whole-px shift (±3 x, ±1 y), XOR ≤ 2 over the band's rows ±2 and the whole width; the Compose no-wrap rows read every band when the picture wraps and, when it does not, line 1 left of the ref's right edge plus "fox" against the ref's line 2 moved there; the reference is the frozen ref until the stage-1 step-8 edit sets FACE_RUN = wave55-pre — "brownn", the heading copied 1 px, "fox" copied 5 px right, round 3's named 2×2 blob on a 014 glyph and D33's clip-10 are WRONG (probes-teeth-r4.py). Round 6 (verify-r5 M3, D40): the RESIDUAL read on all 12 keys — outside the dark bands' rows ±2 (capture ∪ base, from y96 / 011 y112 to y399: the rows `face xor:` / `ink:` read) the capture = the base, the vacated rows white, every changed px inside a grey: a faint 3×3 below the heading and a faint or iOS-grey (127,127,127) 30-px line at y276-368 are WRONG (probes-teeth-r5.py)
 - `/opt/homebrew/bin/python3.12 -B tools/titan/results/wave54-plan/ua-heading-face.geometry.py <run>` — 13 keys: gating 0 · report 6 · control 7 · dropped 2
@@ -2057,8 +2042,8 @@ run to run (wave-54 lesson; `wave55-open` reproduced 1435/1435 on all three).
 - wave54-final -> a synthetic two-section post run (one pixel nudged on a may-move, the ring-fenced and a complement android capture) → **exactly 1 LEAK (the complement); may-move and RING-FENCED printed, not leaks; without the complement nudge it HOLDS; a copy without the may-move class FAILS it** (K4-K6)
 
 **`adjudicateCalibrations`**:
-- the identity record relabelled wave55-open → wave55-final → **FAIL R4: the 9 gating flip rows missed (nothing landed)** (tools/titan/results/wave55-gate/readers-calibration.txt J1)
-- all-met synthetic (the 9 gating f→P rows at P 0.97) → **R1-R5 hold, exit 0** (J2)
+- the identity record relabelled wave55-open → wave55-final → **FAIL R4: the 2 gating flip rows missed (nothing landed)** (tools/titan/results/wave55-gate/readers-calibration.txt J1)
+- all-met synthetic (the 2 gating f→P rows at P 0.97) → **R1-R5 hold, exit 0** (J2)
 - all-met + one complement cell +0.003 → **FAIL R5, labelled "complement"; a copy without the complement read does not see it (exit 0)** (J3, J5)
 - a record whose prev is not the base; a --movers 0.005 record relabelled → **exit 2 ORDER; exit 2 NOT A --movers 0 RECORD** (J4, J4b)
 <!-- /gen:record -->
@@ -2275,10 +2260,10 @@ and its `stage1Decision` verbatim — the record a miss is read against.
 <!-- gen:stage1-required (plan-prose.py; do not edit by hand) -->
 | lane | stage-1 sections | gating keys read at stage 1 | report keys read at stage 1 | keys first read at stage 2 |
 |---|---|---|---|---|
-| L1-hyphen-ios-linebox | css-text | 3: `hyphen-ios-linebox 001 ios`, `hyphen-ios-linebox 003 ios`, `hyphen-ios-linebox 004 ios` | 11: `hyphen-ios-linebox 002 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-001 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-002 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-003 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-004 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-005 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-006 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-007 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-008 ios`, `hyphen-ios-linebox stack text-decoration-dotted-001 ios`, `hyphen-ios-linebox stack text-decoration-dotted-002 ios` | 0 |
+| L1-hyphen-ios-linebox | css-text | 0: — | 11: `hyphen-ios-linebox 002 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-001 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-002 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-003 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-004 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-005 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-006 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-007 ios`, `hyphen-ios-linebox stack boundary-shaping__boundary-shaping-008 ios`, `hyphen-ios-linebox stack text-decoration-dotted-001 ios`, `hyphen-ios-linebox stack text-decoration-dotted-002 ios` | 0 |
 | L2-cbb-android | filter-effects | 8: `abspos/abspos-autopos-htb-ltr android`, `abspos/abspos-autopos-vlr-ltr android`, `abspos/abspos-autopos-vrl-ltr android`, `backdrop-filter-nested-border-radius-clip android`, `backdrop-filter-nested-border-radius-clip-2 android`, `backdrop-filter-nested-border-radius-clip-3 android`, `backdrop-filter-nested-border-radius-clip-4 android`, `backdrop-filter-nested-border-radius-clip-3 android` | 3: `abspos/abspos-autopos-htb-rtl android`, `abspos/abspos-autopos-vlr-rtl android`, `abspos/abspos-autopos-vrl-rtl android` | 0 |
 | L3-positioned-parent-slot | selectors, css-text, css-writing-modes | 6: `[S] dir-style-02a android row6`, `[S] dir-style-02a android row7`, `[S] dir-style-02a android row9`, `[S] bidi-tab-001 android rtl-rows`, `[S] dynamic-offset-rtl-001 android`, `[W] dynamic-offset-rtl-002 android` | 2: `[S] dynamic-offset-vrl-rtl-001 android`, `[W] dynamic-offset-vrl-rtl-002 android` | 13: `[W] anchor-position-multicol-nested-001 web stack`, `[W] anchor-position-multicol-nested-001 android stack`, `[C] css-tags-paint-order android`, `[C] css-tags-paint-order-with-entry android`, `[C] block-end-aligned-abspos-nested android`, `[C] position-absolute-scrollable-overflow-zero android`, `[C] attachment-local-positioning-3 android`, `[C] attachment-local-positioning-4 android` … |
-| L4-ua-heading-margin | css-text-decor | 12: `[M] text-decoration-inset-005 ios`, `[M] text-decoration-inset-005 android`, `[M] text-decoration-inset-006 ios`, `[M] text-decoration-inset-006 android`, `[M] text-decoration-inset-014 ios`, `[M] text-decoration-inset-014 android`, `[M] text-decoration-inset-011 ios`, `[M] text-decoration-inset-011 android`, `[F] text-decoration-inset-005 ios`, `[F] text-decoration-inset-006 ios`, `[F] text-decoration-inset-014 ios`, `[F] text-decoration-inset-014 android` | 8: `[F] text-decoration-inset-005 android`, `[F] text-decoration-inset-006 android`, `text-decoration-inset-005 ios`, `text-decoration-inset-005 android`, `text-decoration-inset-006 ios`, `text-decoration-inset-006 android`, `text-decoration-inset-014 ios`, `text-decoration-inset-014 android` | 7: `[C] block-in-inline-015-print ios`, `[C] block-in-inline-015-print android`, `[C] s-11-1-1b-005 ios`, `[C] s-11-1-1b-005 android`, `block-in-inline-015-print web`, `block-in-inline-015-print ios`, `block-in-inline-015-print android` |
+| L4-ua-heading-margin | css-text-decor | 0: — | 8: `[F] text-decoration-inset-005 android`, `[F] text-decoration-inset-006 android`, `text-decoration-inset-005 ios`, `text-decoration-inset-005 android`, `text-decoration-inset-006 ios`, `text-decoration-inset-006 android`, `text-decoration-inset-014 ios`, `text-decoration-inset-014 android` | 7: `[C] block-in-inline-015-print ios`, `[C] block-in-inline-015-print android`, `[C] s-11-1-1b-005 ios`, `[C] s-11-1-1b-005 android`, `block-in-inline-015-print web`, `block-in-inline-015-print ios`, `block-in-inline-015-print android` |
 | L5-counter-suffix-rows | css-counter-styles | 6: `[H] counter-suffix ios`, `[C] counter-suffix ios`, `[C] counter-suffix android`, `[T] counter-suffix ios`, `[I] cjk-decimal/css3-counter-styles-005 ios`, `[I] cjk-decimal/css3-counter-styles-005 android` | 2: `[L] counter-suffix ios`, `[L] counter-suffix android` | 0 |
 | L6-android-paint-order | filter-effects, css-masking, css-flexbox, css-grid | 7: `[PO] backdrop-filter-clip-rect android`, `[X] flex-abspos-staticpos-align-self-safe-001 android`, `[X] flex-abspos-staticpos-align-self-safe-002 android`, `[X] grid-abspos-staticpos-align-self-001 android`, `[X] grid-abspos-staticpos-justify-self-001 android`, `[X] grid-abspos-staticpos-align-self-vertWM-001 android`, `[X] grid-abspos-staticpos-align-self-rtl-001 android` | 1: `[PO] backdrop-filter-clip-rect-zoom android` | 3: `[ID] borders-008 android`, `[ID] background-clip-002 android`, `[ID] s-11-1-1b-001 android` |
 | L7-instruments | — (no device window) | 0: — | 0: — | 3: `flex/flex-gap-decorations-033 web`, `flex/flex-gap-decorations-033 ios`, `flex/flex-gap-decorations-033 android` |
@@ -2366,9 +2351,9 @@ The machine form that `probe-readout.mjs` and the decisions read (`expectations.
 <!-- gen:ab-arms (plan-prose.py; do not edit by hand) -->
 | arm | lane | units | against | when | sections | platforms | drops (child first) | expect |
 |---|---|---|---|---|---|---|---|---|
-| `drop-NB-ios` | L1-hyphen-ios-linebox | NB-ios | `wave55-final` | closing gate | css-text, css-text-decor | ios | NB-ios-S1* → NB-ios | exactly 6 cells differ (ab-diff lists a flip or \|Δ\| ≥ 0.002): hyphenate-character-001 / -002 / -003 / -004 ios, Δ (final − arm) ≈ +0.017 / +0.016 / +0.019 / +0.027 (-004 a flip), and text-decoration-dotted-001 / -002 ios ≈ +0.004 / +0.005; boundary-shaping-001…008 ios within 0.0002 (not listed); hyphens-vertical-001 ios byte-identical (D22: the vertical guard declines it); any other differing iOS cell is a leak. With NB-ios-b landed the arm drops NB-ios-b, then NB-ios: the same 6 cells |
-| `drop-L4-U2` | L4-ua-heading-margin | U2-ios, U2-android | `wave55-pre` | probe time: right after the wave55-pre read-out, BEFORE any stage-1 revert or swap commit (HEAD == the wave55-pre tree, proved by its hash block; ab-arms55.sh refuses otherwise — round 1, S5) | css-text-decor | ios, android | U2-ios-S1* → U2-android-S1* → U2-ios → U2-android | the arm is U1 alone (arm M): 005 ios ≈0.9167 / android ≈0.9121; 006 ≈0.9164 / ≈0.9117; 014 ≈0.9336 / ≈0.9328 — every one up from wave55-open and f (MED-HIGH); read against wave55-pre, Δ (pre − arm) on those six cells is U2's own contribution; the inset-011 natives are identical (U2 stands down on 011) |
 | `drop-L6-U2` | L6-android-paint-order | U2 | `wave55-final` | closing gate | css-anchor-position, css-flexbox, css-gaps, css-grid, css-images, css-position, filter-effects | android | U2-S1* → U2 | the 25 U2 carriers return to wave55-open (crossings back); C2: the shared L2 / L3 stems (sharedStems) show what L6 U2 does to them — their own lanes' keys are read on the closing run; filter-effects (round-1 S2): U1's clip-rect / clip-rect-zoom identical (U1 stays) and basic-blur android shows D2's ring-fenced band move (report only); L6 may-move stems OUTSIDE these sections are attributed by mayMoveRule, not by this arm |
+| ~~`drop-NB-ios`~~ | L1-hyphen-ios-linebox | NB-ios | — | WITHDRAWN: NB-ios reverted at wave55-pre (rule 1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13) | | | | |
+| ~~`drop-L4-U2`~~ | L4-ua-heading-margin | U2-ios, U2-android | — | WITHDRAWN: U2-ios reverted at wave55-pre (rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 14); U2-android reverted at wave55-pre (rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 14) | | | | |
 
 `abRead`: runId `wave55-ab-<arm>`; runner tools/titan/results/wave55-gate/ab-arms55.sh <arms-file> --run --against <arm.against> (L7 U3; records written only after a verified restore; refuses an --against run whose hash block names a tree that differs from HEAD in code — round 1, S5); cmd `node tools/titan/results/wave52-gate/ab-diff.mjs wave55-ab-<arm> <arm.against> --threshold 0.002 --platforms <arm.platforms>`; order: arm (exclude) first, <arm.against> (include) second: Δ = against − arm = what the dropped unit(s) do on device
 
@@ -2862,6 +2847,124 @@ C1–C15 and D1–D7 are the generator's (`expectations.json` `planDecisions`, r
    writes it: MF1–MF7 are NAMED residual classes with their pixel spans, listed with the verifier's fix bases in
    `ship-notes.md` for the next wave. A gating PASS and a `pictureCorrectTally` count certify the probe's reads and the residual
    read; the recorded looks are the only cover for MF1–MF7.
+
+10. **L3 · positioned-parent-slot: `[S] bidi-tab-001 android rtl-rows` is also read against the decided device picture (2026-10-12, stage 1, `wave55-pre`).**
+    - **Run.** `wave55-pre` (tree 0fd26479), css-text. The line: `ink: band y106 2 blue components vs wave55-open 3 (a stray blob /
+      a doubled or split glyph)`, plus `residual: 24 px` (item 12). The cell: `wave55-pre css-text/bidi/bidi-tab-001.html android P 0.9929`
+      (`wave55-open` P 0.9805, the DEGENERATE pass the brief named). Extent, order (0.966) and mass reads OK.
+    - **Picture (step 8, `../wave55-gate/stage1/wave55-pre/sheets-movers/movers-02.png`, the last row; the measurement in
+      `../wave55-gate/_note.md` stage 1).** The ref's band y106 holds the square x124-135 and the '0' x114-122, apart (two components;
+      Chromium's dotted zero has no separate dot). `wave55-open`: the square, and the '0' STRANDED at x210-219 outside the yellow box —
+      the stray glyph the brief describes — box / ring / inner dot = three components. `wave55-pre`: the '0' at x115-123, 1 px right of
+      Chromium's, TOUCHING its square: box∪ring + dot = two. Every RTL row now reads `■0` / `0■` as the ref's. The look is right.
+    - **Rule read.** The text says "rtl-rows not OK → revert U2". The round-3 read compares each band's components with the BASE's,
+      and the base's band y106 is the wrong picture (the stray '0' on white). Its premise — "U2 moves runs, it neither adds, splits
+      nor merges ink" — does not hold when the glyph it moves lands against its square. This is the class D39 named for the L5 twin
+      reads (a native line read against pixels that are not the device's own decided ones, re-pinned at stage 1 to the decided
+      picture), on a same-renderer read whose reference picture is itself the defect.
+    - **Encoded (`positioned-parent-slot.geometry.py`, `stage1-probe-edits.py`).** `INK_RUN_DEFAULT = 'wave55-pre'` (`--ink-run <run>` /
+      `--ink-run none`): a band's structure is accepted when it equals the base's OR the ink run's same-platform band, under the
+      same rules (`band_ink_why`). Additive like TWIN_RUN: every fixed picture of the standing set keeps its verdict (§R / §T re-run,
+      `probes-selfcheck.txt`), the base picture still reads WRONG against itself (its extent), and on the device picture a 2×2 / 3×3 blob
+      on the yellow (bands y106, y86), a blob touching the ring, one touching the square, the '0' doubled, its dot erased and the run
+      2 px right all read WRONG (`stage1-mutations.out.txt`: 8 fakes, unfaked OK). No threshold moves.
+11. **L5 · counter-suffix-rows: the `[H]` / `[T]` ios reads re-pinned to the device's own glyphs (2026-10-12, stage 1).**
+    - **`[T] ios`** read `ink: row 9 digit window x136-150 + the five U3 run boxes differ from wave55-open android's tabular glyphs
+      by 26 px` — the pre-registered twin-only WRONG (precedence (i)). Its geometry reads (`t_check`, `u3_boxes_check`,
+      `zones_equal`) are OK; the look (`../wave55-gate/_note.md` stage 1, rows 9-12 at scale 4) shows `foo .1 / bar .2 / foo .א /
+      bar .ב` as the ref and `wave55-open` draw them. Right → `TWIN_RUN_DEFAULT = 'wave55-pre'` (the step-8 edit D39 pre-registered).
+    - **`[H] ios`** read `row 3 letter profile 0.80 vs its own ref letter, 0.88 vs row 4's (the counter value of another row)` — a reason
+      the L5 precedence names in neither (i) (`ink:` / `residual:`) nor (ii) (blob count, the period before the letter, x / rows off the
+      ref's, the fill). The round-2 "WHICH letter" read correlates the device letter's 14-column profile with CHROMIUM'S ref letter:
+      a cross-font read, the class D39 describes. The look: row 3 `א.`, row 4 `ב.`, each period AFTER its letter — the ref's order
+      (`wave55-open`: `.א` / `.ב`, the H-low defect U1-ios fixes); against the device's own letters the margins read 1.00 own / 0.83
+      other. None of (ii)'s LRM triggers is present, so U1-ios-LRM does not fire. Right.
+    - **Encoded (`counter-suffix-rows.geometry.py`).** `twin_letters(label)`: a native row is ALSO accepted when it is nearer its own
+      row's letter in TWIN_RUN's same-platform capture (additive, not a replacement: the ok-all ios replay carries Android's Noto
+      glyphs and reads 0.775 own / 0.867 other against the device's letters at row 4 — the cross-font profile misjudges in both
+      directions, §T's fixed picture must keep passing through the ref). The one hole an OR opens — one counter value on both rows
+      that the ref reference misjudges in its favour — is closed by a same-font read: rows 3 and 4 of ONE capture must differ,
+      `corr(row3, row4) < DUP_TOL 0.95` (pictures of record: 0.833 ios, 0.809 / 0.789 / 0.615 elsewhere, every replay ≤ 0.813).
+      Proof on the device picture: the letters swapped, row 4 showing row 3's letter, row 3 showing row 4's, the letter a block — all
+      WRONG; unfaked OK; `one-down3` keeps `[T]` WRONG (`stage1-mutations.out.txt`). `[K] ios` is item 12.
+12. **The residual windows of five decided device pictures, the `[K] ios` zone, and identity inside a recorded window (D40;
+    2026-10-12, stage 1).**
+    - **Residual-only lines, each decided RIGHT by the look (`../wave55-gate/_note.md` stage 1; the gained / movers sheets):**
+      L2 `backdrop-filter-nested-border-radius-clip-3 android` (both scripts `→ GEOMETRY OK`; 20 px: the rounded corners' AA ring
+      y26-27 — cell f 0.9574 → P 0.9999, the ref's picture); L6 `[X] flex-abspos-staticpos-align-self-safe-001 / -002 android`
+      (`→ GEOMETRY OK`; 32 / 30 px: the black L-border's ends now at the box edge where they meet the dotted magenta outline — the
+      ref's picture, 0.9619 → 0.9943 and 0.9635 → 0.9932); L5 `[C] counter-suffix ios` (OK; 4 px, the `[K]` px below); L3 bidi
+      (item 10; 24 px: the '0' glyphs at the device's positions); L5 `[H]` / `[T]` ios (item 11; the same 4 px).
+    - **`[K] counter-suffix ios`** (a CONTROL: `zone x136-end×y256-303 differs from wave55-open (4 px)`): (136,272) 150→100,
+      (136,273) 137→84, (136,296) 255→240, (136,297) 255→236 — the right anti-aliasing fringe of U3-ios's period glyphs on rows 11-12,
+      1 px right of the run boxes x130-135 that `fix-r1.u3-boxes.measure.out.txt` measured on CATALYST ("0 px of U3's delta outside");
+      the device's `tnum` repaint reaches x136. Precedence (iv) names pixels INSIDE the boxes U3-ios's; these sit 1 px outside: the
+      carve-out, not the unit, was short. The zone now starts at x137 (`ZONES['ios']`) and the column is read by the residual
+      window recorded from the device capture — nothing goes unread. Widening the box itself would make the period 4 px wide for
+      `u3_boxes_check` (its fringe pixel is dark at 100 / 84), so the box stays and the window reads the fringe.
+    - **Encoded.** `fix-r6.zones.py --also wave55-pre:<the five cells> --write` (`fix-r6.zones.stage1.out.txt`), with three changes
+      to the mechanism: (a) the `--also` sources are RECORDED (`residual-read.py` `WINDOWS_ALSO`, inside the block `--write`
+      rewrites) so a later `--check` re-derives with the same device pictures (a `--check` without them would have read the
+      literal as STALE); (b) the three cells that declared no `windows` (counter-suffix ios, the two safe cells) now do; (c) inside a
+      RECORDED window of a cell with a decided device picture, a pixel equal to that picture's pixel is accepted at tolerance 0
+      whatever its colour (`read_arrays(…, cell=)`, `also_pics`) — the safe cells' corners are three-colour blends ((135,15,121),
+      (179,102,77): the dotted outline's half-pixel dot over black and yellow) bordered by ONE flat class, which neither `segment`
+      nor `box` AA can name without a palette widening. Outside the windows nothing changes; a window pixel that differs from the
+      decided picture must still be background, class ink or declared AA, and a window still holds one connected change. Re-measure:
+      46 fixed pictures 0 / 0 / 0, `--check` exit 0; `residual-read.py wave55-pre --base wave55-open`: every declared cell OK. Proof:
+      a pixel at x136 outside both windows, a red pixel inside one, a pixel at x140 on row 11 — each FAIL (`stage1-mutations.out.txt`).
+13. **L1 · hyphen-ios-linebox: NB-ios reverted (rule 1; 2026-10-12, stage 1; revert 22c51ee9 of b7108a42).**
+    - **Run / rule.** `wave55-pre css-text/hyphens/hyphenate-character-002.html ios f 0.9165` from `wave55-open` P 0.9534 (rule 1, a lost
+      carrier; rule 2 Δ−0.0369; the lane predicted P ≈0.969, replay +0.016). The three gating rows `→ LINEBOX OK`; 001 / 003 / 004
+      ios 0.978 / 0.9759 / 0.975 (004 a flip f → P); boundary-shaping-010 and hyphens-vertical-001 byte-identical; no `anchor:` reason,
+      so the R1 signature is absent and NB-ios-b is not the route. `hyphenate-character-005 android` moved +0.0001 (L3's carrier).
+    - **Picture (`../wave55-gate/stage1/wave55-pre/sheets-lost/lost-01.png`).** 002 is the no-visible-hyphen host: on NB-ios its
+      lines sit tighter than the ref's (Blink's rounded line box applied to a host whose breaks carry no hyphen glyph shortens the
+      pitch the ref keeps); 001 / 003 / 004 moved toward the ref on the same mechanism. The replay composited the right glyphs at the
+      right x and could not see the device's line pitch (the wave-53 lesson the skill records, on a text run).
+    - **Encoded.** `probe-decisions/reverted.json` row 1; the regeneration withdraws NB-ios's carriers (14 ios stems), its 14
+      predictions (must-not-move from `wave55-probe` on), its three gating keys and the closing arm `drop-NB-ios`
+      (`abArmsWithdrawn`). The 004 flip and the 001 / 003 gains are given up with it. Next wave: `ship-notes.md` §1.
+14. **L4 · ua-heading-margin: the four units reverted (rules 3 and 4; the probe-time arm; 2026-10-12, stage 1; reverts 131cd6e1
+    U2-ios, adc05081 U1-ios, db7b2417 U2-android, 2b0e0b2b U1-android).**
+    - **Run / rules.** 005 / 006: ios f 0.8995 → f 0.93 and 0.8987 → 0.9284, android 0.9 → 0.9147 and 0.8993 → 0.9147 — all four below
+      the 0.95 floor the rows carry (rule 3; predicted P ≈0.966 / 0.967). `[M] 005 / 006 ios` `band 1 y129–173 vs ref y134–173±1`,
+      `[M] 005 / 006 android` `(127, 169) vs ref (134, 173)` (rule 4). The text: a gating `[M]` FAIL reverts U1-<p> and U2-<p>.
+    - **Picture (`../wave55-gate/_note.md` stage 1; `sheets-movers/movers-01.png` rows 6-8).** U2's 2em face is present on both
+      natives (`wave55-open` drew the heading at the body size). Measured per word on the captures: the ref's `the` cap top is y143
+      and both natives' y138 — the WHOLE heading sits 5 px high, the margin U1 applies is 5 px short of the ref's at the 2em face.
+      Android besides: the superscript `quick` top y126 vs the ref's y134 and the subscript `row` bottom y176 vs y173 (the super- /
+      subscript offsets at a 32-px parent, +8 / −8), and no wrap (x1 373 vs 336). `014` flipped f → P on both (0.9936 / 0.9867) with
+      `[M]` reading `face ink:` WRONG (ios 1757 dark px vs the ref's 1907, −7.9 %; android 15 glyph components vs 17): withdrawn with
+      the units, never claimed.
+    - **The probe-time arm `drop-L4-U2`** (`abArms[1]`; `ab-arms55.sh --run --against wave55-pre` at 53f11bba, BEFORE any revert, as
+      pre-registered; `../wave55-gate/final/ab-drop-L4-U2.txt`, build-hashes block `wave55-ab-drop-L4-U2`, arm tree 45473b32 MATCH /
+      MATCH): U1 alone reads exactly the expectation's arm M — 014 ios 0.9337 / android 0.9328 (≈0.9336 / ≈0.9328 pre-registered),
+      005 0.9167 / 0.9121, 006 0.9164 / 0.9117. The face is U2's, the margin U1's; both were predicted right on the replay and the
+      device placed the heading 5 px high. The round-2 `Δx1` re-read: ios −6 / +4 / −7 (005 / 006 / 014), android +37 / +41 / −8 (no
+      wrap on 005 / 006); `X1_TOL` stays ±12 and `FACE_RUN_DEFAULT` stays None — no face key is kept this wave.
+    - **Encoded.** `reverted.json` rows 2-5 (revertOrder U2-<p> → U1-<p>); the regeneration withdraws the lane's carriers (7 ios, 7
+      android stems), its 14 predictions, its 12 gating keys and the arm (`abArmsWithdrawn`). Next wave: `ship-notes.md` §1.
+15. **Stage 1 closed: the regeneration, the re-read, the sweep, and the numbering of items 10-14 (2026-10-12).**
+    - **Kept.** L2 (the four nested-clip lines and the cbb line `→ GEOMETRY OK`, clip-3 0.9999, clip / -2 / -4 at 1.000, filter-effects
+      web and iOS identical to `wave55-open`); L3 U1 and U2 (dir-style-02a rows 6 / 7 / 9 OK, the cell f 0.9425 → P 0.9854;
+      dynamic-offset-rtl-001 / -002 android OK; item 10); L5 U1-ios, U2o / U2i on both natives, U3-ios, D (`[C]` / `[I]` OK,
+      counter-suffix ios 0.992 / android 0.9924, 005 ios 0.9971 / android 0.9741; items 11-12); L6 U1 / U2 / U3 (`[X]` and `[PO]`
+      OK with item 12, the may-move stems within the band); L7 (no device keys). No contingency landed.
+    - **Regeneration** `plan-build.py` from the five `reverted.json` rows: expectations.json b773904f → e65366b6
+      (`stage1-regen.expectations-diff.txt`, `stage1-regen.plan-build.out.txt`); `watchlist.txt` byte-identical. Read against
+      `wave55-pre` itself, the regenerated reader names exactly the withdrawn cells as rule-5 leaks (18 signals:
+      `../wave55-gate/stage1/wave55-pre/regen/probe-readout.txt`) and the control every withdrawn carrier (`regen/control.txt`) — the proof the amended
+      rules fail on the probe tree; from `wave55-probe` on those cells must be decoded-pixel identical to `wave55-open`. The
+      geometry gate on `wave55-pre` with the regenerated plan: gating 27 / 27 PASS, control 135 / 135, residual 30 / 30, exit 0
+      (`regen/geometry.txt`, `geometry-stage1.regen.json`).
+    - **Sweep** on 2b0e0b2b (`../wave55-gate/sweep-stage1.txt`): tooling 2351 (2347 pass, 4 skipped), conformance valid, web 1390,
+      web-harness 344, converter 562, compose 3550, android-app 169, swiftui 2241, ios-harness 30; the doc tables restamped,
+      `doc-staleness-check.sh` exit 0. The standing probe self-check (`probes-selfcheck.py`) is re-run on the edited probes and its
+      record replaced in the same stage (`probes-selfcheck.txt`).
+    - **Numbering.** The five revert commits cite "PLAN §10 item 7 / 8" and the decision commit 00201165 "items 4-9": written before
+      the nine pre-landing items were counted. They are items 13 / 14 and 10-15 here; the probe comments and the `reverted.json`
+      rows were renumbered in the follow-up commit (a second regeneration, text-only: `stage1-regen.expectations-diff.txt`).
 
 Empty at planning: `wave55-open` reproduced `wave54-final` on every cell and every byte, so nothing is restated.
 

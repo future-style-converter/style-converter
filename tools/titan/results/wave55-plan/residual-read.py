@@ -114,7 +114,7 @@ SPECS['css-counter-styles/counter-suffix.html ios'] = {      # [H] rows 3-4 / [C
     # and row 10's '2' (x136-150): Inter's `tnum` is run-wide (wave55-counter-suffix-rows/fix-r1.u3-boxes.measure.out.txt)
     'zone': [('rect', (0, 64, 64, 112)), ('rect', (0, 112, 64, 160)), ('rect', (136, 208, 151, 232)),
              ('rect', (130, 208, 136, 304)), ('rect', (136, 232, 151, 256))], 'ink': [], 'aa': 'neutral',
-    # stage 1 (D40, PLAN §10 item 6): windows recorded from the device capture — the periods' right AA fringe at x136, rows 11-12
+    # stage 1 (D40, PLAN §10 item 12): windows recorded from the device capture — the periods' right AA fringe at x136, rows 11-12
     # (4 px: (136,272) (136,273) (136,296) (136,297)), 1 px right of the Catalyst-measured run boxes
     'windows': []}
 SPECS['css-counter-styles/counter-suffix.html android'] = {'zone': [('rect', (0, 112, 64, 160))], 'ink': [], 'aa': 'neutral'}
@@ -126,7 +126,7 @@ for _n, _f in (('css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001', 
     SPECS[f'{_n}.html android'] = {'zone': [('mask', [_f], 0)], 'ink': [_f]}
 SPECS['filter-effects/backdrop-filter-clip-rect.html android'] = {'zone': [('mask', ['red6'], 0)], 'ink': ['red6']}
 for _n in ('css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001', 'css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002'):
-    # stage 1 (D40, PLAN §10 item 6): the device pictures of U2's two [X] safe cells (the black border now at the box edge) are
+    # stage 1 (D40, PLAN §10 item 12): the device pictures of U2's two [X] safe cells (the black border now at the box edge) are
     # decided right by the recorded look; their windows are recorded from the device capture (fix-r6.zones.py --also). Inside
     # Inside those 4×4 corner windows the black border's end meets the dotted magenta outline over the yellow fill — three-colour
     # blends no class rule names: they are read by identity to the decided device picture (read_arrays, stage 1)

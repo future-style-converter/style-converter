@@ -72,3 +72,59 @@ U6-compose → U6-swift → U6-web → U6-tooling → U5; L6 U1 → U2 → U3; L
 L3 U1 → U2; L5 U1-ios → U2o-ios → U2i-ios → U2o-android → U2i-android; L1 NB-ios; L5 U3-ios → D. Contingencies NB-ios-b and
 U1-ios-LRM not landed (stage 1 decides). Next: the single-writer sweep on 5bbc2a41, S1, the worktree cleanup (§8 step 9½),
 then stage 1 `wave55-pre` after `beforeEveryDeviceRun`.
+
+## Stage 1 — `wave55-pre` (2026-10-12; PLAN §7 stage 1, §10 items 10-15; records in `stage1/wave55-pre/`)
+
+**The run.** `beforeEveryDeviceRun` exit 0; `tools/titan/gate-driver.sh wave55-pre --sections css-counter-styles,css-flexbox,css-grid,
+css-masking,css-text,css-text-decor,css-writing-modes,filter-effects,selectors --skip-fixture-net` on tree 0fd26479 (the landed tree
+5bbc2a41 + records), 9 / 9 sections `OK attempt=1 web=48/48 android=48/48 ios=48/48`; the installed-build block (`build-hashes.txt`
+`== wave55-pre corpus launch`): android f9c6bee5 MATCH, ios 0e4a30c2 MATCH, asset 05118ad1. Read-out (`stage-readout55.sh stage1
+wave55-pre`): `score-stage1.json` (+ 0.005 movers), `control-stage1.json` (HOLDS), `geometry-stage1.json` (18 gating FAIL lines + 1
+control FAIL, 27 gating PASS), every lane's own probe output, `prediction-cells.txt` (77 rows), the review sheets `sheets-{gained,lost,
+movers}/`. Committed 53f11bba.
+
+**The decisions, in the order the rules fired (every line looked at; the zooms were made from the ref / `wave55-open` / `wave55-pre`
+captures at scale 2-6 and are described, not committed):**
+
+- **L1 NB-ios → REVERT (rule 1).** `hyphenate-character-002 ios P 0.9534 → f 0.9165`, a lost carrier (rule 2 too; predicted P ≈0.969).
+  The 3 gating rows `→ LINEBOX OK`, 001 / 003 / 004 up (004 f → P 0.975), the two byte-identical controls identical, no `anchor:`
+  reason → not the R1 signature, no NB-ios-b. The lost sheet: 002's lines sit tighter than the ref's on NB-ios (the no-visible-hyphen
+  host). Revert 22c51ee9. PLAN §10 item 13.
+- **L4 U2-ios, U1-ios, U2-android, U1-android → REVERT (rule 3 + rule 4).** 005 / 006 ios f 0.93 / 0.9284 and android f 0.9147 ×2
+  (floor 0.95; predicted ≈0.966); `[M] 005 / 006` on both natives `GEOMETRY WRONG` — the face IS present now (U2), and the whole
+  heading sits 5 px high (`the` cap top y138 vs the ref's y143 on both; Android's super- / subscript offsets +8 / −8 besides, and no
+  wrap). 014 flipped f → P on both (0.9936 / 0.9867) with `face ink:` WRONG — withdrawn with the units. The pre-registered probe-time
+  arm `drop-L4-U2` ran first, at 53f11bba (`ab-arms55.sh --run --against wave55-pre`; arm tree 45473b32, MATCH / MATCH, css-text-decor
+  48 / 48 / 48; `final/ab-drop-L4-U2.txt`): U1 alone = the expectation's arm M to the third decimal (014 0.9337 / 0.9328; 005 0.9167 /
+  0.9121; 006 0.9164 / 0.9117). Reverts 131cd6e1, adc05081, db7b2417, 2b0e0b2b. PLAN §10 item 14.
+- **L3 U1 → KEEP; U2 → KEEP after the recorded look.** dir-style-02a android rows 6 / 7 / 9 OK, f 0.9425 → P 0.9854; dynamic-offset
+  android OK; `[S] bidi-tab-001 android rtl-rows` read `ink: band y106 2 blue components vs wave55-open 3`. Measured: the ref's band
+  y106 = square x124-135 + '0' x114-122 (apart); `wave55-open` = the square + the '0' stranded at x210-219 OUTSIDE the box (ring +
+  inner dot: 3); `wave55-pre` = the '0' at x115-123 touching its square (2). The rows read `■0` / `0■` as the ref's; the cell P 0.9805 →
+  P 0.9929. The read's reference was the defect itself → the band is also read against the decided device picture (`INK_RUN`,
+  additive); 8 device-picture fakes WRONG. PLAN §10 item 10.
+- **L5 U1-ios, U2o / U2i ios + android, U3-ios, D → KEEP after the recorded looks.** `[C]` / `[I]` OK on both natives; counter-suffix
+  ios 0.9873 → 0.992, android 0.989 → 0.9924; 005 ios 0.993 → 0.9971, android 0.9759 → 0.9741. `[T] ios`: the pre-registered twin-only
+  `ink:` (26 px vs Android's tabular glyphs); rows 9-12 at scale 4 are the ref's → `TWIN_RUN_DEFAULT = 'wave55-pre'`. `[H] ios`: the
+  round-2 letter-profile read (0.80 vs the ref's alef, 0.88 vs its bet) — a cross-font read the precedence did not name; rows 3-4 at
+  scale 6 read `א.` / `ב.` with the period after the letter (the H-low defect gone; `wave55-open` reads `.א` / `.ב`); against the
+  device's own letters 1.00 / 0.83 → the twin letters as a second reference + a same-capture duplicate read; four device-picture fakes
+  WRONG. `[K] ios` (control): 4 px at x136 on rows 11-12 = U3-ios's period AA fringe, 1 px outside the Catalyst-measured run boxes →
+  the zone starts at x137, the column read by the residual window. PLAN §10 items 11-12.
+- **L2 U1 / U2 → KEEP.** Both clip-3 scripts `→ GEOMETRY OK`, clip-3 f 0.9574 → P 0.9999, clip / -2 / -4 at 1.000, web / iOS identical;
+  the residual-only 20 px are the rounded corners' AA ring (the ref's picture) → recorded as windows. PLAN §10 item 12.
+- **L6 U1 / U2 / U3 → KEEP.** `[X]` safe-001 / -002 `→ GEOMETRY OK` (0.9619 → 0.9943, 0.9635 → 0.9932; the black L-border now at the box
+  edge as the ref's), residual 32 / 30 px at the corners where it meets the dotted outline → windows read by identity to the decided
+  picture (the three-colour blends no class rule names). `[PO]` OK; may-move within the band. PLAN §10 item 12.
+- **L7:** no device key.
+
+**After the decisions.** `probe-decisions/reverted.json` 5 rows → `plan-build.py` (expectations b773904f → 2d2df890 → e65366b6 after the
+text-only renumbering); `watchlist.txt` byte-identical; `stage1-regen.expectations-diff.txt`. The probe edits (`stage1-probe-edits.py`,
+replayable byte-identically onto the pre-edit files), the residual windows (`fix-r6.zones.stage1.out.txt`: `--also` of the five device
+pictures recorded as `WINDOWS_ALSO`, 46 fixed pictures 0 / 0 / 0, `--check` exit 0) and their proof (`stage1-mutations.out.txt`: 19
+fakes, 0 violations). The regenerated plan read against `wave55-pre` itself: `regen/probe-readout.txt` names exactly the withdrawn
+cells as rule-5 leaks (18 signals) and `regen/control.txt` the 28 withdrawn carriers — as it must on the tree that still carries the
+units; `regen/geometry.txt` gating 27 / 27, control 135 / 135, residual 30 / 30, exit 0. The sweep on 2b0e0b2b (`sweep-stage1.txt`):
+tooling 2351 (2347 pass, 4 skipped), conformance valid, web 1390, web-harness 344, converter 562, compose 3550, android-app 169, swiftui
+2241, ios-harness 30; doc tables restamped, doc-staleness exit 0. Decisions committed 00201165 (+ the renumbering commit). Next: stage 2
+`wave55-probe` (26 sections) after `beforeEveryDeviceRun`; the withdrawn cells must read identical to `wave55-open` there.

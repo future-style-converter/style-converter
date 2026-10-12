@@ -39,6 +39,38 @@ the closing PR body cites the bounded instrument claim (§2) instead of "class c
    - L4: the seam-4 patch-borne pin (changes PLAN §3 .swift row 2).
    - L7: D2's five guards.
 
+4. **L1 · NB-ios reverted at stage 1: the no-visible-hyphen host (hyphenate-character-002) loses its line pitch on Blink's rounded
+   line box.** Source: PLAN §10 item 13; `../wave55-gate/_note.md` stage 1; the cell `wave55-pre css-text/hyphens/hyphenate-character-002.html ios f 0.9165`
+   (`wave55-open` P 0.9534). The mechanism moved 001 / 003 / 004 ios toward the ref (0.978 / 0.9759 / 0.975, 004 a flip) and 002 away:
+   NB-ios's rounded line box must not apply (or must keep the normal pitch) on a host whose breaks carry no hyphen glyph. The lane's
+   replay predicted +0.016 on 002 and the device read −0.037 — a replay composites glyph crops at the right x and cannot see the
+   line pitch; the next cut needs the one-section device probe BEFORE the closing gate as the skill requires, with 002 a gating row.
+   The delivered contingency `NB-ios-b` (`../wave55-hyphen-ios-linebox/unit-NB-ios-b.patch`) addresses the R1 anchor-offset world,
+   not this one; it was not landed. The unit patch (`unit-NB-ios.patch`, `seam-1.patch`) and its tests are the starting point.
+5. **L4 · the four ua-heading-margin units reverted at stage 1: the out-of-flow heading sits 5 px high at the 2em face on both
+   natives.** Source: PLAN §10 item 14; `../wave55-gate/_note.md` stage 1; `../wave55-gate/final/ab-drop-L4-U2.txt`. Measured on
+   `wave55-pre` text-decoration-inset-005 / -006: the ref's `the` cap top y143, iOS and Android y138 — the UA .67em-family margin
+   U1 applies is 5 px short of the ref's at a 32-px face (U2's face itself is right: the arm drop-L4-U2 reads U1 alone at the
+   expectation's arm M to the third decimal). Android besides: the super- / subscript offsets at the 2em parent (superscript top
+   y126 vs the ref's y134, subscript bottom y176 vs y173) and no wrap (x1 373 vs 336). 014 flipped f → P on both (0.9936 / 0.9867)
+   with its `[M]` `face ink:` read WRONG (ios 1757 dark px vs the ref's 1907; android 15 glyph components vs 17): a gain the next
+   cut can claim only with the face reads re-pinned per D39 (`FACE_RUN_DEFAULT`, `FACE_INK_TOL` re-set from the device faces —
+   round 2's re-read, never done this wave: no face key was kept). The Δx1 re-read of record: ios −6 / +4 / −7 (005 / 006 / 014),
+   android +37 / +41 / −8. The unit patches (`../wave55-ua-heading-margin/unit-U{1,2}-{ios,android}.patch`, seams 1-4) and
+   `headingStandsDown` (item 1 above) are the starting point; the margin's source is the first question.
+6. **Instrument lessons of stage 1 (PLAN §10 items 10-12; each has its proof in `stage1-mutations.out.txt`):**
+   - a same-renderer structure read whose reference is the BASE capture reads the base's defect as the rule (L3's rtl-rows: the
+     stranded '0' counted 3 components; the fixed picture, touching its square, 2). A read "vs the base" needs the base's picture
+     to be right in the band it reads, or the decided device picture as a second reference (INK_RUN).
+   - a glyph-identity read against Chromium's rasterization is a cross-font read (L5's letter profile: 0.80 own / 0.88 other on
+     the right picture; the replay's Noto glyphs against the device's: 0.775 / 0.867). Same-font references only: the device's own
+     decided capture (additive), plus a same-capture duplicate read for the case the additive rule leaves open.
+   - a carve-out measured on Catalyst can be 1 px short on the device (L5's `[K]` zone at x136: the `tnum` repaint's AA fringe).
+     Run-box declarations are re-measured on the first device capture.
+   - a residual window from a device picture can hold three-colour blends no class rule names (the dotted-outline corners of L6's
+     safe cells); the recorded window is read by identity to the decided picture (tolerance 0), never by a palette widening.
+   - `fix-r6.zones.py --check` must re-derive with the device sources (`WINDOWS_ALSO`), or every later check reads STALE.
+
 ## 2. The instrument claim to cite (closing PR, `docs/STATUS.md`)
 
 Do not write "class closed". Cite the claim exactly as PLAN §0 bounds it after round 7 (D31's form). Every gating and

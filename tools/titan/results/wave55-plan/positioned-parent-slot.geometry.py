@@ -63,7 +63,7 @@ argv = sys.argv[1:]
 replay = None
 if '--replay' in argv:
     i = argv.index('--replay'); replay = argv[i + 1]; del argv[i:i + 2]
-# Stage 1 (PLAN §10 item 4, D39's re-pin for a same-renderer read): the [S] bidi-tab-001 rtl-rows `ink:` component read compares
+# Stage 1 (PLAN §10 item 10, D39's re-pin for a same-renderer read): the [S] bidi-tab-001 rtl-rows `ink:` component read compares
 # each RTL band's blue components with the BASE capture's (round 3: "U2 moves runs, it neither adds, splits nor merges ink").
 # On the device, band y106's '0' lands at x115-123 — 1 px right of Chromium's x114-122 — and TOUCHES its square (x124-135): the
 # 4-connected read merges box + ring (262 px) and counts 2 where wave55-open's WRONG picture (the '0' stranded at x210-219,

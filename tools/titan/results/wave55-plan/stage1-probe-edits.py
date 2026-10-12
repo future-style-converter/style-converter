@@ -19,7 +19,7 @@ patch('positioned-parent-slot.geometry.py', [
 """run = argv[0] if argv else 'wave54-final'
 base = argv[1] if len(argv) > 1 else 'wave54-final'
 """,
-"""# Stage 1 (PLAN §10 item 4, D39's re-pin for a same-renderer read): the [S] bidi-tab-001 rtl-rows `ink:` component read compares
+"""# Stage 1 (PLAN §10 item 10, D39's re-pin for a same-renderer read): the [S] bidi-tab-001 rtl-rows `ink:` component read compares
 # each RTL band's blue components with the BASE capture's (round 3: "U2 moves runs, it neither adds, splits nor merges ink").
 # On the device, band y106's '0' lands at x115-123 — 1 px right of Chromium's x114-122 — and TOUCHES its square (x124-135): the
 # 4-connected read merges box + ring (262 px) and counts 2 where wave55-open's WRONG picture (the '0' stranded at x210-219,
@@ -115,14 +115,14 @@ patch('counter-suffix-rows.geometry.py', [
 (
 """TWIN_RUN_DEFAULT = None    # round 4 (D39): the stage-1 step-8 edit sets 'wave55-pre' (the decided device pictures) as an extra twin
 """,
-"""TWIN_RUN_DEFAULT = 'wave55-pre'    # round 4 (D39): the stage-1 step-8 edit — the decided device pictures are an extra twin (PLAN §10 item 5)
+"""TWIN_RUN_DEFAULT = 'wave55-pre'    # round 4 (D39): the stage-1 step-8 edit — the decided device pictures are an extra twin (PLAN §10 item 11)
 """),
 (
 """def h_check(rows, ref):
     for (k, letters, dots), (_, rl, rd) in zip(rows, ref):
 """,
 """def twin_letters(label):
-    \"\"\"Stage 1 (PLAN §10 item 5): {3: profile, 4: profile} of TWIN_RUN's same-platform capture — the decided device glyphs, the
+    \"\"\"Stage 1 (PLAN §10 item 11): {3: profile, 4: profile} of TWIN_RUN's same-platform capture — the decided device glyphs, the
     letter-profile reference of the SAME rasterizer. Why: the round-2 `letter profile` read correlates a device letter's 14-column
     profile with Chromium's ref letter; across fonts it misjudges — the device's own alef reads 0.80 vs the ref's alef and 0.88
     vs the ref's bet (the look: alef then its period, bet then its period, the ref's order; ../wave55-gate/_note.md stage 1) —
@@ -141,7 +141,7 @@ patch('counter-suffix-rows.geometry.py', [
     return out if set(out) == {3, 4} else None
 
 
-DUP_TOL = 0.95   # stage 1 (PLAN §10 item 5): rows 3 and 4 of ONE capture must show different letters (same font: a duplicated
+DUP_TOL = 0.95   # stage 1 (PLAN §10 item 11): rows 3 and 4 of ONE capture must show different letters (same font: a duplicated
                  # counter value correlates ≈ 1.0; the pictures of record read 0.83 ios / lower elsewhere — never widened)
 
 
@@ -164,7 +164,7 @@ def h_check(rows, ref, lref=None):
             ref_letter[k] = prof
         elif ref_letter:
             # round 2: WHICH letter — a row whose letter is nearer the OTHER row's ref letter carries the wrong counter value.
-            # Stage 1 (PLAN §10 item 5): a native row is ALSO accepted when it is nearer its own row's letter in TWIN_RUN's
+            # Stage 1 (PLAN §10 item 11): a native row is ALSO accepted when it is nearer its own row's letter in TWIN_RUN's
             # same-platform capture (twin_letters: the same rasterizer); a swapped pair fails both (stage1-mutations.out.txt).
             c_same, c_other = corr(prof, ref_letter[k]), corr(prof, ref_letter[7 - k])
             t_same, t_other = (corr(prof, lref[k]), corr(prof, lref[7 - k])) if lref else (0.0, 1.0)
@@ -180,7 +180,7 @@ def h_check(rows, ref, lref=None):
 """            if not (near(L[2], rl[0][2], 1) and near(L[3], rl[0][3], 1)):
                 return f'row {k} letter ink y{L[2]}-{L[3]} vs ref y{rl[0][2]}-{rl[0][3]}±1 (marker baseline moved)'
     if ref_letter.get('done') and 3 in profs and 4 in profs and corr(profs[3], profs[4]) >= DUP_TOL:
-        # stage 1 (PLAN §10 item 5): the same-font read the twin reference needs — one counter value on both rows
+        # stage 1 (PLAN §10 item 11): the same-font read the twin reference needs — one counter value on both rows
         return f'rows 3 and 4 letter profiles correlate {corr(profs[3], profs[4]):.2f} ≥ {DUP_TOL} (the same counter value on both rows)'
     return None
 """),
@@ -195,7 +195,7 @@ def h_check(rows, ref, lref=None):
 """                [(0, 232, 130, 256), (151, 232, None, 256), (0, 256, 130, 304), (136, 256, None, 304), (0, 304, None, 600)]}
 """,
 """                [(0, 232, 130, 256), (151, 232, None, 256), (0, 256, 130, 304), (137, 256, None, 304), (0, 304, None, 600)]}
-# Stage 1 (PLAN §10 item 6): rows 11-12's base-identity zone starts at x137, not x136 — on the device U3-ios's run repaint reaches
+# Stage 1 (PLAN §10 item 12): rows 11-12's base-identity zone starts at x137, not x136 — on the device U3-ios's run repaint reaches
 # x136 (the periods' right anti-aliasing fringe: (136,272) 150→100, (136,273) 137→84, (136,296) 255→240, (136,297) 255→236,
 # wave55-pre vs wave55-open), 1 px right of the Catalyst-measured period boxes x130-135 (fix-r1.u3-boxes.measure.out.txt);
 # the column is read by the residual window recorded from the device capture (fix-r6.zones.py --also), not left unread.
