@@ -56,7 +56,7 @@
    L1 NB-ios-b unit patch seam files: none
    L1 NB-ios-b seam-1b.patch -> ['ComponentRenderer.swift'] (registered ComponentRenderer.swift) OK
    L5 U1-ios-LRM unit patch seam files: none
-## scratchpad-path grep (session id / claude-501) over tracked wave-55 files, TREES: lines excluded:
+## scratchpad-path grep (session id / <session>) over tracked wave-55 files, TREES: lines excluded:
 HEAD:tools/titan/results/wave55-gate/prelanding/censuses-and-deliveries.md:181:  - 40 L4 `mutations/*.{red,green}.txt` files hold 1469 `<scratchpad-path>` lines (xcodebuild logs);
 HEAD:tools/titan/results/wave55-instruments/unit-U3.patch:6:-# ab-arms55.selftest.out.txt — 2026-10-11T18:34:42Z; runner sha256 5cd6fccbc928768d…; scratch <scratchpad-path>
 HEAD:tools/titan/results/wave55-plan/fix-r3.guard-proof.out.txt:17:[own-processes] kill_own_gradle_daemons roots=[/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fb
@@ -75,4 +75,4 @@ HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gg_
 HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/lu-check.run1.land-units.out.txt:2:root    <scratchpad-path>
 HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/lu-check.run1.land-units.out.txt:3:HEAD    640276a0 (detached)   export dir (private, removed at exit): <scratchpad-path>
 HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/rec/run-adj.out.txt:6:adjudicate allmet-final.json --geometry ../out/L1-fixed.json -> exit 2 :: GEOMETRY PAIR: ../out/L1-fi
-HEAD:tools/titan/results/wave55-ua-heading-margin/skeptic.md:58:- **Scratch pointers.** No scratchpad pointer appears in any patch (grep for `private/tmp|scratchpad|claude-501`: 0 hits).
+HEAD:tools/titan/results/wave55-ua-heading-margin/skeptic.md:58:- **Scratch pointers.** No scratchpad pointer appears in any patch (grep for `private/tmp|scratchpad|<session>`: 0 hits).

@@ -178,7 +178,7 @@ All of these go through `plan-build.py` and `probe-decisions/*`, then `plan-pros
 ## 4. Other delivery findings
 
 - **Records hygiene (should-fix, before the records commit).** Several records carry scratchpad paths:
-  - 40 L4 `mutations/*.{red,green}.txt` files hold 1469 `/tmp/claude-501/…` lines (xcodebuild logs);
+  - 40 L4 `mutations/*.{red,green}.txt` files hold 1469 `<scratch>/…` lines (xcodebuild logs);
   - `wave55-instruments/u3/selftest.base-bytes.out.txt`;
   - `wave55-gate/wl7a/step4-wire-differential.txt` and `step5-classify-only.txt`.
 
