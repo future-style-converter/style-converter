@@ -76,7 +76,8 @@ PRED = {
     'neutral': lambda a: (a.max(axis=2) - a.min(axis=2)) <= NEUTRAL_TOL,                              # a grey (black text AA)
 }
 PALETTE = {'white': (255, 255, 255), 'green': (0, 128, 0), 'pink': (255, 127, 255), 'red': (255, 0, 0), 'blue66': (102, 204, 255),
-           'grey204': (204, 204, 204), 'yellowFF': (255, 255, 0), 'black': (0, 0, 0), 'blueFF': (0, 0, 255), 'lime': (0, 255, 0)}
+           'grey204': (204, 204, 204), 'yellowFF': (255, 255, 0), 'black': (0, 0, 0), 'blueFF': (0, 0, 255), 'lime': (0, 255, 0),
+           'magentaFF': (255, 0, 255)}     # the dotted outline of L6's two [X] safe cells (named for the record; their corners read by identity)
 
 # ── the per-cell declarations ─────────────────────────────────────────────────────────────────────────────────────────────
 def _l1(y0):            # L1: the probe's lines (core, x < 140, gap 2) with the crop rows −3 … +3 its two-level XOR reads
@@ -112,7 +113,10 @@ SPECS['css-counter-styles/counter-suffix.html ios'] = {      # [H] rows 3-4 / [C
     # and (pre-landing regeneration, L5 fix-r1 R3) U3-ios's five other tabular run boxes — the periods of rows 9-12 (x130-135)
     # and row 10's '2' (x136-150): Inter's `tnum` is run-wide (wave55-counter-suffix-rows/fix-r1.u3-boxes.measure.out.txt)
     'zone': [('rect', (0, 64, 64, 112)), ('rect', (0, 112, 64, 160)), ('rect', (136, 208, 151, 232)),
-             ('rect', (130, 208, 136, 304)), ('rect', (136, 232, 151, 256))], 'ink': [], 'aa': 'neutral'}
+             ('rect', (130, 208, 136, 304)), ('rect', (136, 232, 151, 256))], 'ink': [], 'aa': 'neutral',
+    # stage 1 (D40, PLAN §10 item 6): windows recorded from the device capture — the periods' right AA fringe at x136, rows 11-12
+    # (4 px: (136,272) (136,273) (136,296) (136,297)), 1 px right of the Catalyst-measured run boxes
+    'windows': []}
 SPECS['css-counter-styles/counter-suffix.html android'] = {'zone': [('rect', (0, 112, 64, 160))], 'ink': [], 'aa': 'neutral'}
 for _p in ('ios', 'android'):                                # [I] 005's line windows
     SPECS[f'css-counter-styles/cjk-decimal/css3-counter-styles-005.html {_p}'] = {'zone': [('rect', (200, 95, 390, 152))], 'ink': [], 'aa': 'neutral'}
@@ -121,14 +125,24 @@ for _n, _f in (('css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001', 
                ('css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001', 'teal'), ('css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001', 'teal')):
     SPECS[f'{_n}.html android'] = {'zone': [('mask', [_f], 0)], 'ink': [_f]}
 SPECS['filter-effects/backdrop-filter-clip-rect.html android'] = {'zone': [('mask', ['red6'], 0)], 'ink': ['red6']}
+for _n in ('css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001', 'css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002'):
+    # stage 1 (D40, PLAN §10 item 6): the device pictures of U2's two [X] safe cells (the black border now at the box edge) are
+    # decided right by the recorded look; their windows are recorded from the device capture (fix-r6.zones.py --also). Inside
+    # Inside those 4×4 corner windows the black border's end meets the dotted magenta outline over the yellow fill — three-colour
+    # blends no class rule names: they are read by identity to the decided device picture (read_arrays, stage 1)
+    SPECS[f'{_n}.html android']['windows'] = []
 
 # The recorded windows (fix-r6.zones.py → fix-r6.zones.out.txt: the clusters of each cell's fixed-picture diff the class zones
 # leave out, bbox + 1 px; the record re-measures every fixed picture at 0 / 0 / 0 with them).
 # WINDOWS_BEGIN
+WINDOWS_ALSO = ['wave55-pre:css-text/bidi/bidi-tab-001.html android', 'wave55-pre:css-counter-styles/counter-suffix.html ios', 'wave55-pre:css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html android', 'wave55-pre:css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html android', 'wave55-pre:filter-effects/backdrop-filter-nested-border-radius-clip-3.html android']   # stage 1 (D40): '<run>:<cell>' device captures decided right by a recorded look, window sources beside the fixed pictures (fix-r6.zones.py --also … --write records them here; --check re-derives with them)
 WINDOWS = {
-    'css-text/bidi/bidi-tab-001.html android': [(26, 85, 39, 107), (26, 185, 39, 207), (26, 225, 39, 247), (112, 109, 124, 127), (125, 85, 138, 107), (125, 185, 138, 207), (125, 225, 138, 247), (209, 109, 221, 127)],
+    'css-counter-styles/counter-suffix.html ios': [(135, 271, 138, 275), (135, 295, 138, 299)],
+    'css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html android': [(35, 190, 39, 194), (35, 266, 39, 270), (38, 89, 42, 93), (38, 165, 42, 169), (86, 241, 90, 245), (86, 317, 90, 321), (89, 38, 93, 42), (89, 114, 93, 118)],
+    'css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html android': [(35, 43, 40, 47), (35, 233, 40, 237), (43, 111, 47, 116), (43, 316, 47, 321), (81, 88, 85, 91), (81, 187, 85, 192), (88, 157, 93, 161), (88, 271, 93, 275)],
+    'css-text/bidi/bidi-tab-001.html android': [(26, 85, 41, 107), (26, 185, 41, 207), (26, 225, 41, 247), (112, 109, 125, 127), (125, 85, 138, 107), (125, 185, 138, 207), (125, 225, 138, 247), (209, 109, 221, 127)],
     'filter-effects/backdrop-filter-nested-border-radius-clip-2.html android': [(25, 25, 44, 44), (25, 108, 44, 127), (208, 108, 227, 127)],
-    'filter-effects/backdrop-filter-nested-border-radius-clip-3.html android': [(15, 111, 61, 137), (211, 15, 237, 61), (211, 111, 237, 137)],
+    'filter-effects/backdrop-filter-nested-border-radius-clip-3.html android': [(15, 111, 61, 137), (24, 25, 37, 37), (211, 15, 237, 61), (211, 111, 237, 138)],
     'filter-effects/backdrop-filter-nested-border-radius-clip-4.html android': [(25, 26, 43, 51), (25, 96, 36, 107), (176, 96, 187, 107)],
     'filter-effects/backdrop-filter-nested-border-radius-clip.html android': [(25, 25, 47, 51), (25, 101, 51, 127), (201, 105, 227, 127)],
 }
@@ -262,8 +276,22 @@ def _components(m):
     return lab, n
 
 
-def read_arrays(C, B, spec):
-    """(outside, vacated, non-class) px of capture C against base B under one cell's declaration (masks returned too)."""
+ALSO_PICS = {}          # stage 1: cell -> the WINDOWS_ALSO device captures of that cell (loaded on first use)
+
+
+def also_pics(cell):
+    """The decided device pictures recorded as window sources for `cell` (WINDOWS_ALSO), as arrays."""
+    if cell not in ALSO_PICS:
+        ALSO_PICS[cell] = [S for S in (rgb(capture_path(r, c)) for r, c in (src.split(':', 1) for src in WINDOWS_ALSO) if c == cell) if S is not None]
+    return ALSO_PICS[cell]
+
+
+def read_arrays(C, B, spec, cell=None):
+    """(outside, vacated, non-class) px of capture C against base B under one cell's declaration (masks returned too).
+    Stage 1 (D40): inside a RECORDED window of a cell whose window sources include a decided device picture (WINDOWS_ALSO), a
+    pixel that equals that picture's pixel is the decided picture's own — accepted at tolerance 0 whatever its colour (the
+    dotted-outline corners of L6's safe cells are three-colour blends no class rule names). Outside the windows nothing changes;
+    a window pixel that differs from the decided picture must still be background, class ink or declared anti-aliasing."""
     if C.shape != B.shape:
         n = int(C.shape[0] * C.shape[1])
         return n, 0, 0, None
@@ -286,6 +314,10 @@ def read_arrays(C, B, spec):
     elif aa in ('box', 'segment'):
         inwin = _flat(C, spec['palette']) | (_box_aa(C, B, spec['palette']) if aa == 'box' else _segment(C, spec['palette'], SEG_TOL))
         ok |= win & inwin
+    if cell is not None and spec.get('windows'):
+        for S in also_pics(cell):
+            if S.shape == C.shape:
+                ok |= win & (C == S).all(axis=2)
     nonclass = d & zc & ~ok
     # a recorded window holds ONE connected change (every fixed picture: one component per window, fix-r6.zones.out.txt §2):
     # a second component inside it is paint the unit does not draw (a speck / line not touching the recorded change)
@@ -306,7 +338,7 @@ def read(run, base, cell):
     C, B = rgb(capture_path(run, cell)), rgb(capture_path(base, cell))
     if C is None or B is None:
         return {'state': 'MISSING', 'line': f'residual: capture MISSING ({"run" if C is None else "base"} {cell})'}
-    o, v, n, _ = read_arrays(C, B, spec)
+    o, v, n, _ = read_arrays(C, B, spec, cell=cell)
     ok = o == 0 and v == 0 and n == 0
     why = (f'residual: {o} px differ from {base} OUTSIDE the declared change zone, {v} vacated px not background, {n} non-class px '
            f'inside it (each must be 0: paint the key\'s reads never see)')

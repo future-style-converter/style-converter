@@ -1,0 +1,77 @@
+carriers withdrawn by the probe's reverts: 28 capture stem(s), 0 wire stem(s)
+css-counter-styles   web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-counter-styles   ios      compared 48  identical 44  re-encoded  0  changed  4 (carriers 4)
+css-counter-styles   android  compared 48  identical 43  re-encoded  0  changed  5 (carriers 4)
+      may-move  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles  18 px, max channel delta 77  (L6 band: its score is bound by R5)
+css-flexbox          web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-flexbox          ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-flexbox          android  compared 48  identical 34  re-encoded  0  changed 14 (carriers 13)
+      may-move  wpt__css-flexbox__align-self-016  10000 px, max channel delta 255  (L6 band: its score is bound by R5)
+css-grid             web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-grid             ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-grid             android  compared 48  identical 17  re-encoded  0  changed 31 (carriers 15)
+      may-move  wpt__css-grid__abspos__descendant-static-position-001  400 px, max channel delta 128  (L6 band: its score is bound by R5)
+      may-move  wpt__css-grid__abspos__descendant-static-position-002  800 px, max channel delta 128  (L6 band: its score is bound by R5)
+      may-move  wpt__css-grid__abspos__descendant-static-position-004  80 px, max channel delta 128  (L6 band: its score is bound by R5)
+      may-move  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-img-last-baseline-001  4 px, max channel delta 255  (L6 band: its score is bound by R5)
+      may-move  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-img-last-baseline-002  4 px, max channel delta 255  (L6 band: its score is bound by R5)
+      may-move  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-last-baseline-001  10 px, max channel delta 128  (L6 band: its score is bound by R5)
+      may-move  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-last-baseline-002  10 px, max channel delta 128  (L6 band: its score is bound by R5)
+      may-move  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-last-baseline-001  10 px, max channel delta 128  (L6 band: its score is bound by R5)
+      may-move  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-last-baseline-002  10 px, max channel delta 128  (L6 band: its score is bound by R5)
+      may-move  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-last-baseline-003  10 px, max channel delta 128  (L6 band: its score is bound by R5)
+      may-move  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-last-baseline-004  10 px, max channel delta 128  (L6 band: its score is bound by R5)
+      may-move  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-last-baseline-001  10 px, max channel delta 128  (L6 band: its score is bound by R5)
+      may-move  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-last-baseline-002  10 px, max channel delta 128  (L6 band: its score is bound by R5)
+      may-move  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-last-baseline-003  10 px, max channel delta 128  (L6 band: its score is bound by R5)
+      may-move  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-last-baseline-004  10 px, max channel delta 128  (L6 band: its score is bound by R5)
+      may-move  wpt__css-grid__abspos__grid-abspos-staticpos-justify-self-img-001  130 px, max channel delta 255  (L6 band: its score is bound by R5)
+css-masking          web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-masking          ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-masking          android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-text             web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-text             ios      compared 48  identical 36  re-encoded  0  changed 12 (carriers 0)
+      LEAK  wpt__css-text__boundary-shaping__boundary-shaping-001  556 px, max channel delta 255
+      LEAK  wpt__css-text__boundary-shaping__boundary-shaping-002  556 px, max channel delta 255
+      LEAK  wpt__css-text__boundary-shaping__boundary-shaping-003  556 px, max channel delta 255
+      LEAK  wpt__css-text__boundary-shaping__boundary-shaping-004  556 px, max channel delta 255
+      LEAK  wpt__css-text__boundary-shaping__boundary-shaping-005  556 px, max channel delta 255
+      LEAK  wpt__css-text__boundary-shaping__boundary-shaping-006  742 px, max channel delta 255
+      LEAK  wpt__css-text__boundary-shaping__boundary-shaping-007  556 px, max channel delta 255
+      LEAK  wpt__css-text__boundary-shaping__boundary-shaping-008  556 px, max channel delta 255
+      LEAK  wpt__css-text__hyphens__hyphenate-character-001  2542 px, max channel delta 255
+      LEAK  wpt__css-text__hyphens__hyphenate-character-002  4496 px, max channel delta 255
+      LEAK  wpt__css-text__hyphens__hyphenate-character-003  2802 px, max channel delta 255
+      LEAK  wpt__css-text__hyphens__hyphenate-character-004  3645 px, max channel delta 255
+css-text             android  compared 48  identical 46  re-encoded  0  changed  2 (carriers 2)
+css-text-decor       web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-text-decor       ios      compared 48  identical 42  re-encoded  0  changed  6 (carriers 0)
+      LEAK  wpt__css-text-decor__text-decoration-dotted-001  size 390x608 vs 390x605
+      LEAK  wpt__css-text-decor__text-decoration-dotted-002  size 390x608 vs 390x605
+      LEAK  wpt__css-text-decor__text-decoration-inset-005  6147 px, max channel delta 255
+      LEAK  wpt__css-text-decor__text-decoration-inset-006  6304 px, max channel delta 255
+      LEAK  wpt__css-text-decor__text-decoration-inset-011  4724 px, max channel delta 255
+      LEAK  wpt__css-text-decor__text-decoration-inset-014  4585 px, max channel delta 255
+css-text-decor       android  compared 48  identical 44  re-encoded  0  changed  4 (carriers 0)
+      LEAK  wpt__css-text-decor__text-decoration-inset-005  5876 px, max channel delta 255
+      LEAK  wpt__css-text-decor__text-decoration-inset-006  6014 px, max channel delta 255
+      LEAK  wpt__css-text-decor__text-decoration-inset-011  4722 px, max channel delta 255
+      LEAK  wpt__css-text-decor__text-decoration-inset-014  4618 px, max channel delta 255
+css-writing-modes    web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-writing-modes    ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-writing-modes    android  compared 48  identical 42  re-encoded  0  changed  6 (carriers 4)
+      may-move  wpt__css-writing-modes__bidi-plaintext-br-001  73 px, max channel delta 255  (L6 band: its score is bound by R5)
+      may-move  wpt__css-writing-modes__inline-box-orthogonal-child-with-margins  98 px, max channel delta 255  (L6 band: its score is bound by R5)
+filter-effects       web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+filter-effects       ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+filter-effects       android  compared 48  identical 41  re-encoded  0  changed  7 (carriers 6)
+      RING-FENCED  wpt__filter-effects__backdrop-filter-basic-blur  504 px, max channel delta 102  — report plainly in the PR
+selectors            web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+selectors            ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+selectors            android  compared 48  identical 47  re-encoded  0  changed  1 (carriers 1)
+total web: 432 compared · 432 identical · 0 re-encoded · 0 changed (0 carriers, 0 may-move, 0 ring-fenced)
+total ios: 432 compared · 410 identical · 0 re-encoded · 22 changed (4 carriers, 0 may-move, 0 ring-fenced)
+total android: 432 compared · 362 identical · 0 re-encoded · 70 changed (45 carriers, 20 may-move, 1 ring-fenced)
+wire: 432 documents compared · 0 content-changed · 0 renumbered (ids only, explained by earlier carriers) · 0 outside the plan's wire carriers
+
+CONTROL FAILED: 22 capture(s) and 0 wire document(s) changed outside the carriers

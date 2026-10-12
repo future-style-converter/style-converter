@@ -63,6 +63,19 @@ argv = sys.argv[1:]
 replay = None
 if '--replay' in argv:
     i = argv.index('--replay'); replay = argv[i + 1]; del argv[i:i + 2]
+# Stage 1 (PLAN §10 item 4, D39's re-pin for a same-renderer read): the [S] bidi-tab-001 rtl-rows `ink:` component read compares
+# each RTL band's blue components with the BASE capture's (round 3: "U2 moves runs, it neither adds, splits nor merges ink").
+# On the device, band y106's '0' lands at x115-123 — 1 px right of Chromium's x114-122 — and TOUCHES its square (x124-135): the
+# 4-connected read merges box + ring (262 px) and counts 2 where wave55-open's WRONG picture (the '0' stranded at x210-219,
+# outside the yellow box) counted 3 — the look is the ref's (the recorded look, ../wave55-gate/_note.md stage 1). The band's
+# structure is therefore ALSO accepted when it equals the INK run's same-platform band (the decided device picture; default
+# wave55-pre from stage 1 on, `--ink-run <run>` / `--ink-run none` for dry runs): a band passes against the base OR against the
+# ink run, under the same rules. Additive: no fixed picture changes verdict (every replay band still reads against the base);
+# a stray blob / a doubled '0' / a blob touching the box still fails BOTH (positioned-parent-slot.stage1-mutations.out.txt).
+INK_RUN_DEFAULT = 'wave55-pre'
+ink_run = INK_RUN_DEFAULT
+if '--ink-run' in argv:
+    i = argv.index('--ink-run'); ink_run = None if argv[i + 1] == 'none' else argv[i + 1]; del argv[i:i + 2]
 run = argv[0] if argv else 'wave54-final'
 base = argv[1] if len(argv) > 1 else 'wave54-final'
 selfcheck_failed = False
@@ -285,6 +298,24 @@ def band_comps(a, y0):
     m = np.zeros(a.shape[:2], bool); m[y0:y0 + 20] = A_BLUE(a)[y0:y0 + 20]
     return comps4(m)
 
+
+def band_ink_why(c, bc, ref_name, y0):
+    """The round-3 structure rules of one band against one reference's components (None = the band is that reference's)."""
+    if len(c) != len(bc):
+        return f'ink: band y{y0} {len(c)} blue components vs {ref_name} {len(bc)} (a stray blob / a doubled or split glyph)'
+    (n0, bb), (bn0, bbb) = c[0], bc[0]
+    if not (bb[0] >= bbb[0] and bb[1] >= bbb[1] and bb[2] <= bbb[2] and bb[3] <= bbb[3]) or n0 > bn0 + 2:
+        return f'ink: band y{y0} run box {n0} px {bb} vs {ref_name} {bn0} px {bbb} (inside it, ≤ +2 px: no added ink)'
+    if len(c) > 1:
+        (n1, gb), (bn1, gbb) = c[1], bc[1]
+        if abs((gb[2] - gb[0]) - (gbb[2] - gbb[0])) > 1 or abs((gb[3] - gb[1]) - (gbb[3] - gbb[1])) > 1 or n1 > bn1 + 2:
+            return (f'ink: band y{y0} glyph {n1} px {gb[2] - gb[0] + 1}×{gb[3] - gb[1] + 1} vs {ref_name} {bn1} px '
+                    f'{gbb[2] - gbb[0] + 1}×{gbb[3] - gbb[1] + 1} (size ±1, ≤ +2 px)')
+    rest, brest = sorted(n for n, _ in c[2:]), sorted(n for n, _ in bc[2:])
+    if any(abs(u - v) > 1 for u, v in zip(rest, brest)):
+        return f'ink: band y{y0} small components {rest} px vs {ref_name} {brest} (±1 each)'
+    return None
+
 YBOXES = ((60, 155), (160, 255))            # the two yellow inline-block rows (round 2): their bboxes must not move or vanish
 ref_ext, ref_col, ref_ybox = {}, {}, None
 for label in ('ref', 'web', 'ios', 'android'):
@@ -298,24 +329,21 @@ for label in ('ref', 'web', 'ios', 'android'):
     ba = arr(bim) if bim is not None else None
     if ba is None:
         why.append(f'ink: no {base} capture to read the bands against')
+    # stage 1: the ink run's same-platform capture is the second accepted structure (natives only: web reads its own base)
+    iim, _ = capture('css-text', 'bidi/bidi-tab-001', label, run_id=ink_run) if ink_run and label in ('ios', 'android') else (None, None)
+    ia = arr(iim) if iim is not None else None
     for y0 in RTL_BANDS if ba is not None else ():
         c, bc = band_comps(a, y0), band_comps(ba, y0)
         if not c or not bc:
             continue                                                   # an empty band is the extent rule's (below)
-        if len(c) != len(bc):
-            why.append(f'ink: band y{y0} {len(c)} blue components vs {base} {len(bc)} (a stray blob / a doubled or split glyph)')
-            continue
-        (n0, bb), (bn0, bbb) = c[0], bc[0]
-        if not (bb[0] >= bbb[0] and bb[1] >= bbb[1] and bb[2] <= bbb[2] and bb[3] <= bbb[3]) or n0 > bn0 + 2:
-            why.append(f'ink: band y{y0} run box {n0} px {bb} vs {base} {bn0} px {bbb} (inside it, ≤ +2 px: no added ink)')
-        if len(c) > 1:
-            (n1, gb), (bn1, gbb) = c[1], bc[1]
-            if abs((gb[2] - gb[0]) - (gbb[2] - gbb[0])) > 1 or abs((gb[3] - gb[1]) - (gbb[3] - gbb[1])) > 1 or n1 > bn1 + 2:
-                why.append(f'ink: band y{y0} glyph {n1} px {gb[2] - gb[0] + 1}×{gb[3] - gb[1] + 1} vs {base} {bn1} px '
-                           f'{gbb[2] - gbb[0] + 1}×{gbb[3] - gbb[1] + 1} (size ±1, ≤ +2 px)')
-        rest, brest = sorted(n for n, _ in c[2:]), sorted(n for n, _ in bc[2:])
-        if any(abs(u - v) > 1 for u, v in zip(rest, brest)):
-            why.append(f'ink: band y{y0} small components {rest} px vs {base} {brest} (±1 each)')
+        w = band_ink_why(c, bc, base, y0)
+        if w is not None and ia is not None:
+            ic = band_comps(ia, y0)
+            if ic and band_ink_why(c, ic, ink_run, y0) is None:
+                facts.append(f'band y{y0} structure = {ink_run}\'s ({len(c)} components)')     # the decided device picture's
+                w = None
+        if w is not None:
+            why.append(w)
     ybox = [abox(A_YEL(a), (0, y0, a.shape[1], y1)) for y0, y1 in YBOXES]
     if label == 'ref':
         ref_ybox = ybox

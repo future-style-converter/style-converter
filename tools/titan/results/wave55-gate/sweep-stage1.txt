@@ -1,0 +1,12 @@
+# Wave 55 single-writer full sweep — tree 2b0e0b2b (campaign/applier-campaign), started 2026-10-12T12:33:58Z
+# suite | rc | count line (as the tool prints it) | wall
+tooling            | rc=0 | # pass 2347 # fail 0  | 15s
+conformance        | rc=0 | IR conformance: all documents valid (v1 goldens + v2 goldens) | 5s
+web-runtime        | rc=0 |       Tests  1390 passed (1390) | 5s
+web-harness        | rc=0 |       Tests  344 passed (344) | 9s
+converter          | rc=0 | testcases=562 BUILD SUCCESSFUL in 27s | 27s
+compose            | rc=0 | testcases=3550 BUILD SUCCESSFUL in 29s | 30s
+android-app        | rc=0 | testcases=169 BUILD SUCCESSFUL in 15s | 16s
+swiftui            | rc=0 | 	 Executed 2241 tests, with 0 failures (0 unexpected) in 72.883 (111.650) seconds | 237s
+ios-harness        | rc=0 | 	 Executed 30 tests, with 0 failures (0 unexpected) in 0.054 (0.061) seconds | 119s
+# finished 2026-10-12T12:41:41Z

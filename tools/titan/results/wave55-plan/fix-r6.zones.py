@@ -38,19 +38,34 @@ TALLY = {tuple(k.split(' ', 1)) for part in ('full', 'part', 'paintOrderOnly') f
 cell_of = lambda sec, plat, test: f'{sec}/{test}.html {plat}'
 
 
+def also_sources():
+    """['<run>:<cell>', …]: residual-read.py's recorded WINDOWS_ALSO plus this invocation's --also <run>:<cell>[,<cell>…] (in order, deduplicated)."""
+    out = list(getattr(RR, 'WINDOWS_ALSO', []))
+    if '--also' in sys.argv:
+        run, cells = sys.argv[sys.argv.index('--also') + 1].split(':', 1)
+        out += [f'{run}:{c}' for c in cells.split(',')]
+    return list(dict.fromkeys(out))
+
+
+ALSO = also_sources()
+
+
 def fixed_pictures():
     """{cell: [(case id, picture)]} — every pre-registered PASS picture whose case id ends in `fixed` (deduplicated), plus the
     --also run's captures of the cells it names (the stage-1 device pictures decided right by a look)."""
     out, seen = {}, set()
-    if '--also' in sys.argv:
-        run, cells = sys.argv[sys.argv.index('--also') + 1].split(':', 1)
-        for c in cells.split(','):
-            if c not in RR.SPECS:
-                raise SystemExit(f'--also: {c} is not a declared cell')
-            F = RR.rgb(RR.capture_path(run, c))
-            if F is None:
-                raise SystemExit(f'--also: {run} has no capture of {c}')
-            seen.add((c, hashlib.sha1(F.tobytes()).hexdigest())); out.setdefault(c, []).append((f'{run} (decided by a look)', F))
+    # Stage 1: the --also sources are RECORDED in residual-read.py (WINDOWS_ALSO, inside the WINDOWS block --write rewrites), so a
+    # later --check re-derives with the same device pictures; a new --also on the command line is appended to them.
+    for src in ALSO:
+        run, c = src.split(':', 1)
+        if c not in RR.SPECS:
+            raise SystemExit(f'--also: {c} is not a declared cell')
+        F = RR.rgb(RR.capture_path(run, c))
+        if F is None:
+            raise SystemExit(f'--also: {run} has no capture of {c}')
+        h = hashlib.sha1(F.tobytes()).hexdigest()
+        if (c, h) not in seen:
+            seen.add((c, h)); out.setdefault(c, []).append((f'{run} (decided by a look)', F))
     for L, b in (('L1', pt.l1_cases), ('L2', pt.l2_cases), ('L3', pt.l3_cases), ('L4', pt.l4_cases), ('L5', pt.l5_cases), ('L6', pt.l6_cases)):
         for lane, secs, fid, repl, want in b() + r2.cases(pt, L):
             if not fid.endswith('fixed') or not any(w == 'PASS' for w in want.values()):
@@ -100,7 +115,7 @@ for c in sorted(c for c, s in RR.SPECS.items() if 'windows' in s):
     m = None
     for fid, F in FX.get(c, []):
         B = RR.rgb(RR.capture_path('wave54-final', c))
-        o, v, n, ms = RR.read_arrays(F, B, spec)
+        o, v, n, ms = RR.read_arrays(F, B, spec, cell=c)
         say(f'   {c:72} {fid:28} without windows: outside {o} · vacated {v} · non-class {n}')
         lm = ms[0] | ms[1] | ms[2]
         m = lm if m is None else (m | lm)
@@ -109,7 +124,8 @@ for c in sorted(c for c, s in RR.SPECS.items() if 'windows' in s):
         say(f'      cluster x{x0}-{x1} y{y0}-{y1} ({npx} px)')
     if cl:
         derived[c] = [(max(0, x0 - 1), max(0, y0 - 1), x1 + 2, y1 + 2) for x0, y0, x1, y1, _ in cl]
-lit = 'WINDOWS = {\n' + ''.join(f'    {c!r}: {w!r},\n' for c, w in sorted(derived.items())) + '}\n'
+lit = ('WINDOWS_ALSO = ' + repr(ALSO) + '   # stage 1 (D40): \'<run>:<cell>\' device captures decided right by a recorded look, window sources beside the fixed pictures (fix-r6.zones.py --also … --write records them here; --check re-derives with them)\n'
+       + 'WINDOWS = {\n' + ''.join(f'    {c!r}: {w!r},\n' for c, w in sorted(derived.items())) + '}\n')
 say('\n' + lit.rstrip())
 src_path = os.path.join(HERE, 'residual-read.py'); src = open(src_path).read()
 blk = re.search(r'(# WINDOWS_BEGIN\n)(.*?)(# WINDOWS_END)', src, re.S)
@@ -126,7 +142,7 @@ bad = []
 for c in sorted(FX):
     for fid, F in FX[c]:
         B = RR.rgb(RR.capture_path('wave54-final', c))
-        o, v, n, _ = RR.read_arrays(F, B, RR.SPECS[c])
+        o, v, n, _ = RR.read_arrays(F, B, RR.SPECS[c], cell=c)
         ks = [f'{k[1]}' for k in keys if CELL[k] == c]
         known = 'safe-002' in c
         if (o or v or n) and not known:
@@ -140,7 +156,7 @@ def _total(aa):
     for c in FX:
         if RR.SPECS[c].get('aa') == aa:
             B = RR.rgb(RR.capture_path('wave54-final', c))
-            t += sum(sum(RR.read_arrays(F, B, RR.SPECS[c])[:3]) for _, F in FX[c])
+            t += sum(sum(RR.read_arrays(F, B, RR.SPECS[c], cell=c)[:3]) for _, F in FX[c])
     return t
 for name, aa, vals in (('NEUTRAL_TOL', 'neutral', (0, 1, 2)), ('RAMP_TOL', 'ramp', (0, 1, 3)), ('SEG_TOL', 'segment', (0, 1, 3)), ('BOX_TOL', 'box', (8, 10, 12, 13, 14))):
     old = getattr(RR, name); got = []
@@ -157,7 +173,7 @@ for name, aa, vals in (('NEUTRAL_TOL', 'neutral', (0, 1, 2)), ('RAMP_TOL', 'ramp
         if keep[c].get('aa') == aa:
             sp = dict(keep[c]); sp['aa'] = None
             B = RR.rgb(RR.capture_path('wave54-final', c))
-            none += sum(RR.read_arrays(F, B, sp)[2] for _, F in FX[c])
+            none += sum(RR.read_arrays(F, B, sp, cell=c)[2] for _, F in FX[c])
     say(f'   {name:12} ({aa:8} cells) non-zero px over the fixed pictures at: {" · ".join(got)}; with no AA allowance: {none} non-class px; installed {old}')
 say(f'\n   cells with no fixed picture: {untested or "none"}')
 say(f'\nRESULT: {len(derived)} cells carry windows; {sum(len(v) for v in FX.values())} fixed pictures re-read, {len(bad)} not 0 / 0 / 0; '
