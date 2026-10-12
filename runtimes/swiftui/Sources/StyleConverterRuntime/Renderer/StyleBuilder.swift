@@ -115,6 +115,7 @@ struct TextConfig {
     // level font from TypographyApplier), so the caps variant has to be
     // composed into that font.
     var smallCaps: Bool           = false
+    var tabularNums: Bool         = false  // Wave 55 (L5 U3): css-fonts-4 tabular-nums → labelFont's .monospacedDigit(), same reason as smallCaps
     // Fidelity wave 2 — text-shadow layers applied at the GLYPH level
     // (css-text-decor-3 §4). One `.shadow(...)` per layer chains onto
     // the label's Text; the old box-level shadow haloed the container.
@@ -503,6 +504,7 @@ enum StyleBuilder {
             // and per-layer text-shadow (css-text-decor-3 §4).
             s.text.noWrap = agg.noWrap
             s.text.smallCaps = agg.smallCaps
+            if let t = agg.tabularNums { s.text.tabularNums = t }  // Wave 55 (L5 U3): declared numeric spacing only; nil keeps the face default
             s.text.shadows = agg.textShadowLayers
             // Wave 19 — mirror the aggregate's line cap (line-clamp /
             // max-lines, css-overflow-4 §5) so the label's inner

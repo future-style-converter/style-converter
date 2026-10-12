@@ -5598,6 +5598,11 @@ private struct PlaceholderLabel: View {
         // Text (a direct `.font` wins over container fonts, Apple docs),
         // so the caps variant must be baked in here (Typography_C06).
         if textConfig.smallCaps { f = f.smallCaps() }
+        // Wave 55 (lane L5, U3-ios) — css-fonts-4 `font-variant-numeric:
+        // tabular-nums` composes here for the same reason: SwiftUI's
+        // `Font.monospacedDigit()` (iOS 15+) selects fixed-width digits —
+        // the font's `tnum` (FontVariantNumericApplier; TextConfig field).
+        if textConfig.tabularNums { f = f.monospacedDigit() }
         return f
     }
 

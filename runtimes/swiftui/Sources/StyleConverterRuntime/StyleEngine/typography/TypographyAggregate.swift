@@ -66,6 +66,9 @@ struct TypographyAggregate: Equatable {
     var fontStretchPercent: CGFloat? = nil
     /// True when `small-caps` was specified via `font-variant-caps`.
     var smallCaps: Bool = false
+    /// `font-variant-numeric` spacing: true = `tabular-nums`, false =
+    /// `proportional-nums`, nil = undeclared (FontVariantNumericApplier).
+    var tabularNums: Bool? = nil
 
     // MARK: - Letter / word / line metrics
 
