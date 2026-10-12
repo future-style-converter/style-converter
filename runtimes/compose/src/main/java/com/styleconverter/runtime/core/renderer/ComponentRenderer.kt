@@ -1149,19 +1149,16 @@ object ComponentRenderer {
         // bold }` and `sub, sup { font-size: smaller }` (HTML §15.3) beat the
         // inherited body face and lose to the author's own. It runs BEFORE
         // DynamicValueResolver (below) so `em` / `ch` on the heading resolve
-        // against the UA face. Wave 55 (lane L4, U2-android): the heading
-        // half stands down only for a host whose runs do not FOLD (it would
-        // still paint stacked) - UAHeadingFoldGate on this PRE-UA list; a
-        // folded host takes the face like a leaf. Same list instance for every
-        // untagged component (the 327-pair corpus carries no `_tag`), so no
-        // committed capture moves.
+        // against the UA face. The heading half stands down for an element
+        // that hosts child boxes (headingStandsDown - iOS's wave-40 gate,
+        // verbatim). Same list instance for every untagged component (the
+        // 327-pair corpus carries no `_tag`), so no committed capture moves.
         // UAElementFontRuleSeamWiringTest pins this call's exact arguments.
         val rawProperties = com.styleconverter.runtime.typography.UAElementFontRule.apply(
             component._tag,
             allReset.own,
             listUaProperties,
-            standsDown = com.styleconverter.runtime.typography.UAHeadingFoldGate
-                .standsDown(component, listUaProperties),
+            standsDown = com.styleconverter.runtime.typography.UAElementFontRule.headingStandsDown(component),
         )
         // Wave 55 (lane L4, U1-android) - the THIRD tag-keyed UA step: an
         // OUT-OF-FLOW h1…h6 takes its UA `margin-block` (HTML §15.3, .67em

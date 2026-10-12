@@ -21,8 +21,8 @@
 // ## Scope, stated rather than discovered
 // Keyed on `_tag` (`meta.sourceTag`), which the 327-pair product corpus never
 // carries, so every committed baseline is byte-identical by construction. The
-// heading half stands down for a heading whose child boxes would still paint
-// STACKED ([UAHeadingFoldGate], since wave 55); sup/sub are never
+// heading half stands down for a heading that hosts child boxes
+// ([headingStandsDown], the iOS twin's wave-40 gate); sup/sub are never
 // gated. UA heading MARGINS: UaBlockChildMargins.kt, UaPositionedHeadingMargin.kt
 // (spacing/) + the harness UaBlockMargins. KNOWN GAPS (Swift twin): `smaller` is
 // parent ÷ 1.2, where Blink uses its keyword table for a keyword-sized
@@ -113,11 +113,13 @@ object UAElementFontRule {
             ?: MEDIUM_PX
 
     /**
-     * The wave-54 GO-SMALL verdict (true for any host of child boxes, iOS's
-     * wave-40 gate). Since wave 55 the seam passes [UAHeadingFoldGate]
-     * instead, once spacing/UaPositionedHeadingMargin gives the abspos heading
-     * its UA margin. Kept while a renderer without seam-3 calls it (rule 2b:
-     * the unit compiles without its seam); its removal is queued (BACKLOG).
+     * The seam's `standsDown` verdict: true for an element hosting composed
+     * child boxes — the Swift twin's wave-40 `hasElementChildren` gate,
+     * verbatim (wave 54 GO-SMALL, PLAN §2 L5). A FOLDED heading host stands
+     * down too: its abspos `<h1>` gets no UA `.67em` margin on either native,
+     * so the 2em face alone lands ~21px high and the replay scores
+     * inset-005/-006/-014 LOWER (tools/titan/results/wave54-ua-heading-face/
+     * skeptic.md repro 14); the fold-aware gate waits there, in `held/`.
      */
     fun headingStandsDown(component: IRComponent): Boolean =
         // Any composed child box ⇒ the heading half is withheld.
@@ -132,8 +134,8 @@ object UAElementFontRule {
      * @param own the element's OWN post-reset declarations — a guarded type
      *   here means the author declared it and the UA value loses.
      * @param merged the inheritance-merged list to correct.
-     * @param standsDown [UAHeadingFoldGate]'s verdict: true withholds the
-     *   HEADING half (a stacked host); sup/sub ignore it.
+     * @param standsDown [headingStandsDown]'s verdict: true withholds the
+     *   HEADING half (a host of child boxes); sup/sub ignore it.
      * @return [merged] itself when nothing fires, else a substituted copy.
      */
     fun apply(
@@ -144,7 +146,7 @@ object UAElementFontRule {
     ): List<IRProperty> {
         // Heading tags are the only gated ones; sup/sub always apply.
         val heading = isBold(sourceTag)
-        // The heading half applies unless the fold gate withheld it.
+        // The heading half applies unless [headingStandsDown] withheld it.
         val applies = !heading || !standsDown
         // The size factor (null = no UA size for this tag or gated out).
         val multiplier = if (applies) sizeMultiplier(sourceTag) else null

@@ -160,9 +160,6 @@ class SeamReachabilityTest {
             // Wave 55 (lane L4, U1-android) — the out-of-flow heading's UA
             // margin; its ONLY caller is seam-1, which carries this line.
             "spacing/UaPositionedHeadingMargin.kt",
-            // Wave 55 (lane L4, U2-android) — the fold-aware heading face
-            // gate; its ONLY caller is seam-3, which carries this line.
-            "typography/UAHeadingFoldGate.kt",
             // A5 — currentcolor / background-color inheritance / color-mix.
             "color/CurrentColorBackground.kt",
             "color/BackgroundColorInheritance.kt",

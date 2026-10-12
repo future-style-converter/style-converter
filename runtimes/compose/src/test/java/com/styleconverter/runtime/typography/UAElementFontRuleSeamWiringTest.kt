@@ -13,8 +13,7 @@ package com.styleconverter.runtime.typography
 // execute, so this is a SOURCE-level pin of the four facts the replay
 // assumes: (1) the UA step reads the ListStyleUaRule output, (2) with the
 // element's tag and post-reset OWN list, (3) with `standsDown =
-// UAHeadingFoldGate.standsDown(component, listUaProperties)` (wave 55, lane L4
-// seam-3; it was UAElementFontRule.headingStandsDown), and (4) its result is the
+// UAElementFontRule.headingStandsDown(component)`, and (4) its result is the
 // list DynamicValueResolver resolves — the step runs BEFORE the resolver, so
 // `em` / `ch` on a heading read the UA face. Wave 55 (lane L4, seam-1): (4)
 // now passes through UaPositionedHeadingMargin, which only APPENDS the UA
@@ -53,7 +52,7 @@ class UAElementFontRuleSeamWiringTest {
     /** (2) + (3) The UA font step, verbatim: tag, OWN list, the list above, the stand-down verdict. */
     private val fontStep = "val rawProperties = com.styleconverter.runtime.typography.UAElementFontRule.apply( " +
         "component._tag, allReset.own, listUaProperties, " +
-        "standsDown = com.styleconverter.runtime.typography.UAHeadingFoldGate .standsDown(component, listUaProperties), )"
+        "standsDown = com.styleconverter.runtime.typography.UAElementFontRule.headingStandsDown(component), )"
 
     @Test
     fun `the UA font step wraps the list UA rule's output with the tag, own list and stand-down verdict`() {
