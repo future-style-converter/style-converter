@@ -1,17 +1,18 @@
 package com.styleconverter.runtime.typography
 
-// Wave 54 (lane L5, U1-android, GO-SMALL) — pins the Compose UA element-font
-// rule on the VERBATIM wave53-final per-test IR (UAHeadingFaceWire, below),
-// replaying seam-1's cascade step (UAHeadingFaceReplay, below). PLAN §2 L5:
+// Wave 54 (lane L5, U1-android) — pins the Compose UA element-font rule on
+// the VERBATIM wave53-final per-test IR (UAHeadingFaceWire, below; byte-identical
+// in wave54-final), replaying the seam's cascade step (UAHeadingFaceReplay,
+// below). Wave 55 (lane L4, U2-android) restores the fold-aware gate (seam-3):
 //   • the block-in-inline h1 → 32 / 700 (the HIGH target's whole mechanism);
 //   • inset-001's h1 (extractor-baked 32/700) → the SAME list instance —
 //     mutation: drop the own-declaration guard;
-//   • the folded inset-005/-006/-014 hosts and the inset-011 control → the
-//     SAME list (the heading half stands down for a host of child boxes:
-//     the fold-aware gate is HELD, lane note "Fix pass") — mutation:
-//     headingStandsDown returns false;
-//   • inset-014's 2em on the monospace base → 26 (the rule, gate forced open)
-//     — mutation: base 16 instead of MonospaceUAFontSize;
+//   • the folded inset-005/-006 hosts → 32 / 700 and -014 → 26 / 700, the
+//     bailing inset-011 → the SAME list (UAHeadingFoldGate) — mutations: the
+//     gate always false / always true, and the replay on headingStandsDown
+//     (seam-3 absent);
+//   • inset-014's 2em on the monospace base → 26 — mutation: base 16
+//     instead of MonospaceUAFontSize;
 //   • the text-decoration-color `sup` → 13.333; an untagged component → identity;
 //   • the step writes ONLY FontSize / FontWeight — mutation: it writes Color.
 // Plus the end-to-end read: TextStyleApplier must PAINT the injected face
@@ -65,7 +66,7 @@ class UAElementFontRuleTest {
             val site = UAHeadingFaceReplay.site(UAHeadingFaceWire.BLOCK_IN_INLINE_015_PRINT, id)
             // The verbatim h1 declares only its four margins — no face, no children.
             assertNull("$id carries no own size", sizePx(site.own))
-            assertFalse(UAElementFontRule.headingStandsDown(site.component))
+            assertFalse(UAHeadingFoldGate.standsDown(site.component, site.mergedPreUa))
             val out = UAHeadingFaceReplay.seam(site)
             // 2 × the 16px medium, bold; exactly one entry each (first-/last-wins agree).
             assertEquals(32f, sizePx(out)!!, 1e-4f)
@@ -93,21 +94,29 @@ class UAElementFontRuleTest {
     }
 
     @Test
-    fun `GO-SMALL - every heading host with child boxes keeps its list (005, 006, 014 held, 011 control)`() {
+    fun `fold gate - the folded hosts take the face (005, 006 32, 014 26), the bailing 011 keeps its list`() {
         for ((doc, id) in hostsWithChildren) {
             val site = UAHeadingFaceReplay.site(doc, id)
-            // Unsized h1 hosts (no own face) — the rule WOULD fire without the gate.
+            // Unsized h1 hosts (no own face) — only the gate decides.
             assertNull("$id carries no own size", sizePx(site.own))
-            assertTrue(id, UAElementFontRule.headingStandsDown(site.component))
-            // Identity: the Android capture of all four documents stays byte-identical.
-            assertSame(id, site.mergedPreUa, UAHeadingFaceReplay.seam(site))
+            val out = UAHeadingFaceReplay.seam(site)
+            if (id.startsWith("text-decoration-inset-011")) {
+                // The bailing host paints STACKED: the gate stands it down, identity.
+                assertTrue(id, UAHeadingFoldGate.standsDown(site.component, site.mergedPreUa))
+                assertSame(id, site.mergedPreUa, out)
+            } else {
+                // A folded host paints ONE paragraph: the face applies (014: 2 × 13).
+                assertFalse(id, UAHeadingFoldGate.standsDown(site.component, site.mergedPreUa))
+                assertEquals(id, if (id.startsWith("text-decoration-inset-014")) 26f else 32f, sizePx(out)!!, 1e-4f)
+                assertEquals(id, 700, weight(out))
+            }
         }
     }
 
     @Test
-    fun `inset-014 - the rule's em base on the verbatim monospace host is 13 (gate forced open)`() {
+    fun `inset-014 - the rule's em base on the verbatim monospace host is 13`() {
         val site = UAHeadingFaceReplay.site(UAHeadingFaceWire.INSET_014, "text-decoration-inset-014__1__0-110")
-        // The rule alone, as the held fold-aware gate would call it: 2 × 13 = 26, not 2 × 16.
+        // The rule with the face open: 2 × 13 = 26, not 2 × 16.
         val out = UAElementFontRule.apply(site.component._tag, site.own, site.mergedPreUa, standsDown = false)
         assertEquals(26f, sizePx(out)!!, 1e-4f)
         assertEquals(700, weight(out))
@@ -170,8 +179,8 @@ class UAElementFontRuleTest {
     }
 }
 
-/** seam-1's cascade step replayed root → target over a verbatim document: for each node, own →
- *  mergeInherited → ListStyleUaRule → UAElementFontRule(standsDown = headingStandsDown) → the
+/** The seam's cascade step replayed root → target over a verbatim document: for each node, own →
+ *  mergeInherited → ListStyleUaRule → UAElementFontRule(standsDown = UAHeadingFoldGate) → the
  *  INHERITED subset handed down. Exact for these documents because its premises — no `All`, no
  *  buckets, no var() on the path (so AllReset, the bucket fold and DynamicValueResolver are the
  *  identity) — are ASSERTED per node. Folded in from UAHeadingFaceReplay.kt (fix pass, R2-N8). */
@@ -206,10 +215,10 @@ internal object UAHeadingFaceReplay {
         error("unreachable: the path always ends at the target")
     }
 
-    /** seam-1's output for [site]: the UA font step with the seam's stand-down verdict. */
+    /** The seam's output for [site]: the UA font step with seam-3's fold-gate verdict. */
     fun seam(site: Site): List<IRProperty> = UAElementFontRule.apply(
         site.component._tag, site.own, site.mergedPreUa,
-        standsDown = UAElementFontRule.headingStandsDown(site.component),
+        standsDown = UAHeadingFoldGate.standsDown(site.component, site.mergedPreUa),
     )
 }
 
