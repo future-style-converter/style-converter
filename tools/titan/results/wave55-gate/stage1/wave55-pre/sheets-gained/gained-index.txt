@@ -1,0 +1,6 @@
+columns: re-frozen ref | wave55-open | wave55-pre
+gained-01 row 1: css/css-text-decor/text-decoration-inset-014.html [android] 0.923 → 0.9867
+gained-01 row 2: css/css-text-decor/text-decoration-inset-014.html [ios] 0.9238 → 0.9936
+gained-01 row 3: css/css-text/hyphens/hyphenate-character-004.html [ios] 0.9477 → 0.975
+gained-01 row 4: css/filter-effects/backdrop-filter-nested-border-radius-clip-3.html [android] 0.9574 → 0.9999
+gained-01 row 5: css/selectors/dir-style-02a.html [android] 0.9425 → 0.9854
