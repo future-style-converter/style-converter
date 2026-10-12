@@ -187,6 +187,7 @@ class SeamReachabilityTest {
             "transforms/BackfaceCull.kt",
             "transforms/TransformInheritance.kt",
             "layout/position/PositionedParentSlotGate.kt", // wave 55 L3 U1: called only by seam 1
+            "layout/position/PositionedParentRtlOrigin.kt", // wave 55 L3 U2: the gate's RTL branch
         )
         val dead = modules.filterNot { File(runtimeTree, it) in reachable }
         assertTrue(

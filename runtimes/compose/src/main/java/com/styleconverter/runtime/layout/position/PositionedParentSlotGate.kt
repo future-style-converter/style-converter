@@ -30,6 +30,15 @@ package com.styleconverter.runtime.layout.position
 // host-inactive RTL parent stays UNMOUNTED, with a PropertyTracker
 // breadcrumb (no silent fallthrough); an active host keeps today's mount.
 //
+// ## U2 — the RTL branch
+// An RTL parent whose slot PositionedParentRtlOrigin can correct (a px
+// Width, one physical inline inset) takes the mount WITH the physical-left
+// origin, under any host state of a composed capture: host-inactive
+// (dir-style-02a rows 6/9, bidi-tab-001) and host-active
+// (dynamic-offset-*rtl*, which mounted at W + left until now). An RTL parent
+// the origin declines keeps today's slot (mounted under an active host,
+// withheld otherwise) and records the decline's own breadcrumb.
+//
 // Pure decisions only (JVM-pinned by PositionedParentSlotGateTest, no
 // Robolectric in this suite); the measurement is PositionedParentFlowSlot
 // .mount → CanvasRootHoist.zeroFlowAnchor, unchanged.
@@ -60,6 +69,9 @@ object PositionedParentSlotGate {
 
         /** PositionedParentFlowSlot.mount: zero footprint at the slot origin. */
         MOUNT,
+
+        /** The mount plus the RTL parent's physical-left origin (U2). */
+        MOUNT_RTL_ORIGIN,
     }
 
     /**
@@ -93,9 +105,26 @@ object PositionedParentSlotGate {
         // Not an out-of-flow child of a Column-loop containing block: the
         // slot has nothing to say (the frozen loop owns it).
         if (!PositionedParentFlowSlot.applies(childProperties, parentProperties)) return SlotMount.IDENTITY
+        // U2: an RTL parent's slot the origin can correct, in any host state.
+        if (rtlOriginEngages(hostActive, composedCapture, parentRtl) &&
+            PositionedParentRtlOrigin.applies(parentRtl, parentProperties, childProperties)
+        ) return SlotMount.MOUNT_RTL_ORIGIN
         // Otherwise the engagement table above decides.
         return if (engages(hostActive, composedCapture, parentRtl)) SlotMount.MOUNT else SlotMount.IDENTITY
     }
+
+    /**
+     * U2's engagement row: an RTL parent of a composed capture, whatever the
+     * host (an active host implies a composed capture; the OR keeps the
+     * pre-wave-55 mount's host row explicit). Never the dark stage.
+     */
+    internal fun rtlOriginEngages(
+        hostActive: Boolean,
+        composedCapture: Boolean,
+        parentRtl: Boolean,
+    ): Boolean =
+        // Physical-left origin only where an RTL Column places the slot.
+        parentRtl && (hostActive || composedCapture)
 
     /**
      * True when the RTL guard — not the host or the capture mode — withheld
@@ -121,11 +150,19 @@ object PositionedParentSlotGate {
         composedCapture: Boolean,
         parentRtl: Boolean,
     ): Modifier = when (decide(childProperties, parentProperties, hostActive, composedCapture, parentRtl)) {
-        // The wave-46 mount, unchanged (PositionedParentFlowSlot.mount).
-        SlotMount.MOUNT -> PositionedParentFlowSlot.mount(childProperties)
+        // U2: the mount with its RTL physical-left origin.
+        SlotMount.MOUNT_RTL_ORIGIN -> PositionedParentFlowSlot.mount(childProperties, rtlOrigin = true)
+        // The wave-46 mount, unchanged (PositionedParentFlowSlot.mount) —
+        // after naming why an RTL parent's origin declined, if one did.
+        SlotMount.MOUNT -> {
+            recordRtlOriginDecline(childProperties, parentProperties, hostActive, composedCapture, parentRtl)
+            PositionedParentFlowSlot.mount(childProperties)
+        }
         // Identity — and, when it was the RTL guard that withheld an
         // applying mount, say so (no silent fallthrough).
         SlotMount.IDENTITY -> {
+            // An RTL parent's declined origin is named first (U2).
+            recordRtlOriginDecline(childProperties, parentProperties, hostActive, composedCapture, parentRtl)
             // Only an applying child is a withheld mount; a non-applying
             // child was never the slot's to mount.
             if (PositionedParentFlowSlot.applies(childProperties, parentProperties) &&
@@ -136,5 +173,26 @@ object PositionedParentSlotGate {
             // The identity Modifier keeps today's Column footprint.
             Modifier
         }
+    }
+
+    /**
+     * U2's no-silent-fallthrough: an applying child of an RTL parent whose
+     * origin DECLINED (PositionedParentRtlOrigin's reasons) records that
+     * reason's breadcrumb — the slot keeps today's placement there.
+     */
+    private fun recordRtlOriginDecline(
+        childProperties: List<IRProperty>,
+        parentProperties: List<IRProperty>,
+        hostActive: Boolean,
+        composedCapture: Boolean,
+        parentRtl: Boolean,
+    ) {
+        // Only the RTL-origin row can decline; every other row is silent.
+        if (!rtlOriginEngages(hostActive, composedCapture, parentRtl)) return
+        // A non-applying child was never the slot's.
+        if (!PositionedParentFlowSlot.applies(childProperties, parentProperties)) return
+        // The decline's own key (NONE / NOT_RTL carry none).
+        PositionedParentRtlOrigin.decline(parentRtl, parentProperties, childProperties)
+            .breadcrumb?.let { PropertyTracker.markUnhandled(it) }
     }
 }

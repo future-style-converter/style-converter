@@ -151,14 +151,19 @@ object PositionedParentFlowSlot {
      *    compose from opposite edges).
      * Rides RenderComponent's `itemModifier` channel (outermost), exactly
      * like the RC1 mount and the Box branch's RenderAbsoluteChild mount.
+     * Wave 55 (lane L3, U2): [rtlOrigin] adds ONE outer element,
+     * PositionedParentRtlOrigin.originModifier (the physical-left origin of
+     * an RTL parent's slot, decided by PositionedParentSlotGate); the
+     * default keeps the one-element wave-46 mount byte for byte
+     * (`Modifier.then(x)` is `x`).
      */
-    fun mount(childProperties: List<IRProperty>): Modifier =
-        CanvasRootHoist.zeroFlowAnchor(
+    fun mount(childProperties: List<IRProperty>, rtlOrigin: Boolean = false): Modifier =
+        (if (rtlOrigin) PositionedParentRtlOrigin.originModifier() else Modifier).then(CanvasRootHoist.zeroFlowAnchor(
             shrinkToFit = CanvasRootHoist.staticPositionShrinkToFit(childProperties),
             slotEndAnchor = PositionedAncestorAnchor.anchorGate(
                 childProperties.map { it.type to it.data },
             ),
-        )
+        ))
 
     /**
      * The end edge, in device px, a slot-relative axis anchors to — the
