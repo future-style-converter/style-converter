@@ -15,7 +15,9 @@
 //   - GROUP effects on a box and everything inside it: `opacity`
 //     (css-color-4 #transparency), `transform` (css-transforms-1
 //     #transform-property), `filter` (filter-effects-1 #FilterProperty),
-//     `clip-path` (css-masking-1 #the-clip-path);
+//     `clip-path` (css-masking-1 #the-clip-path), `mask-image`
+//     (css-masking-1 #the-mask-image) and `mix-blend-mode` (compositing-1
+//     #mix-blend-mode);
 //   - the CLIP of a non-`visible` `overflow` (css-overflow-3 §3: content is
 //     clipped at the padding box, and an `outside` marker hangs past it);
 //   - INHERITED paint state the run does not restate (runProperties carries
@@ -29,11 +31,13 @@
 // rather than one painted opaque / unmoved / unclipped / visible where the
 // reference dimmed, moved, clipped or hid it. The ROOT's own effects (and its
 // ancestors') still reach root-owned runs, so they are NOT read.
-// TODO(S6 residue): `mask-image` and `mix-blend-mode` are group effects of the
-// same class and are NOT read yet — no Chromium run in this fix pass could
-// confirm their computed spellings, and a key Chromium does not expose would
-// read as "unmeasured" and decline every marker. Corpus reach: 0 (census in
-// the lane note).
+// `mask-image` and `mix-blend-mode` (the wave-54 S6 residue) are read since
+// wave 55 (L7 U5, BACKLOG 0(o)): a key Chromium did not expose, or spelled
+// other than its initial value, would decline EVERY marker, so the unit lands
+// only behind the [W-L7a] CDP read of counter-suffix's chain plus a wire
+// differential over the six bidi-baked sections. Corpus reach: 0 of the 17
+// bidi-baked sources mention either (tools/titan/results/wave55-plan/
+// instruments.census.out.txt (2)).
 //
 // THE CHAIN. Chromium's computed values, read in-page right after the marker
 // probe (bidi-marker-bake.mjs collectMarkerFacts): the item's `::marker`
@@ -67,6 +71,12 @@ export const MARKER_PAINT_INITIAL = Object.freeze({
   visibility: 'visible',
   // css-text-decor-3 #text-shadow-property: inherited, initial none.
   textShadow: 'none',
+  // css-masking-1 #the-mask-image: initial none (no mask layer); a mask
+  // masks the element AND its descendants as one group, so the marker too.
+  maskImage: 'none',
+  // compositing-1 #mix-blend-mode: initial normal; any other value blends the
+  // element's whole group — marker included — with its backdrop.
+  mixBlendMode: 'normal',
 });
 
 // In-page half. page.evaluate serialises the function source, so it is
