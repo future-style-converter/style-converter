@@ -13,6 +13,8 @@
 #   M-dry     --dry-run falling through to the run path → the dry-run identity check (refs + every file) goes red;
 # plus the dry run's own identity (default mode and --dry-run: refs and files byte-identical), the refusals (exit 2, nothing
 # touched), a failing driver (exit 1, records still written) and a driver that never starts (a NOT READ block, exit 1).
+# Wave 55 L7 U3 added: T6c an ab-diff.mjs that exits non-zero for one arm → exit 7 (its error is not a read-out), and the
+# mutant M-abdiff (the step-9 rc check deleted) turns T6c RED (exit 0 with a failed read-out).
 # Plan-skeptic round 2 added: T5b2 an UNTRACKED file under a code path refuses (process-holes S1); T5l an arm that INCLUDES
 # the child commit W rewriting U's line ('drop-UW W U') dry-runs exit 0 while T5j (U alone) stays refused, and T5m a file
 # created by N and extended by B ('drop-NB B N') dry-runs exit 0 (process-holes M1: the cumulative reverse check); the
@@ -65,7 +67,7 @@ HERE="$(cd "$(dirname "$0")" && pwd)"; ROOT="$(cd "$HERE/../../../.." && pwd)"
 { echo "== $1 — $(date -u +%Y-%m-%dT%H:%M:%SZ) — HEAD $(git -C "$ROOT" rev-parse --short HEAD)"; echo "android  MATCH (stub)"; echo "ios      MATCH (stub)"; echo; } | tee -a "$HERE/build-hashes.txt"
 EOF
   printf '== wave55-open (stub opening block)\nandroid  MATCH\nios      MATCH\n\n' >"$R/tools/titan/results/wave55-gate/build-hashes.txt"
-  printf 'console.log(`A/B  exclude=${process.argv[2]}  include=${process.argv[3]}  (stub ab-diff) ${process.argv.slice(4).join(" ")}`);\nconsole.log("compared 0 cells: 0 differ (stub)");\n' >"$R/tools/titan/results/wave52-gate/ab-diff.mjs"
+  printf 'if ((process.env.STUB_ABDIFF_FAIL ?? "") && process.argv[2].endsWith(process.env.STUB_ABDIFF_FAIL)) { console.error(`no run dir for ${process.argv[2]}`); process.exit(2); }\nconsole.log(`A/B  exclude=${process.argv[2]}  include=${process.argv[3]}  (stub ab-diff) ${process.argv.slice(4).join(" ")}`);\nconsole.log("compared 0 cells: 0 differ (stub)");\n' >"$R/tools/titan/results/wave52-gate/ab-diff.mjs"
   printf 'a0\n' >"$R/src/a.txt"; printf 'b0\n' >"$R/src/b.txt"
   git -C "$R" add -A; git -C "$R" commit -q -m base
   printf 'a1\n' >"$R/src/a.txt"; git -C "$R" commit -q -am "U: a0 -> a1"; U="$(git -C "$R" rev-parse --short HEAD)"
@@ -224,10 +226,23 @@ make_repo "$S/r7"; pool "$S/pool7"
 STUB_NO_START=drop-U runner "$RUNNER" "$S/r7" "$S/pool7" --run
 check "T6b no 'attempt 1 starting' on drop-U → a NOT READ block (once), exit 1, drop-V read normally" test "$RRC-$(grep -c '^== wave55-ab-drop-U .*NOT READ' "$S/r7/tools/titan/results/wave55-gate/build-hashes.txt")-$(blocks "$S/r7" drop-V)" = "1-1-1"
 
+make_repo "$S/r8"; pool "$S/pool8"   # wave 55 L7 U3: the read-out step itself fails (ab-diff.mjs exits 2 on drop-V)
+STUB_ABDIFF_FAIL=drop-V runner "$RUNNER" "$S/r8" "$S/pool8" --run
+check "T6c ab-diff.mjs exits 2 on drop-V → exit 7, its failure named, both blocks once, tree restored" test "$RRC-$(grep -c 'ab-diff.mjs exited 2 for drop-V' "$S/r8.out")-$(blocks "$S/r8" drop-U)-$(blocks "$S/r8" drop-V)-$(git -C "$S/r8" rev-parse HEAD)" = "7-1-1-1-$HEADSHA"
+python3 - "$RUNNER" "$S/mut/ab-arms55.M-abdiff.sh" <<'EOF'
+import sys
+s = open(sys.argv[1]).read(); a = 'bad+=" ab-diff.mjs exited ${ADRC[i]} for $arm (final/ab-$arm.txt holds its error, not a read-out);"'
+assert s.count(a) == 1
+s = s.replace(a, ':   # MUTATION M-abdiff: the step-9 rc check deleted')
+open(sys.argv[2], 'w').write(s)
+EOF
+make_repo "$S/r9"; pool "$S/pool9"; STUB_ABDIFF_FAIL=drop-V runner "$S/mut/ab-arms55.M-abdiff.sh" "$S/r9" "$S/pool9" --run
+check "T6c M-abdiff is RED: the same failed read-out exits $RRC, not 7" test "$RRC" != 7
+
 echo; echo "## T7. outside the throwaway repos"
 check "T7 this repo's refs, worktrees and stash unchanged" test "$(this_repo)" = "$THIS_BEFORE"
 real_pool >"$S/real-pool.after.txt"; printf '%s\n' "$POOL_BEFORE" >"$S/real-pool.before.txt"
 check "T7 the real /tmp/titan-device-pool unchanged (listing with mtimes, $(grep -c . "$S/real-pool.before.txt") lines)" test "$(real_pool)" = "$POOL_BEFORE"
 diff "$S/real-pool.before.txt" "$S/real-pool.after.txt" | sed 's/^/     /'
-echo; echo "ab-arms55.selftest: $([ $FAILS -eq 0 ] && echo 'every check as required (mutants M-L18, M-per-arm, M-dry RED)' || echo "$FAILS check(s) NOT as required")"
+echo; echo "ab-arms55.selftest: $([ $FAILS -eq 0 ] && echo 'every check as required (mutants M-L18, M-per-arm, M-dry, M-abdiff RED)' || echo "$FAILS check(s) NOT as required")"
 exit $FAILS

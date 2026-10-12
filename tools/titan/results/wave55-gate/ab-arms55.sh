@@ -61,7 +61,8 @@
 #   `ab-diff.mjs wave55-ab-<arm> <against> --threshold 0.002 --platforms <p>` → final/ab-<arm>.txt); 9 verify them.
 # Exit: 0 every arm OK · 1 an arm's driver rc ≠ 0 or no hash read (the other arms still run) · 2 refused, nothing touched ·
 #   3 a revert did not apply (that arm skipped, tree restored) · 6 a restore not verified (records left in the stage dir, path
-#   printed; nothing written in the tree) · 7 records written but not verified · 130 interrupted (tree restored).
+#   printed; nothing written in the tree) · 7 records written but not verified (wave 55 L7 U3: an ab-diff.mjs that exits
+#   non-zero — its error, not a read-out, is in final/ab-<arm>.txt — fails the check too) · 130 interrupted (tree restored).
 # Self-test: ab-arms55.selftest.sh (a throwaway `git init` repository; stubs for the driver, the hash script and ab-diff).
 set -uo pipefail
 
@@ -82,7 +83,7 @@ while (( $# )); do
     --dry-run) MODE=dry; shift ;;
     --run) MODE=run; shift ;;
     --against) AGAINST="${2:?--against needs a run id}"; shift 2 ;;
-    -h|--help) sed -n '2,65p' "$0"; exit 0 ;;   # the whole header (round 3: it had drifted to 2-46)
+    -h|--help) sed -n '2,66p' "$0"; exit 0 ;;   # the whole header (round 3: it had drifted to 2-46; L7 U3: +1 line)
     -*) echo "ab-arms55: unknown flag $1" >&2; exit 2 ;;
     *) [[ -z "$ARMS_FILE" ]] || { echo "ab-arms55: unexpected arg $1" >&2; exit 2; }; ARMS_FILE="$1"; shift ;;
   esac
@@ -221,7 +222,7 @@ case "$STAGE/" in "$AB_ROOT"/*) echo "REFUSED: the stage dir $STAGE is inside th
 echo "stage dir (records live here until every arm is restored): $STAGE"
 export PROJECT_ROOT="$AB_ROOT"; source "$AB_ROOT/tools/titan/own-processes.sh"
 RC=0; CUR_RUN=""; DPID=""
-STATUS=(); DRC=(); PRE_SHA=(); PRE_SIZE=(); ARM_TREE=(); LABEL=()
+STATUS=(); DRC=(); PRE_SHA=(); PRE_SIZE=(); ARM_TREE=(); LABEL=(); ADRC=()   # ADRC: each arm's ab-diff.mjs exit code
 
 on_signal() {   # an interrupt mid-arm: stop the driver, put the tree back, keep the stage
   echo "INTERRUPTED — stopping the driver and restoring the tree; records stay in $STAGE"
@@ -285,7 +286,7 @@ write_records() {   # step 8, for every arm that ran — only ever called after 
     if grep -q "^== $run " "$STAGE/$arm.hash.txt" 2>/dev/null; then cat "$STAGE/$arm.hash.txt" >>"$HASHES"
     else printf '== %s — NOT READ: the driver never reached "attempt 1 starting" (driver rc %s); this arm is a score, not evidence\n\n' "${LABEL[i]}" "${DRC[i]}" >>"$HASHES"; RC=$(( RC > 1 ? RC : 1 )); fi
     cp "$STAGE/$arm.driver.txt" "$OUT/ab-$arm.driver.txt"
-    node "$ABDIFF_REL" "$run" "$AGAINST" --threshold 0.002 --platforms "${PLATS[i]}" >"$OUT/ab-$arm.txt" 2>&1
+    node "$ABDIFF_REL" "$run" "$AGAINST" --threshold 0.002 --platforms "${PLATS[i]}" >"$OUT/ab-$arm.txt" 2>&1; ADRC[i]=$?   # kept for step 9
     echo "read-out ($G_REL/final/ab-$arm.txt):"; grep -vE '^\s*$' "$OUT/ab-$arm.txt" | head -24 | cut -c1-170
   done
 }
@@ -297,6 +298,7 @@ verify_records() {   # step 9
     arm="${NAMES[i]}"; run="$WAVE-ab-$arm"
     [[ "$(grep -c "^== $run " "$HASHES")" == 1 ]] || bad+=" '== $run' block x$(grep -c "^== $run " "$HASHES") in build-hashes.txt (want 1);"
     [[ -s "$OUT/ab-$arm.txt" ]] || bad+=" final/ab-$arm.txt empty;"
+    [[ "${ADRC[i]:-0}" == 0 ]] || bad+=" ab-diff.mjs exited ${ADRC[i]} for $arm (final/ab-$arm.txt holds its error, not a read-out);"
     [[ -s "$OUT/ab-$arm.driver.txt" ]] || bad+=" final/ab-$arm.driver.txt empty;"
   done
   if [[ -n "$bad" ]]; then echo "RECORDS NOT VERIFIED:$bad (stage $STAGE)"; exit 7; fi
