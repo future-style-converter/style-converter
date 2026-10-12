@@ -5097,21 +5097,6 @@ private struct PlaceholderLabel: View {
             // default the rest of this label uses for a size-less run.
             fontSizePx: textConfig.fontSize ?? 16,
             wptCaptureMode: wptCaptureMode)
-        // Fidelity wave 3 — CSS line-box leading split (CSS 2.1 §10.8):
-        // `spacing` makes each line ADVANCE exactly line-height px;
-        // `halfLeading` restores the band above the first / below the
-        // last line that browsers paint and SwiftUI's between-lines-only
-        // `.lineSpacing` dropped (IH_LineHeight band-sits-high channel).
-        // Both are 0 when the effective line-height is nil.
-        let leading = LineBoxMetrics.leading(lineHeightPx: effectiveLineHeight,
-                                             fontSizePx: textConfig.fontSize ?? 16,
-                                             design: textConfig.fontDesign,
-                                             // wave-47 Z4: the leading splits
-                                             // around the RENDERED face — the
-                                             // document @font-face when one
-                                             // is declared (see
-                                             // LineBoxMetrics.contentHeight).
-                                             faceName: textConfig.fontFaceName)
         // TITAN Round 4 (GAP 1, height half) — single-line proxy for the
         // WPT line-box CAP below. A run with NO internal whitespace can never
         // wrap, so in composed WPT capture we can pin its box to EXACTLY one
@@ -5195,8 +5180,41 @@ private struct PlaceholderLabel: View {
         let uprightPlans = verticalUprightStack != nil && verticalUprightBudgetPx != nil
         let lineCountIsExact = (singleLineText || textConfig.noWrap
             || wptUnbreakableRun || broken.preBroken) && !uprightPlans
+        // Wave 55 (lane L1, NB-ios) — the line box this run lays out on:
+        // `effectiveLineHeight` VERBATIM for every declared / calibrated run;
+        // for a declared `normal` under WPT capture with an exact line count
+        // in a horizontal run, Blink's ROUNDED box (CSS 2.1 §10.8.1 — see
+        // NormalLineBox for the rule and its guards); else nil as before.
+        // It feeds the leading split and the pin, so it is bound here, after
+        // the exactness it depends on.
+        let usedLineHeight = NormalLineBox.usedLineHeight(
+            effective: effectiveLineHeight,
+            declaredNormal: textConfig.lineHeightIsNormal,
+            lineCountIsExact: lineCountIsExact,
+            wptCapture: wptCaptureMode,
+            // css-writing-modes-4 §7: the line-count proxy is horizontal-only
+            // (plan D22 — hyphens-vertical-001's run is declined).
+            horizontalWritingMode: horizontalWritingMode,
+            fontSizePx: textConfig.fontSize ?? 16,
+            design: textConfig.fontDesign,
+            faceName: textConfig.fontFaceName)
+        // Fidelity wave 3 — CSS line-box leading split (CSS 2.1 §10.8):
+        // `spacing` makes each line ADVANCE exactly line-height px;
+        // `halfLeading` restores the band above the first / below the
+        // last line that browsers paint and SwiftUI's between-lines-only
+        // `.lineSpacing` dropped (IH_LineHeight band-sits-high channel).
+        // Both are 0 when the used line-height is nil.
+        let leading = LineBoxMetrics.leading(lineHeightPx: usedLineHeight,
+                                             fontSizePx: textConfig.fontSize ?? 16,
+                                             design: textConfig.fontDesign,
+                                             // wave-47 Z4: the leading splits
+                                             // around the RENDERED face — the
+                                             // document @font-face when one
+                                             // is declared (see
+                                             // LineBoxMetrics.contentHeight).
+                                             faceName: textConfig.fontFaceName)
         let pinnedBoxHeight = LineBoxMetrics.pinnedBoxHeight(
-            lineHeightPx: effectiveLineHeight,
+            lineHeightPx: usedLineHeight,
             // `line-clamp` truncates the block to N line boxes (css-overflow-4
             // §5) — the `.lineLimit` below is what TextKit obeys, so the pin
             // must count the same lines it renders, not the pre-broken string.
