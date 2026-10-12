@@ -450,7 +450,9 @@ def run_all(scratch, exp_path, py, say, lanes=None, fixed_ok=None):
     # … and so does every key whose CELL is a withdrawn carrier (probeDecisions.reverted[*].carriersWithdrawn): the cell is
     # must-not-move from then on, its tally entries are gone with the unit, and a verdict pre-registered on it because the residual
     # read covered its tally keys (round 6) no longer describes a gate (the wave-54 L1 keys of the r3 named-blind-spot case).
-    wd_cells = {f'{s}.html {p}' for r in (exp.get('probeDecisions') or {}).get('reverted', []) for p, ss in r['carriersWithdrawn']['captures'].items() for s in ss}
+    def _cell(stem, plat):                      # 'wpt__<section>__<path with __>' (a capture stem) -> '<section>/<path>.html <plat>' (a cell)
+        parts = stem.split('__'); return f'{parts[1]}/{"/".join(parts[2:])}.html {plat}'
+    wd_cells = {_cell(s, p) for r in (exp.get('probeDecisions') or {}).get('reverted', []) for p, ss in r['carriersWithdrawn']['captures'].items() for s in ss}
     key_cell = {(os.path.basename(next(t for t in pr['cmd'].split() if t.endswith('.py'))), k): c
                 for l in exp['lanes'].values() for pr in l['geometryProbes'] for k, c in (pr.get('keyCells') or {}).items()}
     withdrawn |= {k for k, c in key_cell.items() if c in wd_cells}
