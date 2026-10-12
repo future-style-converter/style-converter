@@ -4654,7 +4654,10 @@ public struct ComponentRenderer: View {
             // rule (B-RC6), handed to the Layout as a Bool because a Layout
             // reads the guides itself.
             ListMarkerOutsideHangLayout(
-                gap: ListMarkerRow.gapPt,
+                // Wave 55 (lane L5, U2o-ios): the stand-in for the suffix's
+                // trimmed space, keyed on the RAW marker string — 0 after a
+                // U+3001 suffix (css-counter-styles-3 §6.1), else gapPt.
+                gap: ListMarkerSuffixGap.points(forMarker: markerText),
                 alignsByBaseline: ListMarkerRow.rowAlignment(
                     itemExposesTextBaseline: exposesBaseline) == .firstTextBaseline,
                 // An EMPTY item's one line box is the marker's (seam-4's
