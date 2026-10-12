@@ -4227,8 +4227,9 @@ object ComponentRenderer {
      *
      * STILL DEFERRED — an `inside` marker on an item that DOES have text
      * still displaces that item's box (the Row below), and the gap is
-     * still the fixed [ListMarkerRow.gapDp] rather than the UA's
-     * per-counter-style marker padding.
+     * ListMarkerSuffixGap's stand-in (wave 55: 0 after a U+3001 suffix,
+     * else [ListMarkerRow.gapDp]) rather than the UA's per-counter-style
+     * marker padding.
      */
     @Composable
     private fun RenderListItemMarker(
@@ -4694,7 +4695,9 @@ object ComponentRenderer {
                     // so the snap's reported height — which the Row's pitch
                     // depends on — is untouched.
                     .then(markerHalfLeadingCompensation)
-                    .padding(end = ListMarkerRow.gapDp)
+                    // Wave 55 (lane L5, U2i-android): the same string-keyed
+                    // stand-in gap as the hang (ListMarkerSuffixGap).
+                    .padding(end = com.styleconverter.runtime.lists.ListMarkerSuffixGap.gapDp(marker))
             )
             RenderComponent(child, markerBaselineClaim(aligns))
         }
