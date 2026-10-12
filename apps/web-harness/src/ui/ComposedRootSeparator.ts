@@ -11,6 +11,7 @@
 // web f 0.9036: the second atom column starts at x146 where the reference (and
 // both natives, which pack root atoms with their 4.5-px atomGapPx) has x151 —
 // one Inter 16-px space advance (web-root-separator.md §2).
+// TODO(D5): the ' ' advances in the canvas font (Inter, via the ICB), not the body's own font — display-flow-root-list-item-001.
 //
 // SPEC: CSS 2.1 §16.6.1 and css-text-3 §4.1.1 — a collapsible white-space run
 // between two inline-level boxes renders as ONE space; CSS 2.1 §9.2.2.1 —

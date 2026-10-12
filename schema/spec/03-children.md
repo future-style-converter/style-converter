@@ -213,6 +213,28 @@ would make the converter a co-owner of an otherwise opaque hint (see
    box inside an inline box splits it (CSS 2.1 §9.2.1.1) and would
    re-break the very line box the key exists to preserve.
 
+**Renderer latitude — a reader-side exception to rule 2 (no wire
+change).** A reader MAY paint a `{child}` member away from its position
+in `runs` — or, in a paragraph it folds into one text layout, not mount
+it at all — only when the member is out of flow (`position: absolute |
+fixed`) AND paints nothing: an alpha-0 `color`, no declaration besides
+`position`, `color` and `hyphens`, no `children`, `runs` or
+`decorations` of its own, and a text tag with no UA ink (`span`,
+`time`, `data`). CSS 2.1 §9.3.1 takes such a box out of the flow and
+css-text-3 §5.1 gives it no soft wrap opportunity, so the text on both
+sides of it is one word, which a reader that breaks the paragraph at
+the member cannot lay out faithfully. The stated cost is the member's
+static position (CSS 2.1 §10.3.7 / §10.6.4) and its place in the
+accessible-text order. Every use is counted where it happens: web
+`RunsPlacement.joinedOutOfFlowMembers` (the member moved to the end of
+the word it splits, only under the host's own computed `hyphens:
+auto`, warned on the `[InlineRuns]` console channel); Compose
+`InlineRunFold.Folded.droppedOutOfFlowMembers` (the member dropped from
+a folded paragraph, whatever `hyphens` is, printed in the fold
+breadcrumb). The wire is unchanged: `runs` keeps the member at its
+document position (rule 1), and a reader that does not use this
+latitude paints it there (rule 2).
+
 ## 5. The authoring input stays nested — forever
 
 `CssComponent.children: Map<String, CssComponent>` remains the

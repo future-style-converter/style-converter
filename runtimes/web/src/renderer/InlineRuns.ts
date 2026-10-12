@@ -49,8 +49,9 @@ export interface RunsPlacement {
   /**
    * wave-54 L6 (W1): paint-inert out-of-flow members moved to the end of
    * the word they split (InertOutOfFlowWordJoin.ts) — a reader deviation
-   * from spec 03 §4.1 rule 1, counted here AND warned by resolveRuns on the
-   * `[InlineRuns]` console.warn channel when > 0, so it is never silent (the
+   * from spec 03 §4.1 rule 2, under its renderer-latitude paragraph, counted
+   * here AND warned by resolveRuns on the `[InlineRuns]` console.warn
+   * channel when > 0, so it is never silent (the
    * web twin of Compose `Folded.droppedOutOfFlowMembers`, which its fold
    * breadcrumb prints). 0 for every host whose own `hyphens` is not `auto`.
    */
@@ -164,14 +165,15 @@ export function resolveRuns(
   // paint it a second time; identity (0 joined) for every other host.
   const join = joinWordsAroundInertOutOfFlow(entries, children, opts.hyphensAuto === true);
   // wave-54 S1 fix (S4): the join reorders the wire's document order (a reader
-  // deviation from spec 03 §4.1 rule 1), so it is announced on the SAME channel
-  // as rule 5 above — one `[InlineRuns]` console.warn per resolved host, only
+  // deviation from spec 03 §4.1 rule 2, under its renderer-latitude paragraph),
+  // so it is announced on the SAME channel as rule 5 above — one
+  // `[InlineRuns]` console.warn per resolved host, only
   // when a member actually moved (the web twin of Compose's fold breadcrumb
   // ", N out-of-flow member(s) dropped"); 0 joined stays silent and byte-identical.
   if (join.joined > 0) {
     console.warn(
       `[InlineRuns] component "${ownerId}": ${join.joined} paint-inert out-of-flow member(s) moved to the ` +
-        'end of the word they split (hyphens: auto, InertOutOfFlowWordJoin) — reader deviation from spec 03 §4.1 rule 1',
+        'end of the word they split (hyphens: auto, InertOutOfFlowWordJoin) — reader deviation from spec 03 §4.1 rule 2 (renderer latitude)',
     );
   }
 
