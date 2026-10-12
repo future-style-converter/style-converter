@@ -24,3 +24,10 @@ ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=b8adde6764
 ios      MATCH
 asset    sha1 ios=05118ad1084ef6166ddd9c47a705219e0b4e717e android=05118ad1084ef6166ddd9c47a705219e0b4e717e  (the last test-all IR both bundles embed: compare digests only with the same asset line)
 
+== wave55-probe corpus launch (stage-2 probe, launch 1; tree aaf51b1b) — 2026-10-12T14:51:08Z — HEAD aaf51b1b
+android  serial=emulator-5554  built app-debug.apk sha1=ecafaf0d7c9f6796ac7703593379dc0603d074bb  installed base.apk sha1=ecafaf0d7c9f6796ac7703593379dc0603d074bb
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28  installed .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28
+ios      MATCH
+asset    sha1 ios=05118ad1084ef6166ddd9c47a705219e0b4e717e android=05118ad1084ef6166ddd9c47a705219e0b4e717e  (the last test-all IR both bundles embed: compare digests only with the same asset line)
+
