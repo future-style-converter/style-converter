@@ -2974,7 +2974,7 @@ C1–C15 and D1–D7 are the generator's (`expectations.json` `planDecisions`, r
     - **Read-out (`stage-readout55.sh stage2`).** Geometry: gating 28 / 28 PASS, control 159 / 159, residual 31 / 31, withdrawn 15
       (the L1 / L4 keys, gating nothing), exit 0 — L3's `[W] anchor-position-multicol-nested-001 android stack` and L6's `[ID]`
       rows outside the stage-1 sections read PASS. Control: `CONTROL HOLDS` (android 82 changed = 49 carriers + 32 may-move + 1
-      ring-fenced; web and iOS identical outside L5's two iOS carriers; wire 0 / 0 / 0) — the 28 withdrawn L1 / L4 carriers are
+      ring-fenced; web and iOS identical outside L5's two iOS carriers; wire 0 / 0 / 0) — every withdrawn L1 / L4 carrier (`control.txt`'s first line) is
       decoded-pixel identical to `wave55-open`, as the stage-1 decisions require. `probe-readout.mjs`: rules 1-3 fired 0, every
       prediction row met (`abdiff.txt`: 22 of 3538 cells differ, every one a carrier or a may-move stem; the two flips
       dir-style-02a android f → P 0.9854 and clip-3 android f → P 0.9999; basic-blur android +0.0036, ring-fenced, report only).
