@@ -1,0 +1,9 @@
+[gate-driver 12:21:43] run-id=wave55-ab-drop-L4-U2 sections=1 max-tests=48 android=1 ios=1 timeout=50min resume=0
+[gate-driver 12:21:44] [own-processes] kill_own_gradle_daemons roots=[/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf]: stopped [] left []
+[gate-driver 12:21:49] host after stopping our processes: load1=3.10 free+inactive=2789MB (ceiling load 6, floor 2048MB)
+[gate-driver 12:25:48] provision rc=0 android=[emulator-5554 ] ios=[0BB986A6-1EAD-4916-9276-079235324DA1 ] ANDROID_SERIAL=emulator-5554
+[gate-driver 12:25:48] css-text-decor: attempt 1 starting
+[gate-driver 12:28:49] css-text-decor: attempt 1 rc=0 columns: web=48/48 android=48/48 ios=48/48 
+gate-driver summary — run-id wave55-ab-drop-L4-U2 — 2026-10-12T12:28:50Z
+css-text-decor             OK attempt=1 web=48/48 android=48/48 ios=48/48 
+score: node tools/titan/score-gate.mjs <previous-run-id> wave55-ab-drop-L4-U2

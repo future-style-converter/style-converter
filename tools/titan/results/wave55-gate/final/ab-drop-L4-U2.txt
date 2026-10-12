@@ -1,0 +1,8 @@
+A/B  exclude=wave55-ab-drop-L4-U2  include=wave55-pre  sections=css-text-decor  platforms=ios,android
+compared 96 cells: 6 differ (flip, or |Δ| ≥ 0.002), 90 within threshold
+  flip f→P     ios      f 0.9337  → P 0.9936  Δ+0.0599  css/css-text-decor/text-decoration-inset-014.html
+  flip f→P     android  f 0.9328  → P 0.9867  Δ+0.0539  css/css-text-decor/text-decoration-inset-014.html
+  mover        ios      f 0.9167  → f 0.93    Δ+0.0133  css/css-text-decor/text-decoration-inset-005.html
+  mover        ios      f 0.9164  → f 0.9284  Δ+0.012  css/css-text-decor/text-decoration-inset-006.html
+  mover        android  f 0.9117  → f 0.9147  Δ+0.003  css/css-text-decor/text-decoration-inset-006.html
+  mover        android  f 0.9121  → f 0.9147  Δ+0.0026  css/css-text-decor/text-decoration-inset-005.html
