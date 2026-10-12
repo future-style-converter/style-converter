@@ -23,8 +23,8 @@
 // carries, so every committed baseline is byte-identical by construction. The
 // heading half stands down for a heading that hosts child boxes
 // ([headingStandsDown], the iOS twin's wave-40 gate); sup/sub are never
-// gated. UA heading MARGINS stay with spacing/UaBlockChildMargins.kt + the
-// harness UaBlockMargins. KNOWN GAPS (as in the Swift twin): `smaller` is
+// gated. UA heading MARGINS: UaBlockChildMargins.kt, UaPositionedHeadingMargin.kt
+// (spacing/) + the harness UaBlockMargins. KNOWN GAPS (Swift twin): `smaller` is
 // parent ÷ 1.2, where Blink uses its keyword table for a keyword-sized
 // parent (13 vs 13.33); `all: initial|unset|inherit` on a heading still gets
 // the UA face (0 corpus carriers).

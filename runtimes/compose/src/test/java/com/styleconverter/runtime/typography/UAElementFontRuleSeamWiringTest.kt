@@ -15,7 +15,9 @@ package com.styleconverter.runtime.typography
 // element's tag and post-reset OWN list, (3) with `standsDown =
 // UAElementFontRule.headingStandsDown(component)`, and (4) its result is the
 // list DynamicValueResolver resolves — the step runs BEFORE the resolver, so
-// `em` / `ch` on a heading read the UA face.
+// `em` / `ch` on a heading read the UA face. Wave 55 (lane L4, seam-1): (4)
+// now passes through UaPositionedHeadingMargin, which only APPENDS the UA
+// margin of an out-of-flow heading (UaPositionedHeadingMarginSeamWiringTest).
 //
 // Mutations (executed, lane note "Fix pass"): HEAD's renderer (no seam);
 // `standsDown = false`; the merged list in place of the ListStyleUaRule
@@ -67,8 +69,11 @@ class UAElementFontRuleSeamWiringTest {
         // The font step's result is the pre-resolution list…
         val step = source.indexOf(fontStep)
         assertTrue("the UA font step call is missing", step >= 0)
-        val handoff = source.indexOf("val unresolvedProperties = rawProperties ")
-        assertTrue("rawProperties must flow to unresolvedProperties", handoff > step)
+        // …through the wave-55 margin step, which receives it as `merged`…
+        val margin = source.indexOf("listUaProperties, rawProperties, enabled = LocalWptCaptureMode.current, )")
+        assertTrue("rawProperties must feed the UA margin step", margin > step)
+        val handoff = source.indexOf("val unresolvedProperties = uaMarginProperties ")
+        assertTrue("the margin step's output must flow to unresolvedProperties", handoff > margin)
         // …and the resolver reads that list after it (so `em` / `ch` see the UA face).
         val resolve = source.indexOf(".resolve(unresolvedProperties, varScope.variables, dynCtx)")
         assertTrue("the resolver must follow the UA step", resolve > handoff)

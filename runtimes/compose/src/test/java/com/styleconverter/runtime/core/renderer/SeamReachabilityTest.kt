@@ -157,6 +157,9 @@ class SeamReachabilityTest {
             // A2 — the generated-BOX path (fold + its pure claim half).
             "content/PseudoBoxFold.kt",
             "content/PseudoGeneratedBox.kt",
+            // Wave 55 (lane L4, U1-android) — the out-of-flow heading's UA
+            // margin; its ONLY caller is seam-1, which carries this line.
+            "spacing/UaPositionedHeadingMargin.kt",
             // A5 — currentcolor / background-color inheritance / color-mix.
             "color/CurrentColorBackground.kt",
             "color/BackgroundColorInheritance.kt",
