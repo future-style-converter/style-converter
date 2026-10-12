@@ -83,7 +83,9 @@ def cases(pt, lane):
             for q in r['gatingPassQ']:
                 want[tuple(q.split(' ', 1))] = 'FAIL'
             for cell in r['tallyPass']:
-                for k in tally[cell]:
+                # stage 1: a cell whose keys the regeneration WITHDREW (a reverted unit's) has no tally entry any more — it gates
+                # nothing, so the verifier's pre-registered FAIL on it is not asserted (PLAN §10 item 15; run_all drops withdrawn keys)
+                for k in tally.get(cell, []):
                     want[k] = 'FAIL'
         out.append((lane, secs, run, repl, want))
     return out

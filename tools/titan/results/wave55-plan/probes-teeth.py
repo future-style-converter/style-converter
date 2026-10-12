@@ -442,7 +442,26 @@ def run_all(scratch, exp_path, py, say, lanes=None, fixed_ok=None):
     tally = {tuple(k.split(' ', 1)) for part in ('full', 'part', 'paintOrderOnly') for e in exp.get('pictureCorrectTally', {}).get(part, [])
              for k in e['keys']}
     gating = gating | {k for k in tally if not lanes or key_lane.get(k) in lanes}
+    # Stage 1 (PLAN §10 item 15): a gating key WITHDRAWN by a probe decision (its unit reverted) gates nothing from then on — its
+    # probe still prints a line, as class `withdrawn`, but a fake's verdict on it is no longer a pre-registered rejection. Such keys
+    # are dropped from every case's `want`; a case left with no key is skipped and said so (never counted as "as pre-registered").
+    withdrawn = {(os.path.basename(next(t for t in pr['cmd'].split() if t.endswith('.py'))), k)
+                 for l in exp['lanes'].values() for pr in l['geometryProbes'] for k in (pr.get('withdrawn') or {})}
+    # … and so does every key whose CELL is a withdrawn carrier (probeDecisions.reverted[*].carriersWithdrawn): the cell is
+    # must-not-move from then on, its tally entries are gone with the unit, and a verdict pre-registered on it because the residual
+    # read covered its tally keys (round 6) no longer describes a gate (the wave-54 L1 keys of the r3 named-blind-spot case).
+    wd_cells = {f'{s}.html {p}' for r in (exp.get('probeDecisions') or {}).get('reverted', []) for p, ss in r['carriersWithdrawn']['captures'].items() for s in ss}
+    key_cell = {(os.path.basename(next(t for t in pr['cmd'].split() if t.endswith('.py'))), k): c
+                for l in exp['lanes'].values() for pr in l['geometryProbes'] for k, c in (pr.get('keyCells') or {}).items()}
+    withdrawn |= {k for k, c in key_cell.items() if c in wd_cells}
+    skipped = 0
     for lane, secs, fid, repl, want in [c for L, b in builders.items() if not lanes or L in lanes for c in b() + r2.cases(pt, L) + r3.cases(pt, L) + r4.cases(pt, L) + r5.cases(pt, L)]:
+        if withdrawn:
+            want = {k: w for k, w in want.items() if k not in withdrawn}
+            if not want:
+                skipped += 1
+                say(f'  {lane} {fid:28} skipped: every key it pre-registered is withdrawn (a reverted unit\'s)')
+                continue
         n += 1
         rid = make_run(scratch, f'{lane}-{fid}', repl)
         rc, rows = gate(rid, lane, secs, exp_path, py, os.path.join(scratch, f'gate-{lane}-{fid}.json'))
@@ -458,6 +477,8 @@ def run_all(scratch, exp_path, py, say, lanes=None, fixed_ok=None):
                 viol.append(f'{lane} {fid}: {k[0]} {k[1]} printed {v}, pre-registered {w}' + (f' — {r["line"][-150:]}' if r else ''))
         say(f'  {lane} {fid:28} gate exit {rc}: ' + ('as pre-registered' if all(rows.get(k, {}).get('verdict') == w for k, w in want.items()) else 'VIOLATION')
             + f' ({len(want)} key(s))')
+    if skipped:
+        say(f'  (stage 1: {skipped} case(s) skipped — every key they pre-registered is withdrawn; {len(withdrawn)} withdrawn keys dropped from the wants)')
     return viol, covered, gating, n
 
 

@@ -282,7 +282,14 @@ say('## §T3 the added-ink sweep (plan-skeptic-round-3.fakes/sweep.py): every fi
     'that reads it (a HOLE otherwise)')
 _spec_sw = importlib.util.spec_from_file_location('r3_sweep', os.path.join(HERE, 'plan-skeptic-round-3.fakes', 'sweep.py'))
 sweep = importlib.util.module_from_spec(_spec_sw); _spec_sw.loader.exec_module(sweep)
-s_holes, s_acc, s_reads = sweep.run(os.path.join(SCRATCH, 'sweep'), EXP_PATH, T_ONLY, say)
+# Stage 1 (PLAN §10 item 15): a lane whose every gating key a probe decision WITHDREW (its units reverted) is no longer under test —
+# its cells are must-not-move, no gating / tally row reads them, and every fake on them would count as a HOLE by construction.
+# The sweeps below run over the lanes that still carry a gating key; the others are named here.
+UNDER_TEST = sorted({lid.split('-')[0] for lid, l in EXP['lanes'].items() if any(pr.get('gating') for pr in l['geometryProbes'])} & {'L1', 'L2', 'L3', 'L4', 'L5', 'L6'})
+NOT_UNDER_TEST = [L for L in ('L1', 'L2', 'L3', 'L4', 'L5', 'L6') if L not in UNDER_TEST]
+if NOT_UNDER_TEST:
+    say(f'  (stage 1: {", ".join(NOT_UNDER_TEST)} carry no gating key — every one withdrawn by a probe decision — and are not swept in §T3-§T5)')
+s_holes, s_acc, s_reads = sweep.run(os.path.join(SCRATCH, 'sweep'), EXP_PATH, T_ONLY or UNDER_TEST, say)
 say(f'  §T3: {s_reads} key reads on faked captures; HOLES {len(s_holes)}; named residuals {len(sweep.residual)}; key reads that PASS a fake a sibling row of the same capture rejects: {len(s_acc)}')
 for h in s_holes:
     say(f'  ADDED-INK HOLE: {h[0]} {h[1]} {h[2]} — {h[3]}')
@@ -299,7 +306,7 @@ say('## §T4 the round-4 strictly-additive sweep (plan-skeptic-round-4.fakes/fak
 import re as _re
 F4 = os.path.join(HERE, 'plan-skeptic-round-4.fakes')
 t4_in, t4_floor, t4_big = 0, 0, 0
-for L in (T_ONLY or ['L1', 'L2', 'L3', 'L4', 'L5', 'L6']):
+for L in (T_ONLY or UNDER_TEST):
     sc4, fo4, zo4 = os.path.join(SCRATCH, 'sweep4', L), os.path.join(SCRATCH, f'fakes4.{L}.out.txt'), os.path.join(SCRATCH, f'zones4.{L}.out.txt')
     shutil.rmtree(sc4, ignore_errors=True)
     subprocess.run(['nice', '-n', '19'] + PY + [os.path.join(F4, 'fakes4.py'), '--scratch', sc4, '--groups', L, '--out', fo4], cwd=ROOT, capture_output=True, text=True)
@@ -325,7 +332,7 @@ say('## §T5 the round-5 sweep (plan-skeptic-round-5.fakes/fakes5.py + adjudicat
     'strictly additive — through the real gate; a key that PASSes a fake adding > 2 px is a MUST-FIX acceptance (exit 1)')
 F5 = os.path.join(HERE, 'plan-skeptic-round-5.fakes')
 t5_must, t5_floor, t5_js = 0, 0, []
-for L in (T_ONLY or ['L1', 'L2', 'L3', 'L4', 'L5', 'L6']):
+for L in (T_ONLY or UNDER_TEST):
     sc5, fo5, js5 = os.path.join(SCRATCH, 'sweep5', L), os.path.join(SCRATCH, f'fakes5.{L}.out.txt'), os.path.join(SCRATCH, f'fakes5.{L}.json')
     shutil.rmtree(sc5, ignore_errors=True)
     r5p = subprocess.run(['nice', '-n', '19'] + PY + [os.path.join(F5, 'fakes5.py'), '--scratch', sc5, '--groups', L, '--out', fo5, '--json', js5],
