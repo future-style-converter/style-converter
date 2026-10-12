@@ -3848,8 +3848,9 @@ public struct ComponentRenderer: View {
                 //
                 // STILL DEFERRED — an `inside` marker on an item that DOES
                 // have text still displaces that item's box, and the gap
-                // is the fixed ListMarkerRow.gapPt rather than the UA's
-                // per-counter-style marker padding.
+                // is ListMarkerSuffixGap's stand-in (wave 55: 0 after a
+                // U+3001 suffix, else ListMarkerRow.gapPt) rather than the
+                // UA's per-counter-style marker padding.
                 // (v2 rename: the tag hint lives at meta.sourceTag.)
                 let parentTag = (component.meta?.sourceTag ?? "").lowercased()
                 // Wave-52 closing gate: an `<li>` whose OWN authored
@@ -4685,7 +4686,9 @@ public struct ComponentRenderer: View {
             // which would hang the marker's ascent outside the item.
             HStack(alignment: ListMarkerRow.rowAlignment(
                         itemExposesTextBaseline: exposesBaseline),
-                   spacing: ListMarkerRow.gapPt) {
+                   // Wave 55 (lane L5, U2i-ios): the same string-keyed
+                   // stand-in gap as the hang (ListMarkerSuffixGap).
+                   spacing: ListMarkerSuffixGap.points(forMarker: markerText)) {
                 // Wave 34 (lane F1) — per-script font runs, same rule as the
                 // inside-overlay branch above. This is the OUTSIDE marker row,
                 // the branch the armenian / bengali / cambodian documents take.
