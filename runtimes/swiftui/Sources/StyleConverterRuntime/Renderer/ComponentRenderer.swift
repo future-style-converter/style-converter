@@ -3995,6 +3995,14 @@ public struct ComponentRenderer: View {
                         // placements and the evidence for each live in
                         // ListMarkerRow.
                         markerPlacement(child: child, markerText: markerText,
+                                        // Wave 55 (lane L5, U1-ios): the
+                                        // item's resolved `direction`, the
+                                        // ::marker isolate's base
+                                        // (css-lists-3 §3.1.1) — own, else
+                                        // this container's inherited set.
+                                        itemIsRTL: ListMarkerBidi.itemIsRTL(
+                                            own: child.properties,
+                                            inherited: childInherited),
                                         insideOverlay: markerInsideOverlay,
                                         hangsOutside: markerHangsOutside,
                                         exposesBaseline: markerExposesBaseline,
@@ -4583,6 +4591,7 @@ public struct ComponentRenderer: View {
     /// A/B (tools/titan/results/wave52-counters-and-lists/seam-2.patch).
     @ViewBuilder
     private func markerPlacement(child: IRComponent, markerText: String,
+                                 itemIsRTL: Bool = false,
                                  insideOverlay: Bool, hangsOutside: Bool,
                                  exposesBaseline: Bool,
                                  markerType: ListMarkerType,
@@ -4590,6 +4599,12 @@ public struct ComponentRenderer: View {
                                  isCSSFlex: Bool,
                                  childAgg: LayoutAggregate?,
                                  parentAgg: LayoutAggregate?) -> some View {
+        // Wave 55 (lane L5, U1-ios) — what the three Texts below paint: the
+        // marker bidi-isolated in the ITEM's direction when its first strong
+        // character disagrees (css-writing-modes-4 §2.2; ListMarkerBidi),
+        // else the raw string. `.listMarkerSymbol` keeps the RAW `markerText`
+        // (its disc / circle / square string match must not see controls).
+        let painted = ListMarkerBidi.painted(markerText, itemIsRTL: itemIsRTL)
         if insideOverlay {
             // `list-style-position: inside` on an item with no in-flow
             // text: the marker is the item's FIRST INLINE BOX, so it lives
@@ -4623,7 +4638,7 @@ public struct ComponentRenderer: View {
                     // Latin/ASCII marker ("1.", "•"). This is the
                     // `list-style-position: inside` branch — the one the
                     // arabic-indic 101/102/103 documents take.
-                    Text(ScriptFallbackFonts.annotate(markerText,
+                    Text(ScriptFallbackFonts.annotate(painted,
                                                       enabled: wptCaptureMode,
                                                       size: markerFontSizePx))
                         .fixedSize(horizontal: true, vertical: true)
@@ -4647,7 +4662,7 @@ public struct ComponentRenderer: View {
                 itemIsEmpty: ListMarkerEmptyItem.isEmpty(child)) {
                 // Subview 0 — the marker, the HStack's Text byte-for-byte
                 // (per-script runs, shrink-to-fit, painted symbol).
-                Text(ScriptFallbackFonts.annotate(markerText,
+                Text(ScriptFallbackFonts.annotate(painted,
                                                   enabled: wptCaptureMode,
                                                   size: markerFontSizePx))
                     .fixedSize(horizontal: true, vertical: true)
@@ -4671,7 +4686,7 @@ public struct ComponentRenderer: View {
                 // Wave 34 (lane F1) — per-script font runs, same rule as the
                 // inside-overlay branch above. This is the OUTSIDE marker row,
                 // the branch the armenian / bengali / cambodian documents take.
-                Text(ScriptFallbackFonts.annotate(markerText,
+                Text(ScriptFallbackFonts.annotate(painted,
                                                   enabled: wptCaptureMode,
                                                   size: markerFontSizePx))
                     .fixedSize(horizontal: true, vertical: true)
