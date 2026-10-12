@@ -55,3 +55,20 @@ css-writing-modes, selectors → 12 status rows `0 0 0 0 extracted=48 fail=0`, *
 renumbered 0 · one-sided 0 · renumbered-anomalous 0, verdict exit 0**; **step 5** the instrument fails when it must:
 `--classify-only` against an expect file naming counter-suffix as CONTENT-CHANGED → exit 5, `MISSING CONTENT-CHANGED …
 (expected, not observed)`. **Decision (PLAN §8 step 5): U5 lands at seq 9; no `--hold L7:U5`.** Throwaways removed.
+
+## Landing (2026-10-12; `land-units.sh`, PLAN §4 / §8 step 6)
+
+Prerequisites on the tree at b4f64963: the seven lanes COMPLETE (lane notes' last STATUS line; the pre-landing audit
+`prelanding/` — 108 cell citations, 41 patch hashes, the manifest series applies with every revert chain, seams anchored on
+611c9f93), the regeneration of the plan from the audit's items (55dd4cd9: expectations b773904f, 26 intended paths), the
+landing tool's self-test green on the current bytes (144 / 0, b4f64963), [W-L7a] held (U5 lands at seq 9).
+`land-units.sh --check --root <throwaway>` first: a clean checkout holds none of the UNTRACKED lane deliveries nor the
+gitignored force-add files, so the first attempt reported 50 "MISSING" errors and touched nothing — the throwaway check is run
+after rsyncing the seven lane dirs and the six wave-54 `out/` files into it (lesson for the recipe), then it printed
+**0 errors, 0 warnings — landable**; `--check` on the shared tree: 0 / 0, `git status` byte-identical before and after.
+**The landing: records commit fb94a502 (the seven lane dirs + the six force-added files) + 27 unit commits in manifest order
+(L7 U1 optional, no patch, its files tracked), b4f64963..5bbc2a41, working tree clean.** Order as §4: L7 U2 → U3 → U4 →
+U6-compose → U6-swift → U6-web → U6-tooling → U5; L6 U1 → U2 → U3; L4 U1-android → U1-ios → U2-android → U2-ios; L2 U1 → U2;
+L3 U1 → U2; L5 U1-ios → U2o-ios → U2i-ios → U2o-android → U2i-android; L1 NB-ios; L5 U3-ios → D. Contingencies NB-ios-b and
+U1-ios-LRM not landed (stage 1 decides). Next: the single-writer sweep on 5bbc2a41, S1, the worktree cleanup (§8 step 9½),
+then stage 1 `wave55-pre` after `beforeEveryDeviceRun`.

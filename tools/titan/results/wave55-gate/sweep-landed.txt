@@ -1,0 +1,14 @@
+# Wave 55 single-writer full sweep — tree 5bbc2a41 (campaign/applier-campaign), started 2026-10-12T10:07:22Z
+# suite | rc | count line (as the tool prints it) | wall
+tooling            | rc=0 | # pass 2347 # fail 0  | 15s
+conformance        | rc=0 | IR conformance: all documents valid (v1 goldens + v2 goldens) | 5s
+web-runtime        | rc=0 |       Tests  1390 passed (1390) | 6s
+web-harness        | rc=0 |       Tests  344 passed (344) | 9s
+converter          | rc=0 | testcases=562 BUILD SUCCESSFUL in 28s | 29s
+compose            | rc=0 | testcases=3574 BUILD SUCCESSFUL in 29s | 30s
+android-app        | rc=0 | testcases=169 BUILD SUCCESSFUL in 14s | 14s
+swiftui            | rc=0 | 	 Executed 2273 tests, with 1 test skipped and 0 failures (0 unexpected) in 58.488 (94.972) seconds | 193s
+ios-harness        | rc=0 | 	 Executed 30 tests, with 0 failures (0 unexpected) in 0.058 (0.068) seconds | 110s
+# finished 2026-10-12T10:14:13Z
+tooling(detail)    | rc=0 | # tests 2351 # pass 2347 # fail 0 # skipped 4 # todo 0 | (from the tooling.log header lines; the doc tables stamp # tests)
+# count moves vs the wave-54 ship (2340 / 1381 / 3486 / 2212): tooling +11 (L7 U6-tooling T1-T2, U2 wire-differential pins, U5 bake entries), web +9 (L7 U6-web W1-W6 + U4), compose +88 (L2 U1/U2, L3, L4, L5, L6, L7 U6-compose pins), swiftui +61 with 1 skipped (L1 NB-ios, L4, L5, L7 U6-swift); android-app 169 ran for real (14 s, --rerun-tasks); converter 562 unchanged (no converter change this wave).
