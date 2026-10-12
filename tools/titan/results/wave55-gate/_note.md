@@ -128,3 +128,20 @@ units; `regen/geometry.txt` gating 27 / 27, control 135 / 135, residual 30 / 30,
 tooling 2351 (2347 pass, 4 skipped), conformance valid, web 1390, web-harness 344, converter 562, compose 3550, android-app 169, swiftui
 2241, ios-harness 30; doc tables restamped, doc-staleness exit 0. Decisions committed 00201165 (+ the renumbering commit). Next: stage 2
 `wave55-probe` (26 sections) after `beforeEveryDeviceRun`; the withdrawn cells must read identical to `wave55-open` there.
+
+## Stage 2 — `wave55-probe` (2026-10-12; PLAN §7 stage 2, §10 item 16; records in `stage2/wave55-probe/`)
+
+Tree aaf51b1b; `beforeEveryDeviceRun` exit 0 (load 3.4); `probeRun.cmd` over the 26 sections — 26 / 26 `OK attempt=1`, every column
+48 / 48 (css-cascade 43 / 43 / 43); the installed-build block `== wave55-probe corpus launch` (android ecafaf0d MATCH, ios ff158a4e
+MATCH, asset 05118ad1) read after `attempt 1 starting`. Read-out (`stage-readout55.sh stage2 wave55-probe`): geometry gating
+28 / 28, control 159 / 159, residual 31 / 31, withdrawn 15 (`geometry-stage2.json`); `CONTROL HOLDS` — android 82 changed
+captures = 49 carriers + 32 may-move + 1 ring-fenced, web / iOS identical outside L5's iOS carriers, wire identical
+(`control-stage2.json`); the 28 withdrawn L1 / L4 carriers identical to `wave55-open`; rules 1-3 fired 0, every prediction met
+(`score-stage2.json`, `probe-readout.txt`, `prediction-cells.txt`); `abdiff.txt` 22 / 3538 cells differ, all carriers or may-move
+(flips: dir-style-02a android f 0.9425 → P 0.9854, clip-3 android f 0.9574 → P 0.9999). The three leak signals are L6 may-move
+stems beyond the band, each looked at against `wave55-open` and the ref: descendant-static-position-001 / -002 android (the
+grid's black side band now under its grey abspos children: 400 / 800 px black → grey) and break-inside-avoid-child android (the
+bottom band under its child box: 300 px black → light blue on row y317) — `mayMoveRule`'s first picture → L6 U2 KEPT. **Every
+remaining unit is kept; no decision row; no regeneration.** The readers' records after the regeneration: `readers-calibration.txt`
+(every calibration as required on e65366b6), `probes-selfcheck.txt` (HOLDS, 28 / 28 gating keys able to fail),
+`final55-analysis.sh` in sync. Next: the closing gate `wave55-final` (§8 step 12).

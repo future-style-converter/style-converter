@@ -2966,6 +2966,28 @@ C1–C15 and D1–D7 are the generator's (`expectations.json` `planDecisions`, r
       the nine pre-landing items were counted. They are items 13 / 14 and 10-15 here; the probe comments and the `reverted.json`
       rows were renumbered in the follow-up commit (a second regeneration, text-only: `stage1-regen.expectations-diff.txt`).
 
+16. **Stage 2 `wave55-probe` read: no rule fires; the three L6 may-move cells beyond the band show the pre-registered picture
+    (2026-10-12; records in `../wave55-gate/stage2/wave55-probe/`).**
+    - **Run.** Tree aaf51b1b (the five reverts + the stage-1 records); `beforeEveryDeviceRun` exit 0; `probeRun.cmd` over its 26
+      sections, every one `OK attempt=1` with full columns (css-cascade 43 / 43 / 43); the installed-build block `== wave55-probe
+      corpus launch` android ecafaf0d MATCH, ios ff158a4e MATCH, asset 05118ad1 (`build-hashes.txt`).
+    - **Read-out (`stage-readout55.sh stage2`).** Geometry: gating 28 / 28 PASS, control 159 / 159, residual 31 / 31, withdrawn 15
+      (the L1 / L4 keys, gating nothing), exit 0 — L3's `[W] anchor-position-multicol-nested-001 android stack` and L6's `[ID]`
+      rows outside the stage-1 sections read PASS. Control: `CONTROL HOLDS` (android 82 changed = 49 carriers + 32 may-move + 1
+      ring-fenced; web and iOS identical outside L5's two iOS carriers; wire 0 / 0 / 0) — the 28 withdrawn L1 / L4 carriers are
+      decoded-pixel identical to `wave55-open`, as the stage-1 decisions require. `probe-readout.mjs`: rules 1-3 fired 0, every
+      prediction row met (`abdiff.txt`: 22 of 3538 cells differ, every one a carrier or a may-move stem; the two flips
+      dir-style-02a android f → P 0.9854 and clip-3 android f → P 0.9999; basic-blur android +0.0036, ring-fenced, report only).
+    - **The three leak signals** are L6 may-move stems beyond the 0.002 band — `mayMoveRule`'s first picture, looked at on the
+      capture against `wave55-open` and the ref: `css-grid/abspos/descendant-static-position-001 android` P 0.9892 → P 0.9991
+      (400 px black → grey, x44-52: the grid's black side band now under its grey abspos children, as the ref draws it);
+      `descendant-static-position-002 android` P 0.9601 → P 0.9724 (800 px, the same band under the children, x39-58);
+      `css-view-transitions/break-inside-avoid-child android` P 0.9735 → P 0.9872 (300 px black → light blue on row y317: the
+      bottom band now under its child box, as the ref). Each is "a band now under its child" → L6 U2 KEPT and recorded here; no
+      decision row, no regeneration.
+    - **Kept, all:** L2 U1 / U2, L3 U1 / U2, L5 U1-ios / U2o / U2i (both natives) / U3-ios / D, L6 U1 / U2 / U3, L7. Next: the
+      closing gate `wave55-final` (§8 step 12) on this tree.
+
 Empty at planning: `wave55-open` reproduced `wave54-final` on every cell and every byte, so nothing is restated.
 
 Each later item:
