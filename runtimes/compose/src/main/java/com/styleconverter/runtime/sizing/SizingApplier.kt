@@ -120,7 +120,9 @@ object SizingApplier {
         // Retro R2 (A11#10): the percent+min/max lane replaces the fill on
         // its axis (pairs-01 PW_Background_Sizing_04: 50% + min 300 →
         // 300, was 179); otherwise the pre-existing emission runs unchanged.
-        if (pctW != null) r = r.percentWidthClamped(pctW.fraction, pctW.minDp, pctW.maxDp)
+        // Wave 55 (L2 U2): WPT content-box % + band → PercentContentBoxBand.kt (both axes; asked first so its clamp breadcrumb fires).
+        if (PercentContentBoxBand.owns(rawW, config, config.contentBoxInflateX, pctW != null)) r = r.percentFillPlusBand(rawW, config.contentBoxInflateX, horizontal = true)
+        else if (pctW != null) r = r.percentWidthClamped(pctW.fraction, pctW.minDp, pctW.maxDp)
         else if (!minWCalcOwnsAxis) r = applyWidth(r, inflateForContentBox(
             clampLength(rawW, minWv, maxWv, ctx),
             // RC-B6b: the WPT flag rides the config into the width branch
@@ -129,7 +131,8 @@ object SizingApplier {
             // inflation so a content-box Relative resolves against the
             // exact font/line-height basis the apply branch would use.
             config.boxSizing, config.contentBoxInflateX, ctx), ctx, config.wptCaptureMode)
-        if (pctH != null) r = r.percentHeightClamped(pctH.fraction, pctH.minDp, pctH.maxDp)
+        if (PercentContentBoxBand.owns(rawH, config, config.contentBoxInflateY, pctH != null)) r = r.percentFillPlusBand(rawH, config.contentBoxInflateY, horizontal = false)
+        else if (pctH != null) r = r.percentHeightClamped(pctH.fraction, pctH.minDp, pctH.maxDp)
         else if (!minHCalcOwnsAxis) r = applyHeight(r, inflateForContentBox(
             clampLength(rawH, minHv, maxHv, ctx),
             // Wave 44 (lane U6): ctx threaded — see the width twin above.
