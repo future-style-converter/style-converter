@@ -44,7 +44,8 @@
 #       0.795], row 4 [0.532 vs 0.852]; the letters swapped invert it), and the period's ink rows equal the ref's ±1;
 #   [K] ios also reads row 9 OUTSIDE the digit window x136-150: zones x0-135 × y208-231 and x151- × y208-231 (the ok-all
 #       replay differs from wave54-final in row 9 only at x137-145; row 9's item text erased / moved: 161 / 266 px) — and
-#       [T] (with a base run) reads the same two zones: U3-ios changes the digit's glyph, never the row's other ink;
+#       [T] (with a base run) reads the same two zones (on ios carved since the pre-landing regeneration: U3-ios's `tnum` repaints
+#       the whole run, see below — the round-2 sentence "U3-ios changes the digit's glyph, never the row's other ink" was false);
 #   [I] per line the first marker blob's stroke count equals the ref's (1 / 2) and its ink rows equal the BASE capture's ±1
 #       (Android's marker sits 2-4 px below the ref on base and fixed alike; U2i moves nothing vertically) — line 1's
 #       ideograph replaced by line 2's, or the marker 3 px low, is WRONG.
@@ -58,7 +59,7 @@
 #       them in --base (iOS: its own — U1-ios reorders the glyphs, it never redraws them — or Android's: the ok-all model grafts
 #       Android's rows, the bundled Noto Hebrew both natives share), each moved by its own whole-px offset, XOR ≤ INK_TOL in all;
 #   [T] (natives) `ink:` the digit window x136-150 of row 9 = the tabular '1' as Android already paints it in --base (the
-#       ok-all model's graft; U3-ios draws that glyph, nothing else, in the window), at the best whole-px offset, XOR ≤ INK_TOL;
+#       ok-all model's graft; inside the window U3-ios draws that glyph only), at the best whole-px offset, XOR ≤ INK_TOL;
 #   [C] / [I] `ink:` reads the SUM over the key's zones against INK_TOL (round 3 tested each zone alone), [C]'s zone widens to
 #       x0-63 and [I] (natives) also reads 005 outside its line windows (rows 0-94, 152-599, x0-199 of 95-151) = the base.
 # Every `ink:` read (round 3's re-based too) compares the ink LEVEL — (min channel < 200) + (RGB sum < 300), two nested masks —
@@ -67,6 +68,15 @@
 # `--twin-run <run>`) adds that run's same-platform capture as a twin: the stage-1 step-8 edit sets 'wave55-pre' once the
 # device pictures are decided (PLAN §7, D39) — a device '1' / face drawn by another rasterizer is never matched by widening
 # INK_TOL (never widened to pass a fake of probes-teeth-r4.py).
+# Pre-landing regeneration (L5 fix-r1 R1 / R5; the lane's executed proposal, tools/titan/results/wave55-counter-suffix-rows/
+# fix-r1.probe-proposal.{py,diff.txt,out.txt}; wave55-plan/regen.done.md): Font.monospacedDigit() turns on Inter's WHOLE `tnum`
+# feature for the run (fix-r1.inter-tnum.out.txt: one → one.tf, two → two.tf, period → period.tf), so U3-ios also repaints the
+# periods of rows 9-12 (x130-135) and row 10's '2' (x136-150) — Catalyst: 0 px of U3's delta outside these six run boxes
+# (fix-r1.u3-boxes.measure.out.txt). ios's base-identity zones (ZONES['ios'], ROW9_OUT_IOS) skip the five boxes outside row 9's
+# window and [T] ios reads them instead: each period box ONE dot at the ref's x ±1 / rows ±1, the '2' box ONE ≥ 7-px-tall blob
+# at the ref's left and right ±1 / rows ±1 filling ≤ 60 % (u3_boxes_check), and its twin `ink:` read sums the five boxes with
+# the digit window, each at its own best whole-px offset (t_ink). The standing replays re-graft the five boxes from Android's
+# base capture as round 4 grafted the '1' (counter-suffix-rows-replay/<tag>/counter-suffix.ios.png; regen.replay-regraft.py).
 # Every line ends in "→ GEOMETRY OK" or "→ GEOMETRY WRONG (<why>)". The ref rows must print OK (exit 1 otherwise): the
 # rule must describe the picture the test asks for. PIL (geometry_common) + numpy (round 4's twin reads), 8 PNGs (+6 with a
 # base run, +2 with TWIN_RUN).
@@ -332,13 +342,18 @@ def h_ink(cm, cpx, twins):
     return best
 
 
-def t_ink(cm, twins):
-    """Round 4 [T]: (XOR, twin) of row 9's digit window x136-150 against a twin's window at its best whole-px offset (±2, ±1)."""
-    y0, y1 = ROW[9]; W = np.zeros(cm.shape, bool); W[y0:y1, 136:151] = True
+def t_ink(cm, twins, extra=()):
+    """Round 4 [T]: (XOR, twin) of row 9's digit window x136-150 against a twin's window at its best whole-px offset (±2, ±1);
+    L5 fix-r1: plus each `extra` box (x0, y0, x1, y1) at its own best offset, summed (round 4: zones are summed, never ±2 each)."""
+    y0, y1 = ROW[9]
+    boxes = [(136, y0, 151, y1)] + list(extra)
     best = None
-    cw = np.where(W, cm, 0).astype(np.int16)
     for tname, tm, _ in twins:
-        n = min(int(np.abs(cw - np.where(W, moved(np.where(W, tm, 0), a, c), 0)).sum()) for a in (-2, -1, 0, 1, 2) for c in (-1, 0, 1))
+        n = 0
+        for bx0, by0, bx1, by1 in boxes:
+            W = np.zeros(cm.shape, bool); W[by0:by1, bx0:bx1] = True
+            cw = np.where(W, cm, 0).astype(np.int16)
+            n += min(int(np.abs(cw - np.where(W, moved(np.where(W, tm, 0), a, c), 0)).sum()) for a in (-2, -1, 0, 1, 2) for c in (-1, 0, 1))
         if best is None or n < best[0]:
             best = (n, tname)
     return best
@@ -419,9 +434,39 @@ def i_check(rows, ref, base_rows=None):
 # x64-389 × y64-159 (rows 3-6 right of the content edge) is round 1's: the markers move, the item text does not.
 # Round 2 (M3): ios also reads row 9 outside U3-ios's digit window x136-150 (the zones skipped y208-231 entirely, so an
 # erased or moved row-9 item text passed the tally's [K] ios).
-ROW9_OUT = [(0, 208, 136, 232), (151, 208, None, 232)]     # row 9 outside the digit window x136-150 ([T] and [K] ios, round 2)
+ROW9_OUT = [(0, 208, 136, 232), (151, 208, None, 232)]     # row 9 outside the digit window x136-150 ([T] web / android, round 2)
+# L5 fix-r1 (skeptic defect 1): U3-ios's `tnum` repaints the WHOLE run — the periods of rows 9-12 (x130-135, period.tf) and
+# row 10's '2' (x136-150, two.tf) besides row 9's '1' (Catalyst: 0 px of U3's delta outside these boxes) — so ios's base-
+# identity zones skip them and [T] ios reads them against the ref's positions and a twin's ink (u3_boxes_check, t_ink).
+U3_PERIODS = [(130, ROW[k][0], 136, ROW[k][1]) for k in (9, 10, 11, 12)]   # one period per row, ref x134
+U3_TWO = (136, ROW[10][0], 151, ROW[10][1])                                 # row 10's '2' (ref x138-144)
+ROW9_OUT_IOS = [(0, 208, 130, 232), (151, 208, None, 232)]                  # row 9 minus the period box + digit window
 ZONES = {'web': [(0, 0, None, 600)], 'android': [(0, 0, None, 112), (0, 160, None, 600), (64, 64, 390, 160)],
-         'ios': [(0, 0, None, 64), (0, 160, None, 208), (0, 232, None, 600), (64, 64, 390, 160), (0, 208, 136, 232), (151, 208, None, 232)]}
+         'ios': [(0, 0, None, 64), (0, 160, None, 208), (64, 64, 390, 160)] + ROW9_OUT_IOS +
+                [(0, 232, 130, 256), (151, 232, None, 256), (0, 256, 130, 304), (136, 256, None, 304), (0, 304, None, 600)]}
+
+
+def u3_boxes(px):
+    """L5 fix-r1: [(name, blobs)] of the five U3 run boxes outside row 9's digit window (blobs(): column-connected dark ink)."""
+    out = [(f'row{9 + i} period x130-135', blobs(px, b[0], b[2], b[1], b[3])) for i, b in enumerate(U3_PERIODS)]
+    return out + [('row10 two x136-150', blobs(px, U3_TWO[0], U3_TWO[2], U3_TWO[1], U3_TWO[3]))]
+
+
+def u3_boxes_check(px, boxes, ref):
+    """None, or why a U3 box is not its glyph at the ref's place: a period = ONE dot (≤ 3 px wide, ≤ 4 tall) at the ref's x ±1 /
+    rows ±1; the '2' = ONE ≥ 7-px-tall blob at the ref's left AND right ±1 / rows ±1 filling ≤ 60 % of its bbox."""
+    for (name, bl), (_, rbl) in zip(boxes, ref):
+        if len(bl) != 1 or len(rbl) != 1:
+            return f'{name}: {len(bl)} ink blob(s) (want 1, the ref has {len(rbl)})'
+        b, r = bl[0], rbl[0]
+        two = name.startswith('row10 two')
+        if not two and (b[1] - b[0] > 2 or b[3] - b[2] > 3):
+            return f'{name}: blob x{b[0]}-{b[1]} y{b[2]}-{b[3]} is not a period (> 3 px wide or > 4 tall)'
+        if not (near(b[0], r[0], 1) and near(b[2], r[2], 1) and near(b[3], r[3], 1)) or (two and not near(b[1], r[1], 1)):
+            return f'{name}: glyph x{b[0]}-{b[1]} y{b[2]}-{b[3]} vs ref x{r[0]}-{r[1]} y{r[2]}-{r[3]} ±1 (moved)'
+        if two and ink_px(px_h[0], b) > 0.6 * (b[1] - b[0] + 1) * (b[3] - b[2] + 1):
+            return f'{name}: fills > 60 % of its bbox (a block, not the glyph)'
+    return None
 
 
 I_OUT = [(0, 0, None, 95), (0, 152, None, 600), (0, 95, 200, 152)]     # round 4: 005 outside [I]'s line windows (natives = base)
@@ -464,7 +509,7 @@ for label, p in capture_paths(run, 'css-counter-styles', 'counter-suffix'):
     h, c = h_rows(px), c_rows(px)
     t, l1 = digit_ink(px, 9, 136, 151), digit_ink(px, 1, 40, 56)
     if label == 'ref':
-        refs = {'h': h, 'c': c, 't': t, 'l': l1}
+        refs = {'h': h, 'c': c, 't': t, 'l': l1, 'u3': u3_boxes(px)}
     h_why = h_check(h, refs['h'])
     h_x = ''
     if h_why is None and base and label not in ('ref', 'web'):
@@ -491,13 +536,16 @@ for label, p in capture_paths(run, 'css-counter-styles', 'counter-suffix'):
     t_why = t_check(t, refs['t'], label)
     if t_why is None and base and label != 'ref':
         # round 2 (M3): the row's other ink — item text erased or moved 3 px kept every digit read
-        t_why = 'base capture missing' if bim is None else zones_equal(bim, im, ROW9_OUT)
+        t_why = 'base capture missing' if bim is None else zones_equal(bim, im, ROW9_OUT_IOS if label == 'ios' else ROW9_OUT)
+    if t_why is None and label == 'ios':
+        t_why = u3_boxes_check(px, u3_boxes(px), refs['u3'])     # L5 fix-r1: the five other U3 run boxes, geometry first
     t_x = ''
     if t_why is None and base and label not in ('ref', 'web'):
         # round 4 (M4): the digit window holds the tabular '1' a native already paints, and nothing else
-        ti = t_ink(inkarr(im), twins_of(label, False))
+        ti = t_ink(inkarr(im), twins_of(label, False), U3_PERIODS + [U3_TWO] if label == 'ios' else [])
         t_why = ('ink: no twin capture' if ti is None else
-                 f'ink: row 9 digit window x136-150 differs from {ti[1]}\'s tabular \'1\' by {ti[0]} px at its best whole-px offset '
+                 f'ink: row 9 digit window x136-150' + (' + the five U3 run boxes' if label == 'ios' else '') +
+                 f' differ from {ti[1]}\'s tabular glyphs by {ti[0]} px at their best whole-px offsets '
                  f'(> {INK_TOL}: added / lost ink in the window)' if ti[0] > INK_TOL else None)
         t_x = f' ink {ti[0]} vs {ti[1]}' if ti else ''
     emit('[T] counter-suffix', label, f'row9 digit {t[:4] if t else None}' + t_x, t_why)

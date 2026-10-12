@@ -52,12 +52,15 @@ def cases(pt, lane):
         # the tally's hyphenate-character-001 / -003 controls are the wave-54 probe (outside this plan's edits): they reject a
         # ghost, NOT a horizontal copy (sweep §T3: their sibling linebox keys reject that capture, so the tally cell — which
         # needs every key — is not counted picture-correct). Named here so a later round sees the blind spot pinned.
+        # Round 6 (fix-r6.done.md, D40): CLOSED — geometry-gate.py's RESIDUAL read covers every tally key, and the copy changes the
+        # capture outside the cell's declared change zone (the preamble above the lines: 3114 / 2329 px), so the two wave-54 keys
+        # now FAIL too; the case keeps its id and is pre-registered FAIL on every key.
         whole('r2-L1-tally-fixed', WHOLE[1:])
         src_r2 = _load_r2(pt)
         for ln, secs, fid, repl, want in src_r2:
             if fid == 'r2-L1-tally-fixed':
                 out.append((lane, secs, f'r3-{fid}-hdup+2x-named-blind-spot', {k: (v if k[1] == 'web' else ai.ghost(v, 2, 0)) for k, v in repl.items()},
-                            {**{k: 'PASS' for k, w in want.items() if w == 'PASS'},
+                            {**{k: 'FAIL' for k, w in want.items() if w == 'PASS'},
                              **{('hyphen-ios-linebox.geometry.py', f'hyphen-ios-linebox {t} ios'): 'FAIL' for t in ('001', '003')}}))
     if lane == 'L2':
         whole('U1-fixed', WHOLE); whole('U2-fixed', WHOLE)

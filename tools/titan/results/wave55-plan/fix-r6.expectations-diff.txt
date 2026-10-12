@@ -1,0 +1,79 @@
+# fix-r6.expectations-diff.txt — the structural diff of expectations.json, 980542d0 (HEAD, fix-r4) → the round-6 regeneration (plan-build.py, never hand-edited)
+# before sha256 980542d01c1755007c5409a9b07d5d398508dcaf9687078b4437855502103839 · after sha256 8fbfc83a9ba3fdaa6e0c2159ba50ec283a2a1323db1eb9a9571d8f5c9dd4e9a9 (plan-build.py 4e3aced59c910860…)
+# 15 difference(s); every other value identical (the JSON is the indent-1 rendering both times)
+
+~ /geometryGate/what
+  common prefix: 696 chars (…rs excepted) are read in the cell review and named in the PR)
+  before (rest): ''
+  after  (rest): . Round 6 (D40): every GATING and pictureCorrectTally key also carries the RESIDUAL read (residual-read.py, one declaration per key cell): outside the key's declared change zone the capture = the --base capture pixel for pixel, where the base's class ink left only background shows, and inside the zone every changed px is background, a declared ink class or its declared anti-aliasing — tolerance 0 (every fixed picture reads 0 / 0 / 0: fix-r6.zones.out.txt); it only turns a probe PASS into FAIL (`residual: …` on the row, UNMEASURED when the base capture is missing), and a gating / tally key with no declaration is a refusal (exit 2)
+
+~ /lanes/L1-hyphen-ios-linebox/geometryProbes[0]/teeth
+  common prefix: 1195 chars (…y darkens a glyph's edge is WRONG (probes-selfcheck.txt §T4))
+  before (rest): ''
+  after  (rest): . Round 6 (verify-r5 M4, D40): geometry-gate.py's RESIDUAL read (residual-read.py) on the 3 gating keys and the 2 tally controls — outside the lines' crop rows (the probe's own core bands ±3, x < 140, capture ∪ base) the capture = the base pixel for pixel, the vacated rows white, every changed px inside a grey: a faint 3×3 between word groups and a faint 30-px line below the text are WRONG (probes-teeth-r5.py; probes-selfcheck.txt §T5)
+
+~ /lanes/L1-hyphen-ios-linebox/stage1Decision
+  common prefix: 878 chars (…ss-tables / css-text-decor radius rows: read at wave55-probe)
+  before (rest): ''
+  after  (rest):  Round 6 (D40): a gating / tally key whose only reason is `residual:` (the device picture differs from wave55-open outside the key's declared change zone) is decided by the recorded look of PLAN §7 stage 1 step 8 — right: `fix-r6.zones.py --also wave55-pre:<cell> --write` re-records that cell's windows from the device capture (a probe edit with the step-6 regeneration); wrong: it reverts like any gating FAIL; never a tolerance
+
+~ /lanes/L2-cbb-android/geometryProbes[1]/teeth
+  common prefix: 931 chars (… 3×3 hole under the 40-px XOR are WRONG (probes-teeth-r3.py))
+  before (rest): ''
+  after  (rest): . Round 6 (verify-r5 M1, D40): the RESIDUAL read on all eight L2 keys — outside strict green ∪ the backdrop pink (capture ∪ base; the autopos rows green ∪ red) and the recorded windows (the corner arcs' anti-aliasing; clip-3's #middle band, derived from the U2 replay's own diff) the capture = the base, every changed px inside them strict green, or in a window a flat run colour / an arc pixel: a 50 % second box (+10000 px), black / #66ccff / #cccccc / yellow specks and lines anywhere are WRONG (probes-teeth-r5.py; probes-selfcheck.txt §T5)
+
+~ /lanes/L2-cbb-android/stage1Decision
+  common prefix: 600 chars (… stems. A FAIL on read 1 or 2 reverts U2, then U1 (the pair))
+  before (rest): ''
+  after  (rest):  Round 6 (D40): a gating / tally key whose only reason is `residual:` (the device picture differs from wave55-open outside the key's declared change zone) is decided by the recorded look of PLAN §7 stage 1 step 8 — right: `fix-r6.zones.py --also wave55-pre:<cell> --write` re-records that cell's windows from the device capture (a probe edit with the step-6 regeneration); wrong: it reverts like any gating FAIL; never a tolerance
+
+~ /lanes/L3-positioned-parent-slot/geometryProbes[0]/teeth
+  common prefix: 1628 chars (…ays are WRONG (probes-teeth-r3.py; probes-selfcheck.txt §T3))
+  before (rest): ''
+  after  (rest): . Round 6 (verify-r5 M2, D40): the RESIDUAL read — bidi outside the blue runs and the recorded '0'-glyph windows, stack outside the green squares, dyn outside the magenta child (capture ∪ base) = the base; a vacated px beside class ink that stayed is a hole; the dyn magenta count ±2 (was ±5: a 2×2 of the parent's yellow over the child equals the base there) — faint run / parent / square copies (+216 … +9900 px), black strays on the stack picture and yellow over a run box are WRONG (probes-teeth-r5.py); the dir rows 6 / 7 / 9 read their three row bands (lime / blue text anti-aliasing only)
+
+~ /lanes/L3-positioned-parent-slot/stage1Decision
+  common prefix: 1028 chars (…nchor-position (`[W] … stack`) is first read at wave55-probe)
+  before (rest): ''
+  after  (rest):  Round 6 (D40): a gating / tally key whose only reason is `residual:` (the device picture differs from wave55-open outside the key's declared change zone) is decided by the recorded look of PLAN §7 stage 1 step 8 — right: `fix-r6.zones.py --also wave55-pre:<cell> --write` re-records that cell's windows from the device capture (a probe edit with the step-6 regeneration); wrong: it reverts like any gating FAIL; never a tolerance
+
+~ /lanes/L4-ua-heading-margin/geometryProbes[0]/teeth
+  common prefix: 1915 chars (…a 014 glyph and D33's clip-10 are WRONG (probes-teeth-r4.py))
+  before (rest): ''
+  after  (rest): . Round 6 (verify-r5 M3, D40): the RESIDUAL read on all 12 keys — outside the dark bands' rows ±2 (capture ∪ base, from y96 / 011 y112 to y399: the rows `face xor:` / `ink:` read) the capture = the base, the vacated rows white, every changed px inside a grey: a faint 3×3 below the heading and a faint or iOS-grey (127,127,127) 30-px line at y276-368 are WRONG (probes-teeth-r5.py)
+
+~ /lanes/L4-ua-heading-margin/stage1Decision
+  common prefix: 1022 chars (… sets FACE_RUN_DEFAULT = 'wave55-pre' for the face keys kept)
+  before (rest): ''
+  after  (rest):  Round 6 (D40): a gating / tally key whose only reason is `residual:` (the device picture differs from wave55-open outside the key's declared change zone) is decided by the recorded look of PLAN §7 stage 1 step 8 — right: `fix-r6.zones.py --also wave55-pre:<cell> --write` re-records that cell's windows from the device capture (a probe edit with the step-6 regeneration); wrong: it reverts like any gating FAIL; never a tolerance
+
+~ /lanes/L5-counter-suffix-rows/geometryProbes[0]/teeth
+  common prefix: 1698 chars (…2×2 / 3×3 blob beside the '1' are WRONG (probes-teeth-r4.py))
+  before (rest): ''
+  after  (rest): . Round 6 (D40): the RESIDUAL read on the 6 gating keys and the [K] controls — outside the [H] / [C] / [T] / [I] zones the capture = the base (the [K] pixel identity, now on every key), every changed px inside a grey; the round-5 sweep accepted nothing here (> 2 px) and still does not
+
+~ /lanes/L5-counter-suffix-rows/stage1Decision
+  common prefix: 1158 chars (…OL; the same probe edit sets TWIN_RUN_DEFAULT = 'wave55-pre')
+  before (rest): ''
+  after  (rest):  Round 6 (D40): a gating / tally key whose only reason is `residual:` (the device picture differs from wave55-open outside the key's declared change zone) is decided by the recorded look of PLAN §7 stage 1 step 8 — right: `fix-r6.zones.py --also wave55-pre:<cell> --write` re-records that cell's windows from the device capture (a probe edit with the step-6 regeneration); wrong: it reverts like any gating FAIL; never a tolerance
+
+~ /lanes/L6-android-paint-order/geometryProbes[0]/teeth
+  common prefix: 1338 chars (…bes-teeth-r4.py); one stray fill px reads 1 (the 2-px floor))
+  before (rest): ''
+  after  (rest): . Round 6 (verify-r5 M5 / M6, D40): the RESIDUAL read — [X] outside the child fill, [PO] outside the menus' red (capture ∪ base) the capture = the base: black / purple / parent-yellow paint on white, faint child / parent copies and whole-picture ghosts (+2056 … +6294 px), blue specks below the navbar and pink outside its counted box are WRONG (probes-teeth-r5.py)
+
+~ /lanes/L6-android-paint-order/stage1Decision
+  common prefix: 950 chars (…ions and U2's 3 css-images carriers are read at wave55-probe)
+  before (rest): ''
+  after  (rest):  Round 6 (D40): a gating / tally key whose only reason is `residual:` (the device picture differs from wave55-open outside the key's declared change zone) is decided by the recorded look of PLAN §7 stage 1 step 8 — right: `fix-r6.zones.py --also wave55-pre:<cell> --write` re-records that cell's windows from the device capture (a probe edit with the step-6 regeneration); wrong: it reverts like any gating FAIL; never a tolerance
+
+~ /pictureCorrectTally/rule
+  common prefix: 233 chars (…hose keys are not all OK stays DEGENERATE and is not counted)
+  before (rest): ''
+  after  (rest):  — round 6 (D40): every key's geometry-gate.py row PASS, i.e. its probe line OK AND its residual read 0 / 0 / 0 (outside the cell's declared change zone the capture = wave55-open)
+
++ /planDecisions[id=D40]
+  after:  {"id": "D40", "conflict": "verify round 5 M1-M6: BACKGROUND-ONLY paint — 50 % copies of the class ink, ink in a colour the masks never test (black / #66ccff / #cccccc / yellow / iOS grey), lines in rows no XOR covers — passed 33 of 43 gating keys and 17 tally entries (704 fakes adding > 2 px: L2 ×8, L3 bidi / stack / dyn ×2 and the vrl-rtl tally entry, L4 ×12, L1 ×3, L6 [X] ×5 and [PO]); round 4's \"class closed\" held for its own variant set only", "resolution": "geometry-gate.py applies the RESIDUAL read (residual-read.py) to every gating and pictureCorrectTally key: outside the key cell's declared change zone (the colour classes its probe reads pixel for pixel, or the probe's own row bands, capture ∪ base, plus windows recorded from the fixed pictures' own diff by fix-r6.zones.py) the capture equals the --base capture pixel for pixel, a vacated px shows only background (never beside class ink that stayed), and inside the zone every changed px is background, a declared ink class or its declared anti-aliasing — tolerance 0, every fixed picture 0 / 0 / 0; a key with no declaration is a refusal. L3 dyn's magenta count is ±2 (a hole of the parent's own colour equals the base, so only the probe sees it). probes-teeth-r5.py pins the verifier's fake runs FAIL, probes-selfcheck.txt §T5 re-runs its generator (exit 1 on a > 2-px acceptance) and §R re-measures the declarations; round 3's named hyphenate-character hdup+2x blind spot is closed. The 2-px floor stays the named residual; the windows are replay / wave54-probe footprints, re-recorded from a device capture only after a stage-1 look (never a tolerance)"}
+
+# top-level keys: before 37 · after 37; planDecisions ids: before 41 · after 42
+# appends only: YES

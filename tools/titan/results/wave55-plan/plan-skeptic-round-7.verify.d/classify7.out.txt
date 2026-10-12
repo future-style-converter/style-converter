@@ -1,0 +1,15 @@
+MF1 faint (min >= 200) in-zone ink on a neutral / ramp zone: 1398 gating-key reads + 290 tally entries; 1122 distinct fakes; 24 gating keys; 6 tally cells; px 4 … 2558
+    keys: [C] counter-suffix android; [C] counter-suffix ios; [F] text-decoration-inset-005 ios; [F] text-decoration-inset-006 ios; [F] text-decoration-inset-014 android; [F] text-decoration-inset-014 ios; [H] counter-suffix ios; [I] cjk-decimal/css3-counter-styles-005 android; [I] cjk-decimal/css3-counter-styles-005 ios; [M] text-decoration-inset-005 android; [M] text-decoration-inset-005 ios; [M] text-decoration-inset-006 android; [M] text-decoration-inset-006 ios; [M] text-decoration-inset-011 android; [M] text-decoration-inset-011 ios; [M] text-decoration-inset-014 android; [M] text-decoration-inset-014 ios; [S] dir-style-02a android row6; [S] dir-style-02a android row7; [S] dir-style-02a android row9; [T] counter-suffix ios; hyphen-ios-linebox 001 ios; hyphen-ios-linebox 003 ios; hyphen-ios-linebox 004 ios
+MF2 bidi: the class colour outside the RTL bands: 22 gating-key reads + 22 tally entries; 22 distinct fakes; 1 gating keys; 1 tally cells; px 4 … 144
+    keys: [S] bidi-tab-001 android rtl-rows
+MF3 palette paint grown from a recorded window: 96 gating-key reads + 96 tally entries; 96 distinct fakes; 4 gating keys; 4 tally cells; px 6 … 1008
+    keys: [S] bidi-tab-001 android rtl-rows; backdrop-filter-nested-border-radius-clip android; backdrop-filter-nested-border-radius-clip-2 android; backdrop-filter-nested-border-radius-clip-4 android
+MF4 L4 face-present heading moved ±2-3 px in x: 20 gating-key reads + 0 tally entries; 12 distinct fakes; 10 gating keys; 0 tally cells; px 3350 … 4888
+    keys: [F] text-decoration-inset-005 ios; [F] text-decoration-inset-006 ios; [F] text-decoration-inset-014 android; [F] text-decoration-inset-014 ios; [M] text-decoration-inset-005 android; [M] text-decoration-inset-005 ios; [M] text-decoration-inset-006 android; [M] text-decoration-inset-006 ios; [M] text-decoration-inset-014 android; [M] text-decoration-inset-014 ios
+MF5 L6 [X]: child fill painted over the parent band: 10 gating-key reads + 10 tally entries; 10 distinct fakes; 5 gating keys; 5 tally cells; px 4 … 138
+    keys: [X] flex-abspos-staticpos-align-self-safe-001 android; [X] grid-abspos-staticpos-align-self-001 android; [X] grid-abspos-staticpos-align-self-rtl-001 android; [X] grid-abspos-staticpos-align-self-vertWM-001 android; [X] grid-abspos-staticpos-justify-self-001 android
+MF6 L6 [PO]: overlap px reverted + red elsewhere: 3 gating-key reads + 3 tally entries; 3 distinct fakes; 1 gating keys; 1 tally cells; px 8 … 16
+    keys: [PO] backdrop-filter-clip-rect android
+MF7 L3 stack: an other square relocated: 3 gating-key reads + 0 tally entries; 3 distinct fakes; 1 gating keys; 0 tally cells; px 200 … 200
+    keys: [W] anchor-position-multicol-nested-001 android stack
+ALL: 1973 acceptances; 35 gating keys; 16 tally cells

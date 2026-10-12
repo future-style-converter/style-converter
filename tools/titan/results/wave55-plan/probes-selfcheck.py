@@ -21,6 +21,12 @@
 # zones4.py) over every lane: a gating key that PASSes a fake adding > 2 new-ink px inside its OWN read zone (under its probe's
 # own mask) is IN-ZONE, exit 1; a fake adding ≤ 2 px is the NAMED 2-px floor (PLAN §0 / D39), listed with its count. The file is
 # written atomically (a temp file beside it, then os.replace): lanes read this directory while it is regenerated.
+# Plan-skeptic round 5 (verify M1-M6) / round 6 (fix-r6.done.md, D40): §0 also prints the gate's RESIDUAL summary (residual-read.py:
+# every gating / tally key, outside its declared change zone the capture = the base); §R re-derives and re-measures the residual
+# declarations on every fixed picture (fix-r6.zones.py --check: 0 / 0 / 0, the recorded windows in sync); §T also holds
+# probes-teeth-r5.py (the verifier's 346 background-only fake runs, pre-registered FAIL); §T5 re-runs the round-5 verifier's own
+# generator (plan-skeptic-round-5.fakes/fakes5.py — its plan path made relative — and adjudicate5.py) over every lane: a key that
+# PASSes a fake adding > 2 px (a MUST-FIX acceptance) is exit 1; ≤ 2 px is the named 2-px floor, listed with its count.
 # Read-only over runs, refs and the replay folders beside this file. Three steps write, never into this tree (§T: fake runs
 # and gate JSONs under --scratch):
 #   - android-paint-order.geometry.py --fakes RE-WRITES its fake PNGs beside the script it runs. It is therefore run from the
@@ -109,7 +115,7 @@ say('# probes-selfcheck.txt — every wave-55 geometry probe executed on the run
 gj = os.path.join(SCRATCH, 'geometry-selftest.wave54-final.json')
 p = subprocess.run(['nice', '-n', '19'] + PY + [f'{P55}/geometry-gate.py', 'wave54-final', '--base', 'wave54-final', '--self-test', '--json', gj, '--exp', EXP_PATH],
                    cwd=ROOT, capture_output=True, text=True)
-tail = [l for l in p.stdout.splitlines() if l.startswith(('geometry-gate', '  by class', 'self-test', 'SELF-TEST'))]
+tail = [l for l in p.stdout.splitlines() if l.startswith(('geometry-gate', '  by class', '  residual', 'self-test', 'SELF-TEST'))]
 say('## §0 geometry-gate.py wave54-final --base wave54-final --self-test (all lanes, every registered probe)', f'exit {p.returncode}', *tail)
 G = json.load(open(gj))
 for lid in EXP['lanes']:
@@ -122,6 +128,13 @@ for r in G['rows']:
         GATING[(r['script'], r['key'])]['today'] = r['verdict']
 selftest_ok = p.returncode == 0
 say('')
+
+# ── §R the residual read's declarations (round 6, D40): every fixed picture 0 / 0 / 0, the recorded windows = the derivation ──
+say('## §R the residual declarations (fix-r6.zones.py --check): every gating / tally key cell declared; every fixed picture of the standing set '
+    'read against wave54-final reads outside / vacated / non-class 0 / 0 / 0; the recorded WINDOWS literal is the derivation')
+pz = subprocess.run(['nice', '-n', '19'] + PY + [f'{P55}/fix-r6.zones.py', '--check'], cwd=ROOT, capture_output=True, text=True)
+say(f'exit {pz.returncode}', *[l for l in pz.stdout.splitlines() if l.startswith(('## 1.', 'RESULT', '   !!', '   ~~', '   NO SPEC'))], '')
+selftest_ok = selftest_ok and pz.returncode == 0
 
 # ── §L1 hyphen-ios-linebox ─────────────────────────────────────────────────────────────────────────────────────────
 LB = f'{P55}/hyphen-ios-linebox.geometry.py'
@@ -305,6 +318,34 @@ say(f'  §T4: IN-ZONE acceptances {t4_in}; fakes4 HOLES with > 2 new-ink px (any
     f'read by construction; the passing pictures read 0, so closing it is a 0-px tolerance, a stage-1 device question', '')
 teeth_ok = teeth_ok and t4_in == 0 and t4_big == 0
 
+# ── §T5 the round-5 BACKGROUND-ONLY sweep (plan-skeptic-round-5.verify.md §2): the verifier's generator over every lane ─────────
+say('## §T5 the round-5 sweep (plan-skeptic-round-5.fakes/fakes5.py + adjudicate5.py, the verifier\'s own generator and adjudication): '
+    'every fixed picture of the standing set with 1-px … 3×3 specks, 1-px lines, 50 % faint copies (the class ink moved ±1 … +5, the '
+    'whole zone ghosted, a faint speck / line / glyph) and duplicated glyphs, in every solid colour class of every key\'s read zone, '
+    'strictly additive — through the real gate; a key that PASSes a fake adding > 2 px is a MUST-FIX acceptance (exit 1)')
+F5 = os.path.join(HERE, 'plan-skeptic-round-5.fakes')
+t5_must, t5_floor, t5_js = 0, 0, []
+for L in (T_ONLY or ['L1', 'L2', 'L3', 'L4', 'L5', 'L6']):
+    sc5, fo5, js5 = os.path.join(SCRATCH, 'sweep5', L), os.path.join(SCRATCH, f'fakes5.{L}.out.txt'), os.path.join(SCRATCH, f'fakes5.{L}.json')
+    shutil.rmtree(sc5, ignore_errors=True)
+    r5p = subprocess.run(['nice', '-n', '19'] + PY + [os.path.join(F5, 'fakes5.py'), '--scratch', sc5, '--groups', L, '--out', fo5, '--json', js5],
+                         cwd=ROOT, capture_output=True, text=True)
+    summ = next((l for l in open(fo5) if 'fake runs;' in l), '(no summary: the generator failed)').strip() if os.path.exists(fo5) else '(no output: the generator failed)'
+    say(f'  {L}: fakes5 exit {r5p.returncode} — {summ}')
+    if os.path.exists(js5):
+        t5_js.append(js5)
+    else:
+        t5_must += 1
+adj5 = subprocess.run(['nice', '-n', '19'] + PY + [os.path.join(F5, 'adjudicate5.py')] + t5_js, cwd=ROOT, capture_output=True, text=True).stdout
+open(os.path.join(SCRATCH, 'adjudicate5.out.txt'), 'w').write(adj5)
+for l in adj5.splitlines():
+    if l.startswith(('## L', 'ALL LANES')) or 'accepted > 2 px   0' not in l and 'accepted > 2 px' in l or l.lstrip().startswith(('variants accepted (> 2 px): ', 'floor (≤ 2 px)')):
+        say('  ' + l.strip())
+m5 = _re.search(r'MUST-FIX acceptances \(> 2 px\) (\d+); floor \(≤ 2 px\) (\d+)', adj5)
+t5_must += int(m5[1]) if m5 else 1; t5_floor = int(m5[2]) if m5 else -1
+say(f'  §T5: MUST-FIX acceptances {t5_must}; floor (≤ 2 px) acceptances {t5_floor} — the named 2-px floor (PLAN §0, D39 / D40)', '')
+teeth_ok = teeth_ok and t5_must == 0
+
 # ── the per-gating-key table ──────────────────────────────────────────────────────────────────────────────────────
 say('## Every GATING key: today on wave54-final | fakes its rule rejected | fixed pictures it accepted')
 bad = []
@@ -317,7 +358,7 @@ for (script, key), g in sorted(GATING.items(), key=lambda kv: (kv[1]['lane'], kv
 say('', f'gating keys {len(GATING)}: able to fail {len(GATING) - len(bad)} (today FAIL on device, or a fake rejected); with a fixed picture accepted '
     f'{sum(1 for g in GATING.values() if g["fixedOk"])}; §T standing rejection set {"HOLDS" if teeth_ok else "FAILS"} '
     f'({len(t_cov)} / {len(t_gating)} gating + tally keys reject a plausible fake, {len(t_viol)} violation(s); §T3 added-ink holes {len(s_holes)}; '
-    f'§T4 strictly-additive IN-ZONE {t4_in}, > 2-px holes {t4_big}); '
+    f'§T4 strictly-additive IN-ZONE {t4_in}, > 2-px holes {t4_big}; §T5 background-only MUST-FIX {t5_must}, floor {t5_floor}); '
     f'geometry-gate self-test {"HOLDS" if selftest_ok else "FAILS"}')
 for b in bad:
     say(f'  CANNOT FAIL: {b}')

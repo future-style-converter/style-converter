@@ -24,12 +24,12 @@
 #       square, one slab over the four cells or flow-stacked duplicates are WRONG). The ref row reads the cells only (the
 #       ref paints green beside cells 2-3: its ring is not this rule's picture; web is the [W] self-check row).
 #   [S] dynamic-offset-rtl-001|dynamic-offset-vrl-rtl-001 <plat> — the magenta 10×10 bbox equals the ref's ±1 and (round
-#       1) its magenta px count equals the ref's ±5 (a 1-px hollow frame is WRONG).
+#       1) its magenta px count equals the ref's ±5 (a 1-px hollow frame is WRONG; round 6: ±MAG_TOL = 2).
 #   [W] dynamic-offset-rtl-002|dynamic-offset-vrl-rtl-002 <plat> — the magenta box's left edge equals 16 + the wire's
 #       physical `left` (10 / 70) ±1: these refs show the post-script inset the wire does not carry, so the [W] rule
 #       is the WIRE's picture and its self-check row is web (CSS itself on the same wire), not the ref. Round 1 added:
 #       the FULL magenta bbox equals the web row's ±1 (a box 3 px low or 5 px wider was OK on the left edge alone) and
-#       its count is 100 ±5 (a 10×10 box, not a frame).
+#       its count is 100 ±5 (a 10×10 box, not a frame; round 6: ±MAG_TOL = 2).
 #   [C] <doc> <plat> identical to <base> — a must-not-move picture (decoded pixels equal to the base run's), or the
 #       named band / colour subset equal.
 # Plan-skeptic round 2 (instrument-teeth M1) found 18 / 18 plausible wrong pictures accepted (the rules read x only, the
@@ -44,6 +44,10 @@
 #             their ±2 ring within ±10 % of the web row's (web / ios / the replay 300; the other squares erased: 0);
 #   dyn       `parent:` the yellow positioned parent's bbox = the picture's ±1 (the ref for [S], web for [W]) and yellow +
 #             magenta inside it = the picture's ±1 % (10000) — the child read alone passed the parent erased or moved 3 px.
+# Plan-skeptic round 5 (verify M2; fix-r6.done.md): a 2×2 yellow over the magenta child — the parent's own colour, so the
+# picture equals the base there and no residual read can see it (geometry-gate.py's RESIDUAL read, residual-read.py,
+# closes every paint the base does not have) — left 96 magenta px, inside the round-1 ±5. The count tolerance is now MAG_TOL
+# = 2, the named 2-px floor: every passing picture (ref, web, iOS, Android, the U2 replays) reads exactly 100.
 # Self-check: every [S] ref row and every [W] web row must print OK, else exit 1 (the rule, not the lane, is wrong).
 #
 # Usage: python3 positioned-parent-slot.geometry.py <run> [<base>] [--replay ARM]
@@ -391,6 +395,7 @@ for label in ('ref', 'web', 'ios', 'android'):
     verdict(key, label, f'cells {fill} ring {rings} red {reds} others {others}', why, selfcheck=(label in ('ref', 'web')))
 
 # ── [S] / [W] dynamic-offset RTL squares ──
+MAG_TOL = 2      # round 6 (verify-r5 M2): the child's magenta count ±2 px (was ±5: a 2×2 hole of the parent's yellow passed)
 for test, kind, wire_left in (('dynamic-offset-rtl-001', 'S', None), ('dynamic-offset-vrl-rtl-001', 'S', None),
                               ('dynamic-offset-rtl-002', 'W', 10), ('dynamic-offset-vrl-rtl-002', 'W', 70)):
     refb = webb = refpar = webpar = None
@@ -422,8 +427,8 @@ for test, kind, wire_left in (('dynamic-offset-rtl-001', 'S', None), ('dynamic-o
                 refb = b
             if b is None or any(abs(b[i] - refb[i]) > 1 for i in range(4)):
                 why.append(f'magenta {b[:4] if b else None} vs ref {refb[:4]}')
-            elif abs(b[4] - refb[4]) > 5:
-                why.append(f'magenta {b[4]} px vs ref {refb[4]} ±5 (a frame / partial box)')      # round 1
+            elif abs(b[4] - refb[4]) > MAG_TOL:
+                why.append(f'magenta {b[4]} px vs ref {refb[4]} ±{MAG_TOL} (a frame / partial box / a hole)')      # round 1; round 6: ±2
             verdict(key, label, f'magenta {b[:4] if b else None} n {b[4] if b else 0} parent {pb} n {pn}', why, selfcheck=(label == 'ref'))
         else:
             if label == 'ref':
@@ -435,8 +440,8 @@ for test, kind, wire_left in (('dynamic-offset-rtl-001', 'S', None), ('dynamic-o
             elif webb is None or any(abs(b[i] - webb[i]) > 1 for i in range(4)):
                 # round 1: the whole box, not its left edge only — web is CSS on the same wire
                 why.append(f'magenta {b[:4]} vs web {webb[:4] if webb else None} ±1')
-            elif abs(b[4] - 100) > 5:
-                why.append(f'magenta {b[4]} px vs 100 ±5 (the 10×10 box, not a frame)')
+            elif abs(b[4] - 100) > MAG_TOL:
+                why.append(f'magenta {b[4]} px vs 100 ±{MAG_TOL} (the 10×10 box, not a frame / a hole)')      # round 6: ±2
             verdict(key, label, f'magenta {b[:4] if b else None} n {b[4] if b else 0} parent {pb} n {pn}', why, selfcheck=(label == 'web'))
 
 

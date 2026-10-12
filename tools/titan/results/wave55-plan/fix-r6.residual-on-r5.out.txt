@@ -1,0 +1,93 @@
+# fix-r6.residual-on-r5 — residual-read.py 40211eb03f6835cc on the round-5 records (fakes5.py 1d84784e8fdb26d5, its builders); base wave54-final
+
+789 accepted faked zones (> 2 px 704, floor 85); the read that now rejects each:
+  L1 > 2 px OUTSIDE   6
+  L1 floor  OK        3
+  L2 > 2 px NON-CLASS 3
+  L2 > 2 px OUTSIDE   274
+  L2 > 2 px VACATED   3
+  L2 floor  NON-CLASS 1
+  L2 floor  OK        2
+  L2 floor  OUTSIDE   4
+  L2 floor  VACATED   6
+  L3 > 2 px OK        3
+  L3 > 2 px OUTSIDE   96
+  L3 > 2 px VACATED   5
+  L3 floor  OK        10
+  L3 floor  OUTSIDE   1
+  L3 floor  VACATED   1
+  L4 > 2 px OUTSIDE   43
+  L4 > 2 px VACATED   2
+  L4 floor  OK        27
+  L5 floor  OK        10
+  L6 > 2 px OUTSIDE   268
+  L6 > 2 px VACATED   1
+  L6 floor  OK        8
+  L6 floor  OUTSIDE   12
+
+not rejected by the residual read: 63 (> 2 px: 3)
+  FLOOR L1 fixed+r2-L1-tally-fixed      z0 sp1-touch-mid    class (0, 0, 0) hyphenate-character-001 ios lines                       +1 bbox [31, 294, 31, 294]
+  FLOOR L1 fixed+r2-L1-tally-fixed      z0 sp1-touch-mid    class (0, 0, 0) hyphenate-character-003 ios lines                       +1 bbox [39, 264, 39, 264]
+  FLOOR L1 fixed+r2-L1-tally-fixed      z0 sp1-touch-mid    class (0, 0, 0) hyphenate-character-004 ios lines                       +1 bbox [32, 255, 32, 255]
+  FLOOR L2 U1-fixed                     z0 sp1-touch-mid    class (135, 138, 155) backdrop-filter-nested-border-radius-clip android whole +1 bbox [46, 26, 46, 26]
+  FLOOR L2 U2-fixed                     z0 sp1-touch-mid    class (0, 128, 0) backdrop-filter-nested-border-radius-clip-3 android whole +1 bbox [135, 35, 135, 35]
+  FLOOR L3 dir-row6-fixed+dir-row7-fixed+dir-row9-fixed z0 sp1-touch-mid    class (0, 255, 0) dir-style-02a android row6                              +1 bbox [83, 127, 83, 127]
+  FLOOR L3 dir-row6-fixed+dir-row7-fixed+dir-row9-fixed z1 sp1-touch-mid    class (0, 255, 0) dir-style-02a android row7                              +1 bbox [138, 152, 138, 152]
+  FLOOR L3 dir-row6-fixed+dir-row7-fixed+dir-row9-fixed z2 sp1-touch-mid    class (0, 255, 0) dir-style-02a android row9                              +1 bbox [83, 187, 83, 187]
+  FLOOR L3 bidi-fixed                   z0 sp1-touch-mid    class (255, 255, 0) bidi-tab-001 android rtl-bands                          +1 bbox [37, 186, 37, 186]
+  FLOOR L3 001-fixed                    z0 sp1-touch-mid    class (255, 0, 255) dynamic-offset-rtl-001 android whole                    +1 bbox [90, 25, 90, 25]
+  FLOOR L3 001-fixed                    z0 sp1-touch-mid    class (255, 255, 0) dynamic-offset-rtl-001 android whole                    +1 bbox [86, 35, 86, 35]
+  > 2px L3 001-fixed                    z0 sp2-touch-mid    class (255, 255, 0) dynamic-offset-rtl-001 android whole                    +4 bbox [86, 34, 87, 35]
+  FLOOR L3 002-fixed                    z0 sp1-touch-mid    class (255, 0, 255) dynamic-offset-rtl-002 android whole                    +1 bbox [30, 25, 30, 25]
+  FLOOR L3 002-fixed                    z0 sp1-touch-mid    class (255, 255, 0) dynamic-offset-rtl-002 android whole                    +1 bbox [35, 35, 35, 35]
+  > 2px L3 002-fixed                    z0 sp2-touch-mid    class (255, 255, 0) dynamic-offset-rtl-002 android whole                    +4 bbox [34, 34, 35, 35]
+  FLOOR L3 r2-L3-vrl-rtl-001-fixed      z0 sp1-touch-mid    class (255, 0, 255) dynamic-offset-vrl-rtl-001 android whole                +1 bbox [90, 25, 90, 25]
+  FLOOR L3 r2-L3-vrl-rtl-001-fixed      z0 sp1-touch-mid    class (255, 255, 0) dynamic-offset-vrl-rtl-001 android whole                +1 bbox [86, 35, 86, 35]
+  > 2px L3 r2-L3-vrl-rtl-001-fixed      z0 sp2-touch-mid    class (255, 255, 0) dynamic-offset-vrl-rtl-001 android whole                +4 bbox [86, 34, 87, 35]
+  FLOOR L4 C-fixed                      z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-005 ios heading                   +1 bbox [152, 168, 152, 168]
+  FLOOR L4 C-fixed                      z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-005 android heading               +1 bbox [152, 168, 152, 168]
+  FLOOR L4 C-fixed                      z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-006 ios heading                   +1 bbox [158, 168, 158, 168]
+  FLOOR L4 C-fixed                      z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-006 android heading               +1 bbox [158, 168, 158, 168]
+  FLOOR L4 C-fixed                      z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-014 ios heading                   +1 bbox [119, 154, 119, 154]
+  FLOOR L4 C-fixed                      z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-014 android heading               +1 bbox [119, 154, 119, 154]
+  FLOOR L4 C-fixed                      z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-011 ios heading                   +1 bbox [141, 202, 141, 202]
+  FLOOR L4 C-fixed                      z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-011 android heading               +1 bbox [111, 203, 111, 203]
+  FLOOR L4 C-fixed                      z0 f50-ink+1x       class (0, 0, 0) text-decoration-inset-005 ios heading                   +1 bbox [27, 164, 27, 164]
+  FLOOR L4 C-fixed                      z0 f50-ink+1x       class (0, 0, 0) text-decoration-inset-005 android heading               +1 bbox [27, 164, 27, 164]
+  FLOOR L4 C-fixed                      z0 f50-ink+1x       class (0, 0, 0) text-decoration-inset-006 ios heading                   +1 bbox [27, 164, 27, 164]
+  FLOOR L4 C-fixed                      z0 f50-ink+1x       class (0, 0, 0) text-decoration-inset-006 android heading               +1 bbox [27, 164, 27, 164]
+  FLOOR L4 U1-fixed                     z0 sp1-touch-mid    class (127, 127, 127) text-decoration-inset-005 ios heading                   +1 bbox [103, 149, 103, 149]
+  FLOOR L4 U1-fixed                     z0 sp1-touch-mid    class (48, 48, 48) text-decoration-inset-005 android heading               +1 bbox [104, 138, 104, 138]
+  FLOOR L4 U1-fixed                     z0 sp1-touch-mid    class (127, 127, 127) text-decoration-inset-006 ios heading                   +1 bbox [106, 149, 106, 149]
+  FLOOR L4 U1-fixed                     z0 sp1-touch-mid    class (48, 48, 48) text-decoration-inset-006 android heading               +1 bbox [100, 138, 100, 138]
+  FLOOR L4 U1-fixed                     z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-014 ios heading                   +1 bbox [76, 139, 76, 139]
+  FLOOR L4 U1-fixed                     z0 sp1-touch-mid    class (48, 48, 48) text-decoration-inset-014 android heading               +1 bbox [66, 140, 66, 140]
+  FLOOR L4 U1-fixed                     z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-011 ios heading                   +1 bbox [141, 202, 141, 202]
+  FLOOR L4 U1-fixed                     z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-011 android heading               +1 bbox [111, 203, 111, 203]
+  FLOOR L4 U1-fixed                     z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-005 ios heading                   +1 bbox [103, 150, 103, 150]
+  FLOOR L4 U1-fixed                     z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-005 android heading               +1 bbox [97, 135, 97, 135]
+  FLOOR L4 U1-fixed                     z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-006 ios heading                   +1 bbox [106, 150, 106, 150]
+  FLOOR L4 U1-fixed                     z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-006 android heading               +1 bbox [113, 137, 113, 137]
+  FLOOR L4 U1-fixed                     z0 sp1-touch-mid    class (0, 0, 0) text-decoration-inset-014 android heading               +1 bbox [66, 135, 66, 135]
+  FLOOR L4 U1-fixed                     z0 f50-ink+1x       class (0, 0, 0) text-decoration-inset-014 android heading               +1 bbox [101, 139, 101, 139]
+  FLOOR L4 U1-fixed                     z0 f50-ink+1y       class (0, 0, 0) text-decoration-inset-014 android heading               +1 bbox [25, 138, 25, 138]
+  FLOOR L5 fixed                        z0 sp1-touch-mid    class (0, 0, 0) counter-suffix ios H                                    +1 bbox [53, 82, 53, 82]
+  FLOOR L5 fixed                        z0 sp1-touch-mid    class (0, 0, 0) css3-counter-styles-005 ios I                           +1 bbox [268, 140, 268, 140]
+  FLOOR L5 fixed                        z0 sp1-touch-mid    class (0, 0, 0) counter-suffix android C                                +1 bbox [46, 143, 46, 143]
+  FLOOR L5 fixed                        z0 sp1-touch-mid    class (0, 0, 0) css3-counter-styles-005 android I                       +1 bbox [240, 105, 240, 105]
+  FLOOR L5 fixed                        z0 ln-strike        class (0, 0, 0) counter-suffix android C                                +1 bbox [48, 152, 48, 152]
+  FLOOR L5 fixed                        z0 f50-ink+1x       class (0, 0, 0) counter-suffix android C                                +1 bbox [46, 143, 46, 143]
+  FLOOR L5 fixed                        z0 f50-ink+1x       class (0, 0, 0) css3-counter-styles-005 android I                       +2 bbox [240, 105, 290, 105]
+  FLOOR L5 fixed                        z0 f50-ln-strike    class (0, 0, 0) counter-suffix android C                                +1 bbox [48, 152, 48, 152]
+  FLOOR L5 fixed                        z1 sp1-touch-mid    class (15, 15, 15) counter-suffix ios C                                    +1 bbox [42, 144, 42, 144]
+  FLOOR L5 fixed                        z2 sp1-touch-mid    class (0, 0, 0) counter-suffix ios T                                    +1 bbox [141, 226, 141, 226]
+  FLOOR L6 X-fixed                      z0 sp1-touch-mid    class (255, 255, 0) flex-abspos-staticpos-align-self-safe-001 android whole +1 bbox [61, 184, 61, 184]
+  FLOOR L6 X-fixed                      z0 sp1-touch-mid    class (0, 128, 128) grid-abspos-staticpos-align-self-001 android whole      +1 bbox [54, 158, 54, 158]
+  FLOOR L6 X-fixed                      z0 sp1-touch-mid    class (0, 128, 128) grid-abspos-staticpos-justify-self-001 android whole    +1 bbox [80, 125, 80, 125]
+  FLOOR L6 X-fixed                      z0 sp1-touch-mid    class (0, 128, 128) grid-abspos-staticpos-align-self-vertWM-001 android whole +1 bbox [63, 134, 63, 134]
+  FLOOR L6 X-fixed                      z0 sp1-touch-mid    class (0, 128, 128) grid-abspos-staticpos-align-self-rtl-001 android whole  +1 bbox [66, 158, 66, 158]
+  FLOOR L6 X-fixed                      z0 sp1-touch-mid    class (0, 0, 0) flex-abspos-staticpos-align-self-safe-001 android whole +1 bbox [41, 165, 41, 165]
+  FLOOR L6 PO-fixed                     z0 sp1-touch-mid    class (255, 0, 0) backdrop-filter-clip-rect android whole                 +1 bbox [214, 220, 214, 220]
+  FLOOR L6 PO-fixed                     z0 sp1-touch-mid    class (0, 0, 255) backdrop-filter-clip-rect android whole                 +1 bbox [266, 167, 266, 167]
+
+(the > 2-px ones are the three L3 dyn 2×2 yellow-over-magenta holes: equal to the base there, so no residual read can see them; the L3 probe's magenta count ±2 rejects them — probes-teeth-r5.py pins all three FAIL through the real gate)

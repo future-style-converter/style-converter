@@ -1,6 +1,6 @@
-generatedWith: argv [] · 16 input files (sha256 each in expectations.json generatedWith.inputs); decisions: reverted 0 · restate 0 · contingency 0 · goSmall False
+generatedWith: argv [] · 19 input files (sha256 each in expectations.json generatedWith.inputs); decisions: reverted 0 · restate 0 · contingency 0 · goSmall False
 watchlist.txt: 746 watch lines
-expectations.json: union capture carriers {'web': 0, 'ios': 23, 'android': 58} · wire carriers 0 · may-move android 240 (raw 252 + D21 medium 26 + (2b) 1 − shared 12 − L6 carriers)
+expectations.json: union capture carriers {'web': 0, 'ios': 23, 'android': 58} · wire carriers 0 · may-move android 241 (raw 252 + D21 medium 26 + (2b) 1 + fix-r1 growth 1 − shared 12 − L6 carriers)
 scored cells 4096 = carrier cells 76 + named must-not-move 665 + complement 3352 + ring-fenced 3
 stage-1 probe (9): css-counter-styles,css-flexbox,css-grid,css-masking,css-text,css-text-decor,css-writing-modes,filter-effects,selectors
 probe sections (26): CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-grid,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-tables,css-text,css-text-decor,css-transforms,css-values,css-view-transitions,css-writing-modes,filter-effects,selectors · not probed: css-color,css-pseudo,css-sizing,css-ui

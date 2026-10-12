@@ -1,0 +1,181 @@
+L1 001 R0                                      css-text/hyphens/hyphenate-character-001.html ios                            0 /    0 /    0
+L1 001 R1                                      css-text/hyphens/hyphenate-character-001.html ios                            0 /    0 /    0
+L1 001 Rd                                      css-text/hyphens/hyphenate-character-001.html ios                            0 /    0 /    0
+L1 001 Rm                                      css-text/hyphens/hyphenate-character-001.html ios                            0 /    0 /    0
+L1 001 Rm1                                     css-text/hyphens/hyphenate-character-001.html ios                            0 /    0 /    0
+L1 001 Rw                                      css-text/hyphens/hyphenate-character-001.html ios                            0 /    0 /    0
+L1 001 X                                       css-text/hyphens/hyphenate-character-001.html ios                            0 /    0 /    0
+L1 003 R0                                      css-text/hyphens/hyphenate-character-003.html ios                            0 /    0 /    0
+L1 003 R1                                      css-text/hyphens/hyphenate-character-003.html ios                            0 /    0 /    0
+L1 003 Rd                                      css-text/hyphens/hyphenate-character-003.html ios                            0 /    0 /    0
+L1 003 Rm                                      css-text/hyphens/hyphenate-character-003.html ios                            0 /    0 /    0
+L1 003 Rm1                                     css-text/hyphens/hyphenate-character-003.html ios                            0 /    0 /    0
+L1 003 Rw                                      css-text/hyphens/hyphenate-character-003.html ios                            0 /    0 /    0
+L1 003 X                                       css-text/hyphens/hyphenate-character-003.html ios                            0 /    0 /    0
+L1 004 R0                                      css-text/hyphens/hyphenate-character-004.html ios                            0 /    0 /    0
+L1 004 R1                                      css-text/hyphens/hyphenate-character-004.html ios                            0 /    0 /    0
+L1 004 Rd                                      css-text/hyphens/hyphenate-character-004.html ios                            0 /    0 /    0
+L1 004 Rm                                      css-text/hyphens/hyphenate-character-004.html ios                            0 /    0 /    0
+L1 004 Rm1                                     css-text/hyphens/hyphenate-character-004.html ios                            0 /    0 /    0
+L1 004 Rw                                      css-text/hyphens/hyphenate-character-004.html ios                            0 /    0 /    0
+L1 004 X                                       css-text/hyphens/hyphenate-character-004.html ios                            0 /    0 /    0
+L4 005 android B                               css-text-decor/text-decoration-inset-005.html android                        0 /    0 /    0
+L4 005 android B21                             css-text-decor/text-decoration-inset-005.html android                        0 /    0 /    0
+L4 005 android C                               css-text-decor/text-decoration-inset-005.html android                        0 /    0 /    0
+L4 005 android C4                              css-text-decor/text-decoration-inset-005.html android                        0 /    0 /    0
+L4 005 android D                               css-text-decor/text-decoration-inset-005.html android                        0 /    0 /    0
+L4 005 android M20                             css-text-decor/text-decoration-inset-005.html android                        0 /    0 /    0
+L4 005 android M21                             css-text-decor/text-decoration-inset-005.html android                        0 /    0 /    0
+L4 005 android M22                             css-text-decor/text-decoration-inset-005.html android                        0 /    0 /    0
+L4 005 android R                               css-text-decor/text-decoration-inset-005.html android                        0 /    0 /    0
+L4 005 android R11                             css-text-decor/text-decoration-inset-005.html android                        0 /    0 /    0
+L4 005 android T                               css-text-decor/text-decoration-inset-005.html android                        0 /    0 /    0
+L4 005 android U1                              css-text-decor/text-decoration-inset-005.html android                        0 /    0 /    0
+L4 005 android X2                              css-text-decor/text-decoration-inset-005.html android                        0 /    0 /    0
+L4 005 ios B                                   css-text-decor/text-decoration-inset-005.html ios                            0 /    0 /    0
+L4 005 ios B21                                 css-text-decor/text-decoration-inset-005.html ios                            0 /    0 /    0
+L4 005 ios C                                   css-text-decor/text-decoration-inset-005.html ios                            0 /    0 /    0
+L4 005 ios C4                                  css-text-decor/text-decoration-inset-005.html ios                            0 /    0 /    0
+L4 005 ios D                                   css-text-decor/text-decoration-inset-005.html ios                            0 /    0 /    0
+L4 005 ios M20                                 css-text-decor/text-decoration-inset-005.html ios                            0 /    0 /    0
+L4 005 ios M21                                 css-text-decor/text-decoration-inset-005.html ios                            0 /    0 /    0
+L4 005 ios M22                                 css-text-decor/text-decoration-inset-005.html ios                            0 /    0 /    0
+L4 005 ios R                                   css-text-decor/text-decoration-inset-005.html ios                            0 /    0 /    0
+L4 005 ios R11                                 css-text-decor/text-decoration-inset-005.html ios                            0 /    0 /    0
+L4 005 ios T                                   css-text-decor/text-decoration-inset-005.html ios                            0 /    0 /    0
+L4 005 ios U1                                  css-text-decor/text-decoration-inset-005.html ios                            0 /    0 /    0
+L4 005 ios X2                                  css-text-decor/text-decoration-inset-005.html ios                            0 /    0 /    0
+L4 006 android B                               css-text-decor/text-decoration-inset-006.html android                        0 /    0 /    0
+L4 006 android B21                             css-text-decor/text-decoration-inset-006.html android                        0 /    0 /    0
+L4 006 android C                               css-text-decor/text-decoration-inset-006.html android                        0 /    0 /    0
+L4 006 android C4                              css-text-decor/text-decoration-inset-006.html android                        0 /    0 /    0
+L4 006 android D                               css-text-decor/text-decoration-inset-006.html android                        0 /    0 /    0
+L4 006 android M20                             css-text-decor/text-decoration-inset-006.html android                        0 /    0 /    0
+L4 006 android M21                             css-text-decor/text-decoration-inset-006.html android                        0 /    0 /    0
+L4 006 android M22                             css-text-decor/text-decoration-inset-006.html android                        0 /    0 /    0
+L4 006 android R                               css-text-decor/text-decoration-inset-006.html android                        0 /    0 /    0
+L4 006 android R11                             css-text-decor/text-decoration-inset-006.html android                        0 /    0 /    0
+L4 006 android T                               css-text-decor/text-decoration-inset-006.html android                        0 /    0 /    0
+L4 006 android U1                              css-text-decor/text-decoration-inset-006.html android                        0 /    0 /    0
+L4 006 android X2                              css-text-decor/text-decoration-inset-006.html android                        0 /    0 /    0
+L4 006 ios B                                   css-text-decor/text-decoration-inset-006.html ios                            0 /    0 /    0
+L4 006 ios B21                                 css-text-decor/text-decoration-inset-006.html ios                            0 /    0 /    0
+L4 006 ios C                                   css-text-decor/text-decoration-inset-006.html ios                            0 /    0 /    0
+L4 006 ios C4                                  css-text-decor/text-decoration-inset-006.html ios                            0 /    0 /    0
+L4 006 ios D                                   css-text-decor/text-decoration-inset-006.html ios                            0 /    0 /    0
+L4 006 ios M20                                 css-text-decor/text-decoration-inset-006.html ios                            0 /    0 /    0
+L4 006 ios M21                                 css-text-decor/text-decoration-inset-006.html ios                            0 /    0 /    0
+L4 006 ios M22                                 css-text-decor/text-decoration-inset-006.html ios                            0 /    0 /    0
+L4 006 ios R                                   css-text-decor/text-decoration-inset-006.html ios                            0 /    0 /    0
+L4 006 ios R11                                 css-text-decor/text-decoration-inset-006.html ios                            0 /    0 /    0
+L4 006 ios T                                   css-text-decor/text-decoration-inset-006.html ios                            0 /    0 /    0
+L4 006 ios U1                                  css-text-decor/text-decoration-inset-006.html ios                            0 /    0 /    0
+L4 006 ios X2                                  css-text-decor/text-decoration-inset-006.html ios                            0 /    0 /    0
+L4 011 android B                               css-text-decor/text-decoration-inset-011.html android                        0 /    0 /    0
+L4 011 android C                               css-text-decor/text-decoration-inset-011.html android                        0 /    0 /    0
+L4 011 android D                               css-text-decor/text-decoration-inset-011.html android                        0 /    0 /    0
+L4 011 android M20                             css-text-decor/text-decoration-inset-011.html android                        0 /    0 /    0
+L4 011 android M21                             css-text-decor/text-decoration-inset-011.html android                        0 /    0 /    0
+L4 011 android M22                             css-text-decor/text-decoration-inset-011.html android                        0 /    0 /    0
+L4 011 android R                               css-text-decor/text-decoration-inset-011.html android                        0 /    0 /    0
+L4 011 android R11                             css-text-decor/text-decoration-inset-011.html android                        0 /    0 /    0
+L4 011 android T                               css-text-decor/text-decoration-inset-011.html android                        0 /    0 /    0
+L4 011 android U1                              css-text-decor/text-decoration-inset-011.html android                        0 /    0 /    0
+L4 011 android X2                              css-text-decor/text-decoration-inset-011.html android                        0 /    0 /    0
+L4 011 ios B                                   css-text-decor/text-decoration-inset-011.html ios                            0 /    0 /    0
+L4 011 ios C                                   css-text-decor/text-decoration-inset-011.html ios                            0 /    0 /    0
+L4 011 ios D                                   css-text-decor/text-decoration-inset-011.html ios                            0 /    0 /    0
+L4 011 ios M20                                 css-text-decor/text-decoration-inset-011.html ios                            0 /    0 /    0
+L4 011 ios M21                                 css-text-decor/text-decoration-inset-011.html ios                            0 /    0 /    0
+L4 011 ios M22                                 css-text-decor/text-decoration-inset-011.html ios                            0 /    0 /    0
+L4 011 ios R                                   css-text-decor/text-decoration-inset-011.html ios                            0 /    0 /    0
+L4 011 ios R11                                 css-text-decor/text-decoration-inset-011.html ios                            0 /    0 /    0
+L4 011 ios T                                   css-text-decor/text-decoration-inset-011.html ios                            0 /    0 /    0
+L4 011 ios U1                                  css-text-decor/text-decoration-inset-011.html ios                            0 /    0 /    0
+L4 011 ios X2                                  css-text-decor/text-decoration-inset-011.html ios                            0 /    0 /    0
+L4 014 android B                               css-text-decor/text-decoration-inset-014.html android                        0 /    0 /    0
+L4 014 android B17                             css-text-decor/text-decoration-inset-014.html android                        0 /    0 /    0
+L4 014 android C                               css-text-decor/text-decoration-inset-014.html android                        0 /    0 /    0
+L4 014 android C4                              css-text-decor/text-decoration-inset-014.html android                        0 /    0 /    0
+L4 014 android D                               css-text-decor/text-decoration-inset-014.html android                        0 /    0 /    0
+L4 014 android M16                             css-text-decor/text-decoration-inset-014.html android                        0 /    0 /    0
+L4 014 android M17                             css-text-decor/text-decoration-inset-014.html android                        0 /    0 /    0
+L4 014 android M18                             css-text-decor/text-decoration-inset-014.html android                        0 /    0 /    0
+L4 014 android R                               css-text-decor/text-decoration-inset-014.html android                        0 /    0 /    0
+L4 014 android R9                              css-text-decor/text-decoration-inset-014.html android                        0 /    0 /    0
+L4 014 android T                               css-text-decor/text-decoration-inset-014.html android                        0 /    0 /    0
+L4 014 android U1                              css-text-decor/text-decoration-inset-014.html android                        0 /    0 /    0
+L4 014 android X2                              css-text-decor/text-decoration-inset-014.html android                        0 /    0 /    0
+L4 014 ios B                                   css-text-decor/text-decoration-inset-014.html ios                            0 /    0 /    0
+L4 014 ios B17                                 css-text-decor/text-decoration-inset-014.html ios                            0 /    0 /    0
+L4 014 ios C                                   css-text-decor/text-decoration-inset-014.html ios                            0 /    0 /    0
+L4 014 ios C4                                  css-text-decor/text-decoration-inset-014.html ios                            0 /    0 /    0
+L4 014 ios D                                   css-text-decor/text-decoration-inset-014.html ios                            0 /    0 /    0
+L4 014 ios M16                                 css-text-decor/text-decoration-inset-014.html ios                            0 /    0 /    0
+L4 014 ios M17                                 css-text-decor/text-decoration-inset-014.html ios                            0 /    0 /    0
+L4 014 ios M18                                 css-text-decor/text-decoration-inset-014.html ios                            0 /    0 /    0
+L4 014 ios R                                   css-text-decor/text-decoration-inset-014.html ios                            0 /    0 /    0
+L4 014 ios R9                                  css-text-decor/text-decoration-inset-014.html ios                            0 /    0 /    0
+L4 014 ios T                                   css-text-decor/text-decoration-inset-014.html ios                            0 /    0 /    0
+L4 014 ios U1                                  css-text-decor/text-decoration-inset-014.html ios                            0 /    0 /    0
+L4 014 ios X2                                  css-text-decor/text-decoration-inset-014.html ios                            0 /    0 /    0
+L3 anchor-position-multicol-n U1               css-anchor-position/anchor-position-multicol-nested-001.html android         0 /    0 /    0
+L3 bidi-tab-001 PLAIN                          css-text/bidi/bidi-tab-001.html android                                    506 /    0 /    0
+L3 bidi-tab-001 U1U2                           css-text/bidi/bidi-tab-001.html android                                      0 /    0 /    0
+L3 dir-style-02a PLAIN                         selectors/dir-style-02a.html android                                         0 /    0 /    0
+L3 dir-style-02a U1                            selectors/dir-style-02a.html android                                         0 /    0 /    0
+L3 dir-style-02a U1U2                          selectors/dir-style-02a.html android                                         0 /    0 /    0
+L3 dynamic-offset-rtl-001 U2                   css-writing-modes/dynamic-offset-rtl-001.html android                        0 /    0 /    0
+L3 dynamic-offset-rtl-002 U2                   css-writing-modes/dynamic-offset-rtl-002.html android                        0 /    0 /    0
+L3 dynamic-offset-vrl-rtl-001 U2               css-writing-modes/dynamic-offset-vrl-rtl-001.html android                    0 /    0 /    0
+L5 C-nocomma counter-suffix ios                css-counter-styles/counter-suffix.html ios                                   0 /    0 /    0
+L5 C-nocomma cjk-decimal__c ios                css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios              0 /    0 /    0
+L5 C-nocomma counter-suffix android            css-counter-styles/counter-suffix.html android                               0 /    0 /    0
+L5 C-nocomma cjk-decimal__c android            css-counter-styles/cjk-decimal/css3-counter-styles-005.html android          0 /    0 /    0
+L5 C-shift8 counter-suffix ios                 css-counter-styles/counter-suffix.html ios                                   0 /    0 /    0
+L5 C-shift8 cjk-decimal__c ios                 css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios              0 /    0 /    0
+L5 C-shift8 counter-suffix android             css-counter-styles/counter-suffix.html android                               0 /    0 /    0
+L5 C-shift8 cjk-decimal__c android             css-counter-styles/cjk-decimal/css3-counter-styles-005.html android          0 /    0 /    0
+L5 C-space-only counter-suffix ios             css-counter-styles/counter-suffix.html ios                                   0 /    0 /    0
+L5 C-space-only cjk-decimal__c ios             css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios              0 /    0 /    0
+L5 C-space-only counter-suffix android         css-counter-styles/counter-suffix.html android                             476 /    0 /    0
+L5 C-space-only cjk-decimal__c android         css-counter-styles/cjk-decimal/css3-counter-styles-005.html android          0 /    0 /    0
+L5 H-broken counter-suffix ios                 css-counter-styles/counter-suffix.html ios                                   0 /    0 /    0
+L5 H-broken cjk-decimal__c ios                 css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios              0 /    0 /    0
+L5 H-broken counter-suffix android             css-counter-styles/counter-suffix.html android                             183 /    0 /    0
+L5 H-broken cjk-decimal__c android             css-counter-styles/cjk-decimal/css3-counter-styles-005.html android          0 /    0 /    0
+L5 H-flush counter-suffix ios                  css-counter-styles/counter-suffix.html ios                                   0 /    0 /    0
+L5 H-flush cjk-decimal__c ios                  css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios              0 /    0 /    0
+L5 H-flush counter-suffix android              css-counter-styles/counter-suffix.html android                               0 /    0 /    0
+L5 H-flush cjk-decimal__c android              css-counter-styles/cjk-decimal/css3-counter-styles-005.html android          0 /    0 /    0
+L5 H-low counter-suffix ios                    css-counter-styles/counter-suffix.html ios                                   0 /    0 /    0
+L5 H-low cjk-decimal__c ios                    css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios              0 /    0 /    0
+L5 H-low counter-suffix android                css-counter-styles/counter-suffix.html android                               0 /    0 /    0
+L5 H-low cjk-decimal__c android                css-counter-styles/cjk-decimal/css3-counter-styles-005.html android          0 /    0 /    0
+L5 H-nodot counter-suffix ios                  css-counter-styles/counter-suffix.html ios                                   0 /    0 /    0
+L5 H-nodot cjk-decimal__c ios                  css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios              0 /    0 /    0
+L5 H-nodot counter-suffix android              css-counter-styles/counter-suffix.html android                               0 /    0 /    0
+L5 H-nodot cjk-decimal__c android              css-counter-styles/cjk-decimal/css3-counter-styles-005.html android          0 /    0 /    0
+L5 I-wholeline counter-suffix ios              css-counter-styles/counter-suffix.html ios                                   0 /    0 /    0
+L5 I-wholeline cjk-decimal__c ios              css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios              0 /    0 /    0
+L5 I-wholeline counter-suffix android          css-counter-styles/counter-suffix.html android                               0 /    0 /    0
+L5 I-wholeline cjk-decimal__c android          css-counter-styles/cjk-decimal/css3-counter-styles-005.html android          0 /    0 /    0
+L5 K-leak counter-suffix ios                   css-counter-styles/counter-suffix.html ios                                  68 /    0 /    0
+L5 K-leak cjk-decimal__c ios                   css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios              0 /    0 /    0
+L5 K-leak counter-suffix android               css-counter-styles/counter-suffix.html android                               0 /    0 /    0
+L5 K-leak cjk-decimal__c android               css-counter-styles/cjk-decimal/css3-counter-styles-005.html android          0 /    0 /    0
+L5 ok-all counter-suffix ios                   css-counter-styles/counter-suffix.html ios                                   0 /    0 /    0
+L5 ok-all cjk-decimal__c ios                   css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios              0 /    0 /    0
+L5 ok-all counter-suffix android               css-counter-styles/counter-suffix.html android                               0 /    0 /    0
+L5 ok-all cjk-decimal__c android               css-counter-styles/cjk-decimal/css3-counter-styles-005.html android          0 /    0 /    0
+L6 spos-staticpos-align-self-safe-001          css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html androi     0 /    0 /    0
+L6 spos-staticpos-align-self-safe-002          css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html androi    42 /    0 /    0
+L6 id-abspos-staticpos-align-self-001          css-grid/abspos/grid-abspos-staticpos-align-self-001.html android            0 /    0 /    0
+L6 bspos-staticpos-align-self-rtl-001          css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html android        0 /    0 /    0
+L6 os-staticpos-align-self-vertWM-001          css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html android     0 /    0 /    0
+L6 -abspos-staticpos-justify-self-001          css-grid/abspos/grid-abspos-staticpos-justify-self-001.html android          0 /    0 /    0
+L6 backdrop-filter-clip-rect                   filter-effects/backdrop-filter-clip-rect.html android                        0 /    0 /    0
+L2 clip-3 android-clip-3.png                   filter-effects/backdrop-filter-nested-border-radius-clip-3.html android      0 /    0 /    0
+L2 clip-3 fake-centered.png                    filter-effects/backdrop-filter-nested-border-radius-clip-3.html android   4904 /    0 /  119
+L2 clip-3 fake-double.png                      filter-effects/backdrop-filter-nested-border-radius-clip-3.html android      0 /    0 /    0
+L2 clip-3 fake-unclipped.png                   filter-effects/backdrop-filter-nested-border-radius-clip-3.html android   3179 /    0 /    4

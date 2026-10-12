@@ -236,6 +236,12 @@ def section_lines(fname, start, stop=None):
     assert on, f'{fname}: no section {start!r}'
     return out
 
+# Round 6 (plan-skeptic round 5 M1-M6, D40): every lane's stage-1 decision on its residual reads (geometry-gate.py, residual-read.py).
+R6_STAGE1 = (' Round 6 (D40): a gating / tally key whose only reason is `residual:` (the device picture differs from wave55-open outside the key\'s '
+             'declared change zone) is decided by the recorded look of PLAN §7 stage 1 step 8 — right: `fix-r6.zones.py --also wave55-pre:<cell> --write` '
+             're-records that cell\'s windows from the device capture (a probe edit with the step-6 regeneration); wrong: it reverts like any gating FAIL; '
+             'never a tolerance')
+
 # ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 # L1 · hyphen-ios-linebox — NB-ios: a declared-`normal` WPT run on iOS lays out on Blink's rounded line box.
 # ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -248,6 +254,20 @@ assert sorted(l1_ios) == sorted(stem(t) for t in [HC[1], HC[2], HC[3], HC[4], TD
 assert not l1c['captureCarriers']['web'] and not l1c['captureCarriers']['android'] and not l1c['wireCarriers']
 l1_radius = [test_of(s) for s in l1c['mustNotMoveInRadius']['ios']]
 assert len(l1_radius) == 5 and DISC in l1_radius
+# Pre-landing regeneration (PLAN §10 item 4; regen.done.md) — the L1 lane's own census (wave55-hyphen-ios-linebox/census.out.txt,
+# written independently of the brief's .census.mjs, guard by guard from the delivered predicate) SHRANK the radius by one
+# document: all-prop-001's `all: initial` resets its line-height, so NB-ios never reaches it. The brief's 60 components in 19
+# documents (5 SAME) become 58 in 18 (4 SAME / DECLINED). all-prop-001 ios STAYS a named must-not-move row (l1_radius above, the
+# brief's census): outside the radius a move there is a leak to bisect, never R1 evidence about NB-ios's snapping. Asserted here.
+_l1n = open(_track(os.path.join(HERE, '..', 'wave55-hyphen-ios-linebox', 'census.out.txt'))).read().split('\n')
+_l1a = next(i for i, l in enumerate(_l1n) if l.startswith('(1) declared-normal text runs:'))
+_l1b = next(i for i, l in enumerate(_l1n) if l.startswith('(2) per document'))
+_l1rows = [l.split() for l in _l1n[_l1a + 1:_l1b] if l.strip()]
+assert _l1n[_l1a] == '(1) declared-normal text runs: 71 in 18 documents', _l1n[_l1a]
+assert (len(_l1rows), len({(r[1], r[2]) for r in _l1rows}), len({r[1] for r in _l1rows})) == (71, 58, 18), 'the L1 census radius moved'
+l1_same = sorted({'wpt__' + r[1] for r in _l1rows if r[0] in ('SAME', 'DECLINED')})
+assert l1_same == sorted(stem(t) for t in l1_radius if t != T('css-cascade', 'all-prop-001')), l1_same
+assert not any('all-prop-001' in r[1] for r in _l1rows) and len(l1_same) == 4
 BSU = {1: '0.9792', 2: '0.9694', 3: '0.9781', 4: '0.9774', 5: '0.9774', 6: '0.9714', 7: '0.9764', 8: '0.9789'}   # radius replay U
 LB = f'{PY} {P55}/hyphen-ios-linebox.geometry.py <run> --base <base>'     # --base: the glyph-identity reference (round 1, M7)
 lb_stack = {f'hyphen-ios-linebox stack {stem(t)[len("wpt__css-text__"):] if t.startswith("css-text/") else stem(t)[len("wpt__css-text-decor__"):]} ios': t
@@ -265,9 +285,12 @@ L1 = {
                              'tools/titan/extract-fixture.mjs (U3b stays)', 'every Compose and web file']},
   'captureCarriers': caps(ios=l1_ios),
   'wireCarriers': [],
-  'carrierRule': {'NB-ios': l1c['rule'] + ': 60 text components in 19 documents (40 own, 20 inherited); 14 iOS captures move '
-                            '(4 TARGET multi-line runs + 10 MOVES stacked one-line runs: Libertine 36 42→41, Inter 92 112→111); 5 SAME '
-                            '(one-line box unchanged; hyphens-vertical-001 is a vertical run DECLINED by the horizontal-writing-mode guard — '
+  'carrierRule': {'NB-ios': l1c['rule'] + ': 58 text components (71 declared-normal runs) in 18 documents — the lane\'s census '
+                            '(wave55-hyphen-ios-linebox/census.out.txt): all-prop-001 is OUTSIDE the radius (`all: initial` resets its '
+                            'line-height), the brief\'s 60 in 19 counted it; 14 iOS captures move '
+                            '(4 TARGET multi-line runs + 10 MOVES stacked one-line runs: Libertine 36 42→41, Inter 92 112→111); 4 SAME / DECLINED '
+                            '(disclosure-styles — L5\'s U1-ios carrier by C5 —, anonymous-table-ws-001 and boundary-shaping-010: one-line box '
+                            'unchanged; hyphens-vertical-001 is a vertical run DECLINED by the horizontal-writing-mode guard — '
                             'D22: TextKit draws it on 3 lines while the singleLineText proxy reads 1, so without the guard NB-ios would pin it '
                             'to one 19-px box); web 0 · android 0 · wire 0 (hyphen-ios-linebox.census.out.txt (4)-(5))'},
   'stage1Sections': ['css-text'],
@@ -314,7 +337,8 @@ L1 = {
                  'Round 2: four new fakes (one hyphen removed, one cell cut, one run +1x, all +1x) are all WRONG; the tally\'s hyphenate-character-001 / -003 ios controls '
                  'pass the fixed pictures and reject a cut last cell / a missing hyphen (probes-teeth-r2.py). '
                  'Round 3 (verify M2, D38): `ink:` — each line\'s ink mask = the base line\'s ±2 px (XOR, same crop): a blob in a line or a glyph painted twice is WRONG (probes-teeth-r3.py). '
-                 'Round 4 (D39): that XOR counts both nested masks (min < 200 and the core, min < 100) and is summed over the lines — a 1-px smear that only darkens a glyph\'s edge is WRONG (probes-selfcheck.txt §T4)')),
+                 'Round 4 (D39): that XOR counts both nested masks (min < 200 and the core, min < 100) and is summed over the lines — a 1-px smear that only darkens a glyph\'s edge is WRONG (probes-selfcheck.txt §T4). '
+                 'Round 6 (verify-r5 M4, D40): geometry-gate.py\'s RESIDUAL read (residual-read.py) on the 3 gating keys and the 2 tally controls — outside the lines\' crop rows (the probe\'s own core bands ±3, x < 140, capture ∪ base) the capture = the base pixel for pixel, the vacated rows white, every changed px inside a grey: a faint 3×3 between word groups and a faint 30-px line below the text are WRONG (probes-teeth-r5.py; probes-selfcheck.txt §T5)')),
     probe(f'{PY} {P54}/hyphenate-character.geometry.py <run>',
           {f'hyphenate-character-00{n} {p}': GEO_OK for n in (1, 3, 4) for p in PLATS},
           {f'hyphenate-character-00{n} {p}': f'{HC[n]} {p}' for n in (1, 3, 4) for p in PLATS},
@@ -325,7 +349,7 @@ L1 = {
   'revertUnits': {
     'NB-ios': {'commit': 'NEW StyleEngine/typography/line/NormalLineBox.swift (usedLineHeight declines a non-horizontal run: D22) + NEW Tests/…/NormalLineBoxTests.swift '
                          '(pins P1-P8, mutations M1-M8; P8 = hyphens-vertical-001 __2-320 verbatim → nil, M8 drops the guard; the Catalyst pin logs lineCountIsExact / '
-                         'renderedLineCount for the 5 SAME controls) + tools/titan/results/wave55-hyphen-ios-linebox/seam-1.patch (ComponentRenderer.swift PlaceholderLabel: '
+                         'renderedLineCount for the in-radius SAME controls and all-prop-001 — 0 declared-normal runs: outside the radius) + tools/titan/results/wave55-hyphen-ios-linebox/seam-1.patch (ComponentRenderer.swift PlaceholderLabel: '
                          'cut :5055-5069, insert `let usedLineHeight = NormalLineBox.usedLineHeight(…, horizontalWritingMode: horizontalWritingMode)` after :5151-5152, '
                          're-insert the `leading` statement reading it, :5154 → usedLineHeight)',
                'captures': caps(ios=l1_ios), 'wire': [], 'revertOrder': ['NB-ios'],
@@ -333,7 +357,10 @@ L1 = {
                              'U3b, never U3b alone (replay Rd: 004 ios P → f)')},
   },
   'contingencyUnits': {
-    'NB-ios-b': {'base': 'NB-ios', 'trigger': 'the three gating rows print `LINEBOX WRONG` with the reason `anchor: group 1 line 1 offset 1` and nothing else (§9 R1)',
+    'NB-ios-b': {'base': 'NB-ios', 'trigger': ('the three gating rows print `LINEBOX WRONG` with the reason `anchor: group 1 line 1 offset 1` and nothing else (§9 R1); '
+                                               'the iOS css-text movers outside the 12 carriers, if any, are only the in-radius one-line SAME controls '
+                                               '(boundary-shaping-010; anonymous-table-ws-001, read at wave55-probe), each EXACTLY one row low — the R1 '
+                                               'signature (pre-landing regeneration, L1 skeptic should-fix 1): NB-ios-b\'s top pad 0 restores them too'),
                  'commit': 'ComponentRenderer.swift seam-1b (:5335 `.padding(.vertical, leading.halfLeading)` → `NormalLineBox.verticalPads` (top 0 / bottom 2× half-leading for a pinned declared-normal run; (half, half) otherwise)) + NormalLineBox.verticalPads + its pin',
                  'captures': caps(ios=l1_ios), 'wire': [], 'revertOrder': ['NB-ios-b'],
                  'onLand': 'append it to probe-decisions/contingency.json (D25) and re-run this script: it becomes a revert unit, NB-ios\'s revertOrder becomes [NB-ios-b, NB-ios], the drop-NB-ios arm drops it first, re-probe css-text (a pre-registered stage1Probe.reprobes id)'},
@@ -343,9 +370,15 @@ L1 = {
                      '(the iOS clauses only: NB-ios is a Swift-only seam). Web / Android css-text captures outside the union carriers (L3: '
                      'bidi-tab-001, hyphenate-character-005 android; L6 may-move stems: |Δ| ≤ 0.002) are rule-5 must-not-move for EVERY lane: a '
                      'move there is bisected to its commit (probe-readout.mjs names none), never an NB-ios revert by itself (round 2, '
-                     'generator-truth S1). The only reason `anchor: … offset 1` → swap to NB-ios-b, re-probe css-text. Any other WRONG on the 3 '
-                     'gating rows or an iOS clause → revert NB-ios (one commit). css-cascade / css-counter-styles / css-tables / css-text-decor '
-                     'radius rows: read at wave55-probe'),
+                     'generator-truth S1). The only reason `anchor: … offset 1` → swap to NB-ios-b, re-probe css-text. The R1 SIGNATURE — the gating '
+                     'reason is `anchor: group 1 line 1 offset 1` only AND the iOS movers outside the carriers are only in-radius one-line SAME controls '
+                     '(boundary-shaping-010 at stage 1; anonymous-table-ws-001 at wave55-probe), each exactly one row low (disclosure-styles ios\'s '
+                     'horizontal runs are SAME too: on L5\'s U1-ios carrier the same one-row move is R1\'s, never an L5 revert by itself) — is the world NB-ios-b was '
+                     'built for: it routes to `land-units.sh --contingency L1:NB-ios-b` (never a revert of NB-ios), and the pre-registered '
+                     'wave55-pre-r1 re-probe must then print the 3 gating rows `→ LINEBOX OK` and those SAME controls byte-identical to wave55-open '
+                     '(pre-landing regeneration, L1 skeptic should-fix 1; PLAN §10 item 4). Any other WRONG on the 3 gating rows or an iOS clause '
+                     '→ revert NB-ios (one commit; after NB-ios-b, its revertOrder). css-cascade / css-counter-styles / css-tables / css-text-decor '
+                     'radius rows: read at wave55-probe') + R6_STAGE1,
 }
 
 # ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -437,7 +470,8 @@ L2 = {
                  'Round 1 (instrument-teeth M2): `corner:` counts all FOUR 20×20 corner squares (ref [251, 250, 252, 252], each ±8) and the green mass is read — '
                  'gut-cross (957 px) and square-3-corners ([400, 400, 400, 254]) are WRONG (probes-selfcheck.txt §T). Round 2 (M2): the mass is REPLACED by `mask:` '
                  '(|green XOR ref| ≤ 40 px pixelwise) and the fail ink (pink / red) must equal the ref\'s ±2 — a 2×40 pink sliver above row 80 and a 7×7 hole clear of the scanlines are WRONG. '
-                 'Round 3 (verify M2, D38; both L2 probes): `core:` — green outside the ref mask\'s 1-px AA band ≤ 1 and ref green missing inside it ≤ 1: a blob in a rounded corner\'s cut-out and a 3×3 hole under the 40-px XOR are WRONG (probes-teeth-r3.py)')),
+                 'Round 3 (verify M2, D38; both L2 probes): `core:` — green outside the ref mask\'s 1-px AA band ≤ 1 and ref green missing inside it ≤ 1: a blob in a rounded corner\'s cut-out and a 3×3 hole under the 40-px XOR are WRONG (probes-teeth-r3.py). '
+                 'Round 6 (verify-r5 M1, D40): the RESIDUAL read on all eight L2 keys — outside strict green ∪ the backdrop pink (capture ∪ base; the autopos rows green ∪ red) and the recorded windows (the corner arcs\' anti-aliasing; clip-3\'s #middle band, derived from the U2 replay\'s own diff) the capture = the base, every changed px inside them strict green, or in a window a flat run colour / an arc pixel: a 50 % second box (+10000 px), black / #66ccff / #cccccc / yellow specks and lines anywhere are WRONG (probes-teeth-r5.py; probes-selfcheck.txt §T5)')),
   ],
   'revertUnits': {
     'U1': {'commit': 'CBB-android re-landed (5b333c8a, the revert of 8deddc19): NEW core/variables/ContainingBlockBands.kt + DynamicValueResolver.kt (defaulted wptCaptureMode + one condition) + DynamicValueResolverTest rows (census path → wave54-final; C8: + the `ContainingBlock[dark-stage-content-box-bands]` breadcrumb-assertion row, mutation: delete its markUnhandled) + tools/titan/results/wave55-cbb-android/seam-1.patch (ComponentRenderer.kt :1950-1951 `wptCaptureMode = wptCaptureModeForStretch`, patch-borne ChildContainingBlockSeamWiringTest.kt)',
@@ -450,7 +484,7 @@ L2 = {
                      'with their contains strings (the autopos rows are in css-flexbox, also in the stage-1 union: their 3 gating keys are READ, not '
                      'MISSING); (2) cbb-android.geometry.py clip-3 android OK; (3) clip-3 android ≥ 0.95 (≈0.999), clip / -2 / -4 ≈1; (4) filter-effects '
                      'web and iOS decoded-pixel identical to wave55-open; Android changes only on the union carriers (L2 nested-clip ×4, L6 clip-rect / '
-                     '-zoom) and L6\'s may-move stems. A FAIL on read 1 or 2 reverts U2, then U1 (the pair)'),
+                     '-zoom) and L6\'s may-move stems. A FAIL on read 1 or 2 reverts U2, then U1 (the pair)') + R6_STAGE1,
 }
 
 # ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -546,7 +580,9 @@ L3 = {
                  '`boxes:` (the yellow inline-blocks = the ref ±1: erased WRONG), stack `red:` (0) and `others:` (green outside the cells = web ±10 %: the other squares erased WRONG), '
                  'dynamic-offset `parent:` (the yellow parent bbox = the ref / web ±1 and yellow + magenta inside it ±1 %: erased / +3x WRONG; vrl-rtl twins too). '
                  'Round 3 (verify M2, D38): dir rows `rows:` peak ≥ 0.97, `mass:` text ink = the base\'s row 3 (rows 6 / 9) / row 7 ±2, `lead:` the dot ±1, `yext:` the ink rows ±1; bidi `ink:` per RTL band against the base\'s blue components; '
-                 'stack `others:` = web ±2 — row ghosts, horizontal copies, doubled dots / glyphs and 2×2 / 3×3 strays are WRONG (probes-teeth-r3.py; probes-selfcheck.txt §T3)')),
+                 'stack `others:` = web ±2 — row ghosts, horizontal copies, doubled dots / glyphs and 2×2 / 3×3 strays are WRONG (probes-teeth-r3.py; probes-selfcheck.txt §T3). '
+                 'Round 6 (verify-r5 M2, D40): the RESIDUAL read — bidi outside the blue runs and the recorded \'0\'-glyph windows, stack outside the green squares, dyn outside the magenta child (capture ∪ base) = the base; a vacated px beside class ink that stayed is a hole; '
+                 'the dyn magenta count ±2 (was ±5: a 2×2 of the parent\'s yellow over the child equals the base there) — faint run / parent / square copies (+216 … +9900 px), black strays on the stack picture and yellow over a run box are WRONG (probes-teeth-r5.py); the dir rows 6 / 7 / 9 read their three row bands (lime / blue text anti-aliasing only)')),
   ],
   'revertUnits': {
     'U1': {'commit': 'NEW layout/position/PositionedParentSlotGate.kt (engages + slotModifier + breadcrumbs) + PositionedParentFlowSlot.kt :87-89 comment + NEW PositionedParentSlotGateTest.kt + tools/titan/results/wave55-positioned-parent-slot/seam-1.patch (ComponentRenderer.kt :3633-3661 → PositionedParentSlotGate.slotModifier(…), patch-borne PositionedParentSlotSeamWiringTest.kt and the SeamReachabilityTest U1 line, inserted after `"transforms/TransformInheritance.kt",` (:182), cut on HEAD)',
@@ -563,7 +599,7 @@ L3 = {
                      '(dynamic-offset-rtl-001 / -002) are in the stage-1 union (the audit\'s extension): their U2 keys are READ at wave55-pre. Row 6 / 9 / '
                      'rtl-rows / dynamic-offset not OK, or the cell < 0.95 → revert U2; row 7 not OK, or an Android selectors capture outside the union '
                      'carriers moved and the rule-5 bisect lands on U1 / U2 → revert U2, then U1; a web / iOS selectors move is never L3\'s (rule 5 '
-                     'bisects it; round 2, generator-truth S1). css-anchor-position (`[W] … stack`) is first read at wave55-probe'),
+                     'bisects it; round 2, generator-truth S1). css-anchor-position (`[W] … stack`) is first read at wave55-probe') + R6_STAGE1,
 }
 
 # ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -601,7 +637,7 @@ L4 = {
   'ownership': {'owned': ['NEW runtimes/compose/…/spacing/UaPositionedHeadingMargin.kt + NEW …/spacing/UaPositionedHeadingMarginTest.kt',
                           'NEW (patch-borne, seam 1) …/spacing/UaPositionedHeadingMarginSeamWiringTest.kt',
                           '…/typography/UAElementFontRuleSeamWiringTest.kt (patch-borne edits only: seam 1 handoff token, seam 3 fontStep token)',
-                          '…/typography/UAElementFontRule.kt (U1 header sentence :26-27; U2 headingStandsDown removed)', '…/typography/UAElementFontRuleTest.kt (U2 retargets)',
+                          '…/typography/UAElementFontRule.kt (U1 header sentence :26-27; U2 kdoc: headingStandsDown KEPT — superseded at seam 3, no caller after it; deletion queued, PLAN §10 item 7)', '…/typography/UAElementFontRuleTest.kt (U2 retargets)',
                           'RESTORED …/typography/UAHeadingFoldGate.kt + UAHeadingFoldGateTest.kt (held copies, SHA256SUMS 12/12)',
                           'NEW runtimes/swiftui/…/StyleEngine/spacing/UAPositionedHeadingMargin.swift + Tests/…/UAPositionedHeadingMarginTests.swift',
                           'NEW (patch-borne, seam 2) Tests/…/UAPositionedHeadingMarginSeamWiringTests.swift',
@@ -651,7 +687,8 @@ L4 = {
                  'Round 3 (verify M2, D38): today\'s face / 011 `ink:` (each band\'s ink mask = the base band + the margin, XOR ≤ 2) and face-present `face ink:` (the ref\'s component count, dark px ±6 %). '
                  'Round 4 (verify M1, D39): face-present natives `face xor:` — every band\'s ink (two nested masks) = the face reference\'s at its best whole-px shift (±3 x, ±1 y), XOR ≤ 2 over the band\'s rows ±2 and the whole width; '
                  'the Compose no-wrap rows read every band when the picture wraps and, when it does not, line 1 left of the ref\'s right edge plus "fox" against the ref\'s line 2 moved there; the reference is the frozen ref until the stage-1 step-8 edit sets FACE_RUN = wave55-pre — '
-                 '"brownn", the heading copied 1 px, "fox" copied 5 px right, round 3\'s named 2×2 blob on a 014 glyph and D33\'s clip-10 are WRONG (probes-teeth-r4.py)')),
+                 '"brownn", the heading copied 1 px, "fox" copied 5 px right, round 3\'s named 2×2 blob on a 014 glyph and D33\'s clip-10 are WRONG (probes-teeth-r4.py). '
+                 'Round 6 (verify-r5 M3, D40): the RESIDUAL read on all 12 keys — outside the dark bands\' rows ±2 (capture ∪ base, from y96 / 011 y112 to y399: the rows `face xor:` / `ink:` read) the capture = the base, the vacated rows white, every changed px inside a grey: a faint 3×3 below the heading and a faint or iOS-grey (127,127,127) 30-px line at y276-368 are WRONG (probes-teeth-r5.py)')),
     probe(UAF, {k: GEO_OK for k in uaf_keys}, uaf_keys,
           report=[f'text-decoration-inset-{n} {p}' for n in ('005', '006', '014') for p in ('ios', 'android')],
           dropped={f'text-decoration-inset-011 {p}': ('C4: superseded by `[M] text-decoration-inset-011 ' + p + '` (gating U1-' + p + '): U1 moves 011 by 21 px by design, '
@@ -665,7 +702,7 @@ L4 = {
                    'captures': caps(android=[stem(t) for t in L4_CAR]), 'wire': [], 'revertOrder': ['U2-android', 'U1-android']},
     'U1-ios': {'commit': 'NEW StyleEngine/spacing/UAPositionedHeadingMargin.swift + tests + UAElementFontRule.swift (one doc bullet) + seam-2.patch (ComponentRenderer.swift mergedProperties :340-356: mergedPreUA hoist, fontProperties, UAPositionedHeadingMargin.apply; patch-borne UAPositionedHeadingMarginSeamWiringTests.swift)',
                'captures': caps(ios=[stem(t) for t in L4_CAR]), 'wire': [], 'revertOrder': ['U2-ios', 'U1-ios']},
-    'U2-android': {'commit': 'RESTORED typography/UAHeadingFoldGate.kt + UAHeadingFoldGateTest.kt + UAElementFontRule.kt (headingStandsDown removed) + UAElementFontRuleTest.kt retargets + seam-3.patch (ComponentRenderer.kt :1161 standsDown = UAHeadingFoldGate.standsDown(component, listUaProperties); patch-borne fontStep token + the SeamReachabilityTest line directly under seam 1\'s at the :159 anchor)',
+    'U2-android': {'commit': 'RESTORED typography/UAHeadingFoldGate.kt + UAHeadingFoldGateTest.kt + UAElementFontRule.kt (headingStandsDown KEPT for rule 2b — the unit compiles without seam 3; its kdoc says superseded; deletion queued) + UAElementFontRuleTest.kt retargets + seam-3.patch (ComponentRenderer.kt :1161 standsDown = UAHeadingFoldGate.standsDown(component, listUaProperties); patch-borne fontStep token + the SeamReachabilityTest line directly under seam 1\'s at the :159 anchor)',
                    'captures': caps(android=[stem(t) for t in L4_U2]), 'wire': [], 'revertOrder': ['U2-android']},
     'U2-ios': {'commit': 'RESTORED StyleEngine/typography/UAHeadingFoldGate.swift + UAHeadingFoldGateTests.swift + UAElementFontRuleTests.swift (held diff) + UAElementFontRule.swift (docs) + seam-4.patch (ComponentRenderer.swift :352-356 on top of seam 2)',
                'captures': caps(ios=[stem(t) for t in L4_U2]), 'wire': [], 'revertOrder': ['U2-ios']},
@@ -679,7 +716,7 @@ L4 = {
                      'css-text-decor, read against arm M. css-break / CSS2 controls: read at wave55-probe. Round 4 (D39): a face-present native line '
                      'whose only reason is `face xor:` (against Chromium\'s ref: a device face sits 1768-2510 px level-XOR from it) is decided by the '
                      'recorded look of PLAN §7 stage 1 step 8, never by widening FACE_XOR_TOL; the same probe edit sets FACE_RUN_DEFAULT = \'wave55-pre\' '
-                     'for the face keys kept'),
+                     'for the face keys kept') + R6_STAGE1,
 }
 if L4_GO_SMALL:      # D1's alternative: hold U2-android (no DEGENERATE pass carried); Android +0, the four Android rows rise f→f
     L4['heldUnits'] = {'U2-android': 'HELD (GO-SMALL, ua-heading-margin §4): the Compose relative-parent abspos shrink-to-fit is not on the tree, so 005 / 006 android would pass DEGENERATE'}
@@ -725,15 +762,21 @@ L5 = {
   'carrierRule': {
     'U1-ios': 'a painted marker whose UAX #9 natural direction ≠ the item direction: 2 baked markers (counter-suffix א. / ב.) + the 6 rtl <li> of disclosure-styles (identity predicted: a single neutral glyph has no order)',
     'U2o/U2i': 'a marker string ending in U+3001: 36 markers in 4 documents (2 outside: counter-suffix; 34 inside: css3-counter-styles-001 / -004 / -005); the 71 unbaked U+3001-type <li> are NOT reached (the key is the string)',
-    'U3-ios': 'a component declaring FontVariantNumeric: 6 components, all in counter-suffix (not inherited on either native)',
+    'U3-ios': ('a component declaring FontVariantNumeric: 6 components, all in counter-suffix (not inherited on either native); pre-landing '
+               'regeneration (L5 fix-r1, skeptic defect 1): Font.monospacedDigit() turns on Inter\'s WHOLE `tnum` for the run, so inside its one '
+               'capture U3-ios repaints 6 glyphs in 4 rows — row 9\'s \'1\' (one.tf), the periods of rows 9-12 (period.tf) and row 10\'s \'2\' '
+               '(two.tf) (fix-r1.inter-tnum / u3-glyph-census / u3-boxes.measure); the capture set is unchanged (1)'),
     'D': 'comment-only (five stale comments + the counter-style-table.mjs SUFFIX NOTE): no build output changes',
   },
   'stage1Sections': ['css-counter-styles'],
   'probeSections': ['css-counter-styles'],
   'predictions': [
-    pred(f'{CS} ios', 'P 0.9873', 'P ≈0.993 (replay, all three arms; U1 0.9897 · U2o 0.9903 · U3 0.9875 · U1+U2o 0.9927)',
-         'picture-correctness (P→P) rows 3-6 and 9 — DEGENERATE even if P until [H] [C] [T] [K] ios print OK (retired then)', 'MED-HIGH', PASS, True,
-         ['U1-ios', 'U2o-ios', 'U3-ios'], GEO_OK, requires=[],
+    pred(f'{CS} ios', 'P 0.9873', 'P ≈0.993 (replay, all three arms; U1 0.9897 · U2o 0.9903 · U3 0.9875 · U1+U2o 0.9927 — the replay grafted only '
+         'row 9\'s \'1\': U3-ios\'s five other tabular glyphs, ≤ 0.31 px each toward the ref\'s advances, are not modelled (L5 fix-r1))',
+         'picture-correctness (P→P) rows 3-6 and 9-12 — DEGENERATE even if P until [H] [C] [T] [K] ios print OK (retired then)', 'MED', PASS, True,
+         ['U1-ios', 'U2o-ios', 'U3-ios'],
+         'GEOMETRY OK from wave55-probe on; at wave55-pre [H] ios and [T] ios are predicted WRONG on the twin `ink:` read only (no same-rasterizer '
+         'twin before stage 1) → the step-8 recorded look → TWIN_RUN_DEFAULT = \'wave55-pre\' (L5 fix-r1 R5)', requires=[],
          requiresWhy='additive: each arm alone replays up (0.9897 / 0.9903 / 0.9875), so the 0.95 floor is reachable with any subset; the magnitude needs all three'),
     pred(f'{CS} android', 'P 0.989', 'P ≈0.9924 (replay U2o)', 'picture-correctness (P→P) rows 5-6 — DEGENERATE even if P until [C] [K] android print OK (retired then)',
          'MED-HIGH', PASS, True, ['U2o-android'], GEO_OK),
@@ -764,7 +807,12 @@ L5 = {
                  'Round 3 (verify M2, D38): [C] / [I] natives `ink:` against the base (rows 5-6 marker zone / 005 item zone translated, 005 marker zone unmoved, XOR ≤ 2). '
                  'Round 4 (verify M3 / M4, D39): every `ink:` read counts both nested masks; [H] natives — rows 3-4 x0-63 = a native\'s own two glyphs (iOS\'s, or Android\'s: the ok-all graft), each moved by whole px; '
                  '[T] natives — the digit window = Android\'s tabular \'1\' (TWIN_RUN = wave55-pre added from stage 1); [C] (x0-63) and [I] summed over their zones; [I] 005 outside its line windows = the base — '
-                 'the [H] zone copied 1 px, a doubled-glyph sliver, the [T] window copied 1 px down and a 2×2 / 3×3 blob beside the \'1\' are WRONG (probes-teeth-r4.py)')),
+                 'the [H] zone copied 1 px, a doubled-glyph sliver, the [T] window copied 1 px down and a 2×2 / 3×3 blob beside the \'1\' are WRONG (probes-teeth-r4.py). '
+                 'Round 6 (D40): the RESIDUAL read on the 6 gating keys and the [K] controls — outside the [H] / [C] / [T] / [I] zones the capture = the base (the [K] pixel identity, now on every key), every changed px inside a grey; the round-5 sweep accepted nothing here (> 2 px) and still does not. '
+                 'Pre-landing regeneration (L5 fix-r1 R1-R3; regen.l5-proof.out.txt): U3-ios\'s `tnum` is run-wide, so ios\'s base-identity zones skip the five other run boxes (rows 9-12 x130-135, row 10 x136-150) and [T] ios reads them — '
+                 'one dot / one digit blob at the ref\'s place ±1 (fill ≤ 60 %) and the twin `ink:` summed with the digit window; the residual SPEC declares the two rects; the standing replays re-graft the boxes from Android\'s base '
+                 '(regen.replay-regraft.py): the correct-U3 picture reads [T] ios `ink:` only without a decided twin and OK with it, [K] ios OK, residual 0 / 0 / 0; the lane\'s 11 wrong pictures (a period / the \'2\' erased, moved ±2, a block, '
+                 'a 2×2 blob, copied 1 px down, the row-11 letter erased) are each rejected; every committed replay\'s verdicts are unchanged')),
     probe(f'{PY} {P54}/rtl-marker-bake.geometry.py <run> <base>',
           {f'[M] counter-suffix {p}': GEO_OK for p in PLATS}, {f'[M] counter-suffix {p}': f'{CS} {p}' for p in PLATS},
           contains={'[M] counter-suffix web': 'rows 0-207 identical to <base>'},
@@ -800,15 +848,27 @@ L5 = {
   'degenerateRetirement': {f'{CS} ios': ['[H] counter-suffix ios', '[C] counter-suffix ios', '[T] counter-suffix ios', '[K] counter-suffix ios'],
                            f'{CS} android': ['[C] counter-suffix android', '[K] counter-suffix android'],
                            'rule': 'counter-suffix-rows §6: the stayDegenerateEvenIfPass label is retired at the closing gate iff EVERY listed key prints → GEOMETRY OK on wave55-final AND none of the cell\'s units is reverted (a cell review read; adjudicate.mjs reads gains only)'},
-  'stage1Decision': ('at wave55-pre (union carriers): counter-suffix-rows.geometry.py wave55-pre wave55-open — all 6 gating keys OK, the 10 controls OK, [L] natives '
-                     'WRONG; counter-suffix ios ≈0.993 / android ≈0.992 / web 1, -005 ios ≈0.997 / android ≈0.974, every carrier P and ≥ 0.95; the other '
-                     'css-counter-styles captures decoded-pixel identical to wave55-open (disclosure-styles android: L6 may-move, |Δ| ≤ 0.002); per-test IR of all '
-                     '48 documents byte-identical. A gating key not OK reverts ITS unit (U2i before U2o); a [K] FAIL is diagnosed in the picture (U1 first); '
-                     'U2i-android kept iff [I] android OK and ≥ 0.95; [H] ios WRONG or H-low-shaped → the LRM fallback re-cut of U1 (contingencyUnits '
-                     'U1-ios-LRM: an appended probe-decisions/contingency.json row, landed by land-units.sh --contingency L5:U1-ios-LRM), re-probe '
-                     '(a pre-registered stage1Probe.reprobes id); both fail → revert U1-ios (after U1-ios-LRM: its revertOrder). Round 4 (D39): an [H] / [T] '
-                     'native line whose only reason is the twin `ink:` (another rasterizer\'s glyph) is decided by the recorded look of PLAN §7 stage 1 step 8, '
-                     'never by widening INK_TOL; the same probe edit sets TWIN_RUN_DEFAULT = \'wave55-pre\''),
+  'stage1Decision': ('at wave55-pre (union carriers): counter-suffix-rows.geometry.py wave55-pre wave55-open — [C] ios / android and [I] ios / android OK; '
+                     '[H] ios and [T] ios predicted WRONG on the twin `ink:` read ONLY (no same-rasterizer twin draws the reordered marker glyphs or the '
+                     'tabular run before stage 1) → the step-8 recorded look, then TWIN_RUN_DEFAULT = \'wave55-pre\' and OK from wave55-probe on (pre-landing '
+                     'regeneration, L5 fix-r1 R5); the 10 controls OK ([K] ios included: U3-ios\'s five run boxes are carved out of it and read by [T] ios, '
+                     'R1), [L] natives WRONG; the residual read 0 / 0 / 0 on counter-suffix ios / android and -005 ×2 (R3); counter-suffix ios ≈0.993 (MED: '
+                     'U3-ios\'s other glyphs are not in the replay) / android ≈0.992 / web 1, -005 ios ≈0.997 / android ≈0.974, every carrier P and ≥ 0.95; the '
+                     'other css-counter-styles captures decoded-pixel identical to wave55-open (disclosure-styles android: L6 may-move, |Δ| ≤ 0.002); per-test IR '
+                     'of all 48 documents byte-identical. PRECEDENCE (pre-registered before stage 1, L5 fix-r1 R4): (i) an [H] ios / [T] ios line whose only '
+                     'reason is `ink:` (the twin) or `residual:` goes to the step-8 recorded look FIRST — a right picture sets TWIN_RUN_DEFAULT = '
+                     '\'wave55-pre\' (for `residual:`, the D40 fix-r6.zones.py --also record), a wrong one counts as that key\'s GEOMETRY reason ((ii) for [H] ios, (iii) for [T] ios); (ii) the LRM contingency '
+                     'fires only on an [H] ios GEOMETRY reason (blob count, the period before the letter, the letter or the period off the ref\'s x ±2 / '
+                     'rows ±1, the letter fill) or on a look that shows the H-low shape — never on a twin-only `ink:` or `residual:` line (the LRM re-cut '
+                     'also reorders the glyphs: its re-probe would be twin-only WRONG again); (iii) a [T] ios GEOMETRY reason (the digit\'s width / '
+                     'position / rows / fill, a U3 run-box glyph, a row-9 zone) reverts U3-ios; (iv) a [K] ios FAIL whose differing pixels all lie in '
+                     'U3-ios\'s run boxes (rows 9-12 x130-135, row 10 x136-150) is U3-ios\'s, never U1-ios\'s — "U1 first" applies to rows 3-4 x0-63. '
+                     'Any other non-OK gating key reverts ITS unit (U2i before U2o; D first on a U2o revert); U2i-android kept iff [I] android OK and '
+                     '≥ 0.95; (ii) fired → the LRM fallback re-cut of U1 (contingencyUnits U1-ios-LRM: an appended probe-decisions/contingency.json row, '
+                     'landed by land-units.sh --contingency L5:U1-ios-LRM), re-probe (a pre-registered stage1Probe.reprobes id) — OK, or twin-only with a '
+                     'right look, keeps U1-ios + U1-ios-LRM; a geometry reason again → revert U1-ios (after U1-ios-LRM: its revertOrder). Round 4 (D39): '
+                     'an [H] / [T] native line whose only reason is the twin `ink:` (another rasterizer\'s glyph) is decided by the recorded look of PLAN §7 '
+                     'stage 1 step 8, never by widening INK_TOL; the same probe edit sets TWIN_RUN_DEFAULT = \'wave55-pre\'') + R6_STAGE1,
   # Round 2 (process-holes S2): the stage-1 swap between "keep U1-ios" and "revert U1-ios" is pre-registered like L1 NB-ios-b,
   # so it has a generator encoding and a landing row before stage 1 (never improvised at the probe).
   'contingencyUnits': {
@@ -845,6 +905,33 @@ assert l6_u1 == ['wpt__filter-effects__backdrop-filter-clip-rect', 'wpt__filter-
 # scan predicate (a child or own text) misses it. Exactly one in the corpus: the ring-fenced basic-blur.
 l6_opacity = sorted(r['stem'] for r in l6c['opacityBordered'])
 assert l6_opacity == ['wpt__filter-effects__backdrop-filter-basic-blur'] and l6_opacity[0] not in l6_may_raw
+# Pre-landing regeneration (PLAN §10 item 3; regen.done.md) — L6's own behavioural census (Compose's extractConfig → applyConfig over
+# all 10 719 components of the 1435 wave54-final per-test IR documents, on the delivered fix-r1 patches) found ONE exposed android
+# capture outside carriers ∪ mayMove ∪ sharedStems ∪ ring-fence: a KEPT `display: contents` box with pseudos (Compose's
+# ContentsUnboxing.isUnboxable is false when the box carries pseudos, so the box keeps its legacy band) whose band now paints behind
+# its ::after. It joins mayMove BY RULE, asserted three ways: the lane's census and the independent re-verifier's census each name
+# exactly this one growth stem on a pseudo exposure (wave55-android-paint-order/fix-r1/census.out.txt, reverify-r1/census.out.txt),
+# and its run-of-record IR is that box (Display CONTENTS, pseudos, a four-side visible band). Unscored on android, so the complement
+# and the watchlist are unchanged; predicted identical (MED: the ::after ink starts 1 px inside the content box).
+def _l6_growth(rel, head):
+    t = open(_track(os.path.join(HERE, '..', 'wave55-android-paint-order', rel))).read().split('\n')
+    i = [k for k, l in enumerate(t) if l.startswith(head)]
+    assert len(i) == 1, (rel, head, i)
+    n = int(re.search(r'GROWTH (\d+)$', t[i[0]])[1])
+    rows = t[i[0] + 1:i[0] + 1 + n]
+    assert all(r.startswith('   wpt__') for r in rows), (rel, rows)
+    return [(r.split()[0].rstrip(':'), r) for r in rows]
+_g1, _g2 = _l6_growth('fix-r1/census.out.txt', 'fix: inside the plan set'), _l6_growth('reverify-r1/census.out.txt', 'fix-r1 movers (U1 + non-clipping U2)')
+assert [s for s, _ in _g1] == [s for s, _ in _g2] == ['wpt__css-display__display-contents-dynamic-pseudo-insertion-001'], (_g1, _g2)
+assert ' pseudos U2' in _g1[0][1] and ' pseudo U2' in _g2[0][1], (_g1, _g2)
+l6_contents_pseudo = [_g1[0][0]]
+_ir = json.load(open(os.path.join(RUNDIR, section_of(l6_contents_pseudo[0]), 'per-test-ir', l6_contents_pseudo[0] + '.json')))   # the run of record (read, never hashed: gitignored)
+_kept = [c for c in _ir['components'] if {'type': 'Display', 'data': 'CONTENTS'} in c['properties'] and c.get('pseudos')
+         and all(any(p_['type'] == f'Border{side}Width' and p_['data'].get('px', 0) > 0 for p_ in c['properties']) for side in ('Top', 'Right', 'Bottom', 'Left'))
+         and all({'type': f'Border{side}Style', 'data': 'SOLID'} in c['properties'] for side in ('Top', 'Right', 'Bottom', 'Left'))]
+assert len(_kept) == 1, _kept
+assert l6_contents_pseudo[0] in CAPS['android'] and f'{test_of(l6_contents_pseudo[0])} android' not in CELLS, 'the growth stem is scored on android, or has no capture'
+assert not set(l6_contents_pseudo) & (set(l6_may_raw) | set(l6_may_medium) | set(l6_opacity))
 BBLUR = T('filter-effects', 'backdrop-filter-basic-blur')
 CR, CRZ = T('filter-effects', 'backdrop-filter-clip-rect'), T('filter-effects', 'backdrop-filter-clip-rect-zoom')
 CPFO = T('css-masking', 'clip-path', 'clip-path-filter-order')
@@ -881,14 +968,21 @@ L6 = {
     'U2': ('the legacy route (1428 explicit-px bordered components; 1963 under Compose\'s own side resolution — D21): the band moves inner of ColorApplier and paints behind content — capture carriers: '
            'android crossing excess ≥ 20 with web / iOS within 5, 25 captures (android-paint-order.crossings-scan.out.txt); may-move: every document with a bordered component that has a non-<br> '
            'child or own text (252 explicit-px + 26 D21 additions: logical sides, shorthands and the 3-dp MEDIUM default, android-paint-order.maymove-medium.out.txt) + D2 the opacity-bordered '
-           'component of census (2b) (1)'),
+           'component of census (2b) (1) + the fix-r1 census growth by rule: a kept `display: contents` box with pseudos whose band now paints behind its '
+           '::after (1; wave55-android-paint-order/fix-r1/census.out.txt, reverify-r1). Pre-landing regeneration (L6 fix-r1, skeptic D1): the band paints '
+           'behind content only on a box that does NOT clip (`!config.overflow.shouldClip` — css-overflow-3 §3: a clipping box\'s content stops at its '
+           'padding edge, so the base content-then-band chain is the faithful one there): the 29 clipping legacy bands in 26 documents keep the base chain '
+           'byte-for-byte (census I1-I5; pins P3h / P3i), and 19 may-move stems are now over-coverage (harmless)'),
     'U3': 'test only: no carrier',
   },
-  'mayMove': {'android': sorted((set(l6_may_raw) | set(l6_may_medium) | set(l6_opacity)) - set(l6_u1) - set(l6_u2))},    # other lanes' carriers subtracted below (C2)
+  'mayMove': {'android': sorted((set(l6_may_raw) | set(l6_may_medium) | set(l6_opacity) | set(l6_contents_pseudo)) - set(l6_u1) - set(l6_u2))},    # other lanes' carriers subtracted below (C2)
   'mayMoveRule': ('a changed android capture in this set is NOT a leak (control-check: may-move); its score keeps R5\'s 0.002 band (each cell is a '
                   'must-not-move cell — of mustNotMoveComplement or of a lane\'s named list: R5 and probe-readout give both the same 0.002 band, and '
-                  'read may-move first; round-1 N1); a may-move non-carrier with |Δ| > 0.002 stops the ship until its picture shows a band now under '
-                  'its child (android-paint-order §6). Other lanes\' carriers are subtracted (C2) — their moves are theirs, attributed by the drop-L6-U2 '
+                  'read may-move first; round-1 N1); a may-move non-carrier with |Δ| > 0.002 stops the ship until its picture shows one of three '
+                  'pre-registered pictures: a band now under its child (android-paint-order §6); the band now inside the element\'s opacity group '
+                  '(css-color-4 §3.3: anchor-center-overflow-003, 48 bands into their 20 % groups; basic-blur too, ring-fenced); or a UA-widget '
+                  'replica now over the band (flex-gap-decorations-023: the BUTTON replica overflows its band, replay Δ +0.0007, DEGENERATE, never '
+                  'claimed) — pre-landing regeneration, L6 fix-r1 item 4. Other lanes\' carriers are subtracted (C2) — their moves are theirs, attributed by the drop-L6-U2 '
                   'arm inside its sections and BY RULE outside them. Withdrawn (emptied) when L6 U2 or U1 is reverted at a probe (round 1, M4)'),
   'stage1Sections': ['filter-effects', 'css-masking', 'css-flexbox', 'css-grid'],
   'probeSections': [],      # filled below: the carriers' and keys' sections + every may-move section but css-color (§ PROBE)
@@ -921,12 +1015,13 @@ L6 = {
                  'Round 2 (M5): [X] reads the child fill against the base pixel for pixel — `lost` ≤ 4 and `extra` (outside dilate₁(base fill ∪ base band)) ≤ 4: one of 22-26 children moved 3 px inside the union bbox is WRONG. '
                  'Round 3 (verify M2, D38): [X] `extra` ≤ 1, [PO] red n and pink ±2. '
                  'Round 4 (verify M2, D39): `extra` counts fill outside base fill ∪ base band ∪ the band\'s 1-px ring where the base is not white (no ring around the base FILL) — '
-                 'a child fill drawn again 1 px off (+24 … +500 px), a 1-px smear and a 1×4 bar of fill are WRONG (probes-teeth-r4.py); one stray fill px reads 1 (the 2-px floor)')),
+                 'a child fill drawn again 1 px off (+24 … +500 px), a 1-px smear and a 1×4 bar of fill are WRONG (probes-teeth-r4.py); one stray fill px reads 1 (the 2-px floor). '
+                 'Round 6 (verify-r5 M5 / M6, D40): the RESIDUAL read — [X] outside the child fill, [PO] outside the menus\' red (capture ∪ base) the capture = the base: black / purple / parent-yellow paint on white, faint child / parent copies and whole-picture ghosts (+2056 … +6294 px), blue specks below the navbar and pink outside its counted box are WRONG (probes-teeth-r5.py)')),
   ],
   'revertUnits': {
-    'U1': {'commit': 'PO-selfpaint-android: NEW borders/BehindContentBorder.kt (behindContentBorder + drawInOrder + the androidx band arithmetic) + BorderRadiusApplier.kt :207 + kdoc + NEW BehindContentBorderTest.kt (P1, P2) + BorderRadiusSelfPaintTest.kt :158-185',
+    'U1': {'commit': 'PO-selfpaint-android: NEW borders/BehindContentBorder.kt (behindContentBorder + drawInOrder + the androidx band arithmetic) + BorderRadiusApplier.kt :207 + kdoc + NEW BehindContentBorderTest.kt (P1, P2; fix-r1 P5a-f: the rect / rounded painters\' draw and clip calls through a recording DrawScope, the cache dropped on a width / brush / shape change, the generic branch\'s tint and mask config) + BorderRadiusSelfPaintTest.kt :158-185',
            'captures': caps(android=l6_u1), 'wire': [], 'revertOrder': ['U2', 'U1']},
-    'U2': {'commit': 'PO-sides-android: BorderSideApplier.kt (defaulted behindContent + two one-line conditions) + BordersFacade.kt (sidesBehindContent + applySidesBehindContent) + StyleApplier.kt :753-754 three call-site lines + NEW BorderSidesBehindContentTest.kt (P3)',
+    'U2': {'commit': 'PO-sides-android: BorderSideApplier.kt (defaulted behindContent + two one-line conditions) + BordersFacade.kt (sidesBehindContent + applySidesBehindContent) + StyleApplier.kt :753-754 three call-site lines, gated on `!config.overflow.shouldClip` (fix-r1: a clipping box keeps the base chain — css-overflow-3 §3) + NEW BorderSidesBehindContentTest.kt (P3a-g; fix-r1 P3h / P3i: a clipping INSET input and a clipping SOLID box keep their base bands)',
            'captures': caps(android=l6_u2), 'wire': [], 'revertOrder': ['U2']},
     'U3': {'commit': 'FO-pin: NEW effects/EffectsClipFilterOrderTest.kt (P4, test only)', 'captures': caps(), 'wire': [], 'revertOrder': ['U3']},
   },
@@ -935,9 +1030,10 @@ L6 = {
                      'is reverted on an [X] android gating WRONG, a U2 [ID] row WRONG that L6 caused (clip-radius-zoom, grid align-items-center, flex '
                      'safe-003), an Android mover outside the union carriers ∪ mayMove that the rule-5 bisect lands on U2 (round 2, generator-truth S1: '
                      'L2 / L3\'s Compose units are on the same tree), or a mayMove non-carrier with |Δ| > 0.002 whose picture shows '
-                     'anything but a band now under its child — C2: never for another lane\'s carrier. U1 is reverted on `[PO] backdrop-filter-clip-rect '
+                     'none of mayMoveRule\'s three pictures (a band now under its child; the band now inside the element\'s opacity group; a UA-widget '
+                     'replica now over the band — pre-landing regeneration, L6 fix-r1) — C2: never for another lane\'s carrier. U1 is reverted on `[PO] backdrop-filter-clip-rect '
                      'android` WRONG or a U1 [ID] row WRONG (clip-path-*Box-1e, clip-rect-2); U2 goes first. The [ID] rows outside the probe sections and '
-                     'U2\'s 3 css-images carriers are read at wave55-probe'),
+                     'U2\'s 3 css-images carriers are read at wave55-probe') + R6_STAGE1,
 }
 
 # ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -1386,7 +1482,11 @@ expectations = {
                             'FAILs but one is UNMEASURED; with --sections a key whose keyCells section is not listed prints NOT PROBED and gates nothing (C15). '
                             'R6 = exit 0 with no --sections. A CONTROL FAIL never changes the exit; controls that sit on CARRIERS (L1\'s 3 hyphenate-character ios, '
                             'L5\'s 2 rtl-marker-bake / lists-bakes natives, L4\'s ua-heading-face block-in-inline / web rows on non-carriers excepted) are read in the '
-                            'cell review and named in the PR')},
+                            'cell review and named in the PR. Round 6 (D40): every GATING and pictureCorrectTally key also carries the RESIDUAL read (residual-read.py, one '
+                            'declaration per key cell): outside the key\'s declared change zone the capture = the --base capture pixel for pixel, where the base\'s class ink '
+                            'left only background shows, and inside the zone every changed px is background, a declared ink class or its declared anti-aliasing — '
+                            'tolerance 0 (every fixed picture reads 0 / 0 / 0: fix-r6.zones.out.txt); it only turns a probe PASS into FAIL (`residual: …` on the row, '
+                            'UNMEASURED when the base capture is missing), and a gating / tally key with no declaration is a refusal (exit 2)')},
   'revertRule': [
     f'1 lost: a carrier cell (any lane, any tier, predicted or not) that is P on {BASE} and f on the probe reverts the commit that carries it',
     ('2 moved down: Δ <= -0.002 (base → probe) on any prediction row whose direction is "up-or-stay" reverts the commit that carries it; a '
@@ -1476,7 +1576,7 @@ expectations = {
     f'{MC4} android (its red stays visible)',
     f'{INS["005"]} android (no wrap: Compose measures the abspos heading unbounded, "fox" clipped at x390)',
     f'{INS["006"]} android (no wrap: as 005)',
-    f'{CS} ios (rows 3-6 and 9 until [H] [C] [T] [K] ios print OK: lanes.L5-counter-suffix-rows.degenerateRetirement)',
+    f'{CS} ios (rows 3-6 and 9-12 until [H] [C] [T] [K] ios print OK: lanes.L5-counter-suffix-rows.degenerateRetirement)',
     f'{CS} android (rows 5-6 until [C] [K] android print OK)',
     # D3: the 10-px RTL static-position residue (both natives, cbb-android R6) keeps a red strip in U1's picture.
     f'{APOS["htb-rtl"]} android (U1 paints the iOS line: green x16-105, red x106-115 — the RTL static-position residue, both natives)',
@@ -1523,7 +1623,8 @@ for e in TALLY['full'] + TALLY['part'] + TALLY['paintOrderOnly']:
         assert k in _keys, f'tally key missing from every geometryProbes: {k}'
         assert e['cell'].rsplit(' ', 1)[1] in k.split(), f'tally key platform differs: {e}'
     assert e['cell'] in _pcells and _pcells[e['cell']]['from'].startswith('P'), f'tally cell is not a P→P prediction row: {e["cell"]}'
-expectations['pictureCorrectTally'] = dict(TALLY, rule='a cell is counted picture-correct at the closing gate ONLY when EVERY one of its keys prints "→ GEOMETRY OK" / "→ LINEBOX OK" on the closing run (geometry-gate.py); a pass whose keys are not all OK stays DEGENERATE and is not counted',
+expectations['pictureCorrectTally'] = dict(TALLY, rule='a cell is counted picture-correct at the closing gate ONLY when EVERY one of its keys prints "→ GEOMETRY OK" / "→ LINEBOX OK" on the closing run (geometry-gate.py); a pass whose keys are not all OK stays DEGENERATE and is not counted'
+                                                ' — round 6 (D40): every key\'s geometry-gate.py row PASS, i.e. its probe line OK AND its residual read 0 / 0 / 0 (outside the cell\'s declared change zone the capture = wave55-open)',
                                            paintOrderOnlyRule=('paint order corrected; static-position residue: these cells are NEVER counted picture-correct — their [X] key '
                                                                'certifies only that the parent band paints behind the child (CSS 2.1 App. E); the abspos children sit 3-22 px '
                                                                'off the ref in the lane\'s own U2 replay (grid static-position alignment, not this lane). With every key OK the '
@@ -1611,7 +1712,7 @@ expectations['planDecisions'] = [
   {'id': 'C4', 'conflict': 'wave-54 keys the wave-55 units break by design (X4, X5, X6)',
    'resolution': 'rtl-marker-bake [M] / lists-bakes counter-suffix: registered under L5 as controls, `rows 0-207 identical` dropped on ios / android (L5 [K] replaces it), kept on web; ua-heading-face: inset-011 natives DROPPED (superseded by L4 [M] 011, gating), the rest restated (block-in-inline android gating → control); flex-zero-gap-rules: the wave-54 file is not registered, L7\'s wave-55 copy carries 033 ×3 as CONTROL; the wave-54 must-not-move rows of the 8 inset natives are not carried (L4 carriers)'},
   {'id': 'C5', 'conflict': 'disclosure-styles in L1\'s R1 tripwire and L5\'s 44-capture identity read (X1, X2)',
-   'resolution': 'iOS: L5 U1-ios carrier (identity predicted, a prediction row) — it leaves L1\'s tripwire (4 controls remain); Android: L6 may-move — it leaves L5\'s list (the complement keeps its 0.002 band)'},
+   'resolution': 'iOS: L5 U1-ios carrier (identity predicted, a prediction row) — it leaves L1\'s tripwire (3 in-radius controls remain: anonymous-table-ws-001, boundary-shaping-010, hyphens-vertical-001 — all-prop-001 is outside the radius, D41); Android: L6 may-move — it leaves L5\'s list (the complement keeps its 0.002 band)'},
   {'id': 'C6', 'conflict': 'L3 control `[C] anchor-center-safe-rtl android` is unscored and L6 may-move (X8)',
    'resolution': 'dropped from L3\'s expect (`dropped`); the probe still prints it; the drop-L6-U2 arm attributes it'},
   {'id': 'C7', 'conflict': 'orphan O1: counter-style-table.mjs:21-23 SUFFIX NOTE', 'resolution': 'L5 unit D (comment-only, landed after U2o)'},
@@ -1671,6 +1772,12 @@ expectations['planDecisions'] = [
    'resolution': 'every lane probe reads how MUCH ink against a same-renderer reference (L1 `ink:`; L2 `core:`; L3 rows / mass / lead / yext, bidi `ink:`, stack `others:`; L4 `ink:` and `face ink:`; L5 [C] / [I] `ink:`; L6 `extra` ≤ 1, [PO] ±2); probes-teeth-r3.py pins the class and probes-selfcheck.txt §T3 sweeps it over every fixed picture (plan-skeptic-round-3.fakes/sweep.py: exit 1 on a HOLE)'},
   {'id': 'D39', 'conflict': 'verify round 4 M1-M4 / S1 / S2: STRICTLY-additive ink (nothing moved or erased) passed 17 gating keys inside their own read zones — L4 face-present ×10 (FACE_INK_TOL 6 %; the Compose no-wrap rows never read below band 1), L6 [X] ×5 (`extra` dilated by 1 px), L5 [H] ios (no ink read), L5 [T] ios (ink inside its digit window); the 2-px floor was unnamed',
    'resolution': 'L4 `face xor:` (face-present natives: every band = the face reference, two nested masks, XOR ≤ FACE_XOR_TOL 2; the reference is the frozen ref until the stage-1 step-8 edit sets FACE_RUN = wave55-pre, because a device 2em face sits 1768-2510 px level-XOR / −14 … +9 % dark px from Chromium\'s, so a re-set ref tolerance would re-open the class); L6 `extra` without a ring around the base fill; L5 [H] / [T] twin-glyph `ink:` (TWIN_RUN = wave55-pre from stage 1), [C] / [I] summed, two nested masks; L1 `ink:` summed, two nested masks; probes-teeth-r4.py pins every variant the verifier recorded IN-ZONE and probes-selfcheck.txt §T4 re-runs its generator over every lane (exit 1 on an IN-ZONE acceptance); a fake adding ≤ 2 px under a probe\'s own mask is the NAMED 2-px floor (the passing pictures read 0: a 0-px tolerance is a stage-1 device question); round 3\'s named 014 residual and D33\'s clip-10 exception are closed'},
+  # ── plan-skeptic round 5 (plan-skeptic-round-5.verify.md) / round 6 (fix-r6.done.md): background-only paint ──
+  {'id': 'D40', 'conflict': 'verify round 5 M1-M6: BACKGROUND-ONLY paint — 50 % copies of the class ink, ink in a colour the masks never test (black / #66ccff / #cccccc / yellow / iOS grey), lines in rows no XOR covers — passed 33 of 43 gating keys and 17 tally entries (704 fakes adding > 2 px: L2 ×8, L3 bidi / stack / dyn ×2 and the vrl-rtl tally entry, L4 ×12, L1 ×3, L6 [X] ×5 and [PO]); round 4\'s "class closed" held for its own variant set only',
+   'resolution': 'geometry-gate.py applies the RESIDUAL read (residual-read.py) to every gating and pictureCorrectTally key: outside the key cell\'s declared change zone (the colour classes its probe reads pixel for pixel, or the probe\'s own row bands, capture ∪ base, plus windows recorded from the fixed pictures\' own diff by fix-r6.zones.py) the capture equals the --base capture pixel for pixel, a vacated px shows only background (never beside class ink that stayed), and inside the zone every changed px is background, a declared ink class or its declared anti-aliasing — tolerance 0, every fixed picture 0 / 0 / 0; a key with no declaration is a refusal. L3 dyn\'s magenta count is ±2 (a hole of the parent\'s own colour equals the base, so only the probe sees it). probes-teeth-r5.py pins the verifier\'s fake runs FAIL, probes-selfcheck.txt §T5 re-runs its generator (exit 1 on a > 2-px acceptance) and §R re-measures the declarations; round 3\'s named hyphenate-character hdup+2x blind spot is closed. The 2-px floor stays the named residual; the windows are replay / wave54-probe footprints, re-recorded from a device capture only after a stage-1 look (never a tolerance)'},
+  # ── the pre-landing regeneration (regen.done.md; PLAN §8 step 4 ¶2, §10 items 3-8): the lane hand-offs, encoded above ──
+  {'id': 'D41', 'conflict': 'pre-landing audit (wave55-gate/prelanding/citations.md, censuses-and-deliveries.md): after the plan was cut the lane hand-offs changed a census, a prediction, a probe zone and two decision rules — L6 census GROWTH 1 (display-contents-dynamic-pseudo-insertion-001 android) and two may-move pictures mayMoveRule did not name; L5 U3-ios repaints 6 glyphs in 4 rows, not 1 (the probe, the residual SPEC and the replays modelled 1: a correct U3 would have been reverted); L1 radius 58 / 18 with all-prop-001 outside, and a stage-1 rule that reverted NB-ios in the R1 world NB-ios-b was built for; L4 headingStandsDown kept (the plan said removed)',
+   'resolution': f'L6: +{len(l6_contents_pseudo)} mayMove stem by an asserted rule (both lane censuses + the run-of-record IR; unscored: complement unchanged), mayMoveRule / stage1Decision name the opacity-group and UA-widget-replica pictures, U2\'s clip condition and P3h / P3i, U1\'s P5a-f; L5 (fix-r1 R1-R5): the probe carves U3\'s five run boxes out of ios\'s base-identity zones and reads them in [T] ios, residual-read.py declares them, the 10 standing replays re-graft them from Android\'s base (regen.replay-regraft.py), the counter-suffix ios row is MED and its stage1Decision pre-registers the [H] / [T] precedence (twin-only / residual → the look first; LRM only on an [H] geometry reason; a [K] FAIL inside U3\'s boxes is U3\'s) — proven by regen.l5-proof.py and probes-selfcheck.txt §RG; L1: carrierRule 58 / 18 / 4 SAME asserted from the lane census, the R1 signature routes to --contingency L1:NB-ios-b (never a revert of NB-ios) with a re-probe requiring the SAME controls byte-identical; L4: the U2 strings say kept; L2 clip-3 android stays MED-HIGH (§10). No carrier, unit, floor or must-not-move cell changed'},
 ]
 # Round 1 (process-holes S3): what produced this file — the argv (minus --out, which never changes the content) and the
 # sha256 of every input the generator read (the committed decision files included), so the committed tree reproduces it.
@@ -1746,7 +1853,7 @@ print(f"generatedWith: argv {_ARGV_RECORD} · {len(INPUTS)} input files (sha256 
 print(f"watchlist.txt: {sum(1 for l in out if l and not l.startswith('#'))} watch lines")
 print('expectations.json: union capture carriers', {p: len(v) for p, v in union.items()}, '· wire carriers', len(wire_owner),
       '· may-move android', len(expectations['unionMayMoveCaptures']['android']),
-      f'(raw {len(l6_may_raw)} + D21 medium {len(l6_may_medium)} + (2b) {len(l6_opacity)} − shared {len(_shared)} − L6 carriers' + (' — WITHDRAWN: L6 U2 reverted)' if L6.get('mayMoveWithdrawn') else ')'))
+      f'(raw {len(l6_may_raw)} + D21 medium {len(l6_may_medium)} + (2b) {len(l6_opacity)} + fix-r1 growth {len(l6_contents_pseudo)} − shared {len(_shared)} − L6 carriers' + (' — WITHDRAWN: L6 U2 reverted)' if L6.get('mayMoveWithdrawn') else ')'))
 print(f'scored cells {len(CELLS)} = carrier cells {len(carrier_cells)} + named must-not-move {len(named)} + complement {len(complement)} + ring-fenced {len(ring_cells)}')
 print(f'stage-1 probe ({len(STAGE1)}):', ','.join(STAGE1))
 print(f'probe sections ({len(PROBE)}):', ','.join(PROBE), '· not probed:', ','.join(NOT_PROBED))

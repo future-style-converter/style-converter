@@ -1,0 +1,60 @@
+L1-Rm     hyphen-ios-linebox.geometry. hyphen-ios-linebox 001 ios                                     PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L1-Rm     hyphenate-character.geometry hyphenate-character-001 ios                                    PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L1-Rm     hyphen-ios-linebox.geometry. hyphen-ios-linebox 003 ios                                     PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L1-Rm     hyphenate-character.geometry hyphenate-character-003 ios                                    PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L1-Rm     hyphen-ios-linebox.geometry. hyphen-ios-linebox 004 ios                                     PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L2-U1     compose-wpt-content-box-cb.g abspos/abspos-autopos-htb-ltr android                          PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L2-U1     compose-wpt-content-box-cb.g abspos/abspos-autopos-vlr-ltr android                          PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L2-U1     compose-wpt-content-box-cb.g abspos/abspos-autopos-vrl-ltr android                          PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L2-U1     compose-wpt-content-box-cb.g backdrop-filter-nested-border-radius-clip android              PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L2-U1     compose-wpt-content-box-cb.g backdrop-filter-nested-border-radius-clip-2 android            PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L2-U1     compose-wpt-content-box-cb.g backdrop-filter-nested-border-radius-clip-4 android            PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L2-U2     compose-wpt-content-box-cb.g backdrop-filter-nested-border-radius-clip-3 android            PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L2-U2     cbb-android.geometry.py      backdrop-filter-nested-border-radius-clip-3 android            PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L3-fixed  positioned-parent-slot.geome [S] dir-style-02a android row6                                 PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L3-fixed  positioned-parent-slot.geome [S] dir-style-02a android row7                                 PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L3-fixed  positioned-parent-slot.geome [S] dir-style-02a android row9                                 PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L3-fixed  positioned-parent-slot.geome [S] bidi-tab-001 android rtl-rows                              PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L3-fixed  positioned-parent-slot.geome [W] anchor-position-multicol-nested-001 android stack          PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L3-fixed  positioned-parent-slot.geome [S] dynamic-offset-rtl-001 android                             PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L3-fixed  positioned-parent-slot.geome [W] dynamic-offset-rtl-002 android                             PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L3-fixed  positioned-parent-slot.geome [S] dynamic-offset-vrl-rtl-001 android                         PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-C      ua-heading-margin.geometry.p [M] text-decoration-inset-005 ios                              PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-C      ua-heading-margin.geometry.p [F] text-decoration-inset-005 ios                              PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-C      ua-heading-margin.geometry.p [M] text-decoration-inset-005 android                          PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-C      ua-heading-margin.geometry.p [M] text-decoration-inset-006 ios                              PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-C      ua-heading-margin.geometry.p [F] text-decoration-inset-006 ios                              PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-C      ua-heading-margin.geometry.p [M] text-decoration-inset-006 android                          PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-C      ua-heading-margin.geometry.p [M] text-decoration-inset-014 ios                              PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-C      ua-heading-margin.geometry.p [F] text-decoration-inset-014 ios                              PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-C      ua-heading-margin.geometry.p [M] text-decoration-inset-014 android                          PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-C      ua-heading-margin.geometry.p [F] text-decoration-inset-014 android                          PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-C      ua-heading-margin.geometry.p [M] text-decoration-inset-011 ios                              PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-C      ua-heading-margin.geometry.p [M] text-decoration-inset-011 android                          PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L5-ok-all counter-suffix-rows.geometry [H] counter-suffix ios                                         PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L5-ok-all counter-suffix-rows.geometry [C] counter-suffix ios                                         PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L5-ok-all counter-suffix-rows.geometry [T] counter-suffix ios                                         PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L5-ok-all counter-suffix-rows.geometry [K] counter-suffix ios                                         PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L5-ok-all counter-suffix-rows.geometry [I] cjk-decimal/css3-counter-styles-005 ios                    PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L5-ok-all counter-suffix-rows.geometry [C] counter-suffix android                                     PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L5-ok-all counter-suffix-rows.geometry [K] counter-suffix android                                     PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L5-ok-all counter-suffix-rows.geometry [I] cjk-decimal/css3-counter-styles-005 android                PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L6-X-U2   android-paint-order.geometry [X] flex-abspos-staticpos-align-self-safe-001 android          PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L6-X-U2   android-paint-order.geometry [X] flex-abspos-staticpos-align-self-safe-002 android          FAIL       residual residual: 42 px differ from wave55-open OUTSIDE the declared  in-proc 42/0/0
+L6-X-U2   android-paint-order.geometry [X] grid-abspos-staticpos-align-self-001 android               PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L6-X-U2   android-paint-order.geometry [X] grid-abspos-staticpos-justify-self-001 android             PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L6-X-U2   android-paint-order.geometry [X] grid-abspos-staticpos-align-self-vertWM-001 android        PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L6-X-U2   android-paint-order.geometry [X] grid-abspos-staticpos-align-self-rtl-001 android           PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L6-PO-U1  android-paint-order.geometry [PO] backdrop-filter-clip-rect android                         PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-U1     ua-heading-margin.geometry.p [M] text-decoration-inset-005 ios                              PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-U1     ua-heading-margin.geometry.p [F] text-decoration-inset-005 ios                              FAIL       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-U1     ua-heading-margin.geometry.p [M] text-decoration-inset-005 android                          PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-U1     ua-heading-margin.geometry.p [M] text-decoration-inset-006 ios                              PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-U1     ua-heading-margin.geometry.p [F] text-decoration-inset-006 ios                              FAIL       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-U1     ua-heading-margin.geometry.p [M] text-decoration-inset-006 android                          PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-U1     ua-heading-margin.geometry.p [M] text-decoration-inset-014 ios                              PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-U1     ua-heading-margin.geometry.p [F] text-decoration-inset-014 ios                              FAIL       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-U1     ua-heading-margin.geometry.p [M] text-decoration-inset-014 android                          PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-U1     ua-heading-margin.geometry.p [F] text-decoration-inset-014 android                          FAIL       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-U1     ua-heading-margin.geometry.p [M] text-decoration-inset-011 ios                              PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0
+L4-U1     ua-heading-margin.geometry.p [M] text-decoration-inset-011 android                          PASS       residual residual 0 / 0 / 0 vs wave55-open  in-proc 0/0/0

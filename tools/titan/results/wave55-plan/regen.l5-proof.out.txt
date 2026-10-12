@@ -1,0 +1,104 @@
+# regen.l5-proof.out.txt — the L5 fix-r1 R1 / R2 / R3 regeneration, proven on the installed bytes (regen.l5-proof.py)
+# probe old (HEAD) sha256 bd2f001ae6a8ea5b… · new (this tree) f032061a35b9a121…; base wave54-final; decided = the correct picture (stands in for TWIN_RUN = wave55-pre, PLAN §7 stage 1 step 8)
+== §1 the lane's pictures through the old and the new probe
+  base (expect: base)
+    old twin=-       rc=0 [T] ios → GEOMETRY WRONG (digit ink x138-141 4 px wide vs ref 7 (proportional '1': tabular-nums not applied)) · [K] ios → GEOMETRY OK
+    old twin=decided rc=0 [T] ios → GEOMETRY WRONG (digit ink x138-141 4 px wide vs ref 7 (proportional '1': tabular-nums not applied)) · [K] ios → GEOMETRY OK
+    new twin=-       rc=0 [T] ios → GEOMETRY WRONG (digit ink x138-141 4 px wide vs ref 7 (proportional '1': tabular-nums not applied)) · [K] ios → GEOMETRY OK
+    new twin=decided rc=0 [T] ios → GEOMETRY WRONG (digit ink x138-141 4 px wide vs ref 7 (proportional '1': tabular-nums not applied)) · [K] ios → GEOMETRY OK
+    → HOLDS; every other key identical old vs new: True
+  correct (expect: ok)
+    old twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (79 px))
+    old twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (79 px))
+    new twin=-       rc=0 [T] ios → GEOMETRY WRONG (ink: row 9 digit window x136-150 + the five U3 run boxes differ from wave54-final android's tabular glyphs by 41 px at their best whole-px offsets (> 2: added / lost ink in the window)) · [K] ios → GEOMETRY OK
+    new twin=decided rc=0 [T] ios → GEOMETRY OK · [K] ios → GEOMETRY OK
+    → HOLDS; every other key identical old vs new: True
+  F1 row9 period erased (expect: T-geo)
+    old twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (7 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (79 px))
+    old twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (7 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (79 px))
+    new twin=-       rc=0 [T] ios → GEOMETRY WRONG (row9 period x130-135: 0 ink blob(s) (want 1, the ref has 1)) · [K] ios → GEOMETRY OK
+    new twin=decided rc=0 [T] ios → GEOMETRY WRONG (row9 period x130-135: 0 ink blob(s) (want 1, the ref has 1)) · [K] ios → GEOMETRY OK
+    → HOLDS; every other key identical old vs new: True
+  F2 row10 period moved +2 px (expect: T-geo)
+    old twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (84 px))
+    old twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (84 px))
+    new twin=-       rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: 2 ink blob(s) (want 1, the ref has 1)) · [K] ios → GEOMETRY OK
+    new twin=decided rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: 2 ink blob(s) (want 1, the ref has 1)) · [K] ios → GEOMETRY OK
+    → HOLDS; every other key identical old vs new: True
+  F3 row11 period erased (expect: T-geo)
+    old twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (77 px))
+    old twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (77 px))
+    new twin=-       rc=0 [T] ios → GEOMETRY WRONG (row11 period x130-135: 0 ink blob(s) (want 1, the ref has 1)) · [K] ios → GEOMETRY OK
+    new twin=decided rc=0 [T] ios → GEOMETRY WRONG (row11 period x130-135: 0 ink blob(s) (want 1, the ref has 1)) · [K] ios → GEOMETRY OK
+    → HOLDS; every other key identical old vs new: True
+  F4 row12 period moved -2 px (expect: T-geo)
+    old twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (85 px))
+    old twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (85 px))
+    new twin=-       rc=0 [T] ios → GEOMETRY WRONG (row12 period x130-135: glyph x132-133 y296-297 vs ref x134-134 y296-297 ±1 (moved)) · [K] ios → GEOMETRY OK
+    new twin=decided rc=0 [T] ios → GEOMETRY WRONG (row12 period x130-135: glyph x132-133 y296-297 vs ref x134-134 y296-297 ±1 (moved)) · [K] ios → GEOMETRY OK
+    → HOLDS; every other key identical old vs new: True
+  F5 row10 two erased (expect: T-geo)
+    old twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (90 px))
+    old twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (90 px))
+    new twin=-       rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: 0 ink blob(s) (want 1, the ref has 1)) · [K] ios → GEOMETRY OK
+    new twin=decided rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: 0 ink blob(s) (want 1, the ref has 1)) · [K] ios → GEOMETRY OK
+    → HOLDS; every other key identical old vs new: True
+  F6 row10 two moved +2 px (expect: T-geo)
+    old twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (118 px))
+    old twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (118 px))
+    new twin=-       rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: glyph x140-147 y238-249 vs ref x138-144 y238-249 ±1 (moved)) · [K] ios → GEOMETRY OK
+    new twin=decided rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: glyph x140-147 y238-249 vs ref x138-144 y238-249 ±1 (moved)) · [K] ios → GEOMETRY OK
+    → HOLDS; every other key identical old vs new: True
+  F7 row10 two as a block (expect: T-geo)
+    old twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (115 px))
+    old twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (115 px))
+    new twin=-       rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: fills > 60 % of its bbox (a block, not the glyph)) · [K] ios → GEOMETRY OK
+    new twin=decided rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: fills > 60 % of its bbox (a block, not the glyph)) · [K] ios → GEOMETRY OK
+    → HOLDS; every other key identical old vs new: True
+  F8 row10 two copied 1 px down (added) (expect: T-ink)
+    old twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (94 px))
+    old twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (94 px))
+    new twin=-       rc=0 [T] ios → GEOMETRY WRONG (ink: row 9 digit window x136-150 + the five U3 run boxes differ from wave54-final android's tabular glyphs by 77 px at their best whole-px offsets (> 2: added / lost ink in the window)) · [K] ios → GEOMETRY OK
+    new twin=decided rc=0 [T] ios → GEOMETRY WRONG (ink: row 9 digit window x136-150 + the five U3 run boxes differ from decided ios's tabular glyphs by 36 px at their best whole-px offsets (> 2: added / lost ink in the window)) · [K] ios → GEOMETRY OK
+    → HOLDS; every other key identical old vs new: True
+  F9 2x2 blob beside row11 period (added) (expect: T-geo)
+    old twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (83 px))
+    old twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (83 px))
+    new twin=-       rc=0 [T] ios → GEOMETRY WRONG (row11 period x130-135: 2 ink blob(s) (want 1, the ref has 1)) · [K] ios → GEOMETRY OK
+    new twin=decided rc=0 [T] ios → GEOMETRY WRONG (row11 period x130-135: 2 ink blob(s) (want 1, the ref has 1)) · [K] ios → GEOMETRY OK
+    → HOLDS; every other key identical old vs new: True
+  F10 row11 letter erased (outside the boxes) (expect: K)
+    old twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (138 px))
+    old twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (138 px))
+    new twin=-       rc=0 [T] ios → GEOMETRY WRONG (ink: row 9 digit window x136-150 + the five U3 run boxes differ from wave54-final android's tabular glyphs by 41 px at their best whole-px offsets (> 2: added / lost ink in the window)) · [K] ios → GEOMETRY WRONG (zone x136-end×y256-303 differs from wave54-final (59 px))
+    new twin=decided rc=0 [T] ios → GEOMETRY OK · [K] ios → GEOMETRY WRONG (zone x136-end×y256-303 differs from wave54-final (59 px))
+    → HOLDS; every other key identical old vs new: True
+  F11 row12 period copied 1 px down (added) (expect: T-ink)
+    old twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (82 px))
+    old twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (82 px))
+    new twin=-       rc=0 [T] ios → GEOMETRY WRONG (ink: row 9 digit window x136-150 + the five U3 run boxes differ from wave54-final android's tabular glyphs by 45 px at their best whole-px offsets (> 2: added / lost ink in the window)) · [K] ios → GEOMETRY OK
+    new twin=decided rc=0 [T] ios → GEOMETRY WRONG (ink: row 9 digit window x136-150 + the five U3 run boxes differ from decided ios's tabular glyphs by 4 px at their best whole-px offsets (> 2: added / lost ink in the window)) · [K] ios → GEOMETRY OK
+    → HOLDS; every other key identical old vs new: True
+  F12 one light-grey px in row9 period box (added, 1 level) (expect: floor)
+    old twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (11 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (79 px))
+    old twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (11 px)) · [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (79 px))
+    new twin=-       rc=0 [T] ios → GEOMETRY WRONG (ink: row 9 digit window x136-150 + the five U3 run boxes differ from wave54-final android's tabular glyphs by 42 px at their best whole-px offsets (> 2: added / lost ink in the window)) · [K] ios → GEOMETRY OK
+    new twin=decided rc=0 [T] ios → GEOMETRY OK · [K] ios → GEOMETRY OK
+    → HOLDS; every other key identical old vs new: True
+== §2 the standing replays: the old probe on the committed (HEAD) tag vs the new probe on this tree's re-grafted tag
+  ok-all        files changed vs HEAD: ['counter-suffix.ios.png']; 23 keys, verdicts new-on-regrafted == old-on-committed: True
+  H-broken      files changed vs HEAD: ['counter-suffix.ios.png']; 23 keys, verdicts new-on-regrafted == old-on-committed: True
+  H-nodot       files changed vs HEAD: ['counter-suffix.ios.png']; 23 keys, verdicts new-on-regrafted == old-on-committed: True
+  H-flush       files changed vs HEAD: ['counter-suffix.ios.png']; 23 keys, verdicts new-on-regrafted == old-on-committed: True
+  H-low         files changed vs HEAD: ['counter-suffix.ios.png']; 23 keys, verdicts new-on-regrafted == old-on-committed: True
+  C-shift8      files changed vs HEAD: ['counter-suffix.ios.png']; 23 keys, verdicts new-on-regrafted == old-on-committed: True
+  C-nocomma     files changed vs HEAD: ['counter-suffix.ios.png']; 23 keys, verdicts new-on-regrafted == old-on-committed: True
+  C-space-only  files changed vs HEAD: ['counter-suffix.ios.png']; 23 keys, verdicts new-on-regrafted == old-on-committed: True
+  I-wholeline   files changed vs HEAD: ['counter-suffix.ios.png']; 23 keys, verdicts new-on-regrafted == old-on-committed: True
+  K-leak        files changed vs HEAD: ['counter-suffix.ios.png']; 23 keys, verdicts new-on-regrafted == old-on-committed: True
+== §3 the residual read (residual-read.py read_arrays, tolerance 0) on the correct-U3 pictures: new SPEC vs old SPEC
+  skmodel (device + U3 Catalyst delta) vs wave54-final    new outside / vacated / non-class 0 / 0 / 0 · old 89 / 0 / 0
+  Catalyst U3 on vs off (one rasterizer)                  new outside / vacated / non-class 0 / 0 / 0 · old 92 / 0 / 0
+  Catalyst full vs U1 reverted (U1 alone: rows 3-4)       new outside / vacated / non-class 0 / 0 / 0 · old 0 / 0 / 0
+  ok-all (re-grafted) vs wave54-final                     new outside / vacated / non-class 0 / 0 / 0 · old 91 / 0 / 0
+violations: 0

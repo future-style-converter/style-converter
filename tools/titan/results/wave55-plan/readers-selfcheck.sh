@@ -19,6 +19,10 @@
 #      --self-test); B7 --base = the run, B8 a flag without its value, B9 an empty --lanes entry (`L1,`), B10 a --base with no
 #      sections/ are each exit 2, and B11 a copy without the base check proceeds (the refusal is load-bearing); C10-C12
 #      probe-readout's value-less --lanes / --exp and an empty --sections entry exit 2.
+#   Round 6 (plan-skeptic round 5 M1-M6, fix-r6.done.md, D40): B12 the gate's RESIDUAL read is load-bearing — a fake run whose
+#      [PO] picture is the U1 replay plus one 3×3 black speck far from every read (the probe prints OK) FAILs [PO] with
+#      `residual:`, and a copy with the residual disabled PASSes it; B13 a gating key whose cell has no residual declaration
+#      is refused (exit 2).
 # Everything it writes goes under $S (the scratchpad) or $WT (the worktree); the shared tree gets only readers-selfcheck.txt.
 # Usage: bash tools/titan/results/wave55-plan/readers-selfcheck.sh <worktree> <scratch-dir>
 set -uo pipefail
@@ -31,6 +35,9 @@ exec > >(sed -u -E "s#$S#<scratch>#g; s#$WT#<worktree>#g; s#(/private)?/tmp/clau
 echo "# readers-selfcheck.txt — $(date -u +%Y-%m-%dT%H:%M:%SZ); shared tree HEAD $(git -C "$SH" rev-parse --short HEAD); worktree HEAD $(git -C "$WT" rev-parse --short HEAD) (detached, throwaway)"
 echo "# worktree links: tools/titan/runs -> $(readlink "$WT/tools/titan/runs"), tools/wpt -> $(readlink "$WT/tools/wpt")"
 cp "$SH/$P"/{plan-build.py,snapshot-cells.mjs,geometry-gate.py,probe-readout.mjs,probes-selfcheck.py,probes-teeth.py,probes-teeth-r2.py,probes-teeth-r3.py,probes-teeth-r4.py} "$WT/$P/"
+cp "$SH/$P"/{residual-read.py,probes-teeth-r5.py,fix-r6.zones.py} "$WT/$P/"                             # round 6 (D40): the gate's residual read, §T / §R
+mkdir -p "$WT/$P/plan-skeptic-round-5.fakes" "$WT/$P/plan-skeptic-round-5.verify.d"; cp "$SH/$P"/plan-skeptic-round-5.fakes/{added_ink5.py,fakes5.py,adjudicate5.py} "$WT/$P/plan-skeptic-round-5.fakes/"
+cp "$SH/$P"/plan-skeptic-round-5.verify.d/fakes5.L{1,2,3,4,5,6}.json "$WT/$P/plan-skeptic-round-5.verify.d/"   # probes-teeth-r5.py's pinned records
 mkdir -p "$WT/$P/plan-skeptic-round-3.fakes"; cp "$SH/$P"/plan-skeptic-round-3.fakes/{added_ink.py,sweep.py} "$WT/$P/plan-skeptic-round-3.fakes/"   # round 3 (M2): §T3
 mkdir -p "$WT/$P/plan-skeptic-round-4.fakes"; cp "$SH/$P"/plan-skeptic-round-4.fakes/{added_ink4.py,fakes4.py,zones4.py} "$WT/$P/plan-skeptic-round-4.fakes/"   # round 4 (M1-M4): §T / §T4
 cp "$SH/$P"/*.geometry.py "$WT/$P/"                                  # the round-1 probes (and the wave-55 L2 copy)
@@ -117,6 +124,29 @@ sed 's/^if base == run and not self_test:$/if False:   # MUTATION: the base chec
 o=$(cd "$WT" && nice -n 19 $PY $P/geometry-gate.mut.py wave54-final --base wave54-final --lanes L1 2>&1); rc=$?; rm -f "$WT/$P/geometry-gate.mut.py"
 if [ $rc -ne 2 ] && ! grep -q 'is the run itself' <<<"$o"; then echo "  as required     B11 MUTATION (the base check removed): --base = the run is read (exit $rc) — the refusal is load-bearing"
 else echo "  !! NOT as required  B11 (exit $rc)"; FAILS=$((FAILS+1)); fi
+# Round 6 (D40): the residual read is load-bearing (B12) and every gating / tally key must be declared (B13)
+RFK=$( cd "$WT" && $PY - "$S/b12" <<'EOF12'
+import importlib.util, os, sys
+sys.dont_write_bytecode = True
+s = importlib.util.spec_from_file_location('pt', 'tools/titan/results/wave55-plan/probes-teeth.py'); pt = importlib.util.module_from_spec(s); s.loader.exec_module(pt)
+po = pt.png('android-paint-order-replay/backdrop-filter-clip-rect-android-U1.png'); po[560:563, 20:23] = 0     # a 3×3 black speck far below every read
+print(pt.make_run(sys.argv[1], 'b12-PO-speck', {('filter-effects', 'android', 'backdrop-filter-clip-rect'): po}))
+EOF12
+)
+o=$(cd "$WT" && nice -n 19 $PY $GG "$RFK" --base wave54-final --lanes L6 --sections filter-effects --json "$S/b12.json" 2>&1); rc=$?
+po_v=$($PY -c "import json;r=[x for x in json.load(open('$S/b12.json'))['rows'] if x['key']=='[PO] backdrop-filter-clip-rect android'][0];print(r['verdict'], (r.get('residual') or {}).get('outside'), r['line'].endswith('GEOMETRY OK'))")
+sed 's/^            res = residual(probe\[.keyCells.\]\[key\]) if (gate_unit or (script, key) in TALLY_KEYS) else None   # round 6$/            res = None   # MUTATION: the residual read disabled/' "$WT/$GG" > "$WT/$P/geometry-gate.mut.py"
+o2=$(cd "$WT" && nice -n 19 $PY $P/geometry-gate.mut.py "$RFK" --base wave54-final --lanes L6 --sections filter-effects --json "$S/b12m.json" 2>&1); rc2=$?; rm -f "$WT/$P/geometry-gate.mut.py"
+po_m=$($PY -c "import json;r=[x for x in json.load(open('$S/b12m.json'))['rows'] if x['key']=='[PO] backdrop-filter-clip-rect android'][0];print(r['verdict'])")
+if [ "$po_v" = "FAIL 9 True" ] && [ $rc -eq 1 ] && [ "$po_m" = PASS ]; then
+  echo "  as required     B12 a 3×3 black speck far from every [PO] read: the probe prints OK, the gate FAILs it on \`residual:\` (outside 9, exit 1); MUTATION (residual disabled): PASS (exit $rc2) — the read is load-bearing"
+else echo "  !! NOT as required  B12 (gate: $po_v exit $rc; mutated: $po_m exit $rc2)"; FAILS=$((FAILS+1)); fi
+$PY - "$SH/$P/expectations.json" "$S/exp-undeclared.json" <<'EOF13'
+import json, sys
+e = json.load(open(sys.argv[1])); pr = e['lanes']['L7-instruments']['geometryProbes'][0]
+pr['gating']['flex/flex-gap-decorations-033 ios'] = 'U1'; json.dump(e, open(sys.argv[2], 'w'))
+EOF13
+want2 "B13 a gating key whose cell has no residual declaration is refused (round 6, D40)" "without a residual declaration" bash -c "cd '$WT' && $PY $GG wave54-final --base wave54-open --exp '$S/exp-undeclared.json' --lanes L7"
 
 echo; echo "## C. probe-readout.mjs"
 PR="$P/probe-readout.mjs"; E="--exp $SH/$P/expectations.json"
@@ -176,10 +206,12 @@ rm -f "$WT/$P/probe-readout.mut1.mjs" "$WT/$P/probe-readout.mut2.mjs"
 echo; echo "## D. probes-selfcheck.py can fail: a control that can never fail promoted to GATING"
 $PY - "$SH/$P/expectations.json" "$S/exp-cantfail.json" <<'EOF'
 import json, sys
-e = json.load(open(sys.argv[1])); pr = e['lanes']['L7-instruments']['geometryProbes'][0]
-pr['gating']['flex/flex-gap-decorations-033 ios'] = 'U1'; json.dump(e, open(sys.argv[2], 'w'))
+e = json.load(open(sys.argv[1])); pr = e['lanes']['L1-hyphen-ios-linebox']['geometryProbes'][1]
+pr['gating']['hyphenate-character-004 ios'] = 'NB-ios'; json.dump(e, open(sys.argv[2], 'w'))
 EOF
-expect_fail "D1 a gating key with no failing picture (today OK, no fake) is reported CANNOT FAIL" "CANNOT FAIL: flex-zero-gap-rules.geometry.py flex/flex-gap-decorations-033 ios" \
+# round 6: the promoted control sits on a cell residual-read.py declares (a gating key on an undeclared cell is refused before
+# any probe runs — B13 — so the round-1 flex-gap control, on a cell no unit changes, can no longer be promoted)
+expect_fail "D1 a gating key with no failing picture (today OK, no fake) is reported CANNOT FAIL" "CANNOT FAIL: hyphenate-character.geometry.py hyphenate-character-004 ios" \
   bash -c "cd '$SH' && nice -n 19 $PY $P/probes-selfcheck.py --scratch '$S/pscf' --wt '$WT' --exp '$S/exp-cantfail.json' --out '$S/pscf.txt' --teeth-lanes L7 && cat '$S/pscf.txt' || { cat '$S/pscf.txt'; exit 1; }"
 # (round 3: --teeth-lanes L7 narrows §T / §T3 to the mutated key's lane — the CANNOT FAIL read is per gating key and does not
 #  depend on the other lanes' fakes, and the full §T3 added-ink sweep alone takes ~25 min; probes-selfcheck.txt is the full run)
@@ -227,8 +259,11 @@ e = json.load(open(sys.argv[1])); pr = e['lanes']['L2-cbb-android']['geometryPro
 pr['cmd'] = pr['cmd'].replace('wave55-plan/compose-wpt-content-box-cb', 'wave54-plan/compose-wpt-content-box-cb'); json.dump(e, open(sys.argv[2], 'w'))
 EOF8
 o=$(cd "$SH" && nice -n 19 $PY $P/probes-teeth.py --scratch "$S/teeth-w54" --exp "$S/exp-teeth-w54.json" --lanes L2 2>&1); rc=$?
-check "E5 probes-teeth.py on a JSON whose L2 probe is the pre-round-1 wave-54 rule: red (hollow / corners2 / stripe30 accepted)" \
-  $([ $rc -eq 1 ] && grep -q 'VIOLATION L2 U1-hollow' <<<"$o" && echo 1 || echo 0) "exit $rc, $(grep -c '^  VIOLATION' <<<"$o") violation(s)"
+# round 6 (D40): the gate's residual read now rejects the hollow / corners2 / stripe30 fakes even under the wave-54 rule (an emptied
+# interior is a hole beside green that stayed); the wave-54 rule still accepts the clip-3 corner squares and the corner blob —
+# green painted into a corner's cut-out, class ink inside the declared zone, which only the probes' green reads can see
+check "E5 probes-teeth.py on a JSON whose L2 probe is the pre-round-1 wave-54 rule: red (the clip-3 corner squares accepted)" \
+  $([ $rc -eq 1 ] && grep -q 'VIOLATION L2 U2-square-3-corners' <<<"$o" && echo 1 || echo 0) "exit $rc, $(grep -c '^  VIOLATION' <<<"$o") violation(s): $(grep '^  VIOLATION' <<<"$o" | sed -E 's/^  VIOLATION L2 ([^:]+):.*/\1/' | tr '\n' ' ')"
 
 echo; echo "readers-selfcheck: $([ $FAILS -eq 0 ] && echo 'every check behaved as required' || echo "$FAILS check(s) did NOT behave as required")"
 exit $FAILS

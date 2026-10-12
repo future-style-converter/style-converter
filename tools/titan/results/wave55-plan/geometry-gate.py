@@ -20,6 +20,13 @@
 #      (exit 2: every base-relative read — L1 glyph identity, L6 [X], the L3 / L5 [C] / [K] controls, L4 `crop:` — compares
 #      the picture with itself and passes vacuously), except under --self-test, whose contract is the pre-fix identity pair;
 #      a --base run with no sections/ directory is refused (exit 2) instead of reading as UNMEASURED (exit 3).
+#   6. Plan-skeptic round 5 (verify M1-M6; fix-r6.done.md; PLAN §9 D40): every GATING and every pictureCorrectTally key also
+#      carries the RESIDUAL read (residual-read.py, one declaration per key cell): outside the key's declared change zone
+#      the capture equals the --base capture pixel for pixel, where the base's class ink left only background shows, and
+#      inside the zone every changed px is background, a declared ink class or its declared anti-aliasing — tolerance 0,
+#      every fixed picture reads 0 / 0 / 0 (fix-r6.zones.out.txt). It only ever turns a probe's PASS into FAIL ("residual:
+#      …" on the key's row; a missing base capture: UNMEASURED); a gating / tally key whose cell has no declaration is a
+#      refusal (exit 2), so no key can skip it. 704 round-5 fakes on 33 gating keys painted where no read of the key looked.
 # Per expect key, one verdict:
 #   PASS        the probe line for that key ends in the exact expected string (and contains its `contains` string);
 #   FAIL        it does not;
@@ -89,6 +96,17 @@ if _bad_secs or _bad_lanes or (only is not None and not only.strip()) or (sectio
           f'(a prefix of no lane in {sorted(EXP["lanes"])}): an empty scope would read as a vacuous pass')
     sys.exit(2)
 norm = lambda s: re.sub(r'\s+', ' ', s.strip())       # probes pad their columns with runs of spaces
+import importlib.util                                  # round 6: the RESIDUAL read (residual-read.py, beside this file)
+_rs = importlib.util.spec_from_file_location('residual_read', os.path.join(HERE, 'residual-read.py'))
+RESIDUAL = importlib.util.module_from_spec(_rs); _rs.loader.exec_module(RESIDUAL)
+TALLY_KEYS = {tuple(k.split(' ', 1)) for part in ('full', 'part', 'paintOrderOnly') for e in (EXP.get('pictureCorrectTally') or {}).get(part, [])
+              for k in e['keys']}
+_res_cache = {}
+def residual(cell):
+    """Round 6: the residual read of one key cell on this run pair (cached: every key of a cell shares it)."""
+    if cell not in _res_cache:
+        _res_cache[cell] = RESIDUAL.read(run, base, cell)
+    return _res_cache[cell]
 script_of = lambda cmd: os.path.basename(next(t for t in cmd.split() if t.endswith('.py')))
 section_of_key = lambda probe, key: probe['keyCells'][key].split('/')[0]
 
@@ -111,6 +129,13 @@ if stale:
     sys.exit(2)
 if off_interp:
     print(f'REFUSED — probe cmds off the pinned interpreter `{EXP["interpreter"]}` or keys without a section (C14 / C15):\n  ' + '\n  '.join(off_interp))
+    sys.exit(2)
+# Round 6: every gating and tally key carries the residual read — a key whose cell has no declared change zone is a refusal.
+undeclared = sorted({f'{lane_id} {script_of(pr["cmd"])} {k} ({pr["keyCells"][k]})' for lane_id, lane in EXP['lanes'].items()
+                     for pr in lane.get('geometryProbes', []) for k in pr['expect']
+                     if (k in pr.get('gating', {}) or (script_of(pr['cmd']), k) in TALLY_KEYS) and pr['keyCells'][k] not in RESIDUAL.SPECS})
+if undeclared:
+    print('REFUSED — gating / tally keys without a residual declaration (residual-read.py SPECS):\n  ' + '\n  '.join(undeclared))
     sys.exit(2)
 
 def find_line(lines, key):
@@ -158,6 +183,9 @@ for lane_id, lane in EXP['lanes'].items():
                 line = hits[-1]
                 ok = line.endswith(norm(want)) and (not contains or contains in line)
                 verdict = 'PASS' if ok else 'FAIL'
+            res = residual(probe['keyCells'][key]) if (gate_unit or (script, key) in TALLY_KEYS) else None   # round 6
+            if res and verdict == 'PASS' and res['state'] != 'OK':
+                verdict = 'UNMEASURED' if res['state'] == 'MISSING' else 'FAIL'
             cls = 'gating' if gate_unit else 'withdrawn' if withdrawn else 'report' if key in report_keys else 'control'
             if verdict == 'FAIL' and cls == 'gating':
                 gating_fail += 1
@@ -167,9 +195,11 @@ for lane_id, lane in EXP['lanes'].items():
             print(f'{mark} {lane_id:24} {script:42} {key:58} {verdict:10} [{tag}]')
             if verdict != 'PASS':
                 print(f'     line: {line[-220:]}')
+            if res and res['state'] != 'OK':
+                print(f'     {res["line"]}')
             report.append({'lane': lane_id, 'script': script, 'key': key, 'cell': probe['keyCells'][key], 'section': section_of_key(probe, key),
                            'verdict': verdict, 'class': cls, 'gatingUnit': gate_unit, 'withdrawn': withdrawn, 'expected': want,
-                           'contains': contains or None, 'line': line})
+                           'contains': contains or None, 'line': line, 'residual': res})
 
 if not report:
     print(f'REFUSED — 0 keys in scope (lanes {only or "all"}, sections {sections_opt or "all"}): nothing was gated, and that is not a pass')
@@ -181,6 +211,9 @@ print(f'\ngeometry-gate {run} (base {base}{scope}): {len(report)} keys — PASS 
       f'(gating {gating_fail}) · UNMEASURED {n["UNMEASURED"]} (gating {by("gating", "UNMEASURED")}) · probe self-check failures {selfcheck_fail}')
 print('  by class: ' + ' · '.join(f'{c} {sum(1 for r in report if r["class"] == c)} (PASS {by(c, "PASS")} FAIL {by(c, "FAIL")})'
                                   for c in ('gating', 'control', 'report', 'withdrawn')))
+rres = [r for r in report if r.get('residual')]
+print(f'  residual (round 6): {len(rres)} gating / tally key reads on {len({r["cell"] for r in rres})} cells — OK {sum(r["residual"]["state"] == "OK" for r in rres)} · '
+      f'FAIL {sum(r["residual"]["state"] == "FAIL" for r in rres)} · MISSING {sum(r["residual"]["state"] == "MISSING" for r in rres)}')
 units = sorted({f'{r["lane"]} {r["gatingUnit"]}' for r in report if r['verdict'] == 'FAIL' and r['class'] == 'gating'})
 gating_unmeasured = [r for r in report if r['class'] == 'gating' and r['verdict'] == 'UNMEASURED']
 if units:
