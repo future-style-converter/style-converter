@@ -1,8 +1,8 @@
 wire-differential (run)
-  PRE     /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/wave55-wl7a-pre
-  POST    /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/wave55-wl7a-post
+  PRE     <wt:wl7a-pre>
+  POST    <wt:wl7a-post>
   OUT     /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave55-wl7a
-  EXPECT  /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/wl7a-expect-empty.txt (0 expected line(s))
+  EXPECT  <scratch>/wl7a-expect-empty.txt (0 expected line(s))
   RUN     /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave55-open (sections: css-anchor-position css-backgrounds css-counter-styles css-text css-writing-modes selectors)
 [pre css-anchor-position] 48 tests
 pre	css-anchor-position	0	0	0	0	extracted=48	fail=0
