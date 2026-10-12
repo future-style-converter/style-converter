@@ -37,5 +37,5 @@
    L6-android-paint-order   android-paint-order.geometry.py            [ID] grid-abspos-staticpos-align-items-center android      PASS       [control: expected to stay PASS]
    L6-android-paint-order   android-paint-order.geometry.py            [ID] flex-abspos-staticpos-align-self-safe-003 android     PASS       [control: expected to stay PASS]
 
-geometry-gate ../../../../../../../../../../../private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/teeth/fakeruns/combo-L6 (base wave54-final · sections css-flexbox,css-grid,filter-effects (NOT PROBED 9)): 28 keys — PASS 27 · FAIL 1 (gating 0) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+geometry-gate ../../../../../../../../../../..<scratch>/teeth/fakeruns/combo-L6 (base wave54-final · sections css-flexbox,css-grid,filter-effects (NOT PROBED 9)): 28 keys — PASS 27 · FAIL 1 (gating 0) · UNMEASURED 0 (gating 0) · probe self-check failures 0
   by class: gating 7 (PASS 7 FAIL 0) · control 20 (PASS 20 FAIL 0) · report 1 (PASS 0 FAIL 1) · withdrawn 0 (PASS 0 FAIL 0)

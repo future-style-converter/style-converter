@@ -14,9 +14,9 @@ Run the string verbatim with bash from any directory — e.g. bash -c "$(jq -r .
 
 ## 2. the round-3 string run verbatim
   Gradle daemons on the host before: []
-[own-processes] kill_own_gradle_daemons roots=[/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/tba2/wave55-fix-r3-teeth-wt /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/wave55-fix-r3-wt]: stopped [] left []
+[own-processes] kill_own_gradle_daemons roots=[/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf <scratch>/r3/tba2/wave55-fix-r3-teeth-wt <scratch>/r3/wave55-fix-r3-wt]: stopped [] left []
   from the shared tree's root: exit 0   (want 0)
-[own-processes] kill_own_gradle_daemons roots=[/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/tba2/wave55-fix-r3-teeth-wt /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/r3/wave55-fix-r3-wt]: stopped [] left []
+[own-processes] kill_own_gradle_daemons roots=[/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf <scratch>/r3/tba2/wave55-fix-r3-teeth-wt <scratch>/r3/wave55-fix-r3-wt]: stopped [] left []
   from /: exit 0   (want 0)
   Gradle daemons on the host after: []
 

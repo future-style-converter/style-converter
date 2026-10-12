@@ -57,5 +57,5 @@
    L4-ua-heading-margin     ua-heading-face.geometry.py                text-decoration-inset-014 android                          PASS       [report: expected WRONG until the target is fixed]
    L4-ua-heading-margin     ua-heading-face.geometry.py                text-decoration-inset-011 web                              PASS       [control: expected to stay PASS]
 
-geometry-gate ../../../../../../../../../../../private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/teeth/fakeruns/combo-L4 (base wave54-final · sections css-text-decor (NOT PROBED 7)): 47 keys — PASS 43 · FAIL 4 (gating 0) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+geometry-gate ../../../../../../../../../../..<scratch>/teeth/fakeruns/combo-L4 (base wave54-final · sections css-text-decor (NOT PROBED 7)): 47 keys — PASS 43 · FAIL 4 (gating 0) · UNMEASURED 0 (gating 0) · probe self-check failures 0
   by class: gating 12 (PASS 12 FAIL 0) · control 27 (PASS 27 FAIL 0) · report 8 (PASS 4 FAIL 4) · withdrawn 0 (PASS 0 FAIL 0)

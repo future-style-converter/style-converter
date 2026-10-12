@@ -42,5 +42,5 @@
    L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] bidi-tab-001 ios                                       PASS       [control: expected to stay PASS]
    L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] anchor-position-multicol-004 android red               PASS       [control: expected to stay PASS]
 
-geometry-gate ../../../../../../../../../../../private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/teeth/fakeruns/combo-L3 (base wave54-final · sections selectors,css-text,css-anchor-position,css-writing-modes (NOT PROBED 11)): 30 keys — PASS 28 · FAIL 2 (gating 0) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+geometry-gate ../../../../../../../../../../..<scratch>/teeth/fakeruns/combo-L3 (base wave54-final · sections selectors,css-text,css-anchor-position,css-writing-modes (NOT PROBED 11)): 30 keys — PASS 28 · FAIL 2 (gating 0) · UNMEASURED 0 (gating 0) · probe self-check failures 0
   by class: gating 7 (PASS 7 FAIL 0) · control 21 (PASS 21 FAIL 0) · report 2 (PASS 0 FAIL 2) · withdrawn 0 (PASS 0 FAIL 0)

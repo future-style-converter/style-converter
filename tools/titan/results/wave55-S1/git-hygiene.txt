@@ -1,0 +1,78 @@
+# S1 git hygiene record (read-only commands on the shared tree; HEAD 1b53f3a3, landed range b4f64963..5bbc2a41)
+## git status --short (at S1 start, before this dir existed): <empty>
+## git stash list | wc -l: 0
+## tools/titan/runs/wave55-lock: ls: tools/titan/runs/wave55-lock: No such file or directory
+## git diff --stat b4f64963 5bbc2a41 (summary):  668 files changed, 66327 insertions(+), 247 deletions(-)
+## non-results paths in the range: 84
+## records commit fb94a502 path prefixes:
+   6    tools/titan/results/wave54-oof-layout
+ 125    tools/titan/results/wave55-android-paint-order
+ 132    tools/titan/results/wave55-cbb-android
+  68    tools/titan/results/wave55-counter-suffix-rows
+  29    tools/titan/results/wave55-hyphen-ios-linebox
+  74    tools/titan/results/wave55-instruments
+  27    tools/titan/results/wave55-positioned-parent-slot
+ 120    tools/titan/results/wave55-ua-heading-margin
+## probe / log / png / build files among the 84 non-results paths: 0
+## seam patches: exactly one seam file each, unit patches touch none
+   L7 U2 unit patch seam files: none
+   L7 U3 unit patch seam files: none
+   L7 U4 unit patch seam files: none
+   L7 U6-compose unit patch seam files: none
+   L7 U6-swift unit patch seam files: none
+   L7 U6-web unit patch seam files: none
+   L7 U6-tooling unit patch seam files: none
+   L7 U5 unit patch seam files: none
+   L6 U1 unit patch seam files: none
+   L6 U2 unit patch seam files: none
+   L6 U3 unit patch seam files: none
+   L4 U1-android unit patch seam files: none
+   L4 U1-android seam-1.patch -> ['ComponentRenderer.kt'] (registered ComponentRenderer.kt) OK
+   L4 U1-ios unit patch seam files: none
+   L4 U1-ios seam-2.patch -> ['ComponentRenderer.swift'] (registered ComponentRenderer.swift) OK
+   L4 U2-android unit patch seam files: none
+   L4 U2-android seam-3.patch -> ['ComponentRenderer.kt'] (registered ComponentRenderer.kt) OK
+   L4 U2-ios unit patch seam files: none
+   L4 U2-ios seam-4.patch -> ['ComponentRenderer.swift'] (registered ComponentRenderer.swift) OK
+   L2 U1 unit patch seam files: none
+   L2 U1 seam-1.patch -> ['ComponentRenderer.kt'] (registered ComponentRenderer.kt) OK
+   L2 U2 unit patch seam files: none
+   L3 U1 unit patch seam files: none
+   L3 U1 seam-1.patch -> ['ComponentRenderer.kt'] (registered ComponentRenderer.kt) OK
+   L3 U2 unit patch seam files: none
+   L5 U1-ios unit patch seam files: none
+   L5 U1-ios seam-1.patch -> ['ComponentRenderer.swift'] (registered ComponentRenderer.swift) OK
+   L5 U2o-ios unit patch seam files: none
+   L5 U2o-ios seam-2.patch -> ['ComponentRenderer.swift'] (registered ComponentRenderer.swift) OK
+   L5 U2i-ios seam-3.patch -> ['ComponentRenderer.swift'] (registered ComponentRenderer.swift) OK
+   L5 U2o-android unit patch seam files: none
+   L5 U2o-android seam-4.patch -> ['ComponentRenderer.kt'] (registered ComponentRenderer.kt) OK
+   L5 U2i-android seam-5.patch -> ['ComponentRenderer.kt'] (registered ComponentRenderer.kt) OK
+   L1 NB-ios unit patch seam files: none
+   L1 NB-ios seam-1.patch -> ['ComponentRenderer.swift'] (registered ComponentRenderer.swift) OK
+   L5 U3-ios unit patch seam files: none
+   L5 U3-ios seam-6.patch -> ['ComponentRenderer.swift'] (registered ComponentRenderer.swift) OK
+   L5 D unit patch seam files: none
+   L1 NB-ios-b unit patch seam files: none
+   L1 NB-ios-b seam-1b.patch -> ['ComponentRenderer.swift'] (registered ComponentRenderer.swift) OK
+   L5 U1-ios-LRM unit patch seam files: none
+## scratchpad-path grep (session id / claude-501) over tracked wave-55 files, TREES: lines excluded:
+HEAD:tools/titan/results/wave55-gate/prelanding/censuses-and-deliveries.md:181:  - 40 L4 `mutations/*.{red,green}.txt` files hold 1469 `<scratchpad-path>` lines (xcodebuild logs);
+HEAD:tools/titan/results/wave55-instruments/unit-U3.patch:6:-# ab-arms55.selftest.out.txt — 2026-10-11T18:34:42Z; runner sha256 5cd6fccbc928768d…; scratch <scratchpad-path>
+HEAD:tools/titan/results/wave55-plan/fix-r3.guard-proof.out.txt:17:[own-processes] kill_own_gradle_daemons roots=[/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fb
+HEAD:tools/titan/results/wave55-plan/fix-r3.guard-proof.out.txt:19:[own-processes] kill_own_gradle_daemons roots=[/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fb
+HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/ab-dry.out.txt:2:ab-arms55 (dry) — root <scratchpad-path> · branch
+HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/ab-dry.out.txt:9:      driver --plan | run-dir: <scratchpad-path>
+HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gate-out/combo-L1.txt:42:geometry-gate ../../../../../../../../../../..<scratchpad-path> (base wave54-final · sections css
+HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gate-out/combo-L2.txt:38:geometry-gate ../../../../../../../../../../..<scratchpad-path> (base wave54-final · sections css
+HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gate-out/combo-L3.txt:45:geometry-gate ../../../../../../../../../../..<scratchpad-path> (base wave54-final · sections sel
+HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gate-out/combo-L4.txt:60:geometry-gate ../../../../../../../../../../..<scratchpad-path> (base wave54-final · sections css
+HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gate-out/combo-L5.txt:28:geometry-gate ../../../../../../../../../../..<scratchpad-path> (base wave54-final · sections css
+HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gate-out/combo-L6.txt:40:geometry-gate ../../../../../../../../../../..<scratchpad-path> (base wave54-final · sections css
+HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gg_refusals.out.txt:10:gating capture missing (003 ios) → exit 3?   exit 3 :: geometry-gate ../../../../../../../../../..
+HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gg_refusals.out.txt:11:L1 fixed (control: exit 0)                   exit 0 :: geometry-gate ../../../../../../../../../../.
+HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gg_refusals.out.txt:12:section absent from the run → exit 3?        exit 3 :: geometry-gate ../../../../../../../../../..
+HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/lu-check.run1.land-units.out.txt:2:root    <scratchpad-path>
+HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/lu-check.run1.land-units.out.txt:3:HEAD    640276a0 (detached)   export dir (private, removed at exit): <scratchpad-path>
+HEAD:tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/rec/run-adj.out.txt:6:adjudicate allmet-final.json --geometry ../out/L1-fixed.json -> exit 2 :: GEOMETRY PAIR: ../out/L1-fi
+HEAD:tools/titan/results/wave55-ua-heading-margin/skeptic.md:58:- **Scratch pointers.** No scratchpad pointer appears in any patch (grep for `private/tmp|scratchpad|claude-501`: 0 hits).
