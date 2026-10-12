@@ -8,9 +8,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
+import com.styleconverter.runtime.borders.behindContentBorder
+import com.styleconverter.runtime.borders.drawInOrder
 import com.styleconverter.runtime.core.types.ValueExtractors.LineStyle
 
 /**
@@ -67,8 +70,11 @@ object BorderSideApplier {
      * Fast path: single Modifier.border() call when the entire border is
      * uniform + solid. Slow path: one drawBehind pass that strokes each
      * side independently.
+     * [behindContent] (wave 55, L6 U2; BordersFacade.applySidesBehindContent):
+     * the band paints BEFORE the content (CSS 2.1 Appendix E §E.2); the
+     * default false keeps every other caller's chain exactly as it was.
      */
-    fun applyBorders(modifier: Modifier, config: AllBordersConfig): Modifier {
+    fun applyBorders(modifier: Modifier, config: AllBordersConfig, behindContent: Boolean = false): Modifier {
         if (!config.hasBorders) return modifier
 
         // Fast path: every side identical + DECLARED SOLID — delegates to
@@ -79,6 +85,8 @@ object BorderSideApplier {
         if (config.isUniform && config.top.hasBorder && config.top.style == LineStyle.SOLID) {
             val width = config.top.width ?: 1.dp
             val color = config.top.color ?: Color.Black
+            // L6 U2: the same androidx band arithmetic on RectangleShape, painted behind the content.
+            if (behindContent) return modifier.behindContentBorder(width, color, RectangleShape)
             return modifier.border(width, color)
         }
 
@@ -94,9 +102,10 @@ object BorderSideApplier {
         // and the per-side mixed audit fixtures all showing as borderless
         // boxes despite the IR carrying valid border-width / border-style
         // values. Painting after `drawContent()` puts the border on top
-        // of the background and lets it survive the cascade.
-        return modifier.drawWithContent {
-            drawContent()
+        // of the background and lets it survive the cascade. Wave 55 (L6 U2):
+        // with [behindContent] the node sits INNER of the background, so the
+        // band can paint before the content (band → children, CSS 2.1 E.2).
+        val paintSides: DrawScope.() -> Unit = {
             // Pull each side's width once (absent = no border on that side).
             val topWidth = config.top.width?.toPx() ?: 0f
             val endWidth = config.end.width?.toPx() ?: 0f
@@ -122,6 +131,8 @@ object BorderSideApplier {
                 style = config.start.style, color = config.start.color
             )
         }
+        // Band then content through the shared drawInOrder (L6 U2), else the legacy content-then-band.
+        return modifier.drawWithContent { if (behindContent) drawInOrder({ paintSides() }, { drawContent() }) else { drawContent(); paintSides() } }
     }
 
     // Enum identifying which side is currently being painted — drives
