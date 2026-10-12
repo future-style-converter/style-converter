@@ -1,0 +1,1247 @@
+
+━━━ gate set [1]: fixtures/visual-test.json ━━━
+
+[0;34m━━━ Converting fixtures/visual-test.json → IR ━━━[0m
+[CSS Parser] Parsed 3 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 3 properties (0 generic)
+[CSS Parser] Parsed 3 properties (0 generic)
+[CSS Parser] Parsed 3 properties (0 generic)
+[CSS Parser] Parsed 3 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 5 properties (0 generic)
+[CSS Parser] Parsed 5 properties (0 generic)
+[CSS Parser] Parsed 5 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 5 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 5 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'border: 3px solid #2c3e50' → border-top-width, border-right-width, border-bottom-width, border-left-width, border-top-style, border-right-style, border-bottom-style, border-left-style, border-top-color, border-right-color, border-bottom-color, border-left-color
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 16 properties (0 generic)
+[CSS Parser] Expanded 'border: 2px dashed #e74c3c' → border-top-width, border-right-width, border-bottom-width, border-left-width, border-top-style, border-right-style, border-bottom-style, border-left-style, border-top-color, border-right-color, border-bottom-color, border-left-color
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 16 properties (0 generic)
+[CSS Parser] Expanded 'border-top: 4px solid red' → border-top-width, border-top-style, border-top-color
+[CSS Parser] Expanded 'border-right: 2px dashed green' → border-right-width, border-right-style, border-right-color
+[CSS Parser] Expanded 'border-bottom: 4px solid blue' → border-bottom-width, border-bottom-style, border-bottom-color
+[CSS Parser] Expanded 'border-left: 2px dotted orange' → border-left-width, border-left-style, border-left-color
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 16 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 10px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 9 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 50px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'padding: 15px 30px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 9 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 50%' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 9 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 30px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 5 properties (0 generic)
+[CSS Parser] Expanded 'padding: 30px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 5 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 50%' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 5 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 8px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Expanded 'padding: 30px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'gap: 10px' → row-gap, column-gap
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 9 properties (0 generic)
+[CSS Parser] Expanded 'gap: 8px' → row-gap, column-gap
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 9 properties (0 generic)
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 8 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 8 properties (0 generic)
+[CSS Parser] Expanded 'gap: 10px' → row-gap, column-gap
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 10 properties (0 generic)
+[CSS Parser] Expanded 'gap: 10px' → row-gap, column-gap
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 9 properties (0 generic)
+[CSS Parser] Expanded 'gap: 8px' → row-gap, column-gap
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 9 properties (0 generic)
+[CSS Parser] Expanded 'gap: 5px' → row-gap, column-gap
+[CSS Parser] Expanded 'padding: 5px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 10 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 8 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'text-decoration: underline' → text-decoration-line
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'text-decoration: line-through' → text-decoration-line
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 9 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 8 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 8 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 8 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 8 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 8 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 8 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'overflow: hidden' → overflow-x, overflow-y
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 10 properties (0 generic)
+[CSS Parser] Expanded 'outline: 3px solid #e74c3c' → outline-width, outline-style, outline-color
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 9 properties (0 generic)
+[CSS Parser] Expanded 'outline: 2px dashed #3498db' → outline-width, outline-style, outline-color
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 9 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'overflow: hidden' → overflow-x, overflow-y
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 9 properties (0 generic)
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 8 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 12px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 11 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 8px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'padding: 12px 24px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 11 properties (0 generic)
+[CSS Parser] Expanded 'border: 2px solid #3498db' → border-top-width, border-right-width, border-bottom-width, border-left-width, border-top-style, border-right-style, border-bottom-style, border-left-style, border-top-color, border-right-color, border-bottom-color, border-left-color
+[CSS Parser] Expanded 'border-radius: 8px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'padding: 10px 22px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 22 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 12px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'padding: 4px 12px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 12 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 50%' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'border: 3px solid white' → border-top-width, border-right-width, border-bottom-width, border-left-width, border-top-style, border-right-style, border-bottom-style, border-left-style, border-top-color, border-right-color, border-bottom-color, border-left-color
+[CSS Parser] Parsed 20 properties (0 generic)
+[CSS Parser] Expanded 'border: 1px solid #bdc3c7' → border-top-width, border-right-width, border-bottom-width, border-left-width, border-top-style, border-right-style, border-bottom-style, border-left-style, border-top-color, border-right-color, border-bottom-color, border-left-color
+[CSS Parser] Expanded 'border-radius: 6px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'padding: 12px 16px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 22 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 16px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'padding: 6px 14px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 11 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 6px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'padding: 8px 12px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 12 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 16px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'border: 1px solid rgba(255,255,255,0.3)' → border-top-width, border-right-width, border-bottom-width, border-left-width, border-top-style, border-right-style, border-bottom-style, border-left-style, border-top-color, border-right-color, border-bottom-color, border-left-color
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 22 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 20px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'padding: 25px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 10 properties (0 generic)
+[CSS Parser] Expanded 'padding: 15px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 9 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 25%' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 9999px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'padding: 15px 30px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 9 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 5px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'gap: 5px' → row-gap, column-gap
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Expanded 'border: 2px solid #333' → border-top-width, border-right-width, border-bottom-width, border-left-width, border-top-style, border-right-style, border-bottom-style, border-left-style, border-top-color, border-right-color, border-bottom-color, border-left-color
+[CSS Parser] Expanded 'border-radius: 8px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Parsed 25 properties (0 generic)
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 20px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'padding: 25px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 10 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 15px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'padding: 20px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 9 properties (0 generic)
+[style-converter] Wrote out/tmpOutput.json
+[0;32m[test-all][0m out/tmpOutput.json written
+[0;32m[test-all][0m 109 components
+[0;32m[test-all][0m ↳ Converting fixtures/visual-test.json → IR took 5s
+
+[0;34m━━━ Syncing IR to each platform ━━━[0m
+[0;32m[test-all][0m IR synced
+[0;32m[test-all][0m ↳ Syncing IR to each platform took 0s
+
+[0;34m━━━ iOS capture ━━━[0m
+[0;32m[test-all][0m simulator: iPhone 17 Pro (0BB986A6-1EAD-4916-9276-079235324DA1)
+[0;32m[test-all][0m building…
+[0;32m[test-all][0m installed + launching
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 109 captured…
+  2 / 109 captured…
+  29 / 109 captured…
+  62 / 109 captured…
+  98 / 109 captured…
+  109 / 109 captured…
+[0;32m[test-all][0m pulled 109 iOS screenshots
+✓ normalized PNGs: 109 rewritten, 0 unchanged, 0 failed
+[0;32m[test-all][0m android: using already-connected device (count=1)
+[0;32m[test-all][0m android: adb pinned to emulator-5554
+[0;32m[test-all][0m ↳ iOS capture took 130s
+
+[0;34m━━━ Android capture ━━━[0m
+[0;32m[test-all][0m emulator: 390×844 @ 160dpi
+[0;32m[test-all][0m building + installing APK…
+Installed on 1 device.
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 109 captured…
+  0 / 109 captured…
+  3 / 109 captured…
+  6 / 109 captured…
+  10 / 109 captured…
+  13 / 109 captured…
+  17 / 109 captured…
+  20 / 109 captured…
+  23 / 109 captured…
+  27 / 109 captured…
+  30 / 109 captured…
+  34 / 109 captured…
+  37 / 109 captured…
+  41 / 109 captured…
+  44 / 109 captured…
+  47 / 109 captured…
+  51 / 109 captured…
+  54 / 109 captured…
+  58 / 109 captured…
+  61 / 109 captured…
+  64 / 109 captured…
+  68 / 109 captured…
+  71 / 109 captured…
+  74 / 109 captured…
+  78 / 109 captured…
+  81 / 109 captured…
+  85 / 109 captured…
+  88 / 109 captured…
+  92 / 109 captured…
+  95 / 109 captured…
+  99 / 109 captured…
+  102 / 109 captured…
+  106 / 109 captured…
+  109 / 109 captured…
+[0;32m[test-all][0m pulled 109 Android screenshots
+[0;32m[test-all][0m ↳ Android capture took 73s
+
+[0;34m━━━ Web capture ━━━[0m
+[web-port-guard] port 3000 is held by pid 96596 (/Users/dranak/.nvm/versions/node/v22.21.0/bin/node --require /Users/dranak/Documents/Proje) — not this checkout's vite, not touching it
+[1;33m[test-all][0m web port 3000 is in use by another program — using 3300 for this run
+[0;32m[test-all][0m waiting for vite @ :3300…
+→ loading http://localhost:3300/?mode=capture
+  gallery reports 109 / 109 canvases rendered
+  capturing 109 canvases via 390×7880 clip → /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/web-harness/screenshots
+✓ captured 109 / 109 canvases
+[0;32m[test-all][0m captured 109 web screenshots
+[0;32m[test-all][0m ↳ Web capture took 6s
+
+[0;34m━━━ Generating comparison report ━━━[0m
+→ collecting captures…
+  109 unique component(s) across platforms
+  000_Sizing_Fixed.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  001_Sizing_MinMax.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  002_Sizing_AspectRatio.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  003_Sizing_PercentWidth.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  004_Sizing_MaxWidthPercent.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  005_Sizing_HeightPercent.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  006_Padding_All.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  007_Padding_Mixed.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  008_Margin_Offset.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  009_Color_Hex.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  010_Color_RGB.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  011_Color_RGBA.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  012_Color_HSL.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  013_Color_Named.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  014_Opacity_Half.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  015_Opacity_Quarter.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  016_Border_Solid.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  017_Border_Dashed.png… iOS-Android 1.00 · iOS-web 0.97 · Android-web 0.97
+  018_Border_Mixed.png… iOS-Android 1.00 · iOS-web 0.99 · Android-web 0.99
+  019_BorderRadius_Uniform.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  020_BorderRadius_Pill.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  021_BorderRadius_Circle.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  022_BorderRadius_Mixed.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  023_Shadow_Simple.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  024_Shadow_Colored.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  025_Shadow_Multiple.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  026_Shadow_Inset.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  027_Shadow_Spread.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  028_Gradient_Linear.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  029_Gradient_Radial.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  030_Gradient_Conic.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  031_Gradient_MultiStop.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  032_Filter_Blur.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  033_Filter_Brightness.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  034_Filter_Grayscale.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  035_Filter_Sepia.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  036_Filter_Combined.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  037_Transform_Rotate.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  038_Transform_Scale.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  039_Transform_Translate.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  040_Transform_Skew.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  041_Transform_Combined.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  042_Transform_Origin.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  043_Zoom_150.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  044_Zoom_75.png… iOS-Android 1.00 · iOS-web 0.99 · Android-web 0.99
+  045_Zoom_200.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  046_Perspective_Rotate.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  047_ClipPath_Circle.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  048_ClipPath_Ellipse.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  049_ClipPath_Polygon.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  050_ClipPath_Inset.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  051_Flex_Row.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  052_Flex_Column.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  053_Flex_JustifyCenter.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  054_Flex_SpaceBetween.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  055_Flex_AlignCenter.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  056_Flex_Wrap.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  057_Grid_Simple.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  058_Grid_ThreeCol.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  059_Grid_FixedTracks.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  060_Typography_Size.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  061_Typography_Weight.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  062_Typography_Italic.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  063_Typography_LineHeight.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  064_Typography_LetterSpacing.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  065_Typography_Uppercase.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  066_Typography_Underline.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  067_Typography_Strikethrough.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  068_Typography_TextIndent.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  069_Typography_FontMono.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  070_Typography_FontSerif.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  071_Typography_Subscript.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  072_Typography_Superscript.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  073_Typography_FontCondensed.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  074_Typography_FontExpanded.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  075_Typography_FontUltraCondensed.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  076_Typography_FontUltraExpanded.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  077_TextShadow_Simple.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  078_TextShadow_Glow.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  079_TextAlign_Center.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  080_TextOverflow_Ellipsis.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  081_Outline_Solid.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  082_Outline_Dashed.png… iOS-Android 1.00 · iOS-web 0.98 · Android-web 0.98
+  083_ZIndex_Stacking.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  084_Visibility_Hidden.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  085_Overflow_Hidden.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  086_Position_Relative.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  087_BlendMode_Multiply.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  088_BlendMode_Screen.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  089_Card_Complete.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  090_Button_Primary.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  091_Button_Outline.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  092_Badge_Success.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  093_Avatar_Circle.png… iOS-Android 0.99 · iOS-web 1.00 · Android-web 0.99
+  094_Input_Field.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  095_Tag_Chip.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  096_Tooltip_Style.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  097_Glass_Effect.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  098_Neumorphic_Light.png… iOS-Android 0.99 · iOS-web 0.99 · Android-web 1.00
+  099_Edge_NegativeOffset.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  100_Edge_PercentRadius.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  101_Edge_VeryLargeRadius.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  102_Edge_ZeroOpacity.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  103_Edge_TinyText.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  104_Edge_HugeText.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  105_Edge_DeepNesting.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  106_Edge_MultiTransform.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  107_Edge_InsetRoundShadow.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  108_Edge_GradientWithRadius.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+
+✓ report: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html
+  [phase-b] SKIPPED — baseline-stats.json was recorded from "fixtures/combinations/all-then-color.json" but this run is "fixtures/visual-test.json". Regenerate it with `node tools/visual/baseline-stats.mjs` after a run of this fixture.
+· cross-platform gate: 327 pair(s) · 4 known divergence(s) · 0 unexpected
+✓ no regressions vs baseline (327 platform-comparisons ran)
+[0;32m[test-all][0m ↳ Generating comparison report took 27s
+
+[0;34m━━━ Done ━━━[0m
+
+  [0;32m✓[0m iOS: 109 screenshot(s)
+  [0;32m✓[0m Android: 109 screenshot(s)
+  [0;32m✓[0m web: 109 screenshot(s)
+
+  [0;32mtotal elapsed: 241s[0m
+
+  Report: [0;34m/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html[0m
+[test-all] --gate-set: fixtures/composition-test.json has NO committed baseline under tools/visual/baseline/ — running it WITHOUT --baseline (gate + oracle only); seed with: UPDATE_BASELINE=1 ./test-all.sh fixtures/composition-test.json
+
+━━━ gate set [2]: fixtures/composition-test.json ━━━
+
+[0;34m━━━ Converting fixtures/composition-test.json → IR ━━━[0m
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'overflow: hidden' → overflow-x, overflow-y
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'overflow: visible' → overflow-x, overflow-y
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'border-radius: 24px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'overflow: hidden' → overflow-x, overflow-y
+[CSS Parser] Parsed 10 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'padding: 16px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Expanded 'border: 8px solid #e74c3c' → border-top-width, border-right-width, border-bottom-width, border-left-width, border-top-style, border-right-style, border-bottom-style, border-left-style, border-top-color, border-right-color, border-bottom-color, border-left-color
+[CSS Parser] Parsed 20 properties (0 generic)
+[CSS Parser] Parsed 3 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 8 properties (0 generic)
+[CSS Parser] Expanded 'padding: 10px' → padding-top, padding-right, padding-bottom, padding-left
+[CSS Parser] Parsed 8 properties (0 generic)
+[CSS Parser] Parsed 3 properties (0 generic)
+[CSS Parser] Parsed 5 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[style-converter] Wrote out/tmpOutput.json
+[0;32m[test-all][0m out/tmpOutput.json written
+[0;32m[test-all][0m 32 components
+[0;32m[test-all][0m ↳ Converting fixtures/composition-test.json → IR took 4s
+
+[0;34m━━━ Syncing IR to each platform ━━━[0m
+[0;32m[test-all][0m IR synced
+[0;32m[test-all][0m ↳ Syncing IR to each platform took 0s
+
+[0;34m━━━ iOS capture ━━━[0m
+[0;32m[test-all][0m simulator: iPhone 17 Pro (0BB986A6-1EAD-4916-9276-079235324DA1)
+[0;32m[test-all][0m building…
+[0;32m[test-all][0m installed + launching
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 32 captured…
+  0 / 32 captured…
+  31 / 32 captured…
+  32 / 32 captured…
+[0;32m[test-all][0m pulled 32 iOS screenshots
+✓ normalized PNGs: 32 rewritten, 0 unchanged, 0 failed
+[0;32m[test-all][0m android: using already-connected device (count=1)
+[0;32m[test-all][0m android: adb pinned to emulator-5554
+[0;32m[test-all][0m ↳ iOS capture took 111s
+
+[0;34m━━━ Android capture ━━━[0m
+[0;32m[test-all][0m emulator: 390×844 @ 160dpi
+[0;32m[test-all][0m building + installing APK…
+Installed on 1 device.
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 32 captured…
+  0 / 32 captured…
+  0 / 32 captured…
+  0 / 32 captured…
+  0 / 32 captured…
+  0 / 32 captured…
+  0 / 32 captured…
+  0 / 32 captured…
+  0 / 32 captured…
+  0 / 32 captured…
+  0 / 32 captured…
+[1;33m[test-all][0m Android count has been stuck at 0 for 20s
+[1;33m[test-all][0m app may have crashed — check: /Users/dranak/Library/Android/sdk/platform-tools/adb logcat | grep com.styleconverter.test
+[0;32m[test-all][0m pulled 0 Android screenshots
+[0;32m[test-all][0m ↳ Android capture took 76s
+
+[0;34m━━━ Web capture ━━━[0m
+[web-port-guard] port 3000 is held by pid 96596 (/Users/dranak/.nvm/versions/node/v22.21.0/bin/node --require /Users/dranak/Documents/Proje) — not this checkout's vite, not touching it
+[1;33m[test-all][0m web port 3000 is in use by another program — using 3300 for this run
+[0;32m[test-all][0m waiting for vite @ :3300…
+→ loading http://localhost:3300/?mode=capture
+  gallery reports 32 / 32 canvases rendered
+  capturing 32 canvases via 390×2464 clip → /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/web-harness/screenshots
+✓ captured 32 / 32 canvases
+[0;32m[test-all][0m captured 32 web screenshots
+[0;32m[test-all][0m ↳ Web capture took 15s
+
+[0;34m━━━ Generating comparison report ━━━[0m
+→ collecting captures…
+  32 unique component(s) across platforms
+  000_Blend_Multiply_OverGradient.png… iOS-web 1.00
+  001_Blend_Normal_OverGradient_Control.png… iOS-web 1.00
+  002_layer.png… iOS-web 1.00
+  003_Blend_Screen_OverGradient.png… iOS-web 1.00
+  004_Blend_Difference_OverGradient.png… iOS-web 1.00
+  005_Blend_Overlay_OverGradient.png… iOS-web 1.00
+  006_Backdrop_Blur_OverStripes.png… iOS-web 0.87
+  007_Backdrop_None_OverStripes_Control.png… iOS-web 1.00
+  008_glass.png… iOS-web 1.00
+  009_Backdrop_Saturate_OverStripes.png… iOS-web 0.98
+  010_Overflow_Hidden_ClipsChild.png… iOS-web 1.00
+  011_Overflow_Visible_Control.png… iOS-web 1.00
+  012_big.png… iOS-web 1.00
+  013_Overflow_Hidden_WithRadius.png… iOS-web 0.96
+  014_ZOrder_Ascending.png… iOS-web 1.00
+  015_a.png… iOS-web 1.00
+  016_b.png… iOS-web 1.00
+  017_c.png… iOS-web 1.00
+  018_ZOrder_Descending.png… iOS-web 1.00
+  019_a.png… iOS-web 1.00
+  020_b.png… iOS-web 1.00
+  021_c.png… iOS-web 1.00
+  022_ZOrder_SourceOrder_NoIndex.png… iOS-web 1.00
+  023_a.png… iOS-web 1.00
+  024_b.png… iOS-web 1.00
+  025_c.png… iOS-web 1.00
+  026_Nested_BoxModel_PaddingBorder.png… iOS-web 1.00
+  027_inner.png… iOS-web 1.00
+  028_Nested_ThreeDeep.png… iOS-web 1.00
+  029_mid.png… iOS-web 1.00
+  030_leaf.png… iOS-web 1.00
+  031_Nested_OpacityGroup.png… iOS-web 1.00
+
+✓ report: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html
+  [phase-b] SKIPPED — baseline-stats.json was recorded from "fixtures/combinations/all-then-color.json" but this run is "fixtures/composition-test.json". Regenerate it with `node tools/visual/baseline-stats.mjs` after a run of this fixture.
+· cross-platform gate: 32 pair(s) · 2 known divergence(s) · 0 unexpected
+[0;32m[test-all][0m ↳ Generating comparison report took 2s
+
+[0;34m━━━ Done ━━━[0m
+
+  [0;32m✓[0m iOS: 32 screenshot(s)
+  [0;31m✗[0m Android: MISSING (capture failed — not skipped)
+  [0;32m✓[0m web: 32 screenshot(s)
+[0;31m[test-all][0m Android: captured 0 of 32 components and SKIP_ANDROID was not set — a missing/short column is a capture FAILURE, not a result
+
+  [0;32mtotal elapsed: 208s[0m
+
+  Report: [0;34m/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html[0m
+
+  [0;31m✗ column presence: a platform column is MISSING or SHORT (exit 7)[0m
+     The comparator's verdict covered only the columns that exist. Fix the capture (crash /
+     adb / simulator / poll exhaustion) — or set SKIP_<PLATFORM>=1 if the omission is deliberate.
+
+━━━ gate set [3]: fixtures/properties/effects/filter-sepia-amounts.json ━━━
+
+[0;34m━━━ Converting fixtures/properties/effects/filter-sepia-amounts.json → IR ━━━[0m
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[style-converter] Wrote out/tmpOutput.json
+[0;32m[test-all][0m out/tmpOutput.json written
+[0;32m[test-all][0m 8 components
+[0;32m[test-all][0m ↳ Converting fixtures/properties/effects/filter-sepia-amounts.json → IR took 9s
+
+[0;34m━━━ Syncing IR to each platform ━━━[0m
+[0;32m[test-all][0m IR synced
+[0;32m[test-all][0m ↳ Syncing IR to each platform took 0s
+
+[0;34m━━━ iOS capture ━━━[0m
+[0;32m[test-all][0m simulator: iPhone 17 Pro (0BB986A6-1EAD-4916-9276-079235324DA1)
+[0;32m[test-all][0m building…
+[0;32m[test-all][0m installed + launching
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 8 captured…
+  8 / 8 captured…
+[0;32m[test-all][0m pulled 8 iOS screenshots
+✓ normalized PNGs: 8 rewritten, 0 unchanged, 0 failed
+[0;32m[test-all][0m android: using already-connected device (count=1)
+[0;32m[test-all][0m android: adb pinned to emulator-5554
+[0;32m[test-all][0m ↳ iOS capture took 253s
+
+[0;34m━━━ Android capture ━━━[0m
+[0;32m[test-all][0m emulator: 390×844 @ 160dpi
+[0;32m[test-all][0m building + installing APK…
+Installed on 1 device.
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 8 captured…
+  0 / 8 captured…
+  2 / 8 captured…
+  6 / 8 captured…
+  8 / 8 captured…
+[0;32m[test-all][0m pulled 8 Android screenshots
+[0;32m[test-all][0m ↳ Android capture took 13s
+
+[0;34m━━━ Web capture ━━━[0m
+[web-port-guard] port 3000 is held by pid 96596 (/Users/dranak/.nvm/versions/node/v22.21.0/bin/node --require /Users/dranak/Documents/Proje) — not this checkout's vite, not touching it
+[1;33m[test-all][0m web port 3000 is in use by another program — using 3300 for this run
+[0;32m[test-all][0m waiting for vite @ :3300…
+→ loading http://localhost:3300/?mode=capture
+  gallery reports 8 / 8 canvases rendered
+  capturing 8 canvases via 390×844 clip → /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/web-harness/screenshots
+✓ captured 8 / 8 canvases
+[0;32m[test-all][0m captured 8 web screenshots
+[0;32m[test-all][0m ↳ Web capture took 7s
+
+[0;34m━━━ Generating comparison report ━━━[0m
+→ collecting captures…
+  8 unique component(s) across platforms
+  000_Sepia_Zero.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  001_Sepia_Half.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  002_Sepia_Fixture.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  003_Sepia_Full.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  004_Sepia_ExtendedRange.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  005_Sepia_White.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  006_Sepia_Translucent.png… iOS-Android 0.99 · iOS-web 0.99 · Android-web 1.00
+  007_Sepia_OverClamp.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+
+✓ report: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html
+  [phase-b] SKIPPED — baseline-stats.json was recorded from "fixtures/combinations/all-then-color.json" but this run is "fixtures/properties/effects/filter-sepia-amounts.json". Regenerate it with `node tools/visual/baseline-stats.mjs` after a run of this fixture.
+· cross-platform gate: 24 pair(s) · 2 known divergence(s) · 0 unexpected
+· spec oracle: 24 platform-component check(s) · 0 violation(s) · 2 waived
+  ⚠ waived: iOS · Sepia_Translucent · fill — expected rgb(90,92,95) ±1/channel · measured rgb(95,117,129) · Δmax 34
+      waiver: ledgered 2026-08-28: iOS composites the sepia layer src-over, which is exact for opaque content and wrong for translucent (coverage A comes out A*a+(1-A*a)*A). The additive alternative was tried and reverted because it stops SwiftUI Text being filtered at all. iOS renders (95,117,129) vs the spec's (90,92,95). See cross-platform-expectations.json Sepia_Translucent and FilterApplier.swift's sepia comment.
+  ⚠ waived: iOS · Sepia_Translucent · box — expected 120×40 ±1px · measured 0×0 · Δ 120×40
+      waiver: ledgered 2026-08-28: iOS composites the sepia layer src-over, which is exact for opaque content and wrong for translucent (coverage A comes out A*a+(1-A*a)*A). The additive alternative was tried and reverted because it stops SwiftUI Text being filtered at all. iOS renders (95,117,129) vs the spec's (90,92,95). See cross-platform-expectations.json Sepia_Translucent and FilterApplier.swift's sepia comment.
+✓ no regressions vs baseline (24 platform-comparisons ran)
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/test-all.sh: child setpgid (81099 to 81099): Operation not permitted
+[0;32m[test-all][0m ↳ Generating comparison report took 2s
+
+[0;34m━━━ Done ━━━[0m
+
+  [0;32m✓[0m iOS: 8 screenshot(s)
+  [0;32m✓[0m Android: 8 screenshot(s)
+  [0;32m✓[0m web: 8 screenshot(s)
+
+  [0;32mtotal elapsed: 284s[0m
+
+  Report: [0;34m/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html[0m
+[test-all] --gate-set: fixtures/combinations/nested-transforms.json has NO committed baseline under tools/visual/baseline/ — running it WITHOUT --baseline (gate + oracle only); seed with: UPDATE_BASELINE=1 ./test-all.sh fixtures/combinations/nested-transforms.json
+
+━━━ gate set [4]: fixtures/combinations/nested-transforms.json ━━━
+
+[0;34m━━━ Converting fixtures/combinations/nested-transforms.json → IR ━━━[0m
+[CSS Parser] Parsed 3 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[style-converter] Wrote out/tmpOutput.json
+[0;32m[test-all][0m out/tmpOutput.json written
+[0;32m[test-all][0m 8 components
+[0;32m[test-all][0m ↳ Converting fixtures/combinations/nested-transforms.json → IR took 4s
+
+[0;34m━━━ Syncing IR to each platform ━━━[0m
+[0;32m[test-all][0m IR synced
+[0;32m[test-all][0m ↳ Syncing IR to each platform took 0s
+
+[0;34m━━━ iOS capture ━━━[0m
+[0;32m[test-all][0m simulator: iPhone 17 Pro (0BB986A6-1EAD-4916-9276-079235324DA1)
+[0;32m[test-all][0m building…
+[0;32m[test-all][0m installed + launching
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 8 captured…
+  8 / 8 captured…
+[0;32m[test-all][0m pulled 8 iOS screenshots
+✓ normalized PNGs: 8 rewritten, 0 unchanged, 0 failed
+[0;32m[test-all][0m android: using already-connected device (count=1)
+[0;32m[test-all][0m android: adb pinned to emulator-5554
+[0;32m[test-all][0m ↳ iOS capture took 106s
+
+[0;34m━━━ Android capture ━━━[0m
+[0;32m[test-all][0m emulator: 390×844 @ 160dpi
+[0;32m[test-all][0m building + installing APK…
+Installed on 1 device.
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 8 captured…
+  1 / 8 captured…
+  4 / 8 captured…
+  8 / 8 captured…
+[0;32m[test-all][0m pulled 8 Android screenshots
+[0;32m[test-all][0m ↳ Android capture took 9s
+
+[0;34m━━━ Web capture ━━━[0m
+[web-port-guard] port 3000 is held by pid 96596 (/Users/dranak/.nvm/versions/node/v22.21.0/bin/node --require /Users/dranak/Documents/Proje) — not this checkout's vite, not touching it
+[1;33m[test-all][0m web port 3000 is in use by another program — using 3300 for this run
+[0;32m[test-all][0m waiting for vite @ :3300…
+→ loading http://localhost:3300/?mode=capture
+  gallery reports 8 / 8 canvases rendered
+  capturing 8 canvases via 390×844 clip → /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/web-harness/screenshots
+✓ captured 8 / 8 canvases
+[0;32m[test-all][0m captured 8 web screenshots
+[0;32m[test-all][0m ↳ Web capture took 6s
+
+[0;34m━━━ Generating comparison report ━━━[0m
+→ collecting captures…
+  8 unique component(s) across platforms
+  000_NT_Control_ChildRotate.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  001_box.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  002_NT_ParentScaleX_ChildRotate.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  003_box.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  004_NT_ParentRotate_ChildScaleX.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  005_box.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  006_NT_ParentRotate90_ChildTranslate.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  007_box.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+
+✓ report: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html
+  [phase-b] SKIPPED — baseline-stats.json was recorded from "fixtures/combinations/all-then-color.json" but this run is "fixtures/combinations/nested-transforms.json". Regenerate it with `node tools/visual/baseline-stats.mjs` after a run of this fixture.
+· cross-platform gate: 24 pair(s) · 0 known divergence(s) · 0 unexpected
+· spec oracle: 12 platform-component check(s) · 0 violation(s)
+[0;32m[test-all][0m ↳ Generating comparison report took 1s
+
+[0;34m━━━ Done ━━━[0m
+
+  [0;32m✓[0m iOS: 8 screenshot(s)
+  [0;32m✓[0m Android: 8 screenshot(s)
+  [0;32m✓[0m web: 8 screenshot(s)
+
+  [0;32mtotal elapsed: 126s[0m
+
+  Report: [0;34m/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html[0m
+[test-all] --gate-set: fixtures/combinations/radius-overflow-transform.json has NO committed baseline under tools/visual/baseline/ — running it WITHOUT --baseline (gate + oracle only); seed with: UPDATE_BASELINE=1 ./test-all.sh fixtures/combinations/radius-overflow-transform.json
+
+━━━ gate set [5]: fixtures/combinations/radius-overflow-transform.json ━━━
+
+[0;34m━━━ Converting fixtures/combinations/radius-overflow-transform.json → IR ━━━[0m
+[CSS Parser] Expanded 'overflow: hidden' → overflow-x, overflow-y
+[CSS Parser] Expanded 'margin: 24px' → margin-top, margin-right, margin-bottom, margin-left
+[CSS Parser] Parsed 10 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'overflow: hidden' → overflow-x, overflow-y
+[CSS Parser] Expanded 'border-radius: 24px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'margin: 24px' → margin-top, margin-right, margin-bottom, margin-left
+[CSS Parser] Parsed 14 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Expanded 'overflow: hidden' → overflow-x, overflow-y
+[CSS Parser] Expanded 'border-radius: 24px' → border-top-left-radius, border-top-right-radius, border-bottom-right-radius, border-bottom-left-radius
+[CSS Parser] Expanded 'margin: 24px' → margin-top, margin-right, margin-bottom, margin-left
+[CSS Parser] Parsed 14 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'overflow: hidden' → overflow-x, overflow-y
+[CSS Parser] Expanded 'margin: 24px' → margin-top, margin-right, margin-bottom, margin-left
+[CSS Parser] Parsed 10 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[style-converter] Wrote out/tmpOutput.json
+[0;32m[test-all][0m out/tmpOutput.json written
+[0;32m[test-all][0m 4 components
+[0;32m[test-all][0m ↳ Converting fixtures/combinations/radius-overflow-transform.json → IR took 4s
+
+[0;34m━━━ Syncing IR to each platform ━━━[0m
+[0;32m[test-all][0m IR synced
+[0;32m[test-all][0m ↳ Syncing IR to each platform took 0s
+
+[0;34m━━━ iOS capture ━━━[0m
+[0;32m[test-all][0m simulator: iPhone 17 Pro (0BB986A6-1EAD-4916-9276-079235324DA1)
+[0;32m[test-all][0m building…
+[0;32m[test-all][0m installed + launching
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 4 captured…
+  4 / 4 captured…
+[0;32m[test-all][0m pulled 4 iOS screenshots
+✓ normalized PNGs: 4 rewritten, 0 unchanged, 0 failed
+[0;32m[test-all][0m android: using already-connected device (count=1)
+[0;32m[test-all][0m android: adb pinned to emulator-5554
+[0;32m[test-all][0m ↳ iOS capture took 105s
+
+[0;34m━━━ Android capture ━━━[0m
+[0;32m[test-all][0m emulator: 390×844 @ 160dpi
+[0;32m[test-all][0m building + installing APK…
+Installed on 1 device.
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 4 captured…
+  1 / 4 captured…
+  4 / 4 captured…
+[0;32m[test-all][0m pulled 4 Android screenshots
+[0;32m[test-all][0m ↳ Android capture took 9s
+
+[0;34m━━━ Web capture ━━━[0m
+[web-port-guard] port 3000 is held by pid 96596 (/Users/dranak/.nvm/versions/node/v22.21.0/bin/node --require /Users/dranak/Documents/Proje) — not this checkout's vite, not touching it
+[1;33m[test-all][0m web port 3000 is in use by another program — using 3300 for this run
+[0;32m[test-all][0m waiting for vite @ :3300…
+→ loading http://localhost:3300/?mode=capture
+  gallery reports 4 / 4 canvases rendered
+  capturing 4 canvases via 390×844 clip → /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/web-harness/screenshots
+✓ captured 4 / 4 canvases
+[0;32m[test-all][0m captured 4 web screenshots
+[0;32m[test-all][0m ↳ Web capture took 5s
+
+[0;34m━━━ Generating comparison report ━━━[0m
+→ collecting captures…
+  4 unique component(s) across platforms
+  000_ROT_SquareClip_TranslatedChild.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  001_ROT_RadiusClip_TranslatedChild.png… iOS-Android 0.99 · iOS-web 0.99 · Android-web 1.00
+  002_ROT_RadiusClip_NoTransform.png… iOS-Android 0.98 · iOS-web 0.98 · Android-web 1.00
+  003_ROT_SelfRotate_ClippedChild.png… iOS-Android 0.98 · iOS-web 0.98 · Android-web 1.00
+
+✓ report: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html
+  [phase-b] SKIPPED — baseline-stats.json was recorded from "fixtures/combinations/all-then-color.json" but this run is "fixtures/combinations/radius-overflow-transform.json". Regenerate it with `node tools/visual/baseline-stats.mjs` after a run of this fixture.
+· cross-platform gate: 12 pair(s) · 0 known divergence(s) · 0 unexpected
+· spec oracle: 12 platform-component check(s) · 0 violation(s)
+[0;32m[test-all][0m ↳ Generating comparison report took 1s
+
+[0;34m━━━ Done ━━━[0m
+
+  [0;32m✓[0m iOS: 4 screenshot(s)
+  [0;32m✓[0m Android: 4 screenshot(s)
+  [0;32m✓[0m web: 4 screenshot(s)
+
+  [0;32mtotal elapsed: 124s[0m
+
+  Report: [0;34m/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html[0m
+[test-all] --gate-set: fixtures/combinations/transform-abspos-pivot.json has NO committed baseline under tools/visual/baseline/ — running it WITHOUT --baseline (gate + oracle only); seed with: UPDATE_BASELINE=1 ./test-all.sh fixtures/combinations/transform-abspos-pivot.json
+
+━━━ gate set [6]: fixtures/combinations/transform-abspos-pivot.json ━━━
+
+[0;34m━━━ Converting fixtures/combinations/transform-abspos-pivot.json → IR ━━━[0m
+[CSS Parser] Parsed 3 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Parsed 3 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 3 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 3 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[style-converter] Wrote out/tmpOutput.json
+[0;32m[test-all][0m out/tmpOutput.json written
+[0;32m[test-all][0m 12 components
+[0;32m[test-all][0m ↳ Converting fixtures/combinations/transform-abspos-pivot.json → IR took 4s
+
+[0;34m━━━ Syncing IR to each platform ━━━[0m
+[0;32m[test-all][0m IR synced
+[0;32m[test-all][0m ↳ Syncing IR to each platform took 0s
+
+[0;34m━━━ iOS capture ━━━[0m
+[0;32m[test-all][0m simulator: iPhone 17 Pro (0BB986A6-1EAD-4916-9276-079235324DA1)
+[0;32m[test-all][0m building…
+[0;32m[test-all][0m installed + launching
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 12 captured…
+  6 / 12 captured…
+  12 / 12 captured…
+[0;32m[test-all][0m pulled 12 iOS screenshots
+✓ normalized PNGs: 12 rewritten, 0 unchanged, 0 failed
+[0;32m[test-all][0m android: using already-connected device (count=1)
+[0;32m[test-all][0m android: adb pinned to emulator-5554
+[0;32m[test-all][0m ↳ iOS capture took 105s
+
+[0;34m━━━ Android capture ━━━[0m
+[0;32m[test-all][0m emulator: 390×844 @ 160dpi
+[0;32m[test-all][0m building + installing APK…
+Installed on 1 device.
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 12 captured…
+  1 / 12 captured…
+  5 / 12 captured…
+  8 / 12 captured…
+  11 / 12 captured…
+  12 / 12 captured…
+[0;32m[test-all][0m pulled 12 Android screenshots
+[0;32m[test-all][0m ↳ Android capture took 14s
+
+[0;34m━━━ Web capture ━━━[0m
+[web-port-guard] port 3000 is held by pid 96596 (/Users/dranak/.nvm/versions/node/v22.21.0/bin/node --require /Users/dranak/Documents/Proje) — not this checkout's vite, not touching it
+[1;33m[test-all][0m web port 3000 is in use by another program — using 3300 for this run
+[0;32m[test-all][0m waiting for vite @ :3300…
+→ loading http://localhost:3300/?mode=capture
+  gallery reports 12 / 12 canvases rendered
+  capturing 12 canvases via 390×844 clip → /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/web-harness/screenshots
+✓ captured 12 / 12 canvases
+[0;32m[test-all][0m captured 12 web screenshots
+[0;32m[test-all][0m ↳ Web capture took 5s
+
+[0;34m━━━ Generating comparison report ━━━[0m
+→ collecting captures…
+  12 unique component(s) across platforms
+  000_TAP_Control_Coincident.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  001_anchor.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  002_mover.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  003_TAP_Rotate45_Anchored.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  004_anchor.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  005_mover.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  006_TAP_ScaleX2_Anchored.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  007_anchor.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  008_mover.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  009_TAP_RotateY60_Anchored.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  010_anchor.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  011_mover.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+
+✓ report: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html
+  [phase-b] SKIPPED — baseline-stats.json was recorded from "fixtures/combinations/all-then-color.json" but this run is "fixtures/combinations/transform-abspos-pivot.json". Regenerate it with `node tools/visual/baseline-stats.mjs` after a run of this fixture.
+· cross-platform gate: 36 pair(s) · 0 known divergence(s) · 0 unexpected
+· spec oracle: 12 platform-component check(s) · 0 violation(s)
+[0;32m[test-all][0m ↳ Generating comparison report took 1s
+
+[0;34m━━━ Done ━━━[0m
+
+  [0;32m✓[0m iOS: 12 screenshot(s)
+  [0;32m✓[0m Android: 12 screenshot(s)
+  [0;32m✓[0m web: 12 screenshot(s)
+
+  [0;32mtotal elapsed: 129s[0m
+
+  Report: [0;34m/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html[0m
+[test-all] --gate-set: fixtures/combinations/blend-isolation.json has NO committed baseline under tools/visual/baseline/ — running it WITHOUT --baseline (gate + oracle only); seed with: UPDATE_BASELINE=1 ./test-all.sh fixtures/combinations/blend-isolation.json
+
+━━━ gate set [7]: fixtures/combinations/blend-isolation.json ━━━
+
+[0;34m━━━ Converting fixtures/combinations/blend-isolation.json → IR ━━━[0m
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[style-converter] Wrote out/tmpOutput.json
+[0;32m[test-all][0m out/tmpOutput.json written
+[0;32m[test-all][0m 7 components
+[0;32m[test-all][0m ↳ Converting fixtures/combinations/blend-isolation.json → IR took 3s
+
+[0;34m━━━ Syncing IR to each platform ━━━[0m
+[0;32m[test-all][0m IR synced
+[0;32m[test-all][0m ↳ Syncing IR to each platform took 1s
+
+[0;34m━━━ iOS capture ━━━[0m
+[0;32m[test-all][0m simulator: iPhone 17 Pro (0BB986A6-1EAD-4916-9276-079235324DA1)
+[0;32m[test-all][0m building…
+[0;32m[test-all][0m installed + launching
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 7 captured…
+  7 / 7 captured…
+[0;32m[test-all][0m pulled 7 iOS screenshots
+✓ normalized PNGs: 7 rewritten, 0 unchanged, 0 failed
+[0;32m[test-all][0m android: using already-connected device (count=1)
+[0;32m[test-all][0m android: adb pinned to emulator-5554
+[0;32m[test-all][0m ↳ iOS capture took 101s
+
+[0;34m━━━ Android capture ━━━[0m
+[0;32m[test-all][0m emulator: 390×844 @ 160dpi
+[0;32m[test-all][0m building + installing APK…
+Installed on 1 device.
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 7 captured…
+  1 / 7 captured…
+  4 / 7 captured…
+  7 / 7 captured…
+[0;32m[test-all][0m pulled 7 Android screenshots
+[0;32m[test-all][0m ↳ Android capture took 10s
+
+[0;34m━━━ Web capture ━━━[0m
+[web-port-guard] port 3000 is held by pid 96596 (/Users/dranak/.nvm/versions/node/v22.21.0/bin/node --require /Users/dranak/Documents/Proje) — not this checkout's vite, not touching it
+[1;33m[test-all][0m web port 3000 is in use by another program — using 3300 for this run
+[0;32m[test-all][0m waiting for vite @ :3300…
+→ loading http://localhost:3300/?mode=capture
+  gallery reports 7 / 7 canvases rendered
+  capturing 7 canvases via 390×844 clip → /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/web-harness/screenshots
+✓ captured 7 / 7 canvases
+[0;32m[test-all][0m captured 7 web screenshots
+[0;32m[test-all][0m ↳ Web capture took 5s
+
+[0;34m━━━ Generating comparison report ━━━[0m
+→ collecting captures…
+  7 unique component(s) across platforms
+  000_BI_Auto.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  001_wrapper.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  002_BI_Isolate.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  003_wrapper.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  004_BI_NoBlend_Control.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  005_wrapper.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  006_layer.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+
+✓ report: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html
+  [phase-b] SKIPPED — baseline-stats.json was recorded from "fixtures/combinations/all-then-color.json" but this run is "fixtures/combinations/blend-isolation.json". Regenerate it with `node tools/visual/baseline-stats.mjs` after a run of this fixture.
+· cross-platform gate: 21 pair(s) · 0 known divergence(s) · 0 unexpected
+· spec oracle: 9 platform-component check(s) · 0 violation(s)
+[0;32m[test-all][0m ↳ Generating comparison report took 1s
+
+[0;34m━━━ Done ━━━[0m
+
+  [0;32m✓[0m iOS: 7 screenshot(s)
+  [0;32m✓[0m Android: 7 screenshot(s)
+  [0;32m✓[0m web: 7 screenshot(s)
+
+  [0;32mtotal elapsed: 121s[0m
+
+  Report: [0;34m/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html[0m
+[test-all] --gate-set: fixtures/combinations/opacity-blend.json has NO committed baseline under tools/visual/baseline/ — running it WITHOUT --baseline (gate + oracle only); seed with: UPDATE_BASELINE=1 ./test-all.sh fixtures/combinations/opacity-blend.json
+
+━━━ gate set [8]: fixtures/combinations/opacity-blend.json ━━━
+
+[0;34m━━━ Converting fixtures/combinations/opacity-blend.json → IR ━━━[0m
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 8 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 7 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 8 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 8 properties (0 generic)
+[style-converter] Wrote out/tmpOutput.json
+[0;32m[test-all][0m out/tmpOutput.json written
+[0;32m[test-all][0m 6 components
+[0;32m[test-all][0m ↳ Converting fixtures/combinations/opacity-blend.json → IR took 4s
+
+[0;34m━━━ Syncing IR to each platform ━━━[0m
+[0;32m[test-all][0m IR synced
+[0;32m[test-all][0m ↳ Syncing IR to each platform took 0s
+
+[0;34m━━━ iOS capture ━━━[0m
+[0;32m[test-all][0m simulator: iPhone 17 Pro (0BB986A6-1EAD-4916-9276-079235324DA1)
+[0;32m[test-all][0m building…
+[0;32m[test-all][0m installed + launching
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 6 captured…
+  6 / 6 captured…
+[0;32m[test-all][0m pulled 6 iOS screenshots
+✓ normalized PNGs: 6 rewritten, 0 unchanged, 0 failed
+[0;32m[test-all][0m android: using already-connected device (count=1)
+[0;32m[test-all][0m android: adb pinned to emulator-5554
+[0;32m[test-all][0m ↳ iOS capture took 107s
+
+[0;34m━━━ Android capture ━━━[0m
+[0;32m[test-all][0m emulator: 390×844 @ 160dpi
+[0;32m[test-all][0m building + installing APK…
+Installed on 1 device.
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 6 captured…
+  0 / 6 captured…
+  4 / 6 captured…
+  6 / 6 captured…
+[0;32m[test-all][0m pulled 6 Android screenshots
+[0;32m[test-all][0m ↳ Android capture took 10s
+
+[0;34m━━━ Web capture ━━━[0m
+[web-port-guard] port 3000 is held by pid 96596 (/Users/dranak/.nvm/versions/node/v22.21.0/bin/node --require /Users/dranak/Documents/Proje) — not this checkout's vite, not touching it
+[1;33m[test-all][0m web port 3000 is in use by another program — using 3300 for this run
+[0;32m[test-all][0m waiting for vite @ :3300…
+→ loading http://localhost:3300/?mode=capture
+  gallery reports 6 / 6 canvases rendered
+  capturing 6 canvases via 390×844 clip → /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/web-harness/screenshots
+✓ captured 6 / 6 canvases
+[0;32m[test-all][0m captured 6 web screenshots
+[0;32m[test-all][0m ↳ Web capture took 6s
+
+[0;34m━━━ Generating comparison report ━━━[0m
+→ collecting captures…
+  6 unique component(s) across platforms
+  000_OB_Multiply_NoOpacity.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  001_OB_Multiply_Op50.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  002_OB_Screen_NoOpacity.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  003_OB_Screen_Op50.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  004_OB_Normal_Op50_Control.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  005_layer.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+
+✓ report: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html
+  [phase-b] SKIPPED — baseline-stats.json was recorded from "fixtures/combinations/all-then-color.json" but this run is "fixtures/combinations/opacity-blend.json". Regenerate it with `node tools/visual/baseline-stats.mjs` after a run of this fixture.
+· cross-platform gate: 18 pair(s) · 0 known divergence(s) · 0 unexpected
+· spec oracle: 15 platform-component check(s) · 0 violation(s)
+[0;32m[test-all][0m ↳ Generating comparison report took 1s
+
+[0;34m━━━ Done ━━━[0m
+
+  [0;32m✓[0m iOS: 6 screenshot(s)
+  [0;32m✓[0m Android: 6 screenshot(s)
+  [0;32m✓[0m web: 6 screenshot(s)
+
+  [0;32mtotal elapsed: 128s[0m
+
+  Report: [0;34m/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html[0m
+
+━━━ gate set [9]: fixtures/combinations/all-then-color.json ━━━
+
+[0;34m━━━ Converting fixtures/combinations/all-then-color.json → IR ━━━[0m
+[CSS Parser] Parsed 5 properties (0 generic)
+[CSS Parser] Parsed 3 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 4 properties (0 generic)
+[CSS Parser] Parsed 5 properties (0 generic)
+[CSS Parser] Parsed 8 properties (0 generic)
+[style-converter] Wrote out/tmpOutput.json
+[0;32m[test-all][0m out/tmpOutput.json written
+[0;32m[test-all][0m 6 components
+[0;32m[test-all][0m ↳ Converting fixtures/combinations/all-then-color.json → IR took 4s
+
+[0;34m━━━ Syncing IR to each platform ━━━[0m
+[0;32m[test-all][0m IR synced
+[0;32m[test-all][0m ↳ Syncing IR to each platform took 0s
+
+[0;34m━━━ iOS capture ━━━[0m
+[0;32m[test-all][0m simulator: iPhone 17 Pro (0BB986A6-1EAD-4916-9276-079235324DA1)
+[0;32m[test-all][0m building…
+[0;32m[test-all][0m installed + launching
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 6 captured…
+  6 / 6 captured…
+[0;32m[test-all][0m pulled 6 iOS screenshots
+✓ normalized PNGs: 6 rewritten, 0 unchanged, 0 failed
+[0;32m[test-all][0m android: using already-connected device (count=1)
+[0;32m[test-all][0m android: adb pinned to emulator-5554
+[0;32m[test-all][0m ↳ iOS capture took 114s
+
+[0;34m━━━ Android capture ━━━[0m
+[0;32m[test-all][0m emulator: 390×844 @ 160dpi
+[0;32m[test-all][0m building + installing APK…
+Installed on 1 device.
+[0;32m[test-all][0m waiting for per-component capture…
+  0 / 6 captured…
+  1 / 6 captured…
+  4 / 6 captured…
+  6 / 6 captured…
+[0;32m[test-all][0m pulled 6 Android screenshots
+[0;32m[test-all][0m ↳ Android capture took 10s
+
+[0;34m━━━ Web capture ━━━[0m
+[web-port-guard] port 3000 is held by pid 96596 (/Users/dranak/.nvm/versions/node/v22.21.0/bin/node --require /Users/dranak/Documents/Proje) — not this checkout's vite, not touching it
+[1;33m[test-all][0m web port 3000 is in use by another program — using 3300 for this run
+[0;32m[test-all][0m waiting for vite @ :3300…
+→ loading http://localhost:3300/?mode=capture
+  gallery reports 6 / 6 canvases rendered
+  capturing 6 canvases via 390×844 clip → /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/web-harness/screenshots
+✓ captured 6 / 6 canvases
+[0;32m[test-all][0m captured 6 web screenshots
+[0;32m[test-all][0m ↳ Web capture took 6s
+
+[0;34m━━━ Generating comparison report ━━━[0m
+→ collecting captures…
+  6 unique component(s) across platforms
+  000_ATC_AllThenProps.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  001_ATC_PropsThenAll_InGreenParent.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  002_reset.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  003_ATC_InitialUnderRedParent.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  004_span.png… iOS-Android 1.00 · iOS-web 1.00 · Android-web 1.00
+  005_ATC_DirectionSurvives.png… iOS-Android 1.00 · iOS-web 0.97 · Android-web 0.97
+
+✓ report: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html
+· phase-b drift: 18/18 pair(s) comparable · 0 downgrades
+· cross-platform gate: 18 pair(s) · 0 known divergence(s) · 0 unexpected
+· spec oracle: 12 platform-component check(s) · 0 violation(s)
+✓ no regressions vs baseline (18 platform-comparisons ran)
+[0;32m[test-all][0m ↳ Generating comparison report took 2s
+
+[0;34m━━━ Done ━━━[0m
+
+  [0;32m✓[0m iOS: 6 screenshot(s)
+  [0;32m✓[0m Android: 6 screenshot(s)
+  [0;32m✓[0m web: 6 screenshot(s)
+
+  [0;32mtotal elapsed: 136s[0m
+
+  Report: [0;34m/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/visual/report/index.html[0m
+
+━━━ gate set summary — 9 fixture(s), first non-zero exit re-raised ━━━
+  exit 0  fixtures/visual-test.json
+  exit 7  fixtures/composition-test.json   (gate-only: no committed baseline)
+  exit 0  fixtures/properties/effects/filter-sepia-amounts.json
+  exit 0  fixtures/combinations/nested-transforms.json   (gate-only: no committed baseline)
+  exit 0  fixtures/combinations/radius-overflow-transform.json   (gate-only: no committed baseline)
+  exit 0  fixtures/combinations/transform-abspos-pivot.json   (gate-only: no committed baseline)
+  exit 0  fixtures/combinations/blend-isolation.json   (gate-only: no committed baseline)
+  exit 0  fixtures/combinations/opacity-blend.json   (gate-only: no committed baseline)
+  exit 0  fixtures/combinations/all-then-color.json
