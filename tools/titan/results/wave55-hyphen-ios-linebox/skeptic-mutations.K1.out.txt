@@ -1,0 +1,5 @@
+K1 [round the SUM of the raw terms (variant: terms unrounded, one rounding at the return)] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 buildFailed False failed ['testP2EachTermRoundsAloneNeverTheSum', 'testP3HalvesRoundAwayFromZero'] (want ['testP2EachTermRoundsAloneNeverTheSum']) -> RED as required
+   restored: exit 0 passed 9/9 failed [] skipped [] -> GREEN
+   verdict OK
+skeptic mutations: ALL OK

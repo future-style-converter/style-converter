@@ -1,0 +1,12 @@
+=== U5-M — mutated tools/titan/bidi-marker-paint.mjs (python rc 0; sha256 now e8f6cca820326eed…)
+--- red run: node --test tools/titan/bidi-bake.test.mjs
+not ok 71 - S6-2 paint decline: each read effect on the item or its ::marker declines; the ROOT's own does not
+  error: |-
+# pass 67
+# fail 1
+red run rc=1
+--- green run
+# pass 68
+# fail 0
+green run rc=0
+

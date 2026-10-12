@@ -1,0 +1,79 @@
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [M] text-decoration-inset-005 web                          PASS       [control: expected to stay PASS]
+!! L4-ua-heading-margin     ua-heading-margin.geometry.py              [M] text-decoration-inset-005 ios                          FAIL       [GATING -> revert U1-ios]
+     line: [M] text-decoration-inset-005 ios bands [(109, 130, 16, 191)] → GEOMETRY WRONG (band 1 y109–130 vs y130–151±1 (16px face: wave54-final + the 21 px UA margin))
+!! L4-ua-heading-margin     ua-heading-margin.geometry.py              [M] text-decoration-inset-005 android                      FAIL       [GATING -> revert U1-android]
+     line: [M] text-decoration-inset-005 android bands [(107, 131, 17, 191)] → GEOMETRY WRONG (band 1 y107–131 vs y128–152±1 (16px face: wave54-final + the 21 px UA margin))
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [M] text-decoration-inset-006 web                          PASS       [control: expected to stay PASS]
+!! L4-ua-heading-margin     ua-heading-margin.geometry.py              [M] text-decoration-inset-006 ios                          FAIL       [GATING -> revert U1-ios]
+     line: [M] text-decoration-inset-006 ios bands [(109, 130, 16, 194)] → GEOMETRY WRONG (band 1 y109–130 vs y130–151±1 (16px face: wave54-final + the 21 px UA margin))
+!! L4-ua-heading-margin     ua-heading-margin.geometry.py              [M] text-decoration-inset-006 android                      FAIL       [GATING -> revert U1-android]
+     line: [M] text-decoration-inset-006 android bands [(107, 131, 17, 194)] → GEOMETRY WRONG (band 1 y107–131 vs y128–152±1 (16px face: wave54-final + the 21 px UA margin))
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [M] text-decoration-inset-014 web                          PASS       [control: expected to stay PASS]
+!! L4-ua-heading-margin     ua-heading-margin.geometry.py              [M] text-decoration-inset-014 ios                          FAIL       [GATING -> revert U1-ios]
+     line: [M] text-decoration-inset-014 ios bands [(111, 121, 17, 133), (128, 137, 16, 84)] → GEOMETRY WRONG (band 1 y111–121 vs y128–138±1 (16px face: wave54-final + the 17 px UA margin))
+!! L4-ua-heading-margin     ua-heading-margin.geometry.py              [M] text-decoration-inset-014 android                      FAIL       [GATING -> revert U1-android]
+     line: [M] text-decoration-inset-014 android bands [(111, 122, 17, 132), (127, 138, 16, 84)] → GEOMETRY WRONG (band 1 y111–122 vs y128–139±1 (16px face: wave54-final + the 17 px UA margin))
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [M] text-decoration-inset-011 web                          PASS       [control: expected to stay PASS]
+!! L4-ua-heading-margin     ua-heading-margin.geometry.py              [M] text-decoration-inset-011 ios                          FAIL       [GATING -> revert U1-ios]
+     line: [M] text-decoration-inset-011 ios bands [(137, 151, 57, 184), (169, 186, 85, 183), (208, 208, 170, 185), (265, 282, 39, 184)] → GEOMETRY WRONG (band 1 y137–151 vs y158–172±1 (wave54-final + the 21 px UA margin))
+!! L4-ua-heading-margin     ua-heading-margin.geometry.py              [M] text-decoration-inset-011 android                      FAIL       [GATING -> revert U1-android]
+     line: [M] text-decoration-inset-011 android bands [(136, 155, 57, 184), (168, 187, 80, 184), (209, 209, 166, 180), (265, 283, 41, 184)] → GEOMETRY WRONG (band 1 y136–155 vs y157–176±1 (wave54-final + the 21 px UA margin))
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [F] text-decoration-inset-005 web                          PASS       [control: expected to stay PASS]
+!! L4-ua-heading-margin     ua-heading-margin.geometry.py              [F] text-decoration-inset-005 ios                          FAIL       [GATING -> revert U2-ios]
+     line: [F] text-decoration-inset-005 ios bands [(109, 130, 16, 191)] Δx1 -145 profile 0.516 → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(109, 130, 16, 191)]))
+ - L4-ua-heading-margin     ua-heading-margin.geometry.py              [F] text-decoration-inset-005 android                      FAIL       [report: expected WRONG until the target is fixed]
+     line: [F] text-decoration-inset-005 android bands [(107, 131, 17, 191)] Δx1 -145 profile 0.479 ink b1:56/22c-86.4% → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(107, 131, 17, 191)]))
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [F] text-decoration-inset-006 web                          PASS       [control: expected to stay PASS]
+!! L4-ua-heading-margin     ua-heading-margin.geometry.py              [F] text-decoration-inset-006 ios                          FAIL       [GATING -> revert U2-ios]
+     line: [F] text-decoration-inset-006 ios bands [(109, 130, 16, 194)] Δx1 -137 profile 0.498 → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(109, 130, 16, 194)]))
+ - L4-ua-heading-margin     ua-heading-margin.geometry.py              [F] text-decoration-inset-006 android                      FAIL       [report: expected WRONG until the target is fixed]
+     line: [F] text-decoration-inset-006 android bands [(107, 131, 17, 194)] Δx1 -137 profile 0.474 ink b1:64/22c-86.3% → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(107, 131, 17, 194)]))
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [F] text-decoration-inset-014 web                          PASS       [control: expected to stay PASS]
+!! L4-ua-heading-margin     ua-heading-margin.geometry.py              [F] text-decoration-inset-014 ios                          FAIL       [GATING -> revert U2-ios]
+     line: [F] text-decoration-inset-014 ios bands [(111, 121, 17, 133), (128, 137, 16, 84)] Δx1 -125 profile 0.454 ink b1:36/17c-85.0% → GEOMETRY WRONG (line-1 band 11 px tall (< 20: the 2em face is missing))
+!! L4-ua-heading-margin     ua-heading-margin.geometry.py              [F] text-decoration-inset-014 android                      FAIL       [GATING -> revert U2-android]
+     line: [F] text-decoration-inset-014 android bands [(111, 122, 17, 132), (127, 138, 16, 84)] Δx1 -126 profile 0.410 ink b1:31/17c-86.2% → GEOMETRY WRONG (line-1 band 12 px tall (< 20: the 2em face is missing))
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-001 ios                          PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-001 android                      PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-002 ios                          PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-002 android                      PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-003 ios                          PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-003 android                      PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-004 ios                          PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-004 android                      PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-009 ios                          PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-009 android                      PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-015 ios                          PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-015 android                      PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-016 ios                          PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-016 android                      PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-024 ios                          PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] text-decoration-inset-024 android                      PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] block-in-inline-015-print ios                          PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] block-in-inline-015-print android                      PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] s-11-1-1b-005 ios                                      PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-margin.geometry.py              [C] s-11-1-1b-005 android                                  PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-face.geometry.py                block-in-inline-015-print web                              PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-face.geometry.py                block-in-inline-015-print ios                              PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-face.geometry.py                block-in-inline-015-print android                          PASS       [control: expected to stay PASS]
+   L4-ua-heading-margin     ua-heading-face.geometry.py                text-decoration-inset-005 web                              PASS       [control: expected to stay PASS]
+ - L4-ua-heading-margin     ua-heading-face.geometry.py                text-decoration-inset-005 ios                              FAIL       [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-005 ios bands [(110, 130, 16, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 130, 16, 191)]))
+ - L4-ua-heading-margin     ua-heading-face.geometry.py                text-decoration-inset-005 android                          FAIL       [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-005 android bands [(110, 131, 17, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 131, 17, 191)]))
+   L4-ua-heading-margin     ua-heading-face.geometry.py                text-decoration-inset-006 web                              PASS       [control: expected to stay PASS]
+ - L4-ua-heading-margin     ua-heading-face.geometry.py                text-decoration-inset-006 ios                              FAIL       [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-006 ios bands [(110, 130, 16, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 130, 16, 194)]))
+ - L4-ua-heading-margin     ua-heading-face.geometry.py                text-decoration-inset-006 android                          FAIL       [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-006 android bands [(110, 131, 17, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 131, 17, 194)]))
+   L4-ua-heading-margin     ua-heading-face.geometry.py                text-decoration-inset-014 web                              PASS       [control: expected to stay PASS]
+ - L4-ua-heading-margin     ua-heading-face.geometry.py                text-decoration-inset-014 ios                              FAIL       [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-014 ios bands [(111, 121, 17, 133), (128, 137, 16, 84)] → GEOMETRY WRONG (line-1 band 11 px tall (< 20: the 2em face is missing))
+ - L4-ua-heading-margin     ua-heading-face.geometry.py                text-decoration-inset-014 android                          FAIL       [report: expected WRONG until the target is fixed]
+     line: text-decoration-inset-014 android bands [(111, 122, 17, 132), (127, 138, 16, 84)] → GEOMETRY WRONG (line-1 band 12 px tall (< 20: the 2em face is missing))
+   L4-ua-heading-margin     ua-heading-face.geometry.py                text-decoration-inset-011 web                              PASS       [control: expected to stay PASS]
+
+geometry-gate wave54-final (base wave54-open): 54 keys — PASS 34 · FAIL 20 (gating 12) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 12 (PASS 0 FAIL 12) · control 34 (PASS 34 FAIL 0) · report 8 (PASS 0 FAIL 8) · withdrawn 0 (PASS 0 FAIL 0)
+revert rule 4 names: L4-ua-heading-margin U1-android, L4-ua-heading-margin U1-ios, L4-ua-heading-margin U2-android, L4-ua-heading-margin U2-ios
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)

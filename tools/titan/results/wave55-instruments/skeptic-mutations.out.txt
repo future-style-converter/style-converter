@@ -1,0 +1,389 @@
+=== U2-M1 tools/titan/wire-differential.mjs
+--- mutated rc=1
+not ok 2 - P2 one content change: expected → 0; unexpected → 5 UNEXPECTED; expected but absent → 5 MISSING (defect a)
+not ok 3 - P3 a uniform +2 shift after a +2 content change is RENUMBERED; a non-uniform or wrong shift is ANOMALOUS (defect e)
+not ok 4 - P4 a one-sided document → 4; a section present only on POST → 4 (defect d)
+not ok 5 - P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+not ok 6 - P5b the wave-54 mis-invocation shape (no per-test-ir on either side) → 4; nothing at all → 3; --no-status is printed
+not ok 9 - P7 the run path: stub steps on both trees → status.tsv rows and exit 0; a failing convert on POST is never a WARN
+# pass 3
+# fail 6
+--- restored rc=0
+# pass 9
+# fail 0
+=== U2-M2 tools/titan/wire-differential.mjs
+--- mutated rc=1
+not ok 4 - P4 a one-sided document → 4; a section present only on POST → 4 (defect d)
+# pass 8
+# fail 1
+--- restored rc=0
+# pass 9
+# fail 0
+=== U2-M3 tools/titan/wire-differential.mjs
+--- mutated rc=1
+not ok 3 - P3 a uniform +2 shift after a +2 content change is RENUMBERED; a non-uniform or wrong shift is ANOMALOUS (defect e)
+# pass 8
+# fail 1
+--- restored rc=0
+# pass 9
+# fail 0
+=== U2-X1 tools/titan/wire-differential.mjs
+--- mutated rc=1
+not ok 5 - P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+# pass 8
+# fail 1
+--- restored rc=0
+# pass 9
+# fail 0
+=== U2-X2 tools/titan/wire-differential.mjs
+--- mutated rc=1
+not ok 6 - P5b the wave-54 mis-invocation shape (no per-test-ir on either side) → 4; nothing at all → 3; --no-status is printed
+# pass 8
+# fail 1
+--- restored rc=0
+# pass 9
+# fail 0
+=== U2-X3 tools/titan/wire-differential.mjs
+--- mutated rc=0
+# pass 9
+# fail 0
+--- restored rc=0
+# pass 9
+# fail 0
+=== U2-X4 tools/titan/wire-differential.mjs
+--- mutated rc=0
+# pass 9
+# fail 0
+--- restored rc=0
+# pass 9
+# fail 0
+=== U2-X6 tools/titan/wire-differential.mjs
+--- mutated rc=0
+# pass 9
+# fail 0
+--- restored rc=0
+# pass 9
+# fail 0
+=== U2-X7 tools/titan/wire-differential.mjs
+--- mutated rc=0
+# pass 9
+# fail 0
+--- restored rc=0
+# pass 9
+# fail 0
+=== U2-X9 tools/titan/wire-differential.mjs
+--- mutated rc=1
+not ok 6 - P5b the wave-54 mis-invocation shape (no per-test-ir on either side) → 4; nothing at all → 3; --no-status is printed
+# pass 8
+# fail 1
+--- restored rc=0
+# pass 9
+# fail 0
+=== U2-M4 tools/titan/wire-differential.sh
+--- mutated rc=1
+not ok 7 - P6 --dry-run from another cwd with a relative OUT prints an absolute OUT equal to its realpath, and creates nothing
+# pass 8
+# fail 1
+--- restored rc=0
+# pass 9
+# fail 0
+=== U2-M4b tools/titan/wire-differential.sh
+--- mutated rc=0
+# pass 9
+# fail 0
+--- restored rc=0
+# pass 9
+# fail 0
+=== U2-M5 tools/titan/wire-differential.sh
+--- mutated rc=1
+not ok 8 - P6 PRE == POST → 2; PRE = this script's own checkout → 2
+# pass 8
+# fail 1
+--- restored rc=0
+# pass 9
+# fail 0
+=== U2-X5 tools/titan/wire-differential.sh
+--- mutated rc=1
+not ok 9 - P7 the run path: stub steps on both trees → status.tsv rows and exit 0; a failing convert on POST is never a WARN
+# pass 8
+# fail 1
+--- restored rc=0
+# pass 9
+# fail 0
+=== U2-X8 tools/titan/wire-differential.sh
+--- mutated rc=0
+# pass 9
+# fail 0
+--- restored rc=0
+# pass 9
+# fail 0
+=== U2-M4c tools/titan/wire-differential.sh
+--- mutated rc=1
+not ok 7 - P6 --dry-run from another cwd with a relative OUT prints an absolute OUT equal to its realpath, and creates nothing
+# pass 8
+# fail 1
+--- restored rc=0
+# pass 9
+# fail 0
+=== U5-U5a tools/titan/bidi-marker-paint.mjs
+--- mutated rc=1
+not ok 71 - S6-2 paint decline: each read effect on the item or its ::marker declines; the ROOT's own does not
+# Subtest: S6-4 paint decline: an unmeasured, failed, short or misaligned chain DECLINES — never a silent "clean"
+ok 73 - S6-4 paint decline: an unmeasured, failed, short or misaligned chain DECLINES — never a silent "clean"
+# pass 67
+# fail 1
+--- restored rc=0
+# pass 68
+# fail 0
+=== U5-U5b tools/titan/bidi-marker-paint.mjs
+--- mutated rc=0
+# Subtest: S6-4 paint decline: an unmeasured, failed, short or misaligned chain DECLINES — never a silent "clean"
+ok 73 - S6-4 paint decline: an unmeasured, failed, short or misaligned chain DECLINES — never a silent "clean"
+# pass 68
+# fail 0
+--- restored rc=0
+# pass 68
+# fail 0
+=== U5-U5c tools/titan/bidi-marker-paint.mjs
+--- mutated rc=1
+not ok 71 - S6-2 paint decline: each read effect on the item or its ::marker declines; the ROOT's own does not
+# Subtest: S6-4 paint decline: an unmeasured, failed, short or misaligned chain DECLINES — never a silent "clean"
+ok 73 - S6-4 paint decline: an unmeasured, failed, short or misaligned chain DECLINES — never a silent "clean"
+# pass 67
+# fail 1
+--- restored rc=0
+# pass 68
+# fail 0
+=== U4-a runtimes/web/src/renderer/InlineRuns.ts
+--- mutated rc=1
+ ❯ tests/renderer/InlineRunsLatitudeCitation.test.ts (2 tests | 1 failed) 25ms
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+ FAIL  tests/renderer/InlineRunsLatitudeCitation.test.ts > spec 03 §4.1 renderer latitude — the citation and the paragraph (wave-55 L7 U4) > (a) the breadcrumb of a word-splitting inert member cites rule 2 (renderer latitude)
+--- restored rc=0
+
+=== U4-U4b1 schema/spec/03-children.md
+--- mutated rc=1
+ ❯ tests/renderer/InlineRunsLatitudeCitation.test.ts (2 tests | 1 failed) 24ms
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+ FAIL  tests/renderer/InlineRunsLatitudeCitation.test.ts > spec 03 §4.1 renderer latitude — the citation and the paragraph (wave-55 L7 U4) > (b) §4.1 keeps exactly seven numbered rules, and the unnumbered latitude paragraph names both counters
+--- restored rc=0
+
+=== U4-U4b2 schema/spec/03-children.md
+--- mutated rc=1
+ ❯ tests/renderer/InlineRunsLatitudeCitation.test.ts (2 tests | 1 failed) 29ms
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+ FAIL  tests/renderer/InlineRunsLatitudeCitation.test.ts > spec 03 §4.1 renderer latitude — the citation and the paragraph (wave-55 L7 U4) > (b) §4.1 keeps exactly seven numbered rules, and the unnumbered latitude paragraph names both counters
+--- restored rc=0
+
+=== U4-U4b3 schema/spec/03-children.md
+--- mutated rc=0
+
+--- restored rc=0
+
+=== C1 runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/HyphenateCharacterExtractor.kt
+--- mutated rc=1
+FAIL HyphenateCharacterExtractorTest > ofTwoDeclarationsInOneBlockTheLastWins
+Tests 14 executed, 1 failed
+--- restored rc=0
+Tests 14 executed, 0 failed
+=== C2 runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt
+--- mutated rc=1
+FAIL PreBreakPipelineClampHyphenTest > C2 a one-line clamp hides back to the first soft hyphen and paints the run's hyphenate-character there
+Tests 14 executed, 1 failed
+--- restored rc=0
+Tests 14 executed, 0 failed
+=== C3 runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCuts.kt
+--- mutated rc=1
+FAIL SoftHyphenCutsTest > C3 lines the walk cannot align are answered by the wave-52 count, not dropped
+Tests 14 executed, 1 failed
+--- restored rc=0
+Tests 14 executed, 0 failed
+=== C4 runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt
+--- mutated rc=1
+FAIL OutOfFlowContainingBlockBranchesTest > C4 a filter object leaf (url or unresolved expression) establishes
+Tests 14 executed, 1 failed
+--- restored rc=0
+Tests 14 executed, 0 failed
+=== C5 runtimes/compose/src/main/java/com/styleconverter/runtime/performance/PerformanceExtractor.kt
+--- mutated rc=1
+FAIL OutOfFlowContainingBlockBranchesTest > C5 contain paint as a bare string primitive establishes
+Tests 14 executed, 1 failed
+--- restored rc=0
+Tests 14 executed, 0 failed
+=== C6 runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt
+--- mutated rc=1
+FAIL OutOfFlowContainingBlockBranchesTest > C6 an undecodable contain leaf answers false and leaves the decode breadcrumb
+Tests 14 executed, 1 failed
+--- restored rc=0
+Tests 14 executed, 0 failed
+=== C7 runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt
+--- mutated rc=1
+FAIL OutOfFlowContainingBlockBranchesTest > C7 a declared content-visibility leaves the implied-containment breadcrumb
+Tests 14 executed, 1 failed
+--- restored rc=0
+Tests 14 executed, 0 failed
+=== U6-W1 runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts
+--- mutated rc=1
+ ❯ tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx (7 tests | 1 failed) 37ms
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+ FAIL  tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx > InertOutOfFlowWordJoin — the branches no wave-54 test reached (wave-55 L7 U6-web) > W1 a member with its own child, runs or decorations is not one inert box → joined 0 (SK6-w1)
+--- restored rc=0
+
+=== U6-W2 runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts
+--- mutated rc=1
+ ❯ tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx (7 tests | 1 failed) 33ms
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+ FAIL  tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx > InertOutOfFlowWordJoin — the branches no wave-54 test reached (wave-55 L7 U6-web) > W2 a FIXED inert member is out of flow too (CSS 2.1 §9.3.1) → joined 1 (SK6-w2)
+--- restored rc=0
+
+=== U6-W3 runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts
+--- mutated rc=1
+ ❯ tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx (7 tests | 1 failed) 48ms
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+ FAIL  tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx > InertOutOfFlowWordJoin — the branches no wave-54 test reached (wave-55 L7 U6-web) > W3 [text, M, text, text]: the word runs on into the next entry, and the member lands at ITS first space (SK6-w5)
+--- restored rc=0
+
+=== U6-W4 runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts
+--- mutated rc=1
+ ❯ tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx (7 tests | 1 failed) 42ms
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+ FAIL  tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx > InertOutOfFlowWordJoin — the branches no wave-54 test reached (wave-55 L7 U6-web) > W4 alpha 0.3 paints → joined 0 (only alpha ≤ 0 is inert)
+--- restored rc=0
+
+=== U6-W5 runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts
+--- mutated rc=1
+ ❯ tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx (7 tests | 1 failed) 65ms
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+ FAIL  tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx > InertOutOfFlowWordJoin — the branches no wave-54 test reached (wave-55 L7 U6-web) > W5 `srgb.a` as the decimal string "0" reads as 0 (Kotlin floatOrNull) → joined 1 (SK6-w9)
+--- restored rc=0
+
+=== U6-W6 runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts
+--- mutated rc=1
+ ❯ tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx (7 tests | 1 failed) 41ms
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+ FAIL  tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx > InertOutOfFlowWordJoin — the branches no wave-54 test reached (wave-55 L7 U6-web) > W6 Position as the `{keyword}` object dialect (ValueExtractors.extractKeyword) → joined 1 (SK6-w10)
+--- restored rc=0
+
+=== U6-T1 tools/visual/label-chrome-check.mjs
+--- mutated rc=1
+not ok 1 - T1 a name that is a container under P1 but a leaf under P2 cannot be exempted as "container" (X1)
+# pass 1
+# fail 1
+--- restored rc=0
+# pass 2
+# fail 0
+=== U6-T2 tools/visual/label-chrome-check.mjs
+--- mutated rc=1
+not ok 2 - T2 clause (iv): paint on SOME would-be glyph pixels is not a label; paint on ALL of them is (X8)
+# pass 1
+# fail 1
+--- restored rc=0
+# pass 2
+# fail 0
+=== U6-T2b tools/visual/label-chrome-check.mjs
+--- mutated rc=1
+not ok 2 - T2 clause (iv): paint on SOME would-be glyph pixels is not a label; paint on ALL of them is (X8)
+# pass 1
+# fail 1
+--- restored rc=0
+# pass 2
+# fail 0
+=== S1 runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/wrapping/HyphenateCharacterExtractor.swift
+--- mutated rc=65
+** TEST FAILED **
+<wt>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/HyphenateCharacterCascadeTests.swift:32: error: -[StyleConverterRuntimeTests.HyphenateCharacterCascadeTests testS1OfTwoDeclarationsTheLastWins] : XCTAssertEqual failed: ("Optional("/-/")") is not equal to ("Optional("•")")
+<wt>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/HyphenateCharacterCascadeTests.swift:34: error: -[StyleConverterRuntimeTests.HyphenateCharacterCascadeTests testS1OfTwoDeclarationsTheLastWins] : XCTAssertEqual failed: ("Optional("•")") is not equal to ("Optional("/-/")")
+Test Case '-[StyleConverterRuntimeTests.HyphenateCharacterCascadeTests testS1OfTwoDeclarationsTheLastWins]' failed (2.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS2ContainPaintAsABareStringEstablishes]' passed (0.058 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS3AFilterObjectLeafEstablishes]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS4AnUndecodableContainLeafAnswersFalseAndLeavesTheDecodeBreadcrumb]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS5ADeclaredContentVisibilityLeavesTheImpliedContainmentBreadcrumb]' passed (0.008 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS6APositionedEstablisherLeavesItsBreadcrumb]' passed (0.003 seconds).
+--- restored rc=0
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.007 (0.086) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.008 (0.089) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.008 (0.091) seconds
+** TEST SUCCEEDED **
+=== S2 runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift
+--- mutated rc=65
+** TEST FAILED **
+<wt>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockBranchesTests.swift:39: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS2ContainPaintAsABareStringEstablishes] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.HyphenateCharacterCascadeTests testS1OfTwoDeclarationsTheLastWins]' passed (0.003 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS2ContainPaintAsABareStringEstablishes]' failed (2.120 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS3AFilterObjectLeafEstablishes]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS4AnUndecodableContainLeafAnswersFalseAndLeavesTheDecodeBreadcrumb]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS5ADeclaredContentVisibilityLeavesTheImpliedContainmentBreadcrumb]' passed (0.021 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS6APositionedEstablisherLeavesItsBreadcrumb]' passed (0.001 seconds).
+--- restored rc=0
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.006 (0.105) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.010 (0.111) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.010 (0.112) seconds
+** TEST SUCCEEDED **
+=== S3 runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift
+--- mutated rc=65
+** TEST FAILED **
+<wt>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockBranchesTests.swift:43: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS3AFilterObjectLeafEstablishes] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.HyphenateCharacterCascadeTests testS1OfTwoDeclarationsTheLastWins]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS2ContainPaintAsABareStringEstablishes]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS3AFilterObjectLeafEstablishes]' failed (1.775 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS4AnUndecodableContainLeafAnswersFalseAndLeavesTheDecodeBreadcrumb]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS5ADeclaredContentVisibilityLeavesTheImpliedContainmentBreadcrumb]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS6APositionedEstablisherLeavesItsBreadcrumb]' passed (0.001 seconds).
+--- restored rc=0
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.012 (0.013) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.015 (0.097) seconds
+** TEST SUCCEEDED **
+=== S4 runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift
+--- mutated rc=65
+** TEST FAILED **
+<wt>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockBranchesTests.swift:48: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS4AnUndecodableContainLeafAnswersFalseAndLeavesTheDecodeBreadcrumb] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.HyphenateCharacterCascadeTests testS1OfTwoDeclarationsTheLastWins]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS2ContainPaintAsABareStringEstablishes]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS3AFilterObjectLeafEstablishes]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS4AnUndecodableContainLeafAnswersFalseAndLeavesTheDecodeBreadcrumb]' failed (1.305 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS5ADeclaredContentVisibilityLeavesTheImpliedContainmentBreadcrumb]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS6APositionedEstablisherLeavesItsBreadcrumb]' passed (0.001 seconds).
+--- restored rc=0
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.085 (0.087) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.087 (0.090) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.087 (0.091) seconds
+** TEST SUCCEEDED **
+=== S5 runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift
+--- mutated rc=65
+** TEST FAILED **
+<wt>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockBranchesTests.swift:59: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS5ADeclaredContentVisibilityLeavesTheImpliedContainmentBreadcrumb] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.HyphenateCharacterCascadeTests testS1OfTwoDeclarationsTheLastWins]' passed (0.003 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS2ContainPaintAsABareStringEstablishes]' passed (0.005 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS3AFilterObjectLeafEstablishes]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS4AnUndecodableContainLeafAnswersFalseAndLeavesTheDecodeBreadcrumb]' passed (0.003 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS5ADeclaredContentVisibilityLeavesTheImpliedContainmentBreadcrumb]' failed (3.879 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS6APositionedEstablisherLeavesItsBreadcrumb]' passed (0.001 seconds).
+--- restored rc=0
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.091 (0.169) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.094 (0.174) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.094 (0.175) seconds
+** TEST SUCCEEDED **
+=== S6 runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift
+--- mutated rc=65
+** TEST FAILED **
+<wt>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockBranchesTests.swift:66: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS6APositionedEstablisherLeavesItsBreadcrumb] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.HyphenateCharacterCascadeTests testS1OfTwoDeclarationsTheLastWins]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS2ContainPaintAsABareStringEstablishes]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS3AFilterObjectLeafEstablishes]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS4AnUndecodableContainLeafAnswersFalseAndLeavesTheDecodeBreadcrumb]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS5ADeclaredContentVisibilityLeavesTheImpliedContainmentBreadcrumb]' passed (0.003 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS6APositionedEstablisherLeavesItsBreadcrumb]' failed (6.234 seconds).
+--- restored rc=0
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.004 (0.035) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.009 (0.042) seconds
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.009 (0.125) seconds
+** TEST SUCCEEDED **

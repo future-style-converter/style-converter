@@ -1,0 +1,165 @@
+# seam-1.patch — wave 55 lane L4 (ua-heading-margin), revert unit U1-android
+# seam file: runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+# base tree: 611c9f93 (= dev 0d0d3a3d + the committed wave-55 plan + the opening-gate records; the seam file is byte-identical at both)
+# seam file sha256 at base: 2445d9ea2674576fc0946e3f630f48b88d48f0f9d8c98df3249ba67d7a026aa5
+# anchor (PLAN §3 .kt row 1): RenderComponent cascade step :1157 `val rawProperties = …UAElementFontRule.apply(` … :1165
+#   `val unresolvedProperties = rawProperties`; inserts `val uaMarginProperties = …UaPositionedHeadingMargin.apply(component._tag,
+#   allReset.own, listUaProperties, rawProperties, enabled = LocalWptCaptureMode.current)` after :1162 and re-points :1165
+# patch-borne: NEW spacing/UaPositionedHeadingMarginSeamWiringTest.kt; the UAElementFontRuleSeamWiringTest.kt handoff token;
+#   the SeamReachabilityTest.kt module line after `"content/PseudoGeneratedBox.kt",` (:159, the pinned C10 anchor, cut on HEAD)
+# needs, in the SAME commit: unit-U1-android.patch (spacing/UaPositionedHeadingMargin.kt); applies before seam-3.patch
+# check: git apply --check tools/titan/results/wave55-ua-heading-margin/seam-1.patch
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+index 044cf241..babee508 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -1160,9 +1160,25 @@ object ComponentRenderer {
+             listUaProperties,
+             standsDown = com.styleconverter.runtime.typography.UAElementFontRule.headingStandsDown(component),
+         )
++        // Wave 55 (lane L4, U1-android) - the THIRD tag-keyed UA step: an
++        // OUT-OF-FLOW h1…h6 takes its UA `margin-block` (HTML §15.3, .67em
++        // for h1) over its UA-cascade face (the PRE-font-step list's em
++        // base, so the face gate cannot move it). Neither the §8.3.1 child
++        // plan (it bails on an out-of-flow child) nor the harness root stack
++        // reaches a NESTED abspos box, and CSS 2.1 §10.6.4 puts its static
++        // position at the margin edge - so the two longhands it appends paint
++        // like any declared margin. Author edges win (css-cascade-4 §6.1);
++        // identity outside WPT capture, so no committed capture moves.
++        val uaMarginProperties = com.styleconverter.runtime.spacing.UaPositionedHeadingMargin.apply(
++            component._tag,
++            allReset.own,
++            listUaProperties,
++            rawProperties,
++            enabled = LocalWptCaptureMode.current,
++        )
+         // The `all` reset already ran above (AllReset, before the merge); the
+         // post-merge drop-everything it replaced is gone.
+-        val unresolvedProperties = rawProperties
++        val unresolvedProperties = uaMarginProperties
+ 
+         // ── Wave-6 dynamic-value resolution ────────────────────────────
+         // Merge this component's custom-property definitions (the decoded
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
+index c7901fd2..0de6a0c2 100644
+--- a/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
+@@ -157,6 +157,9 @@ class SeamReachabilityTest {
+             // A2 — the generated-BOX path (fold + its pure claim half).
+             "content/PseudoBoxFold.kt",
+             "content/PseudoGeneratedBox.kt",
++            // Wave 55 (lane L4, U1-android) — the out-of-flow heading's UA
++            // margin; its ONLY caller is seam-1, which carries this line.
++            "spacing/UaPositionedHeadingMargin.kt",
+             // A5 — currentcolor / background-color inheritance / color-mix.
+             "color/CurrentColorBackground.kt",
+             "color/BackgroundColorInheritance.kt",
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMarginSeamWiringTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMarginSeamWiringTest.kt
+new file mode 100644
+index 00000000..03beec1f
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMarginSeamWiringTest.kt
+@@ -0,0 +1,74 @@
++package com.styleconverter.runtime.spacing
++
++// Wave 55 (lane L4 · ua-heading-margin, unit U1-android) — the SEAM WIRING
++// pin, shipped INSIDE tools/titan/results/wave55-ua-heading-margin/seam-1.patch
++// with the ComponentRenderer.kt hunk it reads (the UAElementFontRuleSeamWiringTest
++// precedent), so the tree never carries a pin that is red by construction
++// before the seam lands (rule 2b).
++//
++// Why: UaPositionedHeadingMarginTest pins the step on verbatim wire through a
++// replay, which stays green whatever the renderer does with it. RenderComponent
++// is a @Composable this module's plain JVM JUnit cannot execute, so this is a
++// SOURCE-level pin of the facts the replay assumes: (1) the step runs once,
++// with the element's tag and post-reset OWN list, the ListStyleUaRule output
++// as its em base and the UA font step's output as the list it extends;
++// (2) it is gated on the ambient WPT-capture flag; (3) it sits after the font
++// step and before the list DynamicValueResolver resolves.
++//
++// Mutations (executed, lane note "Pins"): HEAD's renderer (no seam);
++// `enabled = true`; the step fed `listUaProperties` as the list it extends.
++
++import java.io.File
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class UaPositionedHeadingMarginSeamWiringTest {
++
++    /** ComponentRenderer.kt, found by walking up to the repo root (the SeamReachabilityTest walk-up). */
++    private val renderer: File by lazy {
++        // The seam file's repo-relative path: the walk stops where it exists.
++        val anchor = "runtimes/compose/src/main/java/com/styleconverter/runtime/" +
++            "core/renderer/ComponentRenderer.kt"
++        // Start at the Gradle working directory (apps/android-harness/…).
++        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
++        // Climb until the anchor is visible (the repo root).
++        while (dir != null && !File(dir, anchor).exists()) dir = dir.parentFile
++        // A missing root is a broken pin, never a skip.
++        File(requireNotNull(dir) { "repo root not found" }, anchor)
++    }
++
++    /** The renderer source with whitespace runs collapsed: the pins read tokens, not layout. */
++    private val source: String by lazy { renderer.readText().replace(Regex("\\s+"), " ") }
++
++    /** How many times [needle] occurs in the flattened source. */
++    private fun count(needle: String): Int = source.split(needle).size - 1
++
++    /** (1) + (2) The margin step, verbatim: tag, OWN list, the pre-font list, the font step's output, the flag. */
++    private val marginStep = "val uaMarginProperties = com.styleconverter.runtime.spacing.UaPositionedHeadingMargin.apply( " +
++        "component._tag, allReset.own, listUaProperties, rawProperties, enabled = LocalWptCaptureMode.current, )"
++
++    /** The UA font step's binding, whose output the margin step extends. */
++    private val fontStep = "val rawProperties = com.styleconverter.runtime.typography.UAElementFontRule.apply("
++
++    @Test
++    fun `the margin step runs once, capture-gated, on the font step's output`() {
++        // Exactly one call, with exactly these arguments.
++        assertEquals("the UA margin step call", 1, count(marginStep))
++        // No second site anywhere in the renderer.
++        assertEquals(1, count("UaPositionedHeadingMargin.apply("))
++    }
++
++    @Test
++    fun `the margin step sits after the font step and before the resolver's input`() {
++        // After the UA font step (it reads rawProperties)…
++        val step = source.indexOf(marginStep)
++        assertTrue("the margin step must follow the UA font step", step > source.indexOf(fontStep))
++        // …its output is the pre-resolution list…
++        val handoff = source.indexOf("val unresolvedProperties = uaMarginProperties ")
++        assertTrue("uaMarginProperties must flow to unresolvedProperties", handoff > step)
++        // …which DynamicValueResolver resolves afterwards.
++        val resolve = source.indexOf(".resolve(unresolvedProperties, varScope.variables, dynCtx)")
++        assertTrue("the resolver must follow the margin step", resolve > handoff)
++    }
++}
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt
+index ae2900c5..b345ca26 100644
+--- a/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt
+@@ -15,7 +15,9 @@ package com.styleconverter.runtime.typography
+ // element's tag and post-reset OWN list, (3) with `standsDown =
+ // UAElementFontRule.headingStandsDown(component)`, and (4) its result is the
+ // list DynamicValueResolver resolves — the step runs BEFORE the resolver, so
+-// `em` / `ch` on a heading read the UA face.
++// `em` / `ch` on a heading read the UA face. Wave 55 (lane L4, seam-1): (4)
++// now passes through UaPositionedHeadingMargin, which only APPENDS the UA
++// margin of an out-of-flow heading (UaPositionedHeadingMarginSeamWiringTest).
+ //
+ // Mutations (executed, lane note "Fix pass"): HEAD's renderer (no seam);
+ // `standsDown = false`; the merged list in place of the ListStyleUaRule
+@@ -67,8 +69,11 @@ class UAElementFontRuleSeamWiringTest {
+         // The font step's result is the pre-resolution list…
+         val step = source.indexOf(fontStep)
+         assertTrue("the UA font step call is missing", step >= 0)
+-        val handoff = source.indexOf("val unresolvedProperties = rawProperties ")
+-        assertTrue("rawProperties must flow to unresolvedProperties", handoff > step)
++        // …through the wave-55 margin step, which receives it as `merged`…
++        val margin = source.indexOf("listUaProperties, rawProperties, enabled = LocalWptCaptureMode.current, )")
++        assertTrue("rawProperties must feed the UA margin step", margin > step)
++        val handoff = source.indexOf("val unresolvedProperties = uaMarginProperties ")
++        assertTrue("the margin step's output must flow to unresolvedProperties", handoff > margin)
+         // …and the resolver reads that list after it (so `em` / `ch` see the UA face).
+         val resolve = source.indexOf(".resolve(unresolvedProperties, varScope.variables, dynCtx)")
+         assertTrue("the resolver must follow the UA step", resolve > handoff)

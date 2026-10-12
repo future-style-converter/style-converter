@@ -1,0 +1,5 @@
+# unit-U2.patch — wave 55 lane L2 (cbb-android), unit U2: PercentContentBoxBand — the in-flow percentage of a content-box box gets its band at layout time.
+# Base: 611c9f932bcfefa147a35f6c5f356d42709ddf84 + unit-U1.patch + seam-1.patch (no shared path; applies on 611c9f93 alone as well).
+# NEW sizing/PercentContentBoxBand.kt (owns / fraction / targetPx / measureSpec / placementOffset, PercentFillPlusBandModifier,
+# Modifier.percentFillPlusBand, two breadcrumbs) · SizingApplier.kt (two call-site lines + one comment line in applySizing; the existing
+# clamp lines become `else if`) · NEW PercentContentBoxBandTest.kt (P-U2-1 … P-U2-6). Never landed or reverted without unit-U1.patch.

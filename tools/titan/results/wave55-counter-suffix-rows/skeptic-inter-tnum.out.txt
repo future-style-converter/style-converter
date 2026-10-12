@@ -1,0 +1,6 @@
+# skeptic-inter-tnum.out.txt — fontTools over apps/ios-harness/StyleConverterTest/Resources/Inter-Regular.otf (the face the iOS harness registers): the GSUB 'tnum' substitutions of the six U3-ios carrier runs' glyphs, at 16 px (advance, ink x-extent from the glyph origin).
+'1' [__0__4__3 (row 9)]: one adv 6.508 px, ink x 0.75..5.10  --tnum-->  one.tf adv 10.375 px, ink x 1.76..8.95
+'2' [__0__4__5 (row 10)]: two adv 9.758 px, ink x 1.20..8.62  --tnum-->  two.tf adv 10.375 px, ink x 1.48..8.89
+'.' [__0__4__2 / __0__4__4 (rows 9-10) and the period of __0__5__2 / __0__5__3 (rows 11-12)]: period adv 4.609 px, ink x 1.25..3.36  --tnum-->  period.tf adv 4.297 px, ink x 1.12..3.23
+Hebrew letters (U+05D0 / U+05D1) are not in this face (cmap lookup: None / None): the letter comes from the fallback face, only the period takes tnum.
+tnum substitutions in the face: 61

@@ -1,0 +1,9 @@
+label=M-U1d-drop-named-argument file=runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+sha256 pre=7ddeb9b0befcb1b144a315ebb686e027e102228d30ce48c97ecd4f9d4f143a23 mutated=10084ec7d682cffa142f9deb94bd3efedf318fc7632366218f7e099234be7466 post=7ddeb9b0befcb1b144a315ebb686e027e102228d30ce48c97ecd4f9d4f143a23 restored=OK
+mutation applied=yes
+mutated run rc=1 (RED)
+  red: > Task :runtime:testDebugUnitTest FAILED
+  red: ChildContainingBlockSeamWiringTest > the child containing block is computed with the WPT capture mode FAILED
+restored run rc=0 (GREEN)
+  green: BUILD SUCCESSFUL in 3s
+  green tally: core.renderer.ChildContainingBlockSeamWiringTest" tests="1" skipped="0" failures="0" errors="0"

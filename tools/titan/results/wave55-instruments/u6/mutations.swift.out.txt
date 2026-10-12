@@ -1,0 +1,61 @@
+=== U6-S1 — mutated runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/wrapping/HyphenateCharacterExtractor.swift (python rc 0; sha256 now 0b52b88c1bc1325e…)
+--- red run: bash tools/titan/results/wave55-instruments/u6/swift-focused.sh
+<wt>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/HyphenateCharacterCascadeTests.swift:32: error: -[StyleConverterRuntimeTests.HyphenateCharacterCascadeTests testS1OfTwoDeclarationsTheLastWins] : XCTAssertEqual failed: ("Optional("/-/")") is not equal to ("Optional("•")")
+<wt>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/HyphenateCharacterCascadeTests.swift:34: error: -[StyleConverterRuntimeTests.HyphenateCharacterCascadeTests testS1OfTwoDeclarationsTheLastWins] : XCTAssertEqual failed: ("Optional("•")") is not equal to ("Optional("/-/")")
+Test Case '-[StyleConverterRuntimeTests.HyphenateCharacterCascadeTests testS1OfTwoDeclarationsTheLastWins]' failed
+** TEST FAILED **
+red run rc=65
+--- green run
+** TEST SUCCEEDED **
+green run rc=0
+
+=== U6-S2 — mutated runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift (python rc 0; sha256 now 4ccdc93f6dd37cd7…)
+--- red run: bash tools/titan/results/wave55-instruments/u6/swift-focused.sh
+<wt>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockBranchesTests.swift:39: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS2ContainPaintAsABareStringEstablishes] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS2ContainPaintAsABareStringEstablishes]' failed
+** TEST FAILED **
+red run rc=65
+--- green run
+** TEST SUCCEEDED **
+green run rc=0
+
+=== U6-S3 — mutated runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift (python rc 0; sha256 now 4b643b0f3f2239d6…)
+--- red run: bash tools/titan/results/wave55-instruments/u6/swift-focused.sh
+<wt>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockBranchesTests.swift:43: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS3AFilterObjectLeafEstablishes] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS3AFilterObjectLeafEstablishes]' failed
+** TEST FAILED **
+red run rc=65
+--- green run
+** TEST SUCCEEDED **
+green run rc=0
+
+=== U6-S4 — mutated runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift (python rc 0; sha256 now 20f49f5d191be28e…)
+--- red run: bash tools/titan/results/wave55-instruments/u6/swift-focused.sh
+<wt>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockBranchesTests.swift:48: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS4AnUndecodableContainLeafAnswersFalseAndLeavesTheDecodeBreadcrumb] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS4AnUndecodableContainLeafAnswersFalseAndLeavesTheDecodeBreadcrumb]' failed
+** TEST FAILED **
+red run rc=65
+--- green run
+** TEST SUCCEEDED **
+green run rc=0
+
+=== U6-S5 — mutated runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift (python rc 0; sha256 now 2b0f40495cd22409…)
+--- red run: bash tools/titan/results/wave55-instruments/u6/swift-focused.sh
+<wt>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockBranchesTests.swift:59: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS5ADeclaredContentVisibilityLeavesTheImpliedContainmentBreadcrumb] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS5ADeclaredContentVisibilityLeavesTheImpliedContainmentBreadcrumb]' failed
+** TEST FAILED **
+red run rc=65
+--- green run
+** TEST SUCCEEDED **
+green run rc=0
+
+=== U6-S6 — mutated runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift (python rc 0; sha256 now d04f53cec7ee4ce2…)
+--- red run: bash tools/titan/results/wave55-instruments/u6/swift-focused.sh
+<wt>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockBranchesTests.swift:66: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS6APositionedEstablisherLeavesItsBreadcrumb] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockBranchesTests testS6APositionedEstablisherLeavesItsBreadcrumb]' failed
+** TEST FAILED **
+red run rc=65
+--- green run
+** TEST SUCCEEDED **
+green run rc=0
+

@@ -1,0 +1,403 @@
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt
+index bb9a9fcb..5177a895 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt
+@@ -21,8 +21,8 @@
+ // ## Scope, stated rather than discovered
+ // Keyed on `_tag` (`meta.sourceTag`), which the 327-pair product corpus never
+ // carries, so every committed baseline is byte-identical by construction. The
+-// heading half stands down for a heading that hosts child boxes
+-// ([headingStandsDown], the iOS twin's wave-40 gate); sup/sub are never
++// heading half stands down for a heading whose child boxes would still paint
++// STACKED ([UAHeadingFoldGate], since wave 55); sup/sub are never
+ // gated. UA heading MARGINS: UaBlockChildMargins.kt, UaPositionedHeadingMargin.kt
+ // (spacing/) + the harness UaBlockMargins. KNOWN GAPS (Swift twin): `smaller` is
+ // parent ÷ 1.2, where Blink uses its keyword table for a keyword-sized
+@@ -113,13 +113,11 @@ object UAElementFontRule {
+             ?: MEDIUM_PX
+ 
+     /**
+-     * The seam's `standsDown` verdict: true for an element hosting composed
+-     * child boxes — the Swift twin's wave-40 `hasElementChildren` gate,
+-     * verbatim (wave 54 GO-SMALL, PLAN §2 L5). A FOLDED heading host stands
+-     * down too: its abspos `<h1>` gets no UA `.67em` margin on either native,
+-     * so the 2em face alone lands ~21px high and the replay scores
+-     * inset-005/-006/-014 LOWER (tools/titan/results/wave54-ua-heading-face/
+-     * skeptic.md repro 14); the fold-aware gate waits there, in `held/`.
++     * The wave-54 GO-SMALL verdict (true for any host of child boxes, iOS's
++     * wave-40 gate). Since wave 55 the seam passes [UAHeadingFoldGate]
++     * instead, once spacing/UaPositionedHeadingMargin gives the abspos heading
++     * its UA margin. Kept while a renderer without seam-3 calls it (rule 2b:
++     * the unit compiles without its seam); its removal is queued (BACKLOG).
+      */
+     fun headingStandsDown(component: IRComponent): Boolean =
+         // Any composed child box ⇒ the heading half is withheld.
+@@ -134,8 +132,8 @@ object UAElementFontRule {
+      * @param own the element's OWN post-reset declarations — a guarded type
+      *   here means the author declared it and the UA value loses.
+      * @param merged the inheritance-merged list to correct.
+-     * @param standsDown [headingStandsDown]'s verdict: true withholds the
+-     *   HEADING half (a host of child boxes); sup/sub ignore it.
++     * @param standsDown [UAHeadingFoldGate]'s verdict: true withholds the
++     *   HEADING half (a stacked host); sup/sub ignore it.
+      * @return [merged] itself when nothing fires, else a substituted copy.
+      */
+     fun apply(
+@@ -146,7 +144,7 @@ object UAElementFontRule {
+     ): List<IRProperty> {
+         // Heading tags are the only gated ones; sup/sub always apply.
+         val heading = isBold(sourceTag)
+-        // The heading half applies unless [headingStandsDown] withheld it.
++        // The heading half applies unless the fold gate withheld it.
+         val applies = !heading || !standsDown
+         // The size factor (null = no UA size for this tag or gated out).
+         val multiplier = if (applies) sizeMultiplier(sourceTag) else null
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAHeadingFoldGate.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAHeadingFoldGate.kt
+new file mode 100644
+index 00000000..2861e2d3
+--- /dev/null
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAHeadingFoldGate.kt
+@@ -0,0 +1,105 @@
++// typography — wave 54 (lane L5, unit U1-android): WHEN the UA heading face
++// may apply to a heading that hosts child boxes. Twin of SwiftUI
++// StyleEngine/typography/UAHeadingFoldGate.swift.
++//
++// ## Why a gate at all (the wave-40 measurement)
++// iOS's UAElementFontRule.headingAppliesTo stood the heading half down for
++// EVERY heading with element children: in wave 40 such a heading painted as a
++// vertical STACK of labels, and a 2em face only magnified the stack
++// (inset-011 0.6999 → 0.6290, inset-014 0.9317 → 0.9150, both WORSE).
++//
++// ## Why the gate is now "the fold does not engage"
++// Since the wave-44/45 inline-run fold, a heading whose runs fold paints as
++// ONE paragraph — the shape the 2em face is right for. On wave53-final both
++// natives paint inset-005/-006/-014 as one folded line (sup raised, sub
++// lowered) at the 16px face, where the ref wraps a 2em bold paragraph
++// (ua-heading-face.md §2). So the heading half stands down only for a
++// heading that has children AND whose content would still paint stacked.
++//
++// ## Why evaluating the fold on the PRE-UA list is sound (brief §4 D)
++// Fold admission never reads the host's FontSize or FontWeight: it reads
++// TextTransform, the writing mode, Hyphens, FontVariantCaps and (through
++// InlineSpanRing.admit) Color. So the verdict on the pre-UA merged list
++// equals the render-time verdict on the post-UA list — pinned by
++// UAHeadingFoldGateTest's invariance case on the four verbatim hosts.
++//
++// ## What it mirrors, and what it does not (stated, not hidden)
++// It mirrors ComponentRenderer.RenderContent's `inlineRunPlan` resolution
++// (runs present, host not `position: relative`) and then the fold itself.
++// It does NOT mirror the later branch choice (a transform containing block
++// with an out-of-flow child, flex/grid hosts, the WPT float/atom packers):
++// float members, widget atoms and display overrides are refused by the
++// fold's own member ring anyway, and on wave53-final every heading host
++// with children (inset-005/-006/-011/-014) is a plain abspos block, so no
++// corpus heading reaches an unmirrored branch. The fold here also reads the
++// PRE-resolution list: a host whose admission hinges on a var()/calc()
++// Color could disagree with the render-time fold (0 corpus hosts).
++//
++// ## Not a silent fallthrough
++// A stand-down IS the fold's refusal of the same host, which RenderContent
++// already logs once per host ("meta.runs fold … bail"); the gate re-runs the
++// pure fold rather than logging a second, duplicate breadcrumb.
++package com.styleconverter.runtime.typography
++
++// The decoded component (tag, runs, children, lang) the gate classifies.
++import com.styleconverter.runtime.core.ir.IRComponent
++// The typed property the host's merged list is made of.
++import com.styleconverter.runtime.core.ir.IRProperty
++// The production run-plan resolver the renderer hands the fold.
++import com.styleconverter.runtime.core.renderer.InlineRunPlan
++// Keyword read for the Position payload (bare "RELATIVE" string on the wire).
++import com.styleconverter.runtime.core.types.ValueExtractors
++// The fold whose verdict decides the gate — called, never edited.
++import com.styleconverter.runtime.typography.inline.InlineRunFold
++
++/**
++ * UAHeadingFoldGate — does the UA heading face stand down for [IRComponent]?
++ *
++ * Pure Kotlin (no Compose) so the JVM suite pins it on verbatim wire.
++ */
++object UAHeadingFoldGate {
++
++    /**
++     * The verdict handed to [UAElementFontRule.apply]'s `standsDown`.
++     *
++     * @param component the element being rendered (its `_tag`, `runs`,
++     *   composed `children` and `lang` are read).
++     * @param mergedPreUa the inheritance-merged list BEFORE the UA font
++     *   step (the seam's ListStyleUaRule output) — the fold's host list.
++     * @return false for a leaf (the face applies, as on iOS since wave 40);
++     *   true for a non-heading with children (the old flag value — the rule
++     *   reads it for headings only, so this is never consulted); for a
++     *   heading with children, true exactly when its runs do NOT fold.
++     */
++    fun standsDown(component: IRComponent, mergedPreUa: List<IRProperty>): Boolean {
++        // The element's composed children (null / empty = a leaf).
++        val children = component.children
++        // A leaf heading takes the face: the wave-40 BETTER case.
++        if (children.isNullOrEmpty()) return false
++        // Not a heading: no heading half to gate — keep the old answer and
++        // skip the fold, so no non-heading container ever pays for it.
++        if (!UAElementFontRule.isBold(component._tag)) return true
++        // No runs: the children paint as a block stack — stand down.
++        val runs = component.runs
++        if (runs.isNullOrEmpty()) return true
++        // A relative host renders through the positioned-container branch,
++        // which never consumes a run plan (RenderContent's first suppression
++        // rule, read here the way its private extractPositionType does:
++        // first Position entry, keyword compare).
++        val position = mergedPreUa.firstOrNull { it.type == "Position" }
++        if (ValueExtractors.extractKeyword(position?.data)?.uppercase() == "RELATIVE") return true
++        // The production plan; null (unresolvable runs) paints stacked too.
++        val plan = InlineRunPlan.resolve(runs, children) ?: return true
++        // The fold, with the renderer's arguments: the host's own `lang`
++        // is exactly what RenderComponent provides as LocalContentLanguage
++        // for its own content (provided verbatim, never ?:-chained).
++        val outcome = InlineRunFold.fold(
++            entries = plan.entries,
++            children = children,
++            hostProperties = mergedPreUa,
++            hostEffectiveLang = component.lang,
++        )
++        // Folded → one paragraph → the face applies; any bail → stacked.
++        return outcome !is InlineRunFold.Outcome.Folded
++    }
++}
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt
+index 33004fe4..b0350825 100644
+--- a/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt
+@@ -1,17 +1,18 @@
+ package com.styleconverter.runtime.typography
+ 
+-// Wave 54 (lane L5, U1-android, GO-SMALL) — pins the Compose UA element-font
+-// rule on the VERBATIM wave53-final per-test IR (UAHeadingFaceWire, below),
+-// replaying seam-1's cascade step (UAHeadingFaceReplay, below). PLAN §2 L5:
++// Wave 54 (lane L5, U1-android) — pins the Compose UA element-font rule on
++// the VERBATIM wave53-final per-test IR (UAHeadingFaceWire, below; byte-identical
++// in wave54-final), replaying the seam's cascade step (UAHeadingFaceReplay,
++// below). Wave 55 (lane L4, U2-android) restores the fold-aware gate (seam-3):
+ //   • the block-in-inline h1 → 32 / 700 (the HIGH target's whole mechanism);
+ //   • inset-001's h1 (extractor-baked 32/700) → the SAME list instance —
+ //     mutation: drop the own-declaration guard;
+-//   • the folded inset-005/-006/-014 hosts and the inset-011 control → the
+-//     SAME list (the heading half stands down for a host of child boxes:
+-//     the fold-aware gate is HELD, lane note "Fix pass") — mutation:
+-//     headingStandsDown returns false;
+-//   • inset-014's 2em on the monospace base → 26 (the rule, gate forced open)
+-//     — mutation: base 16 instead of MonospaceUAFontSize;
++//   • the folded inset-005/-006 hosts → 32 / 700 and -014 → 26 / 700, the
++//     bailing inset-011 → the SAME list (UAHeadingFoldGate) — mutations: the
++//     gate always false / always true, and the replay on headingStandsDown
++//     (seam-3 absent);
++//   • inset-014's 2em on the monospace base → 26 — mutation: base 16
++//     instead of MonospaceUAFontSize;
+ //   • the text-decoration-color `sup` → 13.333; an untagged component → identity;
+ //   • the step writes ONLY FontSize / FontWeight — mutation: it writes Color.
+ // Plus the end-to-end read: TextStyleApplier must PAINT the injected face
+@@ -65,7 +66,7 @@ class UAElementFontRuleTest {
+             val site = UAHeadingFaceReplay.site(UAHeadingFaceWire.BLOCK_IN_INLINE_015_PRINT, id)
+             // The verbatim h1 declares only its four margins — no face, no children.
+             assertNull("$id carries no own size", sizePx(site.own))
+-            assertFalse(UAElementFontRule.headingStandsDown(site.component))
++            assertFalse(UAHeadingFoldGate.standsDown(site.component, site.mergedPreUa))
+             val out = UAHeadingFaceReplay.seam(site)
+             // 2 × the 16px medium, bold; exactly one entry each (first-/last-wins agree).
+             assertEquals(32f, sizePx(out)!!, 1e-4f)
+@@ -93,21 +94,29 @@ class UAElementFontRuleTest {
+     }
+ 
+     @Test
+-    fun `GO-SMALL - every heading host with child boxes keeps its list (005, 006, 014 held, 011 control)`() {
++    fun `fold gate - the folded hosts take the face (005, 006 32, 014 26), the bailing 011 keeps its list`() {
+         for ((doc, id) in hostsWithChildren) {
+             val site = UAHeadingFaceReplay.site(doc, id)
+-            // Unsized h1 hosts (no own face) — the rule WOULD fire without the gate.
++            // Unsized h1 hosts (no own face) — only the gate decides.
+             assertNull("$id carries no own size", sizePx(site.own))
+-            assertTrue(id, UAElementFontRule.headingStandsDown(site.component))
+-            // Identity: the Android capture of all four documents stays byte-identical.
+-            assertSame(id, site.mergedPreUa, UAHeadingFaceReplay.seam(site))
++            val out = UAHeadingFaceReplay.seam(site)
++            if (id.startsWith("text-decoration-inset-011")) {
++                // The bailing host paints STACKED: the gate stands it down, identity.
++                assertTrue(id, UAHeadingFoldGate.standsDown(site.component, site.mergedPreUa))
++                assertSame(id, site.mergedPreUa, out)
++            } else {
++                // A folded host paints ONE paragraph: the face applies (014: 2 × 13).
++                assertFalse(id, UAHeadingFoldGate.standsDown(site.component, site.mergedPreUa))
++                assertEquals(id, if (id.startsWith("text-decoration-inset-014")) 26f else 32f, sizePx(out)!!, 1e-4f)
++                assertEquals(id, 700, weight(out))
++            }
+         }
+     }
+ 
+     @Test
+-    fun `inset-014 - the rule's em base on the verbatim monospace host is 13 (gate forced open)`() {
++    fun `inset-014 - the rule's em base on the verbatim monospace host is 13`() {
+         val site = UAHeadingFaceReplay.site(UAHeadingFaceWire.INSET_014, "text-decoration-inset-014__1__0-110")
+-        // The rule alone, as the held fold-aware gate would call it: 2 × 13 = 26, not 2 × 16.
++        // The rule with the face open: 2 × 13 = 26, not 2 × 16.
+         val out = UAElementFontRule.apply(site.component._tag, site.own, site.mergedPreUa, standsDown = false)
+         assertEquals(26f, sizePx(out)!!, 1e-4f)
+         assertEquals(700, weight(out))
+@@ -170,8 +179,8 @@ class UAElementFontRuleTest {
+     }
+ }
+ 
+-/** seam-1's cascade step replayed root → target over a verbatim document: for each node, own →
+- *  mergeInherited → ListStyleUaRule → UAElementFontRule(standsDown = headingStandsDown) → the
++/** The seam's cascade step replayed root → target over a verbatim document: for each node, own →
++ *  mergeInherited → ListStyleUaRule → UAElementFontRule(standsDown = UAHeadingFoldGate) → the
+  *  INHERITED subset handed down. Exact for these documents because its premises — no `All`, no
+  *  buckets, no var() on the path (so AllReset, the bucket fold and DynamicValueResolver are the
+  *  identity) — are ASSERTED per node. Folded in from UAHeadingFaceReplay.kt (fix pass, R2-N8). */
+@@ -206,10 +215,10 @@ internal object UAHeadingFaceReplay {
+         error("unreachable: the path always ends at the target")
+     }
+ 
+-    /** seam-1's output for [site]: the UA font step with the seam's stand-down verdict. */
++    /** The seam's output for [site]: the UA font step with seam-3's fold-gate verdict. */
+     fun seam(site: Site): List<IRProperty> = UAElementFontRule.apply(
+         site.component._tag, site.own, site.mergedPreUa,
+-        standsDown = UAElementFontRule.headingStandsDown(site.component),
++        standsDown = UAHeadingFoldGate.standsDown(site.component, site.mergedPreUa),
+     )
+ }
+ 
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAHeadingFoldGateTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAHeadingFoldGateTest.kt
+new file mode 100644
+index 00000000..df2a1853
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAHeadingFoldGateTest.kt
+@@ -0,0 +1,130 @@
++package com.styleconverter.runtime.typography
++
++// Wave 54 (lane L5, U1-android) — pins UAHeadingFoldGate on the VERBATIM
++// wave53-final per-test IR. PLAN §2 L5 "Unit pins":
++//   • inset-005 / -006 / -014 hosts → applies (the fold returns Folded);
++//   • inset-011 → stands down (Bailed member-prop:TextDecorationColor-
++//     divergence) — the control whose capture must stay byte-identical;
++//   • a leaf heading → applies.
++// Mutation: return the old `hasChildren` gate → the inset-005 pin is red.
++// Plus the soundness pin of brief §4 D: the fold verdict on the PRE-UA list
++// equals the verdict on the POST-UA list (admission ignores FontSize /
++// FontWeight) — if a future fold starts reading the face, this goes red.
++
++import com.styleconverter.runtime.core.ir.IRComponent
++import com.styleconverter.runtime.core.ir.IRProperty
++import com.styleconverter.runtime.core.renderer.InlineRunPlan
++import com.styleconverter.runtime.typography.inline.InlineRunFold
++import kotlinx.serialization.json.JsonPrimitive
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class UAHeadingFoldGateTest {
++
++    /** The three folded hosts the lane targets, plus the bailing control. */
++    private val inset005 = UAHeadingFaceWire.INSET_005 to "text-decoration-inset-005__1__0-069"
++    private val inset006 = UAHeadingFaceWire.INSET_006 to "text-decoration-inset-006__1__0-076"
++    private val inset014 = UAHeadingFaceWire.INSET_014 to "text-decoration-inset-014__1__0-110"
++    private val inset011 = UAHeadingFaceWire.INSET_011 to "text-decoration-inset-011__1__0-095"
++
++    /** The fold exactly as the gate (and RenderContent) calls it. */
++    private fun foldOf(host: IRComponent, hostProperties: List<IRProperty>): InlineRunFold.Outcome {
++        val plan = InlineRunPlan.resolve(host.runs, host.children)!!
++        return InlineRunFold.fold(plan.entries, host.children!!, hostProperties, host.lang)
++    }
++
++    /** The pre-UA seam site of a (document, id) pair. */
++    private fun site(pair: Pair<String, String>) = UAHeadingFaceReplay.site(pair.first, pair.second)
++
++    @Test
++    fun `inset-005 - the folded h1 host applies (Folded, not the stacked stand-down)`() {
++        val s = site(inset005)
++        // The verbatim host hosts a <u> child — the old gate stood down here.
++        assertFalse(s.component.children.isNullOrEmpty())
++        // The fold engages on the merged list (inherited Color black is the
++        // ink base that admits the u's TextDecorationColor black).
++        val outcome = foldOf(s.component, s.mergedPreUa)
++        assertTrue("fold must engage, got $outcome", outcome is InlineRunFold.Outcome.Folded)
++        assertEquals("the ultra-quick brown fox", (outcome as InlineRunFold.Outcome.Folded).text)
++        // …so the heading half applies.
++        assertFalse(UAHeadingFoldGate.standsDown(s.component, s.mergedPreUa))
++    }
++
++    @Test
++    fun `inset-006 - the folded h1 host applies`() {
++        val s = site(inset006)
++        assertTrue(foldOf(s.component, s.mergedPreUa) is InlineRunFold.Outcome.Folded)
++        assertFalse(UAHeadingFoldGate.standsDown(s.component, s.mergedPreUa))
++    }
++
++    @Test
++    fun `inset-014 - the folded monospace h1 host applies`() {
++        val s = site(inset014)
++        assertTrue(foldOf(s.component, s.mergedPreUa) is InlineRunFold.Outcome.Folded)
++        assertFalse(UAHeadingFoldGate.standsDown(s.component, s.mergedPreUa))
++    }
++
++    @Test
++    fun `inset-011 - the bailing h1 host stands down (the control)`() {
++        val s = site(inset011)
++        // Blue / green decoration over black ink: the span ring refuses.
++        val outcome = foldOf(s.component, s.mergedPreUa) as InlineRunFold.Outcome.Bailed
++        assertEquals("member-prop:TextDecorationColor-divergence", outcome.reason)
++        assertTrue(UAHeadingFoldGate.standsDown(s.component, s.mergedPreUa))
++    }
++
++    @Test
++    fun `a leaf heading applies`() {
++        val s = UAHeadingFaceReplay.site(UAHeadingFaceWire.BLOCK_IN_INLINE_015_PRINT, "block-in-inline-015-print__0__0-190")
++        assertFalse(UAHeadingFoldGate.standsDown(s.component, s.mergedPreUa))
++    }
++
++    @Test
++    fun `a non-heading with children keeps the old flag (never read by the rule)`() {
++        // inset-005's <u>: a runs host with sup/sub children, tag u.
++        val s = UAHeadingFaceReplay.site(UAHeadingFaceWire.INSET_005, "text-decoration-inset-005__1__0__0-070")
++        assertTrue(UAHeadingFoldGate.standsDown(s.component, s.mergedPreUa))
++    }
++
++    @Test
++    fun `a relative heading host stands down even when its runs would fold`() {
++        val s = site(inset005)
++        // RenderContent resolves no run plan for a relative host (it renders
++        // through the positioned-container branch) — the gate mirrors that.
++        val relative = s.mergedPreUa.map {
++            if (it.type == "Position") IRProperty("Position", JsonPrimitive("RELATIVE")) else it
++        }
++        assertTrue(foldOf(s.component, relative) is InlineRunFold.Outcome.Folded)
++        assertTrue(UAHeadingFoldGate.standsDown(s.component, relative))
++    }
++
++    @Test
++    fun `a heading with children but no runs stands down (the stacked block case)`() {
++        val s = site(inset005)
++        val stacked = s.component.copy(runs = null)
++        assertTrue(UAHeadingFoldGate.standsDown(stacked, s.mergedPreUa))
++    }
++
++    @Test
++    fun `soundness - the fold verdict is the same before and after the UA face (brief 4 D)`() {
++        for (pair in listOf(inset005, inset006, inset014, inset011)) {
++            val s = site(pair)
++            // The post-UA list with the face FORCED on (standsDown = false),
++            // so even the bailing control is checked against a 2em list.
++            val postUa = UAElementFontRule.apply(s.component._tag, s.own, s.mergedPreUa, standsDown = false)
++            val pre = foldOf(s.component, s.mergedPreUa)
++            val post = foldOf(s.component, postUa)
++            // Same outcome class and, for a fold, the same paragraph + spans.
++            assertEquals(pair.second, pre::class, post::class)
++            if (pre is InlineRunFold.Outcome.Folded && post is InlineRunFold.Outcome.Folded) {
++                assertEquals(pre.text, post.text)
++                assertEquals(pre.spans, post.spans)
++            }
++            if (pre is InlineRunFold.Outcome.Bailed) {
++                assertEquals(pre.reason, (post as InlineRunFold.Outcome.Bailed).reason)
++            }
++        }
++    }
++}

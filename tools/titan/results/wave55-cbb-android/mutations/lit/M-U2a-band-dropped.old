@@ -1,0 +1,1 @@
+        (maxPx * fraction + bandPx).roundToInt()

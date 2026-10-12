@@ -1,0 +1,6 @@
+== skmodel: 160 px of the iOS capture replaced by U3's Catalyst delta (everywhere)
+  [T] counter-suffix ios      row9 digit (139, 145, 214, 225) → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+  [K] counter-suffix ios      zones y0-63,y160-207,y232-599,x64-389×y64-159,x0-135×y208-231,x151-end×y208-231 vs wave54-final → GEOMETRY WRONG (zone y232-599 differs from wave54-final (79 px))
+== skmodel2: 68 px of the iOS capture replaced by U3's Catalyst delta (row 9 digit window x136-150 only)
+  [T] counter-suffix ios      row9 digit (139, 145, 214, 225) ink 13 vs wave54-final android → GEOMETRY WRONG (ink: row 9 digit window x136-150 differs from wave54-final android's tabular '1' by 13 px at its best whole-px offset (> 2: added / lost ink in the window))
+  [K] counter-suffix ios      zones y0-63,y160-207,y232-599,x64-389×y64-159,x0-135×y208-231,x151-end×y208-231 vs wave54-final → GEOMETRY OK

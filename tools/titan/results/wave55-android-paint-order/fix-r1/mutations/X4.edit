@@ -1,0 +1,3 @@
+if (this.width == width && this.brush == brush && this.shape == shape) return
+=====
+return

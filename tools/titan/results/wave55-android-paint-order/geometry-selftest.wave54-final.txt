@@ -1,0 +1,51 @@
+   L6-android-paint-order   android-paint-order.geometry.py            [PO] backdrop-filter-clip-rect web                         PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [PO] backdrop-filter-clip-rect ios                         PASS       [control: expected to stay PASS]
+!! L6-android-paint-order   android-paint-order.geometry.py            [PO] backdrop-filter-clip-rect android                     FAIL       [GATING -> revert U1]
+     line: 10000 | red n 1136 → GEOMETRY WRONG (paint order: overlap rows red 0 / blue 416 of 416 (parent border over positioned children, CSS 2.1 App. E); menus: red bbox (163, 134, 266, 371) n 1136 vs (163,134,266,371) n 1552 ±2)
+   L6-android-paint-order   android-paint-order.geometry.py            [PO] backdrop-filter-clip-rect-zoom web                    PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [PO] backdrop-filter-clip-rect-zoom ios                    PASS       [control: expected to stay PASS]
+ - L6-android-paint-order   android-paint-order.geometry.py            [PO] backdrop-filter-clip-rect-zoom android                FAIL       [report: expected WRONG until the target is fixed]
+     line: 10000 | red n 1136 → GEOMETRY WRONG (paint order: overlap rows red 0 / blue 416 of 416 (parent border over positioned children, CSS 2.1 App. E); menus: red bbox (163, 134, 266, 371) n 1136 vs (163,134,266,371) n 1552 ±2)
+   L6-android-paint-order   android-paint-order.geometry.py            [FO] clip-path-filter-order web                            PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [FO] clip-path-filter-order ios                            PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [FO] clip-path-filter-order android                        PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [X] flex-abspos-staticpos-align-self-safe-001 web          PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [X] flex-abspos-staticpos-align-self-safe-001 ios          PASS       [control: expected to stay PASS]
+!! L6-android-paint-order   android-paint-order.geometry.py            [X] flex-abspos-staticpos-align-self-safe-001 android      FAIL       [GATING -> revert U2]
+     line:  | crossings 1152 | child fill 16560 (ref 17956) base 16560 | bbox (20, 39, 107, 335) | band 2544 (floor 1308) | lost 0 extra 0 → GEOMETRY WRONG (1152 crossing px (a parent border painted over its child, CSS 2.1 App. E))
+   L6-android-paint-order   android-paint-order.geometry.py            [X] flex-abspos-staticpos-align-self-safe-002 web          PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [X] flex-abspos-staticpos-align-self-safe-002 ios          PASS       [control: expected to stay PASS]
+!! L6-android-paint-order   android-paint-order.geometry.py            [X] flex-abspos-staticpos-align-self-safe-002 android      FAIL       [GATING -> revert U2]
+     line: id | crossings 980 | child fill 15852 (ref 17066) base 15852 | bbox (16, 44, 112, 340) | band 2448 (floor 1372) | lost 0 extra 0 → GEOMETRY WRONG (980 crossing px (a parent border painted over its child, CSS 2.1 App. E))
+   L6-android-paint-order   android-paint-order.geometry.py            [X] grid-abspos-staticpos-align-self-001 web               PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [X] grid-abspos-staticpos-align-self-001 ios               PASS       [control: expected to stay PASS]
+!! L6-android-paint-order   android-paint-order.geometry.py            [X] grid-abspos-staticpos-align-self-001 android           FAIL       [GATING -> revert U2]
+     line:  914 (ref 1056) base 914 | bbox (19, 30, 158, 230) | band 1628 (floor 1541) | lost 0 extra 0 → GEOMETRY WRONG (79 crossing px (a parent border painted over its child, CSS 2.1 App. E); child fill 914 px < 0.90 x ref 1056)
+   L6-android-paint-order   android-paint-order.geometry.py            [X] grid-abspos-staticpos-justify-self-001 web             PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [X] grid-abspos-staticpos-justify-self-001 ios             PASS       [control: expected to stay PASS]
+!! L6-android-paint-order   android-paint-order.geometry.py            [X] grid-abspos-staticpos-justify-self-001 android         FAIL       [GATING -> revert U2]
+     line: 8 (ref 1248) base 1118 | bbox (18, 19, 203, 213) | band 1924 (floor 1823) | lost 0 extra 0 → GEOMETRY WRONG (117 crossing px (a parent border painted over its child, CSS 2.1 App. E); child fill 1118 px < 0.90 x ref 1248)
+   L6-android-paint-order   android-paint-order.geometry.py            [X] grid-abspos-staticpos-align-self-vertWM-001 web        PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [X] grid-abspos-staticpos-align-self-vertWM-001 ios        PASS       [control: expected to stay PASS]
+!! L6-android-paint-order   android-paint-order.geometry.py            [X] grid-abspos-staticpos-align-self-vertWM-001 android    FAIL       [GATING -> revert U2]
+     line: droid | crossings 116 | child fill 1120 (ref 1200) base 1120 | bbox (18, 19, 179, 213) | band 1924 (floor 1828) | lost 0 extra 0 → GEOMETRY WRONG (116 crossing px (a parent border painted over its child, CSS 2.1 App. E))
+   L6-android-paint-order   android-paint-order.geometry.py            [X] grid-abspos-staticpos-align-self-rtl-001 web           PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [X] grid-abspos-staticpos-align-self-rtl-001 ios           PASS       [control: expected to stay PASS]
+!! L6-android-paint-order   android-paint-order.geometry.py            [X] grid-abspos-staticpos-align-self-rtl-001 android       FAIL       [GATING -> revert U2]
+     line: droid | crossings 112 | child fill 1110 (ref 1152) base 1110 | bbox (19, 18, 172, 230) | band 1924 (floor 1828) | lost 0 extra 0 → GEOMETRY WRONG (112 crossing px (a parent border painted over its child, CSS 2.1 App. E))
+   L6-android-paint-order   android-paint-order.geometry.py            [ID] borders-008 android                                   PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [ID] clip-path-borderBox-1e android                        PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [ID] clip-path-contentBox-1e android                       PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [ID] clip-path-paddingBox-1e android                       PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [ID] backdrop-filter-clip-rect-2 android                   PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [ID] background-clip-002 android                           PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [ID] s-11-1-1b-001 android                                 PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [ID] backdrop-filter-clip-radius-zoom android              PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [ID] grid-abspos-staticpos-align-items-center android      PASS       [control: expected to stay PASS]
+   L6-android-paint-order   android-paint-order.geometry.py            [ID] flex-abspos-staticpos-align-self-safe-003 android     PASS       [control: expected to stay PASS]
+
+geometry-gate wave54-final (base wave54-open): 37 keys — PASS 29 · FAIL 8 (gating 7) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 7 (PASS 0 FAIL 7) · control 29 (PASS 29 FAIL 0) · report 1 (PASS 0 FAIL 1) · withdrawn 0 (PASS 0 FAIL 0)
+revert rule 4 names: L6-android-paint-order U1, L6-android-paint-order U2
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)
+exit 0

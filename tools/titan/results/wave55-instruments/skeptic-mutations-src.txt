@@ -1,0 +1,231 @@
+# skeptic-mutations-src.txt — every mutation the L7 skeptic executed: the exact anchor (old) and its replacement (new); applied once each by an exact-count-1 string replace, restored byte-exact (skeptic-mutations.txt brackets, skeptic-mutations.out.txt verdicts).
+## C1
+- old:
+            val prop = properties.lastOrNull { it.type == IR_TYPE } ?: return null
+- new:
+            val prop = properties.firstOrNull { it.type == IR_TYPE } ?: return null
+## C2
+- old:
+    wrapWidthPx, measure, source = text, hyphenChar = hyphenChar)
+- new:
+    wrapWidthPx, measure, source = text)
+## C3
+- old:
+            return walk(text, lines, hyphenChar) ?: legacyCount(text, lines, hyphenChar)
+- new:
+            return walk(text, lines, hyphenChar) ?: false
+## C4
+- old:
+            is JsonObject -> true
+- new:
+            is JsonObject -> false
+## C5
+- old:
+                    val content = data.contentOrNull?.uppercase() ?: return emptySet()
+- new:
+                    val content = data.contentOrNull?.uppercase() ?: return emptySet(); if (true) return emptySet()
+## C6
+- old:
+            PropertyTracker.markUnhandled(CONTAIN_DECODE_BREADCRUMB)
+- new:
+            Unit
+## C7
+- old:
+            if (properties.any { it.type in IMPLIED_TYPES }) PropertyTracker.markUnhandled(IMPLIED_CONTAINMENT_BREADCRUMB)
+- new:
+            if (properties.any { it.type in IMPLIED_TYPES }) Unit
+## M1
+- old:
+      try { const r = classify(o); console.log(r.lines.join('\n')); return r.exit; }
+- new:
+      try { const r = classify(o); console.log(r.lines.join('\n')); return 0; }
+## M2
+- old:
+    [...new Set([...dirs(pre), ...dirs(post)])].sort()
+- new:
+    [...new Set([...dirs(pre)])].sort()
+## M3
+- old:
+    if (shifts.length === 1 && shifts[0] === delta) out.renumbered
+- new:
+    if (true) out.renumbered
+## M4
+- old:
+    else OUT="$(abs_nocreate "${POS[2]}")"; fi
+- new:
+    else OUT="${POS[2]}"; fi
+## M4b
+- old:
+    [[ -n "$OUT" && "$OUT" == /* ]] || refuse
+- new:
+    [[ -n "$OUT" ]] || refuse
+## M4c
+- old:
+    else OUT="$(abs_nocreate "${POS[2]}")"; fi                                  # dry / classify: resolve, never create
+    [[ -n "$OUT" && "$OUT" == /* ]] || refuse
+- new:
+    else OUT="${POS[2]}"; fi                                  # dry / classify: resolve, never create
+    [[ -n "$OUT" ]] || refuse
+## M5
+- old:
+      [[ "$(top_of "$T")" != "$SELF_TOP" ]] || refuse "$T is this script's own checkout
+- new:
+      true || refuse "$T is this script's own checkout
+## S1
+- old:
+                cfg = read(prop.data)
+- new:
+                if cfg == nil { cfg = read(prop.data) }
+## S2
+- old:
+                return s.uppercased().split(separator: " ").contains { claims.contains(String($0)) }
+- new:
+                _ = s; return false
+## S3
+- old:
+            case .object: return true
+- new:
+            case .object: return false
+## S4
+- old:
+                    PropertyTracker.logOnce(key: containDecodeBreadcrumb,
+                                            message: "\(containDecodeBreadcrumb): non-primitive contain flag")
+- new:
+                    _ = 0
+## S5
+- old:
+                PropertyTracker.logOnce(key: impliedContainmentBreadcrumb,
+                                        message: "\(impliedContainmentBreadcrumb): content-visibility / container-type containment not claimed")
+- new:
+                _ = 0
+## S6
+- old:
+                PropertyTracker.logOnce(key: positionedEstablisherBreadcrumb,
+                                        message: "\(positionedEstablisherBreadcrumb): claim withheld on a positioned establisher")
+- new:
+                _ = 0
+## T1
+- old:
+      for (const node of hits) {                                                     // EVERY same-named node must justify the exemption
+- new:
+      for (const node of hits.slice(0, 1)) {                                                     // EVERY same-named node must justify the exemption
+## T2
+- old:
+        if (wouldBe.length && lit === wouldBe.length) problems.push
+- new:
+        if (wouldBe.length && lit > 0) problems.push
+## T2b
+- old:
+        if (wouldBe.length && lit === wouldBe.length) problems.push
+- new:
+        if (wouldBe.length && lit >= wouldBe.length * 2) problems.push
+## U4a
+- old:
+    reader deviation from spec 03 §4.1 rule 2 (renderer latitude)',
+- new:
+    reader deviation from spec 03 §4.1 rule 1',
+## U4b1
+- old:
+    **Renderer latitude — a reader-side exception to rule 2 (no wire
+- new:
+    8. **Renderer latitude — a reader-side exception to rule 2 (no wire
+## U4b2
+- old:
+    `InlineRunFold.Folded.droppedOutOfFlowMembers` (the member dropped from
+- new:
+    `InlineRunFold.Folded.droppedMembers` (the member dropped from
+## U4b3
+- old:
+    change).** A reader MAY paint
+- new:
+    change)** A reader MAY paint
+## U5a
+- old:
+        for (const [k, init] of Object.entries(MARKER_PAINT_INITIAL)) {
+- new:
+        for (const [k, init] of Object.entries(MARKER_PAINT_INITIAL).filter(([k]) => k !== 'maskImage' && k !== 'mixBlendMode')) {
+## U5b
+- old:
+      maskImage: 'none',
+- new:
+      maskImage: 'None',
+## U5c
+- old:
+      mixBlendMode: 'normal',
+- new:
+      mixBlendMode: 'normal', bogusKey: 'x',
+## W1
+- old:
+    || (c.meta?.decorations?.length ?? 0) > 0) return false;
+- new:
+    ) return false;
+## W2
+- old:
+    new Set(['ABSOLUTE', 'FIXED']);
+- new:
+    new Set(['ABSOLUTE']);
+## W3
+- old:
+        if (pending.length > 0 && last?.kind === 'text' && inWordEnd(last.text) && inWordStart(t)) {
+- new:
+        if (false && pending.length > 0 && last?.kind === 'text' && inWordEnd(last.text) && inWordStart(t)) {
+## W4
+- old:
+      return a <= 0;
+- new:
+      return a < 0.5;
+## W5
+- old:
+        : (typeof raw === 'string' && /
+- new:
+        : (false && typeof raw === 'string' && /
+## W6
+- old:
+      return primitiveContent(o.keyword) ?? primitiveContent(o.value);
+- new:
+      return null;
+## X1
+- old:
+        for (const t of fb) if (!fa.has(t)) problems.push
+- new:
+        for (const t of fb) if (false) problems.push
+## X2
+- old:
+      if (out.compared === 0 && out.oneSided.length === 0) out.pipeline.push
+- new:
+      if (false) out.pipeline.push
+## X3
+- old:
+        if (a.rx !== b.rx) problems.push
+- new:
+        if (false) problems.push
+## X4
+- old:
+    out.oneSided.push(`${key} (${x === null ? 'post' : 'pre'} only)`); delta += count(Y) - count(X); continue; }
+- new:
+    out.oneSided.push(`${key} (${x === null ? 'post' : 'pre'} only)`); continue; }
+## X5
+- old:
+    exit "${PIPESTATUS[0]}"
+- new:
+    exit 0
+## X6
+- old:
+          if (!(r.ext > 0)) problems.push
+- new:
+          if (false) problems.push
+## X7
+- old:
+      const unread = (k) => out.oneSided.some
+- new:
+      const unread = (k) => false && out.oneSided.some
+## X8
+- old:
+        for need in node_modules tools/wpt tools/titan/wpt-buckets.json tools/titan/extract-fixture.mjs; do
+- new:
+        for need in node_modules tools/wpt tools/titan/extract-fixture.mjs; do
+## X9
+- old:
+        if (!m) throw new Error
+- new:
+        if (!m) continue; if (0) throw new Error

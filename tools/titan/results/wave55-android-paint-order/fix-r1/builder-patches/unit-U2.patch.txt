@@ -1,0 +1,302 @@
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt
+index 4ec162d8..126b2c0b 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt
+@@ -750,8 +750,11 @@ object StyleApplier {
+             // border-box including the padding band; background then paints
+             // the full sized box, INCLUDING the padding region (padding is
+             // applied in step 8 below, INSIDE bg in chain order).
+-            result = BordersFacade.apply(result, paint.borders)
++            // Wave 55 (L6 U2): the sides chain INNER of the background and
++            // paint behind the content (CSS 2.1 Appendix E §E.2).
++            result = BordersFacade.apply(result, paint.borders, sidesBehindContent = true)
+             result = ColorApplier.applyColors(result, paint.colors)
++            result = BordersFacade.applySidesBehindContent(result, paint.borders)
+         }
+ 
+         // 7. Overflow (clipping and scrolling)
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BordersFacade.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BordersFacade.kt
+index 8b739431..418e2333 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BordersFacade.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BordersFacade.kt
+@@ -29,7 +29,9 @@ import kotlinx.serialization.json.JsonElement
+  *
+  * ## Order of Operations
+  * 1. Border radius (clip) is applied first to establish shape
+- * 2. Border sides are drawn after to respect the clipped shape
++ * 2. Border sides are drawn after to respect the clipped shape — or, on
++ *    StyleApplier's legacy route (wave 55, L6 U2), skipped here and chained
++ *    INNER of the background by [applySidesBehindContent]
+  */
+ object BordersFacade {
+ 
+@@ -80,16 +82,19 @@ object BordersFacade {
+      *
+      * @param modifier The modifier to apply borders to.
+      * @param config The combined border configuration.
++     * @param sidesBehindContent Wave 55 (L6 U2): true leaves the sides out, so
++     *   the caller can chain them INNER of the background with
++     *   [applySidesBehindContent]. Default false keeps every caller as it was.
+      * @return Modified modifier with borders and radius applied.
+      */
+-    fun apply(modifier: Modifier, config: BordersConfig): Modifier {
++    fun apply(modifier: Modifier, config: BordersConfig, sidesBehindContent: Boolean = false): Modifier {
+         var result = modifier
+ 
+         // Apply radius first (clip)
+         result = BorderRadiusApplier.applyRadius(result, config.radius)
+ 
+-        // Then apply borders
+-        result = BorderSideApplier.applyBorders(result, config.sides)
++        // Then apply borders (unless the caller paints them behind content)
++        if (!sidesBehindContent) result = BorderSideApplier.applyBorders(result, config.sides)
+ 
+         // Apply outline (drawn outside the element)
+         result = OutlineApplier.applyOutline(result, config.outline)
+@@ -97,6 +102,21 @@ object BordersFacade {
+         return result
+     }
+ 
++    /**
++     * The border sides painted BEHIND the element's content (wave 55, L6 U2).
++     *
++     * CSS 2.1 Appendix E §E.2 paints a box's background, then its border,
++     * then its descendants. StyleApplier's legacy route chains this call
++     * just INNER of ColorApplier, so the band lands after the background
++     * (and inside its opacity group, css-color-4 §3.3: the element is
++     * composited as one group) and before the children — where androidx
++     * `Modifier.border` and the slow path's `drawContent()`-first order used
++     * to lay the parent's band over any child that crossed it.
++     */
++    fun applySidesBehindContent(modifier: Modifier, config: BordersConfig): Modifier =
++        // Same side painter, band first (BorderSideApplier's behindContent).
++        BorderSideApplier.applyBorders(modifier, config.sides, behindContent = true)
++
+     /**
+      * Check if a property type is a border-related property.
+      *
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt
+index 92ad8f1c..4836d5bd 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt
+@@ -8,9 +8,12 @@ import androidx.compose.ui.geometry.Offset
+ import androidx.compose.ui.geometry.Size
+ import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.graphics.PathEffect
++import androidx.compose.ui.graphics.RectangleShape
+ import androidx.compose.ui.graphics.StrokeCap
+ import androidx.compose.ui.graphics.drawscope.DrawScope
+ import androidx.compose.ui.unit.dp
++import com.styleconverter.runtime.borders.behindContentBorder
++import com.styleconverter.runtime.borders.drawInOrder
+ import com.styleconverter.runtime.core.types.ValueExtractors.LineStyle
+ 
+ /**
+@@ -67,8 +70,11 @@ object BorderSideApplier {
+      * Fast path: single Modifier.border() call when the entire border is
+      * uniform + solid. Slow path: one drawBehind pass that strokes each
+      * side independently.
++     * [behindContent] (wave 55, L6 U2; BordersFacade.applySidesBehindContent):
++     * the band paints BEFORE the content (CSS 2.1 Appendix E §E.2); the
++     * default false keeps every other caller's chain exactly as it was.
+      */
+-    fun applyBorders(modifier: Modifier, config: AllBordersConfig): Modifier {
++    fun applyBorders(modifier: Modifier, config: AllBordersConfig, behindContent: Boolean = false): Modifier {
+         if (!config.hasBorders) return modifier
+ 
+         // Fast path: every side identical + DECLARED SOLID — delegates to
+@@ -79,6 +85,8 @@ object BorderSideApplier {
+         if (config.isUniform && config.top.hasBorder && config.top.style == LineStyle.SOLID) {
+             val width = config.top.width ?: 1.dp
+             val color = config.top.color ?: Color.Black
++            // L6 U2: the same androidx band arithmetic on RectangleShape, painted behind the content.
++            if (behindContent) return modifier.behindContentBorder(width, color, RectangleShape)
+             return modifier.border(width, color)
+         }
+ 
+@@ -94,9 +102,10 @@ object BorderSideApplier {
+         // and the per-side mixed audit fixtures all showing as borderless
+         // boxes despite the IR carrying valid border-width / border-style
+         // values. Painting after `drawContent()` puts the border on top
+-        // of the background and lets it survive the cascade.
+-        return modifier.drawWithContent {
+-            drawContent()
++        // of the background and lets it survive the cascade. Wave 55 (L6 U2):
++        // with [behindContent] the node sits INNER of the background, so the
++        // band can paint before the content (band → children, CSS 2.1 E.2).
++        val paintSides: DrawScope.() -> Unit = {
+             // Pull each side's width once (absent = no border on that side).
+             val topWidth = config.top.width?.toPx() ?: 0f
+             val endWidth = config.end.width?.toPx() ?: 0f
+@@ -122,6 +131,8 @@ object BorderSideApplier {
+                 style = config.start.style, color = config.start.color
+             )
+         }
++        // Band then content through the shared drawInOrder (L6 U2), else the legacy content-then-band.
++        return modifier.drawWithContent { if (behindContent) drawInOrder({ paintSides() }, { drawContent() }) else { drawContent(); paintSides() } }
+     }
+ 
+     // Enum identifying which side is currently being painted — drives
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/borders/sides/BorderSidesBehindContentTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/borders/sides/BorderSidesBehindContentTest.kt
+new file mode 100644
+index 00000000..6a44bf86
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/borders/sides/BorderSidesBehindContentTest.kt
+@@ -0,0 +1,157 @@
++package com.styleconverter.runtime.borders.sides
++
++// Wave 55 (lane L6, unit U2 PO-sides-android) — pin P3: on StyleApplier's
++// legacy route the border sides chain INNER of the background and paint
++// behind the content (CSS 2.1 Appendix E §E.2: background, border, then
++// descendants). Before U2, BordersFacade.apply chained the band OUTER of
++// ColorApplier and painted it AFTER drawContent() (androidx Modifier.border's
++// fast path, or the slow path's drawWithContent { drawContent(); paintSide… }),
++// so a parent's band covered every child that crossed it: WPT
++// flex-abspos-staticpos-align-self-safe-001's 3px black `.flex` band across
++// its yellow abspos children (1152 px on Android, 0 on the ref).
++//
++// Verbatim wires (tools/titan/runs/wave54-final/sections/…/per-test-ir/):
++//   css-flexbox  wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-001
++//                `…__0-023` — the SOLID fast path;
++//   css-backgrounds  wpt__css-backgrounds__background-clip-002 `…__2-095` — the
++//                DOTTED slow path (its order is drawInOrder's, pinned by P1).
++// The JVM chain technique of BackfaceCullChainTest (extractConfig →
++// applyConfig, folded with foldIn; no drawing — android.graphics is stubbed).
++
++// Compose's modifier chain type, walked by foldIn.
++import androidx.compose.ui.Modifier
++// The chain under test and the facade whose default must not change.
++import com.styleconverter.runtime.StyleApplier
++import com.styleconverter.runtime.borders.BehindContentBorderElement
++import com.styleconverter.runtime.borders.BordersFacade
++// Parses the verbatim wire payloads below.
++import kotlinx.serialization.json.Json
++import kotlinx.serialization.json.JsonElement
++// JUnit4 (this module's runner).
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class BorderSidesBehindContentTest {
++
++    /** IR property pair, as StyleApplier.extractConfig consumes it. */
++    private fun p(type: String, json: String): Pair<String, JsonElement?> = type to Json.parseToJsonElement(json)
++
++    /** Four sides of one width / style / colour, as the converter emits them. */
++    private fun sides(px: Int, style: String, color: String) = listOf("Top", "Right", "Bottom", "Left").flatMap { s ->
++        // Width, style and colour longhands per physical side.
++        listOf(p("Border${s}Width", """{"px":$px}"""), p("Border${s}Style", "\"$style\""), p("Border${s}Color", color))
++    }
++
++    /** The `.flex` container of flex safe-001 `…__0-023`, verbatim. */
++    private val flexSafe001 = listOf(
++        p("Display", "\"FLEX\""),
++        p("Height", """{"type":"length","px":50}"""),
++        p("Width", """{"type":"length","px":50}"""),
++    ) + sides(3, "SOLID", """{"srgb":{"r":0,"g":0,"b":0},"original":"black"}""") + listOf(
++        p("VerticalAlign", """{"type":"keyword","value":"TOP"}"""),
++        p("MarginTop", """{"px":20}"""), p("MarginRight", """{"px":20}"""),
++        p("MarginBottom", """{"px":20}"""), p("MarginLeft", """{"px":20}"""),
++        p("Position", "\"RELATIVE\""),
++        p("FlexDirection", "\"ROW\""),
++    )
++
++    /** The DOTTED box of background-clip-002 `…__2-095`, verbatim. */
++    private val backgroundClip002 = listOf(
++        p("BackgroundColor", """{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}"""),
++    ) + sides(5, "DOTTED", """{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}""") + listOf(
++        p("Bottom", """{"px":160}"""),
++        p("Height", """{"type":"length","px":100}"""),
++        p("PaddingTop", """{"px":25}"""), p("PaddingRight", """{"px":25}"""),
++        p("PaddingBottom", """{"px":25}"""), p("PaddingLeft", """{"px":25}"""),
++        p("Position", "\"RELATIVE\""),
++        p("Width", """{"type":"length","px":100}"""),
++    )
++
++    /** applyConfig's element class names, outermost → innermost. */
++    private fun names(props: List<Pair<String, JsonElement?>>): List<String> =
++        StyleApplier.applyConfig(Modifier, StyleApplier.extractConfig(props, wptCaptureMode = true))
++            .foldIn(listOf<String>()) { acc, e -> acc + e.javaClass.simpleName }
++
++    @Test fun `P3a - the verbatim flex wire chains the band INNER of the background-less colors step`() {
++        val n = names(flexSafe001)
++        // The fast path is the behind-content band, never androidx's border node.
++        assertEquals("one behind-content band in $n", 1, n.count { it == "BehindContentBorderElement" })
++        assertFalse("androidx border must not install: $n", n.contains("BorderModifierNodeElement"))
++        // It sits inner of the margin / sizing frame (padding is the innermost step 8).
++        assertTrue("band inner of the size frame in $n",
++            n.indexOf("BehindContentBorderElement") > n.indexOfLast { it.startsWith("Size") })
++    }
++
++    @Test fun `P3b - with a background the fast-path band sits AFTER (inner of) the Background element`() {
++        // The flex wire plus a fill: §E.2 step 2 orders background, then border.
++        val n = names(flexSafe001 + p("BackgroundColor", """{"srgb":{"r":0,"g":0,"b":1},"original":"blue"}"""))
++        assertTrue("Background present in $n", n.contains("BackgroundElement"))
++        assertTrue("band after Background in $n", n.indexOf("BehindContentBorderElement") > n.indexOf("BackgroundElement"))
++    }
++
++    @Test fun `P3c - the verbatim DOTTED wire's slow-path draw node sits AFTER the Background element`() {
++        val n = names(backgroundClip002)
++        // No uniform-solid band here: the slow path's drawWithContent is the band.
++        assertFalse(n.contains("BehindContentBorderElement"))
++        // The background fill comes first …
++        val bg = n.indexOf("BackgroundElement")
++        assertTrue("Background present in $n", bg >= 0)
++        // … and the only DrawWithContent node (no outline, no opacity on this wire) is inner of it.
++        assertEquals("one drawWithContent node in $n", 1, n.count { it == "DrawWithContentElement" })
++        assertTrue("slow-path band after Background in $n", n.indexOf("DrawWithContentElement") > bg)
++    }
++
++    @Test fun `P3d - under opacity the band joins the element's group (css-color-4 §3_3)`() {
++        // Synthetic: the flex wire at opacity 0.5 — OpacityApplier's saveLayer group
++        // is a DrawWithContent node; the band must be inner of it, not outside.
++        val n = names(flexSafe001 + p("Opacity", """{"alpha":0.5,"original":{"type":"number","value":0.5}}"""))
++        val group = n.indexOf("DrawWithContentElement")
++        assertTrue("opacity group present in $n", group >= 0)
++        assertTrue("band inside the group in $n", n.indexOf("BehindContentBorderElement") > group)
++    }
++
++    @Test fun `P3e - BordersFacade's default chain is unchanged for every other caller`() {
++        // The facade's default (sidesBehindContent = false) still paints androidx's
++        // band after the content: StyleApplier's legacy route is the only opt-in.
++        val cfg = BordersFacade.extractConfig(flexSafe001)
++        val n = BordersFacade.apply(Modifier, cfg).foldIn(listOf<String>()) { acc, e -> acc + e.javaClass.simpleName }
++        assertEquals(listOf("BorderModifierNodeElement"), n)
++        // The opt-in route leaves the sides out of apply() and installs them on their own.
++        assertEquals(emptyList<String>(), BordersFacade.apply(Modifier, cfg, sidesBehindContent = true)
++            .foldIn(listOf<String>()) { acc, e -> acc + e.javaClass.simpleName })
++        assertEquals(listOf("BehindContentBorderElement"), BordersFacade.applySidesBehindContent(Modifier, cfg)
++            .foldIn(listOf<String>()) { acc, e -> acc + e.javaClass.simpleName })
++    }
++
++    @Test fun `P3f - the behind-content fast path is the U1 painter on RectangleShape`() {
++        // Same width / colour / shape androidx `border(width, color)` defaults to.
++        val cfg = BordersFacade.extractConfig(flexSafe001).sides
++        val el = BorderSideApplier.applyBorders(Modifier, cfg, behindContent = true)
++            .foldIn(listOf<Modifier.Element>()) { acc, e -> acc + e }.single() as BehindContentBorderElement
++        assertEquals(androidx.compose.ui.unit.Dp(3f), el.width)
++        assertEquals(androidx.compose.ui.graphics.RectangleShape, el.shape)
++    }
++
++    @Test fun `P3g - source - the slow path paints the sides first through drawInOrder`() {
++        // The JVM cannot draw, so the slow path's ORDER is pinned in its source:
++        // behindContent → drawInOrder(sides, content); default → content, then sides.
++        val src = source("runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt")
++        // Code lines only: comments may mention drawContent() freely.
++        val code = src.lines().filterNot { it.trimStart().startsWith("//") || it.trimStart().startsWith("*") }
++            .joinToString("\n")
++        assertTrue("behind-content slow path: sides, then content",
++            code.contains("if (behindContent) drawInOrder({ paintSides() }, { drawContent() }) else { drawContent(); paintSides() }"))
++        // Exactly the two drawContent() call sites of that one line.
++        assertEquals("drawContent() call sites", 2, Regex("""drawContent\(\)""").findAll(code).count())
++    }
++
++    /** A repo file, located by walking up from the test working dir (the BackfaceCullChainTest idiom). */
++    private fun source(rel: String): String {
++        // Gradle runs tests from the module dir; walk up to the repo root.
++        var dir: java.io.File? = java.io.File(System.getProperty("user.dir") ?: ".").absoluteFile
++        while (dir != null && !java.io.File(dir, rel).exists()) dir = dir.parentFile
++        return java.io.File(requireNotNull(dir) { "repo root ($rel) not found" }, rel).readText()
++    }
++}

@@ -1,0 +1,39 @@
+=== U4-a — mutated runtimes/web/src/renderer/InlineRuns.ts (python rc 0; sha256 now 0800d5044b7141c3…)
+--- red run: bash -c cd runtimes/web && npx vitest run tests/renderer/InlineRunsLatitudeCitation.test.ts
+     × (a) the breadcrumb of a word-splitting inert member cites rule 2 (renderer latitude) 21ms
+ FAIL  tests/renderer/InlineRunsLatitudeCitation.test.ts > spec 03 §4.1 renderer latitude — the citation and the paragraph (wave-55 L7 U4) > (a) the breadcrumb of a word-splitting inert member cites rule 2 (renderer latitude)
+AssertionError: expected false to be true // Object.is equality
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+red run rc=1
+--- green run
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+green run rc=0
+
+=== U4-b1 — mutated schema/spec/03-children.md (python rc 0; sha256 now fda15b506dd75337…)
+--- red run: bash -c cd runtimes/web && npx vitest run tests/renderer/InlineRunsLatitudeCitation.test.ts
+     × (b) §4.1 keeps exactly seven numbered rules, and the unnumbered latitude paragraph names both counters 6ms
+ FAIL  tests/renderer/InlineRunsLatitudeCitation.test.ts > spec 03 §4.1 renderer latitude — the citation and the paragraph (wave-55 L7 U4) > (b) §4.1 keeps exactly seven numbered rules, and the unnumbered latitude paragraph names both counters
+AssertionError: expected [ 1, 2, 3, 4, 6, 7, 8 ] to deeply equal [ 1, 2, 3, 4, 5, 6, 7 ]
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+red run rc=1
+--- green run
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+green run rc=0
+
+=== U4-b2 — mutated schema/spec/03-children.md (python rc 0; sha256 now fd59f4408da5c4b5…)
+--- red run: bash -c cd runtimes/web && npx vitest run tests/renderer/InlineRunsLatitudeCitation.test.ts
+     × (b) §4.1 keeps exactly seven numbered rules, and the unnumbered latitude paragraph names both counters 6ms
+ FAIL  tests/renderer/InlineRunsLatitudeCitation.test.ts > spec 03 §4.1 renderer latitude — the citation and the paragraph (wave-55 L7 U4) > (b) §4.1 keeps exactly seven numbered rules, and the unnumbered latitude paragraph names both counters
+AssertionError: expected '**Renderer latitude — a reader-side e…' to contain 'InlineRunFold.Folded.droppedOutOfFlow…'
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+red run rc=1
+--- green run
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+green run rc=0
+

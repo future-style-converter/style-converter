@@ -1,0 +1,17 @@
+{
+ "name": "M3s-old-has-children-gate",
+ "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift",
+ "pre": "2ca760a686e7b8cb13c87e9ba6275c34987ddea77b923c94b64852c3a5cbea31",
+ "mutated": "50696ae4cfd826c49232ff62421e309d9932338c54a3ef784a9d1e04078b62e0",
+ "post": "2ca760a686e7b8cb13c87e9ba6275c34987ddea77b923c94b64852c3a5cbea31",
+ "red_rc": 65,
+ "red_failures": [
+  "UAHeadingFoldGateTests.testInset005FoldedHostTakesTheFace",
+  "UAHeadingFoldGateTests.testInset006FoldedHostTakesTheFace",
+  "UAHeadingFoldGateTests.testInset014FoldedMonospaceHostTakesTwentySix"
+ ],
+ "red_counts": "Executed 39, 5 failures",
+ "green_rc": 0,
+ "green_counts": "Executed 39, 0 failures",
+ "verdict": "RED-THEN-GREEN"
+}

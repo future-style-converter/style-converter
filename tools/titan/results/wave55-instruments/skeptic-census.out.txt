@@ -1,0 +1,48 @@
+(1) touched paths per unit (from the patch headers):
+    U2: 3 — tools/titan/wire-differential.mjs tools/titan/wire-differential.sh tools/titan/wire-differential.test.mjs
+    U3: 3 — tools/titan/results/wave55-gate/ab-arms55.selftest.out.txt tools/titan/results/wave55-gate/ab-arms55.selftest.sh tools/titan/results/wave55-gate/ab-arms55.sh
+    U4: 5 — apps/web-harness/src/ui/ComposedRootSeparator.ts runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts runtimes/web/src/renderer/InlineRuns.ts runtimes/web/tests/renderer/InlineRunsLatitudeCitation.test.ts schema/spec/03-children.md
+    U5: 2 — tools/titan/bidi-bake.test.mjs tools/titan/bidi-marker-paint.mjs
+    U6-compose: 4 — runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlockBranchesTest.kt runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/HyphenateCharacterExtractorTest.kt runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipelineClampHyphenTest.kt runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCutsTest.kt
+    U6-swift: 2 — runtimes/swiftui/Tests/StyleConverterRuntimeTests/HyphenateCharacterCascadeTests.swift runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockBranchesTests.swift
+    U6-tooling: 1 — tools/visual/label-chrome-check.test.mjs
+    U6-web: 1 — runtimes/web/tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx
+    seam files touched: none · paths in two units: none · lane-records-dir writes: none
+(2) gate reach: 112 scripts in the closure of gate-driver.sh / section-runner.sh / test-all.sh
+    U4 apps/web-harness/src/ui/ComposedRootSeparator.ts: BUILT into captures
+    U4 runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts: BUILT into captures
+    U4 runtimes/web/src/renderer/InlineRuns.ts: BUILT into captures
+    U5 tools/titan/bidi-marker-paint.mjs: EXECUTED by the gate
+    every other touched path: off the gate route (tests / prose / records / tools no gate script names)
+(3) apps/web-harness/src/ui/ComposedRootSeparator.ts: comment-stripped emit IDENTICAL → COMMENTS ONLY
+(3) runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts: comment-stripped emit IDENTICAL → COMMENTS ONLY
+(3) runtimes/web/src/renderer/InlineRuns.ts: emit differs on 1 line(s) → STRING LITERALS ONLY
+      - if(join.joined>0){console.warn(`[InlineRuns] component "${ownerId}": ${join.joined} paint-inert out-of-flow member(s) moved to the `+`end of the word 
+      + if(join.joined>0){console.warn(`[InlineRuns] component "${ownerId}": ${join.joined} paint-inert out-of-flow member(s) moved to the `+`end of the word 
+(3) tools/titan/bidi-marker-paint.mjs: emit differs on 1 line(s) → CODE
+      - export const MARKER_PAINT_INITIAL=Object.freeze({opacity:`1`,transform:`none`,filter:`none`,clipPath:`none`,overflowX:`visible`,overflowY:`visible`,vi
+      + export const MARKER_PAINT_INITIAL=Object.freeze({opacity:`1`,transform:`none`,filter:`none`,clipPath:`none`,overflowX:`visible`,overflowY:`visible`,vi
+(4) U5 radius: 17 bidi-baked documents in 6 sections (css-anchor-position, css-backgrounds, css-counter-styles, css-text, css-writing-modes, selectors)
+    css/css-anchor-position/anchor-center-safe-rtl.html: list-item False · mask/mix-blend False · [bidi-bake: baked — 4 roots, 7 runs] 
+    css/css-backgrounds/background-attachment-local/attachment-local-positioning-3.html: list-item False · mask/mix-blend False · [bidi-bake: baked — 1 roots, 1 runs] 
+    css/css-backgrounds/background-attachment-local/attachment-local-positioning-4.html: list-item False · mask/mix-blend False · [bidi-bake: baked — 1 roots, 1 runs] 
+    css/css-counter-styles/arabic-indic/css3-counter-styles-101.html: list-item True · mask/mix-blend False · [bidi-bake: baked — 9 roots, 9 runs] [counter-bake: baked — 9 markers]
+    css/css-counter-styles/arabic-indic/css3-counter-styles-102.html: list-item True · mask/mix-blend False · [bidi-bake: baked — 24 roots, 24 runs] [counter-bake: baked — 24 markers]
+    css/css-counter-styles/arabic-indic/css3-counter-styles-103.html: list-item True · mask/mix-blend False · [bidi-bake: baked — 2 roots, 2 runs] [counter-bake: baked — 2 markers]
+    css/css-counter-styles/counter-suffix.html: list-item True · mask/mix-blend False · [bidi-bake: baked — 2 roots, 10 runs] [counter-bake: baked — 6 markers, 2 declined]
+    css/css-text/bidi/bidi-lines-001.html: list-item False · mask/mix-blend False · [bidi-bake: baked — 2 roots, 11 runs] 
+    css/css-text/bidi/bidi-lines-002.html: list-item False · mask/mix-blend False · [bidi-bake: baked — 1 roots, 7 runs] 
+    css/css-text/bidi/bidi-tab-001.html: list-item False · mask/mix-blend False · [bidi-bake: baked — 8 roots, 8 runs] 
+    css/css-text/boundary-shaping/boundary-shaping-009.html: list-item False · mask/mix-blend False · [bidi-bake: baked — 8 roots, 16 runs] 
+    css/css-text/hyphens/hyphenate-character-005.html: list-item False · mask/mix-blend False · [bidi-bake: baked — 2 roots, 11 runs] 
+    css/css-writing-modes/bidi-plaintext-br-001.html: list-item False · mask/mix-blend False · [bidi-bake: baked — 6 roots, 16 runs] 
+    css/selectors/dir-selector-change-003.html: list-item False · mask/mix-blend False · [bidi-bake: baked — 1 roots, 1 runs] 
+    css/selectors/dir-selector-change-004.html: list-item False · mask/mix-blend False · [bidi-bake: baked — 1 roots, 1 runs] 
+    css/selectors/dir-style-02a.html: list-item False · mask/mix-blend False · [bidi-bake: baked — 6 roots, 17 runs] 
+    css/selectors/dir-style-03a.html: list-item False · mask/mix-blend False · [bidi-bake: baked — 1 roots, 2 runs] 
+    over all 1435 corpus sources: list item AND mask/mix-blend: 0 []
+    of those, not bidi-baked at wave54-final (U5 cannot reach them: the paint read gates only a PLANNED marker of a baked root, bidi-bake.mjs planBidiBake): 0
+(5) expectations captureCarriers {"web": [], "ios": [], "android": []} · wireCarriers [] · revertUnits ['U1', 'U2', 'U3', 'U4', 'U5', 'U6-compose', 'U6-swift', 'U6-tooling', 'U6-web'] (each captures 0/0/0, wire [])
+    landing-manifest L7 units: ['U1(opt)', 'U2', 'U3(opt)', 'U4', 'U6-compose', 'U6-swift', 'U6-web', 'U6-tooling', 'U5']; delivered patches: ['U2', 'U3', 'U4', 'U5', 'U6-compose', 'U6-swift', 'U6-tooling', 'U6-web']; manifest units with no patch: ['U1']
+    MY carriers: captures {'web': [], 'ios': [], 'android': []} · wire [] — PROVIDED [W-L7a] holds (U5 wire-identical); otherwise U5 does not land. Delta vs expectations: IDENTICAL
+    mustNotMove 42 cells over 17 tests; bidi-baked tests with NO L7 must-not-move cell: ['css/css-anchor-position/anchor-center-safe-rtl.html', 'css/css-backgrounds/background-attachment-local/attachment-local-positioning-3.html', 'css/css-backgrounds/background-attachment-local/attachment-local-positioning-4.html']

@@ -1,0 +1,44 @@
+census over 1435 per-test IR documents (runtime predicates, L3CensusRunTest.kt); host INACTIVE on 1221
+Box-branch parents with an applying child (unaffected): 28
+Column-loop parents (PositionedParentFlowSlot.applies to ≥1 child): 107 in 61 docs
+  host ACTIVE (mounted today): 54 parents / 44 docs (≥2 out-of-flow children: 14)
+  host INACTIVE: 53 parents / 17 docs / 65 children (≥2: 8 parents in 5 docs)
+  laid out RTL: 11 parents / 7 docs / 13 children (7 host-inactive)
+U1 reach (today → U1 decision differs): 56 children / 46 parents / 16 docs
+U2 reach (U1 → U1+U2 differs): 13 children / 11 parents / 7 docs
+
+== per document (changed pairs only): classes · android / ios / web cells at wave54-final ==
+  css-anchor-position/wpt__css-anchor-position__anchor-position-multicol-004 [inactive] {'identity': 1, 'STACK(1)': 1} | android P 0.9686 · ios P 0.9712 · web P 0.9897
+  css-anchor-position/wpt__css-anchor-position__anchor-position-multicol-nested-001 [inactive] {'identity': 2, 'STACK(1)': 2, 'STACK(2)': 2, 'STACK(3)': 2} | android f 0.9573 · ios f 0.9703 · web P 0.9742
+  css-backgrounds/wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3 [inactive] {'identity': 2} | android — · ios — · web —
+  css-backgrounds/wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4 [inactive] {'identity': 2} | android — · ios — · web —
+  css-break/wpt__css-break__block-end-aligned-abspos-nested [inactive] {'CLAMP': 1} | android P 0.9967 · ios P 0.9974 · web P 0.999
+  css-counter-styles/wpt__css-counter-styles__counter-suffix [inactive] {'identity': 4} | android P 0.989 · ios P 0.9873 · web P 1
+  css-position/wpt__css-position__position-absolute-scrollable-overflow-zero [inactive] {'identity': 1} | android P 0.9984 · ios P 0.9992 · web P 1
+  css-text-decor/wpt__css-text-decor__text-decoration-subelements-002 [inactive] {'AUTO-W': 2, 'AUTO-H': 2} | android f 0.9047 · ios f 0.7975 · web P 0.9988
+  css-text/wpt__css-text__bidi__bidi-lines-002 [inactive] {'identity': 5} | android P 0.9818 · ios P 0.989 · web P 0.993
+  css-text/wpt__css-text__bidi__bidi-tab-001 [inactive] {'identity': 4, 'RTL-ORIGIN(IDENTITY->MOUNT_RTL_ORIGIN)': 4} | android P 0.9805 · ios P 0.9829 · web P 0.9978
+  css-text/wpt__css-text__boundary-shaping__boundary-shaping-009 [inactive] {'identity': 8} | android f 0.7531 · ios f 0.8919 · web f 0.9482
+  css-text/wpt__css-text__hyphens__hyphenate-character-005 [inactive] {'RTL-ORIGIN(IDENTITY->MOUNT_RTL_ORIGIN)': 1} | android f 0.9474 · ios f 0.9428 · web P 0.974
+  css-view-transitions/wpt__css-view-transitions__css-tags-paint-order [inactive] {'identity': 3} | android P 0.9791 · ios P 0.9791 · web P 0.9791
+  css-view-transitions/wpt__css-view-transitions__css-tags-paint-order-with-entry [inactive] {'identity': 3} | android P 0.9791 · ios P 0.9791 · web P 0.9791
+  css-writing-modes/wpt__css-writing-modes__dynamic-offset-rtl-001 [ACTIVE] {'RTL-ORIGIN(MOUNT->MOUNT_RTL_ORIGIN)': 1} | android P 0.9952 · ios P 0.9955 · web P 1
+  css-writing-modes/wpt__css-writing-modes__dynamic-offset-rtl-002 [ACTIVE] {'RTL-ORIGIN(MOUNT->MOUNT_RTL_ORIGIN)': 1} | android P 0.9953 · ios P 0.9966 · web P 0.9956
+  css-writing-modes/wpt__css-writing-modes__dynamic-offset-vrl-rtl-001 [ACTIVE] {'RTL-ORIGIN(MOUNT->MOUNT_RTL_ORIGIN)': 1} | android P 0.9952 · ios P 0.9955 · web P 1
+  css-writing-modes/wpt__css-writing-modes__dynamic-offset-vrl-rtl-002 [ACTIVE] {'RTL-ORIGIN(MOUNT->MOUNT_RTL_ORIGIN)': 1} | android P 0.9952 · ios P 0.9955 · web P 0.9955
+  selectors/wpt__selectors__dir-selector-change-003 [inactive] {'identity': 3} | android P 0.9994 · ios P 0.9996 · web P 1
+  selectors/wpt__selectors__dir-selector-change-004 [inactive] {'identity': 3} | android P 0.9944 · ios P 0.9958 · web P 1
+  selectors/wpt__selectors__dir-style-02a [inactive] {'identity': 4, 'STACK(1)': 1, 'RTL-ORIGIN(IDENTITY->MOUNT_RTL_ORIGIN)': 4} | android f 0.9425 · ios f 0.9455 · web P 1
+
+== carriers (android captures; web / ios / wire: none — no web, iOS, converter or extractor file changes) ==
+  U1 carriers (STACK class): 3 ['wpt__css-anchor-position__anchor-position-multicol-004', 'wpt__css-anchor-position__anchor-position-multicol-nested-001', 'wpt__selectors__dir-style-02a']
+  U1 controls (reached, identity / CLAMP / AUTO only): 13 ['wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3', 'wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4', 'wpt__css-break__block-end-aligned-abspos-nested', 'wpt__css-counter-styles__counter-suffix', 'wpt__css-position__position-absolute-scrollable-overflow-zero', 'wpt__css-text-decor__text-decoration-subelements-002', 'wpt__css-text__bidi__bidi-lines-002', 'wpt__css-text__bidi__bidi-tab-001', 'wpt__css-text__boundary-shaping__boundary-shaping-009', 'wpt__css-view-transitions__css-tags-paint-order', 'wpt__css-view-transitions__css-tags-paint-order-with-entry', 'wpt__selectors__dir-selector-change-003', 'wpt__selectors__dir-selector-change-004']
+  U2 carriers (RTL origin): 7 ['wpt__css-text__bidi__bidi-tab-001', 'wpt__css-text__hyphens__hyphenate-character-005', 'wpt__css-writing-modes__dynamic-offset-rtl-001', 'wpt__css-writing-modes__dynamic-offset-rtl-002', 'wpt__css-writing-modes__dynamic-offset-vrl-rtl-001', 'wpt__css-writing-modes__dynamic-offset-vrl-rtl-002', 'wpt__selectors__dir-style-02a']
+  union: 9
+
+== cross-check against expectations.json lanes["L3-positioned-parent-slot"] ==
+  U1: census 3 vs expectations 3 — extra none · missing none
+  U2: census 7 vs expectations 7 — extra none · missing none
+  union: census 9 vs expectations 9 — extra none · missing none
+  wireCarriers: expectations [] — the lane changes no converter / extractor byte
+CENSUS IDENTICAL to expectations (no growth)

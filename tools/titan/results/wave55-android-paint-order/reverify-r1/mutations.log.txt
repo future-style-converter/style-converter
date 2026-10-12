@@ -1,0 +1,36 @@
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 e0b379be0297725b5e865f9fb42c5b0290427a40589f4f49597e3f30f569f8ec   [reverify MD1; byte-exact copy under the re-verifier worktree's .l6-reverify-mut-backup/]
+  reverify MD1 mutated  → gradle rc=1 FAIL BorderSidesBehindContentTest :: P3i - a clipping SOLID box keeps androidx's band (drawn after its clipped content) FAIL BorderSidesBehindContentTest :: P3h - a clipping INSET input keeps its slow-path band outer of the background SUMMARY suites=4 tests=36 failed=2 
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 e0b379be0297725b5e865f9fb42c5b0290427a40589f4f49597e3f30f569f8ec   [reverify MD1; post == pre: yes]
+  reverify MD1 restored → gradle rc=0 SUMMARY suites=4 tests=36 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 e0b379be0297725b5e865f9fb42c5b0290427a40589f4f49597e3f30f569f8ec   [reverify XR1; byte-exact copy under the re-verifier worktree's .l6-reverify-mut-backup/]
+  reverify XR1 mutated  → gradle rc=1 FAIL BorderSidesBehindContentTest :: P3i - a clipping SOLID box keeps androidx's band (drawn after its clipped content) FAIL BorderSidesBehindContentTest :: P3h - a clipping INSET input keeps its slow-path band outer of the background SUMMARY suites=4 tests=36 failed=2 
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 e0b379be0297725b5e865f9fb42c5b0290427a40589f4f49597e3f30f569f8ec   [reverify XR1; post == pre: yes]
+  reverify XR1 restored → gradle rc=0 SUMMARY suites=4 tests=36 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 e0b379be0297725b5e865f9fb42c5b0290427a40589f4f49597e3f30f569f8ec   [reverify XR2; byte-exact copy under the re-verifier worktree's .l6-reverify-mut-backup/]
+  reverify XR2 mutated  → gradle rc=1 FAIL BorderSidesBehindContentTest :: P3i - a clipping SOLID box keeps androidx's band (drawn after its clipped content) FAIL BorderSidesBehindContentTest :: P3h - a clipping INSET input keeps its slow-path band outer of the background SUMMARY suites=4 tests=36 failed=2 
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 e0b379be0297725b5e865f9fb42c5b0290427a40589f4f49597e3f30f569f8ec   [reverify XR2; post == pre: yes]
+  reverify XR2 restored → gradle rc=0 SUMMARY suites=4 tests=36 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 e0b379be0297725b5e865f9fb42c5b0290427a40589f4f49597e3f30f569f8ec   [reverify XR3; byte-exact copy under the re-verifier worktree's .l6-reverify-mut-backup/]
+  reverify XR3 mutated  → gradle rc=0 SUMMARY suites=4 tests=36 failed=0 
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 e0b379be0297725b5e865f9fb42c5b0290427a40589f4f49597e3f30f569f8ec   [reverify XR3; post == pre: yes]
+  reverify XR3 restored → gradle rc=0 SUMMARY suites=4 tests=36 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 c67accaba51aa850a280589905c5f46960a0379ce1253747c071bef760dbe0cd   [reverify skeptic-X1; byte-exact copy under the re-verifier worktree's .l6-reverify-mut-backup/]
+  reverify skeptic-X1 mutated  → gradle rc=1 FAIL BehindContentBorderTest :: P5b - rectBand fills the whole box from the origin when the bands meet SUMMARY suites=4 tests=36 failed=1 
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 c67accaba51aa850a280589905c5f46960a0379ce1253747c071bef760dbe0cd   [reverify skeptic-X1; post == pre: yes]
+  reverify skeptic-X1 restored → gradle rc=0 SUMMARY suites=4 tests=36 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 c67accaba51aa850a280589905c5f46960a0379ce1253747c071bef760dbe0cd   [reverify skeptic-X2; byte-exact copy under the re-verifier worktree's .l6-reverify-mut-backup/]
+  reverify skeptic-X2 mutated  → gradle rc=1 FAIL BehindContentBorderTest :: P5a - rectBand strokes the half-inset rect with the ceil'd width SUMMARY suites=4 tests=36 failed=1 
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 c67accaba51aa850a280589905c5f46960a0379ce1253747c071bef760dbe0cd   [reverify skeptic-X2; post == pre: yes]
+  reverify skeptic-X2 restored → gradle rc=0 SUMMARY suites=4 tests=36 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 c67accaba51aa850a280589905c5f46960a0379ce1253747c071bef760dbe0cd   [reverify skeptic-X3; byte-exact copy under the re-verifier worktree's .l6-reverify-mut-backup/]
+  reverify skeptic-X3 mutated  → gradle rc=1 FAIL BehindContentBorderTest :: P5c - a simple radius at exactly half the stroke takes the shrunk-stroke branch SUMMARY suites=4 tests=36 failed=1 
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 c67accaba51aa850a280589905c5f46960a0379ce1253747c071bef760dbe0cd   [reverify skeptic-X3; post == pre: yes]
+  reverify skeptic-X3 restored → gradle rc=0 SUMMARY suites=4 tests=36 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 c67accaba51aa850a280589905c5f46960a0379ce1253747c071bef760dbe0cd   [reverify skeptic-X4; byte-exact copy under the re-verifier worktree's .l6-reverify-mut-backup/]
+  reverify skeptic-X4 mutated  → gradle rc=1 FAIL BehindContentBorderTest :: P5e - the node drops its cached band on an input change, and only then SUMMARY suites=4 tests=36 failed=1 
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 c67accaba51aa850a280589905c5f46960a0379ce1253747c071bef760dbe0cd   [reverify skeptic-X4; post == pre: yes]
+  reverify skeptic-X4 restored → gradle rc=0 SUMMARY suites=4 tests=36 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 c67accaba51aa850a280589905c5f46960a0379ce1253747c071bef760dbe0cd   [reverify skeptic-X7; byte-exact copy under the re-verifier worktree's .l6-reverify-mut-backup/]
+  reverify skeptic-X7 mutated  → gradle rc=1 FAIL BehindContentBorderTest :: P5f - source - the generic branch tints its alpha mask with the OPAQUE colour SUMMARY suites=4 tests=36 failed=1 
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 c67accaba51aa850a280589905c5f46960a0379ce1253747c071bef760dbe0cd   [reverify skeptic-X7; post == pre: yes]
+  reverify skeptic-X7 restored → gradle rc=0 SUMMARY suites=4 tests=36 failed=0 

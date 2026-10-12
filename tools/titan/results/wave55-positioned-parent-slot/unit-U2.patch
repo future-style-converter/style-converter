@@ -1,0 +1,510 @@
+# unit-U2.patch — wave 55, lane L3 (positioned-parent-slot), revert unit U2 (the RTL physical-left origin)
+# base: 611c9f932bcfefa147a35f6c5f356d42709ddf84 + unit-U1.patch + seam-1.patch (U2 dependsOn U1: it is the RTL branch of U1's gate file)
+# paths: NEW runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt, runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt (the RTL branch), runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt (mount(…, rtlOrigin = false) + one .then),
+#   NEW runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOriginTest.kt, runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt (the U2 module line, directly under U1's at the :182 anchor)
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt
+index 04a835c1..4c72cc9b 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt
+@@ -151,14 +151,19 @@ object PositionedParentFlowSlot {
+      *    compose from opposite edges).
+      * Rides RenderComponent's `itemModifier` channel (outermost), exactly
+      * like the RC1 mount and the Box branch's RenderAbsoluteChild mount.
++     * Wave 55 (lane L3, U2): [rtlOrigin] adds ONE outer element,
++     * PositionedParentRtlOrigin.originModifier (the physical-left origin of
++     * an RTL parent's slot, decided by PositionedParentSlotGate); the
++     * default keeps the one-element wave-46 mount byte for byte
++     * (`Modifier.then(x)` is `x`).
+      */
+-    fun mount(childProperties: List<IRProperty>): Modifier =
+-        CanvasRootHoist.zeroFlowAnchor(
++    fun mount(childProperties: List<IRProperty>, rtlOrigin: Boolean = false): Modifier =
++        (if (rtlOrigin) PositionedParentRtlOrigin.originModifier() else Modifier).then(CanvasRootHoist.zeroFlowAnchor(
+             shrinkToFit = CanvasRootHoist.staticPositionShrinkToFit(childProperties),
+             slotEndAnchor = PositionedAncestorAnchor.anchorGate(
+                 childProperties.map { it.type to it.data },
+             ),
+-        )
++        ))
+ 
+     /**
+      * The end edge, in device px, a slot-relative axis anchors to — the
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt
+new file mode 100644
+index 00000000..0139a339
+--- /dev/null
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt
+@@ -0,0 +1,178 @@
++package com.styleconverter.runtime.layout.position
++
++// Wave 55 (lane L3, U2) — the PHYSICAL-LEFT origin of an RTL parent's
++// positioned-parent flow slot (PositionedParentFlowSlot.mount).
++//
++// ## The measured defect (wave54-final, android)
++// css-writing-modes/dynamic-offset-rtl-001: a 100×100 `position: absolute;
++// direction: rtl` box holds a 10×10 `left: 70px` child. Android painted the
++// child at x186 = 16 + 100 + 70, OUTSIDE its parent (ref x86). The slot's
++// zero-flow anchor reports 0×0, and the parent's Column — laid out RTL
++// because ComponentRenderer provides LocalLayoutDirection Rtl for a
++// `Direction: RTL` box — aligns a 0-wide child at `Alignment.Start` =
++// `space − size` = the Column's full width W. The child's own PositionApplier
++// offset (`absoluteOffset`, physical) then adds `left` from THAT edge.
++// Unmounted (a host-inactive capture) the same Column puts a w-wide child at
++// W − w + left: bidi-tab-001's four RTL rows and dir-style-02a rows 6/9 are
++// mirrored (dir-style-02a ink x246-373 where the ref has x17-153).
++//
++// ## What the spec says
++// CSS 2.1 §10.3.7 and css-position-3 §3.1: a declared `left` (with `right`
++// auto) is the offset from the containing block's LEFT edge whatever its
++// `direction`; direction only picks which inset an all-auto or
++// over-constrained box resolves (css-writing-modes-4 §2.1: `direction` sets
++// the inline base direction, not the physical meaning of `left`). The
++// containing block is the parent (§10.1 item 4), so the ink belongs at
++// `left` — and a `right`-only box at `W − w − right`.
++//
++// ## The fix — one outer layout element
++// An outer `Modifier.layout` places the zero-flow anchor at
++// x = −constraints.maxWidth. For a parent with a px Width the Column's
++// constraints are exact, so its width W equals the maxWidth it hands the
++// child, and the ink lands at W − maxWidth + left = left. The constraints
++// pass through untouched, so zeroFlowAnchor's §10.3.7 band and its
++// slot-relative `right` anchor (maxWidth − w) still read the Column's width:
++// a `right`-only child lands at W − w − right, physical right. `place`, never
++// `placeRelative`: the translation is physical (placeRelative under Rtl
++// would mirror it to +maxWidth).
++//
++// ## What it deliberately does NOT do (declined with a breadcrumb)
++//  * a parent without a px Width (auto / % / calc): W need not equal the
++//    child's maxWidth (risk R1 of the lane brief) — today's placement stays;
++//  * a child with no readable physical inline inset (both auto, a
++//    logical-only `inset-inline-*`, or a calc()): PositionConfig folds the
++//    logical insets as LTR (its class kdoc), so no origin is honest here;
++//  * a child with BOTH `left` and `right`: §10.3.7's RTL over-constraint
++//    rule (ignore `left`) is not modelled by this slot.
++// The wave-54 corpus has none of the three among its 11 RTL Column-loop
++// parents / 13 children (all declare a px Width and only `left`).
++
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.layout.layout
++import com.styleconverter.runtime.core.ir.IRProperty
++import com.styleconverter.runtime.core.types.ValueExtractors
++
++object PositionedParentRtlOrigin {
++
++    /** Breadcrumb: the RTL parent's width is not a px length (R1). */
++    const val PARENT_WIDTH_BREADCRUMB = "PositionedParentSlot[rtl-origin-declined:parent-width-not-px]"
++
++    /** Breadcrumb: the child resolves no physical inline inset. */
++    const val NO_INSET_BREADCRUMB = "PositionedParentSlot[rtl-origin-declined:no-physical-inline-inset]"
++
++    /** Breadcrumb: the child declares both `left` and `right`. */
++    const val BOTH_INSETS_BREADCRUMB = "PositionedParentSlot[rtl-origin-declined:both-inline-insets]"
++
++    /** Why the origin does not apply, with the breadcrumb each reason records. */
++    enum class RtlOriginDecline(val breadcrumb: String?) {
++        /** It applies. */
++        NONE(null),
++
++        /** An LTR parent: its Column already starts at the left edge. */
++        NOT_RTL(null),
++
++        /** See [PARENT_WIDTH_BREADCRUMB]. */
++        PARENT_WIDTH_NOT_PX(PARENT_WIDTH_BREADCRUMB),
++
++        /** See [NO_INSET_BREADCRUMB]. */
++        NO_PHYSICAL_INLINE_INSET(NO_INSET_BREADCRUMB),
++
++        /** See [BOTH_INSETS_BREADCRUMB]. */
++        BOTH_INLINE_INSETS(BOTH_INSETS_BREADCRUMB),
++    }
++
++    /**
++     * Does the parent declare a px width? The last `Width` / `InlineSize`
++     * declaration wins (the extractors' fold order); a px length is what
++     * [ValueExtractors.extractDp] reads, a `%` or `calc()` is not.
++     */
++    internal fun hasPxWidth(parentProperties: List<IRProperty>): Boolean =
++        parentProperties.lastOrNull { it.type == "Width" || it.type == "InlineSize" }
++            ?.let { ValueExtractors.extractDp(it.data) != null } == true
++
++    /** The decision, pure over the IR (pinned in PositionedParentRtlOriginTest). */
++    fun decline(
++        parentRtl: Boolean,
++        parentProperties: List<IRProperty>,
++        childProperties: List<IRProperty>,
++    ): RtlOriginDecline {
++        // Only an RTL Column mis-places the 0-wide slot.
++        if (!parentRtl) return RtlOriginDecline.NOT_RTL
++        // W == maxWidth needs a definite parent width (R1).
++        if (!hasPxWidth(parentProperties)) return RtlOriginDecline.PARENT_WIDTH_NOT_PX
++        // The child's PHYSICAL inline insets, read by the SAME extractor its
++        // own PositionApplier offset reads (`Left` → start, `Right` → end).
++        val config = PositionExtractor.extractPositionConfig(childProperties.map { it.type to it.data })
++        val left = config.start != null
++        val right = config.end != null
++        return when {
++            // Over-constrained under RTL: not modelled (header).
++            left && right -> RtlOriginDecline.BOTH_INLINE_INSETS
++            // Exactly one physical inset: the origin makes it physical.
++            left || right -> RtlOriginDecline.NONE
++            // Nothing physical to anchor (header).
++            else -> RtlOriginDecline.NO_PHYSICAL_INLINE_INSET
++        }
++    }
++
++    /** True when [decline] answers [RtlOriginDecline.NONE]. */
++    fun applies(
++        parentRtl: Boolean,
++        parentProperties: List<IRProperty>,
++        childProperties: List<IRProperty>,
++    ): Boolean = decline(parentRtl, parentProperties, childProperties) == RtlOriginDecline.NONE
++
++    /** The origin for a slot whose bounded max width is [boundedMaxPx]: −maxWidth, or null when unbounded. */
++    fun originPx(boundedMaxPx: Int?): Int? = boundedMaxPx?.let { -it }
++
++    /** Where the outer element PLACES its content, in px: the origin, physical (`place`), or 0 with none. */
++    internal fun placedXPx(originPx: Int?): Int = originPx ?: 0
++
++    /**
++     * The pure model of where a mounted child's ink starts, relative to the
++     * Column's left edge: the Column's start alignment of the 0×0 mount
++     * (`colWidth` under Rtl, 0 under Ltr), the origin's placement, the
++     * anchor's slot-relative `right` edge (CanvasRootHoist.anchorPlacePx, the
++     * real arithmetic) and the child's own physical offset (+left / −right).
++     */
++    fun inkLeftPx(
++        colWidthPx: Int,
++        maxWidthPx: Int,
++        rtl: Boolean,
++        origin: Boolean,
++        leftPx: Float? = null,
++        rightPx: Float? = null,
++        boxWidthPx: Int = 0,
++    ): Float {
++        // Alignment.Start of a 0-wide child: `space − size` under Rtl.
++        val slotX = if (rtl) colWidthPx else 0
++        // The outer element's physical translation (none without it).
++        val originX = if (origin) placedXPx(originPx(maxWidthPx)) else 0
++        // zeroFlowAnchor: a `right`-only box anchors at maxWidth − box (A5).
++        val anchorX = CanvasRootHoist.anchorPlacePx(
++            originPx = 0,
++            endEdgePx = PositionedParentFlowSlot.slotEndEdgePx(leftPx == null && rightPx != null, maxWidthPx),
++            boxPx = boxWidthPx,
++        )
++        // PositionConfig.offsetX: `left` wins, else −right, else 0.
++        val offsetX = leftPx ?: -(rightPx ?: 0f)
++        return slotX + originX + anchorX + offsetX
++    }
++
++    /**
++     * The outer layout element: measure the zero-flow anchor with the
++     * Column's own constraints (untouched — see the header), report its size
++     * (0×0) and place it at [originPx] of the bounded max width.
++     */
++    fun originModifier(): Modifier = Modifier.layout { measurable, constraints ->
++        // Pass the Column's constraints through: the anchor reads them.
++        val placeable = measurable.measure(constraints)
++        // −maxWidth when bounded; an unbounded slot keeps today's origin.
++        val origin = originPx(if (constraints.hasBoundedWidth) constraints.maxWidth else null)
++        // Transparent in size: the mount still occupies no flow space.
++        layout(placeable.width, placeable.height) {
++            // Physical, never mirrored (header).
++            placeable.place(x = placedXPx(origin), y = 0)
++        }
++    }
++}
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt
+index da5a506f..d675179a 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt
+@@ -30,6 +30,15 @@ package com.styleconverter.runtime.layout.position
+ // host-inactive RTL parent stays UNMOUNTED, with a PropertyTracker
+ // breadcrumb (no silent fallthrough); an active host keeps today's mount.
+ //
++// ## U2 — the RTL branch
++// An RTL parent whose slot PositionedParentRtlOrigin can correct (a px
++// Width, one physical inline inset) takes the mount WITH the physical-left
++// origin, under any host state of a composed capture: host-inactive
++// (dir-style-02a rows 6/9, bidi-tab-001) and host-active
++// (dynamic-offset-*rtl*, which mounted at W + left until now). An RTL parent
++// the origin declines keeps today's slot (mounted under an active host,
++// withheld otherwise) and records the decline's own breadcrumb.
++//
+ // Pure decisions only (JVM-pinned by PositionedParentSlotGateTest, no
+ // Robolectric in this suite); the measurement is PositionedParentFlowSlot
+ // .mount → CanvasRootHoist.zeroFlowAnchor, unchanged.
+@@ -60,6 +69,9 @@ object PositionedParentSlotGate {
+ 
+         /** PositionedParentFlowSlot.mount: zero footprint at the slot origin. */
+         MOUNT,
++
++        /** The mount plus the RTL parent's physical-left origin (U2). */
++        MOUNT_RTL_ORIGIN,
+     }
+ 
+     /**
+@@ -93,10 +105,27 @@ object PositionedParentSlotGate {
+         // Not an out-of-flow child of a Column-loop containing block: the
+         // slot has nothing to say (the frozen loop owns it).
+         if (!PositionedParentFlowSlot.applies(childProperties, parentProperties)) return SlotMount.IDENTITY
++        // U2: an RTL parent's slot the origin can correct, in any host state.
++        if (rtlOriginEngages(hostActive, composedCapture, parentRtl) &&
++            PositionedParentRtlOrigin.applies(parentRtl, parentProperties, childProperties)
++        ) return SlotMount.MOUNT_RTL_ORIGIN
+         // Otherwise the engagement table above decides.
+         return if (engages(hostActive, composedCapture, parentRtl)) SlotMount.MOUNT else SlotMount.IDENTITY
+     }
+ 
++    /**
++     * U2's engagement row: an RTL parent of a composed capture, whatever the
++     * host (an active host implies a composed capture; the OR keeps the
++     * pre-wave-55 mount's host row explicit). Never the dark stage.
++     */
++    internal fun rtlOriginEngages(
++        hostActive: Boolean,
++        composedCapture: Boolean,
++        parentRtl: Boolean,
++    ): Boolean =
++        // Physical-left origin only where an RTL Column places the slot.
++        parentRtl && (hostActive || composedCapture)
++
+     /**
+      * True when the RTL guard — not the host or the capture mode — withheld
+      * a mount the slot applies to: the case the breadcrumb names.
+@@ -121,11 +150,19 @@ object PositionedParentSlotGate {
+         composedCapture: Boolean,
+         parentRtl: Boolean,
+     ): Modifier = when (decide(childProperties, parentProperties, hostActive, composedCapture, parentRtl)) {
+-        // The wave-46 mount, unchanged (PositionedParentFlowSlot.mount).
+-        SlotMount.MOUNT -> PositionedParentFlowSlot.mount(childProperties)
++        // U2: the mount with its RTL physical-left origin.
++        SlotMount.MOUNT_RTL_ORIGIN -> PositionedParentFlowSlot.mount(childProperties, rtlOrigin = true)
++        // The wave-46 mount, unchanged (PositionedParentFlowSlot.mount) —
++        // after naming why an RTL parent's origin declined, if one did.
++        SlotMount.MOUNT -> {
++            recordRtlOriginDecline(childProperties, parentProperties, hostActive, composedCapture, parentRtl)
++            PositionedParentFlowSlot.mount(childProperties)
++        }
+         // Identity — and, when it was the RTL guard that withheld an
+         // applying mount, say so (no silent fallthrough).
+         SlotMount.IDENTITY -> {
++            // An RTL parent's declined origin is named first (U2).
++            recordRtlOriginDecline(childProperties, parentProperties, hostActive, composedCapture, parentRtl)
+             // Only an applying child is a withheld mount; a non-applying
+             // child was never the slot's to mount.
+             if (PositionedParentFlowSlot.applies(childProperties, parentProperties) &&
+@@ -137,4 +174,25 @@ object PositionedParentSlotGate {
+             Modifier
+         }
+     }
++
++    /**
++     * U2's no-silent-fallthrough: an applying child of an RTL parent whose
++     * origin DECLINED (PositionedParentRtlOrigin's reasons) records that
++     * reason's breadcrumb — the slot keeps today's placement there.
++     */
++    private fun recordRtlOriginDecline(
++        childProperties: List<IRProperty>,
++        parentProperties: List<IRProperty>,
++        hostActive: Boolean,
++        composedCapture: Boolean,
++        parentRtl: Boolean,
++    ) {
++        // Only the RTL-origin row can decline; every other row is silent.
++        if (!rtlOriginEngages(hostActive, composedCapture, parentRtl)) return
++        // A non-applying child was never the slot's.
++        if (!PositionedParentFlowSlot.applies(childProperties, parentProperties)) return
++        // The decline's own key (NONE / NOT_RTL carry none).
++        PositionedParentRtlOrigin.decline(parentRtl, parentProperties, childProperties)
++            .breadcrumb?.let { PropertyTracker.markUnhandled(it) }
++    }
+ }
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
+index f9378533..e6b16ea4 100644
+--- a/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
+@@ -181,6 +181,7 @@ class SeamReachabilityTest {
+             "transforms/BackfaceCull.kt",
+             "transforms/TransformInheritance.kt",
+             "layout/position/PositionedParentSlotGate.kt", // wave 55 L3 U1: called only by seam 1
++            "layout/position/PositionedParentRtlOrigin.kt", // wave 55 L3 U2: the gate's RTL branch
+         )
+         val dead = modules.filterNot { File(runtimeTree, it) in reachable }
+         assertTrue(
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOriginTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOriginTest.kt
+new file mode 100644
+index 00000000..0c3c234f
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOriginTest.kt
+@@ -0,0 +1,171 @@
++package com.styleconverter.runtime.layout.position
++
++// Wave 55 (lane L3, U2) — JVM pins for PositionedParentRtlOrigin and the
++// gate's RTL branch (pure; no Robolectric in this suite):
++//   (a) originPx; (b) the applies / decline table; (c) the inkLeftPx model
++//   and the element's physical `place`; (d) the verbatim wave54-final wires
++//   of bidi-tab-001, dynamic-offset-rtl-001 and dir-style-02a row 6;
++//   (e) the two-element mount, and the decline breadcrumb.
++// Mutations executed red → restore → green (sha256) in
++// tools/titan/results/wave55-positioned-parent-slot/_note.md.
++
++import com.styleconverter.runtime.PropertyTracker
++import com.styleconverter.runtime.layout.position.PositionedParentRtlOrigin.RtlOriginDecline
++import com.styleconverter.runtime.core.ir.IRProperty
++import java.io.File
++import kotlinx.serialization.json.Json
++import kotlinx.serialization.json.jsonArray
++import kotlinx.serialization.json.jsonObject
++import kotlinx.serialization.json.jsonPrimitive
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertNull
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class PositionedParentRtlOriginTest {
++
++    // Decode a declaration list exactly as the per-test IR spells it.
++    private fun wire(declarations: String): List<IRProperty> =
++        Json.parseToJsonElement("[$declarations]").jsonArray.map {
++            IRProperty(it.jsonObject["type"]!!.jsonPrimitive.content, it.jsonObject["data"]!!)
++        }
++
++    // Shorthands for the synthetic rows of the tables below.
++    private val abs = """{"type":"Position","data":"ABSOLUTE"}"""
++    private val pxWidth = """{"type":"Width","data":{"type":"length","px":358}}"""
++    private val left = """{"type":"Left","data":{"px":4.61}}"""
++    private val right = """{"type":"Right","data":{"px":10}}"""
++
++    @Test
++    fun `U2a originPx is minus the bounded max width, none when unbounded`() {
++        // The ink lands at colWidth − maxWidth + left = left (file header).
++        assertEquals(-358, PositionedParentRtlOrigin.originPx(358))
++        assertNull(PositionedParentRtlOrigin.originPx(null))
++        // No origin places at 0: today's slot, unchanged.
++        assertEquals(0, PositionedParentRtlOrigin.placedXPx(null))
++    }
++
++    @Test
++    fun `U2b applies - the decline table`() {
++        // Each row: parentRtl, parent wire, child wire → the decline reason.
++        val o = PositionedParentRtlOrigin
++        assertEquals(RtlOriginDecline.NONE, o.decline(true, wire("$abs,$pxWidth"), wire("$abs,$left")))
++        assertEquals(RtlOriginDecline.NOT_RTL, o.decline(false, wire("$abs,$pxWidth"), wire("$abs,$left")))
++        assertEquals(RtlOriginDecline.PARENT_WIDTH_NOT_PX, o.decline(true, wire(abs), wire("$abs,$left")))
++        assertEquals(RtlOriginDecline.PARENT_WIDTH_NOT_PX,
++            o.decline(true, wire("""$abs,{"type":"Width","data":{"type":"percentage","value":50}}"""), wire("$abs,$left")))
++        assertEquals(RtlOriginDecline.NO_PHYSICAL_INLINE_INSET, o.decline(true, wire("$abs,$pxWidth"), wire(abs)))
++        assertEquals(RtlOriginDecline.NO_PHYSICAL_INLINE_INSET,
++            o.decline(true, wire("$abs,$pxWidth"), wire("""$abs,{"type":"InsetInlineStart","data":{"px":5}}""")))
++        assertEquals(RtlOriginDecline.NONE, o.decline(true, wire("$abs,$pxWidth"), wire("$abs,$right")))
++        assertEquals(RtlOriginDecline.BOTH_INLINE_INSETS, o.decline(true, wire("$abs,$pxWidth"), wire("$abs,$left,$right")))
++        // Only the declines that keep today's placement carry a breadcrumb.
++        assertNull(RtlOriginDecline.NONE.breadcrumb)
++        assertNull(RtlOriginDecline.NOT_RTL.breadcrumb)
++    }
++
++    @Test
++    fun `U2c inkLeftPx - the physical-left origin and the element's place`() {
++        val o = PositionedParentRtlOrigin
++        // dynamic-offset-rtl-001 today (host-active, mounted): x186 − 16.
++        assertEquals(170f, o.inkLeftPx(100, 100, rtl = true, origin = false, leftPx = 70f), 1e-4f)
++        // With the origin: the ref's x86 − 16.
++        assertEquals(70f, o.inkLeftPx(100, 100, rtl = true, origin = true, leftPx = 70f), 1e-4f)
++        // dir-style-02a row 6's text run: x16 + 4.61.
++        assertEquals(4.61f, o.inkLeftPx(358, 358, rtl = true, origin = true, leftPx = 4.61f), 1e-4f)
++        // LTR: the Column starts at 0 and `left` is all there is.
++        assertEquals(70f, o.inkLeftPx(100, 100, rtl = false, origin = false, leftPx = 70f), 1e-4f)
++        // A `right`-only 10-px box: W − w − right, physical right.
++        assertEquals(80f, o.inkLeftPx(100, 100, rtl = true, origin = true, rightPx = 10f, boxWidthPx = 10), 1e-4f)
++        // The element itself places with `place` at placedXPx — physical,
++        // never `placeRelative` (which would mirror −maxWidth to +maxWidth).
++        val src = sourceOf("layout/position/PositionedParentRtlOrigin.kt")
++        val lambda = src.substring(src.indexOf("fun originModifier()"))
++        assertTrue(lambda.contains("placeable.place(x = placedXPx(origin), y = 0)"))
++        assertFalse(lambda.contains("placeRelative"))
++    }
++
++    // The runtime source, found by walking up to the repo root.
++    private fun sourceOf(rel: String): String {
++        val anchor = "runtimes/compose/src/main/java/com/styleconverter/runtime/$rel"
++        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
++        while (dir != null && !File(dir, anchor).exists()) dir = dir.parentFile
++        return File(requireNotNull(dir) { "repo root not found" }, anchor).readText()
++    }
++
++    // tools/titan/runs/wave54-final/sections/<sec>/per-test-ir/ (byte-identical
++    // in wave55-open): each box's Position / Direction / Left / Top / Width /
++    // Height declarations VERBATIM, in wire order. Pairs: parent, child,
++    // whether the document's canvas host is active (the lane census).
++    private val verbatim = listOf(
++        // css-text/bidi/bidi-tab-001 `__2__0-038` → `__2__0__0-039` (host inactive).
++        Triple(wire("""{"type":"Direction","data":"RTL"},$abs,{"type":"Left","data":{"px":12.03}},""" +
++            """{"type":"Top","data":{"px":-2}},{"type":"Width","data":{"type":"length","px":108.38}},""" +
++            """{"type":"Height","data":{"type":"length","px":24}}"""),
++            wire("""$abs,{"type":"Left","data":{"px":0}},{"type":"Top","data":{"px":0}},""" +
++                """{"type":"Width","data":{"type":"length","px":12.05}},""" +
++                """{"type":"Height","data":{"type":"length","px":24}},{"type":"Direction","data":"LTR"}"""), false),
++        // bidi-tab-001 `__3__0-041` → `__3__0__0-042` (host inactive).
++        Triple(wire("""{"type":"Direction","data":"RTL"},$abs,{"type":"Left","data":{"px":0}},""" +
++            """{"type":"Top","data":{"px":-2}},{"type":"Width","data":{"type":"length","px":108.38}},""" +
++            """{"type":"Height","data":{"type":"length","px":24}}"""),
++            wire("""$abs,{"type":"Left","data":{"px":96.33}},{"type":"Top","data":{"px":0}},""" +
++                """{"type":"Width","data":{"type":"length","px":12.05}},""" +
++                """{"type":"Height","data":{"type":"length","px":24}},{"type":"Direction","data":"LTR"}"""), false),
++        // css-writing-modes/dynamic-offset-rtl-001 `__1-752` → `__0__0-753` (host ACTIVE).
++        Triple(wire("""$abs,{"type":"Top","data":{"px":0}},{"type":"Left","data":{"px":0}},""" +
++            """{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}},""" +
++            """{"type":"Direction","data":"RTL"}"""),
++            wire("""$abs,{"type":"Top","data":{"px":10}},{"type":"Width","data":{"type":"length","px":10}},""" +
++                """{"type":"Height","data":{"type":"length","px":10}},{"type":"Left","data":{"px":70}}"""), true),
++        // selectors/dir-style-02a row 6 `__3__2-092` → `__3__2__0-093` (host inactive).
++        Triple(wire("""{"type":"Direction","data":"RTL"},$abs,{"type":"Width","data":{"type":"length","px":358}},""" +
++            """{"type":"Height","data":{"type":"length","px":20}},{"type":"Left","data":{"px":0}},""" +
++            """{"type":"Top","data":{"px":40}}"""),
++            wire("""$abs,{"type":"Left","data":{"px":4.61}},{"type":"Top","data":{"px":0}},""" +
++                """{"type":"Width","data":{"type":"length","px":133.88}},""" +
++                """{"type":"Height","data":{"type":"length","px":20}},{"type":"Direction","data":"LTR"}"""), false),
++    )
++
++    @Test
++    fun `U2d the verbatim RTL carriers take the origin in their own host state`() {
++        for ((parent, child, hostActive) in verbatim) {
++            // The origin applies (px Width, `left` only)…
++            assertTrue(PositionedParentRtlOrigin.applies(true, parent, child))
++            // …and the gate's RTL branch takes it, host active or not.
++            assertEquals(
++                PositionedParentSlotGate.SlotMount.MOUNT_RTL_ORIGIN,
++                PositionedParentSlotGate.decide(child, parent, hostActive, composedCapture = true, parentRtl = true),
++            )
++            // The dark stage never does (no composed capture, no host).
++            assertEquals(
++                PositionedParentSlotGate.SlotMount.IDENTITY,
++                PositionedParentSlotGate.decide(child, parent, false, composedCapture = false, parentRtl = true),
++            )
++        }
++    }
++
++    @Test
++    fun `U2e the origin mount is two elements, and a declined origin is named`() {
++        val child = wire("$abs,$left")
++        // Default: the one-element wave-46 mount (PositionedParentFlowSlotTest).
++        assertEquals(1, PositionedParentFlowSlot.mount(child).foldIn(0) { n, _ -> n + 1 })
++        // rtlOrigin = true: the outer origin element + the anchor.
++        assertEquals(2, PositionedParentFlowSlot.mount(child, rtlOrigin = true).foldIn(0) { n, _ -> n + 1 })
++        // The gate hands the RTL carrier that two-element mount.
++        val parent = wire("$abs,$pxWidth")
++        assertEquals(2, PositionedParentSlotGate.slotModifier(child, parent, false, true, true).foldIn(0) { n, _ -> n + 1 })
++        // An active host's RTL parent with no px Width keeps today's mount
++        // (one element) and records the decline's breadcrumb.
++        val key = PositionedParentRtlOrigin.PARENT_WIDTH_BREADCRUMB
++        val before = PropertyTracker.getOccurrences(key)
++        assertEquals(1, PositionedParentSlotGate.slotModifier(child, wire(abs), true, true, true).foldIn(0) { n, _ -> n + 1 })
++        assertEquals(before + 1, PropertyTracker.getOccurrences(key))
++        // The RTL-origin row of the gate: never the dark stage, never LTR.
++        assertFalse(PositionedParentSlotGate.rtlOriginEngages(false, false, true))
++        assertFalse(PositionedParentSlotGate.rtlOriginEngages(true, true, false))
++        assertTrue(PositionedParentSlotGate.rtlOriginEngages(false, true, true))
++        assertTrue(PositionedParentSlotGate.rtlOriginEngages(true, true, true))
++    }
++}

@@ -1,0 +1,3 @@
+cr.x < half -> clipRect(
+=====
+cr.x <= half -> clipRect(

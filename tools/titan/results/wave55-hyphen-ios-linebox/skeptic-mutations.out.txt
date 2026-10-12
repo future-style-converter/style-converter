@@ -1,0 +1,50 @@
+K2 [ceil the sum (variant: terms unrounded, .up at the return)] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 buildFailed False failed ['testP2EachTermRoundsAloneNeverTheSum', 'testP3HalvesRoundAwayFromZero'] (want ['testP2EachTermRoundsAloneNeverTheSum']) -> RED as required
+   restored: exit 0 passed 9/9 failed [] skipped [] -> GREEN
+   verdict OK
+K3 [banker's rounding on the DESCENDER term only (variant of M3)] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 buildFailed False failed ['testP3HalvesRoundAwayFromZero'] (want ['testP3HalvesRoundAwayFromZero']) -> RED as required
+   restored: exit 0 passed 9/9 failed [] skipped [] -> GREEN
+   verdict OK
+K4 [drop the exactness guard] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 buildFailed False failed ['testP4BlinkBoxOnlyUnderAllFourGuards'] (want ['testP4BlinkBoxOnlyUnderAllFourGuards']) -> RED as required
+   restored: exit 0 passed 9/9 failed [] skipped [] -> GREEN
+   verdict OK
+K5 [drop the WPT guard] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 buildFailed False failed ['testP4BlinkBoxOnlyUnderAllFourGuards'] (want ['testP4BlinkBoxOnlyUnderAllFourGuards']) -> RED as required
+   restored: exit 0 passed 9/9 failed [] skipped [] -> GREEN
+   verdict OK
+K6 [Blink box overrides a non-nil effective (variant: effective ignored entirely)] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 buildFailed False failed ['testP5EffectiveValueIsReturnedVerbatim'] (want ['testP5EffectiveValueIsReturnedVerbatim']) -> RED as required
+   restored: exit 0 passed 9/9 failed [] skipped [] -> GREEN
+   verdict OK
+K7 [faceMetrics: every no-face design resolves to the Inter table (variant of M7)] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 buildFailed False failed ['testP6FaceResolutionMatchesLineBoxMetrics'] (want ['testP6FaceResolutionMatchesLineBoxMetrics']) -> RED as required
+   restored: exit 0 passed 9/9 failed [] skipped [] -> GREEN
+   verdict OK
+K8 [drop the horizontal-writing-mode guard (D22)] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 buildFailed False failed ['testP4BlinkBoxOnlyUnderAllFourGuards', 'testP8VerticalRunIsDeclinedByTheHorizontalGuard'] (want ['testP4BlinkBoxOnlyUnderAllFourGuards', 'testP8VerticalRunIsDeclinedByTheHorizontalGuard']) -> RED as required
+   restored: exit 0 passed 9/9 failed [] skipped [] -> GREEN
+   verdict OK
+K0 [drop the declared-normal guard (no lane mutation names it)] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 buildFailed False failed ['testP4BlinkBoxOnlyUnderAllFourGuards'] (want ['testP4BlinkBoxOnlyUnderAllFourGuards']) -> RED as required
+   restored: exit 0 passed 9/9 failed [] skipped [] -> GREEN
+   verdict OK
+SX1 [faceMetrics IGNORES the document face (branch 1 skipped) — the face 12 of the 14 carriers paint] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 0 buildFailed False failed [] (want none: probe) -> SURVIVED (untested branch)
+   restored: exit 0 passed 9/9 failed [] skipped [] -> GREEN
+   verdict OK
+SX2 [the below-raw breadcrumb never fires (log-once removed)] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 0 buildFailed False failed [] (want none: probe) -> SURVIVED (untested branch)
+   restored: exit 0 passed 9/9 failed [] skipped [] -> GREEN
+   verdict OK
+SX3 [banker's rounding on the LINE-GAP term only] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 0 buildFailed False failed [] (want none: probe) -> SURVIVED (untested branch)
+   restored: exit 0 passed 9/9 failed [] skipped [] -> GREEN
+   verdict OK
+SX4 [the size-0 guard removed (a 0 box returned instead of nil)] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 0 buildFailed False failed [] (want none: probe) -> SURVIVED (untested branch)
+   restored: exit 0 passed 9/9 failed [] skipped [] -> GREEN
+   verdict OK
+skeptic mutations: ALL OK
+exit 0

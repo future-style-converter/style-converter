@@ -1,0 +1,15 @@
+{
+ "name": "I7-widen-table",
+ "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/spacing/UAPositionedHeadingMargin.swift",
+ "pre": "e9abac226c39167b1a1dc7d5b150a47ab3e963a2d252322da36e3bf6f2e18d80",
+ "mutated": "fcad63e47181cbadeaf5a260416d5ffadee7a6c489824b7d1e18dbe7cf89aeb7",
+ "post": "e9abac226c39167b1a1dc7d5b150a47ab3e963a2d252322da36e3bf6f2e18d80",
+ "red_rc": 65,
+ "red_failures": [
+  "UAPositionedHeadingMarginTests.testS1111b005AbsposParagraphIsOutOfScopeAndLogged"
+ ],
+ "red_counts": "Executed 39, 2 failures",
+ "green_rc": 0,
+ "green_counts": "Executed 39, 0 failures",
+ "verdict": "RED-THEN-GREEN"
+}

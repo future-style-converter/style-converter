@@ -1,0 +1,16 @@
+{
+ "name": "M5-ua-step-writes-color",
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt",
+ "pre": "7129ff8e0f77cfe9a65b2f90dc95d7d3e08aa2d6361347c79bb96bdd49b27a6d",
+ "mutated": "9325f257f62d9401817edd9e53b6760476723202275ca323d8d5fb6d71263c61",
+ "post": "7129ff8e0f77cfe9a65b2f90dc95d7d3e08aa2d6361347c79bb96bdd49b27a6d",
+ "red_rc": 1,
+ "red_failures": [
+  "UAElementFontRuleTest > inset-001 - the extractor-baked h1 (own 32 and 700) comes back as the SAME list",
+  "UAHeadingFoldGateTest > soundness - the fold verdict is the same before and after the UA face (brief 4 D)"
+ ],
+ "red_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/1; UAHeadingFoldGateTest 9/1",
+ "green_rc": 0,
+ "green_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "verdict": "RED-THEN-GREEN"
+}

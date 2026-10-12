@@ -1,0 +1,9 @@
+# fix-r1.u3-glyph-census.out.txt — run wave54-final: 1435 per-test IR documents; Inter-Regular tnum maps 61 glyphs
+tools/titan/runs/wave54-final/sections/css-counter-styles/per-test-ir/wpt__css-counter-styles__counter-suffix.json
+  counter-suffix__0__4__2-628 text '.': tnum-mapped ['.'] · in Inter, unmapped [] · fallback face []
+  counter-suffix__0__4__3-629 text '1': tnum-mapped ['1'] · in Inter, unmapped [] · fallback face []
+  counter-suffix__0__4__4-630 text '.': tnum-mapped ['.'] · in Inter, unmapped [] · fallback face []
+  counter-suffix__0__4__5-631 text '2': tnum-mapped ['2'] · in Inter, unmapped [] · fallback face []
+  counter-suffix__0__5__2-637 text 'א.': tnum-mapped ['.'] · in Inter, unmapped [] · fallback face ['א']
+  counter-suffix__0__5__3-638 text 'ב.': tnum-mapped ['.'] · in Inter, unmapped [] · fallback face ['ב']
+TOTAL: 6 declaring component(s) in 1 document(s); 6 glyph(s) repainted by tnum (the plan read 1: row 9's digit window)

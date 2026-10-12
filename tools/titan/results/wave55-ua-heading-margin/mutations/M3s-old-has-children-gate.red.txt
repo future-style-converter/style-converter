@@ -1,0 +1,245 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test -scheme StyleConverterRuntime -destination "platform=macOS,variant=Mac Catalyst,arch=arm64" -derivedDataPath <wt:build-L4>/.dd "-only-testing:StyleConverterRuntimeTests/UAPositionedHeadingMarginTests" "-only-testing:StyleConverterRuntimeTests/UAPositionedHeadingMarginSeamWiringTests" "-only-testing:StyleConverterRuntimeTests/UAElementFontRuleTests" "-only-testing:StyleConverterRuntimeTests/UAHeadingFoldGateTests"
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  StyleConverterRuntime: <wt:build-L4>
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (4 targets)
+    Target 'StyleConverterRuntime-product' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntimeTests-product' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk <wt:build-L4>/.dd/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+    cd <wt:build-L4>/.swiftpm/xcode
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -o <wt:build-L4>/.dd/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+
+SwiftDriver StyleConverterRuntime normal arm64 com.apple.xcode.tools.swift.compiler (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -parse-as-library -module-name StyleConverterRuntime -Onone @<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.SwiftFileList -DSWIFT_PACKAGE -DDEBUG -DSWIFT_MODULE_RESOURCE_BUNDLE_AVAILABLE -DXcode -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-ios16.0-macabi -g -module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path <wt:build-L4>/.dd/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc <wt:build-L4>/.dd/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path <wt:build-L4>/.dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -sdk-module-cache-path <wt:build-L4>/.dd/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file <wt:build-L4>/.dd/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -package-name wave55_build_l4 -emit-const-values -const-gather-protocols-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime_const_extract_protocols.json -Xcc -I<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/include -Xcc -isystem -Xcc /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/usr/include -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources-normal/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-Swift.h -working-directory <wt:build-L4>/.swiftpm/xcode -experimental-emit-module-separately -disable-cmo
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ StyleConverterRuntime (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+
+SwiftCompile normal arm64 (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    
+
+SwiftCompile normal arm64 Compiling\ UAHeadingFoldGate.swift <wt:build-L4>/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+<wt:build-L4>/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift:77:13: warning: initialization of immutable value 'flow' was never used; consider replacing with assignment to '_' or removing it [#NoUsage]
+75 |         // `InlineRunFlow.fold(runs:children:totalChildCount:…)`): nil — no
+76 |         // runs, or any refusal — means the children paint stacked.
+77 |         let flow = InlineRunFlow.fold(runs: component.meta?.runs,
+   |             `- warning: initialization of immutable value 'flow' was never used; consider replacing with assignment to '_' or removing it [#NoUsage]
+78 |                                       children: FlexboxApplier.sorted(inFlowChildren),
+79 |                                       totalChildCount: component.children?.count ?? 0,
+
+[#NoUsage]: <https://docs.swift.org/compiler/documentation/diagnostics/no-usage>
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UAHeadingFoldGate.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling UAHeadingFoldGate.swift (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+
+SwiftDriver\ Compilation StyleConverterRuntime normal arm64 com.apple.xcode.tools.swift.compiler (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -parse-as-library -module-name StyleConverterRuntime -Onone @<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.SwiftFileList -DSWIFT_PACKAGE -DDEBUG -DSWIFT_MODULE_RESOURCE_BUNDLE_AVAILABLE -DXcode -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-ios16.0-macabi -g -module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path <wt:build-L4>/.dd/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc <wt:build-L4>/.dd/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path <wt:build-L4>/.dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -sdk-module-cache-path <wt:build-L4>/.dd/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file <wt:build-L4>/.dd/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -package-name wave55_build_l4 -emit-const-values -const-gather-protocols-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime_const_extract_protocols.json -Xcc -I<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/include -Xcc -isystem -Xcc /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/usr/include -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources-normal/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-Swift.h -working-directory <wt:build-L4>/.swiftpm/xcode -experimental-emit-module-separately -disable-cmo
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for StyleConverterRuntime (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+
+SwiftDriver\ Compilation\ Requirements StyleConverterRuntime normal arm64 com.apple.xcode.tools.swift.compiler (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -parse-as-library -module-name StyleConverterRuntime -Onone @<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.SwiftFileList -DSWIFT_PACKAGE -DDEBUG -DSWIFT_MODULE_RESOURCE_BUNDLE_AVAILABLE -DXcode -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-ios16.0-macabi -g -module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path <wt:build-L4>/.dd/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc <wt:build-L4>/.dd/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path <wt:build-L4>/.dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -sdk-module-cache-path <wt:build-L4>/.dd/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file <wt:build-L4>/.dd/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -package-name wave55_build_l4 -emit-const-values -const-gather-protocols-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime_const_extract_protocols.json -Xcc -I<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/include -Xcc -isystem -Xcc /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/usr/include -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources-normal/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-Swift.h -working-directory <wt:build-L4>/.swiftpm/xcode -experimental-emit-module-separately -disable-cmo
+
+Copy <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.swiftmodule/arm64-apple-ios-macabi.abi.json <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.abi.json (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.abi.json <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.swiftmodule/arm64-apple-ios-macabi.abi.json
+
+Copy <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.swiftmodule/Project/arm64-apple-ios-macabi.swiftsourceinfo <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.swiftsourceinfo (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.swiftsourceinfo <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.swiftmodule/Project/arm64-apple-ios-macabi.swiftsourceinfo
+
+Ld <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.o normal (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios16.0-macabi -r -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -O0 -Xlinker -no_warn_duplicate_libraries -F<wt:build-L4>/.dd/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-maccatalyst -F<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks -filelist <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.LinkFileList -nostdlib -Xlinker -object_path_lto -Xlinker <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime_lto.o -Xlinker -no_deduplicate -Xlinker -debug_variant -Xlinker -dependency_info -Xlinker <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx -L/System/iOSSupport/usr/lib/swift -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.swiftmodule -o <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.o
+
+ExtractAppIntentsMetadata (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name StyleConverterRuntime --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk --xcode-version 27A266a --platform-family macOS --deployment-target 13.0 --bundle-identifier wave55-build-l4.StyleConverterRuntime --output <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.appintents --target-triple arm64-apple-ios16.0-macabi --binary-file <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.o --dependency-file <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime_dependency_info.dat --stringsdata-file <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.SwiftFileList --metadata-file-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/StyleConverterRuntime.DependencyMetadataFileList --static-metadata-file-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/StyleConverterRuntime.DependencyStaticMetadataFileList --swift-const-vals-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.SwiftConstValuesFileList --force --compile-time-extraction --deployment-aware-processing --no-app-shortcuts-localization
+2026-10-11 23:07:18.078 appintentsmetadataprocessor[78092:10261003] Starting appintentsmetadataprocessor export
+2026-10-11 23:07:18.204 appintentsmetadataprocessor[78092:10261003] Extracted no relevant App Intents symbols, skipping writing output
+
+Ld <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/MacOS/StyleConverterRuntimeTests normal (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -Xlinker -reproducible -target arm64-apple-ios17.0-macabi -Xlinker -bundle -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -Xlinker -no_warn_duplicate_libraries -L<wt:build-L4>/.dd/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-maccatalyst -L<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -L/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/usr/lib -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/maccatalyst -L/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -L/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/usr/lib -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/maccatalyst -F<wt:build-L4>/.dd/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-maccatalyst -F<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/PackageFrameworks -F<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks @<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.LinkFileList -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @loader_path -Xlinker -rpath -Xlinker <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/PackageFrameworks -Xlinker -rpath -Xlinker @loader_path/../../.. -Xlinker -rpath -Xlinker @loader_path/Frameworks -Xlinker -rpath -Xlinker @loader_path/../Frameworks -Xlinker -object_path_lto -Xlinker <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests_lto.o -Xclang-linker -rdynamic -Xlinker -no_deduplicate -Xlinker -debug_variant -Xlinker -dependency_info -Xlinker <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests_dependency_info.dat -link-objc-runtime -profile-generate -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx -L/System/iOSSupport/usr/lib/swift -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.swiftmodule -Xlinker -needed_framework -Xlinker XCTest -framework XCTest -Xlinker -needed-lXCTestSwiftSupport -lXCTestSwiftSupport -o <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/MacOS/StyleConverterRuntimeTests -no-stdlib-rpath
+
+ExtractAppIntentsMetadata (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name StyleConverterRuntimeTests --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk --xcode-version 27A266a --platform-family macOS --deployment-target 14.0 --bundle-identifier wave55-build-l4.StyleConverterRuntimeTests --output <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Resources --target-triple arm64-apple-ios17.0-macabi --binary-file <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/MacOS/StyleConverterRuntimeTests --dependency-file <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests_dependency_info.dat --stringsdata-file <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.SwiftFileList --metadata-file-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/StyleConverterRuntimeTests.DependencyMetadataFileList --static-metadata-file-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/StyleConverterRuntimeTests.DependencyStaticMetadataFileList --swift-const-vals-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --no-app-shortcuts-localization
+2026-10-11 23:07:19.107 appintentsmetadataprocessor[78126:10261083] Starting appintentsmetadataprocessor export
+2026-10-11 23:07:19.110 appintentsmetadataprocessor[78126:10261083] warning: Metadata extraction skipped, no AppIntents.framework dependency found
+
+CopySwiftLibs <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    builtin-swiftStdLibTool --copy --verbose --scan-executable <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/MacOS/StyleConverterRuntimeTests --scan-folder <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Frameworks --scan-folder <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/PlugIns --scan-folder <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Library/SystemExtensions --scan-folder <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Extensions --platform macosx --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Frameworks --strip-bitcode --scan-executable /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libXCTestSwiftSupport.dylib --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+Ignoring --strip-bitcode because --sign was not passed
+
+PruneExplicitPrecompiledModules <wt:build-L4>/.dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules <wt:build-L4>/.dd/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules <wt:build-L4>/.dd/SDKExplicitPrecompiledModules
+
+Test Suite 'Selected tests' started at 2026-10-11 23:07:30.097.
+Test Suite 'StyleConverterRuntimeTests.xctest' started at 2026-10-11 23:07:30.097.
+Test Suite 'UAElementFontRuleTests' started at 2026-10-11 23:07:30.097.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testBareH3TakesTheUAFace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testBareH3TakesTheUAFace]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testFontShorthandBlocksBothHalves]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testFontShorthandBlocksBothHalves]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingGatePredicate]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingGatePredicate]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingMultipliersMatchTheUASheet]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingMultipliersMatchTheUASheet]' passed (0.004 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingWithChildrenStandsDown]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingWithChildrenStandsDown]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testInheritedFontSizeIsSubstitutedInPlace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testInheritedFontSizeIsSubstitutedInPlace]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testInheritedSizeIsTheEmBase]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testInheritedSizeIsTheEmBase]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testMonospaceHeadingResolvesAgainstTheFixedDefault]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testMonospaceHeadingResolvesAgainstTheFixedDefault]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testOwnFontSizeAndWeightWin]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testOwnFontSizeAndWeightWin]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testProportionalHeadingResolvesAgainstSixteen]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testProportionalHeadingResolvesAgainstSixteen]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testStyleBuilderConsumesTheInjectedFace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testStyleBuilderConsumesTheInjectedFace]' passed (0.085 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testSupAndSubUseTheSmallerRatio]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testSupAndSubUseTheSmallerRatio]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testSupIsNotGatedByChildren]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testSupIsNotGatedByChildren]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntabledTagIsUnchanged]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntabledTagIsUnchanged]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntabledTagsAreInert]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntabledTagsAreInert]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntaggedComponentIsUnchanged]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntaggedComponentIsUnchanged]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testVerbatimBakedH1IsUntouched]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testVerbatimBakedH1IsUntouched]' passed (0.003 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testVerbatimLeafH1PaintsTheUAFace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testVerbatimLeafH1PaintsTheUAFace]' passed (0.003 seconds).
+Test Suite 'UAElementFontRuleTests' passed at 2026-10-11 23:07:30.210.
+	 Executed 18 tests, with 0 failures (0 unexpected) in 0.108 (0.113) seconds
+Test Suite 'UAHeadingFoldGateTests' started at 2026-10-11 23:07:30.210.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testFoldVerdictIsInvariantUnderTheUAFace]' started.
+[PropertyTracker] inline-run flow bail — member-prop:TextDecorationColor-divergence
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testFoldVerdictIsInvariantUnderTheUAFace]' passed (0.006 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset005FoldedHostTakesTheFace]' started.
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAHeadingFoldGateTests.swift:114: error: -[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset005FoldedHostTakesTheFace] : XCTAssertFalse failed
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAHeadingFoldGateTests.swift:118: error: -[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset005FoldedHostTakesTheFace] : XCTAssertEqualWithAccuracy failed: ("0.0") is not equal to ("32.0") +/- ("1e-09")
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAHeadingFoldGateTests.swift:119: error: -[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset005FoldedHostTakesTheFace] : XCTAssertNotNil failed
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset005FoldedHostTakesTheFace]' failed (2.134 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset006FoldedHostTakesTheFace]' started.
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAHeadingFoldGateTests.swift:125: error: -[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset006FoldedHostTakesTheFace] : XCTAssertEqualWithAccuracy failed: ("0.0") is not equal to ("32.0") +/- ("1e-09")
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset006FoldedHostTakesTheFace]' failed (0.077 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset011BailingHostStandsDown]' started.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset011BailingHostStandsDown]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset014FoldedMonospaceHostTakesTwentySix]' started.
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAHeadingFoldGateTests.swift:132: error: -[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset014FoldedMonospaceHostTakesTwentySix] : XCTAssertEqualWithAccuracy failed: ("0.0") is not equal to ("26.0") +/- ("1e-09")
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset014FoldedMonospaceHostTakesTwentySix]' failed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testLeafHeadingApplies]' started.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testLeafHeadingApplies]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testNonHeadingWithChildrenKeepsTheOldFlag]' started.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testNonHeadingWithChildrenKeepsTheOldFlag]' passed (0.002 seconds).
+Test Suite 'UAHeadingFoldGateTests' failed at 2026-10-11 23:07:32.515.
+	 Executed 7 tests, with 5 failures (0 unexpected) in 2.226 (2.304) seconds
+Test Suite 'UAPositionedHeadingMarginSeamWiringTests' started at 2026-10-11 23:07:32.515.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginSeamWiringTests testTheHoistAndTheFontStepPrecedeIt]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginSeamWiringTests testTheHoistAndTheFontStepPrecedeIt]' passed (0.054 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginSeamWiringTests testTheMarginStepRunsOnceLastInMergedProperties]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginSeamWiringTests testTheMarginStepRunsOnceLastInMergedProperties]' passed (0.070 seconds).
+Test Suite 'UAPositionedHeadingMarginSeamWiringTests' passed at 2026-10-11 23:07:32.642.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.124 (0.127) seconds
+Test Suite 'UAPositionedHeadingMarginTests' started at 2026-10-11 23:07:32.645.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testAuthorSizesAbsolutePxIsTheBasisRelativeAndShorthandAreLogged]' started.
+[PropertyTracker] UAPositionedHeadingMargin: out-of-flow <h3> with an unresolvable author font-size: UA margin-block not emitted
+[PropertyTracker] UAPositionedHeadingMargin: out-of-flow <h4> with an unresolvable author font-size: UA margin-block not emitted
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testAuthorSizesAbsolutePxIsTheBasisRelativeAndShorthandAreLogged]' passed (0.005 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testCaptureOffIsUnchanged]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testCaptureOffIsUnchanged]' passed (0.003 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testFoldVerdictsAreUnchangedByTheMarginStep]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testFoldVerdictsAreUnchangedByTheMarginStep]' passed (0.010 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInFlowHeadingsAreUnchanged]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInFlowHeadingsAreUnchanged]' passed (0.008 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset001DeclaresBothEdgesAndIsUnchanged]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset001DeclaresBothEdgesAndIsUnchanged]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied]' passed (0.008 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset014MonospaceTakesSeventeenPointFourTwo]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset014MonospaceTakesSeventeenPointFourTwo]' passed (0.080 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testOnlyMarginTopDeclaredTakesTheUABottomOnly]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testOnlyMarginTopDeclaredTakesTheUABottomOnly]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testRelativeStickyStaticAreUnchangedAndFixedFires]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testRelativeStickyStaticAreUnchangedAndFixedFires]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testS1111b005AbsposParagraphIsOutOfScopeAndLogged]' started.
+[PropertyTracker] UAPositionedHeadingMargin: out-of-flow <p>: UA margin-block not emitted (headings only)
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testS1111b005AbsposParagraphIsOutOfScopeAndLogged]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testUntaggedOrMarginlessTagsAreUnchanged]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testUntaggedOrMarginlessTagsAreUnchanged]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testVerticalWritingModeIsUnchangedAndLogged]' started.
+[PropertyTracker] UAPositionedHeadingMargin: out-of-flow <h1> in a vertical writing mode: UA margin-block not emitted
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testVerticalWritingModeIsUnchangedAndLogged]' passed (0.001 seconds).
+Test Suite 'UAPositionedHeadingMarginTests' passed at 2026-10-11 23:07:32.772.
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.121 (0.127) seconds
+Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-11 23:07:32.773.
+	 Executed 39 tests, with 5 failures (0 unexpected) in 2.580 (2.675) seconds
+Test Suite 'Selected tests' failed at 2026-10-11 23:07:32.773.
+	 Executed 39 tests, with 5 failures (0 unexpected) in 2.580 (2.676) seconds
+
+Test session results, code coverage, and logs:
+	<wt:build-L4>/.dd/Logs/Test/Test-StyleConverterRuntime-2026.10.11_23-07-05-+0200.xcresult
+
+Testing started
+2026-10-11 23:07:05.181 xcodebuild[77866:10259649] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+2026-10-11 23:07:29.596 xcodebuild[77866:10259666]  DVTAssertions: Warning in IDEFrameworks/IDEFoundation/Execution/LaunchSystem/IDELaunchSession.m:395
+Details:  setRunnablePIDWithDiagnostics:logSection:andCompletionHandler: called without a completion handler - blocking until diagnostics setup completes. Callers should migrate to using a completion handler for better performance.
+Object:   <IDELaunchSession: 0x7cee682b80>
+Method:   -setRunnablePIDWithDiagnostics:logSection:andCompletionHandler:
+Thread:   <NSThread: 0x7cf0f85740>{number = 4, name = (null)}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-10-11 23:07:42.232 xcodebuild[77866:10259649] [MT] IDETestOperationsObserverDebug: 13.097 elapsed -- Testing started completed.
+2026-10-11 23:07:42.232 xcodebuild[77866:10259649] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-11 23:07:42.232 xcodebuild[77866:10259649] [MT] IDETestOperationsObserverDebug: 13.097 sec, +13.097 sec -- end
+Failing tests:
+	UAHeadingFoldGateTests.testInset005FoldedHostTakesTheFace()
+	UAHeadingFoldGateTests.testInset005FoldedHostTakesTheFace()
+	UAHeadingFoldGateTests.testInset005FoldedHostTakesTheFace()
+	UAHeadingFoldGateTests.testInset006FoldedHostTakesTheFace()
+	UAHeadingFoldGateTests.testInset014FoldedMonospaceHostTakesTwentySix()
+
+** TEST FAILED **
+

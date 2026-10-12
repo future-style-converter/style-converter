@@ -1,0 +1,7 @@
+            result = BordersFacade.apply(result, paint.borders, sidesBehindContent = true)
+            result = ColorApplier.applyColors(result, paint.colors)
+            result = BordersFacade.applySidesBehindContent(result, paint.borders)
+=====
+            result = BordersFacade.apply(result, paint.borders, sidesBehindContent = true)
+            result = BordersFacade.applySidesBehindContent(result, paint.borders)
+            result = ColorApplier.applyColors(result, paint.colors)

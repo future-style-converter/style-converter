@@ -1,0 +1,16 @@
+   L7-instruments           flex-zero-gap-rules.geometry.py            flex/flex-gap-decorations-033 web                          PASS       [control: expected to stay PASS]
+   L7-instruments           flex-zero-gap-rules.geometry.py            flex/flex-gap-decorations-033 ios                          PASS       [control: expected to stay PASS]
+   L7-instruments           flex-zero-gap-rules.geometry.py            flex/flex-gap-decorations-033 android                      PASS       [control: expected to stay PASS]
+   L7-instruments           web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-span-002 web                               PASS       [control: expected to stay PASS]
+   L7-instruments           web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-span-002 ios                               PASS       [control: expected to stay PASS]
+   L7-instruments           web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-span-002 android                           PASS       [control: expected to stay PASS]
+   L7-instruments           web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-001 web                        PASS       [control: expected to stay PASS]
+   L7-instruments           web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-001 ios                        PASS       [control: expected to stay PASS]
+   L7-instruments           web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-001 android                    PASS       [control: expected to stay PASS]
+   L7-instruments           web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-002 web                        PASS       [control: expected to stay PASS]
+   L7-instruments           web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-002 ios                        PASS       [control: expected to stay PASS]
+   L7-instruments           web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-002 android                    PASS       [control: expected to stay PASS]
+
+geometry-gate wave54-final (base wave54-open): 12 keys — PASS 12 · FAIL 0 (gating 0) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 0 (PASS 0 FAIL 0) · control 12 (PASS 12 FAIL 0) · report 0 (PASS 0 FAIL 0) · withdrawn 0 (PASS 0 FAIL 0)
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)

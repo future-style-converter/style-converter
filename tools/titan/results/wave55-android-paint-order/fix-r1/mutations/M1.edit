@@ -1,0 +1,8 @@
+    band()
+    // … then everything inner of the node: padding, text, children.
+    content()
+
+=====
+    content()
+    // … then everything inner of the node: padding, text, children.
+    band()

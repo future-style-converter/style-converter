@@ -1,0 +1,76 @@
+# wave55 L1 skeptic — geometry probe self-test re-run (/opt/homebrew/bin/python3.12 -B tools/titan/results/wave55-plan/geometry-gate.py wave54-final --base <b> --lanes L1 --self-test)
+## --base wave54-open
+!c L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 001 web                                 FAIL       [control: expected to stay PASS]
+     line: hyphen-ios-linebox 001 web group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 0.000 → LINEBOX WRONG (glyphs: 15 lines vs base 16 (NB-ios moves line boxes, never breaks or glyphs))
+!! L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 001 ios                                 FAIL       [GATING -> revert NB-ios]
+!c L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 001 android                             FAIL       [control: expected to stay PASS]
+     line: hyphen-ios-linebox 001 android group-first [0, 0, 0, 0] in-group spread [0, 0, 0, 0] glyphs 0.000 → LINEBOX WRONG (glyphs: 15 lines vs base 16 (NB-ios moves line boxes, never breaks or glyphs))
+!c L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 003 web                                 FAIL       [control: expected to stay PASS]
+     line: hyphen-ios-linebox 003 web group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 0.000 → LINEBOX WRONG (glyphs: 15 lines vs base 16 (NB-ios moves line boxes, never breaks or glyphs))
+!! L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 003 ios                                 FAIL       [GATING -> revert NB-ios]
+!c L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 003 android                             FAIL       [control: expected to stay PASS]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 004 web                                 PASS       [control: expected to stay PASS]
+!! L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 004 ios                                 FAIL       [GATING -> revert NB-ios]
+!c L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 004 android                             FAIL       [control: expected to stay PASS]
+     line: hyphen-ios-linebox 004 android group-first [0, 0, 0, 0] in-group spread [0, 0, 0, 0] glyphs 0.000 → LINEBOX WRONG (glyphs: 15 lines vs base 13 (NB-ios moves line boxes, never breaks or glyphs))
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-001 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-002 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-003 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-004 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-005 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-006 ios tops [23, 65, 113] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-007 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-008 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack text-decoration-dotted-001 ios tops [137, 295, 453] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack text-decoration-dotted-002 ios tops [137, 295, 453] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+  by class: gating 3 (PASS 0 FAIL 3) · control 15 (PASS 10 FAIL 5) · report 11 (PASS 0 FAIL 11) · withdrawn 0 (PASS 0 FAIL 0)
+   L1-hyphen-ios-linebox hyphen-ios-linebox.geometry.py hyphen-ios-linebox 001 web
+   L1-hyphen-ios-linebox hyphen-ios-linebox.geometry.py hyphen-ios-linebox 001 android
+   L1-hyphen-ios-linebox hyphen-ios-linebox.geometry.py hyphen-ios-linebox 003 web
+   L1-hyphen-ios-linebox hyphen-ios-linebox.geometry.py hyphen-ios-linebox 003 android
+   L1-hyphen-ios-linebox hyphen-ios-linebox.geometry.py hyphen-ios-linebox 004 android
+SELF-TEST VIOLATION control FAIL: L1-hyphen-ios-linebox hyphen-ios-linebox.geometry.py hyphen-ios-linebox 001 web
+## --base wave55-open
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 001 web                                 PASS       [control: expected to stay PASS]
+!! L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 001 ios                                 FAIL       [GATING -> revert NB-ios]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 001 android                             PASS       [control: expected to stay PASS]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 003 web                                 PASS       [control: expected to stay PASS]
+!! L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 003 ios                                 FAIL       [GATING -> revert NB-ios]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 003 android                             PASS       [control: expected to stay PASS]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 004 web                                 PASS       [control: expected to stay PASS]
+!! L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 004 ios                                 FAIL       [GATING -> revert NB-ios]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 004 android                             PASS       [control: expected to stay PASS]
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-001 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-002 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-003 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-004 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-005 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-006 ios tops [23, 65, 113] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-007 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-008 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack text-decoration-dotted-001 ios tops [137, 295, 453] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack text-decoration-dotted-002 ios tops [137, 295, 453] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+  by class: gating 3 (PASS 0 FAIL 3) · control 15 (PASS 15 FAIL 0) · report 11 (PASS 0 FAIL 11) · withdrawn 0 (PASS 0 FAIL 0)
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)
+## --base wave54-final
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 001 web                                 PASS       [control: expected to stay PASS]
+!! L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 001 ios                                 FAIL       [GATING -> revert NB-ios]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 001 android                             PASS       [control: expected to stay PASS]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 003 web                                 PASS       [control: expected to stay PASS]
+!! L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 003 ios                                 FAIL       [GATING -> revert NB-ios]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 003 android                             PASS       [control: expected to stay PASS]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 004 web                                 PASS       [control: expected to stay PASS]
+!! L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 004 ios                                 FAIL       [GATING -> revert NB-ios]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 004 android                             PASS       [control: expected to stay PASS]
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-001 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-002 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-003 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-004 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-005 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-006 ios tops [23, 65, 113] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-007 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-008 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack text-decoration-dotted-001 ios tops [137, 295, 453] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+     line: hyphen-ios-linebox stack text-decoration-dotted-002 ios tops [137, 295, 453] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+  by class: gating 3 (PASS 0 FAIL 3) · control 15 (PASS 15 FAIL 0) · report 11 (PASS 0 FAIL 11) · withdrawn 0 (PASS 0 FAIL 0)
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)

@@ -1,0 +1,38 @@
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [H] counter-suffix web                                     PASS       [control: expected to stay PASS]
+!! L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [H] counter-suffix ios                                     FAIL       [GATING -> revert U1-ios]
+     line: [H] counter-suffix ios row3:x48-48,x51-57 row4:x48-48,x51-58 → GEOMETRY WRONG (row 3 period x48-48 before the letter x51-57 (suffix on the wrong side: first-strong RTL base direction))
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [H] counter-suffix android                                 PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [C] counter-suffix web                                     PASS       [control: expected to stay PASS]
+!! L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [C] counter-suffix ios                                     FAIL       [GATING -> revert U2o-ios]
+     line: uffix ios row5:x29-42,x46-48|item x64|strokes 1 y(123, 124) row6:x29-42,x46-48|item x65|strokes 2 y(142, 153) → GEOMETRY WRONG (row 5 marker left x29 vs ref x33±1 (suffix gap: the "、" must end flush at the content edge))
+!! L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [C] counter-suffix android                                 FAIL       [GATING -> revert U2o-android]
+     line: x android row5:x29-42,x45-48|item x65|strokes 1 y(123, 124) row6:x30-41,x45-48|item x65|strokes 2 y(143, 153) → GEOMETRY WRONG (row 5 marker left x29 vs ref x33±1 (suffix gap: the "、" must end flush at the content edge))
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [T] counter-suffix web                                     PASS       [control: expected to stay PASS]
+!! L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [T] counter-suffix ios                                     FAIL       [GATING -> revert U3-ios]
+     line: [T] counter-suffix ios row9 digit (138, 141, 214, 225) → GEOMETRY WRONG (digit ink x138-141 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [T] counter-suffix android                                 PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [L] counter-suffix web                                     PASS       [control: expected to stay PASS]
+ - L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [L] counter-suffix ios                                     FAIL       [report: expected WRONG until the target is fixed]
+     line: [L] counter-suffix ios row1 digit (49, 52, 22, 33) → GEOMETRY WRONG (digit ink x49-52 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+ - L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [L] counter-suffix android                                 FAIL       [report: expected WRONG until the target is fixed]
+     line: [L] counter-suffix android row1 digit (49, 52, 23, 33) → GEOMETRY WRONG (digit ink x49-52 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [K] counter-suffix web                                     PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [K] counter-suffix ios                                     PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [K] counter-suffix android                                 PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [I] cjk-decimal/css3-counter-styles-005 web                PASS       [control: expected to stay PASS]
+!! L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [I] cjk-decimal/css3-counter-styles-005 ios                FAIL       [GATING -> revert U2i-ios]
+     line: ker x217-249 (2, fill 0.96, strokes 1 y(102, 103)) item x271 y121:marker x218-249 (2, fill 0.2, strokes 2 y(125, 142)) item x272 → GEOMETRY WRONG (line y95 item text left x271 vs ref x268±1 (inside "、" marker not flush))
+!! L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [I] cjk-decimal/css3-counter-styles-005 android            FAIL       [GATING -> revert U2i-android]
+     line: er x217-248 (2, fill 0.98, strokes 1 y(104, 105)) item x271 y121:marker x218-248 (2, fill 0.11, strokes 2 y(128, 145)) item x272 → GEOMETRY WRONG (line y95 item text left x271 vs ref x268±1 (inside "、" marker not flush))
+   L5-counter-suffix-rows   rtl-marker-bake.geometry.py                [M] counter-suffix web                                     PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   rtl-marker-bake.geometry.py                [M] counter-suffix ios                                     PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   rtl-marker-bake.geometry.py                [M] counter-suffix android                                 PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   lists-bakes.geometry.py                    counter-suffix web                                         PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   lists-bakes.geometry.py                    counter-suffix ios                                         PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   lists-bakes.geometry.py                    counter-suffix android                                     PASS       [control: expected to stay PASS]
+
+geometry-gate wave54-final (base wave55-open): 24 keys — PASS 16 · FAIL 8 (gating 6) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 6 (PASS 0 FAIL 6) · control 16 (PASS 16 FAIL 0) · report 2 (PASS 0 FAIL 2) · withdrawn 0 (PASS 0 FAIL 0)
+  residual (round 6): 8 gating / tally key reads on 4 cells — OK 8 · FAIL 0 · MISSING 0
+revert rule 4 names: L5-counter-suffix-rows U1-ios, L5-counter-suffix-rows U2i-android, L5-counter-suffix-rows U2i-ios, L5-counter-suffix-rows U2o-android, L5-counter-suffix-rows U2o-ios, L5-counter-suffix-rows U3-ios
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)

@@ -1,0 +1,11 @@
+label=M-U2d-band-test-dropped file=runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt
+sha256 pre=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 mutated=39f79bcf4a2f296d7260ab789b021500e0c05c7618f6610101fa5b9fef925e88 post=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 restored=OK
+mutation applied=yes
+mutated run rc=1 (RED)
+  red: PercentContentBoxBandTest > P-U2-2 owns exactly the WPT content-box percent axis with a band FAILED
+  red: PercentContentBoxBandTest > P-U2-6 census - owns selects exactly middle W and H of clip-3 among the percentage axes FAILED
+  red: 8 tests completed, 2 failed
+  red: > Task :runtime:testDebugUnitTest FAILED
+restored run rc=0 (GREEN)
+  green: BUILD SUCCESSFUL in 7s
+  green tally: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"

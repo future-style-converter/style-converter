@@ -1,0 +1,3 @@
+ColorFilter.tint(it.value.copy(alpha = 1f))
+=====
+ColorFilter.tint(it.value)

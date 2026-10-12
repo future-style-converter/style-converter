@@ -1,0 +1,10 @@
+label=M-U1-C8-no-breadcrumb file=runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt
+sha256 pre=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 mutated=8eeee3fcaedc4a249b5a2656bfdd9ab425a40d5db564e7ec4cd86e831dfb0e35 post=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 restored=OK
+mutation applied=yes
+mutated run rc=1 (RED)
+  red: > Task :runtime:testDebugUnitTest FAILED
+  red: DynamicValueResolverTest > CBB the dark stage breadcrumbs a declared content-box and still subtracts FAILED
+  red: 33 tests completed, 1 failed
+restored run rc=0 (GREEN)
+  green: BUILD SUCCESSFUL in 2s
+  green tally: core.variables.DynamicValueResolverTest" tests="33" skipped="0" failures="0" errors="0"

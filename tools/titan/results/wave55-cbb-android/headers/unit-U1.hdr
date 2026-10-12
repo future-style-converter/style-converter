@@ -1,0 +1,5 @@
+# unit-U1.patch — wave 55 lane L2 (cbb-android), unit U1: CBB-android re-landed (5b333c8a, the revert of 8deddc19).
+# Base: 611c9f932bcfefa147a35f6c5f356d42709ddf84. Owned paths only (the ComponentRenderer.kt hunk is seam-1.patch, applied in the same commit).
+# NEW core/variables/ContainingBlockBands.kt (= git show 5b333c8a) · DynamicValueResolver.kt (5b333c8a's hunks: the defaulted wptCaptureMode
+# parameter + one condition) · DynamicValueResolverTest.kt (5b333c8a's rows; census corpus path wave53-final → wave54-final; + the C8
+# breadcrumb-assertion row). Never landed or reverted without unit-U2.patch (PLAN §2 L2 "pair"). Note: tools/titan/results/wave55-cbb-android/_note.md.

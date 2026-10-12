@@ -1,0 +1,46 @@
+
+=== state FULL ===
+applied: U2 U3 U4 U6-compose U6-swift U6-web U6-tooling U5 
+revertStatesCompiled: FULL: tooling[# pass 79 # fail 0 rc 0] U3-syntax[rc 0] U3-selftest[ every check as required (mutants M-L18, M-per-arm, M-dry, M-abdiff RED rc 0] web-tsc[rc 0] web[Tests 21 passed (21)rc 0] schema[39 ok, rc 0] compose[compileDebugUnitTestKotlin UP-TO-DATE testDebugUnitTest UP-TO-DATE BUILD SUCCESSFUL rc 0; 4 classes] swift[tree a86501f57ca00d7c built:  Executed 6 tests, with 0 failures (0 unexpected) ** TEST SUCCEEDED ** rc 0]
+
+=== state FULL-U1 ===
+applied: U2 U3 U4 U6-compose U6-swift U6-web U6-tooling U5 
+revertStatesCompiled: FULL-U1: tooling[# pass 79 # fail 0 rc 0] U3-syntax[rc 0] web-tsc[rc 0] web[Tests 21 passed (21)rc 0] schema[39 ok, rc 0] compose[compileDebugUnitTestKotlin UP-TO-DATE testDebugUnitTest UP-TO-DATE BUILD SUCCESSFUL rc 0; 4 classes] swift[tree a86501f57ca00d7c = the last built tree, byte-identical]
+
+=== state FULL-U2 ===
+applied: U3 U4 U6-compose U6-swift U6-web U6-tooling U5 
+revertStatesCompiled: FULL-U2: tooling[# pass 70 # fail 0 rc 0] U3-syntax[rc 0] web-tsc[rc 0] web[Tests 21 passed (21)rc 0] schema[39 ok, rc 0] compose[compileDebugUnitTestKotlin UP-TO-DATE testDebugUnitTest UP-TO-DATE BUILD SUCCESSFUL rc 0; 4 classes] swift[tree a86501f57ca00d7c = the last built tree, byte-identical]
+
+=== state FULL-U3 ===
+applied: U2 U4 U6-compose U6-swift U6-web U6-tooling U5 
+revertStatesCompiled: FULL-U3: tooling[# pass 79 # fail 0 rc 0] U3-syntax[rc 0] U3-selftest[ every check as required (mutants M-L18, M-per-arm, M-dry RED) rc 0] web-tsc[rc 0] web[Tests 21 passed (21)rc 0] schema[39 ok, rc 0] compose[compileDebugUnitTestKotlin UP-TO-DATE testDebugUnitTest UP-TO-DATE BUILD SUCCESSFUL rc 0; 4 classes] swift[tree a86501f57ca00d7c = the last built tree, byte-identical]
+
+=== state FULL-U4 ===
+applied: U2 U3 U6-compose U6-swift U6-web U6-tooling U5 
+revertStatesCompiled: FULL-U4: tooling[# pass 79 # fail 0 rc 0] U3-syntax[rc 0] web-tsc[rc 0] web[Tests 19 passed (19)rc 0] schema[39 ok, rc 0] compose[compileDebugUnitTestKotlin UP-TO-DATE testDebugUnitTest BUILD SUCCESSFUL rc 0; 4 classes] swift[tree a86501f57ca00d7c = the last built tree, byte-identical]
+
+=== state FULL-U6-compose ===
+applied: U2 U3 U4 U6-swift U6-web U6-tooling U5 
+revertStatesCompiled: FULL-U6-compose: tooling[# pass 79 # fail 0 rc 0] U3-syntax[rc 0] web-tsc[rc 0] web[Tests 21 passed (21)rc 0] schema[39 ok, rc 0] compose[compileDebugUnitTestKotlin testDebugUnitTest BUILD SUCCESSFUL rc 0; 2 classes] swift[tree a86501f57ca00d7c = the last built tree, byte-identical]
+
+=== state FULL-U6-swift ===
+applied: U2 U3 U4 U6-compose U6-web U6-tooling U5 
+revertStatesCompiled: FULL-U6-swift: tooling[# pass 79 # fail 0 rc 0] U3-syntax[rc 0] web-tsc[rc 0] web[Tests 21 passed (21)rc 0] schema[39 ok, rc 0] compose[compileDebugUnitTestKotlin testDebugUnitTest BUILD SUCCESSFUL rc 0; 4 classes] swift[tree e23b8cde9640ef61 built:  Executed 8 tests, with 0 failures (0 unexpected) ** TEST SUCCEEDED ** rc 0]
+
+=== state FULL-U6-web ===
+applied: U2 U3 U4 U6-compose U6-swift U6-tooling U5 
+revertStatesCompiled: FULL-U6-web: tooling[# pass 79 # fail 0 rc 0] U3-syntax[rc 0] web-tsc[rc 0] web[Tests 14 passed (14)rc 0] schema[39 ok, rc 0] compose[compileDebugUnitTestKotlin UP-TO-DATE testDebugUnitTest UP-TO-DATE BUILD SUCCESSFUL rc 0; 4 classes] swift[tree a86501f57ca00d7c built:  Executed 6 tests, with 0 failures (0 unexpected) ** TEST SUCCEEDED ** rc 0]
+
+=== state FULL-U6-tooling ===
+applied: U2 U3 U4 U6-compose U6-swift U6-web U5 
+revertStatesCompiled: FULL-U6-tooling: tooling[# pass 77 # fail 0 rc 0] U3-syntax[rc 0] web-tsc[rc 0] web[Tests 21 passed (21)rc 0] schema[39 ok, rc 0] compose[compileDebugUnitTestKotlin UP-TO-DATE testDebugUnitTest UP-TO-DATE BUILD SUCCESSFUL rc 0; 4 classes] swift[tree a86501f57ca00d7c = the last built tree, byte-identical]
+
+=== state FULL-U5 ===
+applied: U2 U3 U4 U6-compose U6-swift U6-web U6-tooling 
+revertStatesCompiled: FULL-U5: tooling[# pass 79 # fail 0 rc 0] U3-syntax[rc 0] web-tsc[rc 0] web[Tests 21 passed (21)rc 0] schema[39 ok, rc 0] compose[compileDebugUnitTestKotlin UP-TO-DATE testDebugUnitTest UP-TO-DATE BUILD SUCCESSFUL rc 0; 4 classes] swift[tree a86501f57ca00d7c = the last built tree, byte-identical]
+
+=== state FULL ===
+applied: U2 U3 U4 U6-compose U6-swift U6-web U6-tooling U5 
+revertStatesCompiled: FULL: tooling[# pass 79 # fail 0 rc 0] U3-syntax[rc 0] U3-selftest[ every check as required (mutants M-L18, M-per-arm, M-dry, M-abdiff RED rc 0] web-tsc[rc 0] web[Tests 21 passed (21)rc 0] schema[39 ok, rc 0] compose[compileDebugUnitTestKotlin UP-TO-DATE testDebugUnitTest UP-TO-DATE BUILD SUCCESSFUL rc 0; 4 classes] swift[tree a86501f57ca00d7c = the last built tree, byte-identical]
+
+final: 10 tracked changes, HEAD 611c9f93

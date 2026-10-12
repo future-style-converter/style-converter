@@ -1,0 +1,76 @@
+package com.styleconverter.runtime
+
+// tools/titan/results/wave55-android-paint-order/skeptic-census/SkepticL6CensusTest.kt.txt — the L6 SKEPTIC's own
+// census (independent of the lane's L6ChainCensusTest). skeptic-census.sh copies it into a throwaway worktree's Compose
+// test tree with @@RUN_SECTIONS@@ / @@OUT_TSV@@ filled, runs only this class, and deletes it again.
+// One row per component of every verbatim per-test IR document: what Compose's real extractors resolve for the
+// border route (band present, uniform-solid fast path, self-paint predicate exactly as StyleApplier calls it),
+// everything that paints INNER of the band node (children by slot.parent incl. <br>, own text, runs, pseudos, marker,
+// border-image, replaced/form tags, meta keys), the opacity group, the outline and its offset, and the folded chain.
+
+import androidx.compose.ui.Modifier
+import com.styleconverter.runtime.borders.radius.BorderRadiusApplier
+import com.styleconverter.runtime.core.types.ValueExtractors.LineStyle
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import org.junit.Test
+import java.io.File
+
+class SkepticL6CensusTest {
+    @Test fun census() {
+        val out = StringBuilder("sec\tstem\tid\ttag\tband\tfast\tself\topacity\toutline\toutlineOffset\tborderImage\tkidsAll\tkidsNonBr\ttext\truns\tpseudos\tmarker\tmetaKeys\tsig\n")
+        val secs = File("@@RUN_SECTIONS@@").listFiles()!!.sortedBy { it.name }
+        for (sec in secs) {
+            val files = (File(sec, "per-test-ir").listFiles() ?: emptyArray()).filter { it.name.endsWith(".json") }.sortedBy { it.name }
+            for (f in files) {
+                val comps = ((Json.parseToJsonElement(f.readText()).jsonObject["components"]) as? JsonArray ?: JsonArray(emptyList())).map { it.jsonObject }
+                val all = HashMap<String, Int>(); val nonBr = HashMap<String, Int>()
+                for (c in comps) {
+                    val parent = ((c["slot"] as? JsonObject)?.get("parent") as? JsonPrimitive)?.takeIf { it !is JsonNull }?.content ?: continue
+                    all[parent] = (all[parent] ?: 0) + 1
+                    val role = ((c["meta"] as? JsonObject)?.get("role") as? JsonPrimitive)?.content
+                    val tag = ((c["meta"] as? JsonObject)?.get("sourceTag") as? JsonPrimitive)?.content
+                    if (role != "line-break" && tag != "br") nonBr[parent] = (nonBr[parent] ?: 0) + 1
+                }
+                for (c in comps) {
+                    val id = c["id"]!!.jsonPrimitive.content
+                    val meta = c["meta"] as? JsonObject
+                    val pairs: List<Pair<String, JsonElement?>> = (c["properties"] as? JsonArray ?: JsonArray(emptyList()))
+                        .map { it.jsonObject["type"]!!.jsonPrimitive.content to it.jsonObject["data"] }
+                    var band = "ERR"; var fast = "-"; var self = "-"; var op = "-"; var ol = "-"; var olOff = "-"; var bi = "-"
+                    val sig = try {
+                        val cfg = StyleApplier.extractConfig(pairs, wptCaptureMode = true)
+                        val s = cfg.borders.sides
+                        band = s.hasBorders.toString()
+                        fast = (s.isUniform && s.top.hasBorder && s.top.style == LineStyle.SOLID).toString()
+                        self = BorderRadiusApplier.selfPaintsWithoutClip(
+                            radius = cfg.borders.radius, sides = s, overflowClips = cfg.overflow.shouldClip,
+                            hasBackgroundLayers = cfg.colors.backgroundImages.isNotEmpty(),
+                            hasClipInsets = cfg.colors.backgroundClipInsets != null,
+                            hasPartialOpacity = (cfg.colors.opacity ?: 1f) < 1f).toString()
+                        op = (cfg.colors.opacity ?: 1f).toString()
+                        ol = cfg.borders.outline.hasOutline.toString()
+                        olOff = cfg.borders.outline.offset.value.toString()
+                        bi = cfg.borderImage.hasBorderImage.toString()
+                        StyleApplier.applyConfig(Modifier, cfg, wptCaptureMode = true)
+                            .foldIn("") { a, e -> if (a.isEmpty()) e.javaClass.simpleName else a + ">" + e.javaClass.simpleName }
+                    } catch (t: Throwable) { "ERR:" + t.javaClass.simpleName }
+                    val text = ((c["text"] as? JsonPrimitive)?.takeIf { it !is JsonNull }?.content ?: "").isNotBlank()
+                    val runs = meta?.get("runs")?.let { it !is JsonNull } ?: false
+                    val ps = c["pseudos"]?.let { it !is JsonNull && !(it is JsonArray && it.isEmpty()) } ?: false
+                    val marker = meta?.get("markerText")?.let { it !is JsonNull } ?: false
+                    val tag = (meta?.get("sourceTag") as? JsonPrimitive)?.content ?: "-"
+                    val mk = meta?.keys?.sorted()?.joinToString(",") ?: ""
+                    out.append("${sec.name}\t${f.name.removeSuffix(".json")}\t$id\t$tag\t$band\t$fast\t$self\t$op\t$ol\t$olOff\t$bi\t${all[id] ?: 0}\t${nonBr[id] ?: 0}\t$text\t$runs\t$ps\t$marker\t$mk\t$sig\n")
+                }
+            }
+        }
+        File("@@OUT_TSV@@").apply { parentFile.mkdirs() }.writeText(out.toString())
+    }
+}

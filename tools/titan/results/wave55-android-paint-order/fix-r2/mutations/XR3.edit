@@ -1,0 +1,7 @@
+            result = BordersFacade.apply(result, paint.borders, sidesBehindContent = !config.overflow.shouldClip)
+            result = ColorApplier.applyColors(result, paint.colors)
+            if (!config.overflow.shouldClip) result = BordersFacade.applySidesBehindContent(result, paint.borders)
+=====
+            result = BordersFacade.apply(result, paint.borders, sidesBehindContent = !config.overflow.clipsX)
+            result = ColorApplier.applyColors(result, paint.colors)
+            if (!config.overflow.clipsX) result = BordersFacade.applySidesBehindContent(result, paint.borders)

@@ -1,0 +1,50 @@
+components 10719 in 1435 per-test IR documents (wave54-final, verbatim)
+components whose JVM chain could not be built (same on all three trees: True): 4 ['conic-gradient-line-height-relative-units-003__0__0-010', 'conic-gradient-line-height-relative-units-003__0__1-011', 'conic-gradient-line-height-relative-units-004__0__0-013', 'conic-gradient-line-height-relative-units-004__0__1-014']
+
+== U1 (base -> U1+U3): 10 components whose band moves behind the content (route selfPaint=true)
+  signature-changed 10; signature-changed outside the route (must be 0): 0; route members whose class signature reads the same (slow-path drawWithContent kept its class): 0
+  outlines on the route: 2 (2 with offset >= 0: outside the border box, no band overlap)
+  display:contents on the route (unboxed, borders stripped on device): 0 []
+  band=true selfPaint=true fastPath=true outline-shape=rounded: 10
+  changed components WITHOUT a painted band (must be 0): 0 []
+  innermost element before -> after (top 6): [(('BorderModifierNodeElement', 'BehindContentBorderElement'), 8), (('DrawWithContentElement', 'DrawWithContentElement'), 1), (('PaddingElement', 'PaddingElement'), 1)]
+  exposure inert (raster-identical by construction): 7 components in 7 documents
+  exposure child: 3 components in 3 documents
+
+== U2 (U1+U3 -> full): 1963 components whose band moves behind the content (route selfPaint=false)
+  signature-changed 1865; signature-changed outside the route (must be 0): 0; route members whose class signature reads the same (slow-path drawWithContent kept its class): 98
+  outlines on the route: 6 (6 with offset >= 0: outside the border box, no band overlap)
+  display:contents on the route (unboxed, borders stripped on device): 27 ['wpt__css-display__display-contents-block-001', 'wpt__css-display__display-contents-button', 'wpt__css-display__display-contents-details', 'wpt__css-display__display-contents-details', 'wpt__css-display__display-contents-dynamic-fieldset-legend-001', 'wpt__css-display__display-contents-dynamic-fieldset-legend-001', 'wpt__css-display__display-contents-dynamic-fieldset-legend-001', 'wpt__css-display__display-contents-dynamic-fieldset-legend-001', 'wpt__css-display__display-contents-dynamic-fieldset-legend-001', 'wpt__css-display__display-contents-dynamic-flex-001-inline', 'wpt__css-display__display-contents-dynamic-flex-001-inline', 'wpt__css-display__display-contents-dynamic-flex-001-inline', 'wpt__css-display__display-contents-dynamic-flex-001-none', 'wpt__css-display__display-contents-dynamic-flex-001-none', 'wpt__css-display__display-contents-dynamic-flex-001-none', 'wpt__css-display__display-contents-dynamic-generated-content-fieldset-001', 'wpt__css-display__display-contents-fieldset-002', 'wpt__css-display__display-contents-fieldset-002', 'wpt__css-display__display-contents-fieldset-002', 'wpt__css-display__display-contents-fieldset-nested-legend', 'wpt__css-display__display-contents-fieldset', 'wpt__css-display__display-contents-fieldset', 'wpt__css-display__display-contents-flex-001', 'wpt__css-display__display-contents-flex-001', 'wpt__css-display__display-contents-flex-001', 'wpt__css-display__display-contents-inline-001', 'wpt__css-display__display-contents-state-change-001']
+  band=true selfPaint=false fastPath=true outline-shape=-: 1494
+  band=true selfPaint=false fastPath=false outline-shape=-: 469
+  changed components WITHOUT a painted band (must be 0): 0 []
+  innermost element before -> after (top 6): [(('PaddingElement', 'PaddingElement'), 953), (('BorderModifierNodeElement', 'BehindContentBorderElement'), 668), (('BackgroundElement', 'DrawWithContentElement'), 134), (('BackgroundElement', 'BehindContentBorderElement'), 78), (('DrawWithContentElement', 'BehindContentBorderElement'), 49), (('DrawWithContentElement', 'DrawWithContentElement'), 44)]
+  exposure child: 1003 components in 201 documents
+  exposure inert (raster-identical by construction): 586 components in 135 documents
+  exposure text: 266 components in 60 documents
+  exposure opacity<1: 49 components in 2 documents
+  exposure child+text+runs: 33 components in 17 documents
+  exposure pseudo: 15 components in 2 documents
+  exposure text+runs: 6 components in 4 documents
+  exposure child+pseudo: 5 components in 3 documents
+
+U1 self-paint components: 10; outline kinds Counter({'rounded': 10}) (generic = EllipticalCornerShape → androidx drawGenericBorder branch; 0 in the corpus means that branch is device-unexercised)
+  wpt__css-break__borders-003  borders-003__1__0-325  exposure=inert
+  wpt__css-break__borders-004  borders-004__1__0-328  exposure=inert
+  wpt__css-break__borders-005  borders-005__1__0-331  exposure=inert
+  wpt__css-break__borders-008  borders-008__1__0-340  exposure=inert
+  wpt__css-masking__clip-path__clip-path-borderBox-1e  wpt__css-masking__clip-path__clip-path-borderbox-1e__0-006  exposure=inert
+  wpt__css-masking__clip-path__clip-path-contentBox-1e  wpt__css-masking__clip-path__clip-path-contentbox-1e__1-043  exposure=['child']
+  wpt__css-masking__clip-path__clip-path-paddingBox-1e  wpt__css-masking__clip-path__clip-path-paddingbox-1e__1-094  exposure=inert
+  wpt__filter-effects__backdrop-filter-clip-rect  wpt__filter-effects__backdrop-filter-clip-rect__2-073  exposure=['child']
+  wpt__filter-effects__backdrop-filter-clip-rect-2  backdrop-filter-clip-rect-2__2__1-060  exposure=inert
+  wpt__filter-effects__backdrop-filter-clip-rect-zoom  wpt__filter-effects__backdrop-filter-clip-rect-zoom__2-064  exposure=['child']
+self-paint radius-only (no band) components on the generic outline, not changed by L6: 0
+
+== cross-check against expectations.json (L6 carriers 27 · mayMove 240 · sharedStems 12 · ring-fenced 1 = 279 android stems)
+behavioural may-move (documents with a changed AND exposed component): U1 3 · U2 267 · union 270
+  inside the plan's set: 269
+  GROWTH (exposed, outside carriers ∪ mayMove ∪ sharedStems ∪ ring-fence): 1
+    wpt__css-display__display-contents-dynamic-pseudo-insertion-001  [nobody's carrier]  wpt__css-display__display-contents-dynamic-pseudo-insertion-001__0-132 pseudo
+  plan stems with NO exposed changed component (conservative over-coverage): 10
+  plan carriers covered: 27/27

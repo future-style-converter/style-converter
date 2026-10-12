@@ -1,0 +1,24 @@
+BUILD SUCCESSFUL in 6s
+core.variables.DynamicValueResolverTest" tests="1" skipped="0" failures="0" errors="0"
+sizing.PercentContentBoxBandTest" tests="1" skipped="0" failures="0" errors="0"
+U1 census (JUnit, wave54-final): 33 boxes in 14 documents
+U2 census (JUnit, wave54-final): 122 percentage axes, 2 owned, in 1 document(s): ['wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3']
+    wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3.json 0-172 W 100.0% band 20.0
+    wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3.json 0-172 H 100.0% band 20.0
+touched paths: 8 (android/compose 8 · web 0 · ios 0 · wire 0)
+    seam-1.patch: runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+    seam-1.patch: runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/ChildContainingBlockSeamWiringTest.kt
+    unit-U1.patch: runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt
+    unit-U1.patch: runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/DynamicValueResolver.kt
+    unit-U1.patch: runtimes/compose/src/test/java/com/styleconverter/runtime/core/variables/DynamicValueResolverTest.kt
+    unit-U2.patch: runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt
+    unit-U2.patch: runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt
+    unit-U2.patch: runtimes/compose/src/test/java/com/styleconverter/runtime/sizing/PercentContentBoxBandTest.kt
+captureCarriers.android: lane 14 vs expectations 14 — IDENTICAL
+captureCarriers.ios: lane 0 vs expectations 0 — IDENTICAL
+captureCarriers.web: lane 0 vs expectations 0 — IDENTICAL
+wireCarriers: lane 0 vs expectations 0 — IDENTICAL
+revertUnits.U1.captures.android: lane 14 vs expectations 14 — IDENTICAL
+revertUnits.U2.captures.android: lane 1 vs expectations 1 — IDENTICAL
+planning census A (documents): lane 14 vs cbb-android.census.out.txt 14 — IDENTICAL
+planning census B: 122 percentage axes, 2 carriers — lane 122 / 2: IDENTICAL

@@ -1,0 +1,46 @@
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift
+index c0e43154..2a02969c 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift
+@@ -157,4 +157,22 @@ enum NormalLineBox {
+         // The pinned line box for this run.
+         return box
+     }
++
++    /// NB-ios-b (CONTINGENCY — lands only when the stage-1 probe prints
++    /// `anchor: group 1 line 1 offset 1` and nothing else; brief §4 / §9 R1):
++    /// the vertical pads around the glyph run. CSS 2.1 §10.8.1 puts half
++    /// the leading above the first line and half below the last; a
++    /// Blink-pinned run instead pads 0 above and 2 × half-leading below,
++    /// so its first baseline stays at the face's raw ascent (DejaVu 16:
++    /// 14.85 → row 15 under either SwiftUI snapping model) while the box
++    /// stays N × L. Every other run keeps the symmetric half-leading.
++    static func verticalPads(halfLeading: CGFloat, blinkPinned: Bool) -> EdgeInsets {
++        // Blink-pinned: no band above the first line, both halves below.
++        if blinkPinned {
++            // The same total band (2 × half), moved under the last line.
++            return EdgeInsets(top: 0, leading: 0, bottom: 2 * halfLeading, trailing: 0)
++        }
++        // Every other run: the symmetric `.padding(.vertical, half)` band.
++        return EdgeInsets(top: halfLeading, leading: 0, bottom: halfLeading, trailing: 0)
++    }
+ }
+diff --git a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/NormalLineBoxTests.swift b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/NormalLineBoxTests.swift
+index 42c4550a..6aaac741 100644
+--- a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/NormalLineBoxTests.swift
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/NormalLineBoxTests.swift
+@@ -147,6 +147,14 @@ final class NormalLineBoxTests: XCTestCase {
+         XCTAssertNotNil(used(nil, text.lineHeightIsNormal, single, true, true, design: text.fontDesign, face: text.fontFaceName))
+     }
+ 
++    /// P9 (NB-ios-b) — the pad split: symmetric for every run, 0 above / 2× below for a Blink-pinned one.
++    func testP9PadSplitOnlyForABlinkPinnedRun() {
++        // Every other run keeps the symmetric half-leading band.
++        XCTAssertEqual(NormalLineBox.verticalPads(halfLeading: 0.1875, blinkPinned: false), EdgeInsets(top: 0.1875, leading: 0, bottom: 0.1875, trailing: 0))
++        // A Blink-pinned run: nothing above the first line, both halves below the last.
++        XCTAssertEqual(NormalLineBox.verticalPads(halfLeading: 0.1875, blinkPinned: true), EdgeInsets(top: 0, leading: 0, bottom: 0.375, trailing: 0))
++    }
++
+     /// The brief's five SAME controls: logs PlaceholderLabel's line-count inputs per declared-`normal` run, read
+     /// VERBATIM from `$TEST_RUNNER_NB_IOS_PER_TEST_IR/<section>/per-test-ir/` (skipped when unset: runs are local).
+     func testSameControlsLogTheirLineCountInputs() throws {

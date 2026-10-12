@@ -1,0 +1,3 @@
+return onDrawWithContent { drawInOrder(band = { band() }, content = { drawContent() }) }
+=====
+return onDrawWithContent { drawContent(); band() }

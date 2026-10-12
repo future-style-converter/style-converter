@@ -1,0 +1,21 @@
+# reruns.txt — L5 reverify-r1: every recorded check of the skeptic and of fix-r1, re-executed against the CURRENT shared-tree plan bytes
+# (counter-suffix-rows.geometry.py bd2f001a…, geometry-gate.py 09e35e92…, residual-read.py 40211eb0…, expectations.json 8fbfc83a…).
+# Each lane script was run from a private copy whose only edits pin HERE to this lane dir (and, for fix-r1.probe-proposal.py, write its
+# diff to the scratch dir instead of over fix-r1.probe-proposal.diff.txt); skeptic-census-l5.py's copy pins ROOT to the shared tree.
+# 'IDENTICAL' = the re-run's stdout sha256 equals the recorded file's. fontTools scripts ran under /usr/bin/python3 (fontTools 4.60.2):
+# the pinned /opt/homebrew/bin/python3.12 has no fontTools.
+IDENTICAL  a96f93f73c419152  python3.12 -B skeptic-model-u3.py (the correct-U3 model through the CURRENT plan probe: [T] ios WRONG zone 10 px, [K] ios WRONG zone y232-599 79 px)  → recorded skeptic-model-u3.out.txt
+IDENTICAL  c3adabf4b0c3ea8f  python3.12 -B fix-r1.probe-proposal.py (R1 executed: violations 0)  → recorded fix-r1.probe-proposal.out.txt
+IDENTICAL  f2a7ad4be296dab0    … its proposed probe diff (against probe bd2f001a)  → recorded fix-r1.probe-proposal.diff.txt
+IDENTICAL  738e97bc34fa3443  python3.12 -B fix-r1.residual-u3.measure.py (R3: 89 / 92 / 91 px outside the installed SPEC → 0 with the U3 rects)  → recorded fix-r1.residual-u3.measure.out.txt
+IDENTICAL  94e1683e97cb9ca0  python3.12 -B fix-r1.u3-boxes.measure.py  → recorded fix-r1.u3-boxes.measure.out.txt
+IDENTICAL  f8c9fc9a54c18cb9  python3.12 -B fix-r1.h-twin.measure.py (defect 2: [H] ios own-twin ink 36 px on one rasterizer)  → recorded fix-r1.h-twin.measure.out.txt
+IDENTICAL  eb741725d700d18e  /usr/bin/python3 -B fix-r1.inter-tnum.py (Inter tnum: 61 substitutions incl. period.tf / two.tf)  → recorded fix-r1.inter-tnum.out.txt
+IDENTICAL  26e67ca9e9a1c1e8  /usr/bin/python3 -B fix-r1.u3-glyph-census.py (6 glyphs in 1 document)  → recorded fix-r1.u3-glyph-census.out.txt
+IDENTICAL  ef76e83c3f6af77e  python3.12 -B census-l5.py wave54-final  → recorded census-l5.out.txt
+IDENTICAL  5a5bd6d82cc5b0d0  python3.12 -B census-l5.py wave55-open  → recorded census-l5.wave55-open.out.txt
+IDENTICAL  07b379d632e2a663  python3.12 -B skeptic-census-l5.py wave54-final (cross-check vs the CURRENT expectations.json: under-reported none, over none)  → recorded skeptic-census-l5.out.txt
+IDENTICAL  86c5308b5360450d  geometry-gate.py wave54-final --base wave54-final --lanes L5 --self-test → exit 0 HOLDS (gating 6/6 FAIL, control 16/16 PASS, report 2/2 FAIL, residual 8/8 OK)  → recorded fix-r1.geometry-selftest.base-wave54-final.out.txt
+IDENTICAL  5618d83ad82d8643  geometry-gate.py wave54-final --base wave55-open --lanes L5 --self-test → exit 0 HOLDS  → recorded fix-r1.geometry-selftest.base-wave55-open.out.txt
+IDENTICAL  5a7bc525938edc3a  geometry-gate.py wave54-final --base wave54-open --lanes L5 --self-test → exit 1, 5 control violations ([T] web/android, [K] web/ios/android: the wave-54 M' base-age effect)  → recorded fix-r1.geometry-selftest.base-wave54-open.out.txt
+cells (cells.mjs 'counter-suffix|css3-counter-styles-005|disclosure-styles' wave54-final and wave55-open, identical): counter-suffix ios P 0.9873 / android P 0.989 / web P 1; -005 ios P 0.993 / android P 0.9759 / web P 1; disclosure-styles ios f 0.6127 / android f 0.6255 / web f 0.6454 — every number the note cites resolves

@@ -1,0 +1,55 @@
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [S] dir-style-02a web row6                                 PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [S] dir-style-02a web row7                                 PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [S] dir-style-02a web row9                                 PASS       [control: expected to stay PASS]
+!! L3-positioned-parent-slot positioned-parent-slot.geometry.py         [S] dir-style-02a android row6                             FAIL       [GATING -> revert U2]
+     line: +6 vs the ref (want ≥ 0.75 at 0 ±1); mass: 548 text px vs wave55-open row 3 577 ±2 (added / lost ink); lead: 0 px None left of x21 vs wave55-open row 3's dot 5 px (17, 14, 19, 15) (±1 px, bbox ±1: one dot, nothing else))
+!! L3-positioned-parent-slot positioned-parent-slot.geometry.py         [S] dir-style-02a android row7                             FAIL       [GATING -> revert U1]
+     line: 0 mass 998/998 lead 0/5 → GEOMETRY WRONG (extent x22-243 vs ref x17-243; dot: none at x15-19 y148-152; lead: 0 px None left of x21 vs wave55-open row 3's dot 5 px (17, 14, 19, 15) (±1 px, bbox ±1: one dot, nothing else))
+!! L3-positioned-parent-slot positioned-parent-slot.geometry.py         [S] dir-style-02a android row9                             FAIL       [GATING -> revert U2]
+     line: +6 vs the ref (want ≥ 0.75 at 0 ±1); mass: 548 text px vs wave55-open row 3 577 ±2 (added / lost ink); lead: 0 px None left of x21 vs wave55-open row 3's dot 5 px (17, 14, 19, 15) (±1 px, bbox ±1: one dot, nothing else))
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [S] bidi-tab-001 web rtl-rows                              PASS       [control: expected to stay PASS]
+!! L3-positioned-parent-slot positioned-parent-slot.geometry.py         [S] bidi-tab-001 android rtl-rows                          FAIL       [GATING -> revert U2]
+     line: G (band y86 blue x(16, 135, 266) vs ref x(16, 38, 269); band y106 blue x(124, 219, 273) vs ref x(114, 135, 273); band y186 blue x(16, 135, 266) vs ref x(16, 38, 269); band y226 blue x(16, 135, 266) vs ref x(16, 38, 269))
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [W] anchor-position-multicol-nested-001 web stack          PASS       [control: expected to stay PASS]
+!! L3-positioned-parent-slot positioned-parent-slot.geometry.py         [W] anchor-position-multicol-nested-001 android stack      FAIL       [GATING -> revert U1]
+     line: ) 0% green; cell (190,168) 0% green; cell (360,168) 0% green; ring [0, 10, 0, 0] green px outside the cells vs web [0, 0, 0, 0] ±4 (grown / merged / stacked squares); others: 600 green px outside the cells vs web 300 ±2)
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [S] dynamic-offset-rtl-001 web                             PASS       [control: expected to stay PASS]
+!! L3-positioned-parent-slot positioned-parent-slot.geometry.py         [S] dynamic-offset-rtl-001 android                         FAIL       [GATING -> revert U2]
+     line: [S] dynamic-offset-rtl-001 android magenta (186, 26, 195, 35) n 100 parent (16, 16, 115, 115) n 10000 → GEOMETRY WRONG (magenta (186, 26, 195, 35) vs ref (86, 26, 95, 35))
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [S] dynamic-offset-vrl-rtl-001 web                         PASS       [control: expected to stay PASS]
+ - L3-positioned-parent-slot positioned-parent-slot.geometry.py         [S] dynamic-offset-vrl-rtl-001 android                     FAIL       [report: expected WRONG until the target is fixed]
+     line: [S] dynamic-offset-vrl-rtl-001 android magenta (186, 26, 195, 35) n 100 parent (16, 16, 115, 115) n 10000 → GEOMETRY WRONG (magenta (186, 26, 195, 35) vs ref (86, 26, 95, 35))
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [W] dynamic-offset-rtl-002 web                             PASS       [control: expected to stay PASS]
+!! L3-positioned-parent-slot positioned-parent-slot.geometry.py         [W] dynamic-offset-rtl-002 android                         FAIL       [GATING -> revert U2]
+     line: [W] dynamic-offset-rtl-002 android magenta (126, 26, 135, 35) n 100 parent (16, 16, 115, 115) n 10000 → GEOMETRY WRONG (magenta x126 vs wire x26)
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [W] dynamic-offset-vrl-rtl-002 web                         PASS       [control: expected to stay PASS]
+ - L3-positioned-parent-slot positioned-parent-slot.geometry.py         [W] dynamic-offset-vrl-rtl-002 android                     FAIL       [report: expected WRONG until the target is fixed]
+     line: [W] dynamic-offset-vrl-rtl-002 android magenta (186, 96, 195, 105) n 100 parent (16, 16, 115, 115) n 10000 → GEOMETRY WRONG (magenta x186 vs wire x86)
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] bidi-lines-002 android                                 PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] boundary-shaping-009 android                           PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] css-tags-paint-order android                           PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] css-tags-paint-order-with-entry android                PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] dir-selector-change-003 android                        PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] dir-selector-change-004 android                        PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] block-end-aligned-abspos-nested android                PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] position-absolute-scrollable-overflow-zero android     PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] text-decoration-subelements-002 android                PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] attachment-local-positioning-3 android                 PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] attachment-local-positioning-4 android                 PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] composited-filters-under-opacity android               PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] css-transform-scale-002 android                        PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] conic-gradient-line-height-relative-units-003 android  PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] conic-gradient-line-height-relative-units-004 android  PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] dynamic-offset-vrl-001 android                         PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] dir-style-02a android unaffected-rows                  PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] dir-style-02a web                                      PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] dir-style-02a ios                                      PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] bidi-tab-001 android ltr-rows                          PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] bidi-tab-001 web                                       PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] bidi-tab-001 ios                                       PASS       [control: expected to stay PASS]
+   L3-positioned-parent-slot positioned-parent-slot.geometry.py         [C] anchor-position-multicol-004 android red               PASS       [control: expected to stay PASS]
+
+geometry-gate wave54-final (base wave55-open): 41 keys — PASS 32 · FAIL 9 (gating 7) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 7 (PASS 0 FAIL 7) · control 32 (PASS 32 FAIL 0) · report 2 (PASS 0 FAIL 2) · withdrawn 0 (PASS 0 FAIL 0)
+revert rule 4 names: L3-positioned-parent-slot U1, L3-positioned-parent-slot U2
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)

@@ -1,0 +1,436 @@
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMargin.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMargin.kt
+new file mode 100644
+index 00000000..3935f700
+--- /dev/null
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMargin.kt
+@@ -0,0 +1,184 @@
++// spacing — wave 55 (lane L4, unit U1-android): the UA `margin-block` of an
++// OUT-OF-FLOW heading, BACKLOG 0(h). Twin of SwiftUI
++// StyleEngine/spacing/UAPositionedHeadingMargin.swift.
++//
++// ## The defect this closes (measured on wave54-final)
++// css-text-decor/text-decoration-inset-005/-006/-011/-014 each hold a
++// `position: absolute` <h1> with no author margin inside a relative <div>.
++// Chromium's html.css gives it `margin-block: .67em` of its own 2em face
++// (HTML §15.3 "Sections and headings"; css-values-4 §6.1.1): 21.44px, or
++// 17.42px for 014's 26px monospace face. Both natives painted the heading
++// ~21px high, because a NESTED out-of-flow box takes none of the three UA
++// margin routes: the §8.3.1 child plan (ComponentRenderer
++// blockCollapsePlanFor → uaChildBlockEdges) bails the whole container on an
++// out-of-flow child, and the harness root stack / wave-52 T6 rule serve
++// composed ROOTS only.
++//
++// ## Why a cascade step is enough
++// CSS 2.1 §10.6.4: with `top: auto` the static position is the hypothetical
++// box's top MARGIN edge, so the margin offsets the border box; §8.3.1:
++// margins of absolutely positioned boxes never collapse. The renderer already
++// paints an abspos box's DECLARED margin (inset-001's extractor-baked 21.44px
++// lands within 2px of the ref), so the UA value only has to reach the
++// element's merged list as two ordinary longhands in the T6 leaf shape
++// `{"px": m}`. Margins are not inherited, so nothing leaks to children.
++//
++// ## The em base: the UA-CASCADE face, not the painted one
++// m = uaBlockMarginEm(tag) × F, where F for an author-unsized heading is the
++// UA sheet's computed size (UAElementFontRule.sizeMultiplier × emBasePx of
++// the PRE-font-step list) — independent of the face gate, so the margin does
++// not move when the held fold-aware face lands or reverts.
++//
++// ## Scope, stated rather than discovered
++// Capture-gated (`enabled` = LocalWptCaptureMode, the uaChildBlockEdges
++// contract): every product render and the 327-pair corpus are identity.
++// Headings only this wave; an out-of-flow p / ul / ol / blockquote / pre /
++// figure, a vertical writing mode and an author size this step cannot
++// resolve are each logged once and left alone (no silent fallthrough).
++package com.styleconverter.runtime.spacing
++
++// The coverage tracker every runtime breadcrumb writes to.
++import com.styleconverter.runtime.PropertyTracker
++// The typed IR property (type name + raw JSON payload) this step appends.
++import com.styleconverter.runtime.core.ir.IRProperty
++// The renderer's own out-of-flow predicate, so this step fires exactly
++// where RenderAbsoluteChild mounts the box (css-position-3 §2.1).
++import com.styleconverter.runtime.core.renderer.ComponentRenderer
++// Keyword read for the bare-string WritingMode payload.
++import com.styleconverter.runtime.core.types.ValueExtractors
++// The UA font step's own table and em base: one owner of the heading face.
++import com.styleconverter.runtime.typography.UAElementFontRule
++// JSON builders for the `{"px": m}` leaf.
++import kotlinx.serialization.json.JsonObject
++import kotlinx.serialization.json.JsonPrimitive
++// The thread-safe dedupe set behind the once-per-key breadcrumbs.
++import java.util.concurrent.ConcurrentHashMap
++
++/** The UA block margin of an out-of-flow heading as a cascade step at the
++ *  merge seam, after the UA font step. Pure Kotlin (no Compose) so the JVM
++ *  suite pins it on verbatim wire. */
++object UaPositionedHeadingMargin {
++
++    /** The six sectioning headings: this wave's scope (R9 queues the rest). */
++    private val HEADINGS: Set<String> = setOf("h1", "h2", "h3", "h4", "h5", "h6")
++
++    /** css-writing-modes-4 §3.1 vertical modes, where `margin-block` maps to
++     *  left / right: the AbsposStaticPosition set, normalised the same way. */
++    private val VERTICAL_MODES: Set<String> =
++        setOf("VERTICAL_RL", "VERTICAL_LR", "SIDEWAYS_RL", "SIDEWAYS_LR")
++
++    /** Two inherited bases for the author-sized rung: a declared size that
++     *  resolves differently over them is relative to the parent (em / % /
++     *  larger / smaller), whose px this step does not hold. */
++    private const val PROBE_BASE_A = 16f
++    private const val PROBE_BASE_B = 32f
++
++    /** Breadcrumb keys already reported this process. */
++    private val logged: MutableSet<String> = ConcurrentHashMap.newKeySet()
++
++    /**
++     * Append the UA block margin of an out-of-flow heading to its merged list.
++     *
++     * @param sourceTag the element's `_tag` (`meta.sourceTag`).
++     * @param own the element's OWN post-reset declarations: its Position and
++     *   any author margin edge are read here.
++     * @param preUa the merged list BEFORE the UA font step (the seam's
++     *   ListStyleUaRule output): the em base of the UA face.
++     * @param merged the list after the UA font step, the one this step extends.
++     * @param enabled the ambient WPT-capture flag; false is the identity.
++     * @return [merged] itself when nothing fires, else a copy with the UA
++     *   MarginTop / MarginBottom on each edge the author left undeclared.
++     */
++    fun apply(
++        sourceTag: String?,
++        own: List<IRProperty>,
++        preUa: List<IRProperty>,
++        merged: List<IRProperty>,
++        enabled: Boolean,
++    ): List<IRProperty> {
++        // Outside WPT capture no UA margin is emulated anywhere.
++        if (!enabled) return merged
++        // The tag's UA block-margin factor; null for div / span / … (fast path).
++        val em = UaBlockMarginFontBasis.uaBlockMarginEm(sourceTag) ?: return merged
++        // In-flow boxes take their UA margin from the §8.3.1 plan, not here.
++        if (!ComponentRenderer.isOutOfFlowChild(own)) return merged
++        // The element's own property types, for the per-edge author test.
++        val types = own.map { it.type }
++        // Author beats UA per edge (css-cascade-4 §6.1): uaChildBlockEdges' sets.
++        val top = !declaresUaChildTop(types)
++        // The block-end edge cascades independently of the block-start one.
++        val bottom = !declaresUaChildBottom(types)
++        // Both edges declared (the baked / declared abspos <h1>s, T6's root).
++        if (!top && !bottom) return merged
++        // The tag, normalised the way the UA tables compare it.
++        val tag = sourceTag?.lowercase()
++        // A non-heading UA-margin tag: queued (R9), so say so and leave it.
++        if (tag !in HEADINGS) return skip("tag:$tag", "out-of-flow <$tag>: UA margin-block not emitted (headings only)", merged)
++        // A vertical writing mode would put margin-block on the inline axis.
++        if (isVertical(preUa)) return skip("vertical", "out-of-flow <$tag> in a vertical writing mode: UA margin-block not emitted", merged)
++        // The UA-cascade face; null = an author size this step cannot resolve.
++        val face = uaCascadeFacePx(tag, own, preUa)
++            ?: return skip("size:$tag", "out-of-flow <$tag> with an unresolvable author font-size: UA margin-block not emitted", merged)
++        // The UA margin: the tag's em factor over its own computed face.
++        val leaf = JsonObject(mapOf("px" to JsonPrimitive(em * face)))
++        // Only the undeclared edges take the UA value; the author keeps the rest.
++        val added = listOfNotNull(
++            // Block-start: the edge that offsets the static position (§10.6.4).
++            IRProperty("MarginTop", leaf).takeIf { top },
++            // Block-end: painted as the box's own margin, nothing collapses.
++            IRProperty("MarginBottom", leaf).takeIf { bottom },
++        )
++        // A new list; [merged] itself is never mutated.
++        return merged + added
++    }
++
++    /**
++     * The element's computed font-size under the UA cascade, in px: for an
++     * author-unsized heading the UA face (sizeMultiplier × the UA font step's
++     * own em base over [preUa]), else the author's declared size when it is
++     * absolute (UaBlockMarginFontBasis rungs B3 / B4). Null for the unexpanded
++     * `Font` shorthand, var() / calc(), and any size relative to the parent.
++     */
++    internal fun uaCascadeFacePx(tag: String?, own: List<IRProperty>, preUa: List<IRProperty>): Float? {
++        // No own size declaration: the UA font-size is the computed one.
++        if (own.none { it.type in UAElementFontRule.SIZE_DECLARING }) {
++            // The tag's UA multiplier (every heading has one).
++            val multiplier = UAElementFontRule.sizeMultiplier(tag) ?: return null
++            // × the em base the UA font step itself resolves (inherited px, the
++            // monospace 13px default, else 16): 32 for inset-005, 26 for -014.
++            return (multiplier * UAElementFontRule.emBasePx(preUa)).toFloat()
++        }
++        // Only the shorthand declared: its size component is not decoded here.
++        if (own.none { it.type == "FontSize" }) return null
++        // The declared size over one inherited base (null = var / calc / …).
++        val a = UaBlockMarginFontBasis.ownFontSizePx(own, PROBE_BASE_A, tag) ?: return null
++        // The same size over another base; equal only for an absolute size.
++        val b = UaBlockMarginFontBasis.ownFontSizePx(own, PROBE_BASE_B, tag) ?: return null
++        // Parent-relative sizes need the parent's px, which mergeInherited
++        // dropped for the own declaration: unresolvable at this step.
++        return a.takeIf { a == b }
++    }
++
++    /** Is the element in a vertical writing mode? (WritingMode inherits, so
++     *  the merged list carries the ancestor's value.) */
++    private fun isVertical(preUa: List<IRProperty>): Boolean {
++        // The first WritingMode entry: own wins over inherited after the merge.
++        val mode = ValueExtractors.extractKeyword(preUa.firstOrNull { it.type == "WritingMode" }?.data)
++        // Normalised like AbsposStaticPosition (uppercase, '-' → '_').
++        return mode?.uppercase()?.replace('-', '_') in VERTICAL_MODES
++    }
++
++    /** Leave [merged] untouched, reporting [message] under [key] once. */
++    private fun skip(key: String, message: String, merged: List<IRProperty>): List<IRProperty> {
++        // First sighting only: one breadcrumb per reason per process.
++        if (logged.add(key)) {
++            // android.util.Log is a stub on the JVM test classpath, hence runCatching.
++            runCatching { PropertyTracker.logUnhandled("MarginBlock", "UaPositionedHeadingMargin: $message") }
++        }
++        // The identity: the SAME instance every downstream remember key reads.
++        return merged
++    }
++
++    /** Test hook: was [key] reported? (Pins the logged-once branches.) */
++    internal fun hasLogged(key: String): Boolean = key in logged
++}
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt
+index f5c714ba..bb9a9fcb 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt
+@@ -23,8 +23,8 @@
+ // carries, so every committed baseline is byte-identical by construction. The
+ // heading half stands down for a heading that hosts child boxes
+ // ([headingStandsDown], the iOS twin's wave-40 gate); sup/sub are never
+-// gated. UA heading MARGINS stay with spacing/UaBlockChildMargins.kt + the
+-// harness UaBlockMargins. KNOWN GAPS (as in the Swift twin): `smaller` is
++// gated. UA heading MARGINS: UaBlockChildMargins.kt, UaPositionedHeadingMargin.kt
++// (spacing/) + the harness UaBlockMargins. KNOWN GAPS (Swift twin): `smaller` is
+ // parent ÷ 1.2, where Blink uses its keyword table for a keyword-sized
+ // parent (13 vs 13.33); `all: initial|unset|inherit` on a heading still gets
+ // the UA face (0 corpus carriers).
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMarginTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMarginTest.kt
+new file mode 100644
+index 00000000..dd5ea734
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMarginTest.kt
+@@ -0,0 +1,225 @@
++package com.styleconverter.runtime.spacing
++
++// Wave 55 (lane L4, U1-android) — pins UaPositionedHeadingMargin on the
++// VERBATIM per-test IR of wave54-final (= wave55-open): UAHeadingFaceWire
++// (typography/UAElementFontRuleTest.kt; its constants' sha256 equal the
++// wave54-final files) plus S_11_1_1B_005 below, generated by
++// tools/titan/results/wave55-ua-heading-margin/gen-wire55.py. Each site is
++// replayed root → target through the production decoder + composer
++// (UAHeadingFaceReplay.site), so `preUa` is the seam's ListStyleUaRule list.
++//   • inset-005 / -006 / -011 <h1> → 21.44 — mutation: the painted basis (10.72);
++//   • inset-014 → 17.42 — mutations: em base 16; the 16px-root table (21);
++//   • inset-001 (declares both edges) → SAME list — mutation: drop the per-edge guard;
++//   • capture off → SAME — mutation: ignore `enabled`;
++//   • the in-flow text-decoration-color h3 → SAME — mutation: drop the out-of-flow test;
++//   • s-11-1-1b-005's abspos <p> → SAME, logged — mutation: widen past headings;
++//   • RELATIVE / STICKY, vertical writing mode, unresolvable sizes → SAME;
++//   • the fold verdicts of the four hosts are unchanged by the step.
++// The seam CALL SITE is pinned by UaPositionedHeadingMarginSeamWiringTest,
++// which ships inside seam-1.patch with the hunk it reads (rule 2b).
++
++import com.styleconverter.runtime.core.ir.IRProperty
++import com.styleconverter.runtime.core.renderer.InlineRunPlan
++import com.styleconverter.runtime.typography.UAElementFontRule
++import com.styleconverter.runtime.typography.UAHeadingFaceReplay
++import com.styleconverter.runtime.typography.UAHeadingFaceWire
++import com.styleconverter.runtime.typography.inline.InlineRunFold
++import kotlinx.serialization.json.Json
++import kotlinx.serialization.json.jsonObject
++import kotlinx.serialization.json.jsonPrimitive
++import kotlinx.serialization.json.float
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertNull
++import org.junit.Assert.assertSame
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class UaPositionedHeadingMarginTest {
++
++    /** The four heading hosts (wire, id): three folded targets + the bailing 011. */
++    private val inset005 = UAHeadingFaceWire.INSET_005 to "text-decoration-inset-005__1__0-069"
++    private val inset006 = UAHeadingFaceWire.INSET_006 to "text-decoration-inset-006__1__0-076"
++    private val inset011 = UAHeadingFaceWire.INSET_011 to "text-decoration-inset-011__1__0-095"
++    private val inset014 = UAHeadingFaceWire.INSET_014 to "text-decoration-inset-014__1__0-110"
++
++    /** The seam's pre-UA site of a verbatim (document, id) pair. */
++    private fun site(pair: Pair<String, String>) = UAHeadingFaceReplay.site(pair.first, pair.second)
++
++    /** The step on [s] with the UA face HELD or APPLIED (standsDown), capture on. */
++    private fun step(s: UAHeadingFaceReplay.Site, faceHeld: Boolean, enabled: Boolean = true): List<IRProperty> {
++        // The UA font step first (the seam's order), its face held or applied…
++        val font = UAElementFontRule.apply(s.component._tag, s.own, s.mergedPreUa, standsDown = faceHeld)
++        // …then the margin step on its output, the pre-font list as the em base.
++        return UaPositionedHeadingMargin.apply(s.component._tag, s.own, s.mergedPreUa, font, enabled)
++    }
++
++    /** The single [type] entry's px, asserting there is exactly one. */
++    private fun px(list: List<IRProperty>, type: String): Float {
++        // One entry: first-wins and last-wins readers agree.
++        assertEquals(type, 1, list.count { it.type == type })
++        // The `{"px": m}` leaf the margin readers decode.
++        return list.single { it.type == type }.data.jsonObject.getValue("px").jsonPrimitive.float
++    }
++
++    /** A synthetic element list from (type, JSON) pairs. */
++    private fun props(vararg p: Pair<String, String>) = p.map { (t, j) -> IRProperty(t, Json.parseToJsonElement(j)) }
++
++    @Test
++    fun `inset-005, -006 and -011 - the abspos h1 takes 0_67 x its 32px UA face, face held or applied`() {
++        for (pair in listOf(inset005, inset006, inset011)) {
++            // The verbatim heading's seam site (root → target replay).
++            val s = site(pair)
++            // The verbatim heading declares no margin and no size.
++            assertTrue(s.own.none { it.type.startsWith("Margin") || it.type == "FontSize" })
++            // The held (U1 alone) and the applied (U1 + U2) face.
++            for (held in listOf(true, false)) {
++                val out = step(s, faceHeld = held)
++                // .67 × 2 × 16 on both edges, whether or not the face is painted.
++                assertEquals("${pair.second} held=$held", 21.44f, px(out, "MarginTop"), 1e-3f)
++                assertEquals(21.44f, px(out, "MarginBottom"), 1e-3f)
++            }
++        }
++    }
++
++    @Test
++    fun `inset-014 - the monospace abspos h1 takes 0_67 x 26 (the 13px fixed default)`() {
++        // The face held: the basis must still be the UA-cascade 26px.
++        val out = step(site(inset014), faceHeld = true)
++        // 2em × 13 = 26 → 17.42, not 21.44 (base 16) and not 21 (the root table).
++        assertEquals(17.42f, px(out, "MarginTop"), 1e-3f)
++        assertEquals(17.42f, px(out, "MarginBottom"), 1e-3f)
++    }
++
++    @Test
++    fun `the seam replay's own font step feeds the same margin`() {
++        for (pair in listOf(inset005, inset014)) {
++            val s = site(pair)
++            // Whatever face the seam's gate paints, the UA-cascade basis is the same.
++            val out = UaPositionedHeadingMargin.apply(s.component._tag, s.own, s.mergedPreUa, UAHeadingFaceReplay.seam(s), true)
++            assertEquals(if (pair == inset014) 17.42f else 21.44f, px(out, "MarginTop"), 1e-3f)
++        }
++    }
++
++    @Test
++    fun `inset-001 - the extractor-baked h1 declares both edges and comes back as the SAME list`() {
++        // The anchor: same abspos <h1>, extractor-baked MarginTop / MarginBottom 21.44.
++        val s = UAHeadingFaceReplay.site(UAHeadingFaceWire.INSET_001, "text-decoration-inset-001__1__0-053")
++        val font = UAHeadingFaceReplay.seam(s)
++        // Author (the UA_H1_PROPS bake) wins per edge: identity.
++        assertSame(font, UaPositionedHeadingMargin.apply(s.component._tag, s.own, s.mergedPreUa, font, true))
++    }
++
++    @Test
++    fun `an abspos h1 declaring only MarginTop takes the UA bottom only`() {
++        // Synthetic: the author declares the block-start edge only.
++        val own = props("Position" to "\"ABSOLUTE\"", "MarginTop" to """{"px":5}""")
++        val out = UaPositionedHeadingMargin.apply("h1", own, own, own, true)
++        // The author's top is kept verbatim; one UA bottom is appended.
++        assertEquals(5f, px(out, "MarginTop"), 1e-6f)
++        assertEquals(21.44f, px(out, "MarginBottom"), 1e-3f)
++    }
++
++    @Test
++    fun `capture off - the SAME list`() {
++        // A real carrier, so only the flag can keep the margin out.
++        val s = site(inset005)
++        val font = UAElementFontRule.apply(s.component._tag, s.own, s.mergedPreUa, standsDown = true)
++        // The product path (no WPT capture) is the identity.
++        assertSame(font, UaPositionedHeadingMargin.apply(s.component._tag, s.own, s.mergedPreUa, font, enabled = false))
++    }
++
++    @Test
++    fun `in flow - the text-decoration-color h3 (no margin, no position) is the SAME list`() {
++        val s = UAHeadingFaceReplay.site(UAHeadingFaceWire.TEXT_DECORATION_COLOR, "wpt__css-text-decor__text-decoration-color__0-021")
++        // The verbatim h3 declares nothing: only the out-of-flow test keeps it out.
++        assertTrue(s.own.isEmpty())
++        val font = UAHeadingFaceReplay.seam(s)
++        assertSame(font, UaPositionedHeadingMargin.apply(s.component._tag, s.own, s.mergedPreUa, font, true))
++        // The block-in-inline leaf h1s (in flow, margin 0 declared) too.
++        val leaf = UAHeadingFaceReplay.site(UAHeadingFaceWire.BLOCK_IN_INLINE_015_PRINT, "block-in-inline-015-print__0__0-190")
++        val leafFont = UAHeadingFaceReplay.seam(leaf)
++        assertSame(leafFont, UaPositionedHeadingMargin.apply(leaf.component._tag, leaf.own, leaf.mergedPreUa, leafFont, true))
++    }
++
++    @Test
++    fun `RELATIVE and STICKY headings stay in flow - the SAME list, FIXED fires`() {
++        // In-flow positioning schemes: the §8.3.1 plan's, never this step's.
++        for (position in listOf("RELATIVE", "STICKY", "STATIC")) {
++            val own = props("Position" to "\"$position\"")
++            assertSame(position, own, UaPositionedHeadingMargin.apply("h2", own, own, own, true))
++        }
++        // `fixed` is out of flow too (css-position-3 §2.1): .83 × 1.5 × 16.
++        val fixed = props("Position" to "\"FIXED\"")
++        assertEquals(19.92f, px(UaPositionedHeadingMargin.apply("h2", fixed, fixed, fixed, true), "MarginTop"), 1e-3f)
++    }
++
++    @Test
++    fun `s-11-1-1b-005 - the abspos p is outside the heading scope - the SAME list, logged`() {
++        val s = UAHeadingFaceReplay.site(UaPositionedHeadingWire.S_11_1_1B_005, "css21-errata__s-11-1-1b-005__0-140")
++        // The verbatim abspos <p> (top: 0, no margin): a UA-margin tag, not a heading.
++        assertEquals("p", s.component._tag)
++        // Identity, with the heading-scope breadcrumb.
++        assertSame(s.mergedPreUa, UaPositionedHeadingMargin.apply("p", s.own, s.mergedPreUa, s.mergedPreUa, true))
++        assertTrue(UaPositionedHeadingMargin.hasLogged("tag:p"))
++    }
++
++    @Test
++    fun `a vertical writing mode is the SAME list, logged`() {
++        val own = props("Position" to "\"ABSOLUTE\"")
++        // WritingMode inherits: it arrives through the merged list.
++        val merged = own + props("WritingMode" to "\"VERTICAL_RL\"")
++        assertSame(merged, UaPositionedHeadingMargin.apply("h1", own, merged, merged, true))
++        assertTrue(UaPositionedHeadingMargin.hasLogged("vertical"))
++    }
++
++    @Test
++    fun `author sizes - absolute px is the basis, parent-relative and shorthand-only are logged`() {
++        // 40px declared: .67 × 40 = 26.8 (B3).
++        val px40 = props("Position" to "\"ABSOLUTE\"", "FontSize" to """{"px":40}""")
++        assertEquals(26.8f, px(UaPositionedHeadingMargin.apply("h1", px40, px40, px40, true), "MarginTop"), 1e-3f)
++        // 2em of an unknown parent, and the unexpanded `font`: identity, logged.
++        val em = props("Position" to "\"ABSOLUTE\"", "FontSize" to """{"original":{"type":"length","original":{"v":2,"u":"EM"}}}""")
++        assertSame(em, UaPositionedHeadingMargin.apply("h3", em, em, em, true))
++        assertTrue(UaPositionedHeadingMargin.hasLogged("size:h3"))
++        val font = props("Position" to "\"ABSOLUTE\"", "Font" to "\"bold 20px serif\"")
++        assertSame(font, UaPositionedHeadingMargin.apply("h4", font, font, font, true))
++        assertTrue(UaPositionedHeadingMargin.hasLogged("size:h4"))
++    }
++
++    @Test
++    fun `the fold verdicts of the four hosts are unchanged by the margin step`() {
++        for (pair in listOf(inset005, inset006, inset014, inset011)) {
++            // The site, and its list after the margin step.
++            val s = site(pair)
++            val after = step(s, faceHeld = true)
++            // The fold reads the host list; Margin* is not among its inputs.
++            val plan = InlineRunPlan.resolve(s.component.runs, s.component.children)!!
++            val pre = InlineRunFold.fold(plan.entries, s.component.children!!, s.mergedPreUa, s.component.lang)
++            val post = InlineRunFold.fold(plan.entries, s.component.children!!, after, s.component.lang)
++            // Folded carries the host list it was given, so compare it with the
++            // appended margins put back on the pre side: everything else is equal.
++            val expected = if (pre is InlineRunFold.Outcome.Folded) pre.copy(properties = pre.properties + after.drop(s.mergedPreUa.size)) else pre
++            assertEquals(pair.second, expected, post)
++            // 005 / 006 / 014 fold, 011 bails (its diverging decoration colours).
++            assertEquals(pair != inset011, pre is InlineRunFold.Outcome.Folded)
++        }
++    }
++
++    @Test
++    fun `an untagged or non-margin tag is the SAME list`() {
++        val own = props("Position" to "\"ABSOLUTE\"")
++        // div / span / no tag: the UA sheet declares no block margin.
++        for (tag in listOf(null, "div", "span", "u")) assertSame(own, UaPositionedHeadingMargin.apply(tag, own, own, own, true))
++        assertNull(UaBlockMarginFontBasis.uaBlockMarginEm("div"))
++    }
++}
++
++/** The verbatim document only this file needs (the others are UAHeadingFaceWire's), spliced by
++ *  tools/titan/results/wave55-ua-heading-margin/gen-wire55.py --splice-kt — never hand-edited
++ *  (`--check-kt` re-verifies the bytes against tools/titan/runs/wave54-final). */
++private object UaPositionedHeadingWire {
++    // ── BEGIN GENERATED WIRE (gen-wire55.py)
++    // tools/titan/runs/wave54-final/sections/CSS2/per-test-ir/wpt__CSS2__css21-errata__s-11-1-1b-005.json — sha256 0da87f253fd76f9a72410a679f7f8e44e38798088c85dc4333feacd441fa2ddb (VERBATIM bytes)
++    const val S_11_1_1B_005: String = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css2__css21-errata__s-11-1-1b-005__0-139","name":"wpt__CSS2__css21-errata__s-11-1-1b-005__0","properties":[{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"},{"type":"Display","data":"TABLE_CELL"},{"type":"BorderSpacing","data":{"type":"single","px":0}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":-15}},{"type":"MarginRight","data":{"px":8}},{"type":"MarginBottom","data":{"px":8}},{"type":"MarginLeft","data":{"px":8}},{"type":"Width","data":{"type":"length","px":20}},{"type":"Height","data":{"type":"length","px":20}}],"meta":{"role":"body-root"}},{"id":"css21-errata__s-11-1-1b-005__0-140","name":"css21-errata__s-11-1-1b-005__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}}],"slot":{"parent":"wpt__css2__css21-errata__s-11-1-1b-005__0-139"},"text":"Test passes if there is a black square below.","meta":{"sourceTag":"p"}}]}"""
++    // ── END GENERATED WIRE
++}

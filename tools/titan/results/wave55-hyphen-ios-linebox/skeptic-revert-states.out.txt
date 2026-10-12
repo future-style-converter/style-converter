@@ -1,0 +1,101 @@
+# wave55 L1 skeptic — revert states, each built + focused suites run (Mac Catalyst, skeptic worktree, -derivedDataPath <wt>/.dd)
+# suites: LineHeightNormalTests LineBoxPinTests WPTCaptureModeTests LineHeightWireTests (+ NormalLineBoxTests when present); TEST_RUNNER_NB_IOS_PER_TEST_IR = tools/titan/runs/wave54-final/sections
+
+STATE NB-ios (611c9f93 + unit-NB-ios.patch + seam-1.patch)
+208e41bab6a08464549da734ba55822615b2426a61bd006c73bc76fff904c5f5  runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+929108b6946f5141cd80c3c40070a6fed020b8943a337b9b5c63cc67cd66c637  runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift
+b952ee4c9a1eb8036186dbbdf3ea14c4b16bd9ad21d1852dbf71f635727e8a6a  runtimes/swiftui/Tests/StyleConverterRuntimeTests/NormalLineBoxTests.swift
+Test Suite 'LineBoxPinTests' passed at 2026-10-11 23:27:27.515.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 4.192 (4.196) seconds
+Test Suite 'LineHeightNormalTests' passed at 2026-10-11 23:27:27.542.
+	 Executed 16 tests, with 0 failures (0 unexpected) in 0.009 (0.027) seconds
+Test Suite 'LineHeightWireTests' passed at 2026-10-11 23:27:27.555.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.011 (0.013) seconds
+Test Suite 'NormalLineBoxTests' passed at 2026-10-11 23:27:27.766.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.058 (0.211) seconds
+Test Suite 'WPTCaptureModeTests' passed at 2026-10-11 23:27:27.936.
+	 Executed 38 tests, with 0 failures (0 unexpected) in 0.160 (0.170) seconds
+	 Executed 81 tests, with 0 failures (0 unexpected) in 4.430 (4.618) seconds
+Test Suite 'Selected tests' passed at 2026-10-11 23:27:27.937.
+	 Executed 81 tests, with 0 failures (0 unexpected) in 4.430 (4.621) seconds
+** TEST SUCCEEDED **
+EXIT 0
+
+STATE contingency-full
+8f0e8cc214ea61bea0bbf5e1a88f2b3859ca441694c66ea7cfc8e54b448cdada  runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+a5f073ee8491af36809f9dd7074049d224c68497b04968680b2954827bc806cf  runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift
+807acd8a8f9a1d16db74882a51bd89307d340f2b2a3684a2376f6d72dbfe63c9  runtimes/swiftui/Tests/StyleConverterRuntimeTests/NormalLineBoxTests.swift
+Test Suite 'LineBoxPinTests' passed at 2026-10-11 23:49:10.899.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 6.801 (6.804) seconds
+Test Suite 'LineHeightNormalTests' passed at 2026-10-11 23:49:12.228.
+	 Executed 16 tests, with 0 failures (0 unexpected) in 0.700 (1.328) seconds
+Test Suite 'LineHeightWireTests' passed at 2026-10-11 23:49:13.024.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.790 (0.796) seconds
+Test Suite 'NormalLineBoxTests' passed at 2026-10-11 23:49:16.663.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 3.636 (3.639) seconds
+Test Suite 'WPTCaptureModeTests' passed at 2026-10-11 23:49:18.856.
+	 Executed 38 tests, with 0 failures (0 unexpected) in 1.662 (2.193) seconds
+	 Executed 82 tests, with 0 failures (0 unexpected) in 13.590 (14.761) seconds
+Test Suite 'Selected tests' passed at 2026-10-11 23:49:18.857.
+	 Executed 82 tests, with 0 failures (0 unexpected) in 13.590 (14.763) seconds
+** TEST SUCCEEDED **
+EXIT 0
+
+STATE contingency-rule2b
+208e41bab6a08464549da734ba55822615b2426a61bd006c73bc76fff904c5f5  runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+a5f073ee8491af36809f9dd7074049d224c68497b04968680b2954827bc806cf  runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift
+807acd8a8f9a1d16db74882a51bd89307d340f2b2a3684a2376f6d72dbfe63c9  runtimes/swiftui/Tests/StyleConverterRuntimeTests/NormalLineBoxTests.swift
+Test Suite 'LineBoxPinTests' passed at 2026-10-11 23:52:33.967.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 3.444 (3.447) seconds
+Test Suite 'LineHeightNormalTests' passed at 2026-10-11 23:52:34.973.
+	 Executed 16 tests, with 0 failures (0 unexpected) in 0.428 (1.005) seconds
+Test Suite 'LineHeightWireTests' passed at 2026-10-11 23:52:35.074.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.020 (0.101) seconds
+Test Suite 'NormalLineBoxTests' passed at 2026-10-11 23:52:36.566.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 1.490 (1.492) seconds
+Test Suite 'WPTCaptureModeTests' passed at 2026-10-11 23:52:38.852.
+	 Executed 38 tests, with 0 failures (0 unexpected) in 1.686 (2.286) seconds
+	 Executed 82 tests, with 0 failures (0 unexpected) in 7.069 (8.332) seconds
+Test Suite 'Selected tests' passed at 2026-10-11 23:52:38.852.
+	 Executed 82 tests, with 0 failures (0 unexpected) in 7.069 (8.333) seconds
+** TEST SUCCEEDED **
+EXIT 0
+
+STATE rule2b-unit-only
+417853cefdc7627fadc21003efa735d99d47ed0c545b6c1747d7292403fd26f3  runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+929108b6946f5141cd80c3c40070a6fed020b8943a337b9b5c63cc67cd66c637  runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift
+b952ee4c9a1eb8036186dbbdf3ea14c4b16bd9ad21d1852dbf71f635727e8a6a  runtimes/swiftui/Tests/StyleConverterRuntimeTests/NormalLineBoxTests.swift
+Test Suite 'LineBoxPinTests' passed at 2026-10-11 23:54:27.080.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 7.706 (7.757) seconds
+Test Suite 'LineHeightNormalTests' passed at 2026-10-11 23:54:28.102.
+	 Executed 16 tests, with 0 failures (0 unexpected) in 0.511 (1.021) seconds
+Test Suite 'LineHeightWireTests' passed at 2026-10-11 23:54:28.131.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.023 (0.029) seconds
+Test Suite 'NormalLineBoxTests' passed at 2026-10-11 23:54:30.428.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 1.884 (2.297) seconds
+Test Suite 'WPTCaptureModeTests' passed at 2026-10-11 23:54:34.115.
+	 Executed 38 tests, with 0 failures (0 unexpected) in 1.638 (3.687) seconds
+	 Executed 81 tests, with 0 failures (0 unexpected) in 11.762 (14.792) seconds
+Test Suite 'Selected tests' passed at 2026-10-11 23:54:34.116.
+	 Executed 81 tests, with 0 failures (0 unexpected) in 11.762 (14.795) seconds
+** TEST SUCCEEDED **
+EXIT 0
+
+STATE base-611c9f93
+417853cefdc7627fadc21003efa735d99d47ed0c545b6c1747d7292403fd26f3  runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+Test Suite 'LineBoxPinTests' passed at 2026-10-12 00:01:39.230.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 1.917 (1.920) seconds
+Test Suite 'LineHeightNormalTests' passed at 2026-10-12 00:01:39.244.
+	 Executed 16 tests, with 0 failures (0 unexpected) in 0.011 (0.014) seconds
+Test Suite 'LineHeightWireTests' passed at 2026-10-12 00:01:39.268.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.022 (0.024) seconds
+Test Suite 'WPTCaptureModeTests' passed at 2026-10-12 00:01:39.437.
+	 Executed 38 tests, with 0 failures (0 unexpected) in 0.158 (0.169) seconds
+	 Executed 72 tests, with 0 failures (0 unexpected) in 2.108 (2.128) seconds
+Test Suite 'Selected tests' passed at 2026-10-12 00:01:39.437.
+	 Executed 72 tests, with 0 failures (0 unexpected) in 2.108 (2.128) seconds
+** TEST SUCCEEDED **
+EXIT 0
+
+STATE NB-ios-b reverted -> NB-ios: git apply -R seam-1b.patch, then -R unit-NB-ios-b.patch; shasum -c against the NB-ios state's three shas above: OK / OK / OK (byte-identical to the NB-ios state built first)
+FINAL: worktree restored to the NB-ios state (unit-NB-ios + seam-1), shasum -c OK on all three files

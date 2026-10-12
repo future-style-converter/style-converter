@@ -1,0 +1,22 @@
+# fix-r1.h-twin.measure.out.txt — the real L5 probe (sha256 bd2f001ae6a8ea5be86c1980bff9f2a65cf068ecab5726a8c4a6e84d130d3027) on Catalyst pictures
+== run catfull base catnou1 (rc 0)
+  [H] counter-suffix ios      row3:x46-53,x57-57 row4:x47-53,x57-57 ink 36 vs catnou1 ios → GEOMETRY WRONG (ink: rows 3-4 marker zone x0-63 differs from the glyphs of catnou1 ios (each moved by whole px) by 36 px (> 2: added / lost ink — U1 reorders the marker's glyphs, it draws none))
+  [C] counter-suffix ios      row5:x33-46,x50-53|item x64|strokes 1 y(123, 124) row6:x33-46,x50-53|item x65|strokes 2 y(142, 153) → GEOMETRY OK
+  [T] counter-suffix ios      row9 digit (139, 145, 214, 225) ink 13 vs catnou1 android → GEOMETRY WRONG (ink: row 9 digit window x136-150 differs from catnou1 android's tabular '1' by 13 px at its best whole-px offset (> 2: added / lost ink in the window))
+  [L] counter-suffix ios      row1 digit (49, 52, 22, 33) → GEOMETRY WRONG (digit ink x49-52 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+  [K] counter-suffix ios      zones y0-63,y160-207,y232-599,x64-389×y64-159,x0-135×y208-231,x151-end×y208-231 vs catnou1 → GEOMETRY OK
+  [I] cjk-decimal/css3-counter-styles-005 ios      y95:marker x217-249 (2, fill 0.96, strokes 1 y(102, 103)) item x271 y121:marker x218-249 (2, fill 0.2, strokes 2 y(125, 142)) item x272 → GEOMETRY WRONG (line y95 item text left x271 vs ref x268±1 (inside "、" marker not flush))
+== run catfull base wave54-final (rc 0)
+  [H] counter-suffix ios      row3:x46-53,x57-57 row4:x47-53,x57-57 ink 47 vs wave54-final android → GEOMETRY WRONG (ink: rows 3-4 marker zone x0-63 differs from the glyphs of wave54-final android (each moved by whole px) by 47 px (> 2: added / lost ink — U1 reorders the marker's glyphs, it draws none))
+  [C] counter-suffix ios      row5:x33-46,x50-53|item x64|strokes 1 y(123, 124) row6:x33-46,x50-53|item x65|strokes 2 y(142, 153) → GEOMETRY WRONG (ink: 2 zone(s) differ from wave54-final's by 52 px in all (worst row5 marker x0-63 29 at dx +4) (> 2: added / lost ink — the unit moves ink, it adds none))
+  [T] counter-suffix ios      row9 digit (139, 145, 214, 225) → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (160 px))
+  [L] counter-suffix ios      row1 digit (49, 52, 22, 33) → GEOMETRY WRONG (digit ink x49-52 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+  [K] counter-suffix ios      zones y0-63,y160-207,y232-599,x64-389×y64-159,x0-135×y208-231,x151-end×y208-231 vs wave54-final → GEOMETRY WRONG (zone y0-63 differs from wave54-final (433 px))
+  [I] cjk-decimal/css3-counter-styles-005 ios      y95:marker x217-249 (2, fill 0.96, strokes 1 y(102, 103)) item x271 y121:marker x218-249 (2, fill 0.2, strokes 2 y(125, 142)) item x272 → GEOMETRY WRONG (line y95 item text left x271 vs ref x268±1 (inside "、" marker not flush))
+== run catnou1 base wave54-final (rc 0)
+  [H] counter-suffix ios      row3:x47-47,x50-57 row4:x48-48,x51-57 → GEOMETRY WRONG (row 3 period x47-47 before the letter x50-57 (suffix on the wrong side: first-strong RTL base direction))
+  [C] counter-suffix ios      row5:x33-46,x50-53|item x64|strokes 1 y(123, 124) row6:x33-46,x50-53|item x65|strokes 2 y(142, 153) → GEOMETRY WRONG (ink: 2 zone(s) differ from wave54-final's by 52 px in all (worst row5 marker x0-63 29 at dx +4) (> 2: added / lost ink — the unit moves ink, it adds none))
+  [T] counter-suffix ios      row9 digit (139, 145, 214, 225) → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (160 px))
+  [L] counter-suffix ios      row1 digit (49, 52, 22, 33) → GEOMETRY WRONG (digit ink x49-52 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+  [K] counter-suffix ios      zones y0-63,y160-207,y232-599,x64-389×y64-159,x0-135×y208-231,x151-end×y208-231 vs wave54-final → GEOMETRY WRONG (zone y0-63 differs from wave54-final (433 px))
+  [I] cjk-decimal/css3-counter-styles-005 ios      y95:marker x217-249 (2, fill 0.96, strokes 1 y(102, 103)) item x271 y121:marker x218-249 (2, fill 0.2, strokes 2 y(125, 142)) item x272 → GEOMETRY WRONG (line y95 item text left x271 vs ref x268±1 (inside "、" marker not flush))

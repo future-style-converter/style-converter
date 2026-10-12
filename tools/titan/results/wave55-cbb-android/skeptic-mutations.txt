@@ -1,0 +1,188 @@
+# skeptic mutation replay (wave-55 L2) — bracket lines written BEFORE each edit / AFTER each byte-exact restore, then the per-mutation red/green summary
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt sha256 f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 (skeptic label M-U1a-always-subtract)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt sha256 f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 (skeptic label M-U1a-always-subtract; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt sha256 f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 (skeptic label M-U1b-never-subtract)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt sha256 f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 (skeptic label M-U1b-never-subtract; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt sha256 f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 (skeptic label M-U1c-wpt-ignores-border-box)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt sha256 f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 (skeptic label M-U1c-wpt-ignores-border-box; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt sha256 f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 (skeptic label M-U1-C8-no-breadcrumb)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt sha256 f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 (skeptic label M-U1-C8-no-breadcrumb; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt sha256 7ddeb9b0befcb1b144a315ebb686e027e102228d30ce48c97ecd4f9d4f143a23 (skeptic label M-U1d-drop-named-argument)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt sha256 7ddeb9b0befcb1b144a315ebb686e027e102228d30ce48c97ecd4f9d4f143a23 (skeptic label M-U1d-drop-named-argument; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label M-U2a-band-dropped)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label M-U2a-band-dropped; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label M-U2b-report-child)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label M-U2b-report-child; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label M-U2c-wpt-clause-dropped)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label M-U2c-wpt-clause-dropped; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label M-U2d-band-test-dropped)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label M-U2d-band-test-dropped; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt sha256 e8f62e4926a01e131e28b5ded6c5228ab93a7af06ad32e0bea32be54a3e7b2a2 (skeptic label M-U2e-call-site-deleted)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt sha256 e8f62e4926a01e131e28b5ded6c5228ab93a7af06ad32e0bea32be54a3e7b2a2 (skeptic label M-U2e-call-site-deleted; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label M-U2f-centred)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label M-U2f-centred; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label M-U2g-unbounded-not-identity)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label M-U2g-unbounded-not-identity; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label SK1-measure-reports-child)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label SK1-measure-reports-child; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label SK2-measure-centres)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label SK2-measure-centres; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt sha256 e8f62e4926a01e131e28b5ded6c5228ab93a7af06ad32e0bea32be54a3e7b2a2 (skeptic label SK3-height-call-site-deleted)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt sha256 e8f62e4926a01e131e28b5ded6c5228ab93a7af06ad32e0bea32be54a3e7b2a2 (skeptic label SK3-height-call-site-deleted; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label SK5-clamp-clause-dropped)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label SK5-clamp-clause-dropped; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label SK6-boxsizing-clause-dropped)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label SK6-boxsizing-clause-dropped; post == pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label SK7-measure-band-zero)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 (skeptic label SK7-measure-band-zero; post == pre)
+
+== M-U1a-always-subtract (runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt) applied=yes pre=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 mutated=4237459d15c7379726990b904f9268aa40870330864b59f540041a8a9051de57 post=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0
+  mutated run rc=1 (RED)
+    red: core.variables.DynamicValueResolverTest" tests="33" skipped="0" failures="4" errors="0"
+    red: DynamicValueResolverTest > CBB the dark stage breadcrumbs a declared content-box and still subtracts FAILED
+    red: DynamicValueResolverTest > CBB WPT nested clip chain keeps 200 by 100 at both levels FAILED
+    red: DynamicValueResolverTest > CBB WPT content-box container publishes its declared size FAILED
+    red: DynamicValueResolverTest > CBB census - the readers that see a different block are exactly the carriers and the control FAILED
+    red: > Task :runtime:testDebugUnitTest FAILED
+    red: BUILD FAILED in 6s
+    red: 33 tests completed, 4 failed
+  restored run rc=0 (GREEN)
+    green: core.variables.DynamicValueResolverTest" tests="33" skipped="0" failures="0" errors="0"
+== M-U1b-never-subtract (runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt) applied=yes pre=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 mutated=18b6eea12faf985d7e99edd410d9acc8a26bd673aa79f8abe7ca69837f7c810a post=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0
+  mutated run rc=1 (RED)
+    red: core.variables.DynamicValueResolverTest" tests="33" skipped="0" failures="4" errors="0"
+    red: > Task :runtime:testDebugUnitTest FAILED
+    red: DynamicValueResolverTest > child containing block is the resolved content box FAILED
+    red: DynamicValueResolverTest > CBB the dark stage breadcrumbs a declared content-box and still subtracts FAILED
+    red: DynamicValueResolverTest > CBB census - the readers that see a different block are exactly the carriers and the control FAILED
+    red: DynamicValueResolverTest > CBB the dark stage keeps the frozen subtraction even for those payloads FAILED
+    red: BUILD FAILED in 4s
+    red: 33 tests completed, 4 failed
+  restored run rc=0 (GREEN)
+    green: core.variables.DynamicValueResolverTest" tests="33" skipped="0" failures="0" errors="0"
+== M-U1c-wpt-ignores-border-box (runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt) applied=yes pre=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 mutated=43ede169fb7ffb450608ffc68d18c6c39779161a7a34cc9528e0c7787f290b6d post=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0
+  mutated run rc=1 (RED)
+    red: core.variables.DynamicValueResolverTest" tests="33" skipped="0" failures="1" errors="0"
+    red: DynamicValueResolverTest > CBB an explicit border-box under WPT still subtracts its bands FAILED
+    red: > Task :runtime:testDebugUnitTest FAILED
+    red: BUILD FAILED in 4s
+    red: 33 tests completed, 1 failed
+  restored run rc=0 (GREEN)
+    green: core.variables.DynamicValueResolverTest" tests="33" skipped="0" failures="0" errors="0"
+== M-U1-C8-no-breadcrumb (runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt) applied=yes pre=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 mutated=8eeee3fcaedc4a249b5a2656bfdd9ab425a40d5db564e7ec4cd86e831dfb0e35 post=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0
+  mutated run rc=1 (RED)
+    red: core.variables.DynamicValueResolverTest" tests="33" skipped="0" failures="1" errors="0"
+    red: DynamicValueResolverTest > CBB the dark stage breadcrumbs a declared content-box and still subtracts FAILED
+    red: > Task :runtime:testDebugUnitTest FAILED
+    red: BUILD FAILED in 6s
+    red: 33 tests completed, 1 failed
+  restored run rc=0 (GREEN)
+    green: core.variables.DynamicValueResolverTest" tests="33" skipped="0" failures="0" errors="0"
+== M-U1d-drop-named-argument (runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt) applied=yes pre=7ddeb9b0befcb1b144a315ebb686e027e102228d30ce48c97ecd4f9d4f143a23 mutated=10084ec7d682cffa142f9deb94bd3efedf318fc7632366218f7e099234be7466 post=7ddeb9b0befcb1b144a315ebb686e027e102228d30ce48c97ecd4f9d4f143a23
+  mutated run rc=1 (RED)
+    red: core.renderer.ChildContainingBlockSeamWiringTest" tests="1" skipped="0" failures="1" errors="0"
+    red: > Task :runtime:testDebugUnitTest FAILED
+    red: ChildContainingBlockSeamWiringTest > the child containing block is computed with the WPT capture mode FAILED
+    red: BUILD FAILED in 8s
+  restored run rc=0 (GREEN)
+    green: core.renderer.ChildContainingBlockSeamWiringTest" tests="1" skipped="0" failures="0" errors="0"
+== M-U2a-band-dropped (runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt) applied=yes pre=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 mutated=ed2c4a19fea5d57797cde6cd2f1dd402049dd0d79375920181a92c9ab7318d93 post=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9
+  mutated run rc=1 (RED)
+    red: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="1" errors="0"
+    red: PercentContentBoxBandTest > P-U2-1 middle's band is added to the fill and overflows as the house split FAILED
+    red: > Task :runtime:testDebugUnitTest FAILED
+    red: BUILD FAILED in 4s
+    red: 8 tests completed, 1 failed
+  restored run rc=0 (GREEN)
+    green: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"
+== M-U2b-report-child (runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt) applied=yes pre=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 mutated=93b95a6ab09f8df2891cf2b72c0d38183b5c3951dac5442dc5b81b20469fa914 post=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9
+  mutated run rc=1 (RED)
+    red: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="1" errors="0"
+    red: PercentContentBoxBandTest > P-U2-1 middle's band is added to the fill and overflows as the house split FAILED
+    red: > Task :runtime:testDebugUnitTest FAILED
+    red: BUILD FAILED in 5s
+    red: 8 tests completed, 1 failed
+  restored run rc=0 (GREEN)
+    green: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"
+== M-U2c-wpt-clause-dropped (runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt) applied=yes pre=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 mutated=91ce077a6da87ec5972bcff1e4e9ec80a2a08df56794859d8d32ec0635877822 post=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9
+  mutated run rc=1 (RED)
+    red: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="1" errors="0"
+    red: PercentContentBoxBandTest > P-U2-2 owns exactly the WPT content-box percent axis with a band FAILED
+    red: > Task :runtime:testDebugUnitTest FAILED
+    red: BUILD FAILED in 4s
+    red: 8 tests completed, 1 failed
+  restored run rc=0 (GREEN)
+    green: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"
+== M-U2d-band-test-dropped (runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt) applied=yes pre=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 mutated=39f79bcf4a2f296d7260ab789b021500e0c05c7618f6610101fa5b9fef925e88 post=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9
+  mutated run rc=1 (RED)
+    red: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="2" errors="0"
+    red: PercentContentBoxBandTest > P-U2-2 owns exactly the WPT content-box percent axis with a band FAILED
+    red: PercentContentBoxBandTest > P-U2-6 census - owns selects exactly middle W and H of clip-3 among the percentage axes FAILED
+    red: > Task :runtime:testDebugUnitTest FAILED
+    red: BUILD FAILED in 6s
+    red: 8 tests completed, 2 failed
+  restored run rc=0 (GREEN)
+    green: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"
+== M-U2e-call-site-deleted (runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt) applied=yes pre=e8f62e4926a01e131e28b5ded6c5228ab93a7af06ad32e0bea32be54a3e7b2a2 mutated=70f40877bb2868df15ce367fb6537604f3a06c4e5e97a330e35d82fe22a30a2f post=e8f62e4926a01e131e28b5ded6c5228ab93a7af06ad32e0bea32be54a3e7b2a2
+  mutated run rc=1 (RED)
+    red: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="2" errors="0"
+    red: PercentContentBoxBandTest > P-U2-5 source - applySizing asks the band lane before the clamp and the fill FAILED
+    red: PercentContentBoxBandTest > P-U2-5 live chain - middle gets both band nodes outside its clip, background and padding FAILED
+    red: > Task :runtime:testDebugUnitTest FAILED
+    red: BUILD FAILED in 5s
+    red: 8 tests completed, 2 failed
+  restored run rc=0 (GREEN)
+    green: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"
+== M-U2f-centred (runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt) applied=yes pre=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 mutated=bfc7392f035a48d6a61af75c2773b067a55b5ce95b8d371706149b6af13f7519 post=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9
+  mutated run rc=1 (RED)
+    red: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="1" errors="0"
+    red: PercentContentBoxBandTest > P-U2-4 the oversized box is start-anchored, never centred FAILED
+    red: > Task :runtime:testDebugUnitTest FAILED
+    red: BUILD FAILED in 8s
+    red: 8 tests completed, 1 failed
+  restored run rc=0 (GREEN)
+    green: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"
+== M-U2g-unbounded-not-identity (runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt) applied=yes pre=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 mutated=ca99ff35b4e4235fd5e3bcd095fcfa467ced2cc6e73dd92b5bacce84c2d9c97d post=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9
+  mutated run rc=1 (RED)
+    red: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="1" errors="0"
+    red: PercentContentBoxBandTest > P-U2-3 an unbounded axis is identity - FillNode parity FAILED
+    red: > Task :runtime:testDebugUnitTest FAILED
+    red: BUILD FAILED in 8s
+    red: 8 tests completed, 1 failed
+  restored run rc=0 (GREEN)
+    green: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"
+== SK1-measure-reports-child (runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt) applied=yes pre=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 mutated=5b88951114e46b207855b86d900c2b8a636008d4cceaadb2cc7882febba810b4 post=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9
+  mutated run rc=0 (GREEN)
+  restored run rc=0 (GREEN)
+    green: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"
+== SK2-measure-centres (runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt) applied=yes pre=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 mutated=ff884c56b9f2130904f5d775a6a422210c704cb51031b71ba996409315f17c15 post=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9
+  mutated run rc=0 (GREEN)
+  restored run rc=0 (GREEN)
+    green: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"
+== SK3-height-call-site-deleted (runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt) applied=yes pre=e8f62e4926a01e131e28b5ded6c5228ab93a7af06ad32e0bea32be54a3e7b2a2 mutated=ef4574d700c443bc0abb8a25dfa88c48dc3b4f0fcc8963f180beea7a566f1304 post=e8f62e4926a01e131e28b5ded6c5228ab93a7af06ad32e0bea32be54a3e7b2a2
+  mutated run rc=1 (RED)
+    red: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="2" errors="0"
+    red: PercentContentBoxBandTest > P-U2-5 source - applySizing asks the band lane before the clamp and the fill FAILED
+    red: PercentContentBoxBandTest > P-U2-5 live chain - middle gets both band nodes outside its clip, background and padding FAILED
+    red: > Task :runtime:testDebugUnitTest FAILED
+    red: BUILD FAILED in 7s
+    red: 8 tests completed, 2 failed
+  restored run rc=0 (GREEN)
+    green: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"
+== SK5-clamp-clause-dropped (runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt) applied=yes pre=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 mutated=273f465d75e6465916951f09a906819a662906a47b8a47c71b91dbdd76e61248 post=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9
+  mutated run rc=1 (RED)
+    red: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="1" errors="0"
+    red: PercentContentBoxBandTest > P-U2-2 owns exactly the WPT content-box percent axis with a band FAILED
+    red: > Task :runtime:testDebugUnitTest FAILED
+    red: BUILD FAILED in 8s
+    red: 8 tests completed, 1 failed
+  restored run rc=0 (GREEN)
+    green: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"
+== SK6-boxsizing-clause-dropped (runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt) applied=yes pre=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 mutated=9a1c1b491982d75bc5bf55b9583598fbee712ec2442f975a3ceb9583b2ad140e post=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9
+  mutated run rc=0 (GREEN)
+  restored run rc=0 (GREEN)
+    green: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"
+== SK7-measure-band-zero (runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt) applied=yes pre=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 mutated=0f1b1daa200c1d441f62a1b90117196be4e00e97360d0e905f7a645bb6c04040 post=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9
+  mutated run rc=0 (GREEN)
+  restored run rc=0 (GREEN)
+    green: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"

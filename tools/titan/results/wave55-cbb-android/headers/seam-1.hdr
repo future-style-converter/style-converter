@@ -1,0 +1,14 @@
+# seam-1.patch — wave 55 lane L2 (cbb-android), unit U1 (CBB-android re-landed, 5b333c8a), Compose seam (PLAN.md §3 .kt row 3; seam-registry.md §1 order 3).
+# Base: campaign/applier-campaign HEAD 611c9f932bcfefa147a35f6c5f356d42709ddf84 (= dev 0d0d3a3d + the committed wave-55 plan and opening-gate records);
+#       runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt sha256 2445d9ea2674576fc0946e3f630f48b88d48f0f9d8c98df3249ba67d7a026aa5 at base (8488 lines, byte-identical to 0d0d3a3d's).
+# Anchor (content, unique in the file at base): `                .childContainingBlock(effectiveProperties, containingBlock)` — :1950-1951 inside
+#         `val childContainingBlock = androidx.compose.runtime.remember(effectiveProperties, containingBlock, component.children, wptCaptureModeForStretch)`;
+#         `wptCaptureModeForStretch` (:1268 `val wptCaptureModeForStretch = LocalWptCaptureMode.current`) is already that remember's key.
+# Hunks: (1) ComponentRenderer.kt — the named argument `wptCaptureMode = wptCaptureModeForStretch` (+4 comment lines); body identical to
+#            tools/titan/results/wave54-oof-layout/seam-1.patch (whose header offsets :1930 / :1933-1934 are stale), re-cut here on 611c9f93;
+#        (2) NEW runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/ChildContainingBlockSeamWiringTest.kt — the patch-borne
+#            source pin for (1) (the wave-53 FloatAvoidSeamWiringTest precedent: the tree never carries a red-by-construction pin).
+# Needs (same commit, unit U1): unit-U1.patch — NEW core/variables/ContainingBlockBands.kt and the defaulted
+#        DynamicValueResolver.childContainingBlock(…, wptCaptureMode: Boolean = false). unit-U1.patch compiles WITHOUT this patch (the default false).
+# Landing (PLAN §4; seam-registry §6): ComponentRenderer.kt takes L4 s1 → L4 s3 → L2 s1 → L3 s1 → L5 s4 → L5 s5 (cross-lane hunks ≥ 785 lines apart).
+# Apply from the repo root after `git apply --check`: git apply tools/titan/results/wave55-cbb-android/seam-1.patch

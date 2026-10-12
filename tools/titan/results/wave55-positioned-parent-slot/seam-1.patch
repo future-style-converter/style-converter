@@ -1,0 +1,156 @@
+# seam-1.patch — wave 55, lane L3 (positioned-parent-slot), revert unit U1
+# base: 611c9f932bcfefa147a35f6c5f356d42709ddf84 (= dev 0d0d3a3d + the committed wave-55 plan + the opening-gate records)
+# seam file: runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+# sha256 at base: 2445d9ea2674576fc0946e3f630f48b88d48f0f9d8c98df3249ba67d7a026aa5
+# anchor: RenderContent → renderBlockChild, the `val outOfFlowSlotMount: Modifier =` expression (base :3650)
+#         and its comment (base :3644-3649) — PLAN §3 .kt row 4 "L3 · U1" (registry :3633-3661).
+# patch-borne: NEW runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/PositionedParentSlotSeamWiringTest.kt;
+#   runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt: the U1 module line, inserted after `"transforms/TransformInheritance.kt",` (base :182, the
+#   PINNED anchor; sha256 at base 7a1b061f1de5d288af6581d81b35744de9b579a41a7e9388d4ded1c0d9b08f56) — cut on HEAD, never at the list end.
+# consumes PositionedParentSlotGate (unit-U1.patch, applied first); LocalLayoutDirection / LayoutDirection /
+#   LocalWptComposedMode are already in scope in the seam file.
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+index 044cf241..bd193844 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -3641,24 +3641,28 @@ object ComponentRenderer {
+                         // apart). The zero-footprint anchor is the RC1 mount
+                         // (CanvasRootHoist.zeroFlowAnchor) applied one level
+                         // deeper; the decision table and the documented
+-                        // limits live in PositionedParentFlowSlot. Host-gated
+-                        // exactly like RC1, so hostless paths (dark stage,
+-                        // every committed baseline) keep the identity
+-                        // modifier here — and a `relative`/transform-CB
+-                        // parent never reaches this loop (its children take
+-                        // the positioned-container Box branch above).
++                        // limits live in PositionedParentFlowSlot. Wave 55
++                        // (lane L3): engaged by PositionedParentSlotGate on the
++                        // composed capture itself, not only an ACTIVE canvas
++                        // host (a host-inactive capture stacked dir-style-02a's
++                        // row-7 dot out of its 20-px row); an RTL parent's
++                        // slot is the gate's own case. Hostless paths (dark
++                        // stage, every committed baseline) see no composed
++                        // capture and keep the identity modifier — and a
++                        // `relative`/transform-CB parent never reaches this
++                        // loop (its children take the Box branch above).
++                        // `parentRtl` is read HERE, in the parent's content
++                        // scope, never in the child's measure scope.
+                         val outOfFlowSlotMount: Modifier =
+-                            if (com.styleconverter.runtime.layout.position.CanvasRootHoist
+-                                    .LocalActive.current &&
+-                                com.styleconverter.runtime.layout.position
+-                                    .PositionedParentFlowSlot
+-                                    .applies(child.properties, component.properties)
+-                            ) {
+-                                com.styleconverter.runtime.layout.position
+-                                    .PositionedParentFlowSlot.mount(child.properties)
+-                            } else {
+-                                Modifier
+-                            }
++                            com.styleconverter.runtime.layout.position.PositionedParentSlotGate
++                                .slotModifier(
++                                    child.properties,
++                                    component.properties,
++                                    hostActive = com.styleconverter.runtime.layout.position
++                                        .CanvasRootHoist.LocalActive.current,
++                                    composedCapture = LocalWptComposedMode.current,
++                                    parentRtl = LocalLayoutDirection.current == LayoutDirection.Rtl,
++                                )
+                         // The child's style chain, with the margin override
+                         // when one applies (§8.3.1 plan or §9.5.2 clearance —
+                         // both ride the same LocalCollapsedMargin channel).
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/PositionedParentSlotSeamWiringTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/PositionedParentSlotSeamWiringTest.kt
+new file mode 100644
+index 00000000..00569033
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/PositionedParentSlotSeamWiringTest.kt
+@@ -0,0 +1,77 @@
++package com.styleconverter.runtime.core.renderer
++
++// Wave 55 (lane L3, U1) — SOURCE pins for the one seam hunk lane L3 delivers
++// in tools/titan/results/wave55-positioned-parent-slot/seam-1.patch (this
++// file ships INSIDE that patch, so it lands with the hunk it pins). The
++// block-child loop's mount is composed inside RenderContent, which this JVM
++// suite cannot execute (no Robolectric), so — the StaticPositionSeamWiringTest
++// idiom — these pins prove the seam CALLS the pinned pure gate
++// (PositionedParentSlotGateTest) with the right three flags:
++//   PW1 the mount is PositionedParentSlotGate.slotModifier(…), fed by the
++//       canvas host, the composed-capture local and the PARENT's layout
++//       direction;
++//   PW2 the pre-wave-55 host-only gate (`LocalActive.current &&` on a direct
++//       PositionedParentFlowSlot call) is gone from the block-child loop.
++// NEGATIVE CONTROL EXECUTED: run against the pre-seam ComponentRenderer.kt
++// → PW1 and PW2 fail (the bracketed mutation in the lane note).
++
++import java.io.File
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class PositionedParentSlotSeamWiringTest {
++
++    /** ComponentRenderer.kt, found by walking up from the JVM working dir to
++     *  the repo root (the module's Gradle rootDir is apps/android-harness). */
++    private val renderer: File by lazy {
++        // The seam file's repo-relative path is the walk-up anchor.
++        val anchor = "runtimes/compose/src/main/java/com/styleconverter/runtime/" +
++            "core/renderer/ComponentRenderer.kt"
++        // Start at the JVM's working directory and climb until it resolves.
++        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
++        while (dir != null && !File(dir, anchor).exists()) dir = dir.parentFile
++        File(requireNotNull(dir) { "repo root not found" }, anchor)
++    }
++
++    /** The block-child loop: from its lambda header to the child body that
++     *  consumes the mount (the whole region the seam hunk owns). */
++    private fun blockChildLoop(): String {
++        // Both anchors are code, not prose, and occur once in the file.
++        val text = renderer.readText()
++        val start = text.indexOf("val renderBlockChild: @Composable (Int, IRComponent) -> Unit")
++        assertTrue("renderBlockChild not found", start >= 0)
++        val end = text.indexOf("val blockChildBody: @Composable () -> Unit", start)
++        assertTrue("blockChildBody not found after renderBlockChild", end > start)
++        return text.substring(start, end)
++    }
++
++    @Test
++    fun `PW1 the block-child mount is the gate's helper, fed by all three flags`() {
++        // The one call that decides the out-of-flow child's slot.
++        val loop = blockChildLoop()
++        assertTrue("mount must be PositionedParentSlotGate.slotModifier(",
++            loop.contains("PositionedParentSlotGate") && loop.contains(".slotModifier("))
++        // The canvas host keeps every pre-wave-55 mount.
++        assertTrue("hostActive must read CanvasRootHoist.LocalActive",
++            loop.contains("hostActive = com.styleconverter.runtime.layout.position") &&
++                loop.contains(".CanvasRootHoist.LocalActive.current"))
++        // The composed capture itself engages the slot (U1).
++        assertTrue("composedCapture must read LocalWptComposedMode",
++            loop.contains("composedCapture = LocalWptComposedMode.current"))
++        // The PARENT's laid-out direction, read in its content scope.
++        assertTrue("parentRtl must read the parent's LocalLayoutDirection",
++            loop.contains("parentRtl = LocalLayoutDirection.current == LayoutDirection.Rtl"))
++    }
++
++    @Test
++    fun `PW2 the host-only gate is gone from the block-child loop`() {
++        // The pre-seam expression gated the mount on the host alone.
++        val loop = blockChildLoop()
++        assertFalse("the LocalActive-only guard must be gone",
++            loop.contains("LocalActive.current &&"))
++        // The plain mount is reached only through the gate now.
++        assertFalse("no direct PositionedParentFlowSlot.mount( call in the loop",
++            loop.contains("PositionedParentFlowSlot.mount("))
++    }
++}
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
+index c7901fd2..f9378533 100644
+--- a/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
+@@ -180,6 +180,7 @@ class SeamReachabilityTest {
+             // dead runtime code (the wave-49 S5 class).
+             "transforms/BackfaceCull.kt",
+             "transforms/TransformInheritance.kt",
++            "layout/position/PositionedParentSlotGate.kt", // wave 55 L3 U1: called only by seam 1
+         )
+         val dead = modules.filterNot { File(runtimeTree, it) in reachable }
+         assertTrue(

@@ -1,0 +1,18 @@
+{
+ "name": "M3-old-has-children-gate",
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAHeadingFoldGate.kt",
+ "pre": "e0e3186dcbd7cddc05d80d32e3a4a582eee893ec40bee93889f47a66efccc578",
+ "mutated": "a12ec9a1077d149585f92d282f9174cb8aee617c2ea84afc580fda27d5912004",
+ "post": "e0e3186dcbd7cddc05d80d32e3a4a582eee893ec40bee93889f47a66efccc578",
+ "red_rc": 1,
+ "red_failures": [
+  "UAElementFontRuleTest > fold gate - the folded hosts take the face (005, 006 32, 014 26), the bailing 011 keeps its list",
+  "UAHeadingFoldGateTest > inset-006 - the folded h1 host applies",
+  "UAHeadingFoldGateTest > inset-014 - the folded monospace h1 host applies",
+  "UAHeadingFoldGateTest > inset-005 - the folded h1 host applies (Folded, not the stacked stand-down)"
+ ],
+ "red_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/1; UAHeadingFoldGateTest 9/3",
+ "green_rc": 0,
+ "green_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "verdict": "RED-THEN-GREEN"
+}

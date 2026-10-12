@@ -1,0 +1,16 @@
+{
+ "name": "IS3-fed-preUA",
+ "file": "runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift",
+ "pre": "b5992e1a1b9b845702d6cf5693182b5e7b40df6c6a1b3c7a4999a6686f657906",
+ "mutated": "c37bee85d0bed9938592182ecd96271b8d672bb4f852db591e75acf0cc52107a",
+ "post": "b5992e1a1b9b845702d6cf5693182b5e7b40df6c6a1b3c7a4999a6686f657906",
+ "red_rc": 65,
+ "red_failures": [
+  "UAPositionedHeadingMarginSeamWiringTests.testTheHoistAndTheFontStepPrecedeIt",
+  "UAPositionedHeadingMarginSeamWiringTests.testTheMarginStepRunsOnceLastInMergedProperties"
+ ],
+ "red_counts": "Executed 39, 3 failures",
+ "green_rc": 0,
+ "green_counts": "Executed 39, 0 failures",
+ "verdict": "RED-THEN-GREEN"
+}
