@@ -1,7 +1,6 @@
 package com.styleconverter.runtime.borders.radius
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,6 +15,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.styleconverter.runtime.borders.behindContentBorder
 import com.styleconverter.runtime.borders.sides.AllBordersConfig
 import com.styleconverter.runtime.core.types.ValueExtractors.LineStyle
 
@@ -113,8 +113,8 @@ object BorderRadiusApplier {
      *    children under gradient+radius stay clipped until the layer
      *    painter learns shapes);
      *  - the border is absent or uniform-solid — the one band
-     *    [applySelfPaint] can draw exactly (Modifier.border follows the
-     *    Shape). Mixed per-side widths/styles keep the legacy clip whose
+     *    [applySelfPaint] can draw exactly (behindContentBorder follows
+     *    the Shape). Mixed per-side widths/styles keep the legacy clip whose
      *    straight strokes + corner cut are today's committed rendering;
      *  - the element carries NO partial opacity — ColorApplier applies
      *    `opacity` as its OUTERMOST link (`Modifier.alpha`, its step 1),
@@ -169,18 +169,21 @@ object BorderRadiusApplier {
      *    outline (androidx Background draws the shape's Outline path, it
      *    never clips content) — the rounded background fill of
      *    css-backgrounds-3 §4.3;
-     *  - `Modifier.border(width, color, shape)` strokes the border band
-     *    BETWEEN the shape's outline and its width-inset inner outline
-     *    (androidx BorderModifierNode) — the curved border band of §4.3,
-     *    with the inner corner curvature (outer radius minus width) the
-     *    straight-stroke painter never had.
+     *  - `behindContentBorder(width, color, shape)` strokes the border band
+     *    BETWEEN the shape's outline and its width-inset inner outline with
+     *    androidx BorderModifierNode's own arithmetic (BehindContentBorder.kt)
+     *    — the curved border band of §4.3, with the inner corner curvature
+     *    (outer radius minus width) the straight-stroke painter never had.
      *
      * Chain order: background FIRST (outer), border second — Compose draws
      * outer modifiers first, so the band paints on top of the fill's edge
-     * exactly like the legacy chain painted strokes over the background
      * (css-backgrounds-3 §2's painting order: background, then border).
-     * Children are untouched: neither primitive clips, so an overflowing
-     * child paints in full (the clip-rect red menus).
+     * Wave 55 (L6 U1): the band paints BEFORE the content, never after it —
+     * androidx `Modifier.border` draws `drawContent()` first, which laid the
+     * navbar's blue band over its red abspos menus (CSS 2.1 Appendix E §E.2
+     * paints a box's border before its descendants). Children are untouched
+     * otherwise: neither primitive clips, so an overflowing child paints in
+     * full (the clip-rect red menus) and now covers the band it crosses.
      */
     fun applySelfPaint(
         modifier: Modifier,
@@ -203,8 +206,8 @@ object BorderRadiusApplier {
         if (sides.hasBorders && isUniformSolid(sides)) {
             // Same defaults as BorderSideApplier's uniform fast path
             // (width 1px, color black) so mode choice never changes the
-            // resolved band.
-            result = result.border(
+            // resolved band; painted behind the content (L6 U1, see kdoc).
+            result = result.behindContentBorder(
                 width = sides.top.width ?: 1.dp,
                 color = sides.top.color ?: Color.Black,
                 shape = shape
