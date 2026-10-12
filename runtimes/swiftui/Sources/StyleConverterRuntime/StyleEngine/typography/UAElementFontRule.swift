@@ -84,8 +84,8 @@
 //
 //  TWIN STATUS (wave 54, lane L5): PORTED. The Compose twin is
 //  `runtimes/compose/…/typography/UAElementFontRule.kt` — same table, same
-//  em base, same in-place substitution, and the SAME heading gate as this
-//  file (`headingStandsDown` = this call site's `hasElementChildren`), run
+//  em base, same in-place substitution, and (wave 55) the SAME fold-aware
+//  heading gate, typography/UAHeadingFoldGate.{swift,kt}, run
 //  at ComponentRenderer.kt's ListStyleUaRule site before
 //  DynamicValueResolver. Its target: css-break/block-in-inline-015-print
 //  android f 0.9489 (four 16px regular lines where this rule gives iOS
@@ -161,13 +161,15 @@ enum UAElementFontRule {
     /// lands, this gate should be deleted, not widened.
     ///
     /// Wave 54 (lane L5) re-measured it: the wave-44/45 inline-run fold now
-    /// paints inset-005/-006/-014 as ONE paragraph, so narrowing the gate to
-    /// the hosts the fold refuses was built — and HELD. Those `<h1>`s are
-    /// abspos, and neither native gives an abspos heading its UA `.67em`
-    /// margin, so the 2em face alone lands ~21px above the ref and a
-    /// calibrated replay scores all six native cells LOWER
-    /// (tools/titan/results/wave54-ua-heading-face/: skeptic.md repro 14, the
-    /// held gate in `held/`). It lands after that margin does.
+    /// paints inset-005/-006/-014 as ONE paragraph, so the gate was narrowed
+    /// to the hosts the fold refuses — and HELD: those abspos `<h1>`s had no
+    /// UA `.67em` margin, so the 2em face alone landed ~21px above the ref
+    /// (tools/titan/results/wave54-ua-heading-face/skeptic.md repro 14).
+    /// Wave 55 (lane L4) landed both: spacing/UAPositionedHeadingMargin gives
+    /// the margin, and the renderer passes UAHeadingFoldGate.standsDown as
+    /// `hasElementChildren`, so this predicate now stands down only for a
+    /// host that still paints STACKED (inset-011). The table above is the
+    /// wave-40 stacked-render record of why such a host stands down.
     static func headingAppliesTo(hasElementChildren: Bool) -> Bool {
         !hasElementChildren
     }
@@ -215,7 +217,9 @@ enum UAElementFontRule {
     ///   - own: the element's OWN declarations, post bucket/media fold. A
     ///     guarded type here means the author declared it and the UA loses.
     ///   - merged: the inheritance-merged list to correct.
-    ///   - hasElementChildren: does this component host composed child boxes?
+    ///   - hasElementChildren: does this component's content paint as a
+    ///     STACK of child boxes? Since wave 55 the renderer passes
+    ///     UAHeadingFoldGate's verdict (children AND no inline-run fold).
     ///     Gates the HEADING half only — see `headingAppliesTo` for the
     ///     measurement that put the gate there.
     /// - Returns: `merged`, with the FontSize / FontWeight entries substituted

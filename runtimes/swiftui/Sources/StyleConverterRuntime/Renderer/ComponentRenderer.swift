@@ -353,11 +353,18 @@ public struct ComponentRenderer: View {
             sourceTag: component.meta?.sourceTag,
             own: ownProperties,
             merged: mergedPreUA,
-            // The heading half stands down for a heading that hosts child
-            // boxes — this container stacks them, and a 2em face only
-            // magnifies that (UAElementFontRule.headingAppliesTo carries the
-            // measured cells). sup/sub are unaffected by the flag.
-            hasElementChildren: component.children?.isEmpty == false)
+            // Wave 55 (lane L4, U2-ios; the wave-54 held seam): the heading
+            // half stands down only for a heading whose children would still
+            // paint STACKED — a host whose `meta.runs` FOLD into one paragraph
+            // (the wave-44/45 inline flow) takes the 2em face like a leaf
+            // does. The wave-40 all-children stand-down was measured on the
+            // pre-fold stacked render (UAElementFontRule.headingAppliesTo);
+            // UAHeadingFoldGate carries the re-measured cells. sup/sub are
+            // unaffected.
+            hasElementChildren: UAHeadingFoldGate.standsDown(
+                component: component,
+                inFlowChildren: inFlowChildren,
+                mergedPreUA: mergedPreUA))
         // Wave 55 (lane L4, U1-ios) — the THIRD tag-keyed UA step: an
         // OUT-OF-FLOW h1…h6 takes its UA `margin-block` (HTML §15.3, .67em
         // for h1) over its UA-cascade face. MarginCollapsePlanner bails on
