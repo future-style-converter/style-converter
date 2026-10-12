@@ -69,9 +69,7 @@
 //   * The UA heading MARGINS (`h1 { margin: 0.67em 0 }` …) are NOT injected
 //     here — spacing/UABlockMargin.swift already owns them for the composed
 //     capture, resolved at each heading's own face size, and duplicating them
-//     would double every heading's block advance. An OUT-OF-FLOW heading,
-//     which no block-stack fold reaches, takes them from the step after this
-//     one: spacing/UAPositionedHeadingMargin.swift (wave 55, lane L4).
+//     would double every heading's block advance.
 //   * `font-size: smaller` is modelled as parent ÷ 1.2. Blink resolves the
 //     keyword through its absolute-size TABLE when the parent size itself came
 //     from a keyword (16px `medium` → 13px `small`), which differs from

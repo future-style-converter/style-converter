@@ -340,37 +340,20 @@ public struct ComponentRenderer: View {
         // The UA tag rules and the merge below all read the POST-reset own
         // list (identical to the old list for every All-free element).
         let ownProperties = reset.own
-        // Hoisted (the wave-54 held seam-2's hoist, verbatim): the UA
-        // margin step below reads the same PRE-UA merged list the font
-        // rule corrects — its em base is the UA-cascade face.
-        let mergedPreUA = ListStyleUaRule.apply(
+        return UAElementFontRule.apply(
             sourceTag: component.meta?.sourceTag,
             own: ownProperties,
-            merged: InheritedText.merge(
-                own: InheritedText.resolvingCurrentColorOnColor(ownProperties),
-                inherited: reset.inherited))
-        let fontProperties = UAElementFontRule.apply(
-            sourceTag: component.meta?.sourceTag,
-            own: ownProperties,
-            merged: mergedPreUA,
+            merged: ListStyleUaRule.apply(
+                sourceTag: component.meta?.sourceTag,
+                own: ownProperties,
+                merged: InheritedText.merge(
+                    own: InheritedText.resolvingCurrentColorOnColor(ownProperties),
+                    inherited: reset.inherited)),
             // The heading half stands down for a heading that hosts child
             // boxes — this container stacks them, and a 2em face only
             // magnifies that (UAElementFontRule.headingAppliesTo carries the
             // measured cells). sup/sub are unaffected by the flag.
             hasElementChildren: component.children?.isEmpty == false)
-        // Wave 55 (lane L4, U1-ios) — the THIRD tag-keyed UA step: an
-        // OUT-OF-FLOW h1…h6 takes its UA `margin-block` (HTML §15.3, .67em
-        // for h1) over its UA-cascade face. MarginCollapsePlanner bails on
-        // an out-of-flow child and ComposedRootStack serves roots only, so a
-        // NESTED abspos heading had none; CSS 2.1 §10.6.4 puts its static
-        // position at the margin edge, so the two longhands it appends paint
-        // like any declared margin on the overlay child. Author edges win
-        // (css-cascade-4 §6.1); identity outside WPT capture.
-        return UAPositionedHeadingMargin.apply(sourceTag: component.meta?.sourceTag,
-                                               own: ownProperties,
-                                               preUA: mergedPreUA,
-                                               merged: fontProperties,
-                                               enabled: wptCaptureMode)
     }
 
     /// Wave 9 (#37) — true when the merged list's `Color` arrived ONLY
