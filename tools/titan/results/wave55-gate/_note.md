@@ -145,3 +145,42 @@ bottom band under its child box: 300 px black → light blue on row y317) — `m
 remaining unit is kept; no decision row; no regeneration.** The readers' records after the regeneration: `readers-calibration.txt`
 (every calibration as required on e65366b6), `probes-selfcheck.txt` (HOLDS, 28 / 28 gating keys able to fail),
 `final55-analysis.sh` in sync. Next: the closing gate `wave55-final` (§8 step 12).
+
+## Closing gate — `wave55-final` (2026-10-12 16:08 UTC → 2026-10-12 18:39 UTC; PLAN §8 steps 12-13, §10 item 17; records in `final/`)
+
+**Launch 1, the corpus** (`tools/titan/gate-driver.sh wave55-final --skip-fixture-net`; `beforeEveryDeviceRun` exit 0, load 4.4;
+tree 5a4ab5d4 at launch, HEAD 26cd6610 — a records-only commit — when the hash was read after `attempt 1 starting`): 30 / 30
+sections `OK attempt=1 web=48/48 android=48/48 ios=48/48` (css-cascade 43 / 43 / 43). **The hash of record**
+(`build-hashes.txt` `== wave55-final corpus launch`): android app-debug.apk ecafaf0d built == installed MATCH, ios .app ff158a4e
+MATCH, asset 05118ad1 — the same digests as `wave55-probe`'s block: no runtime source changed between the probe and the gate
+tree, so both witnesses are the probe's (§8 step 12.2).
+
+**Launch 2, the fixture net** (`rm -f /tmp/titan-device-pool/provisioned-*` + `--skip-corpus`): refused once at load1 6.25 (the
+corpus run's own teardown; never `--force`; `final/net-launch.refused.driver.txt`), then on a quiet host (load 3.88): eight
+fixtures exit 0, composition-test.json's Android column EMPTY (0 of 32 captured after "Installed on 1 device", "count stuck at 0
+for 20s — app may have crashed"; iOS 32 / web 32) → exit 7, `fixture-net rc=7` (`final/fixture-net.attempt1.txt`,
+`driver-summary.attempt1.txt`). Attempt 2 (load 3.36), with a detached logcat tap on the pool emulator from `provision rc=0` to
+the driver's exit: every fixture exit 0 — visual-test `no regressions vs baseline (327 platform-comparisons ran)`, filter-sepia
+24, all-then-color 18, composition-test 32 / 32 / 32 and the five other gate-only fixtures exit 0 (`fixture-net rc=0`;
+`final/fixture-net.attempt2.txt`, `driver-summary.txt`); the logcat holds no harness crash. **R8 holds on attempt 2; attempt 1's
+empty column is a transient, recorded.** The net-launch hash blocks are ANNOTATED, never of record (attempt 2: android caa0fd42
+MATCH — the net's own apk, a different asset; ios built MISSING at read time — test-all rebuilds the iOS harness per fixture, the
+race by design); the post-net re-reads (devices torn down: MISSING / MISMATCH) likewise. `tools/visual/baseline-stats.json`
+unchanged. Records committed before any arm window (935287c4, a80d8f6f, the attempt-2 commit).
+
+**Read-out** (`bash tools/titan/results/wave55-gate/final55-analysis.sh`, generated; first run): R6 exit 0 (`geometry-final.json`:
+gating 28 / 28, controls and residual all PASS, withdrawn 15); union control HOLDS (`control-final-union.txt`: web 1435 / 1435
+identical; ios 1431 identical + 4 changed = the four L5 carriers; android 1353 identical + 82 changed = 49 carriers + 32 may-move +
+1 ring-fenced; wire 1435 documents 0 / 0 / 0); probe → final differential rc 0 (`probe-to-final.txt`: nothing reverted after the
+probe); scoreOfRecord gained 2 lost 0 (`score-final.json`), 14 movers ≥ 0.005 (`score-final.txt`); **adjudicate FAIL R5 —
+must-not-move cells 4087, moved 3**: descendant-static-position-001 / -002 and break-inside-avoid-child android, the three L6
+may-move stems whose looks the stage-2 section records (the border band now under its child, the ref's picture). Adjudicate reads
+the complement and has no may-move class, so the rule's "stops the ship until its picture shows one of three pre-registered
+pictures" had no mechanical reading there. Encoded as PLAN §10 item 17 says: `probe-decisions/looks.json` → three non-gating,
+undirected L6 prediction rows out of the complement (regeneration 77a06f67; `stage2-regen.expectations-diff.txt`), `final55-analysis.sh`
+re-rendered, `probe-readout.mjs` printing a recorded look as `LOOKED` (proof `final/probe-readout.looks-proof.txt`). **Re-read on
+the same score / geometry records (`final/final55-analysis.out.txt`): R6 exit 0 · adjudicate R1–R5 hold · union control HOLDS ·
+probe-readout rules 1-3 fired 0, 0 leak signals — FINAL READ-OUT HOLDS.** Review sheets 1 / 0 / 3 (`final/sheets-*`), red-square
+census and every prediction row (`final/red-square-census.txt`, `final/prediction-cells.txt`).
+
+**Cell review (§8 step 14; `final/cell-review.json`, `final/cell-review.second-reader.json`)** and **the closing arm `drop-L6-U2` (step 15)**: PLAN §10 item 18 — 57 cells read on the PNGs (FAITHFUL 21 · DEGENERATE 25 · HONEST_FAIL 11; the two gains and the claimed movers FAITHFUL on both reads; 51 adversarial second reads, one label change: counter-suffix ios → DEGENERATE on row 1's proportional '1', the pre-registered `[L]` report row); the arm 7 / 7 sections full columns; arm tree 8de866d8, android MATCH / ios MATCH; read ARM first (Δ = final − arm, `final/ab-drop-L6-U2.txt`): 5 of 309 android cells differ — safe-001 +0.0324, safe-002 +0.0297, descendant-static-position-002 +0.0123, -001 +0.0099 (the pictures the review reads above: the yellow abspos box over the container border, the band under the children) and the ring-fenced basic-blur +0.0036 (D2's band move, report only); every other U2 carrier within 0.002 — their claim is the paint order the `[X]` / `[PO]` keys and the crossings count read, score-flat as predicted; no P → f revealed; break-inside-avoid-child lies outside the arm's seven sections and is attributed by `mayMoveRule` (item 17).

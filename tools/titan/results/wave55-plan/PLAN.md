@@ -2990,6 +2990,72 @@ C1–C15 and D1–D7 are the generator's (`expectations.json` `planDecisions`, r
       decision row, no regeneration.
     - **Kept, all:** L2 U1 / U2, L3 U1 / U2, L5 U1-ios / U2o / U2i (both natives) / U3-ios / D, L6 U1 / U2 / U3, L7. Next: the
       closing gate `wave55-final` (§8 step 12) on this tree.
+17. **The closing gate `wave55-final`, the three may-move looks encoded, and the readers taught the recorded look (2026-10-12/13;
+    PLAN §8 steps 12-13; records in `../wave55-gate/final/`).**
+    - **Run.** Tree 5a4ab5d4 at launch (26cd6610 when the hash was read: a records-only commit; no code differs). Launch 1 (the
+      corpus): `beforeEveryDeviceRun` exit 0, 30 / 30 sections `OK attempt=1` with full columns (css-cascade 43 / 43 / 43); the hash
+      of record `== wave55-final corpus launch` android ecafaf0d MATCH, ios ff158a4e MATCH, asset 05118ad1 — the SAME digests as
+      `wave55-probe`'s block (no runtime source changed between the probe and the gate tree; the Android witness and the iOS
+      witness are the probe's, §8 step 12.2). Launch 2 (the fixture net): refused once (load1 6.25 right after the corpus run's own
+      teardown — the quiet-host rule, never `--force`; `final/net-launch.refused.driver.txt`), then run on a quiet host: eight
+      fixtures exit 0 but composition-test.json's Android column came back EMPTY (0 of 32 captured, "app may have crashed"; iOS
+      32, web 32) → exit 7 (`final/fixture-net.attempt1.txt`). Attempt 2, with a logcat tap on the pool emulator: every fixture
+      exit 0 (visual-test 327 comparisons, filter-sepia 24, all-then-color 18, no regression; composition-test 32 / 32 / 32), no
+      harness crash in logcat — R8 holds on attempt 2 and attempt 1 is recorded as a transient (`final/fixture-net.attempt2.txt`,
+      `net-launch.attempt2.driver.txt`). The net-launch hash blocks are annotated (the race by design: test-all rebuilds the iOS
+      harness per fixture — attempt 2 read ios built MISSING; android caa0fd42 is the net's own apk); the post-net re-reads too.
+      `baseline-stats.json` unchanged.
+    - **Read-out (`final55-analysis.sh`, first run).** R6 exit 0 (geometry: gating 28 / 28, control / residual all PASS);
+      union control HOLDS (web 1435 identical; ios 4 changed = the 4 L5 carriers; android 82 changed = 49 carriers + 32 may-move +
+      1 ring-fenced; wire 0 / 0 / 0); the probe → final differential rc 0 (nothing reverted after `wave55-probe`: the captures are
+      the probe's); scoreOfRecord gained 2, lost 0; **adjudicate FAIL R5: must-not-move cells 4087, moved 3** — exactly
+      `css-grid/abspos/descendant-static-position-001 / -002 android` and `css-view-transitions/break-inside-avoid-child android`,
+      labelled "complement". They are L6 may-move stems beyond the 0.002 band whose pictures item 16 records as `mayMoveRule`'s
+      first ("a band now under its child", the ref's). The rule's text — "stops the ship until its picture shows one of three
+      pre-registered pictures" — said what decides it; nothing said how `adjudicate.mjs`, which reads the complement and has no
+      may-move class, learns the decision. A process hole, closed here, not a tolerance.
+    - **Encoded.** `probe-decisions/looks.json` (append-only, beside the other decision files; `--looks` for dry runs): one row per
+      looked-at may-move cell — lane, cell, run, `open` / `probe` scores, the picture (one of the three, asserted) and the §10
+      evidence. `plan-build.py` turns each into a non-gating, undirected prediction row of the lane that owns the class (kind
+      "may-move stem looked at (wave55-probe): a band now under its child — never claimed", `lookedAt`), the one prediction allowed
+      on a non-carrier (the carrier assertion exempts `lookedAt` rows only), and takes the cell out of the complement (3352 →
+      3349; `probeDecisions.looks`; append-only asserted like the reverts). Regeneration e65366b6 → 77a06f67
+      (`stage2-regen.expectations-diff.txt`: the three rows, the complement, `probeDecisions.looks`, the input hash — nothing else);
+      `watchlist.txt` + 3 lines, `watchlist-check.mjs` unmatched 0; `final55-analysis.sh` re-rendered (73 prediction tests) and in
+      sync; `plan-prose.py --fill` / `--check` HOLDS. `probe-readout.mjs` prints a may-move stem with a recorded look as `LOOKED`
+      with its picture and no leak signal; the proof (`final/probe-readout.looks-proof.txt`): the same closing record read with
+      the pre-looks expectations (`--exp`, sha e65366b6) keeps the three `MAY-MOVE … LOOK` lines and 3 leak signals. The band
+      stays 0.002 for every other may-move cell (212 read, 9 moved within it).
+    - **Read-out, re-read on the same score / geometry records (`SCORE=` / `GEO=`, the scoring steps skipped; `final/final55-analysis.out.txt`).**
+      R6 exit 0 · adjudicate exit 0 (R1–R5 hold) · union control HOLDS · probe-readout rules 1-3 fired 0, leak signals 0 ·
+      **FINAL READ-OUT HOLDS.** `probes-selfcheck.txt` is not re-run for this regeneration: no probe changed and the gating keys
+      are the same 28 (its record names e65366b6; the keys it proves are 77a06f67's).
+    - **Next.** Cell review (step 14) and the closing arm `drop-L6-U2` (step 15; `arms-final.txt`), then the snapshot.
+18. **Cell review, the closing arm `drop-L6-U2`, and the snapshot (2026-10-13; §8 steps 14-17; records in `../wave55-gate/final/`).**
+    - **Cell review (`final/cell-review.json`, `final/cell-review.second-reader.json`).** 57 cells read against the frozen ref: the
+      0.005 record's gained 2 + movers 14 + the kept lanes' 41 prediction-row cells (the withdrawn L1 / L4 rows are byte-identical
+      to `wave55-open` and were not re-read); 12 first readers (five cells each, opus, every capture read as a PNG, 2x-8x crops where
+      needed), then 51 adversarial second readers (every non-FAITHFUL label, every pass under 0.975, every tally claim / gating
+      row). Labels: FAITHFUL 21 · DEGENERATE 25 · HONEST_FAIL 11. The two claimed gains are FAITHFUL on both reads:
+      `selectors/dir-style-02a android` (every row left-aligned with its leading period, the rtl rows no longer mirrored / cut at
+      the right edge) and `clip-3 android` (the green rounded rect clipped at the box's right and bottom, no pink). The movers that
+      carry the wave's claims are FAITHFUL: clip / -2 / -4 android, safe-001 / -002 android (the yellow abspos box over the
+      container border), descendant-static-position-001 android (the band under the children), bidi-tab-001 android (the '0' at
+      its box left + run left). Second readers: 40 agree, 11 disagree — ten keep the first label and correct a detail of its
+      description; ONE label change: `counter-suffix ios` FAITHFUL → DEGENERATE — row 1's "1." keeps the proportional glyph, the
+      `[L]` report row the plan pre-registered WRONG on both natives (U3-ios's `tnum` covers row 9's run; the tally claims rows 3-6
+      and 9-12 only, which both readers find as the ref's). The DEGENERATE labels are the pre-registered DEGENERATE-even-if-P
+      pictures (the three abspos-autopos rtl rows' 10-px static-position residue; the L6 grid / flex abspos rows whose children sit
+      off the ref's positions — paint order, not position, was the claim; descendant-static-position-002's pre-existing red sliver;
+      the two dynamic-offset-*-002 rows whose ref is post-script) — none claimed. The HONEST_FAIL labels are the f → f movers (the
+      three semi-replaced stretch-* L2 carriers: the green inset now fills its frame, the control still at intrinsic size;
+      anchor-position-multicol-nested-001; the gradient / gap / hyphenate-character-005 flat rows). The ring-fenced test
+      `basic-blur android` f 0.904 → f 0.9076 (+0.0036, L6 U2's band) is reported, never reviewed as a target.
+    - **R8 / R9.** The fixture net exit 0 ×9 (attempt 2; item 17); the tooling suite on the ship tree: `../wave55-gate/sweep-ship.txt`.
+    - **The closing arm `drop-L6-U2`** (`arms-final.txt`; `ab-arms55.sh --run --against wave55-final`; refused once at load1 6.11
+      while the review's readers loaded the host — `final/ab-drop-L6-U2.refused.*` — then run on a quiet host): 7 / 7 sections full columns; arm tree 8de866d8, android MATCH / ios MATCH; read ARM first (Δ = final − arm, `final/ab-drop-L6-U2.txt`): 5 of 309 android cells differ — safe-001 +0.0324, safe-002 +0.0297, descendant-static-position-002 +0.0123, -001 +0.0099 (the pictures the review reads above: the yellow abspos box over the container border, the band under the children) and the ring-fenced basic-blur +0.0036 (D2's band move, report only); every other U2 carrier within 0.002 — their claim is the paint order the `[X]` / `[PO]` keys and the crossings count read, score-flat as predicted; no P → f revealed; break-inside-avoid-child lies outside the arm's seven sections and is attributed by `mayMoveRule` (item 17).
+    - **Snapshot** `tools/titan/results/corpus-v6-21.json` (`make-snapshot55.mjs` from `score-final.movers0005.json`, the cell
+      review and the corpus launch's installed-build block; `artifact` / `reproduce --run-id` = `wave55-final`): written (`corpus-v6-21.json`: totals web 1243 / 1372, ios 1131 / 1362, android 1130 / 1362 — Android +2 on corpus-v6.20's 1128, web and iOS unchanged; perCellDiff gained 2, lost 0, movers 14; `artifact` and `reproduce --run-id` wave55-final, checked against `ls tools/titan/runs/`; devSha 0d0d3a3d+wave55 (gate tree 26cd6610); the `_note` carries the whole wave story, the honest losses and the instrument events).
 
 Empty at planning: `wave55-open` reproduced `wave54-final` on every cell and every byte, so nothing is restated.
 
