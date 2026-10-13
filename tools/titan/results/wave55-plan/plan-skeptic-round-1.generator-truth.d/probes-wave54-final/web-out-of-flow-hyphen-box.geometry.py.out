@@ -1,0 +1,12 @@
+hyphens/hyphens-span-002 ref      heights [46, 46, 46, 46, 46, 46, 46] ink-right [(61, 54), (61, 54), (61, 54), (61, 54), (61, 54), (61, 54), (61, 54)] → GEOMETRY OK
+hyphens/hyphens-span-002 web      heights [46, 46, 46, 46, 46, 46, 46] ink-right [(61, 54), (61, 54), (61, 54), (61, 54), (61, 54), (61, 54), (61, 54)] → GEOMETRY OK
+hyphens/hyphens-span-002 ios      heights [46, 46, 46, 46, 46, 46, 46] ink-right [(61, 53), (61, 53), (61, 53), (61, 53), (61, 53), (61, 53), (61, 53)] → GEOMETRY OK
+hyphens/hyphens-span-002 android  heights [46, 46, 46, 46, 46, 46, 46] ink-right [(61, 53), (61, 53), (61, 53), (61, 53), (61, 53), (61, 53), (61, 53)] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 ref      heights [46, 46, 46, 46, 46, 46, 46] ink-right [(61, 54), (61, 54), (61, 54), (61, 54), (61, 54), (61, 54), (61, 54)] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 web      heights [46, 46, 46, 46, 46, 46, 46] ink-right [(61, 54), (61, 54), (61, 54), (61, 54), (61, 54), (61, 54), (61, 54)] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 ios      heights [46, 46, 46, 46, 46, 46, 46] ink-right [(61, 53), (61, 53), (61, 53), (61, 53), (61, 53), (61, 53), (61, 53)] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-001 android  heights [46, 46, 46, 46, 46, 46, 46] ink-right [(61, 53), (61, 53), (61, 53), (61, 53), (61, 53), (61, 53), (61, 53)] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-002 ref      heights [46, 46, 46, 46, 46, 46, 46] ink-right [(61, 54), (61, 54), (61, 54), (61, 54), (61, 54), (61, 54), (61, 54)] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-002 web      heights [46, 46, 46, 46, 46, 46, 46] ink-right [(61, 54), (61, 54), (61, 54), (61, 54), (61, 54), (61, 54), (61, 54)] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-002 ios      heights [46, 46, 46, 46, 46, 46, 46] ink-right [(61, 53), (61, 53), (61, 53), (61, 53), (61, 53), (61, 53), (61, 53)] → GEOMETRY OK
+hyphens/hyphens-out-of-flow-002 android  heights [46, 46, 46, 46, 46, 46, 46] ink-right [(61, 53), (61, 53), (61, 53), (61, 53), (61, 53), (61, 53), (61, 53)] → GEOMETRY OK

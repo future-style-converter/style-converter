@@ -1,0 +1,2 @@
+F 76 rows · P 4096 cells = carriers 76 + named 665 + complement 3352 + ring 3 · W 746 lines · G 44 gating rows
+HOLDS

@@ -1,0 +1,13 @@
+# tag	section	rc_extract	rc_combine	rc_convert	rc_split	extracted	fail
+pre	css-anchor-position	0	0	0	0	extracted=48	fail=0
+pre	css-backgrounds	0	0	0	0	extracted=48	fail=0
+pre	css-counter-styles	0	0	0	0	extracted=48	fail=0
+pre	css-text	0	0	0	0	extracted=48	fail=0
+pre	css-writing-modes	0	0	0	0	extracted=48	fail=0
+pre	selectors	0	0	0	0	extracted=48	fail=0
+post	css-anchor-position	0	0	0	0	extracted=48	fail=0
+post	css-backgrounds	0	0	0	0	extracted=48	fail=0
+post	css-counter-styles	0	0	0	0	extracted=48	fail=0
+post	css-text	0	0	0	0	extracted=48	fail=0
+post	css-writing-modes	0	0	0	0	extracted=48	fail=0
+post	selectors	0	0	0	0	extracted=48	fail=0

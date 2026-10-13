@@ -1,0 +1,35 @@
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row6 | dir-row6-fixed | PASS | [S] dir-style-02a android row6 ink (17, 120, 153, 131) dot 4px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row6 | dir-row6-gut | PASS | [S] dir-style-02a android row6 ink (17, 120, 153, 131) dot 4px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row6 | dir-row6-mirror-words | PASS | [S] dir-style-02a android row6 ink (17, 120, 153, 131) dot 4px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row6 | dir-row6-text+2x | PASS | [S] dir-style-02a android row6 ink (17, 120, 155, 131) dot 4px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row6 | dir-row6-text-3x | PASS | [S] dir-style-02a android row6 ink (17, 120, 150, 131) dot 2px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row6 | dir-row6-text+3x | PASS | [S] dir-style-02a android row6 ink (17, 120, 156, 131) dot 4px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row7 | dir-row7-fixed | PASS | [S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row7 | dir-row7-gut | PASS | [S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row7 | dir-row7-mirror-words | PASS | [S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row7 | dir-row7-text+2x | PASS | [S] dir-style-02a android row7 ink (17, 140, 245, 151) dot 4px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row7 | dir-row7-text-3x | PASS | [S] dir-style-02a android row7 ink (17, 140, 240, 151) dot 2px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row7 | dir-row7-text+3x | PASS | [S] dir-style-02a android row7 ink (17, 140, 246, 151) dot 4px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row9 | dir-row9-fixed | PASS | [S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row9 | dir-row9-gut | PASS | [S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row9 | dir-row9-mirror-words | PASS | [S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row9 | dir-row9-text+2x | PASS | [S] dir-style-02a android row9 ink (17, 180, 155, 191) dot 4px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row9 | dir-row9-text-3x | PASS | [S] dir-style-02a android row9 ink (17, 180, 150, 191) dot 2px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dir-style-02a android row9 | dir-row9-text+3x | PASS | [S] dir-style-02a android row9 ink (17, 180, 156, 191) dot 4px → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] bidi-tab-001 android rtl-rows | bidi-fixed | PASS | [S] bidi-tab-001 android rtl-rows y86:(16, 36) y106:(114, 135) y186:(16, 36) y226:(16, 36) → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] bidi-tab-001 android rtl-rows | bidi-gut | PASS | [S] bidi-tab-001 android rtl-rows y86:(16, 36) y106:(114, 135) y186:(16, 36) y226:(16, 36) → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] bidi-tab-001 android rtl-rows | bidi-rtl+2x | PASS | [S] bidi-tab-001 android rtl-rows y86:(18, 38) y106:(116, 137) y186:(18, 38) y226:(18, 38) → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] bidi-tab-001 android rtl-rows | bidi-rtl-3x | FAIL | METRY WRONG (band y86 blue x(13, 33) vs ref x(16, 38); band y186 blue x(13, 33) vs ref x(16, 38); band y226 blue x(13, 33) vs ref x(16, 38))
+L3 | positioned-parent-slot.geometry.py | [W] anchor-position-multicol-nested-001 android stack | stack-fixed | PASS | [W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [W] anchor-position-multicol-nested-001 android stack | stack-grown30 | PASS | [W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [W] anchor-position-multicol-nested-001 android stack | stack-slab | PASS | [W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [W] anchor-position-multicol-nested-001 android stack | stack-dup-stacked | PASS | [W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [W] anchor-position-multicol-nested-001 android stack | stack-shift+1x | FAIL | lls [90, 90, 90, 90] → GEOMETRY WRONG (cell (190,78) 90% green; cell (360,78) 90% green; cell (190,168) 90% green; cell (360,168) 90% green)
+L3 | positioned-parent-slot.geometry.py | [S] dynamic-offset-rtl-001 android | dyn1-fixed | PASS | [S] dynamic-offset-rtl-001 android magenta (86, 26, 95, 35) → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dynamic-offset-rtl-001 android | dyn1-hollow | PASS | [S] dynamic-offset-rtl-001 android magenta (86, 26, 95, 35) → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [S] dynamic-offset-rtl-001 android | dyn1-shift+2x | FAIL | [S] dynamic-offset-rtl-001 android magenta (88, 26, 97, 35) → GEOMETRY WRONG (magenta (88, 26, 97, 35) vs ref (86, 26, 95, 35))
+L3 | positioned-parent-slot.geometry.py | [W] dynamic-offset-rtl-002 android | dyn2-fixed | PASS | [W] dynamic-offset-rtl-002 android magenta (26, 26, 35, 35) → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [W] dynamic-offset-rtl-002 android | dyn2-shift+3y | PASS | [W] dynamic-offset-rtl-002 android magenta (26, 29, 35, 38) → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [W] dynamic-offset-rtl-002 android | dyn2-shift-3y | PASS | [W] dynamic-offset-rtl-002 android magenta (26, 23, 35, 32) → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [W] dynamic-offset-rtl-002 android | dyn2-wider+5 | PASS | [W] dynamic-offset-rtl-002 android magenta (26, 26, 40, 35) → GEOMETRY OK
+L3 | positioned-parent-slot.geometry.py | [W] dynamic-offset-rtl-002 android | dyn2-hollow | PASS | [W] dynamic-offset-rtl-002 android magenta (26, 26, 35, 35) → GEOMETRY OK

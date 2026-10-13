@@ -1,0 +1,33 @@
+L6 picked: {'abspos/flex-abspos-staticpos-align-self-safe-001': 'child@39,39 -3,+0', 'abspos/flex-abspos-staticpos-align-self-safe-002': 'child@44,272 -3,+0', 'abspos/grid-abspos-staticpos-align-self-001': 'child@19,30 +3,+0', 'abspos/grid-abspos-staticpos-justify-self-001': 'child@30,19 +3,+0', 'abspos/grid-abspos-staticpos-align-self-vertWM-001': 'child@18,19 +3,+0', 'abspos/grid-abspos-staticpos-align-self-rtl-001': 'child@33,18 +3,+0'}
+L2-fail-ink-sliver                         gate-exit 1  abspos/abspos-autopos-htb-ltr android                      PASS   ACCEPTED (defect)
+      abspos/abspos-autopos-htb-ltr android {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 200} → GEOMETRY OK
+L2-fail-ink-sliver                         gate-exit 1  abspos/abspos-autopos-vlr-ltr android                      PASS   ACCEPTED (defect)
+      abspos/abspos-autopos-vlr-ltr android {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 200} → GEOMETRY OK
+L2-fail-ink-sliver                         gate-exit 1  abspos/abspos-autopos-vrl-ltr android                      PASS   ACCEPTED (defect)
+      abspos/abspos-autopos-vrl-ltr android {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 200} → GEOMETRY OK
+L2-fail-ink-sliver                         gate-exit 1  backdrop-filter-nested-border-radius-clip android          PASS   ACCEPTED (defect)
+      backdrop-filter-nested-border-radius-clip android {'green': (26, 26, 225, 125), 'greenPx': 19384, 'failInkPx': 200} → GEOMETRY OK
+L2-fail-ink-sliver                         gate-exit 1  backdrop-filter-nested-border-radius-clip-2 android        PASS   ACCEPTED (defect)
+      backdrop-filter-nested-border-radius-clip-2 android {'green': (26, 26, 225, 125), 'greenPx': 19464, 'failInkPx': 200} → GEOMETRY OK
+L2-fail-ink-sliver                         gate-exit 1  backdrop-filter-nested-border-radius-clip-4 android        PASS   ACCEPTED (defect)
+      backdrop-filter-nested-border-radius-clip-4 android {'green': (26, 26, 185, 105), 'greenPx': 12559, 'failInkPx': 200} → GEOMETRY OK
+L2-notch7                                  gate-exit 1  abspos/abspos-autopos-htb-ltr android                      PASS   ACCEPTED (defect)
+      abspos/abspos-autopos-htb-ltr android {'green': (16, 88, 115, 187), 'greenPx': 9951, 'failInkPx': 0} → GEOMETRY OK
+L2-notch7                                  gate-exit 1  abspos/abspos-autopos-vlr-ltr android                      PASS   ACCEPTED (defect)
+      abspos/abspos-autopos-vlr-ltr android {'green': (16, 88, 115, 187), 'greenPx': 9951, 'failInkPx': 0} → GEOMETRY OK
+L2-notch7                                  gate-exit 1  abspos/abspos-autopos-vrl-ltr android                      PASS   ACCEPTED (defect)
+      abspos/abspos-autopos-vrl-ltr android {'green': (16, 88, 115, 187), 'greenPx': 9951, 'failInkPx': 0} → GEOMETRY OK
+L2-notch7                                  gate-exit 1  backdrop-filter-nested-border-radius-clip android          PASS   ACCEPTED (defect)
+      backdrop-filter-nested-border-radius-clip android {'green': (26, 26, 225, 125), 'greenPx': 19335, 'failInkPx': 0} → GEOMETRY OK
+L2-notch7                                  gate-exit 1  backdrop-filter-nested-border-radius-clip-2 android        PASS   ACCEPTED (defect)
+      backdrop-filter-nested-border-radius-clip-2 android {'green': (26, 26, 225, 125), 'greenPx': 19415, 'failInkPx': 0} → GEOMETRY OK
+L2-notch7                                  gate-exit 1  backdrop-filter-nested-border-radius-clip-4 android        PASS   ACCEPTED (defect)
+      backdrop-filter-nested-border-radius-clip-4 android {'green': (26, 26, 185, 105), 'greenPx': 12510, 'failInkPx': 0} → GEOMETRY OK
+L2-radius-moved                            gate-exit 1  backdrop-filter-nested-border-radius-clip android          PASS   ACCEPTED (defect)
+      backdrop-filter-nested-border-radius-clip android {'green': (26, 26, 225, 125), 'greenPx': 19369, 'failInkPx': 0} → GEOMETRY OK
+L2-radius-moved                            gate-exit 1  backdrop-filter-nested-border-radius-clip-2 android        PASS   ACCEPTED (defect)
+      backdrop-filter-nested-border-radius-clip-2 android {'green': (26, 26, 225, 125), 'greenPx': 19451, 'failInkPx': 0} → GEOMETRY OK
+L2-radius-moved                            gate-exit 1  backdrop-filter-nested-border-radius-clip-4 android        PASS   ACCEPTED (defect)
+      backdrop-filter-nested-border-radius-clip-4 android {'green': (26, 26, 185, 105), 'greenPx': 12549, 'failInkPx': 0} → GEOMETRY OK
+
+15 (fake, key) reads; ACCEPTED 15; rejected 0; other 0

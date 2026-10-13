@@ -258,6 +258,103 @@ rules from the retrospective, none optional:
   per-test-IR files and a 0-byte differential output (wave 54, c7e37409);
   lane evidence of record is `.txt` (or force-added): `*.log` is gitignored
   and 104 cited logs had to be force-added before the closing gate.
+- **A probe decision (a revert or a re-pin) regenerates the plan AND every
+  record that pins its counts, keys or carriers, in the same stage** (wave
+  55, `tools/titan/results/wave55-plan/PLAN.md` §10 items 12-15; the
+  records below are under `tools/titan/results/`): `plan-build.py` is not
+  the whole chain. After wave 55's stage-1 reverts and re-pins, the
+  generated closing read-out had to be re-rendered
+  (`wave55-gate/final55-analysis.gen.py`, then `--check`: the decision had
+  left it STALE on the pre-decision expectations, aaf51b1b);
+  `wave55-gate/readers-calibration.sh` had to read its vanished-carrier
+  stem from `unionCaptureCarriers`, because the hard-coded one had become a
+  withdrawn carrier that reads as a complement leak (its K13 comment);
+  the self-check's §T harness `wave55-plan/probes-teeth.py` had to drop
+  the wants on withdrawn keys, and `wave55-plan/probes-selfcheck.py` had
+  to sweep §T3-§T5 only over the lanes that still carry a gating key, or
+  it reports violations on keys no longer under test (07dd8453, aaf51b1b)
+  (`wave55-plan/probes-selfcheck.txt` §T: 77 cases skipped, 37 withdrawn
+  keys dropped); and `wave55-plan/fix-r6.zones.py --check` re-derives only
+  with its recorded `--also` device sources (`WINDOWS_ALSO` in
+  `wave55-plan/residual-read.py`), or it reads the windows literal as STALE
+  (item 12). A regeneration that changes no probe and no gating key says so
+  in its §10 item instead of re-running the self-check (item 17). Count the
+  §10 items before numbering a new one: the five revert commits cite "item
+  7 / 8" and the decision commit "items 4-9", written before the nine
+  pre-landing items were counted; they are items 13 / 14 and 10-15, and the
+  renumbering cost a second, text-only regeneration (item 15).
+- **A may-move cell beyond its band whose look is right needs a generator
+  input, not only a recorded look** (wave-55 PLAN §10 items 16-17):
+  `wave55-probe` looked at the three L6 may-move stems beyond the 0.002
+  band, found `mayMoveRule`'s first pre-registered picture ("a band now
+  under its child") and kept the unit with no decision row and no
+  regeneration; the closing read-out then failed adjudicate R5 on exactly
+  those three cells (must-not-move 4087, moved 3, labelled complement),
+  because R5 reads the complement and has no may-move class. Encode the
+  look when it is made: an append-only
+  `tools/titan/results/wave55-plan/probe-decisions/looks.json` row per
+  cell (lane, cell, run, open / probe scores, the picture asserted to be one
+  of the rule's) that `plan-build.py` turns into a non-gating, undirected
+  prediction row of the owning lane and takes out of the complement; the
+  band stays for every other may-move cell. Prove it like a revert: the same
+  closing record read with the pre-looks expectations keeps its leak signals
+  (`tools/titan/results/wave55-gate/final/probe-readout.looks-proof.txt`).
+- **A same-renderer structure read whose reference is the base capture
+  reads the base's own defect as the rule** (wave-55 PLAN §10 item 10;
+  `tools/titan/results/wave55-plan/ship-notes.md` §1 item 6): L3's `[S]
+  bidi-tab-001 android rtl-rows` counted each band's ink components against
+  `wave55-open`, whose '0' sat stranded outside its box (three components);
+  the fixed picture, the '0' back beside its square (1 px right of the
+  ref's, touching the square where the ref's sits apart), counts two, so
+  the read printed `ink:` WRONG on `wave55-pre
+  css-text/bidi/bidi-tab-001.html android P 0.9929` and its rule text would
+  have reverted a right unit. A read "vs the base" holds only where the base
+  is right in the band it reads; otherwise give it the decided device
+  picture as a second reference, additive (the band equals the base's OR the
+  decided run's, under the same rules: `INK_RUN_DEFAULT` in
+  `tools/titan/results/wave55-plan/positioned-parent-slot.geometry.py`),
+  set after the recorded look and proven on fakes built from the device
+  picture (`tools/titan/results/wave55-plan/stage1-mutations.out.txt`: 7
+  fakes WRONG, unfaked OK).
+- **A glyph-identity read against Chromium's rasterization is a cross-font
+  read: same-font references only** (wave-55 PLAN §10 item 11): L5's `[H]
+  counter-suffix ios` letter-profile read correlated the device's letter
+  with the ref's and scored a right picture 0.80 against its own letter and
+  0.88 against the other row's (`wave55-pre
+  css-counter-styles/counter-suffix.html ios P 0.992`); against the device's
+  own letters the same rows read 1.00 / 0.83, and the replay's Noto glyphs
+  read 0.775 / 0.867 against the device's: the cross-font profile misjudges
+  in both directions. The fix is same-font and additive: a native row is
+  also accepted when it is nearer its own row's letter in the decided
+  same-platform capture (`TWIN_RUN`), and the one hole that OR opens is
+  closed by a same-capture duplicate read (two rows of one capture must
+  differ, `DUP_TOL`). A cross-font miss is decided by the recorded look,
+  never by widening a tolerance.
+- **The fixture net's first attempt can lose a platform column to a
+  transient: keep the attempt's log, re-run with a logcat tap, record
+  both** (wave-55 PLAN §10 item 17): `wave55-final`'s net attempt 1 brought
+  composition-test.json's Android column back EMPTY (0 of 32 captured, "app
+  may have crashed") and exited 7 while the other eight fixtures exited 0.
+  Commit that attempt's output under its own name before re-running
+  (`tools/titan/results/wave55-gate/final/fixture-net.attempt1.txt`,
+  `final/driver-summary.attempt1.txt`), then re-run the net with a detached
+  logcat tap on the pool emulator from `provision rc=0` to the driver's
+  exit. Attempt 1 is a transient only when the re-run captures the same
+  fixture in full and the tap shows no harness crash (attempt 2: 32 / 32 /
+  32, `final/fixture-net.attempt2.txt`); the gate note records both
+  attempts and what the tap showed. A crash in the tap is a capture to fix
+  under exit 7, never a re-run until green.
+- **A review workflow's readers load the host: run the closing arm before
+  or after the cell review, not during it** (wave-55 PLAN §10 item 18): the
+  arm `drop-L6-U2`, launched while the review's readers were running, was
+  refused by the quiet-host gate at load1 6.11
+  (`tools/titan/results/wave55-gate/final/ab-drop-L6-U2.refused.driver.txt`)
+  and ran on its re-launch at load1 2.50 (`final/ab-drop-L6-U2.driver.txt`).
+  Sequence the reader fan-out and the device window; never `--force` past
+  the refusal, and keep the refused attempt's records beside the arm's. A
+  launch straight after a teardown is refused the same way (the closing
+  gate's fixture-net launch at load1 6.25, right after the corpus run's own
+  teardown: item 17, `final/net-launch.refused.driver.txt`).
 
 The gate contract (post-overhaul): exit 3 aborts a section (fix the
 capture, never the check); exit 4 → fix or ledger with reason/owner/expires

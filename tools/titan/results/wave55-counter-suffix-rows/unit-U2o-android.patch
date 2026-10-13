@@ -1,0 +1,149 @@
+# unit-U2o-android.patch — wave55 L5 (counter-suffix-rows) unit U2o-android: NEW lists/ListMarkerSuffixGap.kt + ListMarkerSuffixGapTest.kt + ListMarkerRow.kt (gapDp KDoc only)
+# base tree 611c9f93 (campaign/applier-campaign; = dev 0d0d3a3d + the wave-55 plan + opening-gate records). Lane note: tools/titan/results/wave55-counter-suffix-rows/_note.md
+# fix-r1 re-cut (PLAN §8 step 3): every hunk identical to the builder's cut (only the index line's hash abbreviation may differ)
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerRow.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerRow.kt
+index 38fbc2b3..3da81d2a 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerRow.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerRow.kt
+@@ -66,6 +66,12 @@ object ListMarkerRow {
+      * silent ~7dp made the two natives disagree on every marker row. The
+      * real value is UA-defined and per-counter-style (css-lists-3 §3.2's
+      * marker padding) — still deferred, still shared with iOS's `gapPt`.
++     *
++     * Wave 55 (lane L5, U2): this is the STAND-IN for the suffix's trimmed
++     * trailing space, so it is read through [ListMarkerSuffixGap.gapDp],
++     * which answers 0.dp for a marker ending in U+3001 (the space-less
++     * `cjk-decimal` family suffix, css-counter-styles-3 §6.1) and this
++     * constant otherwise.
+      */
+     val gapDp = 4.dp
+ 
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerSuffixGap.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerSuffixGap.kt
+new file mode 100644
+index 00000000..928c1766
+--- /dev/null
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerSuffixGap.kt
+@@ -0,0 +1,66 @@
++package com.styleconverter.runtime.lists
++
++// The marker-to-content gap a marker STRING earns — wave 55, lane L5
++// (U2o-android, consumed by U2i-android). BYTE-PARALLEL TWIN of
++// runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/
++// ListMarkerSuffixGap.swift — same rule, same pins.
++//
++// ## What the 4 dp stands in for
++// [ListMarkerRow.gapDp] (4.dp) is the natives' stand-in for the suffix's
++// TRAILING SPACE: the counter bake trims the trailing U+0020 from every
++// predefined suffix (tools/titan/counter-style-table.mjs SUFFIX NOTE) and
++// the author bake likewise (tools/titan/counter-style-author.mjs,
++// `replace(/ +$/, '')`), so the baked `meta.markerText` is "1." and the
++// space is re-added as this gap. css-counter-styles-3 §3.4: the initial
++// `suffix` is "\2E\20" (a full stop THEN a space); every predefined suffix
++// but one family ends in U+0020 (". ", korean ", ", ethiopic "/ ", the
++// bullets " ").
++//
++// ## The family with no space
++// `cjk-decimal` (§6.1), hiragana / katakana (-iroha) (§6.2),
++// cjk-earthly-branch / cjk-heavenly-stem (§6.4), japanese-* (§7.1.1) and
++// chinese (§7.1.3) all use `suffix: "\3001"` — the IDEOGRAPHIC COMMA and
++// nothing after it. css-lists-3 §3.4 makes the marker string the counter
++// representation "followed by the suffix" and §3.5 hangs an outside marker
++// flush before the item's start edge, so the ref's `、` ends AT the content
++// edge. Measured (wave54-final counter-suffix rows 5–6): ref `一` x33 and
++// `、` ending flush at x64; both natives x29 — exactly the 4 dp stand-in.
++// The same constant pads an INSIDE `、` marker from its item's text
++// (css3-counter-styles-005: natives x271 vs ref x268 at 25 px).
++//
++// ## Why the key is the STRING, not the list-style-type
++// The 36 corpus markers that end in U+3001 are all baked strings. The 71
++// `<li>` under a U+3001-suffix TYPE without a baked marker are painted from
++// the native tables (ListStyleApplier.getMarker — a "." suffix, a different
++// defect), so a type-keyed rule would move those rows' wrong glyphs; the
++// string reaches the 36 and nothing else. Census: tools/titan/results/
++// wave55-counter-suffix-rows/census-l5.out.txt (U2 sections).
++//
++// ## Stated limit (not modelled)
++// An AUTHOR @counter-style suffix that has no trailing space (e.g. ",")
++// cannot be told from ", " on the wire — the author bake trims both — so it
++// keeps the stand-in gap.
++
++import androidx.compose.ui.unit.Dp
++import androidx.compose.ui.unit.dp
++
++object ListMarkerSuffixGap {
++
++    /** U+3001 IDEOGRAPHIC COMMA — the space-less predefined suffix. */
++    const val IDEOGRAPHIC_COMMA: Int = 0x3001
++
++    /**
++     * The inline gap between the marker box and the item for [marker] — the
++     * RAW marker string (the baked `meta.markerText` or the table's answer):
++     * its last code point is the suffix's last code point.
++     *
++     * @return 0.dp when the marker ends in U+3001 (its suffix carries no
++     *   trailing space to stand in for), else [ListMarkerRow.gapDp].
++     */
++    fun gapDp(marker: String): Dp =
++        // `codePointBefore(length)` reads the tail as a code point (a
++        // surrogate pair is never split); an empty string has no suffix.
++        if (marker.isNotEmpty() && marker.codePointBefore(marker.length) == IDEOGRAPHIC_COMMA) 0.dp
++        // Every other suffix stood for a trimmed U+0020: keep the stand-in.
++        else ListMarkerRow.gapDp
++}
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/lists/ListMarkerSuffixGapTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/lists/ListMarkerSuffixGapTest.kt
+new file mode 100644
+index 00000000..e996578a
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/lists/ListMarkerSuffixGapTest.kt
+@@ -0,0 +1,51 @@
++package com.styleconverter.runtime.lists
++
++// Wave 55, lane L5 (U2o-android / U2i-android) — pins ListMarkerSuffixGap:
++// 0.dp for a marker string whose last code point is U+3001 (the space-less
++// `cjk-decimal` family suffix, css-counter-styles-3 §6.1), the 4.dp
++// stand-in for the trimmed trailing space otherwise. TWIN of the iOS suite
++// runtimes/swiftui/Tests/StyleConverterRuntimeTests/
++// ListMarkerSuffixGapTests.swift — same rows.
++//
++// Mutation EXECUTED by the lane (bracketed in tools/titan/results/
++// wave55-counter-suffix-rows/_note.md): dropping the U+3001 test (always
++// the stand-in) turns the two zero-gap pins red.
++
++import androidx.compose.ui.unit.dp
++import org.junit.Assert.assertEquals
++import org.junit.Test
++
++class ListMarkerSuffixGapTest {
++
++    @Test
++    fun `an ideographic comma suffix takes no gap`() {
++        // The verbatim baked markers: counter-suffix rows 5-6 and
++        // css3-counter-styles-004's two-digit "一〇、".
++        assertEquals(0.dp, ListMarkerSuffixGap.gapDp("一、"))
++        assertEquals(0.dp, ListMarkerSuffixGap.gapDp("一〇、"))
++    }
++
++    @Test
++    fun `space suffixes keep the stand-in gap`() {
++        // decimal ". " → "1."
++        assertEquals(4.dp, ListMarkerSuffixGap.gapDp("1."))
++        // korean-hangul-formal ", " → "일,"
++        assertEquals(4.dp, ListMarkerSuffixGap.gapDp("일,"))
++        // hebrew ". " → "א."
++        assertEquals(4.dp, ListMarkerSuffixGap.gapDp("א."))
++        // No marker string: the stand-in (callers never paint one).
++        assertEquals(4.dp, ListMarkerSuffixGap.gapDp(""))
++    }
++
++    @Test
++    fun `the stand-in is the shared row gap`() {
++        // One constant, one home: ListMarkerRow.gapDp.
++        assertEquals(ListMarkerRow.gapDp, ListMarkerSuffixGap.gapDp("1."))
++    }
++
++    @Test
++    fun `only the tail counts`() {
++        // A U+3001 that is not the LAST code point is not the suffix.
++        assertEquals(4.dp, ListMarkerSuffixGap.gapDp("、1."))
++    }
++}

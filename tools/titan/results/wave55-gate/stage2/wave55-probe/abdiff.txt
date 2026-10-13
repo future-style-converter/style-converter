@@ -1,0 +1,28 @@
+section css-color: absent from wave55-probe — not compared
+section css-pseudo: absent from wave55-probe — not compared
+section css-sizing: absent from wave55-probe — not compared
+section css-ui: absent from wave55-probe — not compared
+A/B  exclude=wave55-open  include=wave55-probe  sections=CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-color,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-grid,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-pseudo,css-sizing,css-tables,css-text,css-text-decor,css-transforms,css-ui,css-values,css-view-transitions,css-writing-modes,filter-effects,selectors  platforms=web,ios,android
+compared 3538 cells: 22 differ (flip, or |Δ| ≥ 0.002), 3516 within threshold
+  flip f→P     android  f 0.9425  → P 0.9854  Δ+0.0429  css/selectors/dir-style-02a.html
+  flip f→P     android  f 0.9574  → P 0.9999  Δ+0.0425  css/filter-effects/backdrop-filter-nested-border-radius-clip-3.html
+  mover        android  f 0.4117  → f 0.4555  Δ+0.0438  css/css-position/position-absolute-semi-replaced-stretch-input.html
+  mover        android  P 0.9649  → P 1       Δ+0.0351  css/filter-effects/backdrop-filter-nested-border-radius-clip.html
+  mover        android  P 0.9619  → P 0.9943  Δ+0.0324  css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html
+  mover        android  P 0.9689  → P 1       Δ+0.0311  css/filter-effects/backdrop-filter-nested-border-radius-clip-2.html
+  mover        android  P 0.9635  → P 0.9932  Δ+0.0297  css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html
+  mover        android  f 0.4396  → f 0.4685  Δ+0.0289  css/css-position/position-absolute-semi-replaced-stretch-other.html
+  mover        android  P 0.977   → P 0.9999  Δ+0.0229  css/filter-effects/backdrop-filter-nested-border-radius-clip-4.html
+  mover        android  P 0.9735  → P 0.9872  Δ+0.0137  css/css-view-transitions/break-inside-avoid-child.html
+  mover        android  P 0.9805  → P 0.9929  Δ+0.0124  css/css-text/bidi/bidi-tab-001.html
+  mover        android  P 0.9601  → P 0.9724  Δ+0.0123  css/css-grid/abspos/descendant-static-position-002.html
+  mover        android  f 0.9573  → f 0.9688  Δ+0.0115  css/css-anchor-position/anchor-position-multicol-nested-001.html
+  mover        android  f 0.9739  → f 0.9843  Δ+0.0104  css/css-position/position-absolute-semi-replaced-stretch-button.html
+  mover        android  P 0.9892  → P 0.9991  Δ+0.0099  css/css-grid/abspos/descendant-static-position-001.html
+  mover        android  P 0.9869  → P 0.9966  Δ+0.0097  css/css-flexbox/abspos/abspos-autopos-htb-rtl.html
+  mover        android  P 0.9952  → P 1       Δ+0.0048  css/css-writing-modes/dynamic-offset-rtl-001.html
+  mover        android  P 0.9952  → P 1       Δ+0.0048  css/css-writing-modes/dynamic-offset-vrl-rtl-001.html
+  mover        ios      P 0.9873  → P 0.992   Δ+0.0047  css/css-counter-styles/counter-suffix.html
+  mover        ios      P 0.993   → P 0.9971  Δ+0.0041  css/css-counter-styles/cjk-decimal/css3-counter-styles-005.html
+  mover        android  f 0.904   → f 0.9076  Δ+0.0036  css/filter-effects/backdrop-filter-basic-blur.html
+  mover        android  P 0.989   → P 0.9924  Δ+0.0034  css/css-counter-styles/counter-suffix.html

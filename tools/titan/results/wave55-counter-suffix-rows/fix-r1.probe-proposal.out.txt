@@ -1,0 +1,154 @@
+# fix-r1.probe-proposal.out.txt — the L5 fix lane's executed probe proposal (fix-r1.probe-proposal.py)
+# plan probe read: counter-suffix-rows.geometry.py sha256 bd2f001ae6a8ea5be86c1980bff9f2a65cf068ecab5726a8c4a6e84d130d3027 (orig) vs the proposal (fix-r1.probe-proposal.diff.txt); base wave54-final; decided = the correct picture (stands in for TWIN_RUN = wave55-pre)
+== base (expect: base)
+  orig twin=-       rc=0 [T] ios → GEOMETRY WRONG (digit ink x138-141 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+                         [K] ios → GEOMETRY OK
+  orig twin=decided rc=0 [T] ios → GEOMETRY WRONG (digit ink x138-141 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+                         [K] ios → GEOMETRY OK
+  prop twin=-       rc=0 [T] ios → GEOMETRY WRONG (digit ink x138-141 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+                         [K] ios → GEOMETRY OK
+  prop twin=decided rc=0 [T] ios → GEOMETRY WRONG (digit ink x138-141 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+                         [K] ios → GEOMETRY OK
+  → HOLDS; every other key identical to the original probe: True
+== correct (expect: ok)
+  orig twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (79 px))
+  orig twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (79 px))
+  prop twin=-       rc=0 [T] ios → GEOMETRY WRONG (ink: row 9 digit window x136-150 + the five U3 run boxes differ from wave54-final android's tabular glyphs by 41 px at their best whole-px offsets (> 2: added / lost ink in the window))
+                         [K] ios → GEOMETRY OK
+  prop twin=decided rc=0 [T] ios → GEOMETRY OK
+                         [K] ios → GEOMETRY OK
+  → HOLDS; every other key identical to the original probe: True
+== F1 row9 period erased (expect: T-geo)
+  orig twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (7 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (79 px))
+  orig twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (7 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (79 px))
+  prop twin=-       rc=0 [T] ios → GEOMETRY WRONG (row9 period x130-135: 0 ink blob(s) (want 1, the ref has 1))
+                         [K] ios → GEOMETRY OK
+  prop twin=decided rc=0 [T] ios → GEOMETRY WRONG (row9 period x130-135: 0 ink blob(s) (want 1, the ref has 1))
+                         [K] ios → GEOMETRY OK
+  → HOLDS; every other key identical to the original probe: True
+== F2 row10 period moved +2 px (expect: T-geo)
+  orig twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (84 px))
+  orig twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (84 px))
+  prop twin=-       rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: 2 ink blob(s) (want 1, the ref has 1))
+                         [K] ios → GEOMETRY OK
+  prop twin=decided rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: 2 ink blob(s) (want 1, the ref has 1))
+                         [K] ios → GEOMETRY OK
+  → HOLDS; every other key identical to the original probe: True
+== F3 row11 period erased (expect: T-geo)
+  orig twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (77 px))
+  orig twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (77 px))
+  prop twin=-       rc=0 [T] ios → GEOMETRY WRONG (row11 period x130-135: 0 ink blob(s) (want 1, the ref has 1))
+                         [K] ios → GEOMETRY OK
+  prop twin=decided rc=0 [T] ios → GEOMETRY WRONG (row11 period x130-135: 0 ink blob(s) (want 1, the ref has 1))
+                         [K] ios → GEOMETRY OK
+  → HOLDS; every other key identical to the original probe: True
+== F4 row12 period moved -2 px (expect: T-geo)
+  orig twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (85 px))
+  orig twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (85 px))
+  prop twin=-       rc=0 [T] ios → GEOMETRY WRONG (row12 period x130-135: glyph x132-133 y296-297 vs ref x134-134 y296-297 ±1 (moved))
+                         [K] ios → GEOMETRY OK
+  prop twin=decided rc=0 [T] ios → GEOMETRY WRONG (row12 period x130-135: glyph x132-133 y296-297 vs ref x134-134 y296-297 ±1 (moved))
+                         [K] ios → GEOMETRY OK
+  → HOLDS; every other key identical to the original probe: True
+== F5 row10 two erased (expect: T-geo)
+  orig twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (90 px))
+  orig twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (90 px))
+  prop twin=-       rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: 0 ink blob(s) (want 1, the ref has 1))
+                         [K] ios → GEOMETRY OK
+  prop twin=decided rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: 0 ink blob(s) (want 1, the ref has 1))
+                         [K] ios → GEOMETRY OK
+  → HOLDS; every other key identical to the original probe: True
+== F6 row10 two moved +2 px (expect: T-geo)
+  orig twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (118 px))
+  orig twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (118 px))
+  prop twin=-       rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: glyph x140-147 y238-249 vs ref x138-144 y238-249 ±1 (moved))
+                         [K] ios → GEOMETRY OK
+  prop twin=decided rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: glyph x140-147 y238-249 vs ref x138-144 y238-249 ±1 (moved))
+                         [K] ios → GEOMETRY OK
+  → HOLDS; every other key identical to the original probe: True
+== F7 row10 two as a block (expect: T-geo)
+  orig twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (115 px))
+  orig twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (115 px))
+  prop twin=-       rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: fills > 60 % of its bbox (a block, not the glyph))
+                         [K] ios → GEOMETRY OK
+  prop twin=decided rc=0 [T] ios → GEOMETRY WRONG (row10 two x136-150: fills > 60 % of its bbox (a block, not the glyph))
+                         [K] ios → GEOMETRY OK
+  → HOLDS; every other key identical to the original probe: True
+== F8 row10 two copied 1 px down (added) (expect: T-ink)
+  orig twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (94 px))
+  orig twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (94 px))
+  prop twin=-       rc=0 [T] ios → GEOMETRY WRONG (ink: row 9 digit window x136-150 + the five U3 run boxes differ from wave54-final android's tabular glyphs by 77 px at their best whole-px offsets (> 2: added / lost ink in the window))
+                         [K] ios → GEOMETRY OK
+  prop twin=decided rc=0 [T] ios → GEOMETRY WRONG (ink: row 9 digit window x136-150 + the five U3 run boxes differ from decided ios's tabular glyphs by 36 px at their best whole-px offsets (> 2: added / lost ink in the window))
+                         [K] ios → GEOMETRY OK
+  → HOLDS; every other key identical to the original probe: True
+== F9 2x2 blob beside row11 period (added) (expect: T-geo)
+  orig twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (83 px))
+  orig twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (83 px))
+  prop twin=-       rc=0 [T] ios → GEOMETRY WRONG (row11 period x130-135: 2 ink blob(s) (want 1, the ref has 1))
+                         [K] ios → GEOMETRY OK
+  prop twin=decided rc=0 [T] ios → GEOMETRY WRONG (row11 period x130-135: 2 ink blob(s) (want 1, the ref has 1))
+                         [K] ios → GEOMETRY OK
+  → HOLDS; every other key identical to the original probe: True
+== F10 row11 letter erased (outside the boxes) (expect: K)
+  orig twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (138 px))
+  orig twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (138 px))
+  prop twin=-       rc=0 [T] ios → GEOMETRY WRONG (ink: row 9 digit window x136-150 + the five U3 run boxes differ from wave54-final android's tabular glyphs by 41 px at their best whole-px offsets (> 2: added / lost ink in the window))
+                         [K] ios → GEOMETRY WRONG (zone x136-end×y256-303 differs from wave54-final (59 px))
+  prop twin=decided rc=0 [T] ios → GEOMETRY OK
+                         [K] ios → GEOMETRY WRONG (zone x136-end×y256-303 differs from wave54-final (59 px))
+  → HOLDS; every other key identical to the original probe: True
+== F11 row12 period copied 1 px down (added) (expect: T-ink)
+  orig twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (82 px))
+  orig twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (10 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (82 px))
+  prop twin=-       rc=0 [T] ios → GEOMETRY WRONG (ink: row 9 digit window x136-150 + the five U3 run boxes differ from wave54-final android's tabular glyphs by 45 px at their best whole-px offsets (> 2: added / lost ink in the window))
+                         [K] ios → GEOMETRY OK
+  prop twin=decided rc=0 [T] ios → GEOMETRY WRONG (ink: row 9 digit window x136-150 + the five U3 run boxes differ from decided ios's tabular glyphs by 4 px at their best whole-px offsets (> 2: added / lost ink in the window))
+                         [K] ios → GEOMETRY OK
+  → HOLDS; every other key identical to the original probe: True
+== F12 one light-grey px in row9 period box (added, 1 level) (expect: floor)
+  orig twin=-       rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (11 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (79 px))
+  orig twin=decided rc=0 [T] ios → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-final (11 px))
+                         [K] ios → GEOMETRY WRONG (zone y232-599 differs from wave54-final (79 px))
+  prop twin=-       rc=0 [T] ios → GEOMETRY WRONG (ink: row 9 digit window x136-150 + the five U3 run boxes differ from wave54-final android's tabular glyphs by 42 px at their best whole-px offsets (> 2: added / lost ink in the window))
+                         [K] ios → GEOMETRY OK
+  prop twin=decided rc=0 [T] ios → GEOMETRY OK
+                         [K] ios → GEOMETRY OK
+  → HOLDS; every other key identical to the original probe: True
+== §R the standing L5 replays: orig on the committed replay vs the proposal on the committed / re-grafted replay
+  C-nocomma      proposal on committed: 1 verdict flip(s) ['[T] counter-suffix ios: GEOMETRY OK → GEOMETRY WRONG']; proposal on re-grafted == orig on committed: True
+  C-shift8       proposal on committed: 0 verdict flip(s) []; proposal on re-grafted == orig on committed: True
+  C-space-only   proposal on committed: 0 verdict flip(s) []; proposal on re-grafted == orig on committed: True
+  H-broken       proposal on committed: 0 verdict flip(s) []; proposal on re-grafted == orig on committed: True
+  H-flush        proposal on committed: 1 verdict flip(s) ['[T] counter-suffix ios: GEOMETRY OK → GEOMETRY WRONG']; proposal on re-grafted == orig on committed: True
+  H-low          proposal on committed: 1 verdict flip(s) ['[T] counter-suffix ios: GEOMETRY OK → GEOMETRY WRONG']; proposal on re-grafted == orig on committed: True
+  H-nodot        proposal on committed: 1 verdict flip(s) ['[T] counter-suffix ios: GEOMETRY OK → GEOMETRY WRONG']; proposal on re-grafted == orig on committed: True
+  I-wholeline    proposal on committed: 1 verdict flip(s) ['[T] counter-suffix ios: GEOMETRY OK → GEOMETRY WRONG']; proposal on re-grafted == orig on committed: True
+  K-leak         proposal on committed: 1 verdict flip(s) ['[T] counter-suffix ios: GEOMETRY OK → GEOMETRY WRONG']; proposal on re-grafted == orig on committed: True
+  ok-all         proposal on committed: 1 verdict flip(s) ['[T] counter-suffix ios: GEOMETRY OK → GEOMETRY WRONG']; proposal on re-grafted == orig on committed: True
+violations: 0

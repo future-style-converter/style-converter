@@ -1,0 +1,15 @@
+band ghost +3y  [C] dir-style-02a android unaffected-rows     PASS  control  [C] dir-style-02a android unaffected-rows identical to wave54-final → GEOMETRY OK
+band ghost +3y  [S] dir-style-02a android row6                PASS  gating   [S] dir-style-02a android row6 ink (17, 120, 153, 133) dot 4px profile 0.92@+0 rows 0.94@+0 → GEOMETRY OK
+band ghost +3y  [S] dir-style-02a android row7                PASS  gating   [S] dir-style-02a android row7 ink (17, 140, 243, 153) dot 4px profile 0.92@+0 rows 0.92@+0 → GEOMETRY OK
+band ghost +3y  [S] dir-style-02a android row9                PASS  gating   [S] dir-style-02a android row9 ink (17, 180, 153, 193) dot 4px profile 0.92@+0 rows 0.94@+0 → GEOMETRY OK
+gate exit 0
+band ghost +5y  [C] dir-style-02a android unaffected-rows     PASS  control  [C] dir-style-02a android unaffected-rows identical to wave54-final → GEOMETRY OK
+band ghost +5y  [S] dir-style-02a android row6                PASS  gating   [S] dir-style-02a android row6 ink (17, 120, 153, 133) dot 4px profile 0.92@+0 rows 0.93@+1 → GEOMETRY OK
+band ghost +5y  [S] dir-style-02a android row7                PASS  gating   [S] dir-style-02a android row7 ink (17, 140, 243, 153) dot 4px profile 0.92@+0 rows 0.91@+1 → GEOMETRY OK
+band ghost +5y  [S] dir-style-02a android row9                PASS  gating   [S] dir-style-02a android row9 ink (17, 180, 153, 193) dot 4px profile 0.92@+0 rows 0.93@+1 → GEOMETRY OK
+gate exit 0
+band ghost +7y  [C] dir-style-02a android unaffected-rows     PASS  control  [C] dir-style-02a android unaffected-rows identical to wave54-final → GEOMETRY OK
+band ghost +7y  [S] dir-style-02a android row6                PASS  gating   [S] dir-style-02a android row6 ink (17, 120, 153, 133) dot 4px profile 0.92@+0 rows 0.93@+0 → GEOMETRY OK
+band ghost +7y  [S] dir-style-02a android row7                PASS  gating   [S] dir-style-02a android row7 ink (17, 140, 243, 153) dot 4px profile 0.91@+0 rows 0.91@+0 → GEOMETRY OK
+band ghost +7y  [S] dir-style-02a android row9                PASS  gating   [S] dir-style-02a android row9 ink (17, 180, 153, 193) dot 4px profile 0.92@+0 rows 0.93@+0 → GEOMETRY OK
+gate exit 0

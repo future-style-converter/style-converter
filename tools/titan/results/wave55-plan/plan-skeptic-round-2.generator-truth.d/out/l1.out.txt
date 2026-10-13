@@ -1,0 +1,82 @@
+text comps with effective LineHeight normal: 60 docs 19
+own 40 inherited 20
+  css-cascade/all-prop-001.html                                            ios P 0.9641   n=2
+  css-counter-styles/counter-style-at-rule/disclosure-styles.html          ios f 0.6127   n=18
+  css-tables/anonymous-table-ws-001.html                                   ios P 0.9988   n=1
+  css-text-decor/text-decoration-dotted-001.html                           ios f 0.5318   n=3
+  css-text-decor/text-decoration-dotted-002.html                           ios f 0.5426   n=3
+  css-text/boundary-shaping/boundary-shaping-001.html                      ios P 0.9792   n=3
+  css-text/boundary-shaping/boundary-shaping-002.html                      ios P 0.9695   n=3
+  css-text/boundary-shaping/boundary-shaping-003.html                      ios P 0.9781   n=3
+  css-text/boundary-shaping/boundary-shaping-004.html                      ios P 0.9774   n=3
+  css-text/boundary-shaping/boundary-shaping-005.html                      ios P 0.9774   n=3
+  css-text/boundary-shaping/boundary-shaping-006.html                      ios P 0.9714   n=3
+  css-text/boundary-shaping/boundary-shaping-007.html                      ios P 0.9764   n=3
+  css-text/boundary-shaping/boundary-shaping-008.html                      ios P 0.9789   n=3
+  css-text/boundary-shaping/boundary-shaping-010.html                      ios P 0.965    n=3
+  css-text/hyphens/hyphenate-character-001.html                            ios P 0.9611   n=1
+  css-text/hyphens/hyphenate-character-002.html                            ios P 0.9534   n=1
+  css-text/hyphens/hyphenate-character-003.html                            ios P 0.957    n=1
+  css-text/hyphens/hyphenate-character-004.html                            ios f 0.9477   n=1
+  css-text/hyphens/hyphens-vertical-001.html                               ios f 0.8801   n=2
+--- per component (horizontal space-less runs flagged)
+  _css-cascade__all-prop-001                               p-001__1-002 own   fs=20 ff=['monospace'] hy=None ws=None runs=True SPACELESS-H text='321'
+  _css-cascade__all-prop-001                               01__1__0-003 own   fs=20 ff=['monospace'] hy=None ws=None runs=False  text='987 654'
+  _css-counter-styles__counter-style-at-rule__disclosure-s _0__0__0-543 inh2  fs=16 ff=['system-ui'] hy=None ws=None runs=False  text='closed ltr'
+  _css-counter-styles__counter-style-at-rule__disclosure-s _0__0__1-544 inh2  fs=16 ff=['system-ui'] hy=None ws=None runs=False  text='open ltr'
+  _css-counter-styles__counter-style-at-rule__disclosure-s _0__1__0-546 inh2  fs=16 ff=['system-ui'] hy=None ws=None runs=False  text='closed rtl'
+  _css-counter-styles__counter-style-at-rule__disclosure-s _0__1__1-547 inh2  fs=16 ff=['system-ui'] hy=None ws=None runs=False  text='open rtl'
+  _css-counter-styles__counter-style-at-rule__disclosure-s es__0__2-548 inh1  fs=16 ff=['system-ui'] hy=None ws=None runs=False  text='closed ltr'
+  _css-counter-styles__counter-style-at-rule__disclosure-s es__0__3-549 inh1  fs=16 ff=['system-ui'] hy=None ws=None runs=False  text='closed rtl'
+  _css-counter-styles__counter-style-at-rule__disclosure-s _1__0__0-552 inh2  fs=16 ff=['system-ui'] hy=None ws=None runs=False VERTICAL VERTICAL_LR text='closed ltr'
+  _css-counter-styles__counter-style-at-rule__disclosure-s _1__0__1-553 inh2  fs=16 ff=['system-ui'] hy=None ws=None runs=False VERTICAL VERTICAL_LR text='open ltr'
+  _css-counter-styles__counter-style-at-rule__disclosure-s _1__1__0-555 inh2  fs=16 ff=['system-ui'] hy=None ws=None runs=False VERTICAL VERTICAL_LR text='closed rtl'
+  _css-counter-styles__counter-style-at-rule__disclosure-s _1__1__1-556 inh2  fs=16 ff=['system-ui'] hy=None ws=None runs=False VERTICAL VERTICAL_LR text='open rtl'
+  _css-counter-styles__counter-style-at-rule__disclosure-s es__1__2-557 inh1  fs=16 ff=['system-ui'] hy=None ws=None runs=False VERTICAL VERTICAL_LR text='closed ltr'
+  _css-counter-styles__counter-style-at-rule__disclosure-s es__1__3-558 inh1  fs=16 ff=['system-ui'] hy=None ws=None runs=False VERTICAL VERTICAL_LR text='closed rtl'
+  _css-counter-styles__counter-style-at-rule__disclosure-s _2__0__0-561 inh2  fs=16 ff=['system-ui'] hy=None ws=None runs=False VERTICAL VERTICAL_RL text='closed ltr'
+  _css-counter-styles__counter-style-at-rule__disclosure-s _2__0__1-562 inh2  fs=16 ff=['system-ui'] hy=None ws=None runs=False VERTICAL VERTICAL_RL text='open ltr'
+  _css-counter-styles__counter-style-at-rule__disclosure-s _2__1__0-564 inh2  fs=16 ff=['system-ui'] hy=None ws=None runs=False VERTICAL VERTICAL_RL text='closed rtl'
+  _css-counter-styles__counter-style-at-rule__disclosure-s _2__1__1-565 inh2  fs=16 ff=['system-ui'] hy=None ws=None runs=False VERTICAL VERTICAL_RL text='open rtl'
+  _css-counter-styles__counter-style-at-rule__disclosure-s es__2__2-566 inh1  fs=16 ff=['system-ui'] hy=None ws=None runs=False VERTICAL VERTICAL_RL text='closed ltr'
+  _css-counter-styles__counter-style-at-rule__disclosure-s es__2__3-567 inh1  fs=16 ff=['system-ui'] hy=None ws=None runs=False VERTICAL VERTICAL_RL text='closed rtl'
+  _css-tables__anonymous-table-ws-001                      s-001__1-066 own   fs=16 ff=['monospace'] hy=None ws=None runs=False  text='a b'
+  _css-text-decor__text-decoration-dotted-001              d-001__1-043 own   fs=92 ff=['Arial', 'sans-serif'] hy=None ws=None runs=False SPACELESS-H text='fooשלוםbaz'
+  _css-text-decor__text-decoration-dotted-001              d-001__2-044 own   fs=92 ff=['Arial', 'sans-serif'] hy=None ws=None runs=False SPACELESS-H text='fooשלוםbaz'
+  _css-text-decor__text-decoration-dotted-001              d-001__3-045 own   fs=92 ff=['Arial', 'sans-serif'] hy=None ws=None runs=False SPACELESS-H text='fooשלוםbaz'
+  _css-text-decor__text-decoration-dotted-002              d-002__1-047 own   fs=92 ff=['Arial', 'sans-serif'] hy=None ws=None runs=False SPACELESS-H text='foobarbaz'
+  _css-text-decor__text-decoration-dotted-002              d-002__2-048 own   fs=92 ff=['Arial', 'sans-serif'] hy=None ws=None runs=False SPACELESS-H text='foobarbaz'
+  _css-text-decor__text-decoration-dotted-002              d-002__3-049 own   fs=92 ff=['Arial', 'sans-serif'] hy=None ws=None runs=False SPACELESS-H text='foobarbaz'
+  _css-text__boundary-shaping__boundary-shaping-001        g-001__1-085 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='of'
+  _css-text__boundary-shaping__boundary-shaping-001        g-001__2-086 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='f'
+  _css-text__boundary-shaping__boundary-shaping-001        g-001__3-087 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='ice'
+  _css-text__boundary-shaping__boundary-shaping-002        g-002__1-089 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='of'
+  _css-text__boundary-shaping__boundary-shaping-002        g-002__2-090 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='f'
+  _css-text__boundary-shaping__boundary-shaping-002        g-002__3-091 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='ice'
+  _css-text__boundary-shaping__boundary-shaping-003        g-003__1-093 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='of'
+  _css-text__boundary-shaping__boundary-shaping-003        g-003__2-094 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='f'
+  _css-text__boundary-shaping__boundary-shaping-003        g-003__3-095 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='ice'
+  _css-text__boundary-shaping__boundary-shaping-004        g-004__1-097 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='of'
+  _css-text__boundary-shaping__boundary-shaping-004        g-004__2-098 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='f'
+  _css-text__boundary-shaping__boundary-shaping-004        g-004__3-099 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='ice'
+  _css-text__boundary-shaping__boundary-shaping-005        g-005__1-101 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='of'
+  _css-text__boundary-shaping__boundary-shaping-005        g-005__2-102 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='f'
+  _css-text__boundary-shaping__boundary-shaping-005        g-005__3-103 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='ice'
+  _css-text__boundary-shaping__boundary-shaping-006        g-006__1-105 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='of'
+  _css-text__boundary-shaping__boundary-shaping-006        _0__0__0-109 inh3  fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='f'
+  _css-text__boundary-shaping__boundary-shaping-006        g-006__3-110 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='ice'
+  _css-text__boundary-shaping__boundary-shaping-007        g-007__1-112 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='of'
+  _css-text__boundary-shaping__boundary-shaping-007        _0__0__0-116 inh3  fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='f'
+  _css-text__boundary-shaping__boundary-shaping-007        g-007__3-117 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='ice'
+  _css-text__boundary-shaping__boundary-shaping-008        g-008__1-119 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='of'
+  _css-text__boundary-shaping__boundary-shaping-008        g-008__2-120 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='f'
+  _css-text__boundary-shaping__boundary-shaping-008        g-008__3-121 own   fs=36 ff=['test'] hy=None ws=None runs=False SPACELESS-H text='ice'
+  _css-text__boundary-shaping__boundary-shaping-010        g-010__2-157 own   fs=36 ff=['sans-serif'] hy=None ws=None runs=False SPACELESS-H text='ال'
+  _css-text__boundary-shaping__boundary-shaping-010        g-010__3-158 own   fs=36 ff=['sans-serif'] hy=None ws=None runs=False SPACELESS-H text='سل'
+  _css-text__boundary-shaping__boundary-shaping-010        g-010__4-159 own   fs=36 ff=['sans-serif'] hy=None ws=None runs=False SPACELESS-H text='ام'
+  _css-text__hyphens__hyphenate-character-001              r-001__1-177 own   fs=16 ff=['monospace'] hy=MANUAL ws=None runs=True  text='im\xadple\xadmen\xadta\xadtion ini\xadtial\xadiza\xadtion re\xad'
+  _css-text__hyphens__hyphenate-character-002              r-002__1-185 own   fs=16 ff=['monospace'] hy=AUTO ws=None runs=True  text='implementation initialization realizatio'
+  _css-text__hyphens__hyphenate-character-003              r-003__1-193 own   fs=16 ff=['monospace'] hy=MANUAL ws=None runs=True  text='im\xadple\xadmen\xadta\xadtion ini\xadtial\xadiza\xadtion re\xad'
+  _css-text__hyphens__hyphenate-character-004              r-004__1-201 own   fs=16 ff=['monospace'] hy=MANUAL ws=None runs=True  text='im\xadple\xadmen\xadta\xadtion ini\xadtial\xadiza\xadtion re\xad'
+  _css-text__hyphens__hyphens-vertical-001                 l-001__2-320 own   fs=16 ff=['monospace'] hy=MANUAL ws=None runs=False VERTICAL VERTICAL_RL text='hyphen\xadation'
+  _css-text__hyphens__hyphens-vertical-001                 l-001__3-321 own   fs=16 ff=['monospace'] hy=MANUAL ws=None runs=True VERTICAL VERTICAL_RL text='hyphen‐ation'

@@ -1,0 +1,76 @@
+=== U6-C1 — mutated runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/HyphenateCharacterExtractor.kt (python rc 0; sha256 now 3af4f754310fa28f…)
+--- red run: bash tools/titan/results/wave55-instruments/u6/compose-focused.sh
+HyphenateCharacterExtractorTest > ofTwoDeclarationsInOneBlockTheLastWins FAILED
+    java.lang.AssertionError at HyphenateCharacterExtractorTest.kt:108
+> Task :runtime:testDebugUnitTest FAILED
+BUILD FAILED in 15s
+red run rc=1
+--- green run
+BUILD SUCCESSFUL in 5s
+green run rc=0
+
+=== U6-C2 — mutated runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt (python rc 0; sha256 now 4efad8989b0d1bfb…)
+--- red run: bash tools/titan/results/wave55-instruments/u6/compose-focused.sh
+> Task :runtime:testDebugUnitTest FAILED
+PreBreakPipelineClampHyphenTest > C2 a one-line clamp hides back to the first soft hyphen and paints the run's hyphenate-character there FAILED
+BUILD FAILED in 4s
+red run rc=1
+--- green run
+BUILD SUCCESSFUL in 5s
+green run rc=0
+
+=== U6-C3 — mutated runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCuts.kt (python rc 0; sha256 now 430061e9d74e4597…)
+--- red run: bash tools/titan/results/wave55-instruments/u6/compose-focused.sh
+SoftHyphenCutsTest > C3 lines the walk cannot align are answered by the wave-52 count, not dropped FAILED
+    java.lang.AssertionError at SoftHyphenCutsTest.kt:32
+> Task :runtime:testDebugUnitTest FAILED
+BUILD FAILED in 5s
+red run rc=1
+--- green run
+BUILD SUCCESSFUL in 3s
+green run rc=0
+
+=== U6-C4 — mutated runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt (python rc 0; sha256 now d7fcd6244f9d7968…)
+--- red run: bash tools/titan/results/wave55-instruments/u6/compose-focused.sh
+> Task :runtime:testDebugUnitTest FAILED
+OutOfFlowContainingBlockBranchesTest > C4 a filter object leaf (url or unresolved expression) establishes FAILED
+    java.lang.AssertionError at OutOfFlowContainingBlockBranchesTest.kt:41
+BUILD FAILED in 3s
+red run rc=1
+--- green run
+BUILD SUCCESSFUL in 6s
+green run rc=0
+
+=== U6-C5 — mutated runtimes/compose/src/main/java/com/styleconverter/runtime/performance/PerformanceExtractor.kt (python rc 0; sha256 now e181751d3424ba1e…)
+--- red run: bash tools/titan/results/wave55-instruments/u6/compose-focused.sh
+> Task :runtime:testDebugUnitTest FAILED
+OutOfFlowContainingBlockBranchesTest > C5 contain paint as a bare string primitive establishes FAILED
+    java.lang.AssertionError at OutOfFlowContainingBlockBranchesTest.kt:45
+BUILD FAILED in 4s
+red run rc=1
+--- green run
+BUILD SUCCESSFUL in 5s
+green run rc=0
+
+=== U6-C6 — mutated runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt (python rc 0; sha256 now 5e09279cf3044ecf…)
+--- red run: bash tools/titan/results/wave55-instruments/u6/compose-focused.sh
+> Task :runtime:testDebugUnitTest FAILED
+OutOfFlowContainingBlockBranchesTest > C6 an undecodable contain leaf answers false and leaves the decode breadcrumb FAILED
+    java.lang.AssertionError at OutOfFlowContainingBlockBranchesTest.kt:51
+BUILD FAILED in 3s
+red run rc=1
+--- green run
+BUILD SUCCESSFUL in 4s
+green run rc=0
+
+=== U6-C7 — mutated runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt (python rc 0; sha256 now c06dce8efb309b64…)
+--- red run: bash tools/titan/results/wave55-instruments/u6/compose-focused.sh
+> Task :runtime:testDebugUnitTest FAILED
+OutOfFlowContainingBlockBranchesTest > C7 a declared content-visibility leaves the implied-containment breadcrumb FAILED
+    java.lang.AssertionError at OutOfFlowContainingBlockBranchesTest.kt:65
+BUILD FAILED in 7s
+red run rc=1
+--- green run
+BUILD SUCCESSFUL in 6s
+green run rc=0
+

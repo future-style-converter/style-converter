@@ -1,0 +1,8 @@
+U1-ios painted-string changes: 2 docs
+   CARRIER wpt__css-counter-styles__counter-style-at-rule__disclosure-styles 6 ['table:disclosure-closed2', 'table:disclosure-open2'] ['item-rtl']
+   CARRIER wpt__css-counter-styles__counter-suffix 2 ['baked:א.', 'baked:ב.'] ['item-ltr']
+docs with RTL list items: {'wpt__css-counter-styles__counter-style-at-rule__disclosure-styles': 6}
+U2 baked U+3001: {'wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001': 9, 'wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004': 23, 'wpt__css-counter-styles__cjk-decimal__css3-counter-styles-005': 2, 'wpt__css-counter-styles__counter-suffix': 2}
+U3 FontVariantNumeric: {'wpt__css-counter-styles__counter-suffix': 6}
+ios radius-minus-carriers [] carriers-minus-radius []
+android radius-minus-carriers [] carriers-minus-radius []

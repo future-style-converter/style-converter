@@ -1,0 +1,168 @@
+# seam-2.patch — wave55 L5 (counter-suffix-rows) unit U2o-ios — SEAM patch (one seam file + its patch-borne test files)
+# seam file: runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+# base tree 611c9f93; cut on: 611c9f93 + seam-1.patch (L5 U1-ios)
+# seam file sha256 at base 611c9f93: 417853cefdc7627fadc21003efa735d99d47ed0c545b6c1747d7292403fd26f3
+# content anchor: ':4618 gap: ListMarkerRow.gapPt,' in markerPlacement's hang branch (ListMarkerOutsideHangLayout(gap:)); patch-borne: NEW ListMarkerSuffixGapHangRasterTests.swift
+# check: git apply --check <this file> (in landing order, after the patches named in "cut on")
+# fix-r1 re-cut (PLAN §8 step 3): every hunk identical to the builder's cut (only the index line's hash abbreviation may differ)
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+index 12ed3e4f..8b013302 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+@@ -4630,7 +4630,10 @@ public struct ComponentRenderer: View {
+             // rule (B-RC6), handed to the Layout as a Bool because a Layout
+             // reads the guides itself.
+             ListMarkerOutsideHangLayout(
+-                gap: ListMarkerRow.gapPt,
++                // Wave 55 (lane L5, U2o-ios): the stand-in for the suffix's
++                // trimmed space, keyed on the RAW marker string — 0 after a
++                // U+3001 suffix (css-counter-styles-3 §6.1), else gapPt.
++                gap: ListMarkerSuffixGap.points(forMarker: markerText),
+                 alignsByBaseline: ListMarkerRow.rowAlignment(
+                     itemExposesTextBaseline: exposesBaseline) == .firstTextBaseline,
+                 // An EMPTY item's one line box is the marker's (seam-4's
+diff --git a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerSuffixGapHangRasterTests.swift b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerSuffixGapHangRasterTests.swift
+new file mode 100644
+index 00000000..d152df29
+--- /dev/null
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerSuffixGapHangRasterTests.swift
+@@ -0,0 +1,139 @@
++//
++//  ListMarkerSuffixGapHangRasterTests.swift
++//  StyleConverterRuntimeTests — wave 55, lane L5 (U2o-ios) — the SEAM pin.
++//  SHIPS INSIDE seam-2.patch (tools/titan/results/wave55-counter-suffix-
++//  rows/), never on its own: it renders through ComponentRenderer's
++//  `markerPlacement` hang branch, so it is red without the seam by design.
++//
++//  ## What it pins
++//  The outside hang takes `ListMarkerSuffixGap.points(forMarker:)`: a
++//  marker ending in U+3001 hangs FLUSH against the content edge (gap 0,
++//  css-counter-styles-3 §6.1 — the suffix has no trailing space), every
++//  other marker keeps the 4 pt stand-in. Differential, so no font metric
++//  enters the assertion: the VERBATIM counter-suffix cjk-decimal `<ol>`
++//  (`counter-suffix__0__2`, item `__0__2__0` "foo" baked "一、" —
++//  tools/titan/runs/wave54-final/sections/css-counter-styles/per-test-ir/
++//  wpt__css-counter-styles__counter-suffix.json) plus ONE added control
++//  item whose marker is "一、" + U+200B ZERO WIDTH SPACE: the same ink,
++//  but its last scalar is not U+3001, so it keeps the stand-in. The
++//  precondition test pins that the ZWSP adds no width.
++//
++//  Mutation EXECUTED by the lane (bracketed in the lane note): with
++//  ComponentRenderer.swift restored to the pre-seam bytes the two rows'
++//  markers sit at the same x and this goes red.
++//
++
++import XCTest
++import SwiftUI
++@testable import StyleConverterRuntime
++
++final class ListMarkerSuffixGapHangRasterTests: XCTestCase {
++
++    /// The marker of the control row: same glyphs, a non-U+3001 tail.
++    private static let control = "一、\u{200B}"
++
++    /// The cjk-decimal list (property byte-shapes verbatim) + the control.
++    private func cjkList() throws -> IRComponent {
++        // The `<li>` box model the wire carries (all zero) + line-height 150%.
++        let liProps = """
++        [{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},
++         {"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},
++         {"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},
++         {"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},
++         {"type":"LineHeight","data":{"multiplier":1.5,"original":{"type":"percentage","value":150}}}]
++        """
++        return try JSONDecoder().decode(IRComponent.self, from: Data("""
++        {"id":"root","name":"root",
++         "properties":[{"type":"FontSize","data":{"px":16.0,"original":{"type":"length","px":16.0}}}],
++         "children":[
++          {"id":"counter-suffix__0__2-617","name":"counter-suffix__0__2",
++           "properties":[{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},
++             {"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},
++             {"type":"PaddingTop","data":{"px":0}},
++             {"type":"PaddingRight","data":{"original":{"v":3,"u":"EM"}}},
++             {"type":"PaddingBottom","data":{"px":0}},
++             {"type":"PaddingLeft","data":{"original":{"v":3,"u":"EM"}}},
++             {"type":"LineHeight","data":{"multiplier":1.5,"original":{"type":"percentage","value":150}}},
++             {"type":"ListStyleType","data":"cjk-decimal"}],
++           "meta":{"sourceTag":"ol","role":"ws-after"},
++           "children":[
++            {"id":"counter-suffix__0__2__0-618","name":"counter-suffix__0__2__0","text":"foo",
++             "properties":\(liProps),"meta":{"sourceTag":"li","markerText":"一、"}},
++            {"id":"control-1","name":"control","text":"foo",
++             "properties":\(liProps),"meta":{"sourceTag":"li","markerText":"\(Self.control)"}}
++           ]}
++         ]}
++        """.utf8))
++    }
++
++    /// Composed capture geometry (the sibling raster suites' plumbing).
++    @MainActor
++    private func pixels<V: View>(_ v: V, height: CGFloat) throws -> (px: [UInt8], w: Int, h: Int) {
++        let view = v
++            .frame(width: 358, alignment: .topLeading)
++            .padding(16)
++            .frame(width: 390, height: height, alignment: .topLeading)
++            .background(Color.white)
++            .environment(\.wptCaptureMode, true)
++            .environment(\.styleViewport, StyleViewport(width: 390, height: 844, rootContainingBlock: 358))
++        let renderer = ImageRenderer(content: view)
++        renderer.scale = 1
++        let cg = try XCTUnwrap(renderer.cgImage, "ImageRenderer produced no image")
++        var buf = [UInt8](repeating: 0, count: cg.width * cg.height * 4)
++        let ctx = try XCTUnwrap(CGContext(
++            data: &buf, width: cg.width, height: cg.height, bitsPerComponent: 8,
++            bytesPerRow: cg.width * 4, space: CGColorSpaceCreateDeviceRGB(),
++            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
++        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: cg.width, height: cg.height))
++        return (buf, cg.width, cg.height)
++    }
++
++    /// Per text row: the first inked x left of / right of the content edge
++    /// 64 — (marker left, item text left). A row is an ink band; blank runs
++    /// shorter than 6 px stay inside it (`一` and the low `、` of one marker
++    /// are separated vertically by a few blank rows).
++    private func bands(_ img: (px: [UInt8], w: Int, h: Int)) -> [(marker: Int, text: Int)] {
++        var out: [(Int, Int)] = [], mk = Int.max, tx = Int.max, blank = 0, open = false
++        for y in 0..<img.h {
++            var any = false
++            for x in 0..<img.w {
++                let i = (y * img.w + x) * 4
++                guard img.px[i] < 160 && img.px[i + 1] < 160 && img.px[i + 2] < 160 else { continue }
++                any = true
++                if x < 64 { mk = min(mk, x) } else { tx = min(tx, x) }
++            }
++            if any { open = true; blank = 0; continue }
++            blank += 1
++            if open && blank >= 6 { out.append((mk, tx)); open = false; mk = .max; tx = .max }
++        }
++        if open { out.append((mk, tx)) }
++        return out
++    }
++
++    /// Precondition of the differential: the ZWSP control paints the same
++    /// glyph run at the same width as the real marker (identical ink).
++    @MainActor
++    func testControlMarkerHasTheSameWidth() throws {
++        let a = try pixels(Text("一、").fixedSize(), height: 60)
++        let b = try pixels(Text(Self.control).fixedSize(), height: 60)
++        // Same image size and byte-identical pixels: no width, no ink moved.
++        XCTAssertEqual(a.w, b.w); XCTAssertEqual(a.h, b.h)
++        XCTAssertTrue(a.px == b.px, "the ZWSP control moved the ink")
++    }
++
++    /// The U+3001 marker hangs 4 pt (the stand-in) further right than the
++    /// control, and both items' text keep the content edge.
++    @MainActor
++    func testIdeographicCommaMarkerHangsFlush() throws {
++        let list = try cjkList()
++        let b = bands(try pixels(VStack(alignment: .leading, spacing: 0) {
++            ComponentHost(component: list) }, height: 120))
++        // Logged so the lane note can cite the measured columns verbatim.
++        print("ListMarkerSuffixGapHangRasterTests bands (marker x, text x): \(b)")
++        guard b.count >= 2 else { return XCTFail("expected two rows, got \(b)") }
++        // Gap 0 vs the stand-in 4: the real marker sits exactly 4 right.
++        XCTAssertEqual(b[0].marker - b[1].marker, Int(ListMarkerRow.gapPt), "rows \(b)")
++        // The hang never moves the item's content edge (css-lists-3 §3.5).
++        XCTAssertEqual(b[0].text, b[1].text, "rows \(b)")
++    }
++}

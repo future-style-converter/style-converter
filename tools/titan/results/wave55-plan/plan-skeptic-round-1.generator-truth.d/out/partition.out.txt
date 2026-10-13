@@ -1,0 +1,31 @@
+  carrier capture unscored: css-counter-styles/cjk-decimal/css3-counter-styles-001.html ios
+  carrier capture unscored: css-counter-styles/cjk-decimal/css3-counter-styles-004.html ios
+  carrier capture unscored: css-counter-styles/cjk-decimal/css3-counter-styles-001.html android
+  carrier capture unscored: css-counter-styles/cjk-decimal/css3-counter-styles-004.html android
+  stem not a scored test: android wpt__filter-effects__backdrop-filter-clip-rect-zoom
+union stems equal published: {'web': True, 'ios': True, 'android': True}
+sizes carriers 76 named 665 complement 3352 (count field 3352 ) ring 3
+named&carriers []
+named&comp 0 named&ring [] comp&carriers 0 comp&ring [] ring&carriers []
+HOLE (in no list): 0 []
+partition sum 4096 == 4096
+  stem not a scored test: android wpt__css-anchor-position__anchor-center-overflow-005
+  stem not a scored test: android wpt__css-anchor-position__anchor-center-safe-rtl
+  stem not a scored test: android wpt__css-anchor-position__anchor-center-visibility-change
+  stem not a scored test: android wpt__css-anchor-position__anchor-scope-scroll
+  stem not a scored test: android wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-1
+  stem not a scored test: android wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-2
+  stem not a scored test: android wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-3
+  stem not a scored test: android wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-4
+  stem not a scored test: android wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-5
+  stem not a scored test: android wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-6
+  stem not a scored test: android wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-1
+  stem not a scored test: android wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-2
+  stem not a scored test: android wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-3
+  stem not a scored test: android wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-4
+  stem not a scored test: android wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-5
+  stem not a scored test: android wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-6
+  stem not a scored test: android wpt__css-cascade__scope-shadow-sharing
+  stem not a scored test: android wpt__filter-effects__backdrop-filter-edge-behavior
+may-move cells 196 & carriers 0 & named 28 & comp 167 & ring ['filter-effects/backdrop-filter-basic-blur.html android']
+L6 mayMove keys dict ['android']

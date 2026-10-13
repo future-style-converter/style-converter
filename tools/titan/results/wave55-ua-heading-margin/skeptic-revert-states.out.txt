@@ -1,0 +1,7 @@
+# skeptic-revert-states.sh — run by the L4 skeptic in its own worktree (compose then swiftui), 2026-10-12
+revertStatesCompiled: A(U2-android-reverted) compose: rc=0 (touched paths vs HEAD: 7) [SeamReachabilityTest 3/0+0;UaPositionedHeadingMarginSeamWiringTest 2/0+0;UaPositionedHeadingMarginTest 13/0+0;UAElementFontRuleSeamWiringTest 2/0+0;UAElementFontRuleTest 10/0+0;InlineRunFoldTest 45/0+0;]
+revertStatesCompiled: B(U2-android+U1-android-reverted=HEAD) compose: rc=0 (touched paths vs HEAD: 0) [SeamReachabilityTest 3/0+0;UAElementFontRuleSeamWiringTest 2/0+0;UAElementFontRuleTest 10/0+0;InlineRunFoldTest 45/0+0;]
+revertStatesCompiled: F(full) compose: rc=0 (touched paths vs HEAD: 10) [SeamReachabilityTest 3/0+0;UaPositionedHeadingMarginSeamWiringTest 2/0+0;UaPositionedHeadingMarginTest 13/0+0;UAElementFontRuleSeamWiringTest 2/0+0;UAElementFontRuleTest 10/0+0;UAHeadingFoldGateTest 9/0+0;InlineRunFoldTest 45/0+0;]
+revertStatesCompiled: A(U2-ios-reverted) swiftui: rc=0 (touched paths vs HEAD: 5) [Executed 30 tests, with 0 failures] 
+revertStatesCompiled: B(U2-ios+U1-ios-reverted=HEAD) swiftui: rc=0 (touched paths vs HEAD: 0) [Executed 16 tests, with 0 failures] 
+revertStatesCompiled: F(full) swiftui: rc=0 (touched paths vs HEAD: 8) [Executed 39 tests, with 0 failures] 

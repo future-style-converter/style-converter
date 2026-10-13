@@ -1,0 +1,120 @@
+TREES: /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/wave55-skeptic-L3
+# skeptic mutation replay, full state (unit-U1 + seam-1 + unit-U2 on 611c9f93); focused suite = PLAN §2 L3 'May run', --rerun
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 754085db42a04caafc50a46f71b1fe21d83d528388e22deda84192db140ffc3a   [S-U1a1-drop-composedCapture]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 754085db42a04caafc50a46f71b1fe21d83d528388e22deda84192db140ffc3a   [S-U1a1-drop-composedCapture]
+  [S-U1a1-drop-composedCapture] mutated: gradle exit 1, 60 tests, 2 failed, 0 skipped
+      FAILED PositionedParentSlotGateTest > U1a engages - every row of the truth table :: java.lang.AssertionError
+      FAILED PositionedParentSlotGateTest > U1c slotModifier - identity, the one-element mount, the RTL breadcrumb :: java.lang.AssertionError: expected same:<Modifier> was not:<androidx.compose.ui.layout.LayoutElement@7e3181aa>
+  [S-U1a1-drop-composedCapture] restored: gradle exit 0, 60 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 754085db42a04caafc50a46f71b1fe21d83d528388e22deda84192db140ffc3a   [S-U1a2-drop-not-parentRtl]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 754085db42a04caafc50a46f71b1fe21d83d528388e22deda84192db140ffc3a   [S-U1a2-drop-not-parentRtl]
+  [S-U1a2-drop-not-parentRtl] mutated: gradle exit 1, 60 tests, 2 failed, 0 skipped
+      FAILED PositionedParentSlotGateTest > U1a engages - every row of the truth table :: java.lang.AssertionError
+      FAILED PositionedParentSlotGateTest > U1c slotModifier - identity, the one-element mount, the RTL breadcrumb :: java.lang.AssertionError: expected same:<Modifier> was not:<androidx.compose.ui.layout.LayoutElement@253d9f73>
+  [S-U1a2-drop-not-parentRtl] restored: gradle exit 0, 60 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 754085db42a04caafc50a46f71b1fe21d83d528388e22deda84192db140ffc3a   [S-U1a3-collapse-to-hostActive]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 754085db42a04caafc50a46f71b1fe21d83d528388e22deda84192db140ffc3a   [S-U1a3-collapse-to-hostActive]
+  [S-U1a3-collapse-to-hostActive] mutated: gradle exit 1, 60 tests, 3 failed, 0 skipped
+      FAILED PositionedParentSlotGateTest > U1b dir-style-02a - the plain mount takes the LTR parents' children only :: java.lang.AssertionError: expected:<[dir-style-02a__3__0__0-089, dir-style-02a__3__1__0-091, dir-style-02a__4__0__0-097, dir-style-02a__4__0__1-098, d
+      FAILED PositionedParentSlotGateTest > U1a engages - every row of the truth table :: java.lang.AssertionError
+      FAILED PositionedParentSlotGateTest > U1c slotModifier - identity, the one-element mount, the RTL breadcrumb :: java.lang.AssertionError: expected:<1> but was:<0>
+  [S-U1a3-collapse-to-hostActive] restored: gradle exit 0, 60 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt sha256 bd3910015afaae4054a8f2ca2d444820eec80d469db081a2608300cbfe75212c   [S-U1cd-seam-unapplied]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt sha256 bd3910015afaae4054a8f2ca2d444820eec80d469db081a2608300cbfe75212c   [S-U1cd-seam-unapplied]
+  [S-U1cd-seam-unapplied] mutated: gradle exit 1, 60 tests, 3 failed, 0 skipped
+      FAILED SeamReachabilityTest > every module wave 49 added to the compose runtime has a live call site :: java.lang.AssertionError: unreachable from ScreenshotCaptureScreen (no live call site): [layout/position/PositionedParentSlotGate.kt]
+      FAILED PositionedParentSlotSeamWiringTest > PW2 the host-only gate is gone from the block-child loop :: java.lang.AssertionError: the LocalActive-only guard must be gone
+      FAILED PositionedParentSlotSeamWiringTest > PW1 the block-child mount is the gate's helper, fed by all three flags :: java.lang.AssertionError: mount must be PositionedParentSlotGate.slotModifier(
+  [S-U1cd-seam-unapplied] restored: gradle exit 0, 60 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 754085db42a04caafc50a46f71b1fe21d83d528388e22deda84192db140ffc3a   [S-U1-drop-rtl-unmounted-breadcrumb]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 754085db42a04caafc50a46f71b1fe21d83d528388e22deda84192db140ffc3a   [S-U1-drop-rtl-unmounted-breadcrumb]
+  [S-U1-drop-rtl-unmounted-breadcrumb] mutated: gradle exit 1, 60 tests, 1 failed, 0 skipped
+      FAILED PositionedParentSlotGateTest > U1c slotModifier - identity, the one-element mount, the RTL breadcrumb :: java.lang.AssertionError: expected:<1> but was:<0>
+  [S-U1-drop-rtl-unmounted-breadcrumb] restored: gradle exit 0, 60 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493   [S-U2a1-origin-sign]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493   [S-U2a1-origin-sign]
+  [S-U2a1-origin-sign] mutated: gradle exit 1, 60 tests, 2 failed, 0 skipped
+      FAILED PositionedParentRtlOriginTest > U2a originPx is minus the bounded max width, none when unbounded :: java.lang.AssertionError: expected:<-358> but was:<358>
+      FAILED PositionedParentRtlOriginTest > U2c inkLeftPx - the physical-left origin and the element's place :: java.lang.AssertionError: expected:<70.0> but was:<270.0>
+  [S-U2a1-origin-sign] restored: gradle exit 0, 60 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493   [S-U2b1-drop-px-width-rule]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493   [S-U2b1-drop-px-width-rule]
+  [S-U2b1-drop-px-width-rule] mutated: gradle exit 1, 60 tests, 3 failed, 0 skipped
+      FAILED PositionedParentRtlOriginTest > U2b applies - the decline table :: java.lang.AssertionError: expected:<PARENT_WIDTH_NOT_PX> but was:<NONE>
+      FAILED PositionedParentRtlOriginTest > U2e the origin mount is two elements, and a declined origin is named :: java.lang.AssertionError: expected:<1> but was:<2>
+      FAILED PositionedParentSlotGateTest > U1c slotModifier - identity, the one-element mount, the RTL breadcrumb :: java.lang.AssertionError: expected same:<Modifier> was not:<[androidx.compose.ui.layout.LayoutElement@5dcd8c7a, androidx.compose.ui.layout.LayoutEleme
+  [S-U2b1-drop-px-width-rule] restored: gradle exit 0, 60 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493   [S-U2c1-model-drop-origin]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493   [S-U2c1-model-drop-origin]
+  [S-U2c1-model-drop-origin] mutated: gradle exit 1, 60 tests, 1 failed, 0 skipped
+      FAILED PositionedParentRtlOriginTest > U2c inkLeftPx - the physical-left origin and the element's place :: java.lang.AssertionError: expected:<70.0> but was:<170.0>
+  [S-U2c1-model-drop-origin] restored: gradle exit 0, 60 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493   [S-U2c2-placedXPx-mirrored]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493   [S-U2c2-placedXPx-mirrored]
+  [S-U2c2-placedXPx-mirrored] mutated: gradle exit 1, 60 tests, 1 failed, 0 skipped
+      FAILED PositionedParentRtlOriginTest > U2c inkLeftPx - the physical-left origin and the element's place :: java.lang.AssertionError: expected:<70.0> but was:<270.0>
+  [S-U2c2-placedXPx-mirrored] restored: gradle exit 0, 60 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493   [S-U2c3-literal-placeRelative]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493   [S-U2c3-literal-placeRelative]
+  [S-U2c3-literal-placeRelative] mutated: gradle exit 1, 60 tests, 1 failed, 0 skipped
+      FAILED PositionedParentRtlOriginTest > U2c inkLeftPx - the physical-left origin and the element's place :: java.lang.AssertionError
+  [S-U2c3-literal-placeRelative] restored: gradle exit 0, 60 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493   [S-U2x-mechanism-origin-from-minWidth]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493   [S-U2x-mechanism-origin-from-minWidth]
+  [S-U2x-mechanism-origin-from-minWidth] mutated: gradle exit 0, 60 tests, 0 failed, 0 skipped
+  [S-U2x-mechanism-origin-from-minWidth] restored: gradle exit 0, 60 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493   [S-U2x-mechanism-origin-null]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493   [S-U2x-mechanism-origin-null]
+  [S-U2x-mechanism-origin-null] mutated: gradle exit 0, 60 tests, 0 failed, 0 skipped
+  [S-U2x-mechanism-origin-null] restored: gradle exit 0, 60 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 754085db42a04caafc50a46f71b1fe21d83d528388e22deda84192db140ffc3a   [S-U2d1-drop-gate-rtl-branch]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 754085db42a04caafc50a46f71b1fe21d83d528388e22deda84192db140ffc3a   [S-U2d1-drop-gate-rtl-branch]
+  [S-U2d1-drop-gate-rtl-branch] mutated: gradle exit 1, 60 tests, 2 failed, 0 skipped
+      FAILED PositionedParentRtlOriginTest > U2d the verbatim RTL carriers take the origin in their own host state :: java.lang.AssertionError: expected:<MOUNT_RTL_ORIGIN> but was:<IDENTITY>
+      FAILED PositionedParentRtlOriginTest > U2e the origin mount is two elements, and a declined origin is named :: java.lang.AssertionError: expected:<2> but was:<0>
+  [S-U2d1-drop-gate-rtl-branch] restored: gradle exit 0, 60 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt sha256 be07853b2433cabb0d190e89eaec0d2a0d04baa3baaceafc1d6209c4ae170045   [S-U2e1-default-rtlOrigin-true]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt sha256 be07853b2433cabb0d190e89eaec0d2a0d04baa3baaceafc1d6209c4ae170045   [S-U2e1-default-rtlOrigin-true]
+  [S-U2e1-default-rtlOrigin-true] mutated: gradle exit 1, 60 tests, 3 failed, 0 skipped
+      FAILED PositionedParentRtlOriginTest > U2e the origin mount is two elements, and a declined origin is named :: java.lang.AssertionError: expected:<1> but was:<2>
+      FAILED PositionedParentFlowSlotTest > mount installs one layout element and reads the end anchor through anchorGate :: java.lang.AssertionError: expected:<1> but was:<2>
+      FAILED PositionedParentSlotGateTest > U1c slotModifier - identity, the one-element mount, the RTL breadcrumb :: java.lang.AssertionError: expected:<1> but was:<2>
+  [S-U2e1-default-rtlOrigin-true] restored: gradle exit 0, 60 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 754085db42a04caafc50a46f71b1fe21d83d528388e22deda84192db140ffc3a   [S-U2-drop-decline-breadcrumb-in-MOUNT]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 754085db42a04caafc50a46f71b1fe21d83d528388e22deda84192db140ffc3a   [S-U2-drop-decline-breadcrumb-in-MOUNT]
+  [S-U2-drop-decline-breadcrumb-in-MOUNT] mutated: gradle exit 1, 60 tests, 1 failed, 0 skipped
+      FAILED PositionedParentRtlOriginTest > U2e the origin mount is two elements, and a declined origin is named :: java.lang.AssertionError: expected:<1> but was:<0>
+  [S-U2-drop-decline-breadcrumb-in-MOUNT] restored: gradle exit 0, 60 tests, 0 failed, 0 skipped
+# --- U1 state (unit-U1 + seam-1; unit-U2 reverse-applied): the lane's '-final' U1 replays ---
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 3f9584c4d714282a50af0bde11729024462dbd07f5f93b053c570c94f46802bd   [S-U1a1-drop-composedCapture]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 3f9584c4d714282a50af0bde11729024462dbd07f5f93b053c570c94f46802bd   [S-U1a1-drop-composedCapture]
+  [S-U1a1-drop-composedCapture] mutated: gradle exit 1, 55 tests, 2 failed, 0 skipped
+      FAILED PositionedParentSlotGateTest > U1a engages - every row of the truth table :: java.lang.AssertionError
+      FAILED PositionedParentSlotGateTest > U1c slotModifier - identity, the one-element mount, the RTL breadcrumb :: java.lang.AssertionError: expected same:<Modifier> was not:<androidx.compose.ui.layout.LayoutElement@66ac5762>
+  [S-U1a1-drop-composedCapture] restored: gradle exit 0, 55 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 3f9584c4d714282a50af0bde11729024462dbd07f5f93b053c570c94f46802bd   [S-U1a2-drop-not-parentRtl]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 3f9584c4d714282a50af0bde11729024462dbd07f5f93b053c570c94f46802bd   [S-U1a2-drop-not-parentRtl]
+  [S-U1a2-drop-not-parentRtl] mutated: gradle exit 1, 55 tests, 3 failed, 0 skipped
+      FAILED PositionedParentSlotGateTest > U1b dir-style-02a - the plain mount takes the LTR parents' children only :: java.lang.AssertionError: expected:<[dir-style-02a__3__0__0-089, dir-style-02a__3__1__0-091, dir-style-02a__4__0__0-097, dir-style-02a__4__0__1-098, d
+      FAILED PositionedParentSlotGateTest > U1a engages - every row of the truth table :: java.lang.AssertionError
+      FAILED PositionedParentSlotGateTest > U1c slotModifier - identity, the one-element mount, the RTL breadcrumb :: java.lang.AssertionError: expected same:<Modifier> was not:<androidx.compose.ui.layout.LayoutElement@31bcf236>
+  [S-U1a2-drop-not-parentRtl] restored: gradle exit 0, 55 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 3f9584c4d714282a50af0bde11729024462dbd07f5f93b053c570c94f46802bd   [S-U1a3-collapse-to-hostActive]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 3f9584c4d714282a50af0bde11729024462dbd07f5f93b053c570c94f46802bd   [S-U1a3-collapse-to-hostActive]
+  [S-U1a3-collapse-to-hostActive] mutated: gradle exit 1, 55 tests, 3 failed, 0 skipped
+      FAILED PositionedParentSlotGateTest > U1b dir-style-02a - the plain mount takes the LTR parents' children only :: java.lang.AssertionError: expected:<[dir-style-02a__3__0__0-089, dir-style-02a__3__1__0-091, dir-style-02a__4__0__0-097, dir-style-02a__4__0__1-098, d
+      FAILED PositionedParentSlotGateTest > U1a engages - every row of the truth table :: java.lang.AssertionError
+      FAILED PositionedParentSlotGateTest > U1c slotModifier - identity, the one-element mount, the RTL breadcrumb :: java.lang.AssertionError: expected:<1> but was:<0>
+  [S-U1a3-collapse-to-hostActive] restored: gradle exit 0, 55 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt sha256 bd3910015afaae4054a8f2ca2d444820eec80d469db081a2608300cbfe75212c   [S-U1cd-seam-unapplied]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt sha256 bd3910015afaae4054a8f2ca2d444820eec80d469db081a2608300cbfe75212c   [S-U1cd-seam-unapplied]
+  [S-U1cd-seam-unapplied] mutated: gradle exit 1, 55 tests, 3 failed, 0 skipped
+      FAILED SeamReachabilityTest > every module wave 49 added to the compose runtime has a live call site :: java.lang.AssertionError: unreachable from ScreenshotCaptureScreen (no live call site): [layout/position/PositionedParentSlotGate.kt]
+      FAILED PositionedParentSlotSeamWiringTest > PW2 the host-only gate is gone from the block-child loop :: java.lang.AssertionError: the LocalActive-only guard must be gone
+      FAILED PositionedParentSlotSeamWiringTest > PW1 the block-child mount is the gate's helper, fed by all three flags :: java.lang.AssertionError: mount must be PositionedParentSlotGate.slotModifier(
+  [S-U1cd-seam-unapplied] restored: gradle exit 0, 55 tests, 0 failed, 0 skipped
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 3f9584c4d714282a50af0bde11729024462dbd07f5f93b053c570c94f46802bd   [S-U1-drop-rtl-unmounted-breadcrumb]
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 3f9584c4d714282a50af0bde11729024462dbd07f5f93b053c570c94f46802bd   [S-U1-drop-rtl-unmounted-breadcrumb]
+  [S-U1-drop-rtl-unmounted-breadcrumb] mutated: gradle exit 1, 55 tests, 1 failed, 0 skipped
+      FAILED PositionedParentSlotGateTest > U1c slotModifier - identity, the one-element mount, the RTL breadcrumb :: java.lang.AssertionError: expected:<1> but was:<0>
+  [S-U1-drop-rtl-unmounted-breadcrumb] restored: gradle exit 0, 55 tests, 0 failed, 0 skipped

@@ -1,0 +1,7 @@
+{'line-exists': 12, 'ambiguous-or-untracked': 2, 'snippet@MISS': 6}
+   ('android-paint-order', '_note.md', 655, 'OverflowExtractor.kt', 30, 'maps')
+   ('instruments', '_note.md', 123, 'InertOutOfFlowWordJoin.ts', 98, ', Compose')
+   ('instruments', '_note.md', 124, 'InlineRunFold.kt', 177, ', the Compose drop')
+   ('instruments', '_note.md', 124, 'InlineRunFold.kt', 460, '(counted')
+   ('instruments', '_note.md', 126, 'InlineRuns.ts', 58, '). Not a freeze event (')
+   ('instruments', 'skeptic.md', 154, 'build-combined-fixture.mjs', 168, 'turns a fixture that was never extracted')

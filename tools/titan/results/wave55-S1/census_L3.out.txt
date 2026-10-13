@@ -1,0 +1,60 @@
+Column-loop pairs: 121 children in 54 documents
+U1 (host-inactive by the coarse model, LTR parent): 15 documents;  U2: 7 documents 13 children
+        host=A named-mustNotMove  wpt__CSS2__abspos__static-fixed-inside-abspos
+        host=A complement         wpt__css-anchor-position__anchor-center-safe-rtl
+        host=A named-mustNotMove  wpt__css-anchor-position__anchor-name-006
+        host=A named-mustNotMove  wpt__css-anchor-position__anchor-name-007
+  U1    host=i CARRIER            wpt__css-anchor-position__anchor-position-multicol-004
+  U1    host=i CARRIER            wpt__css-anchor-position__anchor-position-multicol-nested-001
+  U1    host=i complement         wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3
+  U1    host=i complement         wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4
+  U1    host=i named-mustNotMove  wpt__css-break__block-end-aligned-abspos-nested
+  U1    host=i complement         wpt__css-counter-styles__counter-suffix
+        host=A named-mustNotMove  wpt__css-flexbox__abspos__position-absolute-containing-block-001
+        host=A named-mustNotMove  wpt__css-flexbox__abspos__position-absolute-containing-block-002
+        host=A named-mustNotMove  wpt__css-gaps__flex__flex-gap-decorations-020
+        host=A named-mustNotMove  wpt__css-gaps__flex__flex-gap-decorations-021
+        host=A named-mustNotMove  wpt__css-images__conic-gradient-line-height-relative-units-003
+        host=A named-mustNotMove  wpt__css-images__conic-gradient-line-height-relative-units-004
+        host=A named-mustNotMove  wpt__css-masking__clip-path__clip-path-circle-closest-corner
+        host=A named-mustNotMove  wpt__css-masking__clip-path__clip-path-circle-farthest-corner
+        host=A named-mustNotMove  wpt__css-masking__clip-path__clip-path-ellipse-closest-farthest-corner
+        host=A named-mustNotMove  wpt__css-position__absolute-pos-box-inside-fixed-pos-box-with-changing-height
+        host=A named-mustNotMove  wpt__css-position__hypothetical-dynamic-change-001
+        host=A named-mustNotMove  wpt__css-position__hypothetical-dynamic-change-002
+  U1    host=i named-mustNotMove  wpt__css-position__position-absolute-scrollable-overflow-zero
+        host=A complement         wpt__css-position__position-fixed-scroll-nested-fixed
+  U1    host=i named-mustNotMove  wpt__css-text-decor__text-decoration-subelements-002
+  U1    host=i named-mustNotMove  wpt__css-text__bidi__bidi-lines-002
+  U1 U2 host=i CARRIER            wpt__css-text__bidi__bidi-tab-001
+  U1    host=i named-mustNotMove  wpt__css-text__boundary-shaping__boundary-shaping-009
+     U2 host=i CARRIER            wpt__css-text__hyphens__hyphenate-character-005
+  U1    host=i named-mustNotMove  wpt__css-transforms__backface-visibility-hidden-004
+        host=A named-mustNotMove  wpt__css-transforms__css-transform-3d-transform-style
+        host=A named-mustNotMove  wpt__css-transforms__css-transform-scale-001-manual
+        host=A named-mustNotMove  wpt__css-transforms__css-transform-scale-002
+        host=A named-mustNotMove  wpt__css-ui__box-sizing-001
+        host=A named-mustNotMove  wpt__css-ui__box-sizing-003
+        host=A named-mustNotMove  wpt__css-ui__box-sizing-005
+        host=A named-mustNotMove  wpt__css-view-transitions__content-with-transparent-background
+     U2 host=A CARRIER            wpt__css-writing-modes__dynamic-offset-rtl-001
+     U2 host=A CARRIER            wpt__css-writing-modes__dynamic-offset-rtl-002
+        host=A named-mustNotMove  wpt__css-writing-modes__dynamic-offset-vrl-001
+        host=A named-mustNotMove  wpt__css-writing-modes__dynamic-offset-vrl-002
+     U2 host=A CARRIER            wpt__css-writing-modes__dynamic-offset-vrl-rtl-001
+     U2 host=A CARRIER            wpt__css-writing-modes__dynamic-offset-vrl-rtl-002
+        host=A named-mustNotMove  wpt__filter-effects__backdrop-filter-basic
+        host=A complement         wpt__filter-effects__backdrop-filter-basic-blur
+        host=A named-mustNotMove  wpt__filter-effects__backdrop-filter-basic-opacity
+        host=A named-mustNotMove  wpt__filter-effects__backdrop-filter-clipped
+        host=A named-mustNotMove  wpt__filter-effects__backdrop-filter-fixed-clip
+        host=A named-mustNotMove  wpt__filter-effects__backdrop-filter-isolation-fixed
+        host=A named-mustNotMove  wpt__filter-effects__backdrop-filter-isolation-isolate
+        host=A named-mustNotMove  wpt__filter-effects__backdrop-filter-plus-filter
+  U1    host=i named-mustNotMove  wpt__selectors__dir-selector-change-003
+  U1    host=i named-mustNotMove  wpt__selectors__dir-selector-change-004
+  U1 U2 host=i CARRIER            wpt__selectors__dir-style-02a
+carriers outside my U1|U2: []
+my U1|U2 outside carriers and outside the named/prediction lists: ['wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3', 'wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4', 'wpt__css-counter-styles__counter-suffix']
+lane-census U1 controls (13): 13
+my U1|U2 outside carriers AND outside the lane census controls: ['wpt__css-transforms__backface-visibility-hidden-004']

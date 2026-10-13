@@ -1,0 +1,10 @@
+filter-effects/backdrop-filter-nested-border-radius-clip.html android    windows 3: changed px by capture class {'AA': 97, 'green': 1146, 'blue66': 6}
+                                                                         base→capture {('AA', 'AA'): 87, ('pink', 'green'): 1146, ('pink', 'AA'): 10, ('blue66', 'blue66'): 6}
+filter-effects/backdrop-filter-nested-border-radius-clip-2.html android  windows 3: changed px by capture class {'grey204': 6, 'AA': 57, 'green': 576}
+                                                                         base→capture {('AA', 'grey204'): 6, ('AA', 'AA'): 57, ('pink', 'green'): 576}
+filter-effects/backdrop-filter-nested-border-radius-clip-4.html android  windows 3: changed px by capture class {'AA': 53, 'green': 398}
+                                                                         base→capture {('AA', 'AA'): 51, ('pink', 'green'): 398, ('blue66', 'AA'): 2}
+filter-effects/backdrop-filter-nested-border-radius-clip-3.html android  windows 3: changed px by capture class {'green': 1413, 'AA': 146, 'grey204': 555, 'white': 3, 'blue66': 4}
+                                                                         base→capture {('grey204', 'green'): 768, ('AA', 'green'): 34, ('pink', 'green'): 92, ('grey204', 'AA'): 30, ('grey204', 'grey204'): 4, ('AA', 'grey204'): 24, ('blue66', 'grey204'): 527, ('blue66', 'AA'): 80, ('blue66', 'green'): 519, ('AA', 'AA'): 36, ('white', 'white'): 3, ('blue66', 'blue66'): 4}
+css-text/bidi/bidi-tab-001.html android                                  windows 8: changed px by capture class {'white': 173, 'yellowFF': 451, 'AA': 312, 'blueFF': 112}
+                                                                         base→capture {('yellowFF', 'white'): 60, ('blueFF', 'yellowFF'): 111, ('yellowFF', 'AA'): 285, ('yellowFF', 'blueFF'): 112, ('blueFF', 'AA'): 27, ('yellowFF', 'yellowFF'): 46, ('white', 'yellowFF'): 60, ('AA', 'yellowFF'): 234, ('AA', 'white'): 78, ('blueFF', 'white'): 28, ('white', 'white'): 7}

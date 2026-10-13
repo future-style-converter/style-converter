@@ -1,0 +1,7 @@
+        result = FilterApplier.applyForegroundFilters(result, config.filters)
+
+        return result
+    }
+
+    /**
+     * Apply all effects to a modifier, with support for rounded corner shadows.

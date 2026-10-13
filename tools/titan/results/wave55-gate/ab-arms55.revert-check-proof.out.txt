@@ -1,0 +1,14 @@
+# ab-arms55.revert-check-proof — 2026-10-11T18:50:22Z; runner sha256 5cd6fccbc928768d…
+## the runner's revert_check (current bytes)
+  as required  R1 'W U' — the arm INCLUDES W (rewrites U's line); not a chain (W^ = X): the cumulative reverse applies — rc 0
+  as required  R2 'U' alone with W on the tree: refused (the reverse of U no longer applies) — rc 1: error: patch failed: src/a.txt:1 error: src/a.txt: patch does not apply 
+  as required  R3 'B N' — N creates n.txt, B extends it (Y between): the cumulative reverse applies — rc 0
+  as required  R4 'N' alone with B on the tree: refused — rc 1: error: patch failed: src/n.txt:1 error: src/n.txt: patch does not apply 
+  as required  R4b 'W U' listed parent first ('U W'): the cumulative order is the arms file's — refused — rc 1: error: patch failed: src/a.txt:1 error: src/a.txt: patch does not apply 
+## R5 MUTATION: the round-1 per-commit check (each reverse alone against the current tree)
+  as required  R5a M-onebyone refuses 'W U' (the defect: drop-L4-U2 with an -S1 fix on U2) — rc 1: error: patch failed: src/a.txt:1 error: src/a.txt: patch does not apply 
+  as required  R5b M-onebyone refuses 'B N' (the defect: drop-NB-ios with NB-ios-b landed) — rc 1: error: patch failed: src/n.txt:1 error: src/n.txt: patch does not apply 
+## R6 nothing written
+  as required  R6 the current tree is byte-identical after every check (31d28145fac2)
+  as required  R6 no ab-arms55-rc.* export dir left behind
+ab-arms55.revert-check-proof: every check as required

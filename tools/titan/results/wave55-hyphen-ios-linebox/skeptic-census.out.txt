@@ -1,0 +1,85 @@
+run wave54-final: inherited set parsed (42 types); declared-normal text runs 58 in 18 documents
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__2__3-567 | default | 16.0 | declared | 19.3594 | 20 | None | DECLINED-vertical |  | closed rtl
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__2__2-566 | default | 16.0 | declared | 19.3594 | 20 | None | DECLINED-vertical |  | closed ltr
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__2__1__1-565 | default | 16.0 | declared | 19.3594 | 20 | None | DECLINED-vertical |  | open rtl
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__2__1__0-564 | default | 16.0 | declared | 19.3594 | 20 | None | DECLINED-vertical |  | closed rtl
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__2__0__1-562 | default | 16.0 | declared | 19.3594 | 20 | None | DECLINED-vertical |  | open ltr
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__2__0__0-561 | default | 16.0 | declared | 19.3594 | 20 | None | DECLINED-vertical |  | closed ltr
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__1__3-558 | default | 16.0 | declared | 19.3594 | 20 | None | DECLINED-vertical |  | closed rtl
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__1__2-557 | default | 16.0 | declared | 19.3594 | 20 | None | DECLINED-vertical |  | closed ltr
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__1__1__1-556 | default | 16.0 | declared | 19.3594 | 20 | None | DECLINED-vertical |  | open rtl
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__1__1__0-555 | default | 16.0 | declared | 19.3594 | 20 | None | DECLINED-vertical |  | closed rtl
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__1__0__1-553 | default | 16.0 | declared | 19.3594 | 20 | None | DECLINED-vertical |  | open ltr
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__1__0__0-552 | default | 16.0 | declared | 19.3594 | 20 | None | DECLINED-vertical |  | closed ltr
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__0__3-549 | default | 16.0 | declared | 19.3594 | 20 | 1 | SAME |  | closed rtl
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__0__2-548 | default | 16.0 | declared | 19.3594 | 20 | 1 | SAME |  | closed ltr
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__0__1__1-547 | default | 16.0 | declared | 19.3594 | 20 | 1 | SAME |  | open rtl
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__0__1__0-546 | default | 16.0 | declared | 19.3594 | 20 | 1 | SAME |  | closed rtl
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__0__0__1-544 | default | 16.0 | declared | 19.3594 | 20 | 1 | SAME |  | open ltr
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles | counter-style-at-rule__disclosure-styles__0__0__0-543 | default | 16.0 | declared | 19.3594 | 20 | 1 | SAME |  | closed ltr
+  wpt__css-tables__anonymous-table-ws-001 | wpt__css-tables__anonymous-table-ws-001__1-066 | monospace | 16.0 | declared | 18.625 | 19 | 1 | SAME |  | a b
+  wpt__css-text-decor__text-decoration-dotted-001 | wpt__css-text-decor__text-decoration-dotted-001__3-045 | default | 92.0 | declared | 111.3164 | 111 | 1 | MOVES(1-line) |  | fooשלוםbaz
+  wpt__css-text-decor__text-decoration-dotted-001 | wpt__css-text-decor__text-decoration-dotted-001__2-044 | default | 92.0 | declared | 111.3164 | 111 | 1 | MOVES(1-line) |  | fooשלוםbaz
+  wpt__css-text-decor__text-decoration-dotted-001 | wpt__css-text-decor__text-decoration-dotted-001__1-043 | default | 92.0 | declared | 111.3164 | 111 | 1 | MOVES(1-line) |  | fooשלוםbaz
+  wpt__css-text-decor__text-decoration-dotted-002 | wpt__css-text-decor__text-decoration-dotted-002__3-049 | default | 92.0 | declared | 111.3164 | 111 | 1 | MOVES(1-line) |  | foobarbaz
+  wpt__css-text-decor__text-decoration-dotted-002 | wpt__css-text-decor__text-decoration-dotted-002__2-048 | default | 92.0 | declared | 111.3164 | 111 | 1 | MOVES(1-line) |  | foobarbaz
+  wpt__css-text-decor__text-decoration-dotted-002 | wpt__css-text-decor__text-decoration-dotted-002__1-047 | default | 92.0 | declared | 111.3164 | 111 | 1 | MOVES(1-line) |  | foobarbaz
+  wpt__css-text__boundary-shaping__boundary-shaping-001 | wpt__css-text__boundary-shaping__boundary-shaping-001__3-087 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | ice
+  wpt__css-text__boundary-shaping__boundary-shaping-001 | wpt__css-text__boundary-shaping__boundary-shaping-001__2-086 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | f
+  wpt__css-text__boundary-shaping__boundary-shaping-001 | wpt__css-text__boundary-shaping__boundary-shaping-001__1-085 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | of
+  wpt__css-text__boundary-shaping__boundary-shaping-002 | wpt__css-text__boundary-shaping__boundary-shaping-002__3-091 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | ice
+  wpt__css-text__boundary-shaping__boundary-shaping-002 | wpt__css-text__boundary-shaping__boundary-shaping-002__2-090 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | f
+  wpt__css-text__boundary-shaping__boundary-shaping-002 | wpt__css-text__boundary-shaping__boundary-shaping-002__1-089 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | of
+  wpt__css-text__boundary-shaping__boundary-shaping-003 | wpt__css-text__boundary-shaping__boundary-shaping-003__3-095 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | ice
+  wpt__css-text__boundary-shaping__boundary-shaping-003 | wpt__css-text__boundary-shaping__boundary-shaping-003__2-094 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | f
+  wpt__css-text__boundary-shaping__boundary-shaping-003 | wpt__css-text__boundary-shaping__boundary-shaping-003__1-093 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | of
+  wpt__css-text__boundary-shaping__boundary-shaping-004 | wpt__css-text__boundary-shaping__boundary-shaping-004__3-099 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | ice
+  wpt__css-text__boundary-shaping__boundary-shaping-004 | wpt__css-text__boundary-shaping__boundary-shaping-004__2-098 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | f
+  wpt__css-text__boundary-shaping__boundary-shaping-004 | wpt__css-text__boundary-shaping__boundary-shaping-004__1-097 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | of
+  wpt__css-text__boundary-shaping__boundary-shaping-005 | wpt__css-text__boundary-shaping__boundary-shaping-005__3-103 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | ice
+  wpt__css-text__boundary-shaping__boundary-shaping-005 | wpt__css-text__boundary-shaping__boundary-shaping-005__2-102 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | f
+  wpt__css-text__boundary-shaping__boundary-shaping-005 | wpt__css-text__boundary-shaping__boundary-shaping-005__1-101 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | of
+  wpt__css-text__boundary-shaping__boundary-shaping-006 | wpt__css-text__boundary-shaping__boundary-shaping-006__3-110 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | ice
+  wpt__css-text__boundary-shaping__boundary-shaping-006 | boundary-shaping__boundary-shaping-006__0__0__0__0-109 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | f
+  wpt__css-text__boundary-shaping__boundary-shaping-006 | wpt__css-text__boundary-shaping__boundary-shaping-006__1-105 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | of
+  wpt__css-text__boundary-shaping__boundary-shaping-007 | wpt__css-text__boundary-shaping__boundary-shaping-007__3-117 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | ice
+  wpt__css-text__boundary-shaping__boundary-shaping-007 | boundary-shaping__boundary-shaping-007__0__0__0__0-116 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | f
+  wpt__css-text__boundary-shaping__boundary-shaping-007 | wpt__css-text__boundary-shaping__boundary-shaping-007__1-112 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | of
+  wpt__css-text__boundary-shaping__boundary-shaping-008 | wpt__css-text__boundary-shaping__boundary-shaping-008__3-121 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | ice
+  wpt__css-text__boundary-shaping__boundary-shaping-008 | wpt__css-text__boundary-shaping__boundary-shaping-008__2-120 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | f
+  wpt__css-text__boundary-shaping__boundary-shaping-008 | wpt__css-text__boundary-shaping__boundary-shaping-008__1-119 | test | 36.0 | declared | 41.04 | 41 | 1 | MOVES(1-line) |  | of
+  wpt__css-text__boundary-shaping__boundary-shaping-010 | wpt__css-text__boundary-shaping__boundary-shaping-010__4-159 | default | 36.0 | declared | 43.5586 | 44 | 1 | SAME |  | ام
+  wpt__css-text__boundary-shaping__boundary-shaping-010 | wpt__css-text__boundary-shaping__boundary-shaping-010__3-158 | default | 36.0 | declared | 43.5586 | 44 | 1 | SAME |  | سل
+  wpt__css-text__boundary-shaping__boundary-shaping-010 | wpt__css-text__boundary-shaping__boundary-shaping-010__2-157 | default | 36.0 | declared | 43.5586 | 44 | 1 | SAME |  | ال
+  wpt__css-text__hyphens__hyphenate-character-001 | wpt__css-text__hyphens__hyphenate-character-001__1-177 | monospace | 16.0 | declared | 18.625 | 19 | 4 | MOVES(multi) | HYPHENATION->N>=2 | im­ple­men­ta­tion ini­tial­iza­tion re­
+  wpt__css-text__hyphens__hyphenate-character-002 | wpt__css-text__hyphens__hyphenate-character-002__1-185 | monospace | 16.0 | declared | 18.625 | 19 | 4 | MOVES(multi) | HYPHENATION->N>=2 | implementation initialization realizatio
+  wpt__css-text__hyphens__hyphenate-character-003 | wpt__css-text__hyphens__hyphenate-character-003__1-193 | monospace | 16.0 | declared | 18.625 | 19 | 4 | MOVES(multi) | HYPHENATION->N>=2 | im­ple­men­ta­tion ini­tial­iza­tion re­
+  wpt__css-text__hyphens__hyphenate-character-004 | wpt__css-text__hyphens__hyphenate-character-004__1-201 | monospace | 16.0 | declared | 18.625 | 19 | 4 | MOVES(multi) | HYPHENATION->N>=2 | im­ple­men­ta­tion ini­tial­iza­tion re­
+  wpt__css-text__hyphens__hyphens-vertical-001 | wpt__css-text__hyphens__hyphens-vertical-001__3-321 | monospace | 16.0 | declared | 18.625 | 19 | None | DECLINED-vertical |  | hyphen‐ation
+  wpt__css-text__hyphens__hyphens-vertical-001 | wpt__css-text__hyphens__hyphens-vertical-001__2-320 | monospace | 16.0 | declared | 18.625 | 19 | None | DECLINED-vertical |  | hyphen­ation
+
+capture carriers (iOS, MOVES): 14
+  wpt__css-text-decor__text-decoration-dotted-001
+  wpt__css-text-decor__text-decoration-dotted-002
+  wpt__css-text__boundary-shaping__boundary-shaping-001
+  wpt__css-text__boundary-shaping__boundary-shaping-002
+  wpt__css-text__boundary-shaping__boundary-shaping-003
+  wpt__css-text__boundary-shaping__boundary-shaping-004
+  wpt__css-text__boundary-shaping__boundary-shaping-005
+  wpt__css-text__boundary-shaping__boundary-shaping-006
+  wpt__css-text__boundary-shaping__boundary-shaping-007
+  wpt__css-text__boundary-shaping__boundary-shaping-008
+  wpt__css-text__hyphens__hyphenate-character-001
+  wpt__css-text__hyphens__hyphenate-character-002
+  wpt__css-text__hyphens__hyphenate-character-003
+  wpt__css-text__hyphens__hyphenate-character-004
+in-radius SAME (box unchanged by the model): 3
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles
+  wpt__css-tables__anonymous-table-ws-001
+  wpt__css-text__boundary-shaping__boundary-shaping-010
+in-radius DECLINED only: 1
+  wpt__css-text__hyphens__hyphens-vertical-001  DECLINED-vertical
+
+vs expectations.json captureCarriers.ios (14): missing-from-plan []; plan-not-in-census []
+vs revertUnits.NB-ios.captures.ios (14): equal=True
+web [] android [] wire []

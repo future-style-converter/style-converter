@@ -1,0 +1,16 @@
+{
+ "name": "I6-no-oof-test",
+ "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/spacing/UAPositionedHeadingMargin.swift",
+ "pre": "e9abac226c39167b1a1dc7d5b150a47ab3e963a2d252322da36e3bf6f2e18d80",
+ "mutated": "3d97d0ff999832b6c36bf6117b52c37dc5785e1b45ae970da4cca0193b303199",
+ "post": "e9abac226c39167b1a1dc7d5b150a47ab3e963a2d252322da36e3bf6f2e18d80",
+ "red_rc": 65,
+ "red_failures": [
+  "UAPositionedHeadingMarginTests.testInFlowHeadingsAreUnchanged",
+  "UAPositionedHeadingMarginTests.testRelativeStickyStaticAreUnchangedAndFixedFires"
+ ],
+ "red_counts": "Executed 39, 4 failures",
+ "green_rc": 0,
+ "green_counts": "Executed 39, 0 failures",
+ "verdict": "RED-THEN-GREEN"
+}

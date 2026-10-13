@@ -1,0 +1,13 @@
+# fix-r2 generator dry runs (plan-build.py --out <scratch>; nothing written beside the generator) — expectations.json sha256 56dbcfc021c3ae60…
+## process-holes S2: the L5 LRM re-cut is a pre-registered contingency
+  L5 U1-ios-LRM row: exit 0 — U1-ios revertOrder ['U1-ios-LRM', 'U1-ios'] · U1-ios-LRM a revert unit: True · contingencyLanded ['U1-ios-LRM']
+  L1 NB-ios-b control: exit 0 — NB-ios revertOrder ['NB-ios-b', 'NB-ios'] · drop-NB-ios drops ['NB-ios-b-S1*', 'NB-ios-b', 'NB-ios-S1*', 'NB-ios']
+  an unregistered contingency row: exit 1 — AssertionError: contingency row L5-counter-suffix-rows U1-ios-XYZ: not a pre-registered contingencyUnits entry (L1 NB-ios-b, L5 U1-ios-LRM)
+## process-holes S7: GO-SMALL before the landing only
+  --go-small: exit 0 — drop-L4-U2 units ['U2-ios'] platforms ['ios'] drops ['U2-ios-S1*', 'U2-ios']
+  --go-small + a U2-android revert row: exit 1 — AssertionError: GO-SMALL is decided BEFORE the landing only (round 2, process-holes S7): once U2-android has landed, the same outcome is a rule-4 revert row of U2-android — never
+  the same row WITHOUT GO-SMALL (the post-landing path): exit 0 — drop-L4-U2 units ['U2-ios'] · narrowedBy U2-android reverted at wave55-pre (rule 4: synthetic)
+## nits taken (generator-truth N5 / process-holes N1): a reverted row is checked by name
+  a row naming an -S1 commit as its unit: exit 1 — AssertionError: reverted row L4-ua-heading-margin U2-android-S1: not a revert unit (one row per UNIT; its -S1 fix commits go in that row's `commit`)
+  a row without its rule: exit 1 — AssertionError: probe-decisions/reverted.json row needs lane / unit / run / rule: {'lane': 'L4-ua-heading-margin', 'unit': 'U2-android', 'run': 'wave55-pre'}
+## the plan dir's status before / after the dry runs: 0bef62daabc7 / 0bef62daabc7 (identical); expectations.json sha256 56dbcfc021c3ae60…

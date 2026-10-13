@@ -1,0 +1,4 @@
+fixed replay: found
+  fixed          [S] dynamic-offset-vrl-rtl-001 android (report): PASS — [S] dynamic-offset-vrl-rtl-001 android magenta (86, 26, 95, 35) n 100 → GEOMETRY OK
+  parent-erased  [S] dynamic-offset-vrl-rtl-001 android (report): PASS — [S] dynamic-offset-vrl-rtl-001 android magenta (86, 26, 95, 35) n 100 → GEOMETRY OK
+  parent+3x      [S] dynamic-offset-vrl-rtl-001 android (report): PASS — [S] dynamic-offset-vrl-rtl-001 android magenta (86, 26, 95, 35) n 100 → GEOMETRY OK

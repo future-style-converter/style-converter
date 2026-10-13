@@ -1,0 +1,10 @@
+DejaVu Sans Mono (iOS monospace pin == Menlo): upem 2048 hhea ascent 1901 descent -483 lineGap 0
+    13px  asc 12.0669 desc 3.0659 gap 0.0000  raw (UIFont.lineHeight) 15.1328  ceil(raw) 16  Blink round-each 15  per-line Δ -0.1328  N=1..6 box today ceil(N·raw) [16, 31, 46, 61, 76, 91] vs Blink N·L [15, 30, 45, 60, 75, 90]
+    16px  asc 14.8516 desc 3.7734 gap 0.0000  raw (UIFont.lineHeight) 18.6250  ceil(raw) 19  Blink round-each 19  per-line Δ +0.3750  N=1..6 box today ceil(N·raw) [19, 38, 56, 75, 94, 112] vs Blink N·L [19, 38, 57, 76, 95, 114]
+    20px  asc 18.5645 desc 4.7168 gap 0.0000  raw (UIFont.lineHeight) 23.2812  ceil(raw) 24  Blink round-each 24  per-line Δ +0.7188  N=1..6 box today ceil(N·raw) [24, 47, 70, 94, 117, 140] vs Blink N·L [24, 48, 72, 96, 120, 144]
+Inter (iOS default design): upem 2048 hhea ascent 1984 descent -494 lineGap 0
+    16px  asc 15.5000 desc 3.8594 gap 0.0000  raw (UIFont.lineHeight) 19.3594  ceil(raw) 20  Blink round-each 20  (exact .5 present: lroundf rounds UP)  per-line Δ +0.6406  N=1..6 box today ceil(N·raw) [20, 39, 59, 78, 97, 117] vs Blink N·L [20, 40, 60, 80, 100, 120]
+    36px  asc 34.8750 desc 8.6836 gap 0.0000  raw (UIFont.lineHeight) 43.5586  ceil(raw) 44  Blink round-each 44  per-line Δ +0.4414  N=1..6 box today ceil(N·raw) [44, 88, 131, 175, 218, 262] vs Blink N·L [44, 88, 132, 176, 220, 264]
+    92px  asc 89.1250 desc 22.1914 gap 0.0000  raw (UIFont.lineHeight) 111.3164  ceil(raw) 112  Blink round-each 111  per-line Δ -0.3164  N=1..6 box today ceil(N·raw) [112, 223, 334, 446, 557, 668] vs Blink N·L [111, 222, 333, 444, 555, 666]
+Linux Libertine (boundary-shaping "test" @font-face): upem 1000 hhea ascent 894 descent -246 lineGap 0
+    36px  asc 32.1840 desc 8.8560 gap 0.0000  raw (UIFont.lineHeight) 41.0400  ceil(raw) 42  Blink round-each 41  per-line Δ -0.0400  N=1..6 box today ceil(N·raw) [42, 83, 124, 165, 206, 247] vs Blink N·L [41, 82, 123, 164, 205, 246]

@@ -1,0 +1,535 @@
+{
+  "_snapshot": "corpus-v6.21",
+  "_note": "Wave 55 (2026-10-11 → 2026-10-13; the closing gate wave55-final launched on tree 5a4ab5d4; its hash of record was read with HEAD at 26cd6610, a records-only commit). Seven lanes from BACKLOG's refilled obligations (f)-(o): L1 hyphen-ios-linebox (NB-ios, Blink's rounded line box on iOS), L2 cbb-android (ContainingBlockBands re-landed + PercentContentBoxBand), L3 positioned-parent-slot (PositionedParentSlotGate + PositionedParentRtlOrigin), L4 ua-heading-margin (the UA .67em-family block margin of an out-of-flow heading + the held folded-host face, both natives), L5 counter-suffix-rows (ListMarkerBidi, ListMarkerSuffixGap outside / inside on both natives, tabular digits on iOS, the SUFFIX NOTE), L6 android-paint-order (BehindContentBorder, the legacy Compose border sides behind content, the FO pin), L7 instruments (wire-differential, ab-arms55, spec 03 §4.1 citations, 21 pins, the marker-paint decline). 27 units landed (b4f64963..5bbc2a41) after a combined-tree skeptic (CLAIM-HOLDS, no must-fix), on a full sweep green.\n\nSTAGE 1 (wave55-pre, 9 sections, tree 0fd26479) decided five reverts under the pre-registered rules: L1 NB-ios (rule 1: hyphenate-character-002 ios P 0.9534 → f 0.9165, a lost carrier — the no-visible-hyphen host's lines tighten under the rounded line box; the 001 / 003 / 004 gains, 004 a flip, given up with it) and all four L4 units (rule 3: inset-005 / -006 below the 0.95 floor on both natives, ios 0.93 / 0.9284, android 0.9147 ×2; rule 4: the [M] band 5 px high — the 2em face is present now but the whole heading sits at cap top y138 vs the ref's y143 on both natives; the probe-time arm drop-L4-U2 measured U1 alone at the expectation's arm M to the third decimal; 014's f → P flips on both natives withdrawn with the units, their face-ink reads WRONG). L2, L3, L5, L6 kept after recorded looks on the cross-rasterizer and residual-only lines: the L3 rtl-rows component read compared with a base whose own picture was the defect (the stray '0' outside the box) and gained the decided device picture as a second reference; the L5 letter-profile read (0.80 vs the ref's alef, 0.88 vs its bet, on the RIGHT picture) gained the device's own letters plus a same-capture duplicate read; five device pictures became residual window sources (recorded, re-derived on --check; a window pixel equal to the decided picture is accepted at tolerance 0); the [K] ios zone starts at x137 (U3-ios's period fringe at x136, 1 px outside the Catalyst-measured boxes). Every edit proven able to fail on the device pictures (19 fakes, 0 violations) and on the standing fake sets (probes-selfcheck HOLDS, 28 / 28 gating keys able to fail). STAGE 2 (wave55-probe, 26 sections, tree aaf51b1b): no rule fired; the three L6 may-move stems beyond the band (descendant-static-position-001 / -002, break-inside-avoid-child android) show the pre-registered picture — the border band now under its child, as the ref — and were encoded as recorded looks (probe-decisions/looks.json) once adjudicate's R5, which has no may-move class, failed the closing record on exactly them.\n\nCLOSING GATE wave55-final: 30 / 30 sections, full columns; hash of record android ecafaf0d MATCH, ios ff158a4e MATCH (= the probe's digests: no runtime source changed between the probe and the gate). The fixture net: refused once on the corpus run's own teardown load (never --force), then exit 7 on a transient empty Android column of composition-test (attempt 1), then exit 0 on all nine fixtures with a logcat tap showing no harness crash (attempt 2; R8). Read-out: R6 geometry exit 0 (gating 28 / 28), union control HOLDS (web identical; ios 4 changed = 4 carriers; android 82 changed = 49 carriers + 32 may-move + 1 ring-fenced; wire identical), probe → final rc 0, adjudicate R1–R5 hold after the looks, probe-readout 0 leak signals — FINAL READ-OUT HOLDS. PER-CELL DIFF wave55-open → wave55-final: gained 2 (selectors/dir-style-02a android f 0.9425 → P 0.9854; filter-effects/backdrop-filter-nested-border-radius-clip-3 android f 0.9574 → P 0.9999), LOST 0, 14 movers ≥ 0.005, every one a carrier or a looked-at may-move stem, all Android: clip / -2 / -4 to 1.000 / 1.000 / 0.9999; safe-001 / -002 0.9943 / 0.9932; descendant-static-position-001 / -002 0.9991 / 0.9724 and break-inside-avoid-child 0.9872 (the three looked-at may-move stems); abspos-autopos-htb-rtl 0.9966; bidi-tab-001 0.9929; anchor-position-multicol-nested-001 f 0.9688 and the three semi-replaced stretch-* L2 carriers, up and still f. Read under the threshold: dynamic-offset-rtl-001 / vrl-rtl-001 android to 1.000, counter-suffix ios 0.992 / android 0.9924, css3-counter-styles-005 ios 0.9971, and the ring-fenced basic-blur android +0.0036 (report only). Cell review: 57 cells read on the PNGs (12 first readers + 51 adversarial second readers): FAITHFUL 21 · DEGENERATE 25 · HONEST_FAIL 11; the two gains and the wave's claimed movers FAITHFUL on both reads; one label change — counter-suffix ios FAITHFUL → DEGENERATE on row 1's proportional '1', the pre-registered [L] report row (final/cell-review.json). Arm drop-L6-U2: 7 / 7 sections, android MATCH / ios MATCH; dropping U2 against the final moves exactly its attributed cells (safe-001 / -002 −0.0324 / −0.0297, descendant-static-position-002 / -001 −0.0123 / −0.0099, basic-blur −0.0036 ring-fenced), no P → f revealed (final/ab-drop-L6-U2.txt).\n\nHONEST LOSSES AND MISSES: L1's NB-ios and all of L4 reverted (five of 27 units; their predicted gains — 004 ios, 014 ios / android, 005 / 006 — not delivered); the instrument's stage-1 misses are named in PLAN §10 items 10-12 and ship-notes §1 item 6 (a same-renderer read whose reference was the defect; a cross-font letter profile; a Catalyst-measured carve-out 1 px short on the device; residual windows for three-colour corners; --check re-deriving without its device sources). Instrument events: the readers' records had to be regenerated or adapted after the stage-1 regeneration (final55-analysis.gen, readers-calibration, probes-selfcheck's withdrawn keys, fix-r6.zones' recorded --also sources); the may-move look needed a generator input the plan had not provided (looks.json); the fixture net's first attempt lost its Android column on one fixture (transient).",
+  "artifact": "tools/titan/runs/wave55-final (gitignored)",
+  "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+  "devSha": "0d0d3a3d+wave55 (gate tree 26cd6610)",
+  "date": "2026-10-13",
+  "bucket": "A",
+  "passThreshold": 0.95,
+  "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence + coverage-RATIO (max/min>2) + colorDivergent-with-dE>=2.3 + extraction-wall exclusion + post-load/structure re-admission (corpus-v5.0 gate) + ref-unachievable exclusion (v5.4) + per-platform native-font-parity exclusion (v5.5) + harness-overhaul gate contract (exits 3/4/5/6; pixelmatch 0.02+AA; fuzzy in WPT-native units) + per-cell absence-only exclusion (v6.18, wave 52 L12 Decision A: a PASS against a reference with ink under the presence floor is undiscriminating and leaves the denominator — inject-wpt-block.mjs isAbsenceOnly / applyAbsenceOnlyGate; a FAIL there is still a measurement and stays)",
+  "sampling": "30 sections x 48 bucket-A tests (depth-48)",
+  "canvasBoundary": "white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin (v6.18, wave 52 L12: the canvas background sits on :where(html) only, and the UA body margin is applied when the test declares a body margin and the reference does not; 23 references re-rendered, 1412 cloned byte-identical)",
+  "totals": {
+    "web": {
+      "passing": 1243,
+      "measured": 1372
+    },
+    "ios": {
+      "passing": 1131,
+      "measured": 1362
+    },
+    "android": {
+      "passing": 1130,
+      "measured": 1362
+    }
+  },
+  "sections": {
+    "CSS2": {
+      "web": {
+        "passing": 44,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 47
+      },
+      "android": {
+        "passing": 41,
+        "measured": 47
+      }
+    },
+    "css-anchor-position": {
+      "web": {
+        "passing": 30,
+        "measured": 32
+      },
+      "ios": {
+        "passing": 24,
+        "measured": 32
+      },
+      "android": {
+        "passing": 27,
+        "measured": 32
+      }
+    },
+    "css-backgrounds": {
+      "web": {
+        "passing": 26,
+        "measured": 29
+      },
+      "ios": {
+        "passing": 26,
+        "measured": 29
+      },
+      "android": {
+        "passing": 26,
+        "measured": 29
+      }
+    },
+    "css-break": {
+      "web": {
+        "passing": 37,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 29,
+        "measured": 48
+      },
+      "android": {
+        "passing": 32,
+        "measured": 48
+      }
+    },
+    "css-cascade": {
+      "web": {
+        "passing": 37,
+        "measured": 41
+      },
+      "ios": {
+        "passing": 35,
+        "measured": 41
+      },
+      "android": {
+        "passing": 36,
+        "measured": 41
+      }
+    },
+    "css-color": {
+      "web": {
+        "passing": 43,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 43,
+        "measured": 48
+      },
+      "android": {
+        "passing": 44,
+        "measured": 48
+      }
+    },
+    "css-contain": {
+      "web": {
+        "passing": 48,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 48
+      },
+      "android": {
+        "passing": 41,
+        "measured": 48
+      }
+    },
+    "css-counter-styles": {
+      "web": {
+        "passing": 40,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 28,
+        "measured": 37
+      },
+      "android": {
+        "passing": 28,
+        "measured": 37
+      }
+    },
+    "css-display": {
+      "web": {
+        "passing": 45,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 47
+      },
+      "android": {
+        "passing": 41,
+        "measured": 47
+      }
+    },
+    "css-flexbox": {
+      "web": {
+        "passing": 46,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 45,
+        "measured": 47
+      },
+      "android": {
+        "passing": 45,
+        "measured": 47
+      }
+    },
+    "css-gaps": {
+      "web": {
+        "passing": 48,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 47,
+        "measured": 48
+      },
+      "android": {
+        "passing": 47,
+        "measured": 48
+      }
+    },
+    "css-grid": {
+      "web": {
+        "passing": 48,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 47,
+        "measured": 48
+      },
+      "android": {
+        "passing": 47,
+        "measured": 48
+      }
+    },
+    "css-images": {
+      "web": {
+        "passing": 43,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 35,
+        "measured": 47
+      },
+      "android": {
+        "passing": 35,
+        "measured": 47
+      }
+    },
+    "css-lists": {
+      "web": {
+        "passing": 42,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 48
+      },
+      "android": {
+        "passing": 41,
+        "measured": 48
+      }
+    },
+    "css-masking": {
+      "web": {
+        "passing": 42,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 42,
+        "measured": 47
+      },
+      "android": {
+        "passing": 41,
+        "measured": 47
+      }
+    },
+    "css-multicol": {
+      "web": {
+        "passing": 46,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 48
+      },
+      "android": {
+        "passing": 43,
+        "measured": 48
+      }
+    },
+    "css-overflow": {
+      "web": {
+        "passing": 46,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 47,
+        "measured": 47
+      },
+      "android": {
+        "passing": 46,
+        "measured": 47
+      }
+    },
+    "css-position": {
+      "web": {
+        "passing": 37,
+        "measured": 41
+      },
+      "ios": {
+        "passing": 33,
+        "measured": 41
+      },
+      "android": {
+        "passing": 33,
+        "measured": 41
+      }
+    },
+    "css-pseudo": {
+      "web": {
+        "passing": 33,
+        "measured": 42
+      },
+      "ios": {
+        "passing": 32,
+        "measured": 42
+      },
+      "android": {
+        "passing": 31,
+        "measured": 42
+      }
+    },
+    "css-sizing": {
+      "web": {
+        "passing": 47,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 44,
+        "measured": 48
+      },
+      "android": {
+        "passing": 45,
+        "measured": 48
+      }
+    },
+    "css-tables": {
+      "web": {
+        "passing": 44,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 36,
+        "measured": 47
+      },
+      "android": {
+        "passing": 37,
+        "measured": 47
+      }
+    },
+    "css-text": {
+      "web": {
+        "passing": 39,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 39,
+        "measured": 48
+      },
+      "android": {
+        "passing": 38,
+        "measured": 48
+      }
+    },
+    "css-text-decor": {
+      "web": {
+        "passing": 42,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 31,
+        "measured": 48
+      },
+      "android": {
+        "passing": 29,
+        "measured": 48
+      }
+    },
+    "css-transforms": {
+      "web": {
+        "passing": 46,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 46,
+        "measured": 47
+      },
+      "android": {
+        "passing": 43,
+        "measured": 47
+      }
+    },
+    "css-ui": {
+      "web": {
+        "passing": 45,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 42,
+        "measured": 48
+      },
+      "android": {
+        "passing": 41,
+        "measured": 48
+      }
+    },
+    "css-values": {
+      "web": {
+        "passing": 44,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 40,
+        "measured": 48
+      },
+      "android": {
+        "passing": 40,
+        "measured": 48
+      }
+    },
+    "css-view-transitions": {
+      "web": {
+        "passing": 32,
+        "measured": 45
+      },
+      "ios": {
+        "passing": 27,
+        "measured": 46
+      },
+      "android": {
+        "passing": 29,
+        "measured": 46
+      }
+    },
+    "css-writing-modes": {
+      "web": {
+        "passing": 36,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 30,
+        "measured": 48
+      },
+      "android": {
+        "passing": 27,
+        "measured": 48
+      }
+    },
+    "filter-effects": {
+      "web": {
+        "passing": 41,
+        "measured": 46
+      },
+      "ios": {
+        "passing": 37,
+        "measured": 46
+      },
+      "android": {
+        "passing": 37,
+        "measured": 46
+      }
+    },
+    "selectors": {
+      "web": {
+        "passing": 46,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 48
+      },
+      "android": {
+        "passing": 39,
+        "measured": 48
+      }
+    }
+  },
+  "perCellDiff": {
+    "against": "wave55-open (= wave54-final content on the same host: 1435 / 1435 captures byte-identical on web, iOS and Android, wire 1435 / 1435; corpus-v6.20 numbers exactly — wave55-gate/_note.md)",
+    "scorer": "node tools/titan/score-gate.mjs wave55-open wave55-final --watch tools/titan/results/wave55-plan/watchlist.txt --movers 0.005",
+    "gained": 2,
+    "lost": 0,
+    "newlyMeasured": 0,
+    "unmeasuredNow": 0,
+    "movers": 14,
+    "gainedCells": [
+      "filter-effects/css/filter-effects/backdrop-filter-nested-border-radius-clip-3.html android 0.9574 -> 0.9999",
+      "selectors/css/selectors/dir-style-02a.html android 0.9425 -> 0.9854"
+    ],
+    "lostCells": [],
+    "newlyMeasuredCells": [],
+    "unmeasuredNowCells": [],
+    "moverCells": [
+      "css-anchor-position/css/css-anchor-position/anchor-position-multicol-nested-001.html android 0.9573 -> 0.9688 (+0.0115)",
+      "css-flexbox/css/css-flexbox/abspos/abspos-autopos-htb-rtl.html android 0.9869 -> 0.9966 (+0.0097)",
+      "css-flexbox/css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html android 0.9619 -> 0.9943 (+0.0324)",
+      "css-flexbox/css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html android 0.9635 -> 0.9932 (+0.0297)",
+      "css-grid/css/css-grid/abspos/descendant-static-position-001.html android 0.9892 -> 0.9991 (+0.0099)",
+      "css-grid/css/css-grid/abspos/descendant-static-position-002.html android 0.9601 -> 0.9724 (+0.0123)",
+      "css-position/css/css-position/position-absolute-semi-replaced-stretch-button.html android 0.9739 -> 0.9843 (+0.0104)",
+      "css-position/css/css-position/position-absolute-semi-replaced-stretch-input.html android 0.4117 -> 0.4555 (+0.0438)",
+      "css-position/css/css-position/position-absolute-semi-replaced-stretch-other.html android 0.4396 -> 0.4685 (+0.0289)",
+      "css-text/css/css-text/bidi/bidi-tab-001.html android 0.9805 -> 0.9929 (+0.0124)",
+      "css-view-transitions/css/css-view-transitions/break-inside-avoid-child.html android 0.9735 -> 0.9872 (+0.0137)",
+      "filter-effects/css/filter-effects/backdrop-filter-nested-border-radius-clip-2.html android 0.9689 -> 1 (+0.0311)",
+      "filter-effects/css/filter-effects/backdrop-filter-nested-border-radius-clip-4.html android 0.977 -> 0.9999 (+0.0229)",
+      "filter-effects/css/filter-effects/backdrop-filter-nested-border-radius-clip.html android 0.9649 -> 1 (+0.0351)"
+    ],
+    "degenerateGains": [],
+    "instrumentOnly": [],
+    "probeReverts": [
+      "L1-hyphen-ios-linebox NB-ios (b7108a42 → 22c51ee9, wave55-pre): rule 1: lost carrier — css-text/hyphens/hyphenate-character-002.html ios P 0.9534 → f 0.9165 (rule 2 Δ-0.0369 too; predicted P ≈0.969); the 3 gating rows LINEBOX OK, the R1 signature absent (no NB-ios-b swap); PLAN §10 item 13 — 14 predictions withdrawn, 14 cells held to must-not-move",
+      "L4-ua-heading-margin U2-ios (1dc521c1 → 131cd6e1, wave55-pre): rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html ios f 0.93, -006 ios f 0.9284 (predicted P ≈0.966); 4: [M] 005 / 006 ios GEOMETRY WRONG (band 1 y129-173 vs ref y134-173: the 2em heading 5 px high); stage1Decision: a gating [M] FAIL reverts U1-<p> and U2-<p>; PLAN §10 item 14 — 3 predictions withdrawn, 3 cells held to must-not-move",
+      "L4-ua-heading-margin U1-ios (cac1d6a3 → adc05081, wave55-pre): rule 3 / 4 on the same rows as U2-ios (revertOrder U2-ios → U1-ios): the UA margin places the out-of-flow heading 5 px high on iOS ('the' cap top y138 vs the ref's y143); PLAN §10 item 14 — 4 predictions withdrawn, 4 cells held to must-not-move",
+      "L4-ua-heading-margin U2-android (69f95267 → db7b2417, wave55-pre): rule 3: below the 0.95 floor — css-text-decor/text-decoration-inset-005.html android f 0.9147, -006 android f 0.9147 (predicted P ≈0.967); 4: [M] 005 / 006 android GEOMETRY WRONG (band 1 (127, 169) vs ref (134, 173): the heading 5 px high, the super-/subscript offsets off at the 2em face); PLAN §10 item 14 — 3 predictions withdrawn, 3 cells held to must-not-move",
+      "L4-ua-heading-margin U1-android (85afc360 → 2b0e0b2b, wave55-pre): rule 3 / 4 on the same rows as U2-android (revertOrder U2-android → U1-android): the UA .67em-family block margin places the out-of-flow heading 5 px high on Compose ('the' cap top y138 vs y143); PLAN §10 item 14 — 4 predictions withdrawn, 4 cells held to must-not-move"
+    ]
+  },
+  "installedBuilds": [
+    {
+      "launch": "wave55-final corpus launch (closing gate (launch 1; tree 26cd6610) — 2026-10-12T16:12:17Z — HEAD 26cd6610",
+      "android": "android  serial=emulator-5554  built app-debug.apk sha1=ecafaf0d7c9f6796ac7703593379dc0603d074bb  installed base.apk sha1=ecafaf0d7c9f6796ac7703593379dc0603d074bb",
+      "androidMatch": "android  MATCH",
+      "ios": "ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28  installed .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28",
+      "iosMatch": "ios      MATCH"
+    },
+    {
+      "launch": "wave55-final post-net re-read (annotated; tree 26cd6610) — 2026-10-12T17:37:07Z — HEAD 26cd6610",
+      "android": "android  serial=none  built app-debug.apk sha1=ecafaf0d7c9f6796ac7703593379dc0603d074bb  installed base.apk sha1=MISSING",
+      "androidMatch": "android  MISMATCH",
+      "ios": "ios      udid=none  built .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28  installed .app digest=MISSING",
+      "iosMatch": "ios      MISMATCH"
+    },
+    {
+      "launch": "wave55-final net launch — ANNOTATED, the race by design (test-all rebuilds the iOS harness per fixture; never of record; tree 935287c4) — 2026-10-12T18:07:41Z — HEAD 935287c4",
+      "android": "android  serial=emulator-5554  built app-debug.apk sha1=caa0fd423fb06e3d2312ae9a18938bbd580c6af9  installed base.apk sha1=MISSING",
+      "androidMatch": "android  MISMATCH",
+      "ios": "ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28  installed .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28",
+      "iosMatch": "ios      MATCH"
+    },
+    {
+      "launch": "wave55-final post-net re-read 2 (annotated; tree 935287c4) — 2026-10-12T18:07:41Z — HEAD 935287c4",
+      "android": "android  serial=emulator-5554  built app-debug.apk sha1=caa0fd423fb06e3d2312ae9a18938bbd580c6af9  installed base.apk sha1=MISSING",
+      "androidMatch": "android  MISMATCH",
+      "ios": "ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28  installed .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28",
+      "iosMatch": "ios      MATCH"
+    },
+    {
+      "launch": "wave55-final net launch, attempt 2 — ANNOTATED, the race by design (never of record; tree a80d8f6f) — 2026-10-12T18:17:24Z — HEAD a80d8f6f",
+      "android": "android  serial=emulator-5554  built app-debug.apk sha1=caa0fd423fb06e3d2312ae9a18938bbd580c6af9  installed base.apk sha1=caa0fd423fb06e3d2312ae9a18938bbd580c6af9",
+      "androidMatch": "android  MATCH",
+      "ios": "ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=MISSING  installed .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28",
+      "iosMatch": "ios      MISMATCH"
+    },
+    {
+      "launch": "wave55-final post-net re-read 3 (annotated; tree a80d8f6f) — 2026-10-12T18:39:19Z — HEAD a80d8f6f",
+      "android": "android  serial=emulator-5554  built app-debug.apk sha1=caa0fd423fb06e3d2312ae9a18938bbd580c6af9  installed base.apk sha1=MISSING",
+      "androidMatch": "android  MISMATCH",
+      "ios": "ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28  installed .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28",
+      "iosMatch": "ios      MATCH"
+    }
+  ],
+  "reproduce": "tools/titan/gate-driver.sh wave55-final --skip-fixture-net, then rm -f /tmp/titan-device-pool/provisioned-* and tools/titan/gate-driver.sh wave55-final --skip-corpus; score with the perCellDiff.scorer line; adjudicate with node tools/titan/results/wave55-gate/adjudicate.mjs <score.json>"
+}

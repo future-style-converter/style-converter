@@ -1,0 +1,33 @@
+# catalyst-u3-probe.out.txt — L5 reverify-r1: the skeptic's throwaway Catalyst probe (skeptic-probe-u3.swift.txt; class renamed ZZReL5ProbeTests,
+# two PNG writes added — source catalyst-u3-probe.swift.txt; never delivered, deleted from the worktree after the run) run ALONE in the
+# re-verify worktree (611c9f93 + the lane's CURRENT 11 landing-order patches, = the fix-r1 FULL state byte for byte):
+#   xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath <wt>/.dd -only-testing:StyleConverterRuntimeTests/ZZReL5ProbeTests
+# Readout below is line-for-line the skeptic's (skeptic-probe-u3.out.txt): U3-ios still repaints 160 px in rows 9-12 x133-146 (no code fix, by design).
+	 Executed 2 tests, with 0 failures (0 unexpected) in 2.224 (2.224) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 2.224 (2.225) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 2.224 (2.226) seconds
+** TEST SUCCEEDED **
+SKPROBE U3 diff band y192-215: 13 px differ, x137-143 y214-215
+SKPROBE U3 diff band y216-239: 81 px differ, x133-146 y216-239
+SKPROBE U3 diff band y240-263: 48 px differ, x133-145 y240-250
+SKPROBE U3 diff band y264-287: 8 px differ, x133-135 y271-273
+SKPROBE U3 diff band y288-311: 10 px differ, x133-135 y295-298
+SKPROBE perrun . identical=false tab[x17-18] prop[x17-18] ["band y24-47: 10 px differ, x17-19 y29-32"]
+SKPROBE perrun 1 identical=false tab[x18-24] prop[x17-20] ["band y0-23: 27 px differ, x16-22 y20-23", "band y24-47: 41 px differ, x17-25 y24-31"]
+SKPROBE perrun 2 identical=false tab[x17-24] prop[x17-24] ["band y0-23: 26 px differ, x17-24 y19-23", "band y24-47: 28 px differ, x17-24 y24-31"]
+SKPROBE perrun א. identical=false tab[x17-19,x21-29] prop[x17-18,x21-29] ["band y24-47: 8 px differ, x17-19 y29-31"]
+SKPROBE perrun ב. identical=false tab[x18-19,x21-28] prop[x18-19,x21-28] ["band y24-47: 10 px differ, x17-19 y29-32"]
+SKPROBE row10 with    x104-111,x113-120,x123-127,x133-134,x138-145
+SKPROBE row10 without x104-111,x113-120,x123-127,x133-134,x138-145
+SKPROBE row11 with    x103-116,x119-126,x133-135,x137-145
+SKPROBE row11 without x103-116,x119-126,x133-134,x137-145
+SKPROBE row12 with    x104-111,x113-120,x123-127,x134-135,x137-144
+SKPROBE row12 without x104-111,x113-120,x123-127,x134-135,x137-144
+SKPROBE row9 with    x103-116,x119-126,x133-134,x139-145
+SKPROBE row9 without x103-116,x119-126,x133-134,x138-141
+SKPROBE size 390 600
+rc=0
+# PNG check: the re-rendered with / without PNGs differ from skeptic-catalyst-u3-{with,without}.png by 34 px each, max channel delta 1,
+# all in rows 1-8 x35-56 and the SAME 34 px in both (a 1-level raster difference between the two runs, outside every U3 box);
+# the U3 delta (with != without) is the identical 160-px mask with identical 'with' values; 0 px of it lies outside the six U3 run boxes
+# (rows 9-12 x130-135, rows 9-10 x136-150).

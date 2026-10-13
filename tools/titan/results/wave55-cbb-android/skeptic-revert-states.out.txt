@@ -1,0 +1,66 @@
+skeptic revertState: A-full [unit-U1.patch seam-1.patch unit-U2.patch]: apply=ok gradle rc=0, 111 tests, 0 failed, 0 skipped
+skeptic revertState: B-revert-U2 [unit-U1.patch seam-1.patch]: apply=ok gradle rc=0, 103 tests, 0 failed, 0 skipped
+skeptic revertState: C-revert-U1 []: apply=ok gradle rc=0, 96 tests, 0 failed, 0 skipped
+skeptic revertState: D-U1-no-seam [unit-U1.patch]: apply=ok gradle rc=0, 102 tests, 0 failed, 0 skipped
+skeptic revertState: E-U1-U2-no-seam [unit-U1.patch unit-U2.patch]: apply=ok gradle rc=0, 110 tests, 0 failed, 0 skipped
+skeptic revertState: F-U2-alone [unit-U2.patch]: apply=ok gradle rc=0, 104 tests, 0 failed, 0 skipped
+skeptic revertState: A-full-restored [unit-U1.patch seam-1.patch unit-U2.patch]: apply=ok gradle rc=0, 111 tests, 0 failed, 0 skipped
+
+# L6 (android-paint-order unit-U1/U2/U3, delivered patch bytes) + L2 (unit-U1, seam-1, unit-U2), applied in landing order on 611c9f93:
+borders.BehindContentBorderTest" tests="8" skipped="0" failures="0" errors="0"
+borders.BorderRadiusSelfPaintTest" tests="11" skipped="0" failures="0" errors="0"
+borders.sides.BorderSidesBehindContentTest" tests="7" skipped="0" failures="0" errors="0"
+core.renderer.ChildContainingBlockSeamWiringTest" tests="1" skipped="0" failures="0" errors="0"
+core.renderer.SeamReachabilityTest" tests="3" skipped="0" failures="0" errors="0"
+core.renderer.VerticalBlockFlowSeamGuardTest" tests="1" skipped="0" failures="0" errors="0"
+core.variables.DynamicValueResolverTest" tests="33" skipped="0" failures="0" errors="0"
+effects.EffectsClipFilterOrderTest" tests="2" skipped="0" failures="0" errors="0"
+images.ReplacedBoxSizingConstraintTest" tests="20" skipped="0" failures="0" errors="0"
+sizing.BoxSizingContentBoxTest" tests="9" skipped="0" failures="0" errors="0"
+sizing.ContentBoxPercentInflationTest" tests="3" skipped="0" failures="0" errors="0"
+sizing.ContentBoxRelativeInflationTest" tests="7" skipped="0" failures="0" errors="0"
+sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"
+sizing.SizingMinMaxClampTest" tests="15" skipped="0" failures="0" errors="0"
+sizing.SizingOverflowWidthTest" tests="7" skipped="0" failures="0" errors="0"
+sizing.WptBoxSizingDefaultTest" tests="6" skipped="0" failures="0" errors="0"
+typography.UAElementFontRuleSeamWiringTest" tests="1" skipped="0" failures="0" errors="0"
+BUILD SUCCESSFUL in 9s
+gradle rc=0
+
+# neighbouring classes on the full L2 state (sizing.*, core.variables.*, StyleApplier*, OutOfFlowContainingBlock*, PercentInset*, SeamReachability*, ElementContainingBlock*, AbsposInsetStretch*, AbsposAutoMargin*, VerticalTextFlow*, ListStyleUaRule*):
+StyleApplierFilterOffsetGateTest" tests="3" skipped="0" failures="0" errors="0"
+StyleApplierTransformPivotSeamTest" tests="3" skipped="0" failures="0" errors="0"
+core.renderer.SeamReachabilityTest" tests="3" skipped="0" failures="0" errors="0"
+core.variables.DynamicValueResolverTest" tests="33" skipped="0" failures="0" errors="0"
+core.variables.FontSizePercentageEmBasisTest" tests="4" skipped="0" failures="0" errors="0"
+effects.backdrop.BackdropAdversarialProbeTest" tests="1" skipped="0" failures="0" errors="0"
+effects.backdrop.BackdropContractParityTest" tests="1" skipped="0" failures="0" errors="0"
+effects.shadow.StyleApplierShadowMarginThreadingTest" tests="3" skipped="0" failures="0" errors="0"
+layout.position.AbsposAutoMarginTest" tests="27" skipped="0" failures="0" errors="0"
+layout.position.AbsposInsetStretchTest" tests="25" skipped="0" failures="0" errors="0"
+layout.position.OutOfFlowContainingBlockTest" tests="8" skipped="0" failures="0" errors="0"
+layout.position.PercentInsetContainingBlockLevelTest" tests="10" skipped="0" failures="0" errors="0"
+layout.position.PercentInsetResolveTest" tests="16" skipped="0" failures="0" errors="0"
+lists.ListStyleApplierTest" tests="6" skipped="0" failures="0" errors="0"
+sizing.AspectRatioValueTest" tests="7" skipped="0" failures="0" errors="0"
+sizing.BorderBoxFloorTest" tests="11" skipped="0" failures="0" errors="0"
+sizing.BoxSizingContentBoxTest" tests="9" skipped="0" failures="0" errors="0"
+sizing.CalcSizeLiveChainTest" tests="4" skipped="0" failures="0" errors="0"
+sizing.CalcSizeValueTest" tests="15" skipped="0" failures="0" errors="0"
+sizing.ContentBoxPercentInflationTest" tests="3" skipped="0" failures="0" errors="0"
+sizing.ContentBoxRelativeInflationTest" tests="7" skipped="0" failures="0" errors="0"
+sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"
+sizing.SizingExtractorTest" tests="12" skipped="0" failures="0" errors="0"
+sizing.SizingLogicalPrecedenceTest" tests="4" skipped="0" failures="0" errors="0"
+sizing.SizingMinMaxClampTest" tests="15" skipped="0" failures="0" errors="0"
+sizing.SizingOverflowWidthTest" tests="7" skipped="0" failures="0" errors="0"
+sizing.SizingVerticalAxisSwapTest" tests="4" skipped="0" failures="0" errors="0"
+sizing.WptBoxSizingDefaultTest" tests="6" skipped="0" failures="0" errors="0"
+sizing.WptRelativeWidthOverflowTest" tests="5" skipped="0" failures="0" errors="0"
+typography.TextStyleApplierLineHeightNormalTest" tests="5" skipped="0" failures="0" errors="0"
+typography.TextStyleApplierTextAlignTest" tests="3" skipped="0" failures="0" errors="0"
+typography.TextStyleApplierTextMotionTest" tests="2" skipped="0" failures="0" errors="0"
+typography.UAElementFontRuleTest" tests="1" skipped="0" failures="0" errors="0"
+typography.text.VerticalTextFlowTest" tests="19" skipped="0" failures="0" errors="0"
+BUILD SUCCESSFUL in 14s
+gradle rc=0

@@ -1,0 +1,6 @@
+revertStatesCompiled: A-full [unit-U1.patch seam-1.patch unit-U2.patch]: gradle rc=0, 111 tests, 0 failed, 0 skipped (GREEN) — revert-states/A-full.txt
+revertStatesCompiled: B-revert-U2 [unit-U1.patch seam-1.patch]: gradle rc=0, 103 tests, 0 failed, 0 skipped (GREEN) — revert-states/B-revert-U2.txt
+revertStatesCompiled: C-revert-U1 []: gradle rc=0, 96 tests, 0 failed, 0 skipped (GREEN) — revert-states/C-revert-U1.txt
+revertStatesCompiled: D-U1-no-seam [unit-U1.patch]: gradle rc=0, 102 tests, 0 failed, 0 skipped (GREEN) — revert-states/D-U1-no-seam.txt
+revertStatesCompiled: E-U1-U2-no-seam [unit-U1.patch unit-U2.patch]: gradle rc=0, 110 tests, 0 failed, 0 skipped (GREEN) — revert-states/E-U1-U2-no-seam.txt
+revertStatesCompiled: F-U2-alone [unit-U2.patch]: gradle rc=0, 104 tests, 0 failed, 0 skipped (GREEN) — revert-states/F-U2-alone.txt

@@ -1,0 +1,85 @@
+# S1 seam-hunk map: git diff -U0 b4f64963 5bbc2a41 per seam file, then each unit commit's hunks on it
+== runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt (range b4f64963..5bbc2a41)
+@@ -1152,4 +1152,6 @@ object ComponentRenderer {
+@@ -1161 +1163,18 @@ object ComponentRenderer {
+@@ -1165 +1184 @@ object ComponentRenderer {
+@@ -1949,0 +1969,4 @@ object ComponentRenderer {
+@@ -1951 +1974 @@ object ComponentRenderer {
+@@ -3644,6 +3667,12 @@ object ComponentRenderer {
+@@ -3651,11 +3680,9 @@ object ComponentRenderer {
+@@ -4203,2 +4230,3 @@ object ComponentRenderer {
+@@ -4480,3 +4508,8 @@ object ComponentRenderer {
+@@ -4665 +4698,3 @@ object ComponentRenderer {
+  85afc360 wave55 L4 U1-android: the UA .67em-family block margin of an:
+      @@ -1162,0 +1163,16 @@ object ComponentRenderer {
+      @@ -1165 +1181 @@ object ComponentRenderer {
+  69f95267 wave55 L4 U2-android: the held folded-host heading face rest:
+      @@ -1152,4 +1152,6 @@ object ComponentRenderer {
+      @@ -1161 +1163,2 @@ object ComponentRenderer {
+  5ade247e wave55 L2 U1: CBB-android re-landed (5b333c8a): under WPT ca:
+      @@ -1968,0 +1969,4 @@ object ComponentRenderer {
+      @@ -1970 +1974 @@ object ComponentRenderer {
+  56c69e24 wave55 L3 U1: composed-capture engagement: a positioned pare:
+      @@ -3667,6 +3667,12 @@ object ComponentRenderer {
+      @@ -3674,11 +3680,9 @@ object ComponentRenderer {
+  3a8249d2 wave55 L5 U2o-android: the Compose twin of the outside-marke:
+      @@ -4507,3 +4507,8 @@ object ComponentRenderer {
+  c5699c09 wave55 L5 U2i-android: the Compose inside-marker Row takes t:
+      @@ -4230,2 +4230,3 @@ object ComponentRenderer {
+      @@ -4697 +4698,3 @@ object ComponentRenderer {
+== runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift (range b4f64963..5bbc2a41)
+@@ -343 +343,4 @@ public struct ComponentRenderer: View {
+@@ -346,11 +349,32 @@ public struct ComponentRenderer: View 
+@@ -3827,2 +3851,3 @@ public struct ComponentRenderer: View 
+@@ -3973,0 +3999,8 @@ public struct ComponentRenderer: View 
+@@ -4561,0 +4595 @@ public struct ComponentRenderer: View {
+@@ -4568,0 +4603,6 @@ public struct ComponentRenderer: View 
+@@ -4602 +4642 @@ public struct ComponentRenderer: View {
+@@ -4618 +4658,4 @@ public struct ComponentRenderer: View {
+@@ -4626 +4669 @@ public struct ComponentRenderer: View {
+@@ -4646 +4689,3 @@ public struct ComponentRenderer: View {
+@@ -4650 +4695 @@ public struct ComponentRenderer: View {
+@@ -5055,15 +5099,0 @@ private struct PlaceholderLabel: View
+@@ -5152,0 +5183,33 @@ private struct PlaceholderLabel: View
+@@ -5154 +5217 @@ private struct PlaceholderLabel: View {
+@@ -5537,0 +5601,5 @@ private struct PlaceholderLabel: View 
+  cac1d6a3 wave55 L4 U1-ios: the SwiftUI twin of the out-of-flow headin:
+      @@ -343 +343,4 @@ public struct ComponentRenderer: View {
+      @@ -346,6 +349,7 @@ public struct ComponentRenderer: View {
+      @@ -356,0 +361,13 @@ public struct ComponentRenderer: View {
+  1dc521c1 wave55 L4 U2-ios: the held folded-host heading face restored:
+      @@ -356,5 +356,12 @@ public struct ComponentRenderer: View {
+  2ca54bc8 wave55 L5 U1-ios: a list marker whose natural direction diff:
+      @@ -3997,0 +3998,8 @@ public struct ComponentRenderer: View 
+      @@ -4585,0 +4594 @@ public struct ComponentRenderer: View {
+      @@ -4592,0 +4602,6 @@ public struct ComponentRenderer: View 
+      @@ -4626 +4641 @@ public struct ComponentRenderer: View {
+      @@ -4650 +4665 @@ public struct ComponentRenderer: View {
+      @@ -4674 +4689 @@ public struct ComponentRenderer: View {
+  3179cf60 wave55 L5 U2o-ios: a U+3001-suffixed outside marker hangs wi:
+      @@ -4657 +4657,4 @@ public struct ComponentRenderer: View {
+  5faec331 wave55 L5 U2i-ios: the inside-marker HStack takes the same s:
+      @@ -3851,2 +3851,3 @@ public struct ComponentRenderer: View 
+      @@ -4688 +4689,3 @@ public struct ComponentRenderer: View {
+  b7108a42 wave55 L1 NB-ios: a declared-normal WPT run on iOS lays out :
+      @@ -5100,15 +5099,0 @@ private struct PlaceholderLabel: View
+      @@ -5197,0 +5183,33 @@ private struct PlaceholderLabel: View
+      @@ -5199 +5217 @@ private struct PlaceholderLabel: View {
+  fc436181 wave55 L5 U3-ios: tabular digits on a SwiftUI label run (fon:
+      @@ -5600,0 +5601,5 @@ private struct PlaceholderLabel: View 
+== apps/web-harness/src/sdui/ComponentRenderer.tsx (range b4f64963..5bbc2a41)
+== tools/titan/extract-fixture.mjs (range b4f64963..5bbc2a41)
+== runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt (range b4f64963..5bbc2a41)
+@@ -159,0 +160,6 @@ class SeamReachabilityTest {
+@@ -167,0 +174,4 @@ class SeamReachabilityTest {
+@@ -182,0 +193,2 @@ class SeamReachabilityTest {
+  85afc360 wave55 L4 U1-android: the UA .67em-family block margin of an:
+      @@ -159,0 +160,3 @@ class SeamReachabilityTest {
+  69f95267 wave55 L4 U2-android: the held folded-host heading face rest:
+      @@ -162,0 +163,3 @@ class SeamReachabilityTest {
+  56c69e24 wave55 L3 U1: composed-capture engagement: a positioned pare:
+      @@ -188,0 +189 @@ class SeamReachabilityTest {
+  0c6b071c wave55 L3 U2: the RTL physical-left origin of a positioned p:
+      @@ -189,0 +190 @@ class SeamReachabilityTest {
+  3a8249d2 wave55 L5 U2o-android: the Compose twin of the outside-marke:
+      @@ -173,0 +174,4 @@ class SeamReachabilityTest {

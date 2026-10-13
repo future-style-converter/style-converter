@@ -1,0 +1,15 @@
+== (1) landing order on HEAD 611c9f93 → equals the lane worktree
+  applied: unit-U1-android seam-1 unit-U1-ios seam-2 unit-U2-android seam-3 unit-U2-ios seam-4
+  IDENTICAL to the lane worktree on all 18 touched paths
+== (2) revert chains on the fully landed series → equal the base
+  ios first (U2-ios, U1-ios, U2-android, U1-android): BASE RESTORED byte-for-byte
+  android first (U2-android, U1-android, U2-ios, U1-ios): BASE RESTORED byte-for-byte
+  U2-android alone reverts (chain [U2-android])
+  U2-ios alone reverts (chain [U2-ios])
+== (3) the WRONG intra-lane order (expected to refuse: revertOrder is load-bearing)
+  seam-1 does NOT reverse while seam-3 is on the tree → revert seam 3 first (as revertOrder says)
+  seam-2 does NOT reverse while seam-4 is on the tree → revert seam 4 first (as revertOrder says)
+  unit-U1-android does NOT reverse while U2-android is on the tree (UAElementFontRule.kt context) → U2 first
+== (4) each U2 patch alone on bare HEAD (expected to refuse: U2 needs U1)
+  seam-3 refuses on bare HEAD (needs its U1 seam)
+  seam-4 refuses on bare HEAD (needs its U1 seam)

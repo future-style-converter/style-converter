@@ -1,0 +1,2 @@
+fixed U1U2   installed residual 0/0/0; band-restricted outside 0; changed blue px outside the RTL bands 0
+PLAIN        installed residual 506/0/0; band-restricted outside 506; changed blue px outside the RTL bands 0

@@ -1,0 +1,90 @@
+MUTATING tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-M1
+RESTORED tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-M1 (== pre)
+MUTATING tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-M2
+RESTORED tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-M2 (== pre)
+MUTATING tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-M3
+RESTORED tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-M3 (== pre)
+MUTATING tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-X1
+RESTORED tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-X1 (== pre)
+MUTATING tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-X2
+RESTORED tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-X2 (== pre)
+MUTATING tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-X3
+RESTORED tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-X3 (== pre)
+MUTATING tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-X4
+RESTORED tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-X4 (== pre)
+MUTATING tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-X6
+RESTORED tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-X6 (== pre)
+MUTATING tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-X7
+RESTORED tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-X7 (== pre)
+MUTATING tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-X9
+RESTORED tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b   # skeptic U2-X9 (== pre)
+MUTATING tools/titan/wire-differential.sh sha256 f8a73de0f99566cc41a0669cd2b0f41f554c27308f9e9d4e2a5bf8bb315348ce   # skeptic U2-M4
+RESTORED tools/titan/wire-differential.sh sha256 f8a73de0f99566cc41a0669cd2b0f41f554c27308f9e9d4e2a5bf8bb315348ce   # skeptic U2-M4 (== pre)
+MUTATING tools/titan/wire-differential.sh sha256 f8a73de0f99566cc41a0669cd2b0f41f554c27308f9e9d4e2a5bf8bb315348ce   # skeptic U2-M4b
+RESTORED tools/titan/wire-differential.sh sha256 f8a73de0f99566cc41a0669cd2b0f41f554c27308f9e9d4e2a5bf8bb315348ce   # skeptic U2-M4b (== pre)
+MUTATING tools/titan/wire-differential.sh sha256 f8a73de0f99566cc41a0669cd2b0f41f554c27308f9e9d4e2a5bf8bb315348ce   # skeptic U2-M5
+RESTORED tools/titan/wire-differential.sh sha256 f8a73de0f99566cc41a0669cd2b0f41f554c27308f9e9d4e2a5bf8bb315348ce   # skeptic U2-M5 (== pre)
+MUTATING tools/titan/wire-differential.sh sha256 f8a73de0f99566cc41a0669cd2b0f41f554c27308f9e9d4e2a5bf8bb315348ce   # skeptic U2-X5
+RESTORED tools/titan/wire-differential.sh sha256 f8a73de0f99566cc41a0669cd2b0f41f554c27308f9e9d4e2a5bf8bb315348ce   # skeptic U2-X5 (== pre)
+MUTATING tools/titan/wire-differential.sh sha256 f8a73de0f99566cc41a0669cd2b0f41f554c27308f9e9d4e2a5bf8bb315348ce   # skeptic U2-X8
+RESTORED tools/titan/wire-differential.sh sha256 f8a73de0f99566cc41a0669cd2b0f41f554c27308f9e9d4e2a5bf8bb315348ce   # skeptic U2-X8 (== pre)
+MUTATING tools/titan/wire-differential.sh sha256 f8a73de0f99566cc41a0669cd2b0f41f554c27308f9e9d4e2a5bf8bb315348ce   # skeptic U2-M4c
+RESTORED tools/titan/wire-differential.sh sha256 f8a73de0f99566cc41a0669cd2b0f41f554c27308f9e9d4e2a5bf8bb315348ce   # skeptic U2-M4c (== pre)
+MUTATING tools/titan/bidi-marker-paint.mjs sha256 f602e3c18435c1bb8f228e767966ddd6e09cd85ea9ced0d13b8071de42d32748   # skeptic U5-U5a
+RESTORED tools/titan/bidi-marker-paint.mjs sha256 f602e3c18435c1bb8f228e767966ddd6e09cd85ea9ced0d13b8071de42d32748   # skeptic U5-U5a (== pre)
+MUTATING tools/titan/bidi-marker-paint.mjs sha256 f602e3c18435c1bb8f228e767966ddd6e09cd85ea9ced0d13b8071de42d32748   # skeptic U5-U5b
+RESTORED tools/titan/bidi-marker-paint.mjs sha256 f602e3c18435c1bb8f228e767966ddd6e09cd85ea9ced0d13b8071de42d32748   # skeptic U5-U5b (== pre)
+MUTATING tools/titan/bidi-marker-paint.mjs sha256 f602e3c18435c1bb8f228e767966ddd6e09cd85ea9ced0d13b8071de42d32748   # skeptic U5-U5c
+RESTORED tools/titan/bidi-marker-paint.mjs sha256 f602e3c18435c1bb8f228e767966ddd6e09cd85ea9ced0d13b8071de42d32748   # skeptic U5-U5c (== pre)
+MUTATING runtimes/web/src/renderer/InlineRuns.ts sha256 0c6d8c46527a37733be52b30f80595f6ffcba5631b7b806accf6507a66c73898   # skeptic U4-a
+RESTORED runtimes/web/src/renderer/InlineRuns.ts sha256 0c6d8c46527a37733be52b30f80595f6ffcba5631b7b806accf6507a66c73898   # skeptic U4-a (== pre)
+MUTATING schema/spec/03-children.md sha256 ff34337fa11b553705b58137f5c51aaae92985ce5cdefcd302ec34ec112bb088   # skeptic U4-U4b1
+RESTORED schema/spec/03-children.md sha256 ff34337fa11b553705b58137f5c51aaae92985ce5cdefcd302ec34ec112bb088   # skeptic U4-U4b1 (== pre)
+MUTATING schema/spec/03-children.md sha256 ff34337fa11b553705b58137f5c51aaae92985ce5cdefcd302ec34ec112bb088   # skeptic U4-U4b2
+RESTORED schema/spec/03-children.md sha256 ff34337fa11b553705b58137f5c51aaae92985ce5cdefcd302ec34ec112bb088   # skeptic U4-U4b2 (== pre)
+MUTATING schema/spec/03-children.md sha256 ff34337fa11b553705b58137f5c51aaae92985ce5cdefcd302ec34ec112bb088   # skeptic U4-U4b3
+RESTORED schema/spec/03-children.md sha256 ff34337fa11b553705b58137f5c51aaae92985ce5cdefcd302ec34ec112bb088   # skeptic U4-U4b3 (== pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/HyphenateCharacterExtractor.kt sha256 968d957fb9656965c36708e60feb2c527c25843de0669547052e6801c5cb2e31   # skeptic C1
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/HyphenateCharacterExtractor.kt sha256 968d957fb9656965c36708e60feb2c527c25843de0669547052e6801c5cb2e31   # skeptic C1 (== pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt sha256 18bafc7bb18a0bee96f8723678c5996b03ab49e5e4456eeea8d7e84f3d4a5304   # skeptic C2
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt sha256 18bafc7bb18a0bee96f8723678c5996b03ab49e5e4456eeea8d7e84f3d4a5304   # skeptic C2 (== pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCuts.kt sha256 d5cd45df0130558c5f7faa75ed6064c5649bd83b0ded704199883ca641b5a49a   # skeptic C3
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCuts.kt sha256 d5cd45df0130558c5f7faa75ed6064c5649bd83b0ded704199883ca641b5a49a   # skeptic C3 (== pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt sha256 ed0d29ac7577f7e56a34c7002cddbf662617db144908dfc8f42223b60f1b86d6   # skeptic C4
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt sha256 ed0d29ac7577f7e56a34c7002cddbf662617db144908dfc8f42223b60f1b86d6   # skeptic C4 (== pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/performance/PerformanceExtractor.kt sha256 9c31018c1217d3ad1afc6cd50c0553d6cd4d05d1b5be883f0b6817fa95581ef9   # skeptic C5
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/performance/PerformanceExtractor.kt sha256 9c31018c1217d3ad1afc6cd50c0553d6cd4d05d1b5be883f0b6817fa95581ef9   # skeptic C5 (== pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt sha256 ed0d29ac7577f7e56a34c7002cddbf662617db144908dfc8f42223b60f1b86d6   # skeptic C6
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt sha256 ed0d29ac7577f7e56a34c7002cddbf662617db144908dfc8f42223b60f1b86d6   # skeptic C6 (== pre)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt sha256 ed0d29ac7577f7e56a34c7002cddbf662617db144908dfc8f42223b60f1b86d6   # skeptic C7
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlock.kt sha256 ed0d29ac7577f7e56a34c7002cddbf662617db144908dfc8f42223b60f1b86d6   # skeptic C7 (== pre)
+MUTATING runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0   # skeptic U6-W1
+RESTORED runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0   # skeptic U6-W1 (== pre)
+MUTATING runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0   # skeptic U6-W2
+RESTORED runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0   # skeptic U6-W2 (== pre)
+MUTATING runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0   # skeptic U6-W3
+RESTORED runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0   # skeptic U6-W3 (== pre)
+MUTATING runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0   # skeptic U6-W4
+RESTORED runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0   # skeptic U6-W4 (== pre)
+MUTATING runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0   # skeptic U6-W5
+RESTORED runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0   # skeptic U6-W5 (== pre)
+MUTATING runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0   # skeptic U6-W6
+RESTORED runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0   # skeptic U6-W6 (== pre)
+MUTATING tools/visual/label-chrome-check.mjs sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65   # skeptic U6-T1
+RESTORED tools/visual/label-chrome-check.mjs sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65   # skeptic U6-T1 (== pre)
+MUTATING tools/visual/label-chrome-check.mjs sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65   # skeptic U6-T2
+RESTORED tools/visual/label-chrome-check.mjs sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65   # skeptic U6-T2 (== pre)
+MUTATING tools/visual/label-chrome-check.mjs sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65   # skeptic U6-T2b
+RESTORED tools/visual/label-chrome-check.mjs sha256 fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65   # skeptic U6-T2b (== pre)
+MUTATING runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/wrapping/HyphenateCharacterExtractor.swift sha256 8a0ba398da67358eb3b2965dfb4da83217ead6513f73042bea43fd863f563958   # skeptic S1
+RESTORED runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/wrapping/HyphenateCharacterExtractor.swift sha256 8a0ba398da67358eb3b2965dfb4da83217ead6513f73042bea43fd863f563958   # skeptic S1 (== pre)
+MUTATING runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift sha256 2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8   # skeptic S2
+RESTORED runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift sha256 2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8   # skeptic S2 (== pre)
+MUTATING runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift sha256 2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8   # skeptic S3
+RESTORED runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift sha256 2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8   # skeptic S3 (== pre)
+MUTATING runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift sha256 2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8   # skeptic S4
+RESTORED runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift sha256 2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8   # skeptic S4 (== pre)
+MUTATING runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift sha256 2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8   # skeptic S5
+RESTORED runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift sha256 2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8   # skeptic S5 (== pre)
+MUTATING runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift sha256 2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8   # skeptic S6
+RESTORED runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift sha256 2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8   # skeptic S6 (== pre)

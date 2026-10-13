@@ -1,0 +1,29 @@
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [H] counter-suffix web                                     PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [H] counter-suffix ios                                     PASS       [GATING -> revert U1-ios]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [H] counter-suffix android                                 PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [C] counter-suffix web                                     PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [C] counter-suffix ios                                     PASS       [GATING -> revert U2o-ios]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [C] counter-suffix android                                 PASS       [GATING -> revert U2o-android]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [T] counter-suffix web                                     PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [T] counter-suffix ios                                     PASS       [GATING -> revert U3-ios]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [T] counter-suffix android                                 PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [L] counter-suffix web                                     PASS       [control: expected to stay PASS]
+ - L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [L] counter-suffix ios                                     FAIL       [report: expected WRONG until the target is fixed]
+     line: [L] counter-suffix ios row1 digit (49, 52) → GEOMETRY WRONG (digit ink x49-52 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+ - L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [L] counter-suffix android                                 FAIL       [report: expected WRONG until the target is fixed]
+     line: [L] counter-suffix android row1 digit (49, 52) → GEOMETRY WRONG (digit ink x49-52 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [K] counter-suffix web                                     PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [K] counter-suffix ios                                     PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [K] counter-suffix android                                 PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [I] cjk-decimal/css3-counter-styles-005 web                PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [I] cjk-decimal/css3-counter-styles-005 ios                PASS       [GATING -> revert U2i-ios]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [I] cjk-decimal/css3-counter-styles-005 android            PASS       [GATING -> revert U2i-android]
+   L5-counter-suffix-rows   rtl-marker-bake.geometry.py                [M] counter-suffix web                                     PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   rtl-marker-bake.geometry.py                [M] counter-suffix ios                                     PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   rtl-marker-bake.geometry.py                [M] counter-suffix android                                 PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   lists-bakes.geometry.py                    counter-suffix web                                         PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   lists-bakes.geometry.py                    counter-suffix ios                                         PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   lists-bakes.geometry.py                    counter-suffix android                                     PASS       [control: expected to stay PASS]
+
+geometry-gate ../../../../../../../../../../..<scratch>/teeth/fakeruns/combo-L5 (base wave54-final · sections css-counter-styles (NOT PROBED 0)): 24 keys — PASS 22 · FAIL 2 (gating 0) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 6 (PASS 6 FAIL 0) · control 16 (PASS 16 FAIL 0) · report 2 (PASS 0 FAIL 2) · withdrawn 0 (PASS 0 FAIL 0)

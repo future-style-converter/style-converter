@@ -1,0 +1,60 @@
+HEAD 611c9f932bcfefa147a35f6c5f356d42709ddf84
+## step 1 — the two patches' sha256 (must equal the note's patch: lines)
+6a9d7edf795c0b0e34d572e925ff701f0b43e347ae484e3a092d4c931d516251  /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave55-instruments/unit-U2.patch
+0ff38b3b35750ad5577b5f731d301601a99e1a5a605255d553602b0e7d378421  /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave55-instruments/unit-U5.patch
+patch: unit-U2.patch sha256 6a9d7edf795c0b0e34d572e925ff701f0b43e347ae484e3a092d4c931d516251
+patch: unit-U5.patch sha256 0ff38b3b35750ad5577b5f731d301601a99e1a5a605255d553602b0e7d378421
+## step 2 — three throwaways at HEAD, provisioned
+HEAD is now at 611c9f932 wave55-plan: the plan — PLAN.md §0–§10 (prose rendered from the generated files by plan-prose.py --check), plan-build.py → expectations.json (seven lanes, 28 revert units + 2 contingencies, 76 carriers / 665 named + 3352 complement must-not-move / 3 ring-fenced = 4096 cells, 44 gating rows at floor 0.95, 230 geometry keys under one pinned interpreter, stage 1 wave55-pre over 9 sections, stage 2 wave55-probe 26 sections, three distinct A/B arms, an executable beforeEveryDeviceRun) + watchlist.txt (746 lines, unmatched 0), the geometry probes with their standing fake set (probes-selfcheck.txt §T 215 cases / 0 violations, §T3 987 reads / 0 holes), geometry-gate.py / probe-readout.mjs with --sections, land-units.sh (records-first, --check read-only, self-test 133/0, landing-manifest.json), the generated final55-analysis.sh, build-workflow.js (the per-lane-worktree D18 fan-out), three plan-skeptic rounds + fix passes + two verifiers (round 4 leaves 17 gating keys accepting strictly-additive ink — fixed next, in parallel with the builders); wave55-gate: adjudicate.mjs / control-check.mjs repointed and calibrated, ab-arms55.sh (records after the restore, self-tested), make-snapshot55.mjs, toolkit proofs
+HEAD is now at 611c9f932 wave55-plan: the plan — PLAN.md §0–§10 (prose rendered from the generated files by plan-prose.py --check), plan-build.py → expectations.json (seven lanes, 28 revert units + 2 contingencies, 76 carriers / 665 named + 3352 complement must-not-move / 3 ring-fenced = 4096 cells, 44 gating rows at floor 0.95, 230 geometry keys under one pinned interpreter, stage 1 wave55-pre over 9 sections, stage 2 wave55-probe 26 sections, three distinct A/B arms, an executable beforeEveryDeviceRun) + watchlist.txt (746 lines, unmatched 0), the geometry probes with their standing fake set (probes-selfcheck.txt §T 215 cases / 0 violations, §T3 987 reads / 0 holes), geometry-gate.py / probe-readout.mjs with --sections, land-units.sh (records-first, --check read-only, self-test 133/0, landing-manifest.json), the generated final55-analysis.sh, build-workflow.js (the per-lane-worktree D18 fan-out), three plan-skeptic rounds + fix passes + two verifiers (round 4 leaves 17 gating keys accepting strictly-additive ink — fixed next, in parallel with the builders); wave55-gate: adjudicate.mjs / control-check.mjs repointed and calibrated, ab-arms55.sh (records after the restore, self-tested), make-snapshot55.mjs, toolkit proofs
+HEAD is now at 611c9f932 wave55-plan: the plan — PLAN.md §0–§10 (prose rendered from the generated files by plan-prose.py --check), plan-build.py → expectations.json (seven lanes, 28 revert units + 2 contingencies, 76 carriers / 665 named + 3352 complement must-not-move / 3 ring-fenced = 4096 cells, 44 gating rows at floor 0.95, 230 geometry keys under one pinned interpreter, stage 1 wave55-pre over 9 sections, stage 2 wave55-probe 26 sections, three distinct A/B arms, an executable beforeEveryDeviceRun) + watchlist.txt (746 lines, unmatched 0), the geometry probes with their standing fake set (probes-selfcheck.txt §T 215 cases / 0 violations, §T3 987 reads / 0 holes), geometry-gate.py / probe-readout.mjs with --sections, land-units.sh (records-first, --check read-only, self-test 133/0, landing-manifest.json), the generated final55-analysis.sh, build-workflow.js (the per-lane-worktree D18 fan-out), three plan-skeptic rounds + fix passes + two verifiers (round 4 leaves 17 gating keys accepting strictly-additive ink — fixed next, in parallel with the builders); wave55-gate: adjudicate.mjs / control-check.mjs repointed and calibrated, ab-arms55.sh (records after the restore, self-tested), make-snapshot55.mjs, toolkit proofs
+post: U5 applied (exit 0)
+diff: U2 applied (exit 0)
+## step 3 — CDP reads (Chromium)
+marker-paint-probe rc=0  last: WL7A MARKER PAINT: every value none / normal
+marker-probe (post tree) rc=0  last: MARKER PROBE: ALL PASS
+PASS baked — 2 roots, 10 runs
+## step 4 — the wire differential (6 sections, pre vs post)
+wire-differential rc=0
+post	selectors	0	0	0	0	extracted=48	fail=0
+identical 288 · content-changed 0 · renumbered 0 · one-sided 0 · renumbered-anomalous 0
+verdict: exit 0 — nothing unexpected
+# tag	section	rc_extract	rc_combine	rc_convert	rc_split	extracted	fail
+pre	css-anchor-position	0	0	0	0	extracted=48	fail=0
+pre	css-backgrounds	0	0	0	0	extracted=48	fail=0
+pre	css-counter-styles	0	0	0	0	extracted=48	fail=0
+pre	css-text	0	0	0	0	extracted=48	fail=0
+pre	css-writing-modes	0	0	0	0	extracted=48	fail=0
+pre	selectors	0	0	0	0	extracted=48	fail=0
+post	css-anchor-position	0	0	0	0	extracted=48	fail=0
+post	css-backgrounds	0	0	0	0	extracted=48	fail=0
+post	css-counter-styles	0	0	0	0	extracted=48	fail=0
+post	css-text	0	0	0	0	extracted=48	fail=0
+post	css-writing-modes	0	0	0	0	extracted=48	fail=0
+post	selectors	0	0	0	0	extracted=48	fail=0
+## step 5 — the instrument fails when it must (expect exit 5)
+classify-only rc=5 (expect 5)
+MISSING CONTENT-CHANGED css-counter-styles/wpt__css-counter-styles__counter-suffix.json (expected, not observed)
+verdict: exit 5 — changed set differs from the expect file
+## step 6 — records
+classify-only.wl7a-expect-cs.txt.txt.txt
+classify.txt.txt
+fail-post-css-anchor-position.txt
+fail-post-css-backgrounds.txt
+fail-post-css-counter-styles.txt
+fail-post-css-text.txt
+fail-post-css-writing-modes.txt
+fail-post-selectors.txt
+fail-pre-css-anchor-position.txt
+fail-pre-css-backgrounds.txt
+fail-pre-css-counter-styles.txt
+fail-pre-css-text.txt
+fail-pre-css-writing-modes.txt
+fail-pre-selectors.txt
+status.txt
+step1-patch-sha256.txt
+step3-marker-paint-probe.txt
+step3-marker-probe-post.txt
+step4-wire-differential.txt
+step5-classify-only.txt
+throwaways removed

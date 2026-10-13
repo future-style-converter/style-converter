@@ -29,7 +29,8 @@
  * `[InlineRuns]` console.warn channel — the web twin of Compose's
  * Folded.droppedOutOfFlowMembers, which goes further and drops the member):
  *   - the member's accessible text and its rect follow the word's end, not
- *     its source slot (a reader deviation from spec 03 §4.1 rule 1);
+ *     its source slot (a reader deviation from spec 03 §4.1 rule 2, under its
+ *     renderer-latitude paragraph);
  *   - only the host's OWN `hyphens` gates the join (`hyphens` inherits,
  *     css-text-3 §5.4; census: 0 reached members inherit it) — TODO thread
  *     the inherited value when a carrier needs it;

@@ -1,0 +1,6 @@
+bidi band ghost +3y  [C] bidi-tab-001 android ltr-rows        PASS  control  [C] bidi-tab-001 android ltr-rows identical to wave54-final → GEOMETRY OK
+bidi band ghost +3y  [S] bidi-tab-001 android rtl-rows        FAIL  gating   e x(16, 135, 314) vs ref x(114, 135, 273); band y186 blue x(16, 135, 298) vs ref x(16, 38, 269); band y226 blue x(16, 135, 298) vs ref x(16, 38, 269))
+gate exit 1
+bidi band ghost +5y  [C] bidi-tab-001 android ltr-rows        FAIL  control  [C] bidi-tab-001 android ltr-rows identical to wave54-final → GEOMETRY WRONG (14 px differ; 13 px differ; 2 px differ)
+bidi band ghost +5y  [S] bidi-tab-001 android rtl-rows        FAIL  gating   e x(16, 135, 329) vs ref x(114, 135, 273); band y186 blue x(16, 135, 300) vs ref x(16, 38, 269); band y226 blue x(16, 135, 300) vs ref x(16, 38, 269))
+gate exit 1

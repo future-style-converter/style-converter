@@ -1,0 +1,26 @@
+hyphen-ios-linebox 001 ref group-first [0, 0, 0, 0] in-group spread [0, 0, 0, 0] → LINEBOX OK
+hyphen-ios-linebox 001 web group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 1.000 → LINEBOX OK
+hyphen-ios-linebox 001 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 1.000 → LINEBOX OK
+hyphen-ios-linebox 001 android group-first [0, 0, 0, 0] in-group spread [0, 0, 0, 0] glyphs 1.000 → LINEBOX OK
+hyphen-ios-linebox 002 ref group-first [0, 0, 0, 0] in-group spread [0, 0, 0, 0] → LINEBOX OK
+hyphen-ios-linebox 002 web group-first [0, -19, -19, -18] in-group spread [0, 0, 0, 0] glyphs 1.000 → LINEBOX WRONG (drift: group-first offsets [0, -19, -19, -18] (want non-decreasing, each 0 or +1))
+hyphen-ios-linebox 002 ios group-first [-9, None, 48] in-group spread [0, 0, 0] glyphs 1.000 → LINEBOX WRONG (anchor: group 1 line 1 offset -9 (want 0); drift: group-first offsets [-9, None, 48] (want non-decreasing, each 0 or +1))
+hyphen-ios-linebox 002 android group-first [0, 19, 38, 76] in-group spread [0, 0, 1, 0] glyphs 1.000 → LINEBOX WRONG (pitch: group 3 line 2 offset 39 vs its line 1 38 (run pitch ≠ the ref line box); drift: group-first offsets [0, 19, 38, 76] (want non-decreasing, each 0 or +1))
+hyphen-ios-linebox 003 ref group-first [0, 0, 0, 0] in-group spread [0, 0, 0, 0] → LINEBOX OK
+hyphen-ios-linebox 003 web group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 1.000 → LINEBOX OK
+hyphen-ios-linebox 003 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 1.000 → LINEBOX OK
+hyphen-ios-linebox 003 android group-first [0, 0, 0, 0] in-group spread [0, 0, 0, 0] glyphs 1.000 → LINEBOX OK
+hyphen-ios-linebox 004 ref group-first [0, 0, 0, 0] in-group spread [0, 0, 0, 0] → LINEBOX OK
+hyphen-ios-linebox 004 web group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 1.000 → LINEBOX OK
+hyphen-ios-linebox 004 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 1.000 → LINEBOX OK
+hyphen-ios-linebox 004 android group-first [0, 0, 0, 0] in-group spread [0, 0, 0, 0] glyphs 1.000 → LINEBOX OK
+hyphen-ios-linebox stack boundary-shaping__boundary-shaping-001 ios tops [23, 64, 107] → STACK OK
+hyphen-ios-linebox stack boundary-shaping__boundary-shaping-002 ios tops [23, 64, 107] → STACK OK
+hyphen-ios-linebox stack boundary-shaping__boundary-shaping-003 ios tops [23, 64, 107] → STACK OK
+hyphen-ios-linebox stack boundary-shaping__boundary-shaping-004 ios tops [23, 64, 107] → STACK OK
+hyphen-ios-linebox stack boundary-shaping__boundary-shaping-005 ios tops [23, 64, 107] → STACK OK
+hyphen-ios-linebox stack boundary-shaping__boundary-shaping-006 ios tops [23, 62, 107] → STACK WRONG (displacement [0, -3, -6] vs wave54-final, want [0, -1, -2])
+hyphen-ios-linebox stack boundary-shaping__boundary-shaping-007 ios tops [23, 64, 107] → STACK OK
+hyphen-ios-linebox stack boundary-shaping__boundary-shaping-008 ios tops [23, 64, 107] → STACK OK
+hyphen-ios-linebox stack text-decoration-dotted-001 ios tops [137, 294, 451] → STACK OK
+hyphen-ios-linebox stack text-decoration-dotted-002 ios tops [137, 294, 451] → STACK OK

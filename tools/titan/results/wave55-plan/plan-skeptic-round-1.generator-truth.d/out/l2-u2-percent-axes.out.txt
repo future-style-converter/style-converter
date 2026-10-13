@@ -1,0 +1,2 @@
+percentage axes 122
+in-flow % axes with own non-zero band: [('wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3', '_0-172', 'Width', 100, 20), ('wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3', '_0-172', 'Height', 100, 20)]

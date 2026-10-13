@@ -1,0 +1,23 @@
+[H] counter-suffix ref      row3:x46-53,x57-58 row4:x47-54,x57-58 → GEOMETRY OK
+[C] counter-suffix ref      row5:x33-46,x49-51|item x64 row6:x33-46,x49-51|item x65 → GEOMETRY OK
+[T] counter-suffix ref      row9 digit (138, 144) → GEOMETRY OK
+[L] counter-suffix ref      row1 digit (47, 53) → GEOMETRY OK
+[H] counter-suffix web      row3:x46-53,x57-58 row4:x47-54,x57-58 → GEOMETRY OK
+[C] counter-suffix web      row5:x33-46,x49-51|item x64 row6:x33-46,x49-51|item x65 → GEOMETRY OK
+[T] counter-suffix web      row9 digit (138, 144) → GEOMETRY OK
+[L] counter-suffix web      row1 digit (47, 53) → GEOMETRY OK
+[K] counter-suffix web      zones y0-599 vs wave54-final → GEOMETRY OK
+[H] counter-suffix ios      row3:x48-48,x51-57 row4:x48-48,x51-58 → GEOMETRY WRONG (row 3 period x48-48 before the letter x51-57 (suffix on the wrong side: first-strong RTL base direction))
+[C] counter-suffix ios      row5:x29-42,x46-48|item x64 row6:x29-42,x46-48|item x65 → GEOMETRY WRONG (row 5 marker left x29 vs ref x33±1 (suffix gap: the "、" must end flush at the content edge))
+[T] counter-suffix ios      row9 digit (138, 141) → GEOMETRY WRONG (digit ink x138-141 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+[L] counter-suffix ios      row1 digit (49, 52) → GEOMETRY WRONG (digit ink x49-52 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+[K] counter-suffix ios      zones y0-63,y160-207,y232-599 vs wave54-final → GEOMETRY OK
+[H] counter-suffix android  row3:x46-53,x57-57 row4:x47-53,x57-57 → GEOMETRY OK
+[C] counter-suffix android  row5:x29-42,x45-48|item x65 row6:x30-41,x45-48|item x65 → GEOMETRY WRONG (row 5 marker left x29 vs ref x33±1 (suffix gap: the "、" must end flush at the content edge))
+[T] counter-suffix android  row9 digit (139, 145) → GEOMETRY OK
+[L] counter-suffix android  row1 digit (49, 52) → GEOMETRY WRONG (digit ink x49-52 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+[K] counter-suffix android  zones y0-111,y160-599 vs wave54-final → GEOMETRY OK
+[I] cjk-decimal/css3-counter-styles-005 ref      y95:marker x217 item x268 y121:marker x217 item x268 → GEOMETRY OK
+[I] cjk-decimal/css3-counter-styles-005 web      y95:marker x217 item x268 y121:marker x217 item x268 → GEOMETRY OK
+[I] cjk-decimal/css3-counter-styles-005 ios      y95:marker x217 item x271 y121:marker x218 item x272 → GEOMETRY WRONG (line y95 item text left x271 vs ref x268±1 (inside "、" marker not flush))
+[I] cjk-decimal/css3-counter-styles-005 android  y95:marker x217 item x271 y121:marker x218 item x272 → GEOMETRY WRONG (line y95 item text left x271 vs ref x268±1 (inside "、" marker not flush))

@@ -1,0 +1,17 @@
+{
+ "name": "AS3-fed-preUa",
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt",
+ "pre": "e30f443de13184cb1338bc7f38ef9ead192a312ab41d160ddb324a456bc6adef",
+ "mutated": "a83f016104354f6fce8ff05a24e0c2e0d2c5b518ecff00097c66aaf703c61b64",
+ "post": "e30f443de13184cb1338bc7f38ef9ead192a312ab41d160ddb324a456bc6adef",
+ "red_rc": 1,
+ "red_failures": [
+  "UaPositionedHeadingMarginSeamWiringTest > the margin step runs once, capture-gated, on the font step's output",
+  "UaPositionedHeadingMarginSeamWiringTest > the margin step sits after the font step and before the resolver's input",
+  "UAElementFontRuleSeamWiringTest > DynamicValueResolver resolves the UA step's output, after it"
+ ],
+ "red_counts": "UaPositionedHeadingMarginSeamWiringTest 2/2; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/1; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "green_rc": 0,
+ "green_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "verdict": "RED-THEN-GREEN"
+}

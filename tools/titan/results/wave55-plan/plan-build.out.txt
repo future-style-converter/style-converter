@@ -1,0 +1,37 @@
+generatedWith: argv [] · 19 input files (sha256 each in expectations.json generatedWith.inputs); decisions: reverted 0 · restate 0 · contingency 0 · goSmall False
+watchlist.txt: 746 watch lines
+expectations.json: union capture carriers {'web': 0, 'ios': 23, 'android': 58} · wire carriers 0 · may-move android 241 (raw 252 + D21 medium 26 + (2b) 1 + fix-r1 growth 1 − shared 12 − L6 carriers)
+scored cells 4096 = carrier cells 76 + named must-not-move 665 + complement 3352 + ring-fenced 3
+stage-1 probe (9): css-counter-styles,css-flexbox,css-grid,css-masking,css-text,css-text-decor,css-writing-modes,filter-effects,selectors
+probe sections (26): CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-grid,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-tables,css-text,css-text-decor,css-transforms,css-values,css-view-transitions,css-writing-modes,filter-effects,selectors · not probed: css-color,css-pseudo,css-sizing,css-ui
+geometry keys first read at the closing gate (section not probed): 1 ['positioned-parent-slot.geometry.py [C] composited-filters-under-opacity android']
+gating predictions (floor 0.95): 44
+revert units (commits): 28 (+ contingency 2)
+predicted f->P flips by tier (DEGENERATE ones included — the scorer counts them): {"web": {"HIGH/MED-HIGH": 0, "MED/MED-LOW": 0, "LOW": 0}, "ios": {"HIGH/MED-HIGH": 0, "MED/MED-LOW": 4, "LOW": 0}, "android": {"HIGH/MED-HIGH": 2, "MED/MED-LOW": 3, "LOW": 0}}
+  L1-hyphen-ios-linebox: carriers [0, 14, 0] wire 0 predictions 14 mustNotMove 132 units ['NB-ios'] probeSections 5
+  L2-cbb-android: carriers [0, 0, 14] wire 0 predictions 14 mustNotMove 119 units ['U1', 'U2'] probeSections 6
+  L3-positioned-parent-slot: carriers [0, 0, 9] wire 0 predictions 9 mustNotMove 187 units ['U1', 'U2'] probeSections 12
+  L4-ua-heading-margin: carriers [0, 4, 4] wire 0 predictions 8 mustNotMove 46 units ['U1-android', 'U1-ios', 'U2-android', 'U2-ios'] probeSections 3
+  L5-counter-suffix-rows: carriers [0, 5, 4] wire 0 predictions 7 mustNotMove 116 units ['U1-ios', 'U2o-ios', 'U2i-ios', 'U2o-android', 'U2i-android', 'U3-ios', 'D'] probeSections 1
+  L6-android-paint-order: carriers [0, 0, 27] wire 0 predictions 29 mustNotMove 65 units ['U1', 'U2', 'U3'] probeSections 26
+  L7-instruments: carriers [0, 0, 0] wire 0 predictions 6 mustNotMove 42 units ['U1', 'U2', 'U3', 'U4', 'U5', 'U6-compose', 'U6-swift', 'U6-web', 'U6-tooling'] probeSections 3
+undirected prediction rows (exempt from revert rule 2): 3: css-gaps/flex/flex-gap-decorations-006.html android; css-anchor-position/anchor-position-multicol-004.html android; css-text/hyphens/hyphenate-character-005.html android
+down-preregistered rows: ['css-counter-styles/cjk-decimal/css3-counter-styles-005.html android']
+f→f rows with floorNA: 15
+geometry keys: 230 = gating 43 + report 27 + control 160 + withdrawn 0; dropped (C4 / C6) 3; probes 13
+picture-correct tally: 18 in full + 0 in part + 4 paint order only (never counted) (+0 withdrawn by probe decisions), each with its geometry key(s)
+A/B arms: drop-NB-ios (L1, against wave55-final, drops NB-ios-S1* → NB-ios); drop-L4-U2 (L4, against wave55-pre, drops U2-ios-S1* → U2-android-S1* → U2-ios → U2-android); drop-L6-U2 (L6, against wave55-final, drops U2-S1* → U2)
+L6 shared stems (C2, in the raw may-move set but another lane's carrier): 12: wpt__css-anchor-position__anchor-position-multicol-004 (L3-positioned-parent-slot), wpt__css-anchor-position__anchor-position-multicol-nested-001 (L3-positioned-parent-slot), wpt__css-flexbox__abspos__abspos-autopos-htb-ltr (L2-cbb-android), wpt__css-flexbox__abspos__abspos-autopos-htb-rtl (L2-cbb-android), wpt__css-flexbox__abspos__abspos-autopos-vlr-ltr (L2-cbb-android), wpt__css-flexbox__abspos__abspos-autopos-vlr-rtl (L2-cbb-android), wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr (L2-cbb-android), wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl (L2-cbb-android), wpt__css-gaps__flex__flex-gap-decorations-006 (L2-cbb-android), wpt__css-position__position-absolute-semi-replaced-stretch-button (L2-cbb-android), wpt__css-position__position-absolute-semi-replaced-stretch-input (L2-cbb-android), wpt__css-position__position-absolute-semi-replaced-stretch-other (L2-cbb-android)
+must-not-move exclusions (another lane's carrier on that platform, or the ring-fence): 12
+    L1-hyphen-ios-linebox: css-text/bidi/bidi-tab-001.html android  -> carrier of L3-positioned-parent-slot
+    L1-hyphen-ios-linebox: css-text/hyphens/hyphenate-character-005.html android  -> carrier of L3-positioned-parent-slot
+    L2-cbb-android: filter-effects/backdrop-filter-basic-blur.html ios  -> RING-FENCED
+    L2-cbb-android: filter-effects/backdrop-filter-basic-blur.html web  -> RING-FENCED
+    L3-positioned-parent-slot: css-counter-styles/counter-suffix.html android  -> carrier of L5-counter-suffix-rows
+    L3-positioned-parent-slot: filter-effects/backdrop-filter-basic-blur.html android  -> RING-FENCED
+    L3-positioned-parent-slot: filter-effects/backdrop-filter-clip-rect.html android  -> carrier of L6-android-paint-order
+    L7-instruments: css-counter-styles/counter-suffix.html android  -> carrier of L5-counter-suffix-rows
+    L7-instruments: css-counter-styles/counter-suffix.html ios  -> carrier of L5-counter-suffix-rows
+    L7-instruments: css-text/bidi/bidi-tab-001.html android  -> carrier of L3-positioned-parent-slot
+    L7-instruments: css-text/hyphens/hyphenate-character-005.html android  -> carrier of L3-positioned-parent-slot
+    L7-instruments: selectors/dir-style-02a.html android  -> carrier of L3-positioned-parent-slot

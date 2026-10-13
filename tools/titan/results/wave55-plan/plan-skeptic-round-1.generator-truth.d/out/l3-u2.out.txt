@@ -1,0 +1,10 @@
+U2 (RTL Column-loop parent, px Width, oof child with a physical inline inset):
+  wpt__css-anchor-position__anchor-position-005                                  android P 0.9889  parents ['_0-596']
+  wpt__css-text__bidi__bidi-tab-001                                              android P 0.9805  parents ['_0-038', '_0-041', '_0-051', '_0-057']
+  wpt__css-text__hyphens__hyphenate-character-005                                android f 0.9474  parents ['_0-209']
+  wpt__css-writing-modes__dynamic-offset-rtl-001                                 android P 0.9952  parents ['_1-752']
+  wpt__css-writing-modes__dynamic-offset-rtl-002                                 android P 0.9953  parents ['_1-755']
+  wpt__css-writing-modes__dynamic-offset-vrl-rtl-001                             android P 0.9952  parents ['_1-764']
+  wpt__css-writing-modes__dynamic-offset-vrl-rtl-002                             android P 0.9952  parents ['_1-767']
+  wpt__selectors__dir-style-02a                                                  android f 0.9425  parents ['_2-092', '_2-101']
+parents 12 docs 8

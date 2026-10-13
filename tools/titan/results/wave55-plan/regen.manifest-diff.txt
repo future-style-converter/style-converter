@@ -1,0 +1,6 @@
+# regen.manifest-diff.txt — landing-manifest.json before sha256 f6716e2f80f112dd6146a13560be28264ba423a15a69a237b756731288420ce8 · after c933f68defd6e24e7d896da959296909f353c88efd92ac9249341372f02ecf4a (land-units.sh 0ced008c2cb25d34…)
+~ /deliveryContract/cutOn
+  common prefix 413 chars
+  before (rest): 't the list end'
+  after  (rest): ppended at whatever the list's end is when the patch lands — L3's pinned anchor is the LAST entry at HEAD, and L3 still cuts AT that anchor (the other two writers insert above it, so the three land in any order: land-units.selftest.sh F; pre-landing regeneration, PLAN §10 item 8)
+# 1 difference(s); exactly deliveryContract.cutOn: YES

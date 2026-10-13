@@ -1,0 +1,10 @@
+U1 heading radius: 4 docs 4 components
+   wpt__css-text-decor__text-decoration-inset-005 ['text-decoration-inset-005__1__0-069']
+   wpt__css-text-decor__text-decoration-inset-006 ['text-decoration-inset-006__1__0-076']
+   wpt__css-text-decor__text-decoration-inset-011 ['text-decoration-inset-011__1__0-095']
+   wpt__css-text-decor__text-decoration-inset-014 ['text-decoration-inset-014__1__0-110']
+U1 non-heading / vertical (logged skip): [('wpt__CSS2__css21-errata__s-11-1-1b-005', ['p']), ('wpt__CSS2__css21-errata__s-11-1-1b-006', ['p']), ('wpt__css-anchor-position__anchor-center-safe-rtl', ['p', 'p'])]
+U1 declared-both-edges abspos headings (identity): 12
+U2 heading hosts: 4 ['wpt__css-text-decor__text-decoration-inset-005', 'wpt__css-text-decor__text-decoration-inset-006', 'wpt__css-text-decor__text-decoration-inset-011', 'wpt__css-text-decor__text-decoration-inset-014']
+ios carriers 4 radius-minus-carriers [] carriers-minus-radius []
+android carriers 4 radius-minus-carriers [] carriers-minus-radius []

@@ -1,0 +1,25 @@
+# skeptic-probe-u3.out.txt — L5 SKEPTIC throwaway Catalyst probe (source: skeptic-probe-u3.swift.txt; never delivered), run ALONE on the skeptic worktree with every L5 patch applied (611c9f93 + the 11 landing-order patches):
+#   xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath <wt>/.dd -only-testing:StyleConverterRuntimeTests/ZZSkL5ProbeTests
+# 'with' = the verbatim wave54-final counter-suffix per-test IR; 'without' = the same bytes minus its 6 FontVariantNumeric declarations (= the base's identity applier). Inter faces registered for the process (the device harness registers them).
+	 Executed 2 tests, with 0 failures (0 unexpected) in 4.494 (4.495) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 4.494 (4.503) seconds
+** TEST SUCCEEDED **
+SKPROBE U3 diff band y192-215: 13 px differ, x137-143 y214-215
+SKPROBE U3 diff band y216-239: 81 px differ, x133-146 y216-239
+SKPROBE U3 diff band y240-263: 48 px differ, x133-145 y240-250
+SKPROBE U3 diff band y264-287: 8 px differ, x133-135 y271-273
+SKPROBE U3 diff band y288-311: 10 px differ, x133-135 y295-298
+SKPROBE perrun . identical=false tab[x17-18] prop[x17-18] ["band y24-47: 10 px differ, x17-19 y29-32"]
+SKPROBE perrun 1 identical=false tab[x18-24] prop[x17-20] ["band y0-23: 27 px differ, x16-22 y20-23", "band y24-47: 41 px differ, x17-25 y24-31"]
+SKPROBE perrun 2 identical=false tab[x17-24] prop[x17-24] ["band y0-23: 26 px differ, x17-24 y19-23", "band y24-47: 28 px differ, x17-24 y24-31"]
+SKPROBE perrun א. identical=false tab[x17-19,x21-29] prop[x17-18,x21-29] ["band y24-47: 8 px differ, x17-19 y29-31"]
+SKPROBE perrun ב. identical=false tab[x18-19,x21-28] prop[x18-19,x21-28] ["band y24-47: 10 px differ, x17-19 y29-32"]
+SKPROBE row10 with    x104-111,x113-120,x123-127,x133-134,x138-145
+SKPROBE row10 without x104-111,x113-120,x123-127,x133-134,x138-145
+SKPROBE row11 with    x103-116,x119-126,x133-135,x137-145
+SKPROBE row11 without x103-116,x119-126,x133-134,x137-145
+SKPROBE row12 with    x104-111,x113-120,x123-127,x134-135,x137-144
+SKPROBE row12 without x104-111,x113-120,x123-127,x134-135,x137-144
+SKPROBE row9 with    x103-116,x119-126,x133-134,x139-145
+SKPROBE row9 without x103-116,x119-126,x133-134,x138-141
+SKPROBE size 390 600

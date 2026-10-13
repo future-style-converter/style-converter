@@ -1,0 +1,91 @@
+diff --git a/runtimes/web/tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx b/runtimes/web/tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx
+new file mode 100644
+index 00000000..1ea1f8cd
+--- /dev/null
++++ b/runtimes/web/tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx
+@@ -0,0 +1,85 @@
++// InertOutOfFlowWordJoin.branches.test.tsx — wave-55 lane L7 (unit U6-web, BACKLOG 0(o)): pins W1–W6 on the
++// branches of the wave-54 W1 word join that no test reached (wave-54 L6 skeptic SK6-w1 / w2 / w5 / w9 / w10 and the
++// alpha threshold). The existing InertOutOfFlowWordJoin.test.tsx is exactly 200 lines, so they live here.
++//
++// The predicate (Compose InertOutOfFlowMember.admits, restated in InertOutOfFlowWordJoin.ts) admits a member only when
++// it has no structure of its own, is out of flow (CSS 2.1 §9.3.1: absolute AND fixed) and paints nothing (an alpha-0
++// colour, css-color-4 §4.1); the join then moves it to the END of the word it splits (css-text-3 §5.1).
++//
++// Input VERBATIM from tools/titan/runs/wave54-final/sections/css-text/per-test-ir/
++// wpt__css-text__hyphens__hyphens-out-of-flow-002.json (sha256 0f1d9251…, byte-identical at wave55-open): box 4's host
++// (`hyphens: auto`, runs high | member | way) and its member; each pin patches ONE fact of the member or the runs.
++//
++// EXECUTED MUTATIONS (red → restore → green, sha256 in tools/titan/results/wave55-instruments/_note.md), each in
++// runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts:
++//   W1 the structural refusal deleted (children / runs / decorations)   W2 FIXED dropped from OUT_OF_FLOW_POSITIONS
++//   W3 the pushText word continuation disabled                         W4 `a <= 0` loosened to `a < 0.5`
++//   W5 the decimal-string branch of alphaIsZero dropped                W6 keywordOf ignores `{keyword}` objects
++
++import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
++import { resolveRuns } from '../../src/renderer/InlineRuns';
++import { composeTree } from '../../src/renderer/Composer';
++import { buildStyles } from '../../src/core/renderer/StyleBuilder';
++import type { IRDocument } from '../../src/core/ir/IRModels';
++
++/** hyphens-out-of-flow-002 box 4: the host and its one run member, verbatim. */
++const BOX4 = [{"id":"wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289","name":"wpt__css-text__hyphens__hyphens-out-of-flow-002__4","properties":[{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderRightColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderBottomColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderLeftColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"MarginTop","data":{"px":5}},{"type":"MarginRight","data":{"px":5}},{"type":"MarginBottom","data":{"px":5}},{"type":"MarginLeft","data":{"px":5}},{"type":"Width","data":{"type":"length","original":{"v":6,"u":"CH"}}},{"type":"Hyphens","data":"AUTO"}],"text":"highway","meta":{"role":"ws-after","lang":"en","runs":[{"text":"high"},{"child":"hyphens__hyphens-out-of-flow-002__4__0"},{"text":"way"}]}},
++{"id":"hyphens__hyphens-out-of-flow-002__4__0-290","name":"hyphens__hyphens-out-of-flow-002__4__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289"},"text":"abspos","meta":{"sourceTag":"span","lang":"en"}}];
++type C = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- a wire component as plain JSON
++const MEMBER_ID = 'hyphens__hyphens-out-of-flow-002__4__0-290';
++
++/** A copy of box 4 with the member (and optionally the host) patched; extra components appended. */
++function box4(member: (m: C) => C, host: (h: C) => C = (h) => h, extra: C[] = []): C[] {
++  return [...structuredClone(BOX4).map((c: C) => (c.id === MEMBER_ID ? member(c) : host(c))), ...extra];
++}
++/** A member property replaced by type (the other facts stay verbatim). */
++const withProp = (type: string, data: unknown) => (m: C) => ({ ...m, properties: m.properties.map((p: C) => (p.type === type ? { type, data } : p)) });
++/** resolveRuns exactly as NodeRenderer calls it: the host's OWN computed hyphens arms the join. */
++function plan(components: C[]) {
++  const host = composeTree({ irVersion: 2, minReaderVersion: 2, components } as unknown as IRDocument)
++    .find((n) => n.component.id.endsWith('__4-289'));
++  if (!host) throw new Error('box 4 host not composed');
++  return resolveRuns(host.component.meta?.runs, host.children, host.component.id,
++    { hyphensAuto: buildStyles(host.component.properties).hyphens === 'auto' });
++}
++// The join's breadcrumb is a console.warn: muted per test so the run stays quiet.
++beforeEach(() => { vi.spyOn(console, 'warn').mockImplementation(() => {}); });
++afterEach(() => { vi.restoreAllMocks(); });
++
++describe('InertOutOfFlowWordJoin — the branches no wave-54 test reached (wave-55 L7 U6-web)', () => {
++  it('control: the verbatim member joins (joined 1), so each refusal below is its patch alone', () => {
++    expect(plan(box4((m) => m))?.joinedOutOfFlowMembers).toBe(1);
++  });
++
++  it('W1 a member with its own child, runs or decorations is not one inert box → joined 0 (SK6-w1)', () => {
++    // A nested component under the member: composeTree gives the member a child node.
++    const kid = { id: 'kid-1', name: 'kid', properties: [], text: 'x', slot: { parent: MEMBER_ID }, meta: { sourceTag: 'span' } };
++    expect(plan(box4((m) => m, undefined, [kid]))?.joinedOutOfFlowMembers).toBe(0);
++    // Its own run plan, or its own decoration lines: either could paint.
++    expect(plan(box4((m) => ({ ...m, meta: { ...m.meta, runs: [{ text: 'abspos' }] } })))?.joinedOutOfFlowMembers).toBe(0);
++    expect(plan(box4((m) => ({ ...m, meta: { ...m.meta, decorations: [{ line: 'UNDERLINE' }] } })))?.joinedOutOfFlowMembers).toBe(0);
++  });
++
++  it('W2 a FIXED inert member is out of flow too (CSS 2.1 §9.3.1) → joined 1 (SK6-w2)', () => {
++    expect(plan(box4(withProp('Position', 'FIXED')))?.joinedOutOfFlowMembers).toBe(1);
++  });
++
++  it('W3 [text, M, text, text]: the word runs on into the next entry, and the member lands at ITS first space (SK6-w5)', () => {
++    const p = plan(box4((m) => m, (h) => ({ ...h, meta: { ...h.meta,
++      runs: [{ text: 'hi' }, { child: 'hyphens__hyphens-out-of-flow-002__4__0' }, { text: 'gh' }, { text: 'way rest' }] } })));
++    expect(p?.joinedOutOfFlowMembers).toBe(1);
++    expect(p?.entries).toEqual([{ kind: 'text', text: 'high' }, { kind: 'text', text: 'way' }, { kind: 'child', index: 0 }, { kind: 'text', text: ' rest' }]);
++  });
++
++  it('W4 alpha 0.3 paints → joined 0 (only alpha ≤ 0 is inert)', () => {
++    expect(plan(box4(withProp('Color', { srgb: { r: 0, g: 0, b: 0, a: 0.3 } })))?.joinedOutOfFlowMembers).toBe(0);
++  });
++
++  it('W5 `srgb.a` as the decimal string "0" reads as 0 (Kotlin floatOrNull) → joined 1 (SK6-w9)', () => {
++    expect(plan(box4(withProp('Color', { srgb: { r: 0, g: 0, b: 0, a: '0' } })))?.joinedOutOfFlowMembers).toBe(1);
++  });
++
++  it('W6 Position as the `{keyword}` object dialect (ValueExtractors.extractKeyword) → joined 1 (SK6-w10)', () => {
++    expect(plan(box4(withProp('Position', { keyword: 'ABSOLUTE' })))?.joinedOutOfFlowMembers).toBe(1);
++  });
++});

@@ -1,0 +1,33 @@
+### ab-arms55.sh --dry-run in the throwaway (AB_ROOT=<throwaway>; detached HEAD → expected refusal 'detached HEAD')
+ab-arms55 (dry) — root <scratch>/wt-lu · branch
+  revert check: arm drop-L4-U2 — the reverse of 640276a0 applies to the tree at 640276a0 (git apply -R --check)
+  arm drop-L4-U2: git checkout -B wave55-ab-drop-L4-U2 640276a0; git revert --no-edit 640276a0; rm -f /tmp/titan-device-pool/provisioned-*;
+      tools/titan/gate-driver.sh wave55-ab-drop-L4-U2 --sections css-text-decor --skip-fixture-net  → $STAGE/drop-L4-U2.driver.txt
+      installed-build-hash.sh 'wave55-ab-drop-L4-U2 (A/B arm …)' after 'attempt 1 starting' → $STAGE/drop-L4-U2.hash.txt; restore + verify;
+      after the last arm: >> tools/titan/results/wave55-gate/build-hashes.txt, tools/titan/results/wave55-gate/final/ab-drop-L4-U2.driver.txt, ab-diff.mjs wave55-ab-drop-L4-U2 wave55-final --threshold
+      driver --plan | run-id: wave55-ab-drop-L4-U2
+      driver --plan | run-dir: <scratch>/wt-lu/too
+      driver --plan | sections (1): css-text-decor
+      driver --plan | max-tests: 48  devices: android=1 ios=1  section-timeout-min: 50
+      driver --plan | corpus: 1  fixture-net: 0  resume: 0  force: 0
+      driver --plan | quiet-host: load1 < 6 and free+inactive > 2048 MB
+REFUSED (1):
+  - detached HEAD: there is no branch to restore to
+exit 
+### bad arms file
+REFUSED (6):
+  - detached HEAD: there is no branch to restore to
+  - arm 2: duplicate arm name drop-U2 (its run dir, branch, read-out and hash label would collide)
+  - arm drop-X: section css-txt is not one of gate-driver.sh's corpus sections
+  - arm drop-X: platform windows is not web / ios / android
+  - arm drop-Y: 640276a0 is not older than the sha before it (list the shas child first)
+  - arm drop-Z: deadbeef is not a commit
+exit 
+### --run on the bad arms file must refuse before touching anything
+REFUSED (6):
+exit 
+snapshot (HEAD, branch, index sha, status --untracked-files=all, refs): IDENTICAL
+files newer than the stamp (excluding .git): 0
+ab-arms55.sh arms-ok.txt --dry-run -> exit 2
+ab-arms55.sh arms-bad.txt --dry-run -> exit 2
+ab-arms55.sh arms-bad.txt --run -> exit 2

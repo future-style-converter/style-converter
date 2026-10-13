@@ -1,0 +1,5 @@
+            // Wave 55 (L6 U2): the sides chain INNER of the background and
+            // paint behind the content (CSS 2.1 Appendix E §E.2).
+            result = BordersFacade.apply(result, paint.borders, sidesBehindContent = true)
+            result = ColorApplier.applyColors(result, paint.colors)
+            result = BordersFacade.applySidesBehindContent(result, paint.borders)

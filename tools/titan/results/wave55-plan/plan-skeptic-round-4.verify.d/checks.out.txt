@@ -1,0 +1,135 @@
+# plan-skeptic round 4 verify — checks.out.txt: the commands of report §1 and their outputs (scratch paths written <scratch>)
+
+## 1a/1b beforeEveryDeviceRun: bash -n, then run verbatim (repo root; the note's jq form from /)
+## bash -n
+bash -n exit 0
+## run verbatim from repo root: bash -c
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+[own-processes] kill_own_gradle_daemons roots=[/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf]: stopped [] left []
+run exit 0
+## jq-form from the note, from /
+[own-processes] kill_own_gradle_daemons roots=[/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf]: stopped [] left []
+run-from-/ exit 0
+
+## 1c the guard's red paths (PROJECT_ROOT re-pointed at a throwaway <scratch>/r4/wave55-r4v-guard-wt)
+root substituted
+## clean throwaway
+[own-processes] kill_own_gradle_daemons roots=[<scratch>/r4/wave55-r4v-guard-wt <scratch>/r4/wave55-r4v-guard-wt]: stopped [] left []
+exit 0
+## + untracked runtimes/r4-probe.kt
+the tree differs from HEAD in code (tracked, staged or untracked): a device run would build it (round-1 S9, round-2 S1)
+exit 2
+## + modified tracked converter file
+the tree differs from HEAD in code (tracked, staged or untracked): a device run would build it (round-1 S9, round-2 S1)
+exit 2
+## results-only change is allowed
+[own-processes] kill_own_gradle_daemons roots=[<scratch>/r4/wave55-r4v-guard-wt <scratch>/r4/wave55-r4v-guard-wt]: stopped [] left []
+exit 0
+
+## 3a ab-arms55.selftest.sh as a scratch copy (HERE / tee target only; diff of the copy:)
+23c23
+< HERE="$(cd "$(dirname "$0")" && pwd -P)"; RUNNER="$HERE/ab-arms55.sh"; SH="$(cd "$HERE/../../../.." && pwd -P)"
+---
+> HERE="/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave55-gate"; RUNNER="$HERE/ab-arms55.sh"; SH="$(cd "$HERE/../../../.." && pwd -P)"
+27c27
+< exec > >(tee "$HERE/ab-arms55.selftest.out.txt") 2>&1
+---
+> exec > >(tee "<scratch>/r4/st/ab-arms55.selftest.out.txt") 2>&1
+--- its record's head / tail:
+# ab-arms55.selftest.out.txt — 2026-10-11T19:38:25Z; runner sha256 5cd6fccbc928768d…; scratch <scratch>/r4/tk/s/abst
+
+ab-arms55.selftest: every check as required (mutants M-L18, M-per-arm, M-dry RED)
+--- diff against the committed ab-arms55.selftest.out.txt (timestamp + scratch normalised; the rest are fresh git-init commit shas):
+25c25
+<   as required  T3 M-per-arm is RED: 4 T1 check(s) fail (exit 6; arm drop-V: the tree is not at ecdbe78, clean, on main before the arm — stopping (records in /private/tmp/cl)
+---
+>   as required  T3 M-per-arm is RED: 4 T1 check(s) fail (exit 6; arm drop-V: the tree is not at 86d1527, clean, on main before the arm — stopping (records in /private/tmp/cl)
+38,39c38,39
+<   as required  T5d a sha that is not an ancestor of HEAD — exit 2, 'arm drop-S: 997eaef is not an ancestor of HEAD (nothing to revert on this branch)'
+<   as required  T5e shas parent first (must be child first) — exit 2, 'arm drop-UV: 98418f5 is not older than the sha before it (list the shas child first)'
+---
+>   as required  T5d a sha that is not an ancestor of HEAD — exit 2, 'arm drop-S: c818f87 is not an ancestor of HEAD (nothing to revert on this branch)'
+>   as required  T5e shas parent first (must be child first) — exit 2, 'arm drop-UV: bb9ff8e is not older than the sha before it (list the shas child first)'
+44c44
+<   as required  T5j a revert that does not apply to HEAD (W rewrote U's line) — exit 2, 'arm drop-U: the revert of c406fed does not apply to 1aa1eae: error: patch failed: src/a.tx'
+---
+>   as required  T5j a revert that does not apply to HEAD (W rewrote U's line) — exit 2, 'arm drop-U: the revert of 257a5b2 does not apply to 824f306: error: patch failed: src/a.tx'
+46c46
+<   as required  T5l 'drop-UW W U' (child first; W rewrites U's line; not a chain) dry-runs exit 0 — revert check: arm drop-UW — the reverse of 1aa1eae c406fed applies to the tree at 1aa1ea
+---
+>   as required  T5l 'drop-UW W U' (child first; W rewrites U's line; not a chain) dry-runs exit 0 — revert check: arm drop-UW — the reverse of 824f306 257a5b2 applies to the tree at 824f30
+
+## 3b land-units.selftest.sh <scratch>/r4/lu (A-G)
+land-units.selftest.sh — 2026-10-11 19:35:21 UTC — shared tree /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf at 640276a0 (never touched)
+script under test: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave55-plan/land-units.sh (sha256 817c96779eec8db2…)
+PASS  Z2 no throwaway worktree left registered
+
+SELFTEST  133 passed, 0 failed
+--- normalised diff against the committed land-units.selftest.out.txt: 0 lines
+
+## 3c toolkit-proofs.sh as a scratch copy (SH / tee target / the C1 self-test call → the scratch copy above; diff of the copy:)
+19c19
+< SH="$(cd "$(dirname "$0")/../../../.." && pwd -P)"
+---
+> SH="/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf"
+23c23
+< exec > >(tee "$SH/$G/toolkit-proofs.txt") 2>&1
+---
+> exec > >(tee "<scratch>/r4/tk/toolkit-proofs.txt") 2>&1
+144,145c144,145
+< bash $G/ab-arms55.selftest.sh "$S/abst" >/dev/null 2>&1; strc=$?
+< grep -E '^  (as required|!! NOT)' $G/ab-arms55.selftest.out.txt | sed 's/^  /     /' | cut -c1-175
+---
+> bash <scratch>/r4/st/ab-arms55.selftest.copy.sh "$S/abst" >/dev/null 2>&1; strc=$?
+> grep -E '^  (as required|!! NOT)' <scratch>/r4/st/ab-arms55.selftest.out.txt | sed 's/^  /     /' | cut -c1-175
+--- its record's head / tail:
+# toolkit-proofs.txt — 2026-10-11T19:38:23Z; shared tree HEAD 640276a0; throwaway worktree <scratch>/r4/wave55-r4v-tk-wt at 640276a0
+# sha256: expectations.json 490dc5b9a8b33ef3… adjudicate.mjs 262d22c32a66ec30… control-check.mjs cba40eb567f11105… ab-arms55.sh 5cd6fccbc928768d… ab-arms55.selftest.sh 72ca276afc0562f9… make-snapshot55.mjs df37730dd3c70f54…
+toolkit-proofs: every instrument behaved as required (each shown able to fail)
+--- normalised diff against the committed toolkit-proofs.txt: 0 lines
+
+## 4a plan-build.py --out <scratch>
+## plan-build.py --out (dry run)
+exit 0
+expectations.json identical
+490dc5b9a8b33ef38d2b1e3a1cd9094c71ca6322fa45ec281b427798c89acacf  <scratch>/r4/pb/expectations.json
+490dc5b9a8b33ef38d2b1e3a1cd9094c71ca6322fa45ec281b427798c89acacf  tools/titan/results/wave55-plan/expectations.json
+watchlist.txt identical
+4b1a9cd5bb421e3bbc3915bc0ca69994df882b7edd1c72f4d779511e61a70eb9  <scratch>/r4/pb/watchlist.txt
+4b1a9cd5bb421e3bbc3915bc0ca69994df882b7edd1c72f4d779511e61a70eb9  tools/titan/results/wave55-plan/watchlist.txt
+stdout identical to plan-build.out.txt
+expectations.json
+stdout.txt
+watchlist.txt
+
+## 4b watchlist (RUN=wave54-final WATCH=watchlist.txt node wave52-plan/watchlist-check.mjs)
+  unmatched 0
+identical to watchlist-check.wave54-final.out.txt
+
+## 4c geometry-gate.py wave54-final --base wave54-final --self-test
+geometry-gate wave54-final (base wave54-final): 230 keys — PASS 160 · FAIL 70 (gating 43) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 43 (PASS 0 FAIL 43) · control 160 (PASS 160 FAIL 0) · report 27 (PASS 0 FAIL 27) · withdrawn 0 (PASS 0 FAIL 0)
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)
+
+## 4d plan-prose.py --check (scratch copy, then the installed PLAN.md)
+plan-prose --check ../../../../../../../..<scratch>/r4/PLAN.copy.md against expectations.json sha256 490dc5b9a8b33ef3…: 36 gen blocks · 39 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
+plan-prose --check: HOLDS
+check on copy exit 0
+plan-prose --check tools/titan/results/wave55-plan/PLAN.md against expectations.json sha256 490dc5b9a8b33ef3…: 36 gen blocks · 39 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
+plan-prose --check: HOLDS
+check on installed PLAN.md exit 0
+
+## 4e A/B arms
+arms ['drop-NB-ios', 'drop-L4-U2', 'drop-L6-U2'] | names unique True | run ids ['wave55-ab-drop-NB-ios', 'wave55-ab-drop-L4-U2', 'wave55-ab-drop-L6-U2'] unique True
+runner template: tools/titan/results/wave55-gate/ab-arms55.sh <arms-file> --run --against <arm.ag …  cmd template: node tools/titan/results/wave52-gate/ab-diff.mjs wave55-ab-<arm> <arm.against> --threshold 0.002 --platforms <arm.platforms>
+the two U2 arms (formerly both drop-U2): [('drop-L4-U2', 'wave55-ab-drop-L4-U2', 'wave55-pre', 'L4-ua-heading-margin'), ('drop-L6-U2', 'wave55-ab-drop-L6-U2', 'wave55-final', 'L6-android-paint-order')] | distinct run ids True | distinct against True
+  drop-NB-ios  run id wave55-ab-drop-NB-ios    --against wave55-final  | tools/titan/results/wave55-gate/ab-arms55.sh <arms-file> --run --against wave55-final | read-out node tools/titan/results/wave52-gate/ab-diff.mjs wave55-ab-drop-NB-ios wave55-final --threshold 0.002 --platforms ios
+  drop-L4-U2   run id wave55-ab-drop-L4-U2     --against wave55-pre    | tools/titan/results/wave55-gate/ab-arms55.sh <arms-file> --run --against wave55-pre | read-out node tools/titan/results/wave52-gate/ab-diff.mjs wave55-ab-drop-L4-U2 wave55-pre --threshold 0.002 --platforms ios,android
+  drop-L6-U2   run id wave55-ab-drop-L6-U2     --against wave55-final  | tools/titan/results/wave55-gate/ab-arms55.sh <arms-file> --run --against wave55-final | read-out node tools/titan/results/wave52-gate/ab-diff.mjs wave55-ab-drop-L6-U2 wave55-final --threshold 0.002 --platforms android
+PLAN: L4 probe-time read-out line present: True | L4 dry run --against wave55-pre: True | closing step "(`wave55-final` for both closing arms)": True
+any arm named drop-U2 in expectations: False
+
+## 2b standing set: probes-teeth.py --scratch <scratch>/r4/teeth
+  L6 r3-PO-fixed-ghost+3y         gate exit 1: as pre-registered (1 key(s))
+215 cases; violations 0; gating + tally keys with ≥ 1 rejected fake 48 / 48
+exit 0

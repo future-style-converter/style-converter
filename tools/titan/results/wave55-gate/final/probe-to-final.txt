@@ -1,0 +1,2 @@
+A/B  exclude=wave55-probe  include=wave55-final  sections=CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-grid,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-tables,css-text,css-text-decor,css-transforms,css-values,css-view-transitions,css-writing-modes,filter-effects,selectors  platforms=web,ios,android
+compared 3538 cells: 0 differ (flip, or |Δ| ≥ 0.002), 3538 within threshold

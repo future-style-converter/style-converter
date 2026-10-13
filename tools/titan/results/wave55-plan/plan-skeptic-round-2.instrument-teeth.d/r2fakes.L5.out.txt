@@ -1,0 +1,35 @@
+L6 picked: {'abspos/flex-abspos-staticpos-align-self-safe-001': 'child@39,39 -3,+0', 'abspos/flex-abspos-staticpos-align-self-safe-002': 'child@44,272 -3,+0', 'abspos/grid-abspos-staticpos-align-self-001': 'child@19,30 +3,+0', 'abspos/grid-abspos-staticpos-justify-self-001': 'child@30,19 +3,+0', 'abspos/grid-abspos-staticpos-align-self-vertWM-001': 'child@18,19 +3,+0', 'abspos/grid-abspos-staticpos-align-self-rtl-001': 'child@33,18 +3,+0'}
+L5-C-ideographs-swapped-5-6                gate-exit 0  [C] counter-suffix android                                 PASS   ACCEPTED (defect)
+      [C] counter-suffix android row5:x34-45,x49-52|item x65 row6:x33-46,x49-52|item x65 → GEOMETRY OK
+L5-C-ideographs-swapped-5-6                gate-exit 0  [C] counter-suffix ios                                     PASS   ACCEPTED (defect)
+      [C] counter-suffix ios row5:x33-46,x50-52|item x64 row6:x33-46,x50-52|item x65 → GEOMETRY OK
+L5-C-ideograph+3y                          gate-exit 0  [C] counter-suffix android                                 PASS   ACCEPTED (defect)
+      [C] counter-suffix android row5:x33-46,x49-52|item x65 row6:x34-45,x49-52|item x65 → GEOMETRY OK
+L5-C-ideograph+3y                          gate-exit 0  [C] counter-suffix ios                                     PASS   ACCEPTED (defect)
+      [C] counter-suffix ios row5:x33-46,x50-52|item x64 row6:x33-46,x50-52|item x65 → GEOMETRY OK
+L5-H-letters-swapped-3-4                   gate-exit 0  [H] counter-suffix ios                                     PASS   ACCEPTED (defect)
+      [H] counter-suffix ios row3:x47-53,x57-57 row4:x46-53,x57-57 → GEOMETRY OK
+L5-H-period-3y                             gate-exit 0  [H] counter-suffix ios                                     PASS   ACCEPTED (defect)
+      [H] counter-suffix ios row3:x46-53,x57-57 row4:x47-53,x57-57 → GEOMETRY OK
+L5-T-row9-text-erased                      gate-exit 0  [K] counter-suffix android                                 FAIL   rejected
+      [K] counter-suffix android zones y0-111,y160-599,x64-389×y64-159 vs wave54-final → GEOMETRY WRONG (zone y160-599 differs from wave54-final (163 px))
+L5-T-row9-text-erased                      gate-exit 0  [K] counter-suffix ios                                     PASS   ACCEPTED (defect)
+      [K] counter-suffix ios zones y0-63,y160-207,y232-599,x64-389×y64-159 vs wave54-final → GEOMETRY OK
+L5-T-row9-text-erased                      gate-exit 0  [T] counter-suffix ios                                     PASS   ACCEPTED (defect)
+      [T] counter-suffix ios row9 digit (139, 145, 215, 225) → GEOMETRY OK
+L5-T-row9-text-3x                          gate-exit 0  [K] counter-suffix android                                 FAIL   rejected
+      [K] counter-suffix android zones y0-111,y160-599,x64-389×y64-159 vs wave54-final → GEOMETRY WRONG (zone y160-599 differs from wave54-final (273 px))
+L5-T-row9-text-3x                          gate-exit 0  [K] counter-suffix ios                                     PASS   ACCEPTED (defect)
+      [K] counter-suffix ios zones y0-63,y160-207,y232-599,x64-389×y64-159 vs wave54-final → GEOMETRY OK
+L5-T-row9-text-3x                          gate-exit 0  [T] counter-suffix ios                                     PASS   ACCEPTED (defect)
+      [T] counter-suffix ios row9 digit (139, 145, 215, 225) → GEOMETRY OK
+L5-I-line1-ideograph-is-line2s             gate-exit 0  [I] cjk-decimal/css3-counter-styles-005 android            PASS   ACCEPTED (defect)
+      [I] cjk-decimal/css3-counter-styles-005 android y95:marker x218-248 (2, fill 0.11) item x267 y121:marker x218-248 (2, fill 0.11) item x268 → GEOMETRY OK
+L5-I-line1-ideograph-is-line2s             gate-exit 0  [I] cjk-decimal/css3-counter-styles-005 ios                PASS   ACCEPTED (defect)
+      [I] cjk-decimal/css3-counter-styles-005 ios y95:marker x218-249 (2, fill 1.0) item x267 y121:marker x218-249 (2, fill 0.2) item x268 → GEOMETRY OK
+L5-I-line1-marker+3y                       gate-exit 0  [I] cjk-decimal/css3-counter-styles-005 android            PASS   ACCEPTED (defect)
+      [I] cjk-decimal/css3-counter-styles-005 android y95:marker x217-248 (2, fill 0.98) item x267 y121:marker x218-248 (2, fill 0.11) item x268 → GEOMETRY OK
+L5-I-line1-marker+3y                       gate-exit 0  [I] cjk-decimal/css3-counter-styles-005 ios                PASS   ACCEPTED (defect)
+      [I] cjk-decimal/css3-counter-styles-005 ios y95:marker x217-249 (2, fill 0.96) item x267 y121:marker x218-249 (2, fill 0.2) item x268 → GEOMETRY OK
+
+16 (fake, key) reads; ACCEPTED 14; rejected 2; other 0

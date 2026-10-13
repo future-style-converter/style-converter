@@ -1,0 +1,16 @@
+{
+ "name": "A2-em-base-16",
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMargin.kt",
+ "pre": "3bb03d886fb06ced20e65dc170197cb27310068371d575c120554f809e998a65",
+ "mutated": "203a69fa624750472db5c5c704e12f9fb9a936803e30c0a7dbc0e4159fc46801",
+ "post": "3bb03d886fb06ced20e65dc170197cb27310068371d575c120554f809e998a65",
+ "red_rc": 1,
+ "red_failures": [
+  "UaPositionedHeadingMarginTest > the seam replay's own font step feeds the same margin",
+  "UaPositionedHeadingMarginTest > inset-014 - the monospace abspos h1 takes 0_67 x 26 (the 13px fixed default)"
+ ],
+ "red_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/2; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "green_rc": 0,
+ "green_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "verdict": "RED-THEN-GREEN"
+}

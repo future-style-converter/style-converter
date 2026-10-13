@@ -1,0 +1,24 @@
+# probe-monospacedDigit.out.txt — wave55 L5 throwaway Catalyst probe (NOT a delivered test; source: probe-monospacedDigit.swift.txt).
+# Run ALONE in its own xcodebuild invocation (it registers the harness Inter faces for its test process), on the L5 worktree with every L5 patch applied:
+#   xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath <wt>/.dd -only-testing:StyleConverterRuntimeTests/ZZL5ProbeTests
+# Tuples are ink (first, last) inked column; R1R2 lines are box WxH and ink rows/cols relative to the Text's box.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 5.351 (5.353) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 5.351 (5.354) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 5.351 (5.355) seconds
+** TEST SUCCEEDED **
+PROBE Inter faceName Optional("Inter-Regular")
+PROBE R1R2 א. rtl=false raw: box 15x20 ink y6-15 x1-13 | painted: box 15x20 ink y6-15 x1-12 | changed: true
+PROBE R1R2 ב. rtl=false raw: box 14x20 ink y6-15 x1-12 | painted: box 14x20 ink y6-15 x0-11 | changed: true
+PROBE R1R2 • rtl=true raw: box 9x20 ink y9-13 x2-6 | painted: box 9x20 ink y9-13 x2-6 | changed: true
+PROBE R1R2 一、 rtl=false raw: box 32x20 ink y9-16 x1-21 | painted: box 32x20 ink y9-16 x1-21 | changed: false
+PROBE custom(Inter-Regular,registered) (9, 56) +mono (11, 87)
+PROBE customInter(unregistered) (11, 65) +mono (11, 65)
+PROBE label(Inter registered) '1' tab (10, 16) prop (9, 12)
+PROBE label(ui-rounded) '1111' tab (10, 45) prop (9, 36)
+PROBE label(unregistered) '1' tab (10, 13) prop (10, 13)
+PROBE register Inter-Black true
+PROBE register Inter-Bold true
+PROBE register Inter-Medium true
+PROBE register Inter-Regular true
+PROBE rounded (9, 61) rounded+mono (12, 79)
+PROBE system (9, 61) system+mono (12, 79)

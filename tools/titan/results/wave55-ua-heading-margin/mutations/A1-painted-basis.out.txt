@@ -1,0 +1,19 @@
+{
+ "name": "A1-painted-basis",
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMargin.kt",
+ "pre": "3bb03d886fb06ced20e65dc170197cb27310068371d575c120554f809e998a65",
+ "mutated": "62d4dce0fe703458d2d9292fa2f480832b84861563417d6b06dee9160c3a992a",
+ "post": "3bb03d886fb06ced20e65dc170197cb27310068371d575c120554f809e998a65",
+ "red_rc": 1,
+ "red_failures": [
+  "UaPositionedHeadingMarginTest > author sizes - absolute px is the basis, parent-relative and shorthand-only are logged",
+  "UaPositionedHeadingMarginTest > inset-005, -006 and -011 - the abspos h1 takes 0_67 x its 32px UA face, face held or applied",
+  "UaPositionedHeadingMarginTest > RELATIVE and STICKY headings stay in flow - the SAME list, FIXED fires",
+  "UaPositionedHeadingMarginTest > an abspos h1 declaring only MarginTop takes the UA bottom only",
+  "UaPositionedHeadingMarginTest > inset-014 - the monospace abspos h1 takes 0_67 x 26 (the 13px fixed default)"
+ ],
+ "red_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/5; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "green_rc": 0,
+ "green_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "verdict": "RED-THEN-GREEN"
+}

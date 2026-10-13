@@ -1,0 +1,128 @@
+=== --arm T
+[M] text-decoration-inset-005            ios      bands [(109, 130, 16, 191)] → GEOMETRY WRONG (heading top y109 vs y130±2 (16px face: wave54-final y109 + the 21 px UA margin))
+[F] text-decoration-inset-005            ios      bands [(109, 130, 16, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(109, 130, 16, 191)]))
+[M] text-decoration-inset-005            android  bands [(107, 131, 17, 191)] → GEOMETRY WRONG (heading top y107 vs y128±2 (16px face: wave54-final y107 + the 21 px UA margin))
+[F] text-decoration-inset-005            android  bands [(107, 131, 17, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(107, 131, 17, 191)]))
+[M] text-decoration-inset-006            ios      bands [(109, 130, 16, 194)] → GEOMETRY WRONG (heading top y109 vs y130±2 (16px face: wave54-final y109 + the 21 px UA margin))
+[F] text-decoration-inset-006            ios      bands [(109, 130, 16, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(109, 130, 16, 194)]))
+[M] text-decoration-inset-006            android  bands [(107, 131, 17, 194)] → GEOMETRY WRONG (heading top y107 vs y128±2 (16px face: wave54-final y107 + the 21 px UA margin))
+[F] text-decoration-inset-006            android  bands [(107, 131, 17, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(107, 131, 17, 194)]))
+[M] text-decoration-inset-014            ios      bands [(111, 121, 17, 133), (128, 137, 16, 84)] → GEOMETRY WRONG (heading top y111 vs y128±2 (16px face: wave54-final y111 + the 17 px UA margin))
+[F] text-decoration-inset-014            ios      bands [(111, 121, 17, 133), (128, 137, 16, 84)] → GEOMETRY WRONG (line-1 band 11 px tall (< 20: the 2em face is missing))
+[M] text-decoration-inset-014            android  bands [(111, 122, 17, 132), (127, 138, 16, 84)] → GEOMETRY WRONG (heading top y111 vs y128±2 (16px face: wave54-final y111 + the 17 px UA margin))
+[F] text-decoration-inset-014            android  bands [(111, 122, 17, 132), (127, 138, 16, 84)] → GEOMETRY WRONG (line-1 band 12 px tall (< 20: the 2em face is missing))
+[M] text-decoration-inset-011            ios      bands [(137, 151, 57, 184), (169, 186, 85, 183), (208, 208, 170, 185), (265, 282, 39, 184)] → GEOMETRY WRONG (band 1 y137–151 vs y158–172±1 (wave54-final + the 21 px UA margin))
+[M] text-decoration-inset-011            android  bands [(136, 155, 57, 184), (168, 187, 80, 184), (209, 209, 166, 180), (265, 283, 41, 184)] → GEOMETRY WRONG (band 1 y136–155 vs y157–176±1 (wave54-final + the 21 px UA margin))
+(probe exit 0 — the ref self-check)
+=== --arm U1
+[M] text-decoration-inset-005            ios      bands [(130, 151, 16, 191)] → GEOMETRY OK
+[F] text-decoration-inset-005            ios      bands [(130, 151, 16, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(130, 151, 16, 191)]))
+[M] text-decoration-inset-005            android  bands [(128, 152, 17, 191)] → GEOMETRY OK
+[F] text-decoration-inset-005            android  bands [(128, 152, 17, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(128, 152, 17, 191)]))
+[M] text-decoration-inset-006            ios      bands [(130, 151, 16, 194)] → GEOMETRY OK
+[F] text-decoration-inset-006            ios      bands [(130, 151, 16, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(130, 151, 16, 194)]))
+[M] text-decoration-inset-006            android  bands [(128, 152, 17, 194)] → GEOMETRY OK
+[F] text-decoration-inset-006            android  bands [(128, 152, 17, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(128, 152, 17, 194)]))
+[M] text-decoration-inset-014            ios      bands [(128, 138, 17, 133), (145, 154, 16, 84)] → GEOMETRY OK
+[F] text-decoration-inset-014            ios      bands [(128, 138, 17, 133), (145, 154, 16, 84)] → GEOMETRY WRONG (line-1 band 11 px tall (< 20: the 2em face is missing))
+[M] text-decoration-inset-014            android  bands [(128, 139, 17, 132), (144, 155, 16, 84)] → GEOMETRY OK
+[F] text-decoration-inset-014            android  bands [(128, 139, 17, 132), (144, 155, 16, 84)] → GEOMETRY WRONG (line-1 band 12 px tall (< 20: the 2em face is missing))
+[M] text-decoration-inset-011            ios      bands [(158, 172, 57, 184), (190, 207, 85, 183), (229, 229, 170, 185), (286, 303, 39, 184)] → GEOMETRY OK
+[M] text-decoration-inset-011            android  bands [(157, 176, 57, 184), (189, 208, 80, 184), (230, 230, 166, 180), (286, 304, 41, 184)] → GEOMETRY OK
+(probe exit 0 — the ref self-check)
+=== --arm R
+[M] text-decoration-inset-005            ios      bands [(120, 141, 16, 191)] → GEOMETRY WRONG (heading top y120 vs y130±2 (16px face: wave54-final y109 + the 21 px UA margin))
+[F] text-decoration-inset-005            ios      bands [(120, 141, 16, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(120, 141, 16, 191)]))
+[M] text-decoration-inset-005            android  bands [(118, 142, 17, 191)] → GEOMETRY WRONG (heading top y118 vs y128±2 (16px face: wave54-final y107 + the 21 px UA margin))
+[F] text-decoration-inset-005            android  bands [(118, 142, 17, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(118, 142, 17, 191)]))
+[M] text-decoration-inset-006            ios      bands [(120, 141, 16, 194)] → GEOMETRY WRONG (heading top y120 vs y130±2 (16px face: wave54-final y109 + the 21 px UA margin))
+[F] text-decoration-inset-006            ios      bands [(120, 141, 16, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(120, 141, 16, 194)]))
+[M] text-decoration-inset-006            android  bands [(118, 142, 17, 194)] → GEOMETRY WRONG (heading top y118 vs y128±2 (16px face: wave54-final y107 + the 21 px UA margin))
+[F] text-decoration-inset-006            android  bands [(118, 142, 17, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(118, 142, 17, 194)]))
+[M] text-decoration-inset-014            ios      bands [(120, 130, 17, 133), (137, 146, 16, 84)] → GEOMETRY WRONG (heading top y120 vs y128±2 (16px face: wave54-final y111 + the 17 px UA margin))
+[F] text-decoration-inset-014            ios      bands [(120, 130, 17, 133), (137, 146, 16, 84)] → GEOMETRY WRONG (line-1 band 11 px tall (< 20: the 2em face is missing))
+[M] text-decoration-inset-014            android  bands [(120, 131, 17, 132), (136, 147, 16, 84)] → GEOMETRY WRONG (heading top y120 vs y128±2 (16px face: wave54-final y111 + the 17 px UA margin))
+[F] text-decoration-inset-014            android  bands [(120, 131, 17, 132), (136, 147, 16, 84)] → GEOMETRY WRONG (line-1 band 12 px tall (< 20: the 2em face is missing))
+[M] text-decoration-inset-011            ios      bands [(148, 162, 57, 184), (180, 197, 85, 183), (219, 219, 170, 185), (276, 293, 39, 184)] → GEOMETRY WRONG (band 1 y148–162 vs y158–172±1 (wave54-final + the 21 px UA margin))
+[M] text-decoration-inset-011            android  bands [(147, 166, 57, 184), (179, 198, 80, 184), (220, 220, 166, 180), (276, 294, 41, 184)] → GEOMETRY WRONG (band 1 y147–166 vs y157–176±1 (wave54-final + the 21 px UA margin))
+(probe exit 0 — the ref self-check)
+=== --arm X2
+[M] text-decoration-inset-005            ios      bands [(151, 172, 16, 191)] → GEOMETRY WRONG (heading top y151 vs y130±2 (16px face: wave54-final y109 + the 21 px UA margin))
+[F] text-decoration-inset-005            ios      bands [(151, 172, 16, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(151, 172, 16, 191)]))
+[M] text-decoration-inset-005            android  bands [(149, 173, 17, 191)] → GEOMETRY WRONG (heading top y149 vs y128±2 (16px face: wave54-final y107 + the 21 px UA margin))
+[F] text-decoration-inset-005            android  bands [(149, 173, 17, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(149, 173, 17, 191)]))
+[M] text-decoration-inset-006            ios      bands [(151, 172, 16, 194)] → GEOMETRY WRONG (heading top y151 vs y130±2 (16px face: wave54-final y109 + the 21 px UA margin))
+[F] text-decoration-inset-006            ios      bands [(151, 172, 16, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(151, 172, 16, 194)]))
+[M] text-decoration-inset-006            android  bands [(149, 173, 17, 194)] → GEOMETRY WRONG (heading top y149 vs y128±2 (16px face: wave54-final y107 + the 21 px UA margin))
+[F] text-decoration-inset-006            android  bands [(149, 173, 17, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(149, 173, 17, 194)]))
+[M] text-decoration-inset-014            ios      bands [(145, 155, 17, 133), (162, 171, 16, 84)] → GEOMETRY WRONG (heading top y145 vs y128±2 (16px face: wave54-final y111 + the 17 px UA margin))
+[F] text-decoration-inset-014            ios      bands [(145, 155, 17, 133), (162, 171, 16, 84)] → GEOMETRY WRONG (line-1 band 11 px tall (< 20: the 2em face is missing))
+[M] text-decoration-inset-014            android  bands [(145, 156, 17, 132), (161, 172, 16, 84)] → GEOMETRY WRONG (heading top y145 vs y128±2 (16px face: wave54-final y111 + the 17 px UA margin))
+[F] text-decoration-inset-014            android  bands [(145, 156, 17, 132), (161, 172, 16, 84)] → GEOMETRY WRONG (line-1 band 12 px tall (< 20: the 2em face is missing))
+[M] text-decoration-inset-011            ios      bands [(179, 193, 57, 184), (211, 228, 85, 183), (250, 250, 170, 185), (307, 324, 39, 184)] → GEOMETRY WRONG (band 1 y179–193 vs y158–172±1 (wave54-final + the 21 px UA margin))
+[M] text-decoration-inset-011            android  bands [(178, 197, 57, 184), (210, 229, 80, 184), (251, 251, 166, 180), (307, 325, 41, 184)] → GEOMETRY WRONG (band 1 y178–197 vs y157–176±1 (wave54-final + the 21 px UA margin))
+(probe exit 0 — the ref self-check)
+=== --arm B
+[M] text-decoration-inset-005            ios      bands [(113, 152, 16, 336), (167, 191, 16, 64)] → GEOMETRY WRONG (heading top y113 vs ref y134 (2em face present: the UA margin is missing or wrong))
+[F] text-decoration-inset-005            ios      bands [(113, 152, 16, 336), (167, 191, 16, 64)] → GEOMETRY WRONG (band top y113 vs ref y134 (the abspos heading's UA margin))
+[M] text-decoration-inset-005            android  bands [(113, 152, 16, 336), (167, 191, 16, 64)] → GEOMETRY WRONG (heading top y113 vs ref y134 (2em face present: the UA margin is missing or wrong))
+[F] text-decoration-inset-005            android  bands [(113, 152, 16, 336), (167, 191, 16, 64)] → GEOMETRY WRONG (band top y113 vs ref y134 (the abspos heading's UA margin))
+[M] text-decoration-inset-006            ios      bands [(113, 152, 16, 331), (167, 191, 16, 64)] → GEOMETRY WRONG (heading top y113 vs ref y134 (2em face present: the UA margin is missing or wrong))
+[F] text-decoration-inset-006            ios      bands [(113, 152, 16, 331), (167, 191, 16, 64)] → GEOMETRY WRONG (band top y113 vs ref y134 (the abspos heading's UA margin))
+[M] text-decoration-inset-006            android  bands [(113, 152, 16, 331), (167, 191, 16, 64)] → GEOMETRY WRONG (heading top y113 vs ref y134 (2em face present: the UA margin is missing or wrong))
+[F] text-decoration-inset-006            android  bands [(113, 152, 16, 331), (167, 191, 16, 64)] → GEOMETRY WRONG (band top y113 vs ref y134 (the abspos heading's UA margin))
+[M] text-decoration-inset-014            ios      bands [(112, 137, 17, 258), (146, 169, 16, 155)] → GEOMETRY WRONG (heading top y112 vs ref y129 (2em face present: the UA margin is missing or wrong))
+[F] text-decoration-inset-014            ios      bands [(112, 137, 17, 258), (146, 169, 16, 155)] → GEOMETRY WRONG (band top y112 vs ref y129 (the abspos heading's UA margin))
+[M] text-decoration-inset-014            android  bands [(112, 137, 17, 258), (146, 169, 16, 155)] → GEOMETRY WRONG (heading top y112 vs ref y129 (2em face present: the UA margin is missing or wrong))
+[F] text-decoration-inset-014            android  bands [(112, 137, 17, 258), (146, 169, 16, 155)] → GEOMETRY WRONG (band top y112 vs ref y129 (the abspos heading's UA margin))
+[M] text-decoration-inset-011            ios      bands [(137, 151, 57, 184), (169, 186, 85, 183), (208, 208, 170, 185), (265, 282, 39, 184)] → GEOMETRY WRONG (band 1 y137–151 vs y158–172±1 (wave54-final + the 21 px UA margin))
+[M] text-decoration-inset-011            android  bands [(136, 155, 57, 184), (168, 187, 80, 184), (209, 209, 166, 180), (265, 283, 41, 184)] → GEOMETRY WRONG (band 1 y136–155 vs y157–176±1 (wave54-final + the 21 px UA margin))
+(probe exit 0 — the ref self-check)
+=== --arm C
+[M] text-decoration-inset-005            ios      bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+[F] text-decoration-inset-005            ios      bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+[M] text-decoration-inset-005            android  bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+[F] text-decoration-inset-005            android  bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+[M] text-decoration-inset-006            ios      bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+[F] text-decoration-inset-006            ios      bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+[M] text-decoration-inset-006            android  bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+[F] text-decoration-inset-006            android  bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+[M] text-decoration-inset-014            ios      bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+[F] text-decoration-inset-014            ios      bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+[M] text-decoration-inset-014            android  bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+[F] text-decoration-inset-014            android  bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+[M] text-decoration-inset-011            ios      bands [(158, 172, 57, 184), (190, 207, 85, 183), (229, 229, 170, 185), (286, 303, 39, 184)] → GEOMETRY OK
+[M] text-decoration-inset-011            android  bands [(157, 176, 57, 184), (189, 208, 80, 184), (230, 230, 166, 180), (286, 304, 41, 184)] → GEOMETRY OK
+(probe exit 0 — the ref self-check)
+=== --arm D
+[M] text-decoration-inset-005            ios      bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+[F] text-decoration-inset-005            ios      bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+[M] text-decoration-inset-005            android  bands [(134, 173, 16, 389)] → GEOMETRY OK
+[F] text-decoration-inset-005            android  bands [(134, 173, 16, 389)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(134, 173, 16, 389)]))
+[M] text-decoration-inset-006            ios      bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+[F] text-decoration-inset-006            ios      bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+[M] text-decoration-inset-006            android  bands [(134, 173, 16, 389)] → GEOMETRY OK
+[F] text-decoration-inset-006            android  bands [(134, 173, 16, 389)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(134, 173, 16, 389)]))
+[M] text-decoration-inset-014            ios      bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+[F] text-decoration-inset-014            ios      bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+[M] text-decoration-inset-014            android  bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+[F] text-decoration-inset-014            android  bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+[M] text-decoration-inset-011            ios      bands [(158, 172, 57, 184), (190, 207, 85, 183), (229, 229, 170, 185), (286, 303, 39, 184)] → GEOMETRY OK
+[M] text-decoration-inset-011            android  bands [(157, 176, 57, 184), (189, 208, 80, 184), (230, 230, 166, 180), (286, 304, 41, 184)] → GEOMETRY OK
+(probe exit 0 — the ref self-check)
+=== --arm C4
+[M] text-decoration-inset-005            ios      bands [(138, 177, 16, 336), (192, 216, 16, 64)] → GEOMETRY WRONG (heading top y138 vs ref y134 (2em face present: the UA margin is missing or wrong))
+[F] text-decoration-inset-005            ios      bands [(138, 177, 16, 336), (192, 216, 16, 64)] → GEOMETRY WRONG (band top y138 vs ref y134 (the abspos heading's UA margin))
+[M] text-decoration-inset-005            android  bands [(138, 177, 16, 336), (192, 216, 16, 64)] → GEOMETRY WRONG (heading top y138 vs ref y134 (2em face present: the UA margin is missing or wrong))
+[F] text-decoration-inset-005            android  bands [(138, 177, 16, 336), (192, 216, 16, 64)] → GEOMETRY WRONG (band top y138 vs ref y134 (the abspos heading's UA margin))
+[M] text-decoration-inset-006            ios      bands [(138, 177, 16, 331), (192, 216, 16, 64)] → GEOMETRY WRONG (heading top y138 vs ref y134 (2em face present: the UA margin is missing or wrong))
+[F] text-decoration-inset-006            ios      bands [(138, 177, 16, 331), (192, 216, 16, 64)] → GEOMETRY WRONG (band top y138 vs ref y134 (the abspos heading's UA margin))
+[M] text-decoration-inset-006            android  bands [(138, 177, 16, 331), (192, 216, 16, 64)] → GEOMETRY WRONG (heading top y138 vs ref y134 (2em face present: the UA margin is missing or wrong))
+[F] text-decoration-inset-006            android  bands [(138, 177, 16, 331), (192, 216, 16, 64)] → GEOMETRY WRONG (band top y138 vs ref y134 (the abspos heading's UA margin))
+[M] text-decoration-inset-014            ios      bands [(133, 158, 17, 258), (167, 190, 16, 155)] → GEOMETRY WRONG (heading top y133 vs ref y129 (2em face present: the UA margin is missing or wrong))
+[F] text-decoration-inset-014            ios      bands [(133, 158, 17, 258), (167, 190, 16, 155)] → GEOMETRY WRONG (band top y133 vs ref y129 (the abspos heading's UA margin))
+[M] text-decoration-inset-014            android  bands [(133, 158, 17, 258), (167, 190, 16, 155)] → GEOMETRY WRONG (heading top y133 vs ref y129 (2em face present: the UA margin is missing or wrong))
+[F] text-decoration-inset-014            android  bands [(133, 158, 17, 258), (167, 190, 16, 155)] → GEOMETRY WRONG (band top y133 vs ref y129 (the abspos heading's UA margin))
+[M] text-decoration-inset-011            ios      MISSING → GEOMETRY WRONG (no capture)
+[M] text-decoration-inset-011            android  MISSING → GEOMETRY WRONG (no capture)
+(probe exit 0 — the ref self-check)

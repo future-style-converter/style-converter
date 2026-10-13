@@ -1,0 +1,318 @@
+run wave54-final: 252 structural documents (bordered component with a non-<br> child or own text)
+candidates: android excess over ref >= 20 crossing px (web / ios excess shown for contrast)
+  css-cascade/scope-shadow-sharing                                                   ref  2136  android +1416  web +1416 ios +1416
+  css-flexbox/abspos__flex-abspos-staticpos-align-self-safe-001                      ref     0  android +1152  web +0 ios +0
+  css-flexbox/abspos__flex-abspos-staticpos-align-self-safe-002                      ref     0  android +980   web +0 ios +0
+  css-backgrounds/background-attachment-local__attachment-local-clipping-image-6         ref  1839  android +490   web +361 ios +485
+  css-backgrounds/background-attachment-local__attachment-local-clipping-image-3         ref  1973  android +410   web +943 ios +405
+  css-backgrounds/background-attachment-local__attachment-local-clipping-image-4         ref  2076  android +253   web +20 ios +248
+  css-backgrounds/background-attachment-local__attachment-local-clipping-image-5         ref  2076  android +253   web +20 ios +248
+  css-color/currentcolor-003                                                       ref     0  android +197   web +0 ios +176
+  css-flexbox/abspos__flex-abspos-staticpos-justify-self-001                         ref     0  android +126   web +0 ios +0
+  css-flexbox/abspos__flex-abspos-staticpos-margin-003                               ref     0  android +117   web +0 ios +0
+  css-grid/abspos__grid-abspos-staticpos-justify-self-001                         ref     0  android +117   web +0 ios +0
+  css-grid/abspos__grid-abspos-staticpos-justify-self-002                         ref     0  android +117   web +0 ios +0
+  css-grid/abspos__grid-abspos-staticpos-align-self-safe-001                      ref     0  android +116   web +0 ios +3
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-001                    ref     0  android +116   web +0 ios +0
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-002                    ref     0  android +116   web +0 ios +0
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-003                    ref     0  android +116   web +0 ios +0
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-004                    ref     0  android +116   web +0 ios +0
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-001                       ref     0  android +112   web +0 ios +0
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-002                       ref     0  android +112   web +0 ios +0
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-003                       ref     0  android +112   web +0 ios +0
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-004                       ref     0  android +112   web +0 ios +0
+  css-images/gradient__gradient-powerless-hue-oklch                                 ref     0  android +106   web +0 ios +16
+  css-flexbox/abspos__flex-abspos-staticpos-margin-002                               ref     0  android +83    web +0 ios +0
+  css-images/gradient__gradient-powerless-hue-lch                                   ref     0  android +83    web +0 ios +0
+  css-grid/abspos__grid-abspos-staticpos-align-self-001                           ref     0  android +79    web +0 ios +0
+  css-grid/abspos__grid-abspos-staticpos-align-self-002                           ref     0  android +79    web +0 ios +0
+  css-grid/abspos__grid-abspos-staticpos-align-self-img-001                       ref     0  android +75    web +0 ios +0
+  css-grid/abspos__grid-abspos-staticpos-align-self-img-002                       ref     0  android +75    web +0 ios +0
+  css-flexbox/abspos__flex-abspos-staticpos-margin-001                               ref     0  android +73    web +0 ios +0
+  css-images/gradient__gradient-powerless-hue-hsl                                   ref     0  android +67    web +0 ios +5
+  css-images/gradient__gradient-powerless-hue-hwb                                   ref     0  android +56    web +0 ios +2
+  css-writing-modes/inline-box-orthogonal-child-with-margins                               ref    14  android +54    web +8 ios +18
+  css-text/hanging-punctuation__hanging-punctuation-block-bound-001               ref   220  android +43    web +4 ios -47
+  css-text/hanging-punctuation__hanging-punctuation-inline-bound-001              ref   223  android +40    web +1 ios -16
+  css-flexbox/abspos__flex-abspos-staticpos-fallback-justify-content-001             ref     0  android +32    web +0 ios +0
+
+U2 android capture carriers (android excess >= 20, web/ios within 5): 25
+  wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-001
+  wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-002
+  wpt__css-flexbox__abspos__flex-abspos-staticpos-fallback-justify-content-001
+  wpt__css-flexbox__abspos__flex-abspos-staticpos-justify-self-001
+  wpt__css-flexbox__abspos__flex-abspos-staticpos-margin-001
+  wpt__css-flexbox__abspos__flex-abspos-staticpos-margin-002
+  wpt__css-flexbox__abspos__flex-abspos-staticpos-margin-003
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-002
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-img-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-img-002
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-002
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-003
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-004
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-safe-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-002
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-003
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-004
+  wpt__css-grid__abspos__grid-abspos-staticpos-justify-self-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-justify-self-002
+  wpt__css-images__gradient__gradient-powerless-hue-hsl
+  wpt__css-images__gradient__gradient-powerless-hue-hwb
+  wpt__css-images__gradient__gradient-powerless-hue-lch
+
+U2 may-move set (android captures only; every other android capture must be decoded-pixel identical): 252 stems
+  wpt__CSS2__abspos__static-inside-inline-002
+  wpt__CSS2__abspos__static-inside-inline-003
+  wpt__CSS2__borders__border-conflict-style-107
+  wpt__CSS2__cascade__inherit-computed-001
+  wpt__CSS2__cascade__inherit-computed-002
+  wpt__CSS2__floats-clear__clear-on-parent-with-margins-no-clearance
+  wpt__CSS2__floats-clear__clear-with-top-margin-after-cleared-empty-block
+  wpt__css-anchor-position__anchor-center-overflow-005
+  wpt__css-anchor-position__anchor-center-safe-rtl
+  wpt__css-anchor-position__anchor-center-safe
+  wpt__css-anchor-position__anchor-center-visibility-change
+  wpt__css-anchor-position__anchor-fieldset-001
+  wpt__css-anchor-position__anchor-function-chain-pseudo-elements
+  wpt__css-anchor-position__anchor-position-multicol-002
+  wpt__css-anchor-position__anchor-position-multicol-004
+  wpt__css-anchor-position__anchor-position-multicol-007
+  wpt__css-anchor-position__anchor-position-multicol-008
+  wpt__css-anchor-position__anchor-position-multicol-nested-001
+  wpt__css-anchor-position__anchor-scope-scroll
+  wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-1
+  wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-2
+  wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-3
+  wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-4
+  wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-5
+  wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-6
+  wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-1
+  wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-2
+  wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-3
+  wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-4
+  wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-5
+  wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-6
+  wpt__css-break__background-image-000
+  wpt__css-break__background-image-001
+  wpt__css-break__background-image-002
+  wpt__css-break__background-image-006
+  wpt__css-break__block-in-inline-008
+  wpt__css-break__block-in-inline-009
+  wpt__css-break__block-max-height-001b
+  wpt__css-break__block-max-height-002b
+  wpt__css-break__block-max-height-003b
+  wpt__css-break__block-max-height-004
+  wpt__css-break__block-min-height-001b
+  wpt__css-cascade__important-prop
+  wpt__css-cascade__scope-pseudo-element
+  wpt__css-cascade__scope-shadow-sharing
+  wpt__css-color__border-color-currentcolor
+  wpt__css-color__currentcolor-003
+  wpt__css-contain__contain-inline-size-fieldset
+  wpt__css-contain__contain-inline-size-flex
+  wpt__css-contain__contain-inline-size-grid
+  wpt__css-contain__contain-inline-size-legend
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles
+  wpt__css-display__display-contents-alignment-001
+  wpt__css-display__display-contents-alignment-002
+  wpt__css-display__display-contents-block-001
+  wpt__css-display__display-contents-button
+  wpt__css-display__display-contents-details
+  wpt__css-display__display-contents-dynamic-fieldset-legend-001
+  wpt__css-display__display-contents-dynamic-flex-001-inline
+  wpt__css-display__display-contents-dynamic-flex-001-none
+  wpt__css-display__display-contents-dynamic-generated-content-fieldset-001
+  wpt__css-display__display-contents-fieldset-002
+  wpt__css-display__display-contents-fieldset-nested-legend
+  wpt__css-display__display-contents-fieldset
+  wpt__css-display__display-contents-flex-001
+  wpt__css-display__display-contents-inline-001
+  wpt__css-display__display-contents-state-change-001
+  wpt__css-display__display-contents-suppression-dynamic-001
+  wpt__css-display__display-flow-root-001
+  wpt__css-display__display-flow-root-list-item-001
+  wpt__css-flexbox__abspos__abspos-autopos-htb-ltr
+  wpt__css-flexbox__abspos__abspos-autopos-htb-rtl
+  wpt__css-flexbox__abspos__abspos-autopos-vlr-ltr
+  wpt__css-flexbox__abspos__abspos-autopos-vlr-rtl
+  wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr
+  wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl
+  wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-001
+  wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-002
+  wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-003
+  wpt__css-flexbox__abspos__flex-abspos-staticpos-fallback-justify-content-001
+  wpt__css-flexbox__abspos__flex-abspos-staticpos-justify-self-001
+  wpt__css-flexbox__abspos__flex-abspos-staticpos-margin-001
+  wpt__css-flexbox__abspos__flex-abspos-staticpos-margin-002
+  wpt__css-flexbox__abspos__flex-abspos-staticpos-margin-003
+  wpt__css-flexbox__abspos__position-absolute-containing-block-002
+  wpt__css-flexbox__align-self-016
+  wpt__css-gaps__flex__flex-gap-decorations-003
+  wpt__css-gaps__flex__flex-gap-decorations-004
+  wpt__css-gaps__flex__flex-gap-decorations-005
+  wpt__css-gaps__flex__flex-gap-decorations-006
+  wpt__css-gaps__flex__flex-gap-decorations-007
+  wpt__css-gaps__flex__flex-gap-decorations-008
+  wpt__css-gaps__flex__flex-gap-decorations-009
+  wpt__css-gaps__flex__flex-gap-decorations-010
+  wpt__css-gaps__flex__flex-gap-decorations-011
+  wpt__css-gaps__flex__flex-gap-decorations-012
+  wpt__css-gaps__flex__flex-gap-decorations-013
+  wpt__css-gaps__flex__flex-gap-decorations-014
+  wpt__css-gaps__flex__flex-gap-decorations-015
+  wpt__css-gaps__flex__flex-gap-decorations-016
+  wpt__css-gaps__flex__flex-gap-decorations-017
+  wpt__css-gaps__flex__flex-gap-decorations-018
+  wpt__css-gaps__flex__flex-gap-decorations-023
+  wpt__css-gaps__flex__flex-gap-decorations-027
+  wpt__css-gaps__flex__flex-gap-decorations-028
+  wpt__css-gaps__flex__flex-gap-decorations-040
+  wpt__css-gaps__flex__flex-gap-decorations-041
+  wpt__css-gaps__flex__flex-gap-decorations-042
+  wpt__css-gaps__flex__flex-gap-decorations-043
+  wpt__css-gaps__flex__flex-gap-decorations-044
+  wpt__css-gaps__flex__flex-gap-decorations-045
+  wpt__css-gaps__flex__flex-gap-decorations-049
+  wpt__css-gaps__flex__flex-gap-decorations-050
+  wpt__css-grid__abspos__descendant-static-position-001
+  wpt__css-grid__abspos__descendant-static-position-002
+  wpt__css-grid__abspos__descendant-static-position-003
+  wpt__css-grid__abspos__descendant-static-position-004
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-items-center-large-border-padding
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-items-center
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-items-end-large-border-padding
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-items-end
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-items-flex-end-large-border-padding
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-items-flex-end
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-items-self-end-large-border-padding
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-items-self-end
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-002
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-center-large-border-padding
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-center
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-end-large-border-padding
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-end
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-flex-end-large-border-padding
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-flex-end
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-img-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-img-002
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-img-last-baseline-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-img-last-baseline-002
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-last-baseline-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-last-baseline-002
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-002
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-003
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-004
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-last-baseline-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-last-baseline-002
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-last-baseline-003
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-rtl-last-baseline-004
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-safe-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-self-end-large-border-padding
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-self-end
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-002
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-003
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-004
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-last-baseline-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-last-baseline-002
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-last-baseline-003
+  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-vertWM-last-baseline-004
+  wpt__css-grid__abspos__grid-abspos-staticpos-justify-self-001
+  wpt__css-grid__abspos__grid-abspos-staticpos-justify-self-002
+  wpt__css-grid__abspos__grid-abspos-staticpos-justify-self-img-001
+  wpt__css-images__gradient__gradient-powerless-hue-hsl
+  wpt__css-images__gradient__gradient-powerless-hue-hwb
+  wpt__css-images__gradient__gradient-powerless-hue-lch
+  wpt__css-images__gradient__gradient-powerless-hue-oklch
+  wpt__css-lists__change-list-style-position-002
+  wpt__css-lists__change-list-style-position-003
+  wpt__css-masking__clip-path__clip-path-contentBox-1d
+  wpt__css-masking__clip-path__clip-path-contentBox-1e
+  wpt__css-multicol__as-column-flex-item
+  wpt__css-overflow__line-clamp__block-ellipsis-001
+  wpt__css-overflow__line-clamp__block-ellipsis-004
+  wpt__css-overflow__line-clamp__block-ellipsis-005
+  wpt__css-overflow__line-clamp__block-ellipsis-006
+  wpt__css-overflow__line-clamp__block-ellipsis-011
+  wpt__css-overflow__line-clamp__block-ellipsis-012
+  wpt__css-overflow__line-clamp__block-ellipsis-013
+  wpt__css-overflow__line-clamp__block-ellipsis-014
+  wpt__css-overflow__line-clamp__block-ellipsis-015.tentative
+  wpt__css-overflow__line-clamp__block-ellipsis-016
+  wpt__css-overflow__line-clamp__block-ellipsis-017
+  wpt__css-overflow__line-clamp__block-ellipsis-022
+  wpt__css-overflow__line-clamp__block-ellipsis-026
+  wpt__css-overflow__line-clamp__block-ellipsis-027
+  wpt__css-overflow__line-clamp__block-ellipsis-028
+  wpt__css-overflow__line-clamp__block-ellipsis-029
+  wpt__css-overflow__line-clamp__block-ellipsis-030
+  wpt__css-overflow__line-clamp__block-ellipsis-031
+  wpt__css-overflow__line-clamp__block-ellipsis-032.tentative
+  wpt__css-overflow__line-clamp__discard__discard-multicol-001
+  wpt__css-overflow__line-clamp__discard__discard-multicol-002
+  wpt__css-overflow__line-clamp__discard__discard-multicol-003
+  wpt__css-overflow__line-clamp__discard__discard-multicol-004
+  wpt__css-position__block-axis-constraint-changes-for-out-of-flow-box
+  wpt__css-position__position-absolute-dynamic-relayout-002
+  wpt__css-position__position-absolute-semi-replaced-stretch-button
+  wpt__css-position__position-absolute-semi-replaced-stretch-input
+  wpt__css-position__position-absolute-semi-replaced-stretch-other
+  wpt__css-tables__background-clip-001
+  wpt__css-tables__baseline-empty-cell-001
+  wpt__css-tables__baseline-vertical
+  wpt__css-tables__border-collapse-dynamic-oof
+  wpt__css-tables__border-collapse-rowspan-cell
+  wpt__css-tables__border-conflict-resolution
+  wpt__css-tables__box-shadow-001
+  wpt__css-tables__collapsed-border-color-change-with-compositing
+  wpt__css-tables__collapsed-border-paint-phase-001
+  wpt__css-tables__collapsed-border-paint-phase-002
+  wpt__css-tables__collapsed-border-remove-row-group
+  wpt__css-tables__height-distribution__td-different-subpixel-padding-in-same-row-vertical-rl
+  wpt__css-text-decor__text-decoration-inset-025
+  wpt__css-text__boundary-shaping__boundary-shaping-005
+  wpt__css-text__hanging-punctuation__hanging-punctuation-block-bound-001
+  wpt__css-text__hanging-punctuation__hanging-punctuation-inline-bound-001
+  wpt__css-text__hyphens__hyphenate-limit-chars-001
+  wpt__css-text__hyphens__hyphens-auto-010
+  wpt__css-text__hyphens__hyphens-auto-control
+  wpt__css-text__hyphens__hyphens-auto-inline-010
+  wpt__css-text__hyphens__hyphens-auto-last-word-001
+  wpt__css-text__hyphens__hyphens-auto-min-content
+  wpt__css-text__hyphens__hyphens-manual-010
+  wpt__css-text__hyphens__hyphens-manual-011
+  wpt__css-text__hyphens__hyphens-manual-012
+  wpt__css-text__hyphens__hyphens-manual-013
+  wpt__css-text__hyphens__hyphens-manual-inline-010
+  wpt__css-text__hyphens__hyphens-manual-inline-011
+  wpt__css-text__hyphens__hyphens-manual-inline-012
+  wpt__css-text__hyphens__hyphens-none-011
+  wpt__css-text__hyphens__hyphens-none-012
+  wpt__css-text__hyphens__hyphens-none-013
+  wpt__css-text__hyphens__hyphens-punctuation-001
+  wpt__css-text__hyphens__hyphens-vertical-001
+  wpt__css-transforms__backface-visibility-001
+  wpt__css-values__calc-height-table-1
+  wpt__css-view-transitions__break-inside-avoid-child
+  wpt__css-view-transitions__content-visibility-auto-shared-element
+  wpt__css-view-transitions__far-away-capture
+  wpt__css-writing-modes__abs-pos-border-offset-001
+  wpt__css-writing-modes__abs-pos-border-offset-002
+  wpt__css-writing-modes__abs-pos-border-offset-003
+  wpt__css-writing-modes__bidi-plaintext-br-001
+  wpt__css-writing-modes__forms__input-range-zero-inline-size
+  wpt__css-writing-modes__img-intrinsic-size-contribution-001
+  wpt__css-writing-modes__img-intrinsic-size-contribution-002
+  wpt__css-writing-modes__inline-box-border-vlr-001
+  wpt__css-writing-modes__inline-box-orthogonal-child-with-margins
+  wpt__filter-effects__backdrop-filter-clip-rect-zoom
+  wpt__filter-effects__backdrop-filter-clip-rect
+  wpt__filter-effects__backdrop-filter-edge-behavior
+  wpt__filter-effects__backdrop-filter-edge-clipping
+  wpt__filter-effects__backdrop-filter-inline-positioning
+  wpt__selectors__invalidation__nth-child-of-attr-largedom

@@ -1,0 +1,49 @@
+## L4 — line-1 right edge Δ vs ref; line-1 column-profile best corr vs ref (shift ±12); U1-alone crop identity vs wave54-final + margin
+  text-decoration-inset-005 ref band1 [134, 173, np.int64(16), np.int64(336)]
+    web                              band1 (134, 173, 16, 328) Δx1 -8  colprof (0.999, 0)
+    C-ios                            band1 (134, 173, 16, 336) Δx1 +0  colprof (1.0, 0)
+    C-ios:line1-clipped-10px         band1 (134, 173, 16, 326) Δx1 -10  colprof (0.997, 0)
+    C-ios:line1-mirrored             band1 (134, 173, 16, 336) Δx1 +0  colprof (0.771, -3)
+    C-ios:line1-thirds-swapped       band1 (134, 173, 16, 336) Δx1 +0  colprof (0.821, 0)
+    U1-ios                           band1 (130, 151, 16, 191) Δx1 -145  crop-id 1.0
+    U1-ios:line1-mirrored            band1 (130, 151, 16, 191) Δx1 -145  crop-id 0.521
+    U1-ios:line1-thirds-swapped      band1 (130, 151, 16, 191) Δx1 -145  crop-id 0.537
+    C-android                        band1 (134, 173, 16, 336) Δx1 +0  colprof (1.0, 0)
+    C-android:line1-clipped-10px     band1 (134, 173, 16, 326) Δx1 -10  colprof (0.997, 0)
+    C-android:line1-mirrored         band1 (134, 173, 16, 336) Δx1 +0  colprof (0.771, -3)
+    C-android:line1-thirds-swapped   band1 (134, 173, 16, 336) Δx1 +0  colprof (0.821, 0)
+    U1-android                       band1 (128, 152, 17, 191) Δx1 -145  crop-id 1.0
+    U1-android:line1-mirrored        band1 (128, 152, 17, 191) Δx1 -145  crop-id 0.387
+    U1-android:line1-thirds-swapped  band1 (128, 152, 17, 191) Δx1 -145  crop-id 0.563
+  text-decoration-inset-006 ref band1 [134, 173, np.int64(16), np.int64(331)]
+    web                              band1 (134, 173, 16, 333) Δx1 +2  colprof (0.999, 0)
+    C-ios                            band1 (134, 173, 16, 331) Δx1 +0  colprof (1.0, 0)
+    C-ios:line1-clipped-10px         band1 (134, 173, 16, 321) Δx1 -10  colprof (0.988, 0)
+    C-ios:line1-mirrored             band1 (134, 173, 16, 331) Δx1 +0  colprof (0.771, -6)
+    C-ios:line1-thirds-swapped       band1 (134, 173, 16, 331) Δx1 +0  colprof (0.844, 0)
+    U1-ios                           band1 (130, 151, 16, 194) Δx1 -137  crop-id 1.0
+    U1-ios:line1-mirrored            band1 (130, 151, 16, 194) Δx1 -137  crop-id 0.515
+    U1-ios:line1-thirds-swapped      band1 (130, 151, 16, 194) Δx1 -137  crop-id 0.617
+    C-android                        band1 (134, 173, 16, 331) Δx1 +0  colprof (1.0, 0)
+    C-android:line1-clipped-10px     band1 (134, 173, 16, 321) Δx1 -10  colprof (0.988, 0)
+    C-android:line1-mirrored         band1 (134, 173, 16, 331) Δx1 +0  colprof (0.771, -6)
+    C-android:line1-thirds-swapped   band1 (134, 173, 16, 331) Δx1 +0  colprof (0.844, 0)
+    U1-android                       band1 (128, 152, 17, 194) Δx1 -137  crop-id 1.0
+    U1-android:line1-mirrored        band1 (128, 152, 17, 194) Δx1 -137  crop-id 0.425
+    U1-android:line1-thirds-swapped  band1 (128, 152, 17, 194) Δx1 -137  crop-id 0.583
+  text-decoration-inset-014 ref band1 [129, 154, np.int64(17), np.int64(258)]
+    web                              band1 (129, 154, 17, 250) Δx1 -8  colprof (0.999, 0)
+    C-ios                            band1 (129, 154, 17, 258) Δx1 +0  colprof (1.0, 0)
+    C-ios:line1-clipped-10px         band1 (129, 154, 17, 248) Δx1 -10  colprof (0.999, 0)
+    C-ios:line1-mirrored             band1 (129, 154, 17, 258) Δx1 +0  colprof (0.707, -7)
+    C-ios:line1-thirds-swapped       band1 (129, 154, 17, 258) Δx1 +0  colprof (0.709, 0)
+    U1-ios                           band1 (128, 138, 17, 133) Δx1 -125  crop-id 1.0
+    U1-ios:line1-mirrored            band1 (128, 138, 17, 133) Δx1 -125  crop-id 0.403
+    U1-ios:line1-thirds-swapped      band1 (128, 138, 17, 133) Δx1 -125  crop-id 0.643
+    C-android                        band1 (129, 154, 17, 258) Δx1 +0  colprof (1.0, 0)
+    C-android:line1-clipped-10px     band1 (129, 154, 17, 248) Δx1 -10  colprof (0.999, 0)
+    C-android:line1-mirrored         band1 (129, 154, 17, 258) Δx1 +0  colprof (0.707, -7)
+    C-android:line1-thirds-swapped   band1 (129, 154, 17, 258) Δx1 +0  colprof (0.709, 0)
+    U1-android                       band1 (128, 139, 17, 132) Δx1 -126  crop-id 1.0
+    U1-android:line1-mirrored        band1 (128, 139, 17, 132) Δx1 -126  crop-id 0.496
+    U1-android:line1-thirds-swapped  band1 (128, 139, 17, 132) Δx1 -126  crop-id 0.646

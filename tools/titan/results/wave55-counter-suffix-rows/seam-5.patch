@@ -1,0 +1,98 @@
+# seam-5.patch — wave55 L5 (counter-suffix-rows) unit U2i-android — SEAM patch (one seam file + its patch-borne test files)
+# seam file: runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+# base tree 611c9f93; cut on: 611c9f93 + seam-4.patch (L5 U2o-android)
+# seam file sha256 at base 611c9f93: 2445d9ea2674576fc0946e3f630f48b88d48f0f9d8c98df3249ba67d7a026aa5
+# content anchor: ':4665 .padding(end = ListMarkerRow.gapDp)' — the Row marker Text's last modifier in RenderListItemMarker — plus the one 'STILL DEFERRED' KDoc sentence about that gap on RenderListItemMarker (:4201-4204); patch-borne: NEW lists/ListMarkerSuffixGapRowSeamTest.kt
+# check: git apply --check <this file> (in landing order, after the patches named in "cut on")
+# fix-r1 re-cut (PLAN §8 step 3): every hunk identical to the builder's cut (only the index line's hash abbreviation may differ)
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+index b65f37ce..ee7a6ecc 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -4200,8 +4200,9 @@ object ComponentRenderer {
+      *
+      * STILL DEFERRED — an `inside` marker on an item that DOES have text
+      * still displaces that item's box (the Row below), and the gap is
+-     * still the fixed [ListMarkerRow.gapDp] rather than the UA's
+-     * per-counter-style marker padding.
++     * ListMarkerSuffixGap's stand-in (wave 55: 0 after a U+3001 suffix,
++     * else [ListMarkerRow.gapDp]) rather than the UA's per-counter-style
++     * marker padding.
+      */
+     @Composable
+     private fun RenderListItemMarker(
+@@ -4667,7 +4668,9 @@ object ComponentRenderer {
+                     // so the snap's reported height — which the Row's pitch
+                     // depends on — is untouched.
+                     .then(markerHalfLeadingCompensation)
+-                    .padding(end = ListMarkerRow.gapDp)
++                    // Wave 55 (lane L5, U2i-android): the same string-keyed
++                    // stand-in gap as the hang (ListMarkerSuffixGap).
++                    .padding(end = com.styleconverter.runtime.lists.ListMarkerSuffixGap.gapDp(marker))
+             )
+             RenderComponent(child, markerBaselineClaim(aligns))
+         }
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/lists/ListMarkerSuffixGapRowSeamTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/lists/ListMarkerSuffixGapRowSeamTest.kt
+new file mode 100644
+index 00000000..0a8f771e
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/lists/ListMarkerSuffixGapRowSeamTest.kt
+@@ -0,0 +1,58 @@
++package com.styleconverter.runtime.lists
++
++// Wave 55, lane L5 (U2i-android) — the SEAM pin for the Row marker's end
++// padding. SHIPS INSIDE seam-5.patch (tools/titan/results/
++// wave55-counter-suffix-rows/), never on its own: it reads the renderer
++// source, so it is red on a tree without the seam by design.
++//
++// WHY A SOURCE-LEVEL PIN: `runtimes/compose` unit tests are plain JVM JUnit
++// (no Compose UI test, no Robolectric), so the Row placement cannot be laid
++// out here; the device key `[I] cjk-decimal/css3-counter-styles-005
++// android` is the picture evidence. This pin is the executable check that
++// the inside-marker Row reads the string-keyed gap
++// (ListMarkerSuffixGap.gapDp(marker)) and no longer the bare stand-in — the
++// idiom core/renderer/SeamReachabilityTest uses for its spliced seams
++// (comments and string literals stripped first, so prose never counts).
++//
++// Mutation EXECUTED by the lane (bracketed in the lane note): with the
++// seam-5 hunk reverse-applied to ComponentRenderer.kt this goes red.
++
++import java.io.File
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class ListMarkerSuffixGapRowSeamTest {
++
++    /** The renderer source, found by walking up to the repo root (the
++     *  module's Gradle rootDir is apps/android-harness). */
++    private val renderer: File by lazy {
++        val rel = "runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt"
++        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
++        while (dir != null && !File(dir, rel).exists()) dir = dir.parentFile
++        File(requireNotNull(dir) { "repo root not found" }, rel)
++    }
++
++    /** Source minus block comments, line comments and string literals. */
++    private fun code(): String =
++        renderer.readText()
++            .replace(Regex("""/\*[\s\S]*?\*/"""), " ")
++            .replace(Regex("""//[^\n]*"""), " ")
++            .replace(Regex(""""(?:[^"\\\n]|\\.)*""""), " ")
++
++    @Test
++    fun `the inside marker Row pads by the string-keyed suffix gap`() {
++        val src = code()
++        // The seam: the Row marker Text's end padding is the marker's gap.
++        assertTrue(
++            "the Row marker padding does not read ListMarkerSuffixGap.gapDp(marker)",
++            Regex("""\.padding\(end\s*=\s*com\.styleconverter\.runtime\.lists\.ListMarkerSuffixGap\.gapDp\(marker\)\)""")
++                .containsMatchIn(src)
++        )
++        // …and the bare 4dp stand-in is gone from that padding.
++        assertFalse(
++            "a Row marker still pads by the bare ListMarkerRow.gapDp",
++            Regex("""\.padding\(end\s*=\s*ListMarkerRow\.gapDp\)""").containsMatchIn(src)
++        )
++    }
++}

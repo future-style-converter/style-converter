@@ -1,0 +1,19 @@
+{
+ "name": "I1-painted-basis",
+ "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/spacing/UAPositionedHeadingMargin.swift",
+ "pre": "e9abac226c39167b1a1dc7d5b150a47ab3e963a2d252322da36e3bf6f2e18d80",
+ "mutated": "c97269076fb5264ac9a933fd196d0667bd21e34e137ecb0660e21a6a129ce4e4",
+ "post": "e9abac226c39167b1a1dc7d5b150a47ab3e963a2d252322da36e3bf6f2e18d80",
+ "red_rc": 65,
+ "red_failures": [
+  "UAPositionedHeadingMarginTests.testAuthorSizesAbsolutePxIsTheBasisRelativeAndShorthandAreLogged",
+  "UAPositionedHeadingMarginTests.testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied",
+  "UAPositionedHeadingMarginTests.testInset014MonospaceTakesSeventeenPointFourTwo",
+  "UAPositionedHeadingMarginTests.testOnlyMarginTopDeclaredTakesTheUABottomOnly",
+  "UAPositionedHeadingMarginTests.testRelativeStickyStaticAreUnchangedAndFixedFires"
+ ],
+ "red_counts": "Executed 39, 14 failures",
+ "green_rc": 0,
+ "green_counts": "Executed 39, 0 failures",
+ "verdict": "RED-THEN-GREEN"
+}

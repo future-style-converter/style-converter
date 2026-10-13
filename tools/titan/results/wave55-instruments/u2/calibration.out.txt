@@ -1,0 +1,17 @@
+# wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b
+## (1) parked wave-54 trees, the wave-54 expect file
+exit=0
+identical 1397 · content-changed 23 · renumbered 15 · one-sided 0 · renumbered-anomalous 0
+verdict: exit 0 — nothing unexpected
+## (2) the same, counter-suffix deleted from the expect file
+exit=5
+UNEXPECTED CONTENT-CHANGED css-counter-styles/wpt__css-counter-styles__counter-suffix.json
+identical 1397 · content-changed 23 · renumbered 15 · one-sided 0 · renumbered-anomalous 0
+verdict: exit 5 — changed set differs from the expect file
+## (3) the mis-invocation shape (30 section dirs, no per-test-ir)
+exit=4 (wave-54 expect file; UNREAD lines: 38)
+identical 0 · content-changed 0 · renumbered 0 · one-sided 30 · renumbered-anomalous 0
+verdict: exit 4 — ONE-SIDED
+exit=4 (empty expect file)
+identical 0 · content-changed 0 · renumbered 0 · one-sided 30 · renumbered-anomalous 0
+verdict: exit 4 — ONE-SIDED

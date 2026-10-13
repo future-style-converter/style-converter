@@ -1,0 +1,6 @@
+# fix-r1.residual-u3.measure.out.txt — residual-read.py sha256 40211eb03f6835ccc2e79b36c5df71d534dfbdff8a24a715eeef564197b2f4d9, cell css-counter-styles/counter-suffix.html ios: installed zone [('rect', (0, 64, 64, 112)), ('rect', (0, 112, 64, 160)), ('rect', (136, 208, 151, 232))]
+skmodel (correct U3, device + Catalyst delta) vs wave54-final: differing px 156 (x133-146 y214-298) → installed SPEC outside / vacated / non-class 89 / 0 / 0 (FAIL: every key of the cell); + the U3 boxes 0 / 0 / 0 (OK)
+Catalyst U3 on vs U3 off (one rasterizer): differing px 160 (x133-146 y214-298) → installed SPEC outside / vacated / non-class 92 / 0 / 0 (FAIL: every key of the cell); + the U3 boxes 0 / 0 / 0 (OK)
+Catalyst FULL vs U1 reverted (one rasterizer): differing px 204 (x45-58 y72-106) → installed SPEC outside / vacated / non-class 0 / 0 / 0 (OK); + the U3 boxes 0 / 0 / 0 (OK)
+ok-all as committed vs wave54-final: differing px 356 (x28-145 y72-225) → installed SPEC outside / vacated / non-class 0 / 0 / 0 (OK); + the U3 boxes 0 / 0 / 0 (OK)
+ok-all re-grafted (Android boxes) vs wave54-final: differing px 447 (x28-145 y72-298) → installed SPEC outside / vacated / non-class 91 / 0 / 0 (FAIL: every key of the cell); + the U3 boxes 0 / 0 / 0 (OK)

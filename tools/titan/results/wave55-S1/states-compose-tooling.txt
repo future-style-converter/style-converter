@@ -1,0 +1,26 @@
+L2 U2,U1 compose bc0678b9 5ade247e
+L3 U2,U1 compose 0c6b071c 56c69e24
+L3 U2 compose 0c6b071c
+L4 U2-android,U1-android compose 69f95267 85afc360
+L4 U2-android compose 69f95267
+L5 U2i-android compose c5699c09
+L6 U2,U1 compose 103deb33 b9d210d9
+L6 U2 compose 103deb33
+L6 U3 compose 1f138c9e
+L7 U6-compose compose 1079534d
+L7 U2 tooling 4c1a3d66
+L7 U3 tooling a8deff25
+L7 U5 tooling b724b5af
+L7 U6-tooling tooling b24526a9
+L7 U4 web 1ed93e6b
+L7 U6-web web 6d8c571d
+L1 NB-ios swift b7108a42
+L4 U2-ios,U1-ios swift 1dc521c1 cac1d6a3
+L4 U2-ios swift 1dc521c1
+L5 U1-ios swift 2ca54bc8
+L5 U2i-ios swift 5faec331
+L5 U3-ios swift fc436181
+L5 D both 5bbc2a41
+L5 D,U2i-ios,U2o-ios both 5bbc2a41 5faec331 3179cf60
+L5 D,U2i-android,U2o-android both 5bbc2a41 c5699c09 3a8249d2
+L7 U6-swift swift a888476c

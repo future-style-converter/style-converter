@@ -1,0 +1,39 @@
+L6 picked: {'abspos/flex-abspos-staticpos-align-self-safe-001': 'child@39,39 -3,+0', 'abspos/flex-abspos-staticpos-align-self-safe-002': 'child@44,272 -3,+0', 'abspos/grid-abspos-staticpos-align-self-001': 'child@19,30 +3,+0', 'abspos/grid-abspos-staticpos-justify-self-001': 'child@30,19 +3,+0', 'abspos/grid-abspos-staticpos-align-self-vertWM-001': 'child@18,19 +3,+0', 'abspos/grid-abspos-staticpos-align-self-rtl-001': 'child@33,18 +3,+0'}
+L3-dir-row6-text+2y                        gate-exit 0  [S] dir-style-02a android row6                             PASS   ACCEPTED (defect)
+      [S] dir-style-02a android row6 ink (17, 122, 153, 133) dot 4px profile 0.92@+0 → GEOMETRY OK
+L3-dir-row6-text-2y                        gate-exit 0  [S] dir-style-02a android row6                             PASS   ACCEPTED (defect)
+      [S] dir-style-02a android row6 ink (17, 118, 153, 131) dot 4px profile 0.92@+0 → GEOMETRY OK
+L3-dir-row6-text-vflip                     gate-exit 0  [S] dir-style-02a android row6                             PASS   ACCEPTED (defect)
+      [S] dir-style-02a android row6 ink (17, 120, 153, 131) dot 4px profile 0.92@+0 → GEOMETRY OK
+L3-dir-row7-text+2y                        gate-exit 0  [S] dir-style-02a android row7                             PASS   ACCEPTED (defect)
+      [S] dir-style-02a android row7 ink (17, 142, 243, 153) dot 4px profile 0.92@+0 → GEOMETRY OK
+L3-dir-row7-text-2y                        gate-exit 0  [S] dir-style-02a android row7                             PASS   ACCEPTED (defect)
+      [S] dir-style-02a android row7 ink (17, 138, 243, 151) dot 4px profile 0.92@+0 → GEOMETRY OK
+L3-dir-row7-text-vflip                     gate-exit 0  [S] dir-style-02a android row7                             PASS   ACCEPTED (defect)
+      [S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px profile 0.92@+0 → GEOMETRY OK
+L3-dir-row9-text+2y                        gate-exit 0  [S] dir-style-02a android row9                             PASS   ACCEPTED (defect)
+      [S] dir-style-02a android row9 ink (17, 182, 153, 193) dot 4px profile 0.92@+0 → GEOMETRY OK
+L3-dir-row9-text-2y                        gate-exit 0  [S] dir-style-02a android row9                             PASS   ACCEPTED (defect)
+      [S] dir-style-02a android row9 ink (17, 178, 153, 191) dot 4px profile 0.92@+0 → GEOMETRY OK
+L3-dir-row9-text-vflip                     gate-exit 0  [S] dir-style-02a android row9                             PASS   ACCEPTED (defect)
+      [S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px profile 0.92@+0 → GEOMETRY OK
+L3-bidi-rtl-run-order-mirrored             gate-exit 0  [S] bidi-tab-001 android rtl-rows                          PASS   ACCEPTED (defect)
+      [S] bidi-tab-001 android rtl-rows y86:(16, 36, 248) y106:(114, 135, 266) y186:(16, 36, 248) y226:(16, 36, 248) → GEOMETRY OK
+L3-bidi-rtl-runs+2y                        gate-exit 0  [S] bidi-tab-001 android rtl-rows                          PASS   ACCEPTED (defect)
+      [S] bidi-tab-001 android rtl-rows y86:(16, 36, 222) y106:(114, 135, 238) y186:(16, 36, 222) y226:(16, 36, 222) → GEOMETRY OK
+L3-bidi-yellow-boxes-erased                gate-exit 0  [S] bidi-tab-001 android rtl-rows                          PASS   ACCEPTED (defect)
+      [S] bidi-tab-001 android rtl-rows y86:(16, 36, 248) y106:(114, 135, 266) y186:(16, 36, 248) y226:(16, 36, 248) → GEOMETRY OK
+L3-stack-red-shown                         gate-exit 0  [W] anchor-position-multicol-nested-001 android stack      PASS   ACCEPTED (defect)
+      [W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] ring [0, 0, 0, 0] → GEOMETRY OK
+L3-stack-other-squares-erased              gate-exit 0  [W] anchor-position-multicol-nested-001 android stack      PASS   ACCEPTED (defect)
+      [W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] ring [0, 0, 0, 0] → GEOMETRY OK
+L3-001-parent-erased                       gate-exit 1  [S] dynamic-offset-rtl-001 android                         PASS   ACCEPTED (defect)
+      [S] dynamic-offset-rtl-001 android magenta (86, 26, 95, 35) n 100 → GEOMETRY OK
+L3-001-parent+3x                           gate-exit 1  [S] dynamic-offset-rtl-001 android                         PASS   ACCEPTED (defect)
+      [S] dynamic-offset-rtl-001 android magenta (86, 26, 95, 35) n 100 → GEOMETRY OK
+L3-002-parent-erased                       gate-exit 1  [W] dynamic-offset-rtl-002 android                         PASS   ACCEPTED (defect)
+      [W] dynamic-offset-rtl-002 android magenta (26, 26, 35, 35) n 100 → GEOMETRY OK
+L3-002-parent+3x                           gate-exit 1  [W] dynamic-offset-rtl-002 android                         PASS   ACCEPTED (defect)
+      [W] dynamic-offset-rtl-002 android magenta (26, 26, 35, 35) n 100 → GEOMETRY OK
+
+18 (fake, key) reads; ACCEPTED 18; rejected 0; other 0

@@ -1,0 +1,4 @@
+backdrop-filter-nested-border-radius-clip-3 ref      {green (36, 36, 235, 135) greenPx 19365 corner [251, 250, 252, 252] row blue[16..25] grey[26..35] green[36..235] xor 0 core (0, 0) failInk 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-3 web      {green (36, 36, 235, 135) greenPx 19390 corner [255, 255, 256, 256] row blue[16..25] grey[26..35] green[36..235] xor 25 core (0, 0) failInk 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-3 ios      {green (36, 36, 235, 135) greenPx 19384 corner [254, 254, 254, 254] row blue[16..25] grey[26..35] green[36..235] xor 23 core (0, 0) failInk 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-3 android  {green (36, 36, 235, 135) greenPx 19384 corner [254, 254, 254, 254] row blue[16..25] grey[26..35] green[36..235] xor 23 core (0, 0) failInk 0} → GEOMETRY OK

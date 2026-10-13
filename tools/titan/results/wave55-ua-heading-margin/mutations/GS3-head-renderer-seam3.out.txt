@@ -1,0 +1,16 @@
+{
+ "name": "GS3-head-renderer-seam3",
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt",
+ "pre": "e30f443de13184cb1338bc7f38ef9ead192a312ab41d160ddb324a456bc6adef",
+ "mutated": "1f25b7cdeabfdf6feb0c0e686cfdfaba178829f35b6315ff1964ee16614e95ac",
+ "post": "e30f443de13184cb1338bc7f38ef9ead192a312ab41d160ddb324a456bc6adef",
+ "red_rc": 1,
+ "red_failures": [
+  "UAElementFontRuleSeamWiringTest > DynamicValueResolver resolves the UA step's output, after it",
+  "UAElementFontRuleSeamWiringTest > the UA font step wraps the list UA rule's output with the tag, own list and stand-down verdict"
+ ],
+ "red_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/2; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "green_rc": 0,
+ "green_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "verdict": "RED-THEN-GREEN"
+}

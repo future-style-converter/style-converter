@@ -1305,7 +1305,8 @@ test('S6-1 paint decline: verbatim counter-suffix — an item with opacity .5 is
 test('S6-2 paint decline: each read effect on the item or its ::marker declines; the ROOT\'s own does not', () => {
   // A non-initial computed spelling per key (CSSOM serialisations).
   const effects = { opacity: '0.5', transform: 'matrix(1, 0, 0, 1, 5, 0)', filter: 'blur(1px)', clipPath: 'inset(0px)',
-    overflowX: 'hidden', overflowY: 'clip', visibility: 'hidden', textShadow: 'rgb(0, 0, 0) 1px 1px 0px' };
+    overflowX: 'hidden', overflowY: 'clip', visibility: 'hidden', textShadow: 'rgb(0, 0, 0) 1px 1px 0px',
+    maskImage: 'linear-gradient(rgb(0, 0, 0), rgba(0, 0, 0, 0))', mixBlendMode: 'multiply' };   // wave 55 L7 U5
   // Every key the reader reads is exercised here (a dropped key fails this line).
   assert.deepEqual(Object.keys(effects), Object.keys(MARKER_PAINT_INITIAL));
   const els = counterSuffixWalk().elements, item = [0, 4, 0], root = [0, 4];

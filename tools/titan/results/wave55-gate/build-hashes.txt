@@ -1,0 +1,82 @@
+== wave55-open corpus launch (opening gate, 30 sections; tree 0d0d3a3d = the wave-54 squash: the wave54-final gate tree ef20c977 + records/docs + the post-gate web regex rewrite — no Compose or Swift source change since wave54-final, so the ios digest should equal the wave-54 record's 38ea8fdc…; the apk sha1 is not build-reproducible (wave-54 lesson L19) so only built == installed is read) — 2026-10-11T10:41:27Z — HEAD 0d0d3a3d
+android  serial=emulator-5554  built app-debug.apk sha1=62384c7ec87860601abdd542a4d39d605ac41107  installed base.apk sha1=62384c7ec87860601abdd542a4d39d605ac41107
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=38ea8fdca14f780335b00c9d38b459b2e5d348b7  installed .app digest=38ea8fdca14f780335b00c9d38b459b2e5d348b7
+ios      MATCH
+
+== wave55-open net launch (fixture net, BASELINE=1 --gate-set; tree 0d0d3a3d — a NET-launch read, annotated per the wave-53/54 lesson: test-all rebuilds the iOS .app per fixture and rewrites the android asset, so a MISSING / changed side here is the race, not evidence; the record of value is the corpus launch's block above) — 2026-10-11T12:04:38Z — HEAD a2a37a8e
+android  serial=emulator-5554  built app-debug.apk sha1=62384c7ec87860601abdd542a4d39d605ac41107  installed base.apk sha1=62384c7ec87860601abdd542a4d39d605ac41107
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=MISSING  installed .app digest=38ea8fdca14f780335b00c9d38b459b2e5d348b7
+ios      MISMATCH
+
+== wave55-pre corpus launch (stage-1 probe, launch 1; tree 0fd26479) — 2026-10-12T11:30:03Z — HEAD 0fd26479
+android  serial=emulator-5554  built app-debug.apk sha1=f9c6bee5e720d6368889cbe2b43cb6d89940b810  installed base.apk sha1=f9c6bee5e720d6368889cbe2b43cb6d89940b810
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=0e4a30c2a0d571666ce10d266b220b6fcd077782  installed .app digest=0e4a30c2a0d571666ce10d266b220b6fcd077782
+ios      MATCH
+asset    sha1 ios=05118ad1084ef6166ddd9c47a705219e0b4e717e android=05118ad1084ef6166ddd9c47a705219e0b4e717e  (the last test-all IR both bundles embed: compare digests only with the same asset line)
+
+== wave55-ab-drop-L4-U2 (A/B arm of wave55: drop-L4-U2 = 53f11bba minus 1dc521c1 69f95267; sections css-text-decor; arm tree 45473b32; read against wave55-pre) — 2026-10-12T12:25:58Z — HEAD 45473b32
+android  serial=emulator-5554  built app-debug.apk sha1=171f582e5a35b4cc3d9bb81fbc4786c138e10be3  installed base.apk sha1=171f582e5a35b4cc3d9bb81fbc4786c138e10be3
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=b8adde6764e0636b824106b16aeebdead454026d  installed .app digest=b8adde6764e0636b824106b16aeebdead454026d
+ios      MATCH
+asset    sha1 ios=05118ad1084ef6166ddd9c47a705219e0b4e717e android=05118ad1084ef6166ddd9c47a705219e0b4e717e  (the last test-all IR both bundles embed: compare digests only with the same asset line)
+
+== wave55-probe corpus launch (stage-2 probe, launch 1; tree aaf51b1b) — 2026-10-12T14:51:08Z — HEAD aaf51b1b
+android  serial=emulator-5554  built app-debug.apk sha1=ecafaf0d7c9f6796ac7703593379dc0603d074bb  installed base.apk sha1=ecafaf0d7c9f6796ac7703593379dc0603d074bb
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28  installed .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28
+ios      MATCH
+asset    sha1 ios=05118ad1084ef6166ddd9c47a705219e0b4e717e android=05118ad1084ef6166ddd9c47a705219e0b4e717e  (the last test-all IR both bundles embed: compare digests only with the same asset line)
+
+== wave55-final corpus launch (closing gate (launch 1; tree 26cd6610) — 2026-10-12T16:12:17Z — HEAD 26cd6610
+android  serial=emulator-5554  built app-debug.apk sha1=ecafaf0d7c9f6796ac7703593379dc0603d074bb  installed base.apk sha1=ecafaf0d7c9f6796ac7703593379dc0603d074bb
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28  installed .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28
+ios      MATCH
+asset    sha1 ios=05118ad1084ef6166ddd9c47a705219e0b4e717e android=05118ad1084ef6166ddd9c47a705219e0b4e717e  (the last test-all IR both bundles embed: compare digests only with the same asset line)
+
+== wave55-final post-net re-read (annotated; tree 26cd6610) — 2026-10-12T17:37:07Z — HEAD 26cd6610
+android  serial=none  built app-debug.apk sha1=ecafaf0d7c9f6796ac7703593379dc0603d074bb  installed base.apk sha1=MISSING
+android  MISMATCH
+ios      udid=none  built .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28  installed .app digest=MISSING
+ios      MISMATCH
+asset    sha1 ios=05118ad1084ef6166ddd9c47a705219e0b4e717e android=05118ad1084ef6166ddd9c47a705219e0b4e717e  (the last test-all IR both bundles embed: compare digests only with the same asset line)
+
+== wave55-final net launch — ANNOTATED, the race by design (test-all rebuilds the iOS harness per fixture; never of record; tree 935287c4) — 2026-10-12T18:07:41Z — HEAD 935287c4
+android  serial=emulator-5554  built app-debug.apk sha1=caa0fd423fb06e3d2312ae9a18938bbd580c6af9  installed base.apk sha1=MISSING
+android  MISMATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28  installed .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28
+ios      MATCH
+asset    sha1 ios=05118ad1084ef6166ddd9c47a705219e0b4e717e android=05118ad1084ef6166ddd9c47a705219e0b4e717e  (the last test-all IR both bundles embed: compare digests only with the same asset line)
+
+== wave55-final post-net re-read 2 (annotated; tree 935287c4) — 2026-10-12T18:07:41Z — HEAD 935287c4
+android  serial=emulator-5554  built app-debug.apk sha1=caa0fd423fb06e3d2312ae9a18938bbd580c6af9  installed base.apk sha1=MISSING
+android  MISMATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28  installed .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28
+ios      MATCH
+asset    sha1 ios=05118ad1084ef6166ddd9c47a705219e0b4e717e android=05118ad1084ef6166ddd9c47a705219e0b4e717e  (the last test-all IR both bundles embed: compare digests only with the same asset line)
+
+== wave55-final net launch, attempt 2 — ANNOTATED, the race by design (never of record; tree a80d8f6f) — 2026-10-12T18:17:24Z — HEAD a80d8f6f
+android  serial=emulator-5554  built app-debug.apk sha1=caa0fd423fb06e3d2312ae9a18938bbd580c6af9  installed base.apk sha1=caa0fd423fb06e3d2312ae9a18938bbd580c6af9
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=MISSING  installed .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28
+ios      MISMATCH
+asset    sha1 ios=MISSING android=05118ad1084ef6166ddd9c47a705219e0b4e717e  (the last test-all IR both bundles embed: compare digests only with the same asset line)
+
+== wave55-final post-net re-read 3 (annotated; tree a80d8f6f) — 2026-10-12T18:39:19Z — HEAD a80d8f6f
+android  serial=emulator-5554  built app-debug.apk sha1=caa0fd423fb06e3d2312ae9a18938bbd580c6af9  installed base.apk sha1=MISSING
+android  MISMATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28  installed .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28
+ios      MATCH
+asset    sha1 ios=05118ad1084ef6166ddd9c47a705219e0b4e717e android=05118ad1084ef6166ddd9c47a705219e0b4e717e  (the last test-all IR both bundles embed: compare digests only with the same asset line)
+
+== wave55-ab-drop-L6-U2 (A/B arm of wave55: drop-L6-U2 = 0b29be14 minus 103deb33; sections css-anchor-position,css-flexbox,css-gaps,css-grid,css-images,css-position,filter-effects; arm tree 8de866d8; read against wave55-final) — 2026-10-13T07:56:55Z — HEAD 8de866d8
+android  serial=emulator-5554  built app-debug.apk sha1=951f48803369b7d80578e4af5d93f84d5ae07616  installed base.apk sha1=951f48803369b7d80578e4af5d93f84d5ae07616
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28  installed .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28
+ios      MATCH
+asset    sha1 ios=05118ad1084ef6166ddd9c47a705219e0b4e717e android=05118ad1084ef6166ddd9c47a705219e0b4e717e  (the last test-all IR both bundles embed: compare digests only with the same asset line)
+

@@ -1,0 +1,61 @@
+# fix-r1.revert-states.out.txt — every revert state of L5's revertOrder chains (and the contingency's) on the RE-CUT patches, in the
+# fix worktree. Per state: reset to 611c9f93 (checkout -- . + clean of the lane's new-file dirs), FORWARD-apply the kept patches in
+# landing order and snapshot; reset again, apply all 11 (+ the contingency when named), REVERSE-apply the reverted patches in
+# revert order (the landing's revert path) and snapshot; 'forward==reverse' compares the two snapshots (git diff + porcelain
+# status + every untracked runtime file's sha256). Then the focused suites of the platform(s) the state changes. The snapshot
+# hash in () is comparable ACROSS states only in the last block (its status is restricted to code paths; before that it also
+# hashed the worktree's Swift DerivedData listing, which changes with every build).
+# Swift = the 17 L5 / list / fidelity classes present (xcodebuild Catalyst -only-testing); Compose = :runtime:testDebugUnitTest
+# --tests '*ListMarker*' '*SeamReachabilityTest*' '*KoreanHangulFormal*' '*ListStyle*' (JUnit XML counts); node = counter-style-bake /
+# -author tests. RENDER = the throwaway Catalyst render (fix-r1.render-probe.swift.txt) behind fix-r1.catalyst-{full,noU1}.png.
+STATE FULL reverted=[] contingency=[] forward=ok forward==reverse: yes (2dc2177bd7509cb6)
+RENDER FULL rc=0 FXRENDER FULL 390x600
+NODE FULL rc=0 # pass 44 # fail 0 # skipped 1 
+SWIFT FULL rc=0 classes=17 Executed 113 tests, with 0 failures (0 unexpected) in 6.743 (8.599) seconds 0 failing-assertions
+COMPOSE FULL rc=0 tests=99 failures=0 errors=0 skipped=0
+> Task :runtime:compileDebugKotlin UP-TO-DATE
+> Task :runtime:compileDebugUnitTestKotlin UP-TO-DATE
+STATE noU1 reverted=[seam-1 unit-U1-ios] contingency=[] forward=ok forward==reverse: yes (6939591fcbaa3ab7)
+RENDER noU1 rc=0 FXRENDER noU1 390x600
+SWIFT noU1 rc=0 classes=15 Executed 102 tests, with 0 failures (0 unexpected) in 6.314 (7.702) seconds 0 failing-assertions
+STATE noD reverted=[unit-D] contingency=[] forward=ok forward==reverse: yes (31cdf32808e915ae)
+NODE noD rc=0 # pass 44 # fail 0 # skipped 1 
+SWIFT noD rc=0 classes=17 Executed 113 tests, with 0 failures (0 unexpected) in 8.755 (10.799) seconds 0 failing-assertions
+COMPOSE noD rc=0 tests=99 failures=0 errors=0 skipped=0
+> Task :runtime:compileDebugKotlin
+> Task :runtime:compileDebugUnitTestKotlin UP-TO-DATE
+STATE noD-noU2i-ios reverted=[unit-D seam-3] contingency=[] forward=ok forward==reverse: yes (a6bf00f86d97bbf3)
+SWIFT noD-noU2i-ios rc=0 classes=16 Executed 112 tests, with 0 failures (0 unexpected) in 8.910 (11.424) seconds 0 failing-assertions
+STATE noD-noU2i-ios-noU2o-ios reverted=[unit-D seam-3 seam-2 unit-U2o-ios] contingency=[] forward=ok forward==reverse: yes (c1a474f6cdb7d477)
+SWIFT noD-noU2i-ios-noU2o-ios rc=0 classes=14 Executed 106 tests, with 0 failures (0 unexpected) in 1.497 (1.517) seconds 0 failing-assertions
+STATE noU2i-ios reverted=[seam-3] contingency=[] forward=ok forward==reverse: yes (3e1fc2e3b35e0915)
+SWIFT noU2i-ios rc=0 classes=16 Executed 112 tests, with 0 failures (0 unexpected) in 9.494 (12.963) seconds 0 failing-assertions
+STATE noD-noU2i-android reverted=[unit-D seam-5] contingency=[] forward=ok forward==reverse: yes (6da5be5ccff1a966)
+COMPOSE noD-noU2i-android rc=0 tests=98 failures=0 errors=0 skipped=0
+> Task :runtime:compileDebugKotlin
+> Task :runtime:compileDebugUnitTestKotlin
+STATE noD-noU2i-android-noU2o-android reverted=[unit-D seam-5 seam-4 unit-U2o-android] contingency=[] forward=ok forward==reverse: yes (f58d971bf83dde89)
+COMPOSE noD-noU2i-android-noU2o-android rc=0 tests=93 failures=0 errors=0 skipped=0
+> Task :runtime:compileDebugKotlin
+> Task :runtime:compileDebugUnitTestKotlin
+STATE noU2i-android reverted=[seam-5] contingency=[] forward=ok forward==reverse: yes (cc132f52a24d20b7)
+COMPOSE noU2i-android rc=0 tests=98 failures=0 errors=0 skipped=0
+> Task :runtime:compileDebugKotlin
+> Task :runtime:compileDebugUnitTestKotlin
+STATE noU3-ios reverted=[seam-6 unit-U3-ios] contingency=[] forward=ok forward==reverse: yes (56c03fd38d7689cb)
+SWIFT noU3-ios rc=0 classes=15 Executed 108 tests, with 0 failures (0 unexpected) in 3.143 (4.242) seconds 0 failing-assertions
+STATE FULL-LRM reverted=[] contingency=[unit-U1-ios-LRM] forward=ok forward==reverse: yes (7e711bbd91ee8206)
+SWIFT FULL-LRM rc=0 classes=17 Executed 113 tests, with 0 failures (0 unexpected) in 11.084 (14.416) seconds 0 failing-assertions
+## contingency chain byte compares (code-only snapshot): [FULL + LRM − LRM] == FULL, [FULL + LRM − LRM − U1-ios] == [all − U1-ios]
+STATE noU1-snap reverted=[seam-1 unit-U1-ios] contingency=[] forward=ok forward==reverse: yes (738efc0aec20955d)
+STATE LRM-chain2 reverted=[unit-U1-ios-LRM seam-1 unit-U1-ios] contingency=[unit-U1-ios-LRM] forward=ok forward==reverse: yes (738efc0aec20955d)
+STATE LRM-chain1 reverted=[unit-U1-ios-LRM] contingency=[unit-U1-ios-LRM] forward=ok forward==reverse: yes (95b372927a9a8b2e)
+STATE FULL-final reverted=[] contingency=[] forward=ok forward==reverse: yes (95b372927a9a8b2e)
+## FINAL: the FULL state again after every revert state and the last restore (worktree left at FULL)
+NODE FINAL rc=0 # pass 44 # fail 0 # skipped 1 
+COMPOSE FINAL rc=0 tests=99 failures=0 errors=0 skipped=0
+> Task :runtime:compileDebugKotlin
+> Task :runtime:compileDebugUnitTestKotlin
+SWIFT FINAL rc=0 classes=17 Executed 113 tests, with 0 failures (0 unexpected) in 8.375 (11.533) seconds 0 failing-assertions
+> Task :runtime:compileDebugKotlin
+> Task :runtime:testDebugUnitTest

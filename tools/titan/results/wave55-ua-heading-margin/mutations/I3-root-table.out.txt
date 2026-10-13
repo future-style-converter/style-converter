@@ -1,0 +1,19 @@
+{
+ "name": "I3-root-table",
+ "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/spacing/UAPositionedHeadingMargin.swift",
+ "pre": "e9abac226c39167b1a1dc7d5b150a47ab3e963a2d252322da36e3bf6f2e18d80",
+ "mutated": "1c2a77272ee5d5c12638a051626fc41e7a2f5823a18881154c35bdcb7542426f",
+ "post": "e9abac226c39167b1a1dc7d5b150a47ab3e963a2d252322da36e3bf6f2e18d80",
+ "red_rc": 65,
+ "red_failures": [
+  "UAPositionedHeadingMarginTests.testAuthorSizesAbsolutePxIsTheBasisRelativeAndShorthandAreLogged",
+  "UAPositionedHeadingMarginTests.testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied",
+  "UAPositionedHeadingMarginTests.testInset014MonospaceTakesSeventeenPointFourTwo",
+  "UAPositionedHeadingMarginTests.testOnlyMarginTopDeclaredTakesTheUABottomOnly",
+  "UAPositionedHeadingMarginTests.testRelativeStickyStaticAreUnchangedAndFixedFires"
+ ],
+ "red_counts": "Executed 39, 17 failures",
+ "green_rc": 0,
+ "green_counts": "Executed 39, 0 failures",
+ "verdict": "RED-THEN-GREEN"
+}

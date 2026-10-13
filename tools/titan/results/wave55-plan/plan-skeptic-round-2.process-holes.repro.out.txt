@@ -1,0 +1,212 @@
+# plan-skeptic-round-2.process-holes.repro.out.txt — 2026-10-11T16:35:03Z; script sha256 9cf37f5cbcabe2fe…; scratch redacted as <scratch>
+
+## H inputs (sha256)
+  tools/titan/results/wave55-plan/PLAN.md          ddaa6955313405f7…
+  tools/titan/results/wave55-plan/expectations.json a1fdca7126867267…
+  tools/titan/results/wave55-plan/landing-manifest.json 90f077b01abd641e…
+  tools/titan/results/wave55-plan/plan-build.py    dacc884a1692825e…
+  tools/titan/results/wave55-plan/land-units.sh    98b0b07bfa6f174b…
+  tools/titan/results/wave55-gate/ab-arms55.sh     b5e1e7b1f2e5d869…
+  tools/titan/results/wave55-gate/final55-analysis.sh dd70067a1debdc8c…
+  HEAD 640276a0
+
+## E1 plan-prose.py --check on the shared tree
+plan-prose --check tools/titan/results/wave55-plan/PLAN.md against expectations.json sha256 a1fdca7126867267…: 36 gen blocks · 30 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
+plan-prose --check: HOLDS
+exit=0
+
+## E2 the generator reproduces its outputs (plan-build.py --out <scratch>)
+exit=0
+  expectations.json byte-identical
+  watchlist.txt byte-identical
+  plan-build.out.txt byte-identical
+
+## E3 the 15 audit conflicts C1-C15: each resolution encoded in expectations.json / landing-manifest.json
+  C1   OK  stage-1 union 9 sections incl. css-writing-modes; complement 3352 cells
+  C2   OK  sharedStems 12; mayMove ∩ other lanes' android carriers = 0
+  C3   OK  L7 must-not-move holds no counter-suffix native; L7 probes ['flex-zero-gap-rules.geometry.py', 'web-out-of-flow-hyphen-box.geometry.py']
+  C4   OK  L5 probes ['counter-suffix-rows.geometry.py', 'rtl-marker-bake.geometry.py', 'lists-bakes.geometry.py']
+  C5   OK  disclosure-styles: ios ∈ L5 U1-ios carriers, android ∈ L6 mayMove, android ∉ L5 must-not-move
+  C6   OK  L3 dropped ['[C] anchor-center-safe-rtl android']
+  C7   OK  D in both U2o chains ['D', 'U2i-ios', 'U2o-ios'] / ['D', 'U2i-android', 'U2o-android']; manifest constraints U2o-ios < D and U2o-android < D
+  C8   OK  L2 U1 commit carries the breadcrumb-assertion row
+  C9   OK  no L2 unit edits ContentBoxRelativeInflationTest (orchestrator docs pass)
+  C10  OK  pinned anchors :159 (L4) / :167 (L5) / :182 (L3) in the commit strings and deliveryContract.cutOn
+  C11  OK  gating 44 all floor 0.95; f→f 12 all floorNA; dir-style-02a fallbackIfReverted True
+  C12  OK  L4 dryRuns + L5 U1-ios dryRun present
+  C13  OK  L2 JSON cites StyleApplier by symbol, never by line
+  C14  OK  13 probe cmds on /opt/homebrew/bin/python3.12 -B
+  C15  OK  expect keys without keyCells: 0
+  §9   OK  §9 table carries a row for each of 15 C-ids of planDecisions
+
+## E4 round-1 M4 / S8 re-check: an L6 U2 revert withdraws may-move and its arm
+plan-build exit=0
+  unionMayMoveCaptures.android 0 · abArms ['drop-NB-ios', 'drop-L4-U2'] · withdrawn ['drop-L6-U2']
+
+## E5 GO-SMALL (probe-decisions/holds.json goSmall.held) is not wired to the arm or to the landing
+plan-build --go-small exit=0
+  heldUnits ['U2-android'] · revertUnits ['U1-android', 'U1-ios', 'U2-ios']
+  drop-L4-U2 units ['U2-ios', 'U2-android'] · drops ['U2-ios-S1*', 'U2-android-S1*', 'U2-ios', 'U2-android'] (U2-android is held: it never lands, so the arms file cannot resolve it)
+  land-units.sh reads holds.json: 0 line(s) (the landing needs --hold L4:U2-android by hand; its plan check errs if absent)
+  GO-SMALL taken AFTER U2-android landed (a stage-1 hold + its revert row): plan-build exit=1
+KeyError: 'U2-android'
+
+## E6 the L5 U1 LRM re-cut (a pre-registered stage-1 swap, §7 step 7) has no generator or landing path
+  control: an L1 NB-ios-b contingency row → plan-build exit=0
+    NB-ios revertOrder ['NB-ios-b', 'NB-ios']
+  an L5 U1 LRM row (the only way §7 step 7 says a swap is recorded) → plan-build exit=1
+KeyError: 'contingencyUnits'
+  L5 lane keys with 'contingency': []
+  land-units.sh ORDER rows for an L5 re-cut: 0; --contingency lands: L1 NB-ios-b only
+
+## E7 a stage-1 regeneration drifts final55-analysis.sh, which §7 step 6 does not regenerate
+  plan-build (L2 pair reverted) exit=0
+final55-analysis.sh DRIFT: it differs from its rendering of <scratch>/…
+  final55-analysis.gen.py --check on the regenerated JSON: exit=1
+  §7 step 6 names final55-analysis.gen.py: 0
+  final55-analysis.sh checks the expectations sha at run time: 0
+
+## E8 beforeEveryDeviceRun (and the hash block, and the arm runner) do not see an UNTRACKED source file
+  beforeEveryDeviceRun clause 1 on a tree with 2 untracked runtime sources: exit=0 (0 = the device run proceeds and builds them)
+  installed-build-hash.sh '+ uncommitted' test: exit=0 (0 = the block says nothing)
+  ab-arms55.sh tracked_dirty (--untracked-files=no): '' (empty = not refused)
+  the fix (status --untracked-files=all over the code paths) lists: ?? runtimes/compose/src/main/java/com/styleconverter/runtime/StrayLaneFile.kt ?? runtimes/swiftui/Sources/StyleConverterRuntime/StrayLaneFile.swift 
+  the same fix on the shared tree today lists: '' (empty: it would not refuse a clean tree)
+  control — a TRACKED edit: clause 1 exit=1 (1 = refused, as designed)
+  (throwaway <scratch>/wt-untracked removed)
+
+## E9 the one-shot hash wait returns at once on a launch whose driver.log already says 'attempt 1 starting'
+98:LOG="$DRV_DIR/driver.log"
+99:log() { local line; line="[gate-driver $(date -u +%H:%M:%S)] $*"; echo "$line"; [[ -d "$DRV_DIR" ]] && echo "$line" >> "$LOG"; }
+146:mkdir -p "$DRV_DIR"
+  a --resume launch of the same run id: the plan's until-grep returned after 0 s, before that launch's provision
+  PLAN names a hash read for a --resume launch: 0
+
+## E10 beforeEveryDeviceRun's daemon roots: the 'wave55-' grep and the TREES: placeholder
+  registered worktrees matching wave55-: 0
+  registered Workflow worktrees (wf_*): 4  e.g. ~/Documents/Projects/Style-Converter/.claude/worktrees/wf_c3a87fe8-936-12 5932a94a [worktree-wf_c3a87fe8-936-12]
+  PLAN rules that name a lane worktree path with 'wave55-': 0
+  beforeEveryDeviceRun carries a placeholder, not a command: True
+
+## E11 an S1 fix patch delivered as §8 step 8 says (fix-S1-<U>.patch in the lane dir) is refused by land-units.sh's M3 guard
+  control: COMPLETE note, unit + seam patch → --check exit=0
+  + fix-S1-NB-ios.patch with its patch: line (PLAN §8 step 8) → --check exit=1
+      ERROR   tools/titan/results/wave55-hyphen-ios-linebox/fix-S1-NB-ios.patch is not a patch the ORDER table names for this lane (a stale dead-attempt patch? delete it)
+    SUMMARY  1 error(s), 0 warning(s) — NOT landable as is (--check touched nothing: no checkout, no rm, no apply on the tree)
+  the --contingency path walks the same lane-dir loop (RECDIRS has no CONT guard): 1  CONT mention(s) in the records block (the force-add line only)
+  (throwaway <scratch>/wt-fixs1 removed)
+
+## E12 the destructive-path self-tests are recorded against older script bytes
+  land-units.sh now 98b0b07bfa6f174b… · land-units.selftest.out.txt (A-D, the real landing path) cites sha256 06bb1f5357936fb3 · r1-EF cites sha256 98b0b07bfa6f174b
+  ab-arms55.sh now b5e1e7b1f2e5d869… · ab-arms55.selftest.out.txt (--run, restore, records) cites runner sha256 b8db42d873a270cf · against-proof (dry-run only) cites runner sha256 b5e1e7b1f2e5d869
+  PLAN §8 steps 2-15 name a re-run of land-units.selftest.sh A-D / ab-arms55.selftest.sh: 0
+
+## E13 the iOS .app embeds the same test-all IR as the apk (the apk-asset finding applies to iOS too)
+  test-all.sh:459:cp "$OUTPUT_DIR/tmpOutput.json" "$IOS_DIR/StyleConverterTest/Resources/tmpOutput.json"
+  test-all.sh:460:cp "$OUTPUT_DIR/tmpOutput.json" "$ANDROID_DIR/app/src/main/assets/tmpOutput.json"
+  test-all.sh:461:cp "$OUTPUT_DIR/tmpOutput.json" "$WEB_DIR/public/ir-components.json"
+  is the sync step guarded by SKIP_IOS? 0
+  project.yml:49:      - StyleConverterTest/Resources
+  05118ad1084ef6166ddd9c47a705219e0b4e717e  apps/ios-harness/StyleConverterTest/Resources/tmpOutput.json
+  05118ad1084ef6166ddd9c47a705219e0b4e717e  apps/android-harness/app/src/main/assets/tmpOutput.json
+  PLAN §0 hash rule states the asset caveat for: android 1 · ios 0
+
+## E14 §6 'Two caveats' contradict the generated strings and the reader's code
+1982:- `corpusSnapshotSource` and `closingGateFiles` name `wave52-gate/make-corpus.mjs` as the snapshot's reader. That name is
+1986:- `control-check.mjs` prints a post capture that is "absent before" as `LEAK` but does not count it in its exit status.
+  corpusSnapshotSource names make-snapshot55: True · names make-corpus: False
+  control-check.mjs:125:      if (!existsSync(fa)) { r.changed.push({ stem, note: 'absent before' }); if (!allowed.has(stem)) out.leaks.push({ sec, platform, st
+
+## E15 stale arm names left by the D8 rename
+  L4 stage1Decision says "arm drop-U2": True
+  land-units.sh ORDER row 03 note: L4 drop-U2, L6 drop-U2
+
+## E16 disk: lane / skeptic / S1 worktrees each get their own DerivedData, and nothing removes them
+  free 38 GiB of 460
+  4.0G StyleConverterRuntime-dhqlkcum… → WorkspacePath ~/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+  PLAN lines on worktree removal / disk / DerivedData: 1 (the one hit is the planning-stage throwaway at :47)
+  registered worktrees older than this wave still on the host: 4
+
+## E17 the provisioning symlink resolves @style-converter/web to the SHARED tree
+  lrwxr-xr-x@ 1 dranak  staff  100 Aug 30 03:35 web -> ~/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/web
+
+## E18 committed-to-be records that carry scratchpad paths (§8 step 18 greps for them at ship)
+  tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/lu-check.run1.land-units.out.txt
+  tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gg_refusals.out.txt
+  tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/rec/run-adj.out.txt
+  tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gate-out/combo-L6.txt
+  tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gate-out/combo-L4.txt
+  tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gate-out/combo-L5.txt
+  tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gate-out/combo-L1.txt
+  tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gate-out/combo-L2.txt
+  tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/gate-out/combo-L3.txt
+  tools/titan/results/wave55-plan/plan-skeptic-round-1.instrument-teeth.d/ab-dry.out.txt
+  tools/titan/results/wave55-gate/ab-arms55.selftest.out.txt
+  tools/titan/results/wave55-gate/toolkit-proofs.txt
+
+## E19 the seam landing order on paper: hunk windows (anchor ± 3 context) at HEAD, cross-lane and intra-lane
+  kt                   intra L4 s1 U1-android         :1157-1165  vs  L4 s3 U2-android         :1161-1161  gap   -4  STACKED (same lane; cut in order)
+  kt                   CROSS L4 s3 U2-android         :1161-1161  vs  L2 s1 U1                 :1950-1951  gap  789  disjoint
+  kt                   CROSS L2 s1 U1                 :1950-1951  vs  L3 s1 U1                 :3633-3661  gap 1682  disjoint
+  kt                   CROSS L3 s1 U1                 :3633-3661  vs  L5 s4 U2o-android        :4482-4482  gap  821  disjoint
+  kt                   intra L5 s4 U2o-android        :4482-4482  vs  L5 s5 U2i-android        :4665-4665  gap  183  disjoint
+  swift                intra L4 s2 U1-ios             :340-356  vs  L4 s4 U2-ios             :352-356  gap   -4  STACKED (same lane; cut in order)
+  swift                CROSS L4 s4 U2-ios             :352-356  vs  L5 s1 U1-ios @3973       :3973-3973  gap 3617  disjoint
+  swift                intra L5 s1 U1-ios @3973       :3973-3973  vs  L5 s1 U1-ios @4561       :4561-4561  gap  588  disjoint
+  swift                intra L5 s1 U1-ios @4561       :4561-4561  vs  L5 s1 U1-ios @4602       :4602-4602  gap   41  disjoint
+  swift                intra L5 s1 U1-ios @4602       :4602-4602  vs  L5 s2 U2o-ios            :4618-4618  gap   16  disjoint
+  swift                intra L5 s2 U2o-ios            :4618-4618  vs  L5 s1 U1-ios @4626       :4626-4626  gap    8  disjoint
+  swift                intra L5 s1 U1-ios @4626       :4626-4626  vs  L5 s3 U2i-ios            :4646-4646  gap   20  disjoint
+  swift                intra L5 s3 U2i-ios            :4646-4646  vs  L5 s1 U1-ios @4650       :4650-4650  gap    4  shared context only
+  swift                CROSS L5 s1 U1-ios @4650       :4650-4650  vs  L1 s1 NB-ios cut         :5055-5069  gap  405  disjoint
+  swift                intra L1 s1 NB-ios cut         :5055-5069  vs  L1 s1 NB-ios insert      :5151-5154  gap   82  disjoint
+  swift                intra L1 s1 NB-ios insert      :5151-5154  vs  L1 s1b NB-ios-b          :5335-5335  gap  181  disjoint
+  swift                CROSS L1 s1b NB-ios-b          :5335-5335  vs  L5 s6 U3-ios             :5537-5537  gap  202  disjoint
+  SeamReachabilityTest CROSS L4 s1+s3 (stacked)       :159-159  vs  L5 s4                    :167-167  gap    8  disjoint
+  SeamReachabilityTest CROSS L5 s4                    :167-167  vs  L3 s1+U2 (stacked)       :182-182  gap   15  disjoint
+
+## E20 rule-6 revert states vs the §0 revertStatesCompiled list
+  L1-hyphen-ios-linebox        chains: NB-ios
+  L2-cbb-android               chains: U2 + U1
+  L3-positioned-parent-slot    chains: U2 | U2 + U1
+  L4-ua-heading-margin         chains: U2-android | U2-android + U1-android | U2-ios | U2-ios + U1-ios
+  L5-counter-suffix-rows       chains: D | D + U2i-android + U2o-android | D + U2i-ios + U2o-ios | U1-ios | U2i-android | U2i-ios | U3-ios
+  L6-android-paint-order       chains: U2 | U2 + U1 | U3
+
+## E21 regenerable counts still typed outside the gen blocks (lesson 11)
+1742:asserts all 26 of its own.
+2358:       and the leak signals over `probeRun`'s 26 sections, its default (adjudicate R5 and the control cover the other
+  landing-manifest orderConstraints 26 · probeRun sections 26
+
+## E22 ab-arms55.sh's revert check, non-chain branch: each commit's reverse is checked ALONE on the current tree
+  | revert_check() {  # <shas…>
+  |   local -a s=("$@"); local i chain=1
+  |   for (( i = 1; i < ${#s[@]}; i++ )); do [[ "$(gitr rev-parse -q --verify "${s[i-1]}^")" == "$(gitr rev-parse -q --verify "${s[i]}")" ]] || chain=0; done
+  |   if (( chain )); then gitr diff --binary "${s[${#s[@]}-1]}^" "${s[0]}" | gitr apply -R --check 2>&1
+  |   else for c in "${s[@]}"; do gitr diff --binary "$c^" "$c" | gitr apply -R --check 2>&1 || return 1; done; fi
+  | }
+  (a) a modified line: arms file 'drop-X … <W> <U>' (child first), current tree = U + W
+      runner, one by one on the current tree:  W ok · U REFUSED   → the arm is REFUSED (exit 2)
+      cumulative (what git revert W U does): W ok · U ok
+  (b) a created file (NB-ios) later extended (NB-ios-b, or any -S1 on a NEW file): drop-NB-ios 'NB-ios-b NB-ios'
+      runner, one by one on the current tree:  NB-ios-b ok · NB-ios REFUSED   → REFUSED
+      cumulative: NB-ios-b ok · NB-ios ok
+  the plan's drops put -S1 commits / a landed contingency first in every arm: ['drop-NB-ios: NB-ios-S1* → NB-ios', 'drop-L4-U2: U2-ios-S1* → U2-android-S1* → U2-ios → U2-android', 'drop-L6-U2: U2-S1* → U2']
+
+## E23 every native unit in stage1Probe.decides has a carrier in a stage-1 section
+  native units without a stage-1 carrier or not decided at stage 1: none
+
+## E24 how an -S1 revert and a regenerated re-read are recorded (rule 6 / §7 step 6)
+  a reverted.json row for the -S1 commit rule 6 reverts first → plan-build exit=1 (KeyError: 'U2-S1')
+  PLAN says how an -S1 revert is recorded in reverted.json: 0
+  PROBE_READOUT renders a regenerated re-read (the '*.regen.*' names of §7 step 6): 0 · in expectations.json: 0
+
+## E25 the arm's dry run as §7 step 5 writes it (no --against) skips the --against tree check that --run applies
+  --dry-run (PLAN §7 step 5):            against: wave55-final has not run yet (no run dir, no block) — its tree is checked once it has
+  --dry-run --against wave55-pre:         --against wave55-pre ran tree 7cce3b22, but HEAD differs from it in code ( 64 files changed, 5834 insertions(+), 171 del
+  (throwaway <scratch>/wt-armdry removed)
+
+## Z the shared tree is unchanged (HEAD + status outside the two plan dirs); no throwaway left
+  unchanged
+  scratch worktrees still registered: 0
+repro exit=0

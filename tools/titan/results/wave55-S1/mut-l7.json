@@ -1,0 +1,5 @@
+[
+ {"label":"S1-L7a","what":"L7 U2: wire-differential accepts ANY uniform shift as a renumbering (drops the running-delta equality)","file":"tools/titan/wire-differential.mjs","old":"if (shifts.length === 1 && shifts[0] === delta) out.renumbered","new":"if (shifts.length === 1) out.renumbered","test":"node --test tools/titan/wire-differential.test.mjs"},
+ {"label":"S1-L7b","what":"L7 U5: MARKER_PAINT_INITIAL loses mixBlendMode (a blended marker would no longer decline)","file":"tools/titan/bidi-marker-paint.mjs","old":"  mixBlendMode: 'normal',\n","new":"","test":"node --test tools/titan/bidi-bake.test.mjs"},
+ {"label":"S1-L7c","what":"L7 U6-web: an inert out-of-flow member no longer requires transparent ink","file":"runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts","old":"  return outOfFlow && transparentInk;","new":"  return outOfFlow;","test":"cd runtimes/web && npx vitest run tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx"}
+]

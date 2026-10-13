@@ -1,0 +1,60 @@
+# android-paint-order.maymove-medium.py wave54-final (plan-skeptic round 1 GT-M2; PLAN §9 D21)
+(1) the brief's explicit-px rule (crossings-scan structural_docs): 252 documents; bordered components 1438
+(2) the Compose rule (medium default, keywords, shorthands, logical sides): 278 documents; bordered components 1973
+(3) the Compose rule adds 26 documents and drops 0
+MEDIUM-DEFAULT ADDITIONS
+  wpt__CSS2__floats-clear__floats-clear-multicol-000
+  wpt__CSS2__floats-clear__floats-clear-multicol-001
+  wpt__CSS2__floats-clear__floats-clear-multicol-002
+  wpt__CSS2__floats-clear__floats-clear-multicol-003
+  wpt__CSS2__floats-clear__floats-clear-multicol-balancing-000
+  wpt__CSS2__floats-clear__floats-clear-multicol-balancing-001
+  wpt__CSS2__floats-clear__floats-clear-multicol-balancing-002
+  wpt__CSS2__floats-clear__floats-clear-multicol-balancing-003
+  wpt__css-anchor-position__anchor-center-overflow-001
+  wpt__css-anchor-position__anchor-center-overflow-002
+  wpt__css-anchor-position__anchor-center-overflow-003
+  wpt__css-anchor-position__anchor-center-overflow-004
+  wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-2
+  wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3
+  wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4
+  wpt__css-break__box-decoration-break-clone-001
+  wpt__css-break__box-decoration-break-clone-002
+  wpt__css-cascade__all-prop-001
+  wpt__css-text__bidi__bidi-lines-001
+  wpt__css-text__bidi__bidi-lines-002
+  wpt__css-text__hyphens__hyphens-out-of-flow-001
+  wpt__css-text__hyphens__hyphens-out-of-flow-002
+  wpt__css-text__hyphens__hyphens-span-001
+  wpt__css-text__hyphens__hyphens-span-002
+  wpt__css-writing-modes__direction-upright-001
+  wpt__css-writing-modes__direction-upright-002
+END ADDITIONS
+(4) crossing excess of each addition (android / web / ios − ref; a carrier needs android ≥ 20 with web / ios within 5):
+  wpt__CSS2__floats-clear__floats-clear-multicol-000                             ref 0 · android 0 · web 0 · ios 0
+  wpt__CSS2__floats-clear__floats-clear-multicol-001                             ref 0 · android 0 · web 0 · ios 0
+  wpt__CSS2__floats-clear__floats-clear-multicol-002                             ref 0 · android 0 · web 0 · ios 0
+  wpt__CSS2__floats-clear__floats-clear-multicol-003                             ref 0 · android 0 · web 0 · ios 0
+  wpt__CSS2__floats-clear__floats-clear-multicol-balancing-000                   ref 0 · android 0 · web 0 · ios 0
+  wpt__CSS2__floats-clear__floats-clear-multicol-balancing-001                   ref 0 · android 0 · web 0 · ios 0
+  wpt__CSS2__floats-clear__floats-clear-multicol-balancing-002                   ref 0 · android 0 · web 0 · ios 0
+  wpt__CSS2__floats-clear__floats-clear-multicol-balancing-003                   ref 0 · android 0 · web 0 · ios 0
+  wpt__css-anchor-position__anchor-center-overflow-001                           ref 0 · android 0 · web 0 · ios 0
+  wpt__css-anchor-position__anchor-center-overflow-002                           ref 0 · android 0 · web 0 · ios 0
+  wpt__css-anchor-position__anchor-center-overflow-003                           ref 0 · android 0 · web 0 · ios 0
+  wpt__css-anchor-position__anchor-center-overflow-004                           ref 0 · android 0 · web 0 · ios 0
+  wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-2 ref 32 · android 0 · web -32 · ios 0
+  wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3 ref 32 · android 0 · web 0 · ios 0
+  wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4 ref 0 · android 0 · web 32 · ios 0
+  wpt__css-break__box-decoration-break-clone-001                                 ref 0 · android 0 · web 0 · ios 0
+  wpt__css-break__box-decoration-break-clone-002                                 ref 0 · android 0 · web 0 · ios 0
+  wpt__css-cascade__all-prop-001                                                 ref 0 · android 0 · web 0 · ios 0
+  wpt__css-text__bidi__bidi-lines-001                                            ref 0 · android 0 · web 0 · ios 0
+  wpt__css-text__bidi__bidi-lines-002                                            ref 0 · android 0 · web 0 · ios 0
+  wpt__css-text__hyphens__hyphens-out-of-flow-001                                ref 0 · android 0 · web 0 · ios 0
+  wpt__css-text__hyphens__hyphens-out-of-flow-002                                ref 0 · android 0 · web 0 · ios 0
+  wpt__css-text__hyphens__hyphens-span-001                                       ref 0 · android 0 · web 0 · ios 0
+  wpt__css-text__hyphens__hyphens-span-002                                       ref 0 · android 0 · web 0 · ios 0
+  wpt__css-writing-modes__direction-upright-001                                  ref 0 · android 0 · web 0 · ios 0
+  wpt__css-writing-modes__direction-upright-002                                  ref 432 · android -432 · web 0 · ios -432
+carriers among the additions: 0

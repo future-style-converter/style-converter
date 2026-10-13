@@ -1,0 +1,5 @@
+keys by class {'control': 160, 'gating': 43, 'report': 27} total 230
+lines matched at token 0: 230
+wrong-class outcomes on wave54-final (gating/report should FAIL, control PASS): 0
+keys matching >1 line: 0
+gating/report expect strings printed neither on wave54-final nor anywhere in probes-selfcheck.txt: 0

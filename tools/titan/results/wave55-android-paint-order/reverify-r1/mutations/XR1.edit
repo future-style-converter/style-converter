@@ -1,0 +1,3 @@
+            result = BordersFacade.apply(result, paint.borders, sidesBehindContent = !config.overflow.shouldClip)
+=====
+            result = BordersFacade.apply(result, paint.borders, sidesBehindContent = true)

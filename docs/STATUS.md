@@ -2870,18 +2870,293 @@ writes its records after the tree is restored; the apk sha1 is not
 build-reproducible, the iOS .app digest is. Gate record and every artifact:
 `tools/titan/results/wave54-gate/`; open items: `docs/BACKLOG.md`.
 
+**Wave 55 (2026-10-11 → 10-13): seven lanes, probe-then-ship in two stages,
+five stage-1 reverts, one process hole closed.** corpus-v6.21
+(`tools/titan/results/corpus-v6-21.json`): web 1243/1372 90.6%, iOS 1131/1362
+83.0%, Android 1130/1362 83.0% (corpus-v6.20: 1243 · 1131 · 1128); **2 cells
+gained (web 0 · iOS 0 · Android 2), 0 lost, 0 newly measured, 0
+unmeasured-now** against `wave55-open` over 4096 scored cells (`wave55-final`,
+gate tree 26cd6610, a records-only commit on the launch tree 5a4ab5d4; 30/30
+sections on attempt 1, css-cascade 43/43/43 and every other section 48/48/48;
+14 movers ≥ 0.005, none downward; the adjudicator's R1–R5 hold, 27 gating
+predictions missed 0 and 4084 must-not-move cells moved 0:
+`tools/titan/results/wave55-gate/score-final.txt`,
+`tools/titan/results/wave55-gate/final/adjudicate-final.txt`). The opening
+gate reproduced `wave54-final` byte for byte on this host: `wave55-open` = 0
+gained / 0 lost / 0 movers (none at any Δ) / 0 newly measured / 0
+unmeasured-now against `wave54-final`, every
+capture on all three platforms and every wire document byte-identical
+(1435/1435 each; `tools/titan/results/wave55-gate/score-open.txt`,
+`tools/titan/results/wave55-gate/control-open.txt`), so the post-gate regex
+rewrite in `InertOutOfFlowWordJoin.ts` moved no pixel; fixture net exit 0 ×9.
+The opening hash read corrected wave 54's lesson that the apk sha1 is not
+build-reproducible: the apk embeds one asset, `assets/tmpOutput.json`, the IR
+of the last fixture a `test-all.sh` run converted (its sync step copies it
+there, `test-all.sh:460`), so wave 54's two digests differ by that asset (the
+fixture net rewrote it between the builds), and with unchanged
+sources and the same asset Gradle reuses the apk byte for byte; built ==
+installed MATCH stays the check of record
+(`tools/titan/results/wave55-gate/_note.md`, opening gate). Then seven lanes
+on the shared tree, landed as the records commit fb94a502 and 27 unit commits
+through 5bbc2a41 in PLAN §4's pre-registered order and read CLAIM-HOLDS by a
+combined-tree skeptic (`tools/titan/results/corpus-v6-21.json` `_note`). What
+the final tree carries: L2 (Compose) re-lands CBB-android, which wave 54
+reverted under rule 4. Under WPT capture a content-box box publishes its
+declared size to its children's containing block (`ContainingBlockBands`, CSS
+2.1 §10.1–§10.2), and an in-flow percentage of a content-box box gets its
+containing block's content band at layout time (`PercentContentBoxBand`,
+§10.2). Both clip-3 geometry scripts read PASS (wave 54's gating row printed
+GEOMETRY WRONG): `backdrop-filter-nested-border-radius-clip-3` android f
+0.9574 → P 0.9999 (the green rounded rect clipped at the box's right and
+bottom, no pink); `-clip` / `-clip-2` / `-clip-4` android P 0.9649 / 0.9689 /
+0.977 → 1 / 1 / 0.9999 (the pink (255,127,255) strip gone);
+`abspos-autopos-htb-ltr` / `-vlr-ltr` / `-vrl-ltr` android P 0.9966 → 0.9967,
+pre-registered DEGENERATE → faithful (the red L-frame `wave55-open` drew
+around a 70×80 green block is gone; the score barely moves because red and
+green have almost the same luma). The three `-rtl` rows keep a 10×100 red
+strip, the iOS line the plan predicted (`-htb-rtl` P 0.9869 → 0.9966), and the
+three `position-absolute-semi-replaced-stretch-*` android carriers rose and
+still fail (the green inset now fills its frame; the control is still drawn at
+intrinsic size). L3 (Compose): a positioned parent's flow slot mounts under
+composed capture for LTR parents (`PositionedParentSlotGate`) and, on the
+gate's RTL branch, takes its physical-left origin
+(`PositionedParentRtlOrigin`): `selectors/dir-style-02a` android f 0.9425 → P
+0.9854 (every row left-aligned with its leading period, the rtl rows no longer
+mirrored or cut at the right edge), `bidi-tab-001` android P 0.9805 → 0.9929
+(all eight lines as the ref's, where `wave55-open` stranded a '0' outside the
+box), `dynamic-offset-rtl-001` / `dynamic-offset-vrl-rtl-001` android P 0.9952
+→ 1 (`-rtl-001` pixel-identical to the ref), and
+`anchor-position-multicol-nested-001` android f 0.9573 → f 0.9688, moved
+toward the ref and still failing, as predicted. L5 (both natives): a list
+marker whose natural direction differs from its item's is bidi-isolated on
+SwiftUI (`ListMarkerBidi`, css-lists-3 §3.1.1, UAX #9); a U+3001-suffixed
+outside marker hangs with no stand-in gap, and an inside marker takes the same
+gap, on both natives (`ListMarkerSuffixGap`, css-counter-styles-3 §6); and a
+SwiftUI label run takes `font-variant-numeric: tabular-nums` as
+`Font.monospacedDigit()`.
+`counter-suffix` android P 0.989 → 0.9924 (the CJK rows' extra gap gone) and
+iOS P 0.9873 → 0.992 (the Hebrew rows read `א.` / `ב.` with the period after
+the letter, and the CJK rows start at the ref's x); `css3-counter-styles-005`
+iOS P 0.993 → 0.9971 and Android P 0.9759 → 0.9741 (the pre-registered
+−0.0018). L6 (Compose): a self-painted border band paints behind its content
+(`BehindContentBorder`, CSS 2.1 Appendix E), and the legacy border sides move
+inner of the background and paint behind content (`BorderSideApplier`,
+`BordersFacade`; a clipping box keeps the base chain), with the
+filter-then-clip order pinned by a test:
+`flex-abspos-staticpos-align-self-safe-001` / `-002` android P 0.9619 / 0.9635
+→ 0.9943 / 0.9932 (the yellow abspos box over the container border),
+`descendant-static-position-001` android P 0.9892 → 0.9991 (the grid's band
+under its children; a looked-at may-move cell, never claimed) and
+`backdrop-filter-clip-rect` android P 0.9559 → 0.9574 (416 overlap px blue →
+red, the ref's paint order). L7: the gate-flag wire differential that can fail
+(`tools/titan/wire-differential.sh`, `tools/titan/wire-differential.mjs`), the
+A/B arm runner that writes its records after the tree is restored
+(`tools/titan/results/wave55-gate/ab-arms55.sh`), the renderer-latitude
+paragraph of spec 03 §4.1 with its web citations, the pins C1–C7 / S1–S6 /
+W1–W6 / T1–T2 on wave-54 Compose / SwiftUI / web / tooling code (tests only),
+and the marker paint decline that lists maskImage / mixBlendMode
+(wire-identical: before the landing the six-section wire differential read
+identical 288, content-changed 0, renumbered 0, one-sided 0, and failed on
+demand with exit 5; PLAN §10 item 1). **Probe-then-ship in two stages; five
+units reverted at stage 1**
+(`tools/titan/results/wave55-plan/probe-decisions/reverted.json`; PLAN §10
+items 13–14 in `tools/titan/results/wave55-plan/PLAN.md`; the reverts
+22c51ee9, 131cd6e1, adc05081, db7b2417 and 2b0e0b2b are on the final tree).
+Stage 1 (`wave55-pre`: 9 sections on the landed tree, 0fd26479) read the
+landed units' device keys before the closing gate. **L1 NB-ios REVERTED under
+rule 1**, a lost carrier: it laid a declared-normal WPT run on iOS out on
+Blink's rounded line box (`NormalLineBox`, CSS 2.1 §10.8.1), and `wave55-pre
+css-text/hyphens/hyphenate-character-002 ios f 0.9165` fell from P 0.9534 (Δ
+−0.0369; predicted P ≈0.969). 002 is the no-visible-hyphen host: the rounded
+line box on breaks that carry no hyphen glyph tightens the line pitch the ref
+keeps, and the lane's replay, which composited the right glyphs at the right
+x, could not see the pitch. Its three gating rows read LINEBOX OK and 001 /
+003 / 004 iOS had moved toward the ref (0.978 / 0.9759 / 0.975, 004 a flip);
+those gains went with the unit, and the R1 signature was absent, so the
+contingency NB-ios-b was not landed. **All four L4 units REVERTED under rules
+3 and 4**: the UA .67em-family block margin of an out-of-flow heading (U1) and
+the held folded-host heading face (U2), on both natives, left
+`text-decoration-inset-005` / `-006` below the 0.95 floor (iOS f 0.93 /
+0.9284, Android f 0.9147 ×2; predicted P ≈0.966 / 0.967) with their `[M]` keys
+GEOMETRY WRONG. U2's 2em face is present, but the whole heading sits 5 px high
+(`the` cap top y138 vs the ref's y143 on both natives; on Android the super- /
+subscript offsets are off by +8 / −8 and the line does not wrap), so the
+margin U1 applies is 5 px short of the ref's at that face. The pre-registered
+probe-time arm `drop-L4-U2`, run before any revert
+(`tools/titan/results/wave55-gate/final/ab-drop-L4-U2.txt`; arm tree 45473b32,
+MATCH / MATCH), read U1 alone at the expectation's arm M to the third decimal
+(`text-decoration-inset-014` iOS 0.9337 / Android 0.9328 against ≈0.9336 /
+≈0.9328 pre-registered): the face is U2's, the margin U1's. The 014 f → P
+flips on both natives (0.9936 / 0.9867) were withdrawn with the units and
+never claimed: their face-ink reads were WRONG (iOS 1757 dark px vs the ref's
+1907; Android 15 glyph components vs 17). The regeneration withdrew the
+reverted units' carriers and predictions into must-not-move, and their gating
+keys and arms; L2, L3, L5 and L6 were kept after recorded looks on their
+residual-only and cross-rasterizer lines (the instrument events below). Stage
+2 (`wave55-probe`, 26 sections, tree aaf51b1b): no rule fired, every
+prediction met, the 28 withdrawn L1 / L4 carriers read decoded-pixel identical
+to `wave55-open`, and the three L6 may-move stems beyond the 0.002 band
+(`descendant-static-position-001` / `-002`, `break-inside-avoid-child`
+android) showed the pre-registered picture "a band now under its child" (400 /
+800 / 300 px of black become the child's colour), so L6 U2 was kept (PLAN §10
+item 16). **The closing gate's instruments** (read-out
+`tools/titan/results/wave55-gate/final/final55-analysis.out.txt`: FINAL
+READ-OUT HOLDS): the hash of record android ecafaf0d and iOS ff158a4e built ==
+installed MATCH, asset 05118ad1, the same digests as `wave55-probe`'s, so no
+runtime source changed between the probe and the gate
+(`tools/titan/results/wave55-gate/build-hashes.txt`); geometry gating 28/28
+PASS, control 160/160, residual 31/31 OK, the 15 withdrawn L1 / L4 keys FAIL
+and gate nothing (`tools/titan/results/wave55-gate/geometry-final.out.txt`);
+union control web 1435/1435 identical, iOS 1431 identical and 4 changed (the
+four L5 carriers), Android 1353 identical and 82 changed (49 carriers, 32
+may-move, 1 ring-fenced), wire 1435 documents with 0 content-changed and 0
+renumbered (`tools/titan/results/wave55-gate/final/control-final-union.txt`);
+the probe → final differential rc 0 (nothing reverted after the probe);
+probe-readout rules 1–3 fired 0 with 0 leak signals; red-square census PASSING
+red 150 (web 22 / iOS 62 / Android 66) over 80 tests and FAILING red 58 over
+34 tests, from `wave54-final`'s 156 (22 / 62 / 72) and 59
+(`tools/titan/results/wave55-gate/final/red-square-census.txt`,
+`tools/titan/results/wave54-gate/final/red-square-census.txt`). **Every gained
+and moved cell and every kept-lane prediction-row cell was read on the PNGs**
+(57 cells: the 0.005 record's 2 gained and 14 movers plus 41 prediction-row
+cells; 12 first readers, then 51 adversarial second reads;
+`tools/titan/results/wave55-gate/final/cell-review.json`,
+`tools/titan/results/wave55-gate/final/cell-review.second-reader.json`; the
+withdrawn L1 / L4 rows were byte-identical to `wave55-open` and not re-read):
+**FAITHFUL 21 · DEGENERATE 25 · HONEST_FAIL 11**. Both gains are FAITHFUL, as
+are the movers that carry the wave's claims (clip / -2 / -4, safe-001 / -002
+and bidi-tab-001 android), the three abspos-autopos `-ltr` rows, the
+dynamic-offset `-001` rows, counter-suffix android, css3-counter-styles-005 on
+both natives, backdrop-filter-clip-rect android and the looked-at may-move
+cell descendant-static-position-001 android; an adversarial second reader
+confirmed each of these except the two gains and
+descendant-static-position-001, which the second-reader record does not hold
+(PLAN §10 item 18 says the gains were FAITHFUL on both reads). No DEGENERATE
+cell is claimed; each is a picture the plan already declined to claim: the
+three abspos-autopos `-rtl` rows' red strip and anchor-position-multicol-004
+android's unchanged red (`stayDegenerateEvenIfPass`), the two dynamic-offset
+`-002` rows (their ref is post-script; they land on web's picture as
+predicted, and web's picture is not the ref's), the L6 grid / flex abspos rows
+whose children sit off the ref's positions (paint order, not position, was the
+claim), and descendant-static-position-002 and break-inside-avoid-child
+android, the looked-at may-move cells kept as never claimed: the first keeps a
+pre-existing 3-px red sliver, and in the second the band now sits under the
+child as the ref's does, but the child box still runs to the canvas bottom
+where the ref keeps a 16-px white band (as at open). The one second-reader
+label change is `counter-suffix` iOS P 0.9873 → 0.992, FAITHFUL → DEGENERATE:
+the rows the plan's tally claims (3–6 and 9–12) read as the ref's, but row 1's
+"1." keeps the proportional glyph, the `[L]` report row pre-registered WRONG
+on both natives. HONEST_FAIL 11: the f → f movers (the three stretch-*
+carriers, anchor-position-multicol-nested-001),
+grid-abspos-staticpos-align-self-safe-001 android (only its paint order moved;
+the four boxes still stack in one column) and the flat gradient,
+flex-gap-decorations-006, hyphenate-character-005 and disclosure-styles rows.
+The second readers agreed on 40 of 51; ten of the eleven disagreements correct
+a description only. **The closing arm `drop-L6-U2`**
+(`tools/titan/results/wave55-gate/final/ab-drop-L6-U2.txt`; refused once at
+load1 6.11 while the review's readers loaded the host, then run): 7/7 sections
+with full columns, arm tree 8de866d8, android MATCH / iOS MATCH; read
+arm-first, so Δ = final − arm is U2's share, 5 of 309 Android cells differ:
+safe-001 +0.0324, safe-002 +0.0297, descendant-static-position-002 +0.0123,
+-001 +0.0099, and the ring-fenced `backdrop-filter-basic-blur` android f 0.904
+→ f 0.9076 (+0.0036, U2's band move; reported, never a target). Every other U2
+carrier sits within 0.002 (their claim is the paint order the `[X]` / `[PO]`
+keys read, score-flat as predicted); no P → f was revealed;
+break-inside-avoid-child lies outside the arm's seven sections and is
+attributed by the may-move rule. **Fixture net (R8)**: refused once at load1
+6.25 on the corpus run's own teardown (never `--force`;
+`tools/titan/results/wave55-gate/final/net-launch.refused.driver.txt`);
+attempt 1 exit 7, composition-test's Android column empty (0 of 32 captured,
+"app may have crashed"; iOS and web 32;
+`tools/titan/results/wave55-gate/final/fixture-net.attempt1.txt`); attempt 2,
+with a logcat tap on the pool emulator, exit 0 on all 9 gate fixtures
+(visual-test "no regressions vs baseline (327 platform-comparisons ran)",
+filter-sepia-amounts 24 and all-then-color 18 comparisons against their
+baselines, composition-test 32/32/32, the five gate-only combinations exit 0)
+and no harness crash in the logcat, so attempt 1 is recorded as a transient
+(`tools/titan/results/wave55-gate/final/fixture-net.attempt2.txt`). The
+net-launch hash blocks are annotated, never of record (the race by design).
+Suites on the last code change (the single-writer sweep on 2b0e0b2b, after the
+five reverts; later commits touch records, the plan's readers and the doc
+tables' suite-count stamps only (CLAUDE.md, README.md and docs/STATUS.md in
+00201165; the apps/android-harness, runtimes/compose and runtimes/swiftui
+READMEs in 821eb727); `tools/titan/results/wave55-gate/sweep-stage1.txt`, the
+tooling tests / skipped split as
+`tools/titan/results/wave55-gate/sweep-landed.txt` read it on 5bbc2a41 (the
+five reverts touch no tooling; PLAN §10 item 15)): converter
+562 · web runtime 1390 · web-harness 344 · compose 3550 · android-harness 169
+· swiftui 2241 · tooling 2351 (2347 pass, 4 skipped) · ios-harness XCTest
+30/30 · IR conformance valid; the landed tree before the reverts read compose
+3574 and swiftui 2273 (`tools/titan/results/wave55-gate/sweep-landed.txt`).
+**Instrument events.** PLAN §10 item 10: L3's `[S] bidi-tab-001 android
+rtl-rows` read counted each band's components against the BASE capture, whose
+band y106 was itself the defect (`wave55-open`'s '0' stranded at x210–219
+outside the box reads 3 components, the fixed '0' touching its square 2); the
+look decided the device picture right, and the read now also accepts the
+decided device picture as an additive second reference (`INK_RUN_DEFAULT =
+'wave55-pre'`; blobs on the band, a doubled or dotless '0' and the run 2 px
+right still read WRONG). Item 11: L5's `[T]` ios read failed only on its
+pre-registered twin-ink line (the twin run re-pinned to `wave55-pre`), and its
+`[H]` ios letter-profile read correlated the device's letters with Chromium's
+(0.80 own vs 0.88 other on the right picture), a cross-font read; it now also
+reads the device's own decided letters, with a same-capture duplicate read for
+the case the additive rule leaves open. Item 12: five decided device pictures
+became residual-window sources, recorded so that `fix-r6.zones.py --check`
+re-derives with them; inside a recorded window a pixel equal to the decided
+picture is accepted at tolerance 0 (the safe cells' dotted-outline corners are
+three-colour blends no class rule names); the `[K]` ios zone starts at x137,
+because U3-ios's period anti-aliasing fringe reaches x136, 1 px outside the
+run boxes measured on Catalyst. Every stage-1 edit was proven able to fail on
+the device pictures
+(`tools/titan/results/wave55-plan/stage1-mutations.out.txt`: every fake
+rejected, every unfaked picture OK, 0 violations) and on the standing fake
+sets (`tools/titan/results/wave55-plan/probes-selfcheck.txt`: HOLDS, 28 gating
+keys able to fail 28), and the readers' own records were regenerated or
+adapted after the stage-1 regeneration
+(`tools/titan/results/wave55-gate/readers-calibration.txt`: every calibration
+as required). Item 17, a process hole closed rather than a tolerance: the
+first closing read-out FAILED adjudicate R5 (must-not-move cells 4087, 3
+moved) on exactly the three looked-at L6 may-move cells, because adjudicate
+reads the complement and had no may-move class, so the rule "stops the ship
+until its picture shows one of three pre-registered pictures" had no
+mechanical reading.
+`tools/titan/results/wave55-plan/probe-decisions/looks.json` (append-only) now
+turns each looked-at stem into a non-gating, undirected L6 prediction row out
+of the complement (3352 → 3349; regeneration e65366b6 → 77a06f67);
+`probe-readout.mjs` prints it as LOOKED, the same closing record read with the
+pre-looks expectations keeps the three leak signals
+(`tools/titan/results/wave55-gate/final/probe-readout.looks-proof.txt`), and
+the band stays 0.002 for every other may-move cell (212 read, 9 moved within
+it). The instrument claim stays bounded as PLAN §0 and §10 item 9 write it:
+every gating and tally key rejects the standing fake set and any paint outside
+its declared zone in a colour that is not the cell's declared class; the
+round-7 classes MF1–MF7 and the 2-px floor are named, not closed
+(`tools/titan/results/wave55-plan/ship-notes.md` §1 item 2 and §2), and a
+picture-correct count does not certify their absence. Lessons that outlive the
+wave: a structure read whose reference is the base capture reads the base's
+defect as the rule, so it needs the base right in the band it reads or the
+decided device picture as a second reference; a glyph-identity read against
+Chromium's rasterization is a cross-font read, so a native read takes
+same-font references only; a carve-out measured on Catalyst can be 1 px short
+on the device; a replay that composites glyph crops cannot see a line pitch
+(NB-ios's replay said +0.016 on 002, the device read −0.0369); a rule that
+stops the ship on a picture needs a recorded decision its reader can read; the
+apk sha1 tracks the asset it embeds. Gate record and every artifact:
+`tools/titan/results/wave55-gate/`; the plan, the probes and the decisions:
+`tools/titan/results/wave55-plan/`; open items: `docs/BACKLOG.md`.
+
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 562 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1381 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3486 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1390 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3550 |
 | android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 169 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2212 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2241 |
 | web-harness (vitest) | `npm -w apps/web-harness run test` | 344 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 2340 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 2351 |
 | ios-harness app (XCTest — needs a simulator, so it is outside the device-less sweep) | `(cd apps/ios-harness && xcodebuild test -project StyleConverterTest.xcodeproj -scheme StyleConverterTestTests -destination 'platform=iOS Simulator,name=<a booted device>')` | 30 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 

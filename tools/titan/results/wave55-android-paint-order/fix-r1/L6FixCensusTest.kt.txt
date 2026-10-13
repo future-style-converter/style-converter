@@ -1,0 +1,82 @@
+package com.styleconverter.runtime
+
+// tools/titan/results/wave55-android-paint-order/fix-r1/L6FixCensusTest.kt.txt — the L6 FIX lane's behavioural census
+// (fix-r1, answering skeptic D1). Not a delivered test (".kt.txt"): fix-r1/census.sh copies it into the fix worktree's
+// Compose test tree with @@RUN_SECTIONS@@ / @@OUT_TSV@@ filled, runs only this class, and deletes it again.
+//
+// One TSV row per component of every verbatim per-test IR document of the run, through Compose's OWN
+// StyleApplier.extractConfig → applyConfig (wptCaptureMode, as the captures run): the band route (band present,
+// uniform-solid fast path, the self-paint predicate exactly as StyleApplier calls it), the overflow clip that decides
+// fix-r1's order (cfg.overflow.shouldClip), everything that paints INNER of the band node (children by slot.parent incl.
+// <br>, own text, runs, pseudos, marker, border-image, the source tag + its type attribute + Appearance for the UA-widget
+// replicas), the opacity group, the outline + offset, and the folded chain's element-class signature. Run on the base
+// tree, on the builder's patches and on the fix patches; fix-r1/census.py diffs the signatures.
+
+import androidx.compose.ui.Modifier
+import com.styleconverter.runtime.borders.radius.BorderRadiusApplier
+import com.styleconverter.runtime.core.types.ValueExtractors.LineStyle
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import org.junit.Test
+import java.io.File
+
+class L6FixCensusTest {
+    @Test fun census() {
+        val out = StringBuilder("sec\tstem\tid\ttag\tattrType\tappearance\tband\tfast\tself\tclips\topacity\toutline\toutlineOffset\tborderImage\tkidsAll\tkidsNonBr\ttext\truns\tpseudos\tmarker\tsig\n")
+        for (sec in File("@@RUN_SECTIONS@@").listFiles()!!.sortedBy { it.name }) {
+            val files = (File(sec, "per-test-ir").listFiles() ?: emptyArray()).filter { it.name.endsWith(".json") }.sortedBy { it.name }
+            for (f in files) {
+                val comps = ((Json.parseToJsonElement(f.readText()).jsonObject["components"]) as? JsonArray ?: JsonArray(emptyList())).map { it.jsonObject }
+                // Children per parent id: all, and without <br> line breaks.
+                val all = HashMap<String, Int>(); val nonBr = HashMap<String, Int>()
+                for (c in comps) {
+                    val parent = ((c["slot"] as? JsonObject)?.get("parent") as? JsonPrimitive)?.takeIf { it !is JsonNull }?.content ?: continue
+                    all[parent] = (all[parent] ?: 0) + 1
+                    val m = c["meta"] as? JsonObject
+                    val role = (m?.get("role") as? JsonPrimitive)?.content
+                    if (role != "line-break" && (m?.get("sourceTag") as? JsonPrimitive)?.content != "br") nonBr[parent] = (nonBr[parent] ?: 0) + 1
+                }
+                for (c in comps) {
+                    val id = c["id"]!!.jsonPrimitive.content
+                    val meta = c["meta"] as? JsonObject
+                    val pairs: List<Pair<String, JsonElement?>> = (c["properties"] as? JsonArray ?: JsonArray(emptyList()))
+                        .map { it.jsonObject["type"]!!.jsonPrimitive.content to it.jsonObject["data"] }
+                    var band = "ERR"; var fast = "-"; var self = "-"; var clips = "-"; var op = "-"; var ol = "-"; var olOff = "-"; var bi = "-"
+                    val sig = try {
+                        val cfg = StyleApplier.extractConfig(pairs, wptCaptureMode = true)
+                        val s = cfg.borders.sides
+                        band = s.hasBorders.toString()
+                        fast = (s.isUniform && s.top.hasBorder && s.top.style == LineStyle.SOLID).toString()
+                        self = BorderRadiusApplier.selfPaintsWithoutClip(
+                            radius = cfg.borders.radius, sides = s, overflowClips = cfg.overflow.shouldClip,
+                            hasBackgroundLayers = cfg.colors.backgroundImages.isNotEmpty(),
+                            hasClipInsets = cfg.colors.backgroundClipInsets != null,
+                            hasPartialOpacity = (cfg.colors.opacity ?: 1f) < 1f).toString()
+                        clips = cfg.overflow.shouldClip.toString()
+                        op = (cfg.colors.opacity ?: 1f).toString()
+                        ol = cfg.borders.outline.hasOutline.toString()
+                        olOff = cfg.borders.outline.offset.value.toString()
+                        bi = cfg.borderImage.hasBorderImage.toString()
+                        StyleApplier.applyConfig(Modifier, cfg, wptCaptureMode = true)
+                            .foldIn("") { a, e -> if (a.isEmpty()) e.javaClass.simpleName else a + ">" + e.javaClass.simpleName }
+                    } catch (t: Throwable) { "ERR:" + t.javaClass.simpleName }
+                    val text = ((c["text"] as? JsonPrimitive)?.takeIf { it !is JsonNull }?.content ?: "").isNotBlank()
+                    val runs = meta?.get("runs")?.let { it !is JsonNull } ?: false
+                    val ps = c["pseudos"]?.let { it !is JsonNull && !(it is JsonArray && it.isEmpty()) } ?: false
+                    val marker = meta?.get("markerText")?.let { it !is JsonNull } ?: false
+                    val tag = (meta?.get("sourceTag") as? JsonPrimitive)?.content ?: "-"
+                    val attrType = ((meta?.get("attrs") as? JsonObject)?.get("type") as? JsonPrimitive)?.content ?: "-"
+                    val app = pairs.firstOrNull { it.first == "Appearance" }?.second?.toString()?.replace('\t', ' ') ?: "-"
+                    out.append("${sec.name}\t${f.name.removeSuffix(".json")}\t$id\t$tag\t$attrType\t$app\t$band\t$fast\t$self\t$clips\t$op\t$ol\t$olOff\t$bi\t${all[id] ?: 0}\t${nonBr[id] ?: 0}\t$text\t$runs\t$ps\t$marker\t$sig\n")
+                }
+            }
+        }
+        File("@@OUT_TSV@@").apply { parentFile.mkdirs() }.writeText(out.toString())
+    }
+}

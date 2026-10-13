@@ -1,0 +1,152 @@
+census-l5 over wave54-final: 1435 per-test IR documents
+
+(ALL-ios) every iOS marker row the renderer paints, by source, natural/item direction and placement:
+        4  baked L/none/ltr hang
+       35  baked L/none/ltr overlay
+      176  baked L/none/ltr row
+        2  baked R/ltr hang
+       71  table L/none/ltr hang
+        3  table L/none/ltr overlay
+      154  table L/none/ltr row
+        6  table L/none/rtl row
+    total 451 marker rows; baked 217 (of which painted unchanged: 215)
+
+(U1-ios) 8 components in 2 documents
+  wpt__css-counter-styles__counter-style-at-rule__disclosure-styles: 6
+    ios counter-style-at-rule__disclosure-styles__0__1__0 '•' natural=L/none item=rtl row table
+    ios counter-style-at-rule__disclosure-styles__0__1__1 '•' natural=L/none item=rtl row table
+    ios counter-style-at-rule__disclosure-styles__1__1__0 '•' natural=L/none item=rtl row table
+    ios counter-style-at-rule__disclosure-styles__1__1__1 '•' natural=L/none item=rtl row table
+    ios counter-style-at-rule__disclosure-styles__2__1__0 '•' natural=L/none item=rtl row table
+    ios counter-style-at-rule__disclosure-styles__2__1__1 '•' natural=L/none item=rtl row table
+  wpt__css-counter-styles__counter-suffix: 2
+    ios counter-suffix__0__1__0 'א.' natural=R item=ltr hang baked
+    ios counter-suffix__0__1__1 'ב.' natural=R item=ltr hang baked
+
+(U2i-android) 34 components in 3 documents
+  wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001: 9
+    android cjk-decimal__css3-counter-styles-001__1__0__0 '一、' row
+    android cjk-decimal__css3-counter-styles-001__1__0__1 '二、' row
+    android cjk-decimal__css3-counter-styles-001__1__0__2 '三、' row
+    android cjk-decimal__css3-counter-styles-001__1__0__3 '四、' row
+    android cjk-decimal__css3-counter-styles-001__1__0__4 '五、' row
+    android cjk-decimal__css3-counter-styles-001__1__0__5 '六、' row
+    android cjk-decimal__css3-counter-styles-001__1__0__6 '七、' row
+    android cjk-decimal__css3-counter-styles-001__1__0__7 '八、' row
+    android cjk-decimal__css3-counter-styles-001__1__0__8 '九、' row
+  wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004: 23
+    android cjk-decimal__css3-counter-styles-004__1__0__0 '一〇、' row
+    android cjk-decimal__css3-counter-styles-004__1__1__0 '一一、' row
+    android cjk-decimal__css3-counter-styles-004__1__2__0 '一二、' row
+    android cjk-decimal__css3-counter-styles-004__1__3__0 '四三、' row
+    android cjk-decimal__css3-counter-styles-004__1__4__0 '七七、' row
+    android cjk-decimal__css3-counter-styles-004__1__5__0 '八〇、' row
+    android cjk-decimal__css3-counter-styles-004__1__6__0 '九九、' row
+    android cjk-decimal__css3-counter-styles-004__1__7__0 '一〇〇、' row
+    android cjk-decimal__css3-counter-styles-004__1__8__0 '一〇一、' row
+    android cjk-decimal__css3-counter-styles-004__1__9__0 '二二二、' row
+    android cjk-decimal__css3-counter-styles-004__1__10__0 '五四〇、' row
+    android cjk-decimal__css3-counter-styles-004__1__11__0 '九九九、' row
+    android cjk-decimal__css3-counter-styles-004__1__12__0 '一〇〇〇、' row
+    android cjk-decimal__css3-counter-styles-004__1__13__0 '一〇〇五、' row
+    android cjk-decimal__css3-counter-styles-004__1__14__0 '一〇六〇、' row
+    android cjk-decimal__css3-counter-styles-004__1__15__0 '一〇六五、' row
+    android cjk-decimal__css3-counter-styles-004__1__16__0 '一八〇〇、' row
+    android cjk-decimal__css3-counter-styles-004__1__17__0 '一八六〇、' row
+    android cjk-decimal__css3-counter-styles-004__1__18__0 '五八六五、' row
+    android cjk-decimal__css3-counter-styles-004__1__19__0 '七〇〇五、' row
+    android cjk-decimal__css3-counter-styles-004__1__20__0 '七八〇〇、' row
+    android cjk-decimal__css3-counter-styles-004__1__21__0 '七八六四、' row
+    android cjk-decimal__css3-counter-styles-004__1__22__0 '九九九九、' row
+  wpt__css-counter-styles__cjk-decimal__css3-counter-styles-005: 2
+    android cjk-decimal__css3-counter-styles-005__1__0__0 '一、' row
+    android cjk-decimal__css3-counter-styles-005__1__0__1 '二、' row
+
+(U2i-ios) 34 components in 3 documents
+  wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001: 9
+    ios cjk-decimal__css3-counter-styles-001__1__0__0 '一、' row
+    ios cjk-decimal__css3-counter-styles-001__1__0__1 '二、' row
+    ios cjk-decimal__css3-counter-styles-001__1__0__2 '三、' row
+    ios cjk-decimal__css3-counter-styles-001__1__0__3 '四、' row
+    ios cjk-decimal__css3-counter-styles-001__1__0__4 '五、' row
+    ios cjk-decimal__css3-counter-styles-001__1__0__5 '六、' row
+    ios cjk-decimal__css3-counter-styles-001__1__0__6 '七、' row
+    ios cjk-decimal__css3-counter-styles-001__1__0__7 '八、' row
+    ios cjk-decimal__css3-counter-styles-001__1__0__8 '九、' row
+  wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004: 23
+    ios cjk-decimal__css3-counter-styles-004__1__0__0 '一〇、' row
+    ios cjk-decimal__css3-counter-styles-004__1__1__0 '一一、' row
+    ios cjk-decimal__css3-counter-styles-004__1__2__0 '一二、' row
+    ios cjk-decimal__css3-counter-styles-004__1__3__0 '四三、' row
+    ios cjk-decimal__css3-counter-styles-004__1__4__0 '七七、' row
+    ios cjk-decimal__css3-counter-styles-004__1__5__0 '八〇、' row
+    ios cjk-decimal__css3-counter-styles-004__1__6__0 '九九、' row
+    ios cjk-decimal__css3-counter-styles-004__1__7__0 '一〇〇、' row
+    ios cjk-decimal__css3-counter-styles-004__1__8__0 '一〇一、' row
+    ios cjk-decimal__css3-counter-styles-004__1__9__0 '二二二、' row
+    ios cjk-decimal__css3-counter-styles-004__1__10__0 '五四〇、' row
+    ios cjk-decimal__css3-counter-styles-004__1__11__0 '九九九、' row
+    ios cjk-decimal__css3-counter-styles-004__1__12__0 '一〇〇〇、' row
+    ios cjk-decimal__css3-counter-styles-004__1__13__0 '一〇〇五、' row
+    ios cjk-decimal__css3-counter-styles-004__1__14__0 '一〇六〇、' row
+    ios cjk-decimal__css3-counter-styles-004__1__15__0 '一〇六五、' row
+    ios cjk-decimal__css3-counter-styles-004__1__16__0 '一八〇〇、' row
+    ios cjk-decimal__css3-counter-styles-004__1__17__0 '一八六〇、' row
+    ios cjk-decimal__css3-counter-styles-004__1__18__0 '五八六五、' row
+    ios cjk-decimal__css3-counter-styles-004__1__19__0 '七〇〇五、' row
+    ios cjk-decimal__css3-counter-styles-004__1__20__0 '七八〇〇、' row
+    ios cjk-decimal__css3-counter-styles-004__1__21__0 '七八六四、' row
+    ios cjk-decimal__css3-counter-styles-004__1__22__0 '九九九九、' row
+  wpt__css-counter-styles__cjk-decimal__css3-counter-styles-005: 2
+    ios cjk-decimal__css3-counter-styles-005__1__0__0 '一、' row
+    ios cjk-decimal__css3-counter-styles-005__1__0__1 '二、' row
+
+(U2o-android) 2 components in 1 documents
+  wpt__css-counter-styles__counter-suffix: 2
+    android counter-suffix__0__2__0 '一、' hang
+    android counter-suffix__0__2__1 '二、' hang
+
+(U2o-ios) 2 components in 1 documents
+  wpt__css-counter-styles__counter-suffix: 2
+    ios counter-suffix__0__2__0 '一、' hang
+    ios counter-suffix__0__2__1 '二、' hang
+
+(U3-ios) 6 components in 1 documents
+  wpt__css-counter-styles__counter-suffix: 6
+    ios counter-suffix__0__4__2 text='.'
+    ios counter-suffix__0__4__3 text='1'
+    ios counter-suffix__0__4__4 text='.'
+    ios counter-suffix__0__4__5 text='2'
+    ios counter-suffix__0__5__2 text='א.'
+    ios counter-suffix__0__5__3 text='ב.'
+
+CROSS-CHECK against expectations.json lanes['L5-counter-suffix-rows']
+  U1-ios       web      plan 0 census 0 identical
+  U1-ios       ios      plan 2 census 2 identical
+  U1-ios       android  plan 0 census 0 identical
+  U2o-ios      web      plan 0 census 0 identical
+  U2o-ios      ios      plan 1 census 1 identical
+  U2o-ios      android  plan 0 census 0 identical
+  U2i-ios      web      plan 0 census 0 identical
+  U2i-ios      ios      plan 3 census 3 identical
+  U2i-ios      android  plan 0 census 0 identical
+  U2o-android  web      plan 0 census 0 identical
+  U2o-android  ios      plan 0 census 0 identical
+  U2o-android  android  plan 1 census 1 identical
+  U2i-android  web      plan 0 census 0 identical
+  U2i-android  ios      plan 0 census 0 identical
+  U2i-android  android  plan 3 census 3 identical
+  U3-ios       web      plan 0 census 0 identical
+  U3-ios       ios      plan 1 census 1 identical
+  U3-ios       android  plan 0 census 0 identical
+  D            web      plan 0 census 0 identical
+  D            ios      plan 0 census 0 identical
+  D            android  plan 0 census 0 identical
+  captureCarriers web      plan 0 census 0 identical
+  captureCarriers ios      plan 5 census 5 identical
+  captureCarriers android  plan 4 census 4 identical
+  wireCarriers plan 0 census 0 (no converter / extractor / bake file is touched) identical
+
+CENSUS DELTA vs plan: grew 0 · shrank 0 (unit capture sets)
+  U2-overlay-ios: 0 (overlay markers ending U+3001 — no unit reaches the overlay, reported for completeness)
+  U2-overlay-android: 0 (overlay markers ending U+3001 — no unit reaches the overlay, reported for completeness)

@@ -1,0 +1,36 @@
+  align-self-safe-001    fixed U2 replay    fill 17748/16560 bbox Δ0 dark 1356/1308 → OK
+  align-self-safe-001    border-erased      fill 17748/16560 bbox Δ0 dark 0/1308 → WRONG
+  align-self-safe-001    child+3x           fill 17748/16560 bbox Δ3 dark 1356/1308 → WRONG
+  align-self-safe-001    child-3y           fill 17748/16560 bbox Δ3 dark 1188/1308 → WRONG
+  align-self-safe-001    child-shrunk8%     fill 16287/16560 bbox Δ23 dark 1356/1308 → WRONG
+  align-self-safe-001    child-scrambled    fill 17748/16560 bbox Δ203 dark 789/1308 → WRONG
+  align-self-safe-002    fixed U2 replay    fill 16826/15852 bbox Δ0 dark 1432/1372 → OK
+  align-self-safe-002    border-erased      fill 16826/15852 bbox Δ0 dark 0/1372 → WRONG
+  align-self-safe-002    child+3x           fill 16826/15852 bbox Δ3 dark 1432/1372 → WRONG
+  align-self-safe-002    child-3y           fill 16826/15852 bbox Δ3 dark 1414/1372 → WRONG
+  align-self-safe-002    child-shrunk8%     fill 15365/15852 bbox Δ23 dark 1432/1372 → WRONG
+  align-self-safe-002    child-scrambled    fill 16826/15852 bbox Δ211 dark 954/1372 → WRONG
+  align-self-001         fixed U2 replay    fill 1000/914 bbox Δ0 dark 1542/1541 → OK
+  align-self-001         border-erased      fill 1000/914 bbox Δ0 dark 0/1541 → WRONG
+  align-self-001         child+3x           fill 1000/914 bbox Δ3 dark 1536/1541 → WRONG
+  align-self-001         child-3y           fill 1000/914 bbox Δ3 dark 1527/1541 → WRONG
+  align-self-001         child-shrunk8%     fill 904/914 bbox Δ20 dark 1542/1541 → WRONG
+  align-self-001         child-scrambled    fill 1000/914 bbox Δ199 dark 1512/1541 → WRONG
+  justify-self-001       fixed U2 replay    fill 1248/1118 bbox Δ0 dark 1794/1823 → OK
+  justify-self-001       border-erased      fill 1248/1118 bbox Δ0 dark 0/1823 → WRONG
+  justify-self-001       child+3x           fill 1248/1118 bbox Δ3 dark 1764/1823 → WRONG
+  justify-self-001       child-3y           fill 1248/1118 bbox Δ3 dark 1684/1823 → WRONG
+  justify-self-001       child-shrunk8%     fill 1056/1118 bbox Δ20 dark 1794/1823 → WRONG
+  justify-self-001       child-scrambled    fill 1248/1118 bbox Δ179 dark 1756/1823 → WRONG
+  align-self-vertWM-001  fixed U2 replay    fill 1248/1120 bbox Δ0 dark 1796/1828 → OK
+  align-self-vertWM-001  border-erased      fill 1248/1120 bbox Δ0 dark 0/1828 → WRONG
+  align-self-vertWM-001  child+3x           fill 1248/1120 bbox Δ3 dark 1790/1828 → WRONG
+  align-self-vertWM-001  child-3y           fill 1248/1120 bbox Δ3 dark 1686/1828 → WRONG
+  align-self-vertWM-001  child-shrunk8%     fill 1056/1120 bbox Δ20 dark 1796/1828 → WRONG
+  align-self-vertWM-001  child-scrambled    fill 1248/1120 bbox Δ179 dark 1758/1828 → WRONG
+  align-self-rtl-001     fixed U2 replay    fill 1234/1110 bbox Δ0 dark 1800/1828 → OK
+  align-self-rtl-001     border-erased      fill 1234/1110 bbox Δ0 dark 0/1828 → WRONG
+  align-self-rtl-001     child+3x           fill 1234/1110 bbox Δ3 dark 1762/1828 → WRONG
+  align-self-rtl-001     child-3y           fill 1234/1110 bbox Δ3 dark 1714/1828 → WRONG
+  align-self-rtl-001     child-shrunk8%     fill 1042/1110 bbox Δ20 dark 1800/1828 → WRONG
+  align-self-rtl-001     child-scrambled    fill 1234/1110 bbox Δ196 dark 1763/1828 → WRONG

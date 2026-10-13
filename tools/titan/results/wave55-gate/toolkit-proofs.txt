@@ -1,0 +1,152 @@
+# toolkit-proofs.txt — 2026-10-12T10:01:27Z; shared tree HEAD 55dd4cd9; throwaway worktree <scratch>/wave55-lu-selftest-3 at 55dd4cd9
+# sha256: expectations.json b773904f788d023d… adjudicate.mjs 262d22c32a66ec30… control-check.mjs cba40eb567f11105… ab-arms55.sh 5cd6fccbc928768d… ab-arms55.selftest.sh 72ca276afc0562f9… make-snapshot55.mjs df37730dd3c70f54…
+
+## A. adjudicate.mjs (tools/titan/results/wave55-gate)
+  A0 repointing audit (the wave-54 file → this copy):
+  as required  A0a 'wave54' survives only in the provenance header (7 )
+  as required  A0b the copy carries: tools/titan/results/wave55-plan/expectations.json
+  as required  A0b the copy carries: opt('--base', 'wave55-open')
+  as required  A0b the copy carries: score-gate.mjs wave55-open wave55-final --movers 0
+  as required  A0b the copy carries: tools/titan/results/wave55-gate/score-final.json
+  as required  A0b the copy carries: geometry-gate.py wave55-final --base wave55-open
+  as required  A0b the copy carries: tools/titan/results/wave55-gate/geometry-final.json
+  as required  A0b the copy carries: EXP.probeDecisions && EXP.probeDecisions.reverted
+  as required  A0b the copy carries: withdrawnPredictions
+  as required  A0b the copy carries: mustNotMoveAfter
+  as required  A0b the copy carries: mustNotMoveComplement
+     code delta vs tools/titan/results/wave54-gate/adjudicate.mjs (19 changed lines):
+       9,11c9,17
+       < const opt = (name, dflt) => { const i = args.indexOf(name); return i < 0 ? dflt : args.splice(i, 2)[1]; };
+       < const expPath = opt('--exp', path.join(REPO, 'tools/titan/results/wave54-plan/expectations.json'));
+       < const base = opt('--base', 'wave54-open');
+       ---
+       > const USAGE = 'usage: adjudicate.mjs <score.json> [--geometry <geometry.json>] [--base wave55-open] [--exp <expectations.json>]';
+       > const opt = (name, dflt) => {
+       >   const i = args.indexOf(name); if (i < 0) return dflt;
+       >   const v = args[i + 1];
+       >   if (v === undefined || v.startsWith('--')) { console.error(`${USAGE}\n  REFUSED — ${name} given without a value`); process.exit(2); }
+       >   args.splice(i, 2); return v;
+       > };
+       > const expPath = opt('--exp', path.join(REPO, 'tools/titan/results/wave55-plan/expectations.json'));
+       > const base = opt('--base', 'wave55-open');
+       16c22
+       <   console.error('usage: adjudicate.mjs <score.json> [--geometry <geometry.json>] [--base wave54-open] [--exp <expectations.json>]');
+       ---
+       >   console.error(USAGE);
+       93c99,100
+       < const mnmPairs = [...Object.entries(EXP.lanes).flatMap(([laneId, lane]) => (lane.mustNotMove || []).map((c) => [laneId, c])), ...heldCells];
+       ---
+       > const mnmPairs = [...Object.entries(EXP.lanes).flatMap(([laneId, lane]) => (lane.mustNotMove || []).map((c) => [laneId, c])),
+       >   ...((EXP.mustNotMoveComplement && EXP.mustNotMoveComplement.cells) || []).map((c) => ['complement', c]), ...heldCells];   
+       107a115
+       > const stayDegenerate = new Set((EXP.stayDegenerateEvenIfPass || []).map((x) => x.split(' (')[0]));
+       110a119
+       >   if (stayDegenerate.has(`${test} ${c.platform}`)) return 'stays degenerate (stayDegenerateEvenIfPass): never written as a fix this wave';
+  as required  A0c the code delta is the expectations path, the --base default, the usage string, the R5 complement walk and (round 2) the opt() refusal + R6's honesty-list read — nothing else
+  gating rows met in allmet: 44; the lost carrier cell: css-anchor-position/anchor-position-multicol-004.html android (81 carrier cells in the union)
+  as required  A1 the wave-54 record relabelled (wave 54's moves under wave 55's rules) reads red — exit 1: ADJUDICATION: 2 rule(s) broken — do not ship
+     its rule lines: ok   R1  lost 0; pre-registered 0; outside the list 0|ok   R2  unmeasured-now 0 (unexpected 0), newly measured 0 (|ok   R3  missing sections 0, short columns 0|FAIL R4  gating predictions 44, missed 9|FAIL R5  must-not-move cells 4059, moved 84|
+  as required  A2 all-met synthetic (every gating row at its 'to', nothing else moved) holds — exit 0: ADJUDICATION: R1–R5 hold
+  as required  A3 all-met + ONE lost carrier cell → exit 1 — exit 1: FAIL R1  lost 1; pre-registered 0; outside the list 1
+     its rule lines: FAIL R1  lost 1; pre-registered 0; outside the list 1|ok   R2  unmeasured-now 0 (unexpected 0), newly measured 0 (|ok   R3  missing sections 0, short columns 0|ok   R4  gating predictions 44, missed 0|ok   R5  must-not-move cells 4059, moved 0|
+  as required  A3b … and only R1 is broken
+  as required  A4 prev ≠ wave55-open (the all-met record with prev wave54-final) → ORDER — exit 2: ORDER: this record is score-gate.mjs wave54-final → wave55-final; adjudication needs wave55-open FIRST (node tools/titan/score-gate.mjs wave55-open wave55-final --watch
+  as required  A4b the raw wave-54 record (wave54-open → wave54-final) → ORDER — exit 2: ORDER: this record is score-gate.mjs wave54-open → wave54-final; adjudication needs wave55-open FIRST (node tools/titan/score-gate.mjs wave55-open wave55-final --watch 
+  as required  A5 the wave-54 --movers 0.005 record (relabelled, so ORDER passes) → NOT A --movers 0 RECORD — exit 2: NOT A --movers 0 RECORD: 81 cells listed against 4096 scored on wave55-open (81 against 4096 on wave55-final); a same-verdict cell below the record's mover threshold is a
+  as required  A5b the raw wave-54 0.005 record → refused (ORDER fires first) — exit 2: ORDER: this record is score-gate.mjs wave54-open → wave54-final; adjudication needs wave55-open FIRST (node tools/titan/score-gate.mjs wave55-open wave55-final --watch 
+  as required  A6 a geometry JSON of another pair (wave54-final --base wave54-open) → GEOMETRY PAIR — exit 2: GEOMETRY PAIR: tools/titan/results/wave54-gate/geometry-final.json is geometry-gate.py wave54-final --base wave54-open; the score record is wave55-open → wave55-final. 
+  as required  A7 MUTATION (R1 blinded, scratch copy, --exp explicit): A3's lost cell is no longer seen — exit 0: ADJUDICATION: R1–R5 hold
+
+## B. control-check.mjs (tools/titan/results/wave55-gate) on wave54-open → wave54-final with the WAVE-55 carriers
+  B0 repointing audit:
+  as required  B0a 'wave54' survives only in the provenance header (2 )
+  as required  B0b the copy carries: tools/titan/results/wave55-plan/expectations.json
+  as required  B0b the copy carries: wireRenumbered++
+  as required  B0b the copy carries: shift === runShift
+  as required  B0b the copy carries: carriersWithdrawn
+  as required  B0b the copy carries: unionMayMoveCaptures
+  as required  B0b the copy carries: ringFenced.captures
+  as required  B1 the wave-54 pair under the wave-55 carriers FAILS — exit 1: CONTROL FAILED: 79 capture(s) and 23 wire document(s) changed outside the carriers
+     total web: 1435 compared · 1395 identical · 0 re-encoded · 40 changed (0 carriers, 0 may-move, 0 ring-fenced)
+     total ios: 1435 compared · 1416 identical · 0 re-encoded · 19 changed (5 carriers, 0 may-move, 0 ring-fenced)
+     total android: 1435 compared · 1404 identical · 0 re-encoded · 31 changed (2 carriers, 4 may-move, 0 ring-fenced)
+     wire: 1435 documents compared · 23 content-changed · 15 renumbered (ids only, explained by earlier carriers) · 23 outside the plan's wire carriers
+     web      changed 40 (the wave-54 reader on this pair: 40, same) = LEAK 40 + wave-55 carrier 0 + may-move 0 + ring-fenced 0
+     ios      changed 19 (the wave-54 reader on this pair: 19, same) = LEAK 14 + wave-55 carrier 5 + may-move 0 + ring-fenced 0
+     android  changed 31 (the wave-54 reader on this pair: 31, same) = LEAK 25 + wave-55 carrier 2 + may-move 4 + ring-fenced 0
+     wave-54 changes that ARE wave-55 capture carriers (not leaks): 7 — ios wpt__css-counter-styles__counter-suffix, android wpt__css-counter-styles__counter-suffix, ios wpt__css-text__hyphens__hyphenate-character-001, ios wpt__css-text__hyphens__hyphenate-character-002, ios wpt__css-text__hyphens__hyphenate-character-003, ios wpt__css-text__hyphens__hyphenate-character-004, android wpt__filter-effects__backdrop-filter-clip-rect
+     may-move (L6 band, not leaks): 4 — android wpt__css-anchor-position__anchor-center-safe-rtl, android wpt__css-text__bidi__bidi-lines-001, android wpt__css-text__bidi__bidi-lines-002, android wpt__filter-effects__backdrop-filter-edge-clipping
+     ring-fenced: 0
+     wire: content-changed 23 → WIRE LEAK 23 (unionWireCarriers is empty this wave); renumbered 15 (the class is kept: ids-only shifts explained by earlier content changes, not leaks); the wave-54 reader: changed 23, renumbered 15, same
+     THE PROOF: 79 capture LEAK(s) + 23 wire LEAK(s) — every wave-54 change that is not a wave-55 carrier, may-move or ring-fenced capture reads LEAK; accounting CLOSES
+  as required  B2 the class split adds up per platform, the changed counts equal the wave-54 reader's on the same pair, and every content-changed wire document is a WIRE LEAK
+
+## C. ab-arms55.sh
+     as required  T1 exit 0 (got 0)
+     as required  T1 HEAD restored: main at the head commit
+     as required  T1 the arm branches are gone (refs/heads = main)
+     as required  T1 '== wave55-ab-drop-U' block exactly once in build-hashes.txt (1)
+     as required  T1 final/ab-drop-U.txt and final/ab-drop-U.driver.txt written
+     as required  T1 '== wave55-ab-drop-V' block exactly once in build-hashes.txt (1)
+     as required  T1 final/ab-drop-V.txt and final/ab-drop-V.driver.txt written
+     as required  T1 build-hashes.txt = the opening block + exactly one block per arm (3 '== ' lines)
+     as required  T1 drop-U's driver ran on the U-reverted tree (branch wave55-ab-drop-U, a0, b1)
+     as required  T1 drop-V's driver ran on the V-reverted tree (branch wave55-ab-drop-V, a1, b0)
+     as required  T1 each hash block was read on its arm tree (HEAD in the block != the head commit)
+     as required  T1 the stub pool's provisioned-* markers removed
+     as required  T1 the only tracked change is build-hashes.txt (the records await the orchestrator's commit)
+     as required  T1 the records were written after the last restore (runner log order)
+     as required  T1 the reusable T1 check set reads 0 failures on the real runner
+     as required  T2 M-L18 is RED: 4 T1 check(s) fail (exit 7; drop-U blocks 0, drop-V blocks 0)
+     as required  T2 … and the read-outs survived (untracked), exactly as in wave 54
+     as required  T3 M-per-arm is RED: 4 T1 check(s) fail (exit 6; arm drop-V: the tree is not at 13683e3, clean, on main before the arm — stopping (records in <scratch>…
+     as required  T4 no mode flag = the dry run: exit 0, 'DRY RUN OK', refs + files identical
+     as required  T4 --dry-run: exit 0, refs + files identical, the pool markers untouched
+     as required  T4 the dry run printed the driver's own --plan for both arms
+     as required  T4 M-dry is RED: the identity check sees the changed refs/files (exit 0)
+     as required  T5a tracked change, --run — exit 2, 'tracked changes in the tree (git status --porcelain --untracked-files=no):  M src/c.txt '
+     as required  T5b an UNTRACKED file outside the code paths does not block — exit 0
+     as required  T5b2 an UNTRACKED file under a code path (runtimes/) refuses — a device run would build it — exit 2, 'code differs from HEAD (tracked, staged or UNTRACKE
+     as required  T5c detached HEAD, --run — exit 2, 'detached HEAD: there is no branch to restore to'
+     as required  T5d a sha that is not an ancestor of HEAD — exit 2, 'arm drop-S: 34f255a is not an ancestor of HEAD (nothing to revert on this branch)'
+     as required  T5e shas parent first (must be child first) — exit 2, 'arm drop-UV: 3ade678 is not older than the sha before it (list the shas child first)'
+     as required  T5f a duplicate arm name (expectations abArms has two drop-U2) — exit 2, 'arm 2: duplicate arm name drop-U (its run dir, branch, read-out and hash label wo
+     as required  T5g a section the driver does not know — exit 2, 'arm drop-U: section css-nope is not one of gate-driver.sh's corpus sections'
+     as required  T5h a platform that is not web / ios / android — exit 2, 'arm drop-U: platform mac is not web / ios / android'
+     as required  T5i the arm's run dir already exists (never overwrite a capture) — exit 2, 'arm drop-U: tools/titan/runs/wave55-ab-drop-U already exists (never overwrite a
+     as required  T5j a revert that does not apply to HEAD (W rewrote U's line) — exit 2, 'arm drop-U: the revert of 4cbbcc4 does not apply to 1d83e4f: error: patch failed: 
+     as required  T5k a branch with the arm's run name already exists — exit 2, 'arm drop-U: branch wave55-ab-drop-U already exists (checkout -B would reset it)'
+     as required  T5l 'drop-UW W U' (child first; W rewrites U's line; not a chain) dry-runs exit 0 — revert check: arm drop-UW — the reverse of 1d83e4f 4cbbcc4 applies to
+     as required  T5m 'drop-NB B N' (N creates n.txt, B extends it; not a chain) dry-runs exit 0
+     as required  T5m M-onebyone is RED on 'drop-NB B N' (each reverse alone: N's deletion does not apply over B) — exit 2
+     as required  T5l M-onebyone is RED on 'drop-UW W U' — exit 2
+     as required  T6a driver rc 1 on drop-V → exit 1, both arms recorded once, tree restored
+     as required  T6b no 'attempt 1 starting' on drop-U → a NOT READ block (once), exit 1, drop-V read normally
+     as required  T7 this repo's refs, worktrees and stash unchanged
+     as required  T7 the real /tmp/titan-device-pool unchanged (listing with mtimes, 8 lines)
+  as required  C1 ab-arms55.selftest.sh: every check as required, M-L18 / M-per-arm / M-dry RED (record: ab-arms55.selftest.out.txt; exit 0)
+  as required  C2 --dry-run in the throwaway worktree (detached HEAD) → REFUSED — exit 2:   - detached HEAD: there is no branch to restore to
+  as required  C2 … and it reports: 6e1c2d5e is not an ancestor of HEAD
+  as required  C2 … and it reports: revert check: arm drop-gaterecs — the reverse of 55dd4cd9 7566fb03 applies
+  as required  C2 … and it reports: driver --plan | run-id: wave55-ab-drop-gaterecs
+  as required  C2 … and it reports: driver --plan | sections (1): css-text
+  as required  C2 … and the worktree, its refs and this repo's refs / stash are byte-identical after it
+  as required  C3a --dry-run on a scratch clone on campaign/applier-campaign at 55dd4cd9 (tracked-clean) → DRY RUN OK — exit 0: DRY RUN OK — nothing written; --run would start the 1 arm(s) above
+  as required  C3a … the clone's refs, HEAD, status, build-hashes.txt and gate dir unchanged
+  as required  C3b --dry-run on the shared tree, tracked-dirty (5 uncommitted tracked records) → REFUSED for that — exit 2:   - tracked changes in the tree (git status --porcelain --untracked-files=no):  M tools/titan/results/wave55-plan/PLAN.md  M tools/titan/results/wave55-plan/land-units.se
+  as required  C3b … refs, stash, HEAD, tracked status, build-hashes.txt and final/ unchanged
+
+## D. make-snapshot55.mjs
+  as required  D1 the wave-54 inputs → a scratch snapshot — exit 0: wrote <scratch>/wave
+     totals: scratch {"web":{"passing":1243,"measured":1372},"ios":{"passing":1131,"measured":1362},"android":{"passing":1128,"measured":1362}} · corpus-v6-20 {"web":{"passing":1243,"measured":1372},"ios":{"passing":1131,"measured":1362},"android":{"passing":1128,"measured":1362}}
+  as required  D1a its totals equal corpus-v6-20.json's
+  as required  D1b … and the whole file is byte-identical to corpus-v6-20.json (sections, perCellDiff, installedBuilds, probeReverts, degenerateGains, reproduce)
+  as required  D2 the comparison can fail: the same scratch totals against corpus-v6-19.json differ ({"web":{"passing":1232,"measured":1372},"ios":{"passing":1125,"measured":1362},"android":{"passing":1115,"measured":1362}})
+  as required  D3a the --movers 0 record (score-final.json) → NOT THE 0.005 RECORD — exit 2: NOT THE 0.005 RECORD: 4015 of its 4066 movers have |Δ| < 0.005 (e.g. css-anchor-position/css/css-anchor-position/anchor-center-002.html android Δ 0); the snapshot's sou
+  as required  D3b the wave-54 record under the wave-55 defaults → ORDER — exit 2: ORDER: tools/titan/results/wave54-gate/score-final.movers0005.json is score-gate.mjs wave54-open → wave54-final, the snapshot needs wave55-open → wave55-final. Refusi
+  as required  D3c wave55-gate has no final/cell-review.json yet → NO CELL REVIEW — exit 2: NO CELL REVIEW: tools/titan/results/wave55-gate/final/cell-review.json does not exist (degenerateGains would be empty). Refusing (nothing written).
+  as required  D3d a build-hashes.txt without a wave54-final block (wave55-gate's) → NO INSTALLED BUILD — exit 2: NO INSTALLED BUILD: <scratch>…
+  as required  D3e no refusal wrote its output file
+  as required  D4 an A/B arm block that names the run in its label body is not published as a launch: 2 builds; the MUTATION (wave 54's includes) publishes 3
+
+toolkit-proofs: every instrument behaved as required (each shown able to fail)

@@ -1,0 +1,158 @@
+run wave54-final: 1435 per-test IR documents
+bordered components: self-paint route (radius + uniform-solid band) 10 · legacy route 1428
+
+(1) U1 — self-paint parents with a child that can paint into the band: 2 parents in 2 docs; child classes {"abspos-band":4}
+  filter-effects/backdrop-filter-clip-rect-zoom  wpt__filter-effects__backdrop-filter-clip-rect-zoom__2-064  [abspos-band,abspos-band]  web — · ios — · android —
+  filter-effects/backdrop-filter-clip-rect  wpt__filter-effects__backdrop-filter-clip-rect__2-073  [abspos-band,abspos-band]  web P 1 · ios P 0.9961 · android P 0.9559
+
+(2) U2 — legacy-route parents with a child that can paint into the band: 136 parents in 26 docs; child classes {"flow-overflow":3,"abspos-band":102,"flow-negmargin":1,"abspos-unknown":35}
+    of which resolvable (not only abspos-unknown): 101 parents in 19 docs
+  css-anchor-position/anchor-position-multicol-007  anchor-position-multicol-007__1__2-672  [flow-overflow]  web P 0.999 · ios f 0.9398 · android P 0.9519
+  css-anchor-position/anchor-position-multicol-008  anchor-position-multicol-008__1__0-681  [flow-overflow]  web P 0.999 · ios P 0.9699 · android P 0.9804
+  css-flexbox/abspos__flex-abspos-staticpos-align-self-safe-001  wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-001__0-023  [abspos-band]  web P 1 · ios P 0.9939 · android P 0.9619
+  css-flexbox/abspos__flex-abspos-staticpos-align-self-safe-001  wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-001__1-025  [abspos-band]  web P 1 · ios P 0.9939 · android P 0.9619
+  css-flexbox/abspos__flex-abspos-staticpos-align-self-safe-001  wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-001__2-027  [abspos-band]  web P 1 · ios P 0.9939 · android P 0.9619
+  css-flexbox/abspos__flex-abspos-staticpos-align-self-safe-001  wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-001__3-029  [abspos-band]  web P 1 · ios P 0.9939 · android P 0.9619
+  css-flexbox/abspos__flex-abspos-staticpos-align-self-safe-002  wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-002__0-031  [abspos-band]  web P 1 · ios P 0.9925 · android P 0.9635
+  css-flexbox/abspos__flex-abspos-staticpos-align-self-safe-002  wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-002__1-033  [abspos-band]  web P 1 · ios P 0.9925 · android P 0.9635
+  css-flexbox/abspos__flex-abspos-staticpos-align-self-safe-002  wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-002__2-035  [abspos-band]  web P 1 · ios P 0.9925 · android P 0.9635
+  css-flexbox/abspos__flex-abspos-staticpos-align-self-safe-002  wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-002__3-037  [abspos-band]  web P 1 · ios P 0.9925 · android P 0.9635
+  css-flexbox/align-self-016  wpt__css-flexbox__align-self-016__1-445  [flow-overflow]  web f 0.9226 · ios f 0.9209 · android f 0.9202
+  css-gaps/flex__flex-gap-decorations-027  wpt__css-gaps__flex__flex-gap-decorations-027__1-194  [flow-negmargin]  web P 1 · ios P 0.9997 · android P 0.9991
+  css-grid/abspos__grid-abspos-staticpos-align-self-001  abspos__grid-abspos-staticpos-align-self-001__1__0-159  [abspos-band]  web P 0.9818 · ios P 0.9671 · android P 0.9673
+  css-grid/abspos__grid-abspos-staticpos-align-self-001  abspos__grid-abspos-staticpos-align-self-001__1__1-161  [abspos-band]  web P 0.9818 · ios P 0.9671 · android P 0.9673
+  css-grid/abspos__grid-abspos-staticpos-align-self-001  abspos__grid-abspos-staticpos-align-self-001__1__2-163  [abspos-band]  web P 0.9818 · ios P 0.9671 · android P 0.9673
+  css-grid/abspos__grid-abspos-staticpos-align-self-001  abspos__grid-abspos-staticpos-align-self-001__1__4-166  [abspos-band]  web P 0.9818 · ios P 0.9671 · android P 0.9673
+  css-grid/abspos__grid-abspos-staticpos-align-self-001  abspos__grid-abspos-staticpos-align-self-001__1__6-169  [abspos-band]  web P 0.9818 · ios P 0.9671 · android P 0.9673
+  css-grid/abspos__grid-abspos-staticpos-align-self-001  abspos__grid-abspos-staticpos-align-self-001__1__7-171  [abspos-band]  web P 0.9818 · ios P 0.9671 · android P 0.9673
+  css-grid/abspos__grid-abspos-staticpos-align-self-001  abspos__grid-abspos-staticpos-align-self-001__1__8-173  [abspos-band]  web P 0.9818 · ios P 0.9671 · android P 0.9673
+  css-grid/abspos__grid-abspos-staticpos-align-self-001  abspos__grid-abspos-staticpos-align-self-001__1__9-175  [abspos-band]  web P 0.9818 · ios P 0.9671 · android P 0.9673
+  css-grid/abspos__grid-abspos-staticpos-align-self-001  abspos__grid-abspos-staticpos-align-self-001__1__10-177  [abspos-band]  web P 0.9818 · ios P 0.9671 · android P 0.9673
+  css-grid/abspos__grid-abspos-staticpos-align-self-001  abspos__grid-abspos-staticpos-align-self-001__1__12-180  [abspos-band]  web P 0.9818 · ios P 0.9671 · android P 0.9673
+  css-grid/abspos__grid-abspos-staticpos-align-self-001  abspos__grid-abspos-staticpos-align-self-001__1__13-182  [abspos-band]  web P 0.9818 · ios P 0.9671 · android P 0.9673
+  css-grid/abspos__grid-abspos-staticpos-align-self-last-baseline-001  abspos__grid-abspos-staticpos-align-self-last-baseline-001__1__0-391  [abspos-band]  web P 0.9998 · ios P 0.9948 · android P 0.9947
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-001  abspos__grid-abspos-staticpos-align-self-rtl-001__1__0-431  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-001  abspos__grid-abspos-staticpos-align-self-rtl-001__1__1-433  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-001  abspos__grid-abspos-staticpos-align-self-rtl-001__1__2-435  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-001  abspos__grid-abspos-staticpos-align-self-rtl-001__1__4-438  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-001  abspos__grid-abspos-staticpos-align-self-rtl-001__1__6-441  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-001  abspos__grid-abspos-staticpos-align-self-rtl-001__1__7-443  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-001  abspos__grid-abspos-staticpos-align-self-rtl-001__1__8-445  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-001  abspos__grid-abspos-staticpos-align-self-rtl-001__1__9-447  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-001  abspos__grid-abspos-staticpos-align-self-rtl-001__1__10-449  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-001  abspos__grid-abspos-staticpos-align-self-rtl-001__1__12-452  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-001  abspos__grid-abspos-staticpos-align-self-rtl-001__1__13-454  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-001  abspos__grid-abspos-staticpos-align-self-rtl-001__1__14-456  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-001  abspos__grid-abspos-staticpos-align-self-rtl-001__1__15-458  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-002  abspos__grid-abspos-staticpos-align-self-rtl-002__1__0-493  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-002  abspos__grid-abspos-staticpos-align-self-rtl-002__1__1-495  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-002  abspos__grid-abspos-staticpos-align-self-rtl-002__1__2-497  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-002  abspos__grid-abspos-staticpos-align-self-rtl-002__1__4-500  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-002  abspos__grid-abspos-staticpos-align-self-rtl-002__1__6-503  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-002  abspos__grid-abspos-staticpos-align-self-rtl-002__1__7-505  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-002  abspos__grid-abspos-staticpos-align-self-rtl-002__1__8-507  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-002  abspos__grid-abspos-staticpos-align-self-rtl-002__1__9-509  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-002  abspos__grid-abspos-staticpos-align-self-rtl-002__1__10-511  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-002  abspos__grid-abspos-staticpos-align-self-rtl-002__1__12-514  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-002  abspos__grid-abspos-staticpos-align-self-rtl-002__1__13-516  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-002  abspos__grid-abspos-staticpos-align-self-rtl-002__1__14-518  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-002  abspos__grid-abspos-staticpos-align-self-rtl-002__1__15-520  [abspos-band]  web P 0.9789 · ios P 0.9657 · android P 0.9646
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-last-baseline-001  abspos__grid-abspos-staticpos-align-self-rtl-last-baseline-001__1__0-651  [abspos-band]  web P 0.9999 · ios P 0.9949 · android P 0.9948
+  css-grid/abspos__grid-abspos-staticpos-align-self-rtl-last-baseline-002  abspos__grid-abspos-staticpos-align-self-rtl-last-baseline-002__1__0-657  [abspos-band]  web P 0.9999 · ios P 0.9949 · android P 0.9948
+  css-grid/abspos__grid-abspos-staticpos-align-self-safe-001  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-safe-001__2-675  [abspos-band]  web P 1 · ios f 0.9448 · android f 0.9441
+  css-grid/abspos__grid-abspos-staticpos-align-self-safe-001  wpt__css-grid__abspos__grid-abspos-staticpos-align-self-safe-001__3-677  [abspos-band]  web P 1 · ios f 0.9448 · android f 0.9441
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-001  abspos__grid-abspos-staticpos-align-self-vertwm-001__1__0-715  [abspos-band]  web P 0.986 · ios P 0.9613 · android P 0.9612
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-001  abspos__grid-abspos-staticpos-align-self-vertwm-001__1__1-717  [abspos-band]  web P 0.986 · ios P 0.9613 · android P 0.9612
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-001  abspos__grid-abspos-staticpos-align-self-vertwm-001__1__2-719  [abspos-band]  web P 0.986 · ios P 0.9613 · android P 0.9612
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-001  abspos__grid-abspos-staticpos-align-self-vertwm-001__1__4-722  [abspos-band]  web P 0.986 · ios P 0.9613 · android P 0.9612
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-001  abspos__grid-abspos-staticpos-align-self-vertwm-001__1__6-725  [abspos-band]  web P 0.986 · ios P 0.9613 · android P 0.9612
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-001  abspos__grid-abspos-staticpos-align-self-vertwm-001__1__7-727  [abspos-band]  web P 0.986 · ios P 0.9613 · android P 0.9612
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-001  abspos__grid-abspos-staticpos-align-self-vertwm-001__1__8-729  [abspos-band]  web P 0.986 · ios P 0.9613 · android P 0.9612
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-001  abspos__grid-abspos-staticpos-align-self-vertwm-001__1__9-731  [abspos-band]  web P 0.986 · ios P 0.9613 · android P 0.9612
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-001  abspos__grid-abspos-staticpos-align-self-vertwm-001__1__10-733  [abspos-band]  web P 0.986 · ios P 0.9613 · android P 0.9612
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-001  abspos__grid-abspos-staticpos-align-self-vertwm-001__1__12-736  [abspos-band]  web P 0.986 · ios P 0.9613 · android P 0.9612
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-001  abspos__grid-abspos-staticpos-align-self-vertwm-001__1__13-738  [abspos-band]  web P 0.986 · ios P 0.9613 · android P 0.9612
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-001  abspos__grid-abspos-staticpos-align-self-vertwm-001__1__14-740  [abspos-band]  web P 0.986 · ios P 0.9613 · android P 0.9612
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-001  abspos__grid-abspos-staticpos-align-self-vertwm-001__1__15-742  [abspos-band]  web P 0.986 · ios P 0.9613 · android P 0.9612
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-002  abspos__grid-abspos-staticpos-align-self-vertwm-002__1__0-777  [abspos-band]  web P 0.9862 · ios P 0.9615 · android P 0.9614
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-002  abspos__grid-abspos-staticpos-align-self-vertwm-002__1__1-779  [abspos-band]  web P 0.9862 · ios P 0.9615 · android P 0.9614
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-002  abspos__grid-abspos-staticpos-align-self-vertwm-002__1__2-781  [abspos-band]  web P 0.9862 · ios P 0.9615 · android P 0.9614
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-002  abspos__grid-abspos-staticpos-align-self-vertwm-002__1__4-784  [abspos-band]  web P 0.9862 · ios P 0.9615 · android P 0.9614
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-002  abspos__grid-abspos-staticpos-align-self-vertwm-002__1__6-787  [abspos-band]  web P 0.9862 · ios P 0.9615 · android P 0.9614
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-002  abspos__grid-abspos-staticpos-align-self-vertwm-002__1__7-789  [abspos-band]  web P 0.9862 · ios P 0.9615 · android P 0.9614
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-002  abspos__grid-abspos-staticpos-align-self-vertwm-002__1__8-791  [abspos-band]  web P 0.9862 · ios P 0.9615 · android P 0.9614
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-002  abspos__grid-abspos-staticpos-align-self-vertwm-002__1__9-793  [abspos-band]  web P 0.9862 · ios P 0.9615 · android P 0.9614
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-002  abspos__grid-abspos-staticpos-align-self-vertwm-002__1__10-795  [abspos-band]  web P 0.9862 · ios P 0.9615 · android P 0.9614
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-002  abspos__grid-abspos-staticpos-align-self-vertwm-002__1__12-798  [abspos-band]  web P 0.9862 · ios P 0.9615 · android P 0.9614
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-002  abspos__grid-abspos-staticpos-align-self-vertwm-002__1__13-800  [abspos-band]  web P 0.9862 · ios P 0.9615 · android P 0.9614
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-002  abspos__grid-abspos-staticpos-align-self-vertwm-002__1__14-802  [abspos-band]  web P 0.9862 · ios P 0.9615 · android P 0.9614
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-002  abspos__grid-abspos-staticpos-align-self-vertwm-002__1__15-804  [abspos-band]  web P 0.9862 · ios P 0.9615 · android P 0.9614
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-last-baseline-001  abspos__grid-abspos-staticpos-align-self-vertwm-last-baseline-001__1__0-935  [abspos-band]  web P 1 · ios P 0.9946 · android P 0.9946
+  css-grid/abspos__grid-abspos-staticpos-align-self-vertWM-last-baseline-002  abspos__grid-abspos-staticpos-align-self-vertwm-last-baseline-002__1__0-941  [abspos-band]  web P 1 · ios P 0.9946 · android P 0.9946
+  css-grid/abspos__grid-abspos-staticpos-justify-self-001  abspos__grid-abspos-staticpos-justify-self-001__1__0-987  [abspos-band]  web P 0.9862 · ios P 0.9662 · android P 0.9667
+  css-grid/abspos__grid-abspos-staticpos-justify-self-001  abspos__grid-abspos-staticpos-justify-self-001__1__1-989  [abspos-band]  web P 0.9862 · ios P 0.9662 · android P 0.9667
+  css-grid/abspos__grid-abspos-staticpos-justify-self-001  abspos__grid-abspos-staticpos-justify-self-001__1__2-991  [abspos-band]  web P 0.9862 · ios P 0.9662 · android P 0.9667
+  css-grid/abspos__grid-abspos-staticpos-justify-self-001  abspos__grid-abspos-staticpos-justify-self-001__1__4-994  [abspos-band]  web P 0.9862 · ios P 0.9662 · android P 0.9667
+  css-grid/abspos__grid-abspos-staticpos-justify-self-001  abspos__grid-abspos-staticpos-justify-self-001__1__6-997  [abspos-band]  web P 0.9862 · ios P 0.9662 · android P 0.9667
+  css-grid/abspos__grid-abspos-staticpos-justify-self-001  abspos__grid-abspos-staticpos-justify-self-001__1__7-999  [abspos-band]  web P 0.9862 · ios P 0.9662 · android P 0.9667
+  css-grid/abspos__grid-abspos-staticpos-justify-self-001  abspos__grid-abspos-staticpos-justify-self-001__1__8-1001  [abspos-band]  web P 0.9862 · ios P 0.9662 · android P 0.9667
+  css-grid/abspos__grid-abspos-staticpos-justify-self-001  abspos__grid-abspos-staticpos-justify-self-001__1__9-1003  [abspos-band]  web P 0.9862 · ios P 0.9662 · android P 0.9667
+  css-grid/abspos__grid-abspos-staticpos-justify-self-001  abspos__grid-abspos-staticpos-justify-self-001__1__10-1005  [abspos-band]  web P 0.9862 · ios P 0.9662 · android P 0.9667
+  css-grid/abspos__grid-abspos-staticpos-justify-self-001  abspos__grid-abspos-staticpos-justify-self-001__1__12-1008  [abspos-band]  web P 0.9862 · ios P 0.9662 · android P 0.9667
+  css-grid/abspos__grid-abspos-staticpos-justify-self-001  abspos__grid-abspos-staticpos-justify-self-001__1__13-1010  [abspos-band]  web P 0.9862 · ios P 0.9662 · android P 0.9667
+  css-grid/abspos__grid-abspos-staticpos-justify-self-001  abspos__grid-abspos-staticpos-justify-self-001__1__14-1012  [abspos-band]  web P 0.9862 · ios P 0.9662 · android P 0.9667
+  css-grid/abspos__grid-abspos-staticpos-justify-self-001  abspos__grid-abspos-staticpos-justify-self-001__1__15-1014  [abspos-band]  web P 0.9862 · ios P 0.9662 · android P 0.9667
+  css-writing-modes/bidi-plaintext-br-001  wpt__css-writing-modes__bidi-plaintext-br-001__0-412  [abspos-band,abspos-band]  web P 1 · ios P 0.9572 · android f 0.9482
+  css-writing-modes/bidi-plaintext-br-001  wpt__css-writing-modes__bidi-plaintext-br-001__1-415  [abspos-band]  web P 1 · ios P 0.9572 · android f 0.9482
+  css-writing-modes/bidi-plaintext-br-001  wpt__css-writing-modes__bidi-plaintext-br-001__2-418  [abspos-band,abspos-band,abspos-band]  web P 1 · ios P 0.9572 · android f 0.9482
+  css-writing-modes/bidi-plaintext-br-001  wpt__css-writing-modes__bidi-plaintext-br-001__3-423  [abspos-band]  web P 1 · ios P 0.9572 · android f 0.9482
+  css-writing-modes/bidi-plaintext-br-001  wpt__css-writing-modes__bidi-plaintext-br-001__4-428  [abspos-band,abspos-band,abspos-band]  web P 1 · ios P 0.9572 · android f 0.9482
+  css-writing-modes/bidi-plaintext-br-001  wpt__css-writing-modes__bidi-plaintext-br-001__5-433  [abspos-band]  web P 1 · ios P 0.9572 · android f 0.9482
+    abspos-unknown only (declared non-px inset or non-px size; not listed one by one): 35 parents in 7 docs:
+      css-images/wpt__css-images__gradient__gradient-powerless-hue-hsl  web P 0.9999 · ios f 0.943 · android f 0.7542
+      css-images/wpt__css-images__gradient__gradient-powerless-hue-hwb  web P 0.9999 · ios f 0.9445 · android f 0.755
+      css-images/wpt__css-images__gradient__gradient-powerless-hue-lch  web P 0.9999 · ios f 0.935 · android f 0.7013
+      css-images/wpt__css-images__gradient__gradient-powerless-hue-oklch  web P 0.9999 · ios f 0.9334 · android f 0.6991
+      css-position/wpt__css-position__position-absolute-semi-replaced-stretch-button  web P 1 · ios f 0.9783 · android f 0.9739
+      css-position/wpt__css-position__position-absolute-semi-replaced-stretch-input  web P 1 · ios f 0.4425 · android f 0.4117
+      css-position/wpt__css-position__position-absolute-semi-replaced-stretch-other  web P 0.9965 · ios f 0.4623 · android f 0.4396
+
+(2b) legacy-route bordered components with opacity < 1 (a reorder would move their band INSIDE the group): 1 in 1 docs
+  filter-effects/wpt__filter-effects__backdrop-filter-basic-blur  backdrop-filter-basic-blur__1__2-012  opacity 0.6  kids 0  web P 1 · ios P 0.9526 · android f 0.904
+
+(3) filter: drop-shadow() carriers: 3 components in 2 docs
+  css-color/wpt__css-color__currentcolor-003  currentcolor-003__1__0-256  fns drop-shadow  clip-path null  bg true  text true  kids 1  web f 1 · ios f 0.7707 · android f 0.7794
+  css-color/wpt__css-color__currentcolor-003  currentcolor-003__2__0-259  fns drop-shadow  clip-path null  bg true  text true  kids 0  web f 1 · ios f 0.7707 · android f 0.7794
+  css-masking/wpt__css-masking__clip-path__clip-path-filter-order  wpt__css-masking__clip-path__clip-path-filter-order__1-072  fns drop-shadow  clip-path inset  bg true  text false  kids 0  web P 1 · ios P 0.9978 · android P 0.9548
+
+(4) NOT this lane: {text, <br>}*-only runs hosts whose run after a <br> keeps a leading collapsible space: 30 hosts in 27 docs
+  css-cascade/wpt__css-cascade__revert-layer-006  web P 0.999 · ios P 0.9974 · android P 0.9967
+  css-cascade/wpt__css-cascade__revert-val-001  web P 0.999 · ios P 0.9974 · android P 0.9967
+  css-cascade/wpt__css-cascade__revert-val-002  web P 0.999 · ios P 0.9974 · android P 0.9967
+  css-masking/wpt__css-masking__clip-path__clip-path-filter-order  web P 1 · ios P 0.9978 · android P 0.9548
+  css-multicol/wpt__css-multicol__balance-grid-container  web P 1 · ios f 0.8735 · android f 0.8724
+  css-multicol/wpt__css-multicol__balance-grid-container  web P 1 · ios f 0.8735 · android f 0.8724
+  css-multicol/wpt__css-multicol__column-height-009  web f 0.9092 · ios f 0.8804 · android f 0.848
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-002  web P 1 · ios P 0.9928 · android P 0.9896
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-003  web P 0.9999 · ios P 0.9918 · android P 0.9861
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-004  web P 0.998 · ios P 0.9713 · android P 0.9792
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-007  web P 0.9841 · ios P 0.9843 · android P 0.9844
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-008  web P 0.9841 · ios P 0.9843 · android P 0.9844
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-009  web P 0.984 · ios P 0.9839 · android P 0.9795
+  css-text/wpt__css-text__hyphens__hyphenate-character-001  web P 0.985 · ios P 0.9611 · android P 0.9802
+  css-text/wpt__css-text__hyphens__hyphenate-character-002  web f 0.9344 · ios P 0.9534 · android f 0.9249
+  css-text/wpt__css-text__hyphens__hyphenate-character-003  web P 0.9825 · ios P 0.957 · android P 0.9792
+  css-text/wpt__css-text__hyphens__hyphenate-character-004  web P 0.9832 · ios f 0.9477 · android P 0.9774
+  css-text-decor/wpt__css-text-decor__text-decoration-skip-spaces-001  web P 0.9525 · ios P 0.9753 · android f 0.9389
+  css-writing-modes/wpt__css-writing-modes__direction-upright-001  web f 0.9269 · ios f 0.5491 · android f 0.4896
+  css-writing-modes/wpt__css-writing-modes__direction-upright-001  web f 0.9269 · ios f 0.5491 · android f 0.4896
+  css-writing-modes/wpt__css-writing-modes__direction-upright-001  web f 0.9269 · ios f 0.5491 · android f 0.4896
+  filter-effects/wpt__filter-effects__backdrop-filter-basic  web P 1 · ios P 0.9981 · android P 0.9861
+  filter-effects/wpt__filter-effects__backdrop-filter-clip-rect  web P 1 · ios P 0.9961 · android P 0.9559
+  filter-effects/wpt__filter-effects__backdrop-filter-edge-clipping  web P 1 · ios P 0.9975 · android P 0.9533
+  filter-effects/wpt__filter-effects__backdrop-filter-edge-pixels  web P 1 · ios P 0.9979 · android P 0.9694
+  filter-effects/wpt__filter-effects__backdrop-filter-fixed-clip  web P 1 · ios f 0.9733 · android f 0.9481
+  filter-effects/wpt__filter-effects__backdrop-filter-isolation-fixed  web P 1 · ios P 0.9975 · android P 0.9729
+  filter-effects/wpt__filter-effects__backdrop-filter-isolation-isolate  web P 1 · ios P 0.9975 · android P 0.9729
+  filter-effects/wpt__filter-effects__backdrop-filter-paint-order  web P 1 · ios P 0.9975 · android P 0.9533
+  filter-effects/wpt__filter-effects__backdrop-filter-plus-filter  web P 1 · ios f 0.9499 · android P 0.9709

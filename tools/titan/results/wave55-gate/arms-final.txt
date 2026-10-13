@@ -1,0 +1,4 @@
+# tools/titan/results/wave55-gate/arms-final.txt — the closing-gate arms (expectations.json abArms, against wave55-final), run by
+# ab-arms55.sh after the closing gate's read-out. After stage 1 only drop-L6-U2 remains: drop-NB-ios and drop-L4-U2 are in
+# abArmsWithdrawn (their units reverted at wave55-pre; PLAN §10 items 13-14). Shas child first; U2 carries no -S1 fix commit.
+drop-L6-U2 css-anchor-position,css-flexbox,css-gaps,css-grid,css-images,css-position,filter-effects android 103deb33

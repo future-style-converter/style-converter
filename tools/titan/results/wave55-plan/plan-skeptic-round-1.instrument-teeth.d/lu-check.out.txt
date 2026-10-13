@@ -1,0 +1,67 @@
+### run 1: --check --only L6 on a clean delivery (3 synthetic L6 patches)
+exit 0
+  00   records  the selected lane dirs → 1 commit
+  01   L7  U1           -- skipped: not in --only
+  02   L7  U2           -- skipped: not in --only
+  03   L7  U3           -- skipped: not in --only
+  04   L7  U4           -- skipped: not in --only
+  05   L7  U6-compose   -- skipped: not in --only
+  06   L7  U6-swift     -- skipped: not in --only
+  07   L7  U6-web       -- skipped: not in --only
+  08   L7  U6-tooling   -- skipped: not in --only
+  09   L7  U5           -- skipped: not in --only
+  10   L6  U1           wave55-android-paint-order/unit-U1.patch 
+  11   L6  U2           wave55-android-paint-order/unit-U2.patch 
+  12   L6  U3           wave55-android-paint-order/unit-U3.patch 
+  13   L4  U1-android   -- skipped: not in --only
+  14   L4  U1-ios       -- skipped: not in --only
+  15   L4  U2-android   -- skipped: not in --only
+  16   L4  U2-ios       -- skipped: not in --only
+  17   L2  U1           -- skipped: not in --only
+  18   L2  U2           -- skipped: not in --only
+  19   L3  U1           -- skipped: not in --only
+  20   L3  U2           -- skipped: not in --only
+  21   L5  U1-ios       -- skipped: not in --only
+  22   L5  U2o-ios      -- skipped: not in --only
+  23   L5  U2i-ios      -- skipped: not in --only
+  24   L5  U2o-android  -- skipped: not in --only
+  25   L5  U2i-android  -- skipped: not in --only
+  26   L1  NB-ios       -- skipped: not in --only
+  27   L5  U3-ios       -- skipped: not in --only
+  28   L5  D            -- skipped: not in --only
+  29   L1  NB-ios-b     -- skipped: not in --only
+  plan    28 plan revert units (+ 1 contingency) agree with the table: lane dirs, unit names, revertOrders (expectations.json)
+  ok      tools/titan/results/wave55-android-paint-order/  (4 files)
+  WARN    written less than 120s ago (an instrument may still be writing; the landing refuses): tools/titan/results/wave55-android-paint-order/unit-U2.patch tools/titan/results/wave55-android-paint-or
+PATCHES (each: present · parsed · its paths · the rules · alone on the current tree)
+            alone: applies on the current tree
+            alone: applies on the current tree
+            alone: applies on the current tree
+  ok      3 paths (2 created, the rest clean at HEAD 640276a0)
+CUMULATIVE (the series in landing order, `git apply --check` of one concatenated input on the current tree)
+  ok      3 patches apply in order on 640276a0 (+ the records commit, which touches no patched path)
+snapshot (HEAD, index sha+mtime, refs, stash, status --untracked-files=all): IDENTICAL
+files newer than the pre-run stamp in the work tree (excluding .git): 0
+
+### run 2: the same with three canaries (an untracked copy where U3 CREATES, the U2 file dirty, a stray in the lane dir)
+canary sha256 before: 1b4c226bc264dee4 03cf8f58cde7e2d4 ed4c918103b23750
+exit 1
+  WARN    written less than 120s ago (an instrument may still be writing; the landing refuses): tools/titan/results/wave55-android-paint-order/unit-U2.patch tools/titan/results/wave55-android-paint-or
+  ERROR   tools/titan/results/wave55-android-paint-order/unit-U3.patch does NOT apply on the current tree and stacks on nothing: error: runtimes/compose/src/test/java/com/styleconverter/runtime/effect
+  ERROR   runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BordersFacade.kt is MODIFIED in the working tree (a lane edited the shared tree? the landing never rewinds it — refuses)
+  ERROR   runtimes/compose/src/test/java/com/styleconverter/runtime/effects/EffectsClipFilterOrderTest.kt exists on disk, but its first patch CREATES it (a lane copied it in? the patch is the record �
+  ERROR   the series STOPS at wave55-android-paint-order/unit-U3.patch (L6:U3): error: runtimes/compose/src/test/java/com/styleconverter/runtime/effects/EffectsClipFilterOrderTest.kt: already exists i
+snapshot: IDENTICAL
+canary sha256 after:  1b4c226bc264dee4 03cf8f58cde7e2d4 ed4c918103b23750
+files newer than the pre-run stamp (excluding .git): 0
+
+### run 3: the REAL path (no --check) on the dirty canary tree must refuse before touching anything
+exit 1
+  WARN    written less than 120s ago (an instrument may still be writing; the landing refuses): tools/titan/results/wave55-android-paint-order/unit-U2.patch tools/titan/results/wave55-android-paint-or
+  ERROR   tools/titan/results/wave55-android-paint-order/unit-U3.patch does NOT apply on the current tree and stacks on nothing: error: runtimes/compose/src/test/java/com/styleconverter/runtime/effect
+  ERROR   runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BordersFacade.kt is MODIFIED in the working tree (a lane edited the shared tree? the landing never rewinds it — refuses)
+  ERROR   runtimes/compose/src/test/java/com/styleconverter/runtime/effects/EffectsClipFilterOrderTest.kt exists on disk, but its first patch CREATES it (a lane copied it in? the patch is the record �
+  ERROR   the series STOPS at wave55-android-paint-order/unit-U3.patch (L6:U3): error: runtimes/compose/src/test/java/com/styleconverter/runtime/effects/EffectsClipFilterOrderTest.kt: already exists i
+land-units: the preflight found 4 error(s) — nothing was touched
+snapshot: IDENTICAL
+canary sha256 after:  1b4c226bc264dee4 03cf8f58cde7e2d4 ed4c918103b23750

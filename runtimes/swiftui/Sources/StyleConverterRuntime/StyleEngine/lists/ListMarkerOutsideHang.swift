@@ -30,15 +30,23 @@
 //  start 18 px late. A `Layout` measures both, reports the item's size and
 //  places the marker outside its bounds.
 //
-//  ## RTL (BACKLOG (c⁴): RTL markers are BLOCKED UPSTREAM)
+//  ## RTL
 //  SwiftUI's Layout engine mirrors every `place(at:)` x about the layout
 //  bounds under an RTL layoutDirection (probe-verified — see
 //  FloatBlockLayout.placedX), so the physical `-(w + gap)` handed in here
-//  lands at `width + gap`: the inline-END side css-lists-3 §3.5 asks for,
-//  with no code of its own. (Compose's `place` is NOT mirrored, so the
-//  Kotlin twin spells the mirror explicitly.) The corpus's RTL rows still
-//  lack markers for an UPSTREAM reason (no `meta.markerText` reaches
-//  them), so this does not move a cell this wave — stated, not hidden.
+//  lands at `width + gap`: the inline-START side of an rtl item (its start
+//  edge is the physical right), which is where css-lists-3 §3.5 puts an
+//  outside marker, with no code of its own. (Compose's `place` is NOT
+//  mirrored, so the Kotlin twin spells the mirror explicitly.) No corpus
+//  `<li>` both inherits `direction: rtl` and hangs outside (census
+//  tools/titan/results/wave55-counter-suffix-rows/census-l5.out.txt,
+//  ALL-ios): counter-suffix's two `dir=rtl` lists are bidi-baked (bake root
+//  `direction: ltr`, items absolutely positioned, markers baked as glyph
+//  runs owned by the root since wave-54 M′, tools/titan/
+//  bidi-marker-bake.mjs), and the only rtl items left
+//  (counter-style-at-rule/disclosure-styles, 6 `<li>`) are
+//  `list-style-position: inside`. So this branch moves no corpus cell —
+//  stated, not hidden.
 //
 //  Staged as a DEVICE A/B: the `markerPlacement` seam that swaps the HStack
 //  for this Layout is tools/titan/results/wave52-counters-and-lists/
@@ -65,8 +73,9 @@ enum ListMarkerOutsideHang {
     /// - Parameters:
     ///   - markerBaseline: the marker's first text baseline, nil if it
     ///     exposes none; `itemBaseline` likewise for the item.
-    ///   - gap: the inline gap — the caller hands in `ListMarkerRow.gapPt`
-    ///     so both placements share ONE gap constant.
+    ///   - gap: the inline gap — the caller hands in
+    ///     `ListMarkerSuffixGap.points(forMarker:)`: the `ListMarkerRow.gapPt`
+    ///     stand-in for the suffix's trimmed space, 0 after a U+3001 suffix.
     ///   - alignsByBaseline: the row's per-item decision
     ///     (`ListMarkerRow.rowAlignment == .firstTextBaseline`); false ⇒
     ///     both boxes stack by their tops.
@@ -99,7 +108,8 @@ enum ListMarkerOutsideHang {
 
 /// The Layout: subview 0 is the marker, subview 1 the item.
 struct ListMarkerOutsideHangLayout: Layout {
-    /// `ListMarkerRow.gapPt`, threaded so the constant has one home.
+    /// `ListMarkerSuffixGap.points(forMarker:)` — the string-keyed stand-in
+    /// gap (`ListMarkerRow.gapPt`, or 0 after a U+3001 suffix).
     let gap: CGFloat
     /// `ListMarkerRow.rowAlignment(itemExposesTextBaseline:) == .firstTextBaseline`.
     let alignsByBaseline: Bool
@@ -134,8 +144,8 @@ struct ListMarkerOutsideHangLayout: Layout {
                                             itemIsEmpty: itemIsEmpty)
         // The item at the origin, laid out as if the marker did not exist.
         subviews[1].place(at: bounds.origin, anchor: .topLeading, proposal: proposal)
-        // The marker outside the bounds (negative x; the engine mirrors it
-        // to the end side under RTL — see the header).
+        // The marker outside the bounds (negative x; SwiftUI mirrors it to
+        // the physical right — an rtl item's start side — see the header).
         subviews[0].place(at: CGPoint(x: bounds.minX + p.markerX, y: bounds.minY + p.markerY),
                           anchor: .topLeading, proposal: .unspecified)
     }

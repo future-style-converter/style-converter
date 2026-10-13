@@ -1,0 +1,8 @@
+# bracket.py <line>: append one bracket line to reverify-r1/mutations.txt and insert it into the lane note before the sentinel
+import sys
+L='<shared>/tools/titan/results/wave55-counter-suffix-rows'
+line=sys.argv[1].rstrip('\n')
+open(f'{L}/reverify-r1/mutations.txt','a').write(line+'\n')
+p=f'{L}/_note.md'; s=open(p).read(); sent='<!-- reverify-r1 brackets: end -->\n'
+assert s.count(sent)==1
+open(p,'w').write(s.replace(sent, line+'\n'+sent))

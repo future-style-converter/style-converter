@@ -105,3 +105,6 @@ apps/android-harness/local.properties
 # compilation failed" events the single-writer rule exists for. Directory
 # pattern with no leading slash so both roots are covered (retro S1 #4).
 .kotlin/
+
+# Python bytecode caches left by the plan probes (tools/titan/results/*/*.geometry.py imports)
+__pycache__/

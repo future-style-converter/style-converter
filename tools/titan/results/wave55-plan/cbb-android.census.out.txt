@@ -1,0 +1,62 @@
+# cbb-android census over wave54-final: 1435 per-test IR documents
+
+## A. U1 (restored ContainingBlockBands) — boxes whose incoming block differs AND that read it: 33 boxes in 14 documents
+wpt__css-flexbox__abspos__abspos-autopos-htb-ltr  [web P 0.999 · ios P 0.9974 · android P 0.9966]
+    0-003 [oof] 70x80->100x100
+wpt__css-flexbox__abspos__abspos-autopos-htb-rtl  [web P 0.999 · ios P 0.9974 · android P 0.9869]
+    0-006 [oof] 70x80->100x100
+wpt__css-flexbox__abspos__abspos-autopos-vlr-ltr  [web P 0.999 · ios P 0.9974 · android P 0.9966]
+    0-009 [oof] 70x80->100x100
+wpt__css-flexbox__abspos__abspos-autopos-vlr-rtl  [web P 0.999 · ios P 0.9974 · android P 0.9966]
+    0-012 [oof] 70x80->100x100
+wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr  [web P 0.999 · ios P 0.9974 · android P 0.9966]
+    0-015 [oof] 70x80->100x100
+wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl  [web P 0.999 · ios P 0.9974 · android P 0.9966]
+    0-018 [oof] 70x80->100x100
+wpt__css-gaps__flex__flex-gap-decorations-006  [web P 1 · ios f 0.8266 · android f 0.8223]
+    0-045 [vtext] 296x296->300x300
+    1-046 [vtext] 296x296->300x300
+    2-047 [vtext] 296x296->300x300
+    3-048 [vtext] 296x296->300x300
+    4-049 [vtext] 296x296->300x300
+    5-050 [vtext] 296x296->300x300
+wpt__css-position__position-absolute-semi-replaced-stretch-button  [web P 1 · ios f 0.9783 · android f 0.9739]
+    0-136 [oof] 144x94->150x100
+wpt__css-position__position-absolute-semi-replaced-stretch-input  [web P 1 · ios f 0.4425 · android f 0.4117]
+    0-138 [oof] 144x94->150x100
+    0-140 [oof] 144x94->150x100
+    0-142 [oof] 144x94->150x100
+    0-144 [oof] 144x94->150x100
+    0-146 [oof] 344x94->350x100
+    0-148 [oof] 344x94->350x100
+    0-150 [oof] 344x94->350x100
+    0-152 [oof] 344x94->350x100
+    0-154 [oof] 344x94->350x100
+wpt__css-position__position-absolute-semi-replaced-stretch-other  [web P 0.9965 · ios f 0.4623 · android f 0.4396]
+    0-156 [oof] 144x94->150x100
+    0-159 [oof] 144x94->150x100
+    0-161 [oof] 144x94->150x100
+    0-163 [oof] 144x94->150x100
+    0-165 [oof] 344x94->350x100
+    0-167 [oof] 344x94->350x100
+    0-169 [oof] 344x94->350x100
+wpt__filter-effects__backdrop-filter-nested-border-radius-clip-2  [web P 1 · ios P 0.9998 · android P 0.9689]
+    1-170 [oof] 180x80->200x100
+wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3  [web P 0.9921 · ios P 0.9921 · android f 0.9574]
+    1-175 [oof] 160x60->200x100
+wpt__filter-effects__backdrop-filter-nested-border-radius-clip-4  [web P 0.9964 · ios P 0.9981 · android P 0.977]
+    1-180 [oof] 144x64->160x80
+wpt__filter-effects__backdrop-filter-nested-border-radius-clip  [web P 0.9936 · ios P 0.9936 · android P 0.9649]
+    1-184 [oof] 180x80->200x100
+A vs wave-54 probeDecisions CBB-android android captures (14): IDENTICAL
+
+## B. U2 (in-flow % size under an effective content-box with a non-zero band) — 122 percentage axes in the corpus, by class:
+       2  IN-FLOW CARRIER: fill(fraction) + band
+     120  zero band — untouched
+B carriers: 2 axes in 1 documents
+wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3  [web P 0.9921 · ios P 0.9921 · android f 0.9574]  (also a U1 document)
+    0-172 W 100% band 20 base 200 parent BLOCK(default) → IN-FLOW CARRIER: fill(fraction) + band
+    0-172 H 100% band 20 base 100 parent BLOCK(default) → IN-FLOW CARRIER: fill(fraction) + band
+B named limitation (min/max lane): 0 documents []
+
+## C. dark stage: committed fixtures declaring content-box with a % size and a padding/border band: 0

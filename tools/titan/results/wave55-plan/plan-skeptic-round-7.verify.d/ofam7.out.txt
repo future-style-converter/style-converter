@@ -1,0 +1,3 @@
+325 ("residual 0/0/0 (paint of the cell's own declared class colour: its own zone)", 'gate residual OK')
+5140 ('residual FAIL (in-process outside/vacated/non-class > 0)', 'gate residual FAIL on every key')
+fake runs (family × group): 710

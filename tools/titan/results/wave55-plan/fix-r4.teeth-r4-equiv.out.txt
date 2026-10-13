@@ -1,0 +1,45 @@
+# fix-r4.teeth-r4-equiv.out.txt — 2026-10-11T22:19:41Z; HEAD 611c9f93; probes-teeth-r4.py 686e21fe3deec95a… / added_ink4.py 6608eff7c0221d40… vs the fake runs plan-skeptic-round-4.verify.d/fakes4.py (379b3a1e…, the verifier's ORIGINAL) wrote on this tree (fix-r4.verifier-rerun.out.txt)
+  IDENTICAL L4 C-fixed c0:dg-first-adj        8 faked capture(s), 6 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c0:dg-last-adj         8 faked capture(s), 2 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c0:dg-mid-smear        8 faked capture(s), 10 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c0:dg-first-smear      8 faked capture(s), 10 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c0:st-dash             8 faked capture(s), 2 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c0:st-vbar             8 faked capture(s), 3 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c0:dg-band0-last       8 faked capture(s), 4 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c0:st2-band0-end3      8 faked capture(s), 2 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c0:hd-band1@+2         8 faked capture(s), 2 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c0:hd-band1@+5         8 faked capture(s), 2 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c0:dg-band1-last       8 faked capture(s), 2 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c0:st2-band1-end3      8 faked capture(s), 2 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c1:vd-tgt+1            8 faked capture(s), 10 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c1:vd-tgt-1            8 faked capture(s), 6 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c1:vd-tgt+2            8 faked capture(s), 4 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c1:hd-tgt+1            8 faked capture(s), 4 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c1:hd-tgt-1            8 faked capture(s), 6 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c1:dg-last-adj         8 faked capture(s), 2 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c1:dg-mid-smear        8 faked capture(s), 4 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c1:dg-first-smear      8 faked capture(s), 4 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c1:st2-band1-end3      8 faked capture(s), 1 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c1:vd-band2@-3         6 faked capture(s), 2 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c1:hd-band2@+2         6 faked capture(s), 2 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c1:hd-band2@+5         6 faked capture(s), 2 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c1:dg-band2-last       6 faked capture(s), 2 key(s) pre-registered FAIL
+  IDENTICAL L4 C-fixed c1:st2-band2-end3      6 faked capture(s), 2 key(s) pre-registered FAIL
+  IDENTICAL L5 fixed c0:hd-tgt+1            4 faked capture(s), 2 key(s) pre-registered FAIL
+  IDENTICAL L5 fixed c0:dg-first-adj        4 faked capture(s), 1 key(s) pre-registered FAIL
+  IDENTICAL L5 fixed c0:hd-band0@+2         4 faked capture(s), 1 key(s) pre-registered FAIL
+  IDENTICAL L5 fixed c0:st2-band6-end3      1 faked capture(s), 1 key(s) pre-registered FAIL
+  IDENTICAL L5 fixed vd-whole-min+1         4 faked capture(s), 1 key(s) pre-registered FAIL
+  IDENTICAL L5 fixed vd-whole-min-1         4 faked capture(s), 1 key(s) pre-registered FAIL
+  IDENTICAL L5 fixed c0:vd-tgt+1            4 faked capture(s), 1 key(s) pre-registered FAIL
+  IDENTICAL L5 fixed c0:vd-tgt-1            4 faked capture(s), 1 key(s) pre-registered FAIL
+  IDENTICAL L5 fixed c0:hd-tgt-1            4 faked capture(s), 1 key(s) pre-registered FAIL
+  IDENTICAL L6 X-fixed c0:vd-tgt+1            6 faked capture(s), 5 key(s) pre-registered FAIL
+  IDENTICAL L6 X-fixed c0:vd-tgt-1            6 faked capture(s), 4 key(s) pre-registered FAIL
+  IDENTICAL L6 X-fixed c0:hd-tgt+1            6 faked capture(s), 4 key(s) pre-registered FAIL
+  IDENTICAL L6 X-fixed c0:hd-tgt-1            6 faked capture(s), 4 key(s) pre-registered FAIL
+  IDENTICAL L6 X-fixed c0:dg-mid-smear        6 faked capture(s), 4 key(s) pre-registered FAIL
+  IDENTICAL L6 X-fixed c0:dg-first-smear      6 faked capture(s), 5 key(s) pre-registered FAIL
+  IDENTICAL L6 X-fixed c0:st-vbar             5 faked capture(s), 2 key(s) pre-registered FAIL
+
+42 pinned round-4 cases, 286 native captures compared: 42 identical to fakes4.py's own fake runs, 0 differ

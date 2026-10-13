@@ -1,0 +1,16 @@
+census census-jvm.wave54-final.out.txt platform=android
+SUMMARY run=wave54-final docs=1435 u1Docs=4 u2Docs=3
+U1-android: census 4 vs expectations 4 → IDENTICAL
+U2-android: census 3 vs expectations 3 → IDENTICAL
+captureCarriers.android: 4 vs 4 → IDENTICAL
+wireCarriers: expectations [] (runtime-only units: no converter / extractor byte moves)
+out-of-flow UA-margin-tag components: 22 in 21 documents; firing 4 in 4 documents
+  decl=TB: 14
+  root=true: 1
+  consumed=true: 0
+  ANOMALY: 0
+  faceIndependent=false: 0
+  non-heading tags: ['p']
+UNEXPECTED-FIRE: 0
+DECODE-FAIL: 0
+VERDICT IDENTICAL to expectations.json

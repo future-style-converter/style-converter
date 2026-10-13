@@ -1,0 +1,108 @@
+counter-suffix-rows census over wave54-final: 1435 per-test IR documents
+
+(A) baked list-item markers (meta.markerText on an <li> under ol/ul/menu/dir, list-style-type not none): 217 in 34 documents
+    by (first strong bidi class, item direction): L/ltr 167, R/ltr 2, none/ltr 48
+
+(U1-ios) markers whose iOS first-strong base direction disagrees with the item direction (css-lists-3 §3.1.1):
+    css-counter-styles/wpt__css-counter-styles__counter-suffix: counter-suffix__0__1__0 'א.' (R, ltr, outside), counter-suffix__0__1__1 'ב.' (R, ltr, outside)
+        cells: web P 1 ios P 0.9873 android P 0.989
+    total: 2 markers in 1 documents
+
+(U2) markers ending in U+3001 IDEOGRAPHIC COMMA (suffix without trailing space), by list-style-position:
+    inside 34, outside 2
+    css-counter-styles/wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001: 9 markers (inside 9; type ['cjk-decimal']; e.g. '一、')
+        cells: web P 0.9933
+    css-counter-styles/wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004: 23 markers (inside 23; type ['cjk-decimal']; e.g. '一〇、')
+        cells: web P 0.9878
+    css-counter-styles/wpt__css-counter-styles__cjk-decimal__css3-counter-styles-005: 2 markers (inside 2; type ['cjk-decimal']; e.g. '一、')
+        cells: web P 1 ios P 0.993 android P 0.9759
+    css-counter-styles/wpt__css-counter-styles__counter-suffix: 2 markers (outside 2; type ['cjk-decimal']; e.g. '一、')
+        cells: web P 1 ios P 0.9873 android P 0.989
+    total: 36 markers in 4 documents
+
+(U2-table) <li> under a U+3001-suffix list-style-type WITHOUT a baked marker (the native tables would paint "." — ListMarkerText.swift:45-49 / StyleListApplier.getMarker): 71
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-201 cjk-earthly-branch__css3-counter-styles-201__1__0__0-388 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-201 cjk-earthly-branch__css3-counter-styles-201__1__0__1-389 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-201 cjk-earthly-branch__css3-counter-styles-201__1__0__2-390 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-201 cjk-earthly-branch__css3-counter-styles-201__1__0__3-391 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-201 cjk-earthly-branch__css3-counter-styles-201__1__0__4-392 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-201 cjk-earthly-branch__css3-counter-styles-201__1__0__5-393 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-201 cjk-earthly-branch__css3-counter-styles-201__1__0__6-394 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-201 cjk-earthly-branch__css3-counter-styles-201__1__0__7-395 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-201 cjk-earthly-branch__css3-counter-styles-201__1__0__8-396 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-201 cjk-earthly-branch__css3-counter-styles-201__1__0__9-397 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-201 cjk-earthly-branch__css3-counter-styles-201__1__0__10-398 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-201 cjk-earthly-branch__css3-counter-styles-201__1__0__11-399 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__0__0-403 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__1__0-405 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__2__0-407 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__3__0-409 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__4__0-411 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__5__0-413 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__6__0-415 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__7__0-417 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__8__0-419 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__9__0-421 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__10__0-423 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__11__0-425 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__12__0-427 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__13__0-429 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__14__0-431 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__15__0-433 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__16__0-435 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__17__0-437 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__18__0-439 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__19__0-441 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-202 cjk-earthly-branch__css3-counter-styles-202__1__20__0-443 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-203 cjk-earthly-branch__css3-counter-styles-203__1__0__0-447 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-earthly-branch__css3-counter-styles-203 cjk-earthly-branch__css3-counter-styles-203__1__0__1-448 cjk-earthly-branch inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-204 cjk-heavenly-stem__css3-counter-styles-204__1__0__0-452 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-204 cjk-heavenly-stem__css3-counter-styles-204__1__0__1-453 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-204 cjk-heavenly-stem__css3-counter-styles-204__1__0__2-454 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-204 cjk-heavenly-stem__css3-counter-styles-204__1__0__3-455 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-204 cjk-heavenly-stem__css3-counter-styles-204__1__0__4-456 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-204 cjk-heavenly-stem__css3-counter-styles-204__1__0__5-457 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-204 cjk-heavenly-stem__css3-counter-styles-204__1__0__6-458 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-204 cjk-heavenly-stem__css3-counter-styles-204__1__0__7-459 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-204 cjk-heavenly-stem__css3-counter-styles-204__1__0__8-460 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-204 cjk-heavenly-stem__css3-counter-styles-204__1__0__9-461 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__0__0-465 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__1__0-467 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__2__0-469 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__3__0-471 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__4__0-473 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__5__0-475 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__6__0-477 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__7__0-479 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__8__0-481 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__9__0-483 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__10__0-485 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__11__0-487 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__12__0-489 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__13__0-491 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__14__0-493 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__15__0-495 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__16__0-497 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__17__0-499 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__18__0-501 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__19__0-503 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__20__0-505 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-205 cjk-heavenly-stem__css3-counter-styles-205__1__21__0-507 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-206 cjk-heavenly-stem__css3-counter-styles-206__1__0__0-511 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__cjk-heavenly-stem__css3-counter-styles-206 cjk-heavenly-stem__css3-counter-styles-206__1__0__1-512 cjk-heavenly-stem inside
+    css-counter-styles/wpt__css-counter-styles__counter-style-at-rule__name-case-sensitivity counter-style-at-rule__name-case-sensitivity__0__0-570 hiragana inside
+    css-counter-styles/wpt__css-counter-styles__counter-style-at-rule__name-case-sensitivity counter-style-at-rule__name-case-sensitivity__4__0-578 hiragana inside
+
+(U3-ios) components DECLARING FontVariantNumeric: 6 in 1 documents
+    css-counter-styles/wpt__css-counter-styles__counter-suffix counter-suffix__0__4__2-628 ["TABULAR_NUMS"] text='.' digit=False
+    css-counter-styles/wpt__css-counter-styles__counter-suffix counter-suffix__0__4__3-629 ["TABULAR_NUMS"] text='1' digit=True
+    css-counter-styles/wpt__css-counter-styles__counter-suffix counter-suffix__0__4__4-630 ["TABULAR_NUMS"] text='.' digit=False
+    css-counter-styles/wpt__css-counter-styles__counter-suffix counter-suffix__0__4__5-631 ["TABULAR_NUMS"] text='2' digit=True
+    css-counter-styles/wpt__css-counter-styles__counter-suffix counter-suffix__0__5__2-637 ["TABULAR_NUMS"] text='א.' digit=False
+    css-counter-styles/wpt__css-counter-styles__counter-suffix counter-suffix__0__5__3-638 ["TABULAR_NUMS"] text='ב.' digit=False
+    cells css-counter-styles/wpt__css-counter-styles__counter-suffix: web P 1 ios P 0.9873 android P 0.989
+
+(Q, queued) baked markers holding an ASCII digit (UA ::marker tabular-nums reach on both natives): 13 in 7 documents: css-counter-styles/armenian__css3-counter-styles-008, css-counter-styles/counter-suffix, css-counter-styles/cssom__cssom-negative-setter-invalid, css-counter-styles/cssom__cssom-pad-setter-invalid, css-counter-styles/cssom__cssom-range-setter-invalid, css-lists/content-property__marker-text-matches-decimal-leading-zero, css-lists/content-property__marker-text-matches-decimal
+
+(D) <li> under an inherited direction: rtl: 6 in 1 documents
+    css-counter-styles/wpt__css-counter-styles__counter-style-at-rule__disclosure-styles: 6 <li> (parent tags ['ul']; Position ['None']; markerText ['None'])

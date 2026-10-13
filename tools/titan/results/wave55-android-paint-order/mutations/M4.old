@@ -1,0 +1,1 @@
+CornerRadius(max(0f, r.x - v), max(0f, r.y - v))

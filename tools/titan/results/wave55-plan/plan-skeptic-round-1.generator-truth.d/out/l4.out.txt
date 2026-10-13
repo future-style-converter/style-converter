@@ -1,0 +1,8 @@
+U1 fires (heading, abspos/fixed, >=1 undeclared block margin, horizontal):
+  wpt__css-text-decor__text-decoration-inset-005                         ios f 0.8995  android f 0.9     [('1__0-069', 'h1', ['MarginTop', 'MarginBottom'], 1)]
+  wpt__css-text-decor__text-decoration-inset-006                         ios f 0.8987  android f 0.8993  [('1__0-076', 'h1', ['MarginTop', 'MarginBottom'], 1)]
+  wpt__css-text-decor__text-decoration-inset-011                         ios f 0.6999  android f 0.6852  [('1__0-095', 'h1', ['MarginTop', 'MarginBottom'], 3)]
+  wpt__css-text-decor__text-decoration-inset-014                         ios f 0.9238  android f 0.923   [('1__0-110', 'h1', ['MarginTop', 'MarginBottom'], 1)]
+components 4 docs 4
+identity headings (both margins declared or vertical): 12 ['wpt__css-text-decor__text-decoration-inset-001', 'wpt__css-text-decor__text-decoration-inset-002', 'wpt__css-text-decor__text-decoration-inset-003', 'wpt__css-text-decor__text-decoration-inset-004', 'wpt__css-text-decor__text-decoration-inset-007', 'wpt__css-text-decor__text-decoration-inset-008', 'wpt__css-text-decor__text-decoration-inset-009', 'wpt__css-text-decor__text-decoration-inset-012', 'wpt__css-text-decor__text-decoration-inset-013', 'wpt__css-text-decor__text-decoration-inset-015', 'wpt__css-text-decor__text-decoration-inset-016', 'wpt__css-text-decor__text-decoration-inset-024']
+abspos <p> with an undeclared margin: ['wpt__CSS2__css21-errata__s-11-1-1b-005', 'wpt__CSS2__css21-errata__s-11-1-1b-006', 'wpt__css-anchor-position__anchor-center-safe-rtl']

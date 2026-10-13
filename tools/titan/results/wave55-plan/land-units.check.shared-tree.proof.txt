@@ -1,0 +1,96 @@
+# land-units.sh --check on the SHARED tree (no lane patch delivered yet): the read-only proof
+# command: GITSHIM_LOG=<scratch>/git-calls.tsv PATH=<scratch>/gitshim:$PATH nice -n 19 bash tools/titan/results/wave55-plan/land-units.sh --check
+# script sha256 06bb1f5357936fb3…; its output: land-units.check.shared-tree.out.txt; run 2026-10-11 13:18 UTC
+
+## exit code
+exit=1
+## errors: 47 = 7 lane dirs MISSING + 37 patches MISSING + 3 L7 U3 planning files untracked (wave55-gate/ab-arms55.*)
+
+## snapshot before (HEAD, branch, index sha256, refs / stash / worktree-list sha256, then git status --short --untracked-files=all; read with --no-optional-locks)
+HEAD 640276a0f3245a6c90aa9922978e31f5caa1df73
+branch refs/heads/campaign/applier-campaign
+index-sha256 5cd81dad8cf1ae3c4e8fca1ec1117c294676024f78a383ec6d60e0bb86891a17
+refs-sha256 65fbed9df1ef28d7fc3540290c18b7cf7d37b57ab422f0a8d8eaffe5ecef3faf
+stash-sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+worktrees-sha256 5250b74cd8fe67bcac454619d2645b85e0febc55f5b79dbc7c76ad665f8ffd53
+--- status --short --untracked-files=all
+?? tools/titan/results/wave55-gate/ab-arms55.selftest.out.txt
+?? tools/titan/results/wave55-gate/ab-arms55.selftest.sh
+?? tools/titan/results/wave55-gate/ab-arms55.sh
+?? tools/titan/results/wave55-gate/adjudicate.mjs
+?? tools/titan/results/wave55-gate/control-check.mjs
+?? tools/titan/results/wave55-gate/make-snapshot55.mjs
+?? tools/titan/results/wave55-gate/readers-calibration.sh
+?? tools/titan/results/wave55-gate/readers-calibration.txt
+?? tools/titan/results/wave55-gate/toolkit-proofs.sh
+?? tools/titan/results/wave55-gate/toolkit-proofs.txt
+?? tools/titan/results/wave55-gate/toolkit.done.md
+?? tools/titan/results/wave55-plan/PLAN.md
+?? tools/titan/results/wave55-plan/cells-wave54-final.json
+?? tools/titan/results/wave55-plan/expectations.json
+?? tools/titan/results/wave55-plan/generator.done.md
+?? tools/titan/results/wave55-plan/geometry-gate.py
+?? tools/titan/results/wave55-plan/land-units.check.shared-tree.out.txt
+?? tools/titan/results/wave55-plan/land-units.check.shared-tree.proof.txt
+?? tools/titan/results/wave55-plan/land-units.selftest.out.txt
+?? tools/titan/results/wave55-plan/land-units.selftest.sh
+?? tools/titan/results/wave55-plan/land-units.sh
+?? tools/titan/results/wave55-plan/landing-manifest.json
+?? tools/titan/results/wave55-plan/plan-build.out.txt
+?? tools/titan/results/wave55-plan/plan-build.py
+?? tools/titan/results/wave55-plan/plan-prose.out.txt
+?? tools/titan/results/wave55-plan/plan-prose.py
+?? tools/titan/results/wave55-plan/plan-prose.selfcheck.sh
+?? tools/titan/results/wave55-plan/plan-prose.worktree.out.txt
+?? tools/titan/results/wave55-plan/probe-readout.mjs
+?? tools/titan/results/wave55-plan/probes-selfcheck.py
+?? tools/titan/results/wave55-plan/probes-selfcheck.txt
+?? tools/titan/results/wave55-plan/readers-selfcheck.sh
+?? tools/titan/results/wave55-plan/readers-selfcheck.txt
+?? tools/titan/results/wave55-plan/snapshot-cells.mjs
+?? tools/titan/results/wave55-plan/toolkit.done.md
+?? tools/titan/results/wave55-plan/watchlist-check.wave54-final.out.txt
+?? tools/titan/results/wave55-plan/watchlist.txt
+
+## snapshot after
+IDENTICAL to the snapshot before (cmp exit 0)
+
+## git status --short before / after
+IDENTICAL (37 lines; cmp exit 0)
+
+## files under the tree (and the worktree's git dir) newer than a marker touched just before the run
+  none
+
+## every git call land-units.sh made (cwd · GIT_INDEX_FILE · argv), from the logging shim
+<scratch>/proof-shared		-C /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave55-plan rev-parse --show-toplevel
+<scratch>/proof-shared		-C /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf rev-parse --show-toplevel
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		rev-parse --short HEAD
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		symbolic-ref -q --short HEAD
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		diff-index --cached --quiet HEAD --
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		ls-files --error-unmatch -- tools/titan/results/wave54-oof-layout/fix/dry/h1h2/out/expectations.json
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		ls-files --error-unmatch -- tools/titan/results/wave54-oof-layout/fix/dry/h1h2/out/watchlist.txt
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		ls-files --error-unmatch -- tools/titan/results/wave54-oof-layout/fix/dry/h2/out/expectations.json
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		ls-files --error-unmatch -- tools/titan/results/wave54-oof-layout/fix/dry/h2/out/watchlist.txt
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		ls-files --error-unmatch -- tools/titan/results/wave54-oof-layout/reverify/dry/h1h2/out/expectations.json
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		ls-files --error-unmatch -- tools/titan/results/wave54-oof-layout/reverify/dry/h1h2/out/watchlist.txt
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		ls-files --error-unmatch -- tools/titan/results/wave55-plan/flex-zero-gap-rules.geometry.py
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		hash-object -- tools/titan/results/wave55-plan/flex-zero-gap-rules.geometry.py
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		rev-parse -q --verify HEAD:tools/titan/results/wave55-plan/flex-zero-gap-rules.geometry.py
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		ls-files --error-unmatch -- tools/titan/results/wave55-plan/flex-zero-gap-rules.fakes-run.sh
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		hash-object -- tools/titan/results/wave55-plan/flex-zero-gap-rules.fakes-run.sh
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		rev-parse -q --verify HEAD:tools/titan/results/wave55-plan/flex-zero-gap-rules.fakes-run.sh
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		ls-files --error-unmatch -- tools/titan/results/wave55-plan/flex-zero-gap-rules.geometry.out.txt
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		hash-object -- tools/titan/results/wave55-plan/flex-zero-gap-rules.geometry.out.txt
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		rev-parse -q --verify HEAD:tools/titan/results/wave55-plan/flex-zero-gap-rules.geometry.out.txt
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		ls-files --error-unmatch -- tools/titan/results/wave55-gate/ab-arms55.sh
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		ls-files --error-unmatch -- tools/titan/results/wave55-gate/ab-arms55.selftest.sh
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf		ls-files --error-unmatch -- tools/titan/results/wave55-gate/ab-arms55.selftest.out.txt
+
+## by subcommand
+   1 diff-index
+   3 hash-object
+  12 ls-files
+   6 rev-parse
+   1 symbolic-ref
+→ read-only only (rev-parse, symbolic-ref, diff-index --cached --quiet, ls-files, hash-object without -w): no add / commit / checkout /
+  reset / stash / rm / apply. The private export dir (mktemp under $TMPDIR) was removed at exit: ls $TMPDIR/land-units.* → none.

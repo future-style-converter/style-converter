@@ -1,0 +1,21 @@
+### supplementary probe, wave54-final (+ the U2 replay and the three fakes)
+backdrop-filter-nested-border-radius-clip-3 ref      {green (36, 36, 235, 135) greenPx 19365 corner 252 row blue[16..25] grey[26..35] green[36..235]} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-3 web      {green (36, 36, 235, 135) greenPx 19390 corner 256 row blue[16..25] grey[26..35] green[36..235]} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-3 ios      {green (36, 36, 235, 135) greenPx 19384 corner 254 row blue[16..25] grey[26..35] green[36..235]} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-3 android  {green (36, 36, 195, 95) greenPx 9438 corner 0 row blue[16..25] grey[26..35] green[36..195] pink[196..215] grey[216..225] blue[226..235]} → GEOMETRY WRONG (green (36, 36, 195, 95) vs ref (36, 36, 235, 135); bands row blue[16..25] grey[26..35] green[36..195] pink[196..215] grey[216..225] blue[226..235] / col blue[16..25] grey[26..35] green[36..95] pink[96..115] grey[116..125] blue[126..135]; corner 0 vs ref 252)
+backdrop-filter-nested-border-radius-clip-3 replay-U1U2 {green (36, 36, 235, 135) greenPx 19384 corner 254 row blue[16..25] grey[26..35] green[36..235]} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-3 F3-centered {green (26, 26, 225, 125) greenPx 19384 corner 10 row grey[16..25] green[26..225] grey[226..235]} → GEOMETRY WRONG (green (26, 26, 225, 125) vs ref (36, 36, 235, 135); bands row grey[16..25] green[26..225] grey[226..235] / col grey[16..25] green[26..125] grey[126..135]; corner 10 vs ref 252)
+backdrop-filter-nested-border-radius-clip-3 F4-unclipped {green (36, 36, 235, 135) greenPx 19384 corner 254 row blue[16..25] grey[26..35] green[36..235] grey[236..245]} → GEOMETRY WRONG (bands row blue[16..25] grey[26..35] green[36..235] grey[236..245] / col blue[16..25] grey[26..35] green[36..135] grey[136..145])
+backdrop-filter-nested-border-radius-clip-3 F6-double {green (36, 36, 235, 135) greenPx 19815 corner 369 row blue[16..25] grey[26..35] green[36..235]} → GEOMETRY WRONG (corner 369 vs ref 252)
+rc=0
+### supplementary probe, wave54-probe (U1 = 5b333c8a on the tree)
+backdrop-filter-nested-border-radius-clip-3 ref      {green (36, 36, 235, 135) greenPx 19365 corner 252 row blue[16..25] grey[26..35] green[36..235]} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-3 web      {green (36, 36, 235, 135) greenPx 19390 corner 256 row blue[16..25] grey[26..35] green[36..235]} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-3 ios      {green (36, 36, 235, 135) greenPx 19384 corner 254 row blue[16..25] grey[26..35] green[36..235]} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-3 android  {green (36, 36, 215, 115) greenPx 13784 corner 0 row blue[16..25] grey[26..35] green[36..215] grey[216..225] blue[226..235]} → GEOMETRY WRONG (green (36, 36, 215, 115) vs ref (36, 36, 235, 135); bands row blue[16..25] grey[26..35] green[36..215] grey[216..225] blue[226..235] / col blue[16..25] grey[26..35] green[36..115] grey[116..125] blue[126..135]; corner 0 vs ref 252)
+rc=0
+### the RE-USED rule (compose-wpt-content-box-cb.geometry.py predicates, verbatim) on the replay and the three fakes
+backdrop-filter-nested-border-radius-clip-3 replay-U1U2  {'green': (36, 36, 235, 135), 'greenPx': 19384, 'failInkPx': 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-3 F3-centered  {'green': (26, 26, 225, 125), 'greenPx': 19384, 'failInkPx': 0} → GEOMETRY WRONG (green (26, 26, 225, 125) vs ref (36, 36, 235, 135))
+backdrop-filter-nested-border-radius-clip-3 F4-unclipped {'green': (36, 36, 235, 135), 'greenPx': 19384, 'failInkPx': 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-3 F6-double    {'green': (36, 36, 235, 135), 'greenPx': 19815, 'failInkPx': 0} → GEOMETRY OK

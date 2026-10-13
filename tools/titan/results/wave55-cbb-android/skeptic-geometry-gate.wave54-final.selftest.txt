@@ -1,0 +1,49 @@
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-ltr web                          PASS       [control: expected to stay PASS]
+!! L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-ltr android                      FAIL       [GATING -> revert U1]
+     line: abspos/abspos-autopos-htb-ltr android {'green': (16, 88, 85, 167), 'greenPx': 5600, 'failInkPx': 4400, 'xorPx': 4400, 'core': (0, 4153)} → GEOMETRY WRONG (green (16, 88, 85, 167) vs ref (16, 88, 115, 187))
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-ltr web                          PASS       [control: expected to stay PASS]
+!! L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-ltr android                      FAIL       [GATING -> revert U1]
+     line: abspos/abspos-autopos-vlr-ltr android {'green': (16, 88, 85, 167), 'greenPx': 5600, 'failInkPx': 4400, 'xorPx': 4400, 'core': (0, 4153)} → GEOMETRY WRONG (green (16, 88, 85, 167) vs ref (16, 88, 115, 187))
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-ltr web                          PASS       [control: expected to stay PASS]
+!! L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-ltr android                      FAIL       [GATING -> revert U1]
+     line: abspos/abspos-autopos-vrl-ltr android {'green': (16, 88, 85, 167), 'greenPx': 5600, 'failInkPx': 4400, 'xorPx': 4400, 'core': (0, 4153)} → GEOMETRY WRONG (green (16, 88, 85, 167) vs ref (16, 88, 115, 187))
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-rtl web                          PASS       [control: expected to stay PASS]
+ - L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-rtl android                      FAIL       [report: expected WRONG until the target is fixed]
+     line: abspos/abspos-autopos-htb-rtl android {'green': (66, 88, 135, 167), 'greenPx': 4800, 'failInkPx': 6000, 'xorPx': 6800, 'core': (800, 5733)} → GEOMETRY WRONG (green (66, 88, 135, 167) vs ref (16, 88, 115, 187))
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-rtl web                          PASS       [control: expected to stay PASS]
+ - L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-rtl android                      FAIL       [report: expected WRONG until the target is fixed]
+     line: abspos/abspos-autopos-vlr-rtl android {'green': (36, 108, 105, 187), 'greenPx': 5600, 'failInkPx': 4400, 'xorPx': 4400, 'core': (0, 4074)} → GEOMETRY WRONG (green (36, 108, 105, 187) vs ref (16, 88, 115, 187))
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-rtl web                          PASS       [control: expected to stay PASS]
+ - L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-rtl android                      FAIL       [report: expected WRONG until the target is fixed]
+     line: abspos/abspos-autopos-vrl-rtl android {'green': (36, 108, 105, 187), 'greenPx': 5600, 'failInkPx': 4400, 'xorPx': 4400, 'core': (0, 4074)} → GEOMETRY WRONG (green (36, 108, 105, 187) vs ref (16, 88, 115, 187))
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-ltr ios                          PASS       [control: expected to stay PASS]
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-ltr ios                          PASS       [control: expected to stay PASS]
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-ltr ios                          PASS       [control: expected to stay PASS]
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-rtl ios                          PASS       [control: expected to stay PASS]
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-rtl ios                          PASS       [control: expected to stay PASS]
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-rtl ios                          PASS       [control: expected to stay PASS]
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip web              PASS       [control: expected to stay PASS]
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip ios              PASS       [control: expected to stay PASS]
+!! L2-cbb-android           compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip android          FAIL       [GATING -> revert U1]
+     line: backdrop-filter-nested-border-radius-clip android {'green': (46, 26, 225, 105), 'greenPx': 14238, 'failInkPx': 5156, 'xorPx': 5140, 'core': (0, 4795)} → GEOMETRY WRONG (green (46, 26, 225, 105) vs ref (26, 26, 225, 125))
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-2 web            PASS       [control: expected to stay PASS]
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-2 ios            PASS       [control: expected to stay PASS]
+!! L2-cbb-android           compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-2 android        FAIL       [GATING -> revert U1]
+     line: ckdrop-filter-nested-border-radius-clip-2 android {'green': (46, 26, 225, 105), 'greenPx': 14266, 'failInkPx': 5210, 'xorPx': 5192, 'core': (0, 4854)} → GEOMETRY WRONG (green (46, 26, 225, 105) vs ref (26, 26, 225, 125))
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-3 web            PASS       [control: expected to stay PASS]
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-3 ios            PASS       [control: expected to stay PASS]
+!! L2-cbb-android           compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-3 android        FAIL       [GATING -> revert U2]
+     line: backdrop-filter-nested-border-radius-clip-3 android {'green': (36, 36, 195, 95), 'greenPx': 9438, 'failInkPx': 4360, 'xorPx': 9937, 'core': (0, 9547)} → GEOMETRY WRONG (green (36, 36, 195, 95) vs ref (36, 36, 235, 135))
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-4 web            PASS       [control: expected to stay PASS]
+   L2-cbb-android           compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-4 ios            PASS       [control: expected to stay PASS]
+!! L2-cbb-android           compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-4 android        FAIL       [GATING -> revert U1]
+     line: backdrop-filter-nested-border-radius-clip-4 android {'green': (42, 26, 185, 89), 'greenPx': 9177, 'failInkPx': 3385, 'xorPx': 3377, 'core': (0, 3105)} → GEOMETRY WRONG (green (42, 26, 185, 89) vs ref (26, 26, 185, 105))
+   L2-cbb-android           cbb-android.geometry.py                    backdrop-filter-nested-border-radius-clip-3 web            PASS       [control: expected to stay PASS]
+   L2-cbb-android           cbb-android.geometry.py                    backdrop-filter-nested-border-radius-clip-3 ios            PASS       [control: expected to stay PASS]
+!! L2-cbb-android           cbb-android.geometry.py                    backdrop-filter-nested-border-radius-clip-3 android        FAIL       [GATING -> revert U2]
+     line:  green XOR ref 9937 px > 40 (a hole / gutted / partial #inner); core: green 0 px outside / 9547 px missing beyond the ref mask's 1-px band (±1: added green / a hole); failure ink 4360 px vs ref 0 ±2 (pink / red showing))
+
+geometry-gate wave54-final (base wave54-open): 33 keys — PASS 22 · FAIL 11 (gating 8) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 8 (PASS 0 FAIL 8) · control 22 (PASS 22 FAIL 0) · report 3 (PASS 0 FAIL 3) · withdrawn 0 (PASS 0 FAIL 0)
+revert rule 4 names: L2-cbb-android U1, L2-cbb-android U2
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)

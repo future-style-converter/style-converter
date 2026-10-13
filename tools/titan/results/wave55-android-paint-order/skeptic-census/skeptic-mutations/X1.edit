@@ -1,0 +1,3 @@
+drawRect(brush, if (g.fillArea) Offset.Zero else g.topLeft,
+=====
+drawRect(brush, g.topLeft,

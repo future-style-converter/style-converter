@@ -1,0 +1,15 @@
+## d-comment-only-check.py on unit-D.patch (the pin)
+unit-D: 6 files, 133 changed lines, non-comment lines: 0
+stale phrases in the added text: 0
+exit 0
+
+## negative control 1: the same check on unit-U2o-ios.patch (code) must exit 1
+unit-D: 3 files, 117 changed lines, non-comment lines: 27
+  NON-COMMENT +import CoreGraphics
+  NON-COMMENT +enum ListMarkerSuffixGap {
+exit 1
+
+## negative control 2: a unit-D copy with one stale phrase ('the inline-END side') re-added must exit 1
+unit-D: 6 files, 133 changed lines, non-comment lines: 0
+stale phrases in the added text: 1
+exit 1

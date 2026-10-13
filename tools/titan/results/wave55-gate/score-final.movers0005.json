@@ -1,0 +1,1103 @@
+{
+ "prev": "wave55-open",
+ "cur": "wave55-final",
+ "totals": {
+  "prev": {
+   "web": {
+    "passing": 1243,
+    "measured": 1372
+   },
+   "ios": {
+    "passing": 1131,
+    "measured": 1362
+   },
+   "android": {
+    "passing": 1128,
+    "measured": 1362
+   }
+  },
+  "cur": {
+   "web": {
+    "passing": 1243,
+    "measured": 1372
+   },
+   "ios": {
+    "passing": 1131,
+    "measured": 1362
+   },
+   "android": {
+    "passing": 1130,
+    "measured": 1362
+   }
+  }
+ },
+ "sections": {
+  "CSS2": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   }
+  },
+  "css-anchor-position": {
+   "prev": {
+    "web": {
+     "passing": 30,
+     "measured": 32
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 32
+    },
+    "android": {
+     "passing": 27,
+     "measured": 32
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 30,
+     "measured": 32
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 32
+    },
+    "android": {
+     "passing": 27,
+     "measured": 32
+    }
+   }
+  },
+  "css-backgrounds": {
+   "prev": {
+    "web": {
+     "passing": 26,
+     "measured": 29
+    },
+    "ios": {
+     "passing": 26,
+     "measured": 29
+    },
+    "android": {
+     "passing": 26,
+     "measured": 29
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 26,
+     "measured": 29
+    },
+    "ios": {
+     "passing": 26,
+     "measured": 29
+    },
+    "android": {
+     "passing": 26,
+     "measured": 29
+    }
+   }
+  },
+  "css-break": {
+   "prev": {
+    "web": {
+     "passing": 37,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 29,
+     "measured": 48
+    },
+    "android": {
+     "passing": 32,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 37,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 29,
+     "measured": 48
+    },
+    "android": {
+     "passing": 32,
+     "measured": 48
+    }
+   }
+  },
+  "css-cascade": {
+   "prev": {
+    "web": {
+     "passing": 37,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 41
+    },
+    "android": {
+     "passing": 36,
+     "measured": 41
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 37,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 41
+    },
+    "android": {
+     "passing": 36,
+     "measured": 41
+    }
+   }
+  },
+  "css-color": {
+   "prev": {
+    "web": {
+     "passing": 43,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 43,
+     "measured": 48
+    },
+    "android": {
+     "passing": 44,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 43,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 43,
+     "measured": 48
+    },
+    "android": {
+     "passing": 44,
+     "measured": 48
+    }
+   }
+  },
+  "css-contain": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   }
+  },
+  "css-counter-styles": {
+   "prev": {
+    "web": {
+     "passing": 40,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 28,
+     "measured": 37
+    },
+    "android": {
+     "passing": 28,
+     "measured": 37
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 40,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 28,
+     "measured": 37
+    },
+    "android": {
+     "passing": 28,
+     "measured": 37
+    }
+   }
+  },
+  "css-display": {
+   "prev": {
+    "web": {
+     "passing": 45,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 45,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   }
+  },
+  "css-flexbox": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 45,
+     "measured": 47
+    },
+    "android": {
+     "passing": 45,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 45,
+     "measured": 47
+    },
+    "android": {
+     "passing": 45,
+     "measured": 47
+    }
+   }
+  },
+  "css-gaps": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   }
+  },
+  "css-grid": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   }
+  },
+  "css-images": {
+   "prev": {
+    "web": {
+     "passing": 43,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 47
+    },
+    "android": {
+     "passing": 35,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 43,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 47
+    },
+    "android": {
+     "passing": 35,
+     "measured": 47
+    }
+   }
+  },
+  "css-lists": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   }
+  },
+  "css-masking": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   }
+  },
+  "css-multicol": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 43,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 43,
+     "measured": 48
+    }
+   }
+  },
+  "css-overflow": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 47
+    },
+    "android": {
+     "passing": 46,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 47
+    },
+    "android": {
+     "passing": 46,
+     "measured": 47
+    }
+   }
+  },
+  "css-position": {
+   "prev": {
+    "web": {
+     "passing": 37,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 41
+    },
+    "android": {
+     "passing": 33,
+     "measured": 41
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 37,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 41
+    },
+    "android": {
+     "passing": 33,
+     "measured": 41
+    }
+   }
+  },
+  "css-pseudo": {
+   "prev": {
+    "web": {
+     "passing": 33,
+     "measured": 42
+    },
+    "ios": {
+     "passing": 32,
+     "measured": 42
+    },
+    "android": {
+     "passing": 31,
+     "measured": 42
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 33,
+     "measured": 42
+    },
+    "ios": {
+     "passing": 32,
+     "measured": 42
+    },
+    "android": {
+     "passing": 31,
+     "measured": 42
+    }
+   }
+  },
+  "css-sizing": {
+   "prev": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 44,
+     "measured": 48
+    },
+    "android": {
+     "passing": 45,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 44,
+     "measured": 48
+    },
+    "android": {
+     "passing": 45,
+     "measured": 48
+    }
+   }
+  },
+  "css-tables": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 47
+    },
+    "android": {
+     "passing": 37,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 47
+    },
+    "android": {
+     "passing": 37,
+     "measured": 47
+    }
+   }
+  },
+  "css-text": {
+   "prev": {
+    "web": {
+     "passing": 39,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 39,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 39,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 39,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   }
+  },
+  "css-text-decor": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 31,
+     "measured": 48
+    },
+    "android": {
+     "passing": 29,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 31,
+     "measured": 48
+    },
+    "android": {
+     "passing": 29,
+     "measured": 48
+    }
+   }
+  },
+  "css-transforms": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 47
+    },
+    "android": {
+     "passing": 43,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 47
+    },
+    "android": {
+     "passing": 43,
+     "measured": 47
+    }
+   }
+  },
+  "css-ui": {
+   "prev": {
+    "web": {
+     "passing": 45,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 45,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   }
+  },
+  "css-values": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 40,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 40,
+     "measured": 48
+    }
+   }
+  },
+  "css-view-transitions": {
+   "prev": {
+    "web": {
+     "passing": 32,
+     "measured": 45
+    },
+    "ios": {
+     "passing": 27,
+     "measured": 46
+    },
+    "android": {
+     "passing": 29,
+     "measured": 46
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 32,
+     "measured": 45
+    },
+    "ios": {
+     "passing": 27,
+     "measured": 46
+    },
+    "android": {
+     "passing": 29,
+     "measured": 46
+    }
+   }
+  },
+  "css-writing-modes": {
+   "prev": {
+    "web": {
+     "passing": 36,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 30,
+     "measured": 48
+    },
+    "android": {
+     "passing": 27,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 36,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 30,
+     "measured": 48
+    },
+    "android": {
+     "passing": 27,
+     "measured": 48
+    }
+   }
+  },
+  "filter-effects": {
+   "prev": {
+    "web": {
+     "passing": 41,
+     "measured": 46
+    },
+    "ios": {
+     "passing": 37,
+     "measured": 46
+    },
+    "android": {
+     "passing": 36,
+     "measured": 46
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 41,
+     "measured": 46
+    },
+    "ios": {
+     "passing": 37,
+     "measured": 46
+    },
+    "android": {
+     "passing": 37,
+     "measured": 46
+    }
+   }
+  },
+  "selectors": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 39,
+     "measured": 48
+    }
+   }
+  }
+ },
+ "gained": [
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-nested-border-radius-clip-3.html",
+   "platform": "android",
+   "prev": 0.9574,
+   "cur": 0.9999,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "selectors",
+   "test": "css/selectors/dir-style-02a.html",
+   "platform": "android",
+   "prev": 0.9425,
+   "cur": 0.9854,
+   "prevPass": false,
+   "curPass": true
+  }
+ ],
+ "lost": [],
+ "movers": [
+  {
+   "sec": "css-anchor-position",
+   "test": "css/css-anchor-position/anchor-position-multicol-nested-001.html",
+   "platform": "android",
+   "prev": 0.9573,
+   "cur": 0.9688,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0115
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/abspos-autopos-htb-rtl.html",
+   "platform": "android",
+   "prev": 0.9869,
+   "cur": 0.9966,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0097
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html",
+   "platform": "android",
+   "prev": 0.9619,
+   "cur": 0.9943,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0324
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html",
+   "platform": "android",
+   "prev": 0.9635,
+   "cur": 0.9932,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0297
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/descendant-static-position-001.html",
+   "platform": "android",
+   "prev": 0.9892,
+   "cur": 0.9991,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0099
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/descendant-static-position-002.html",
+   "platform": "android",
+   "prev": 0.9601,
+   "cur": 0.9724,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0123
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-semi-replaced-stretch-button.html",
+   "platform": "android",
+   "prev": 0.9739,
+   "cur": 0.9843,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0104
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-semi-replaced-stretch-input.html",
+   "platform": "android",
+   "prev": 0.4117,
+   "cur": 0.4555,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0438
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-semi-replaced-stretch-other.html",
+   "platform": "android",
+   "prev": 0.4396,
+   "cur": 0.4685,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0289
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/bidi/bidi-tab-001.html",
+   "platform": "android",
+   "prev": 0.9805,
+   "cur": 0.9929,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0124
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/break-inside-avoid-child.html",
+   "platform": "android",
+   "prev": 0.9735,
+   "cur": 0.9872,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0137
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-nested-border-radius-clip-2.html",
+   "platform": "android",
+   "prev": 0.9689,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0311
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-nested-border-radius-clip-4.html",
+   "platform": "android",
+   "prev": 0.977,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0229
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-nested-border-radius-clip.html",
+   "platform": "android",
+   "prev": 0.9649,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0351
+  }
+ ],
+ "newlyMeasured": [],
+ "unmeasuredNow": [],
+ "missingSections": [],
+ "columnShorts": []
+}

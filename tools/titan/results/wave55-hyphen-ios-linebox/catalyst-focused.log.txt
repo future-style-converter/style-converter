@@ -1,0 +1,122 @@
+# wave55 L1 NB-ios — Catalyst focused run (worktree = 611c9f93 + unit-NB-ios + seam-1), TEST_RUNNER_NB_IOS_PER_TEST_IR=tools/titan/runs/wave54-final/sections
+# cmd: xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath <wt>/.dd -only-testing:StyleConverterRuntimeTests/{NormalLineBoxTests,LineHeightNormalTests,LineBoxPinTests,WPTCaptureModeTests,LineHeightWireTests}
+Test Case '-[StyleConverterRuntimeTests.LineBoxPinTests testDefaultParagraphAdvanceIsExactlyThirtySix]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineBoxPinTests testNoPinOutsideWptCapture]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineBoxPinTests testNoPinWhenTheLineCountIsAGuess]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineBoxPinTests testNoPinWithoutADeclaredLineBox]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineBoxPinTests testPinnedHeightIsLineCountTimesTheLineBox]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineBoxPinTests testRenderedLineCountCountsHardBreaks]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineBoxPinTests testRenderedLineCountObeysTheLineClamp]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineBoxPinTests testSingleLineRunStillOccupiesExactlyOneLineBox]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineBoxPinTests testTheNaturalMetricsBoxOvershootsByExactlyTheLeading]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineBoxPinTests testWrappedRunOccupiesAWholeNumberOfDeclaredLineBoxes]' passed 
+	 Executed 10 tests, with 0 failures (0 unexpected) in 3.100 (3.105) seconds
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testApplierClearsTheNormalFlagForANumericDeclaration]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testApplierPublishesTheNormalFlagAlongsideTheNumber]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testDeclaredNormalIsRecognisedOnTheLiveWire]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testEffectiveLineHeightDeclaredNormalBeatsTheRefLineBox]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testEffectiveLineHeightDeclaredNumberStillWins]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testEffectiveLineHeightOutsideWptIsByteIdenticalToBefore]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testExtractorFlagsNormalAndKeepsTheLegacyMultiplier]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testExtractorKeepsRealNumbersAndLengths]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testLengthPercentageAndGlobalKeywordAreNotNormal]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testLineBoxSourceOutsideWptCaptureIsByteIdenticalToBefore]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testLineBoxSourceWptCaptureTable]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testMalformedAndAbsentPayloadsAreNotNormal]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testMultiplierAloneIsNotNormal]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testPropertyListDottedOneShapeReportsNormal]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testPropertyListLastDeclarationWins]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightNormalTests testPropertyListWithoutLineHeightReportsFalse]' passed 
+	 Executed 16 tests, with 0 failures (0 unexpected) in 0.175 (0.179) seconds
+Test Case '-[StyleConverterRuntimeTests.LineHeightWireTests testResolverLeavesMultiplierShapes]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightWireTests testResolverRewritesLengthWires]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightWireTests testSubNaturalOffsetMath]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightWireTests testSubNaturalPlacementShiftsGlyphBandUp]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightWireTests testWireAbsoluteNestedPx]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightWireTests testWireEmUsesOwnFontSize]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightWireTests testWireLeavesOtherShapesAlone]' passed 
+Test Case '-[StyleConverterRuntimeTests.LineHeightWireTests testWireRem]' passed 
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.093 (0.095) seconds
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP1DejaVu16IsTheRefNineteenPixelPitch]' passed 
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP2EachTermRoundsAloneNeverTheSum]' passed 
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP3HalvesRoundAwayFromZero]' passed 
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP4BlinkBoxOnlyUnderAllFourGuards]' passed 
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP5EffectiveValueIsReturnedVerbatim]' passed 
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP6FaceResolutionMatchesLineBoxMetrics]' passed 
+[PropertyTracker] line-height: normal (WPT capture): Blink's rounded line box is below the face's raw line height; a multi-line run keeps the raw advance inside the pinned box (SwiftUI lineSpacing cannot be negative)
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP7VerbatimHostInputs]' passed 
+NB-ios P8 hyphens-vertical-001 __2-320 horizontal=false singleLineText=true lineCountIsExact=true renderedLineCount=1
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP8VerticalRunIsDeclinedByTheHorizontalGuard]' passed 
+NB-ios SAME all-prop-001: 0 declared-normal run(s)
+NB-ios SAME anonymous-table-ws-001 wpt__css-tables__anonymous-table-ws-001__1-066 horizontal=true singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME anonymous-table-ws-001: 1 declared-normal run(s)
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__2__3-567 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__2__2-566 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__2__1__1-565 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__2__1__0-564 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__2__0__1-562 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__2__0__0-561 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__1__3-558 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__1__2-557 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__1__1__1-556 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__1__1__0-555 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__1__0__1-553 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__1__0__0-552 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__0__3-549 horizontal=true singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__0__2-548 horizontal=true singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__0__1__1-547 horizontal=true singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__0__1__0-546 horizontal=true singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__0__0__1-544 horizontal=true singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__0__0__0-543 horizontal=true singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles: 18 declared-normal run(s)
+NB-ios SAME boundary-shaping__boundary-shaping-010 wpt__css-text__boundary-shaping__boundary-shaping-010__4-159 horizontal=true singleLineText=true preBreak=false lineCountIsExact=true renderedLineCount=1
+NB-ios SAME boundary-shaping__boundary-shaping-010 wpt__css-text__boundary-shaping__boundary-shaping-010__3-158 horizontal=true singleLineText=true preBreak=false lineCountIsExact=true renderedLineCount=1
+NB-ios SAME boundary-shaping__boundary-shaping-010 wpt__css-text__boundary-shaping__boundary-shaping-010__2-157 horizontal=true singleLineText=true preBreak=false lineCountIsExact=true renderedLineCount=1
+NB-ios SAME boundary-shaping__boundary-shaping-010: 3 declared-normal run(s)
+NB-ios SAME hyphens__hyphens-vertical-001 wpt__css-text__hyphens__hyphens-vertical-001__3-321 horizontal=false singleLineText=true preBreak=false lineCountIsExact=true renderedLineCount=1
+[PropertyTracker] hyphens: a space-less soft-hyphen run in a vertical writing mode is not pre-broken (the label's wrap width is the physical width, not the vertical line axis); TextKit keeps the run
+NB-ios SAME hyphens__hyphens-vertical-001 wpt__css-text__hyphens__hyphens-vertical-001__2-320 horizontal=false singleLineText=true preBreak=false lineCountIsExact=true renderedLineCount=1
+NB-ios SAME hyphens__hyphens-vertical-001: 2 declared-normal run(s)
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testSameControlsLogTheirLineCountInputs]' passed 
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.696 (0.777) seconds
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testCanvasFrameIsTheRefImagePad]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testCaptureBackgroundSplitsOnWptMode]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testCaptureTextInkSplitsOnWptMode]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testComposedBackgroundContainedBodyKeepsWhiteCanvas]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testComposedBackgroundHalfAlphaRedIsPinkOverWhite]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testComposedBackgroundNilFallsBackToWhiteCanvas]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testComposedBackgroundOpaqueBodyReturnsVerbatim]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testComposedBackgroundTransparentBodyComposesToWhite]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testComposedBackgroundUncontainedDefaultUnchanged]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testContainmentGateAbsentOrNoneIsNotContainment]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testContainmentGateAnyKeywordBlocks]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testDeclaredFromFrameConvertsInjectedExtents]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testEffectiveBoxSizingSplitsOnWptMode]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testEffectiveLineHeightDefersToIR]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testEffectiveLineHeightOffKeepsNaturalMetrics]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testEffectiveLineHeightOnPinsRefLineBox]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testIcbExtentIsTheRefRenderViewport]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testIcbExtentNeverGoesNegative]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testPredicateFlagOffNeverSuppresses]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testPredicateNamelessEmptyInWptModeSuppresses]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testPredicateRealTextInWptModeNotSuppressed]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testPredicateWithChildrenNotSuppressed]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testPublishedViewportBasisIsTheRefRenderViewport]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testPublishedViewportHeightGrowsWithTheDocument]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testPublishedViewportIsNeverTheFramedImage]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testRealTextRendersBlackInkInWptMode]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testRootBgA1TargetPaintsTheFramedSurfaceGreen]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testRootBgA1TargetPlanAndStrip]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testRootBgA2MarginRoot001PixelsFrameWhiteBandAt66]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testRootBgA2MarginRoot001PlanIsIcbOnly]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testRootBgA2MarginRoot002PixelsBandAtTheIcbCorner]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testRootBgA3IhdrUniformity]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testRootBgA4ContainedDoesNotPropagate]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testRootBgA5ColourOnlyBodiesAreIdentity]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testRuntimePaintsNoNameLabelInEitherMode]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testWptBoxSizingDefaultInflatesTheGridFixtureFrame]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testWptCanvasBackgroundIsWhite]' passed 
+Test Case '-[StyleConverterRuntimeTests.WPTCaptureModeTests testWptDefaultTextInkIsBlack]' passed 
+	 Executed 38 tests, with 0 failures (0 unexpected) in 0.575 (0.749) seconds
+	 Executed 81 tests, with 0 failures (0 unexpected) in 4.638 (4.906) seconds
+	 Executed 81 tests, with 0 failures (0 unexpected) in 4.638 (4.910) seconds

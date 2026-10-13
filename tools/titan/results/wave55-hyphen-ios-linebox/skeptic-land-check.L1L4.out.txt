@@ -1,0 +1,116 @@
+land-units.sh — wave 55 (CHECK: read-only)
+root    /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+HEAD    611c9f93 (campaign/applier-campaign)   export dir (private, removed at exit): /private/var/folders/34/h7173byn5kb_lddtbn4hqt9w0000gn/T/land-units.FMTmEy
+
+ORDER (5 unit commits + records; hold: none; only: L1,L4)
+  00   records  the selected lane dirs → 1 commit
+  01   L7  U1           -- skipped: not in --only
+  02   L7  U2           -- skipped: not in --only
+  03   L7  U3           -- skipped: not in --only
+  04   L7  U4           -- skipped: not in --only
+  05   L7  U6-compose   -- skipped: not in --only
+  06   L7  U6-swift     -- skipped: not in --only
+  07   L7  U6-web       -- skipped: not in --only
+  08   L7  U6-tooling   -- skipped: not in --only
+  09   L7  U5           -- skipped: not in --only
+  10   L6  U1           -- skipped: not in --only
+  11   L6  U2           -- skipped: not in --only
+  12   L6  U3           -- skipped: not in --only
+  13   L4  U1-android   wave55-ua-heading-margin/unit-U1-android.patch wave55-ua-heading-margin/seam-1.patch 
+  14   L4  U1-ios       wave55-ua-heading-margin/unit-U1-ios.patch wave55-ua-heading-margin/seam-2.patch 
+  15   L4  U2-android   wave55-ua-heading-margin/unit-U2-android.patch wave55-ua-heading-margin/seam-3.patch 
+  16   L4  U2-ios       wave55-ua-heading-margin/unit-U2-ios.patch wave55-ua-heading-margin/seam-4.patch 
+  17   L2  U1           -- skipped: not in --only
+  18   L2  U2           -- skipped: not in --only
+  19   L3  U1           -- skipped: not in --only
+  20   L3  U2           -- skipped: not in --only
+  21   L5  U1-ios       -- skipped: not in --only
+  22   L5  U2o-ios      -- skipped: not in --only
+  23   L5  U2i-ios      -- skipped: not in --only
+  24   L5  U2o-android  -- skipped: not in --only
+  25   L5  U2i-android  -- skipped: not in --only
+  26   L1  NB-ios       wave55-hyphen-ios-linebox/unit-NB-ios.patch wave55-hyphen-ios-linebox/seam-1.patch 
+  27   L5  U3-ios       -- skipped: not in --only
+  28   L5  D            -- skipped: not in --only
+  29   L1  NB-ios-b     -- skipped: contingency (lands only by --contingency)
+  30   L5  U1-ios-LRM   -- skipped: not in --only
+
+HOST, INDEX, MANIFEST
+  host    no gate / probe / A/B arm process in this tree
+  index   nothing staged
+  manifest in sync with the tables (landing-manifest.json, sha256 f6716e2f80f1…)
+  plan    28 plan revert units (+ 2 contingency) agree with the table: lane dirs, unit names, revertOrders (expectations.json)
+
+RECORDS (committed first)
+  WARN    tools/titan/results/wave55-ua-heading-margin holds gitignored files the records commit will NOT carry (lane evidence of record is .txt, or force-added): tools/titan/results/wave55-ua-heading-margin/mutations/A1-painted-basis.green.log tools/titan/results/wave55-ua-heading-margin/mutations/A1-painted-basis.red.log tools/titan/results/wave55-ua-heading-margin/mutations/A2-em-base-16.green.log tools/titan/results/wave55-ua-heading-margin/mutations/A2-em-base-16.red.log tools/titan/results/wave55-ua-heading-margin/mutations/A3-root-table.green.log tools/titan/results/wave55-ua-heading-margin/mutations/A3-root-table.red.log tools/titan/results/wave55-ua-heading-margin/mutations/A4-no-edge-guard.green.log tools/titan/results/wave55-ua-heading-margin/mutations/A4-no-edge-guard.red.log tools/titan/results/wave55-ua-heading-margin/mutations/A5-ignore-enabled.green.log tools/titan/results/wave55-ua-heading-margin/mutations/A5-ignore-enabled.red.log tools/titan/results/wave55-ua-heading-margin/mutations/A6-no-oof-test.green.log tools/titan/results/wave55-ua-heading-margin/mutations/A6-no-oof-test.red.log tools/titan/results/wave55-ua-heading-margin/mutations/A7-widen-table.green.log tools/titan/results/wave55-ua-heading-margin/mutations/A7-widen-table.red.log tools/titan/results/wave55-ua-heading-margin/mutations/AS1-head-renderer.green.log tools/titan/results/wave55-ua-heading-margin/mutations/AS1-head-renderer.red.log tools/titan/results/wave55-ua-heading-margin/mutations/AS2-enabled-true.green.log tools/titan/results/wave55-ua-heading-margin/mutations/AS2-enabled-true.red.log tools/titan/results/wave55-ua-heading-margin/mutations/AS3-fed-preUa.green.log tools/titan/results/wave55-ua-heading-margin/mutations/AS3-fed-preUa.red.log 
+  ok      tools/titan/results/wave55-ua-heading-margin/  (111 files)
+  ok      tools/titan/results/wave55-hyphen-ios-linebox/  (22 files)
+  WARN    written less than 120s ago (an instrument may still be writing; the landing refuses): tools/titan/results/wave55-ua-heading-margin/land-units.check.only-L4.out.txt tools/titan/results/wave55-ua-heading-margin/_note.md tools/titan/results/wave55-hyphen-ios-linebox/skeptic-mutations.out.txt tools/titan/results/wave55-hyphen-ios-linebox/skeptic.md
+
+PATCHES (each: present · parsed · its paths · the rules · alone on the current tree)
+  wave55-ua-heading-margin/unit-U1-android.patch                 (L4:U1-android)
+            + runtimes/compose/src/main/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMargin.kt
+            ~ runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt
+            + runtimes/compose/src/test/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMarginTest.kt
+            alone: applies on the current tree
+  wave55-ua-heading-margin/seam-1.patch                          (L4:U1-android)
+            ~ runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+            ~ runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
+            + runtimes/compose/src/test/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMarginSeamWiringTest.kt
+            ~ runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt
+            alone: applies on the current tree
+  wave55-ua-heading-margin/unit-U1-ios.patch                     (L4:U1-ios)
+            + runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/spacing/UAPositionedHeadingMargin.swift
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAElementFontRule.swift
+            + runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift
+            alone: applies on the current tree
+  wave55-ua-heading-margin/seam-2.patch                          (L4:U1-ios)
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+            + runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginSeamWiringTests.swift
+            alone: applies on the current tree
+  wave55-ua-heading-margin/unit-U2-android.patch                 (L4:U2-android)
+            ~ runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt
+            + runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAHeadingFoldGate.kt
+            ~ runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt
+            + runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAHeadingFoldGateTest.kt
+            alone: does not apply on the current tree — STACKED (expected; the cumulative check decides): runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt on L4:U1-android;
+  wave55-ua-heading-margin/seam-3.patch                          (L4:U2-android)
+            ~ runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+            ~ runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
+            ~ runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt
+            alone: does not apply on the current tree — STACKED (expected; the cumulative check decides): runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt on L4:U1-android; runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt on L4:U1-android; runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt on L4:U1-android;
+  wave55-ua-heading-margin/unit-U2-ios.patch                     (L4:U2-ios)
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAElementFontRule.swift
+            + runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift
+            ~ runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAElementFontRuleTests.swift
+            + runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAHeadingFoldGateTests.swift
+            alone: applies on the current tree (stacked: runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAElementFontRule.swift on L4:U1-ios;)
+  wave55-ua-heading-margin/seam-4.patch                          (L4:U2-ios)
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+            alone: does not apply on the current tree — STACKED (expected; the cumulative check decides): runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift on L4:U1-ios;
+  wave55-hyphen-ios-linebox/unit-NB-ios.patch                    (L1:NB-ios)
+            + runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift
+            + runtimes/swiftui/Tests/StyleConverterRuntimeTests/NormalLineBoxTests.swift
+            alone: applies on the current tree
+  wave55-hyphen-ios-linebox/seam-1.patch                         (L1:NB-ios)
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+            alone: applies on the current tree (stacked: runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift on L4:U1-ios; runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift on L4:U2-ios;)
+  shared  runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift: L4 L1 (registered shared file)
+
+TOUCHED PATHS (clean at HEAD on the current tree; a created path absent)
+  ok      20 paths (12 created, the rest clean at HEAD 611c9f93)
+
+CUMULATIVE (the series in landing order, `git apply --check` of one concatenated input on the current tree)
+  ok      10 patches apply in order on 611c9f93 (+ the records commit, which touches no patched path)
+
+REVERT DRY-RUNS (every selected unit's revertOrder, reverse-applied on the fully landed series; export tree)
+  ok      L4:U1-android   revert [ U2-android U1-android ] reverse-applies on the landed series  (C12)
+  ok      L4:U1-ios       revert [ U2-ios U1-ios ] reverse-applies on the landed series  (C12)
+  ok      L4:U2-android   revert [ U2-android ] reverse-applies on the landed series  (C12)
+  ok      L4:U2-ios       revert [ U2-ios ] reverse-applies on the landed series  (C12)
+  ok      L1:NB-ios       revert [ NB-ios ] reverse-applies on the landed series
+
+CONTINGENCY (not landed by this run)
+  ok      L1:NB-ios-b (contingency) applies on top of the series
+
+SUMMARY  0 error(s), 2 warning(s) — landable (--check touched nothing: no checkout, no rm, no apply on the tree)

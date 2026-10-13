@@ -1,0 +1,2 @@
+        result = ClipPathApplier.applyClipPath(result, config.clipPath, collapsed)
+

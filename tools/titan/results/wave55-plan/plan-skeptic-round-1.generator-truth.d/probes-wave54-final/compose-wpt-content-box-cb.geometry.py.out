@@ -1,0 +1,40 @@
+abspos/abspos-autopos-htb-ltr ref      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0} → GEOMETRY OK
+abspos/abspos-autopos-htb-ltr web      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0} → GEOMETRY OK
+abspos/abspos-autopos-htb-ltr ios      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0} → GEOMETRY OK
+abspos/abspos-autopos-htb-ltr android  {'green': (16, 88, 85, 167), 'greenPx': 5600, 'failInkPx': 4400} → GEOMETRY WRONG (green (16, 88, 85, 167) vs ref (16, 88, 115, 187))
+abspos/abspos-autopos-htb-rtl ref      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0} → GEOMETRY OK
+abspos/abspos-autopos-htb-rtl web      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0} → GEOMETRY OK
+abspos/abspos-autopos-htb-rtl ios      {'green': (16, 88, 105, 187), 'greenPx': 9000, 'failInkPx': 1000} → GEOMETRY WRONG (green (16, 88, 105, 187) vs ref (16, 88, 115, 187))
+abspos/abspos-autopos-htb-rtl android  {'green': (66, 88, 135, 167), 'greenPx': 4800, 'failInkPx': 6000} → GEOMETRY WRONG (green (66, 88, 135, 167) vs ref (16, 88, 115, 187))
+abspos/abspos-autopos-vlr-ltr ref      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0} → GEOMETRY OK
+abspos/abspos-autopos-vlr-ltr web      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0} → GEOMETRY OK
+abspos/abspos-autopos-vlr-ltr ios      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0} → GEOMETRY OK
+abspos/abspos-autopos-vlr-ltr android  {'green': (16, 88, 85, 167), 'greenPx': 5600, 'failInkPx': 4400} → GEOMETRY WRONG (green (16, 88, 85, 167) vs ref (16, 88, 115, 187))
+abspos/abspos-autopos-vlr-rtl ref      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0} → GEOMETRY OK
+abspos/abspos-autopos-vlr-rtl web      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0} → GEOMETRY OK
+abspos/abspos-autopos-vlr-rtl ios      {'green': (16, 88, 105, 187), 'greenPx': 9000, 'failInkPx': 1000} → GEOMETRY WRONG (green (16, 88, 105, 187) vs ref (16, 88, 115, 187))
+abspos/abspos-autopos-vlr-rtl android  {'green': (36, 108, 105, 187), 'greenPx': 5600, 'failInkPx': 4400} → GEOMETRY WRONG (green (36, 108, 105, 187) vs ref (16, 88, 115, 187))
+abspos/abspos-autopos-vrl-ltr ref      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0} → GEOMETRY OK
+abspos/abspos-autopos-vrl-ltr web      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0} → GEOMETRY OK
+abspos/abspos-autopos-vrl-ltr ios      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0} → GEOMETRY OK
+abspos/abspos-autopos-vrl-ltr android  {'green': (16, 88, 85, 167), 'greenPx': 5600, 'failInkPx': 4400} → GEOMETRY WRONG (green (16, 88, 85, 167) vs ref (16, 88, 115, 187))
+abspos/abspos-autopos-vrl-rtl ref      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0} → GEOMETRY OK
+abspos/abspos-autopos-vrl-rtl web      {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0} → GEOMETRY OK
+abspos/abspos-autopos-vrl-rtl ios      {'green': (16, 88, 105, 187), 'greenPx': 9000, 'failInkPx': 1000} → GEOMETRY WRONG (green (16, 88, 105, 187) vs ref (16, 88, 115, 187))
+abspos/abspos-autopos-vrl-rtl android  {'green': (36, 108, 105, 187), 'greenPx': 5600, 'failInkPx': 4400} → GEOMETRY WRONG (green (36, 108, 105, 187) vs ref (16, 88, 115, 187))
+backdrop-filter-nested-border-radius-clip ref      {'green': (26, 26, 225, 125), 'greenPx': 19358, 'failInkPx': 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip web      {'green': (26, 26, 225, 125), 'greenPx': 19374, 'failInkPx': 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip ios      {'green': (26, 26, 225, 125), 'greenPx': 19376, 'failInkPx': 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip android  {'green': (46, 26, 225, 105), 'greenPx': 14238, 'failInkPx': 5156} → GEOMETRY WRONG (green (46, 26, 225, 105) vs ref (26, 26, 225, 125))
+backdrop-filter-nested-border-radius-clip-2 ref      {'green': (26, 26, 225, 125), 'greenPx': 19456, 'failInkPx': 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-2 web      {'green': (26, 26, 225, 125), 'greenPx': 19451, 'failInkPx': 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-2 ios      {'green': (26, 26, 225, 125), 'greenPx': 19464, 'failInkPx': 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-2 android  {'green': (46, 26, 225, 105), 'greenPx': 14266, 'failInkPx': 5210} → GEOMETRY WRONG (green (46, 26, 225, 105) vs ref (26, 26, 225, 125))
+backdrop-filter-nested-border-radius-clip-3 ref      {'green': (36, 36, 235, 135), 'greenPx': 19365, 'failInkPx': 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-3 web      {'green': (36, 36, 235, 135), 'greenPx': 19390, 'failInkPx': 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-3 ios      {'green': (36, 36, 235, 135), 'greenPx': 19384, 'failInkPx': 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-3 android  {'green': (36, 36, 195, 95), 'greenPx': 9438, 'failInkPx': 4360} → GEOMETRY WRONG (green (36, 36, 195, 95) vs ref (36, 36, 235, 135))
+backdrop-filter-nested-border-radius-clip-4 ref      {'green': (26, 26, 185, 105), 'greenPx': 12542, 'failInkPx': 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-4 web      {'green': (26, 26, 185, 105), 'greenPx': 12542, 'failInkPx': 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-4 ios      {'green': (26, 26, 185, 105), 'greenPx': 12545, 'failInkPx': 0} → GEOMETRY OK
+backdrop-filter-nested-border-radius-clip-4 android  {'green': (42, 26, 185, 89), 'greenPx': 9177, 'failInkPx': 3385} → GEOMETRY WRONG (green (42, 26, 185, 89) vs ref (26, 26, 185, 105))

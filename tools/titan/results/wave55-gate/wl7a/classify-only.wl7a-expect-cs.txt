@@ -1,0 +1,3 @@
+MISSING CONTENT-CHANGED css-counter-styles/wpt__css-counter-styles__counter-suffix.json (expected, not observed)
+identical 288 · content-changed 0 · renumbered 0 · one-sided 0 · renumbered-anomalous 0
+verdict: exit 5 — changed set differs from the expect file

@@ -66,6 +66,12 @@ object ListMarkerRow {
      * silent ~7dp made the two natives disagree on every marker row. The
      * real value is UA-defined and per-counter-style (css-lists-3 §3.2's
      * marker padding) — still deferred, still shared with iOS's `gapPt`.
+     *
+     * Wave 55 (lane L5, U2): this is the STAND-IN for the suffix's trimmed
+     * trailing space, so it is read through [ListMarkerSuffixGap.gapDp],
+     * which answers 0.dp for a marker ending in U+3001 (the space-less
+     * `cjk-decimal` family suffix, css-counter-styles-3 §6.1) and this
+     * constant otherwise.
      */
     val gapDp = 4.dp
 

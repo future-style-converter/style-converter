@@ -1,0 +1,257 @@
+# sweep.L3-before.out.txt — the FIRST round-3 sweep (an earlier sweep.py: group-level verdicts, row variants per row), --lanes L3, on the ROUND-2 L3 probe bytes (positioned-parent-slot.geometry.py 96832289…): 83 of 167 key reads ACCEPTED an added-ink fake (every dir-style row variant: the verifier's M2, and the bidi / stack strays). Kept as the before-picture of the L3 fix; the current sweep.py classifies per faked capture.
+# round-3 added-ink sweep on expectations.json (sha256 56dbcfc021c3ae60…)
+L3 dir-row6-fixed         band-ghost+3y-r6   [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 153, 133) dot 4px profile 0.92@+0 rows 0.94@+0 → GEOMETRY OK
+L3 dir-row6-fixed         band-ghost+5y-r6   [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 153, 133) dot 4px profile 0.92@+0 rows 0.93@+1 → GEOMETRY OK
+L3 dir-row6-fixed         band-ghost+7y-r6   [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 153, 133) dot 4px profile 0.92@+0 rows 0.93@+0 → GEOMETRY OK
+L3 dir-row6-fixed         band-ghost-3y-r6   [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 117, 153, 131) dot 6px profile 0.92@+0 rows 0.91@+0 → GEOMETRY OK
+L3 dir-row6-fixed         band-hdup+1x-r6    [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 154, 131) dot 6px profile 0.93@+1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         band-hdup+2x-r6    [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 155, 131) dot 6px profile 0.87@+1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         band-hdup-2x-r6    [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (15, 120, 153, 131) dot 8px profile 0.87@-1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         dot2-left-r6       [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (13, 120, 153, 131) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         dot2-end-r6        [S] dir-style-02a android row6                             FAIL
+L3 dir-row6-fixed         stray2-gap-r6      [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 153, 131) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         stray3-gap-r6      [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 153, 131) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         stray3-above-r6    [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 117, 153, 131) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         stray3-inside-r6   [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 153, 131) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         glyph2-r6          [S] dir-style-02a android row6                             FAIL
+L3 dir-row6-fixed         ghost+2y           [S] dir-style-02a android row6                             FAIL
+L3 dir-row6-fixed         ghost+3y           [S] dir-style-02a android row6                             FAIL
+L3 dir-row6-fixed         ghost-3y           [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 117, 153, 131) dot 6px profile 0.92@+0 rows 0.89@+0 → GEOMETRY OK
+L3 dir-row6-fixed         hdup+1x            [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 154, 131) dot 6px profile 0.93@+1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         hdup+2x            [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 155, 131) dot 6px profile 0.87@+1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         hdup-2x            [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (15, 120, 153, 131) dot 8px profile 0.87@-1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         tgt-ghost+3y       [S] dir-style-02a android row6                             FAIL
+L3 dir-row6-fixed         tgt-ghost-3y       [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 117, 153, 131) dot 6px profile 0.92@+0 rows 0.89@+0 → GEOMETRY OK
+L3 dir-row6-fixed         tgt-hdup+2x        [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 155, 131) dot 6px profile 0.87@+1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         glyph2-small       [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 153, 131) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         glyph2-mid      (no-op on every capture: not run)
+L3 dir-row6-fixed         stray2-first       [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 117, 153, 131) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         stray2-mid         [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 153, 131) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         stray3-first       [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 116, 153, 131) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         stray3-mid         [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 153, 131) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row6-fixed         stray3-last        [S] dir-style-02a android row6                             PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 153, 131) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         band-ghost+3y-r7   [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 243, 153) dot 4px profile 0.92@+0 rows 0.93@+0 → GEOMETRY OK
+L3 dir-row7-fixed         band-ghost+5y-r7   [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 243, 153) dot 4px profile 0.92@+0 rows 0.92@+1 → GEOMETRY OK
+L3 dir-row7-fixed         band-ghost+7y-r7   [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 243, 153) dot 4px profile 0.91@+0 rows 0.93@+0 → GEOMETRY OK
+L3 dir-row7-fixed         band-ghost-3y-r7   [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 137, 243, 151) dot 6px profile 0.92@+0 rows 0.91@+0 → GEOMETRY OK
+L3 dir-row7-fixed         band-hdup+1x-r7    [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 244, 151) dot 6px profile 0.92@+1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         band-hdup+2x-r7    [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 245, 151) dot 6px profile 0.85@+1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         band-hdup-2x-r7    [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (15, 140, 243, 151) dot 8px profile 0.85@-1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         dot2-left-r7       [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (13, 140, 243, 151) dot 4px profile 0.91@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         dot2-end-r7        [S] dir-style-02a android row7                             FAIL
+L3 dir-row7-fixed         stray2-gap-r7      [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         stray3-gap-r7      [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px profile 0.91@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         stray3-above-r7    [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 137, 243, 151) dot 4px profile 0.91@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         stray3-inside-r7   [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px profile 0.91@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         glyph2-r7          [S] dir-style-02a android row7                             FAIL
+L3 dir-row7-fixed         ghost+2y           [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 243, 153) dot 6px profile 0.92@+0 rows 0.90@+1 → GEOMETRY OK
+L3 dir-row7-fixed         ghost+3y           [S] dir-style-02a android row7                             FAIL
+L3 dir-row7-fixed         ghost-3y           [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 137, 243, 151) dot 6px profile 0.92@+0 rows 0.91@+0 → GEOMETRY OK
+L3 dir-row7-fixed         hdup+1x            [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 244, 151) dot 6px profile 0.92@+1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         hdup+2x            [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 245, 151) dot 6px profile 0.85@+1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         hdup-2x            [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (15, 140, 243, 151) dot 8px profile 0.85@-1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         tgt-ghost+3y       [S] dir-style-02a android row7                             FAIL
+L3 dir-row7-fixed         tgt-ghost-3y       [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 137, 243, 151) dot 6px profile 0.92@+0 rows 0.91@+0 → GEOMETRY OK
+L3 dir-row7-fixed         tgt-hdup+2x        [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 245, 151) dot 6px profile 0.85@+1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         glyph2-small       [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px profile 0.91@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         glyph2-mid      (no-op on every capture: not run)
+L3 dir-row7-fixed         stray2-first       [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         stray2-mid         [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 243, 153) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         stray3-first       [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         stray3-mid         [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 243, 154) dot 4px profile 0.91@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed         stray3-last        [S] dir-style-02a android row7                             PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         band-ghost+3y-r9   [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 153, 193) dot 4px profile 0.92@+0 rows 0.94@+0 → GEOMETRY OK
+L3 dir-row9-fixed         band-ghost+5y-r9   [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 153, 193) dot 4px profile 0.92@+0 rows 0.93@+1 → GEOMETRY OK
+L3 dir-row9-fixed         band-ghost+7y-r9   [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 153, 193) dot 4px profile 0.92@+0 rows 0.93@+0 → GEOMETRY OK
+L3 dir-row9-fixed         band-ghost-3y-r9   [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 177, 153, 191) dot 6px profile 0.92@+0 rows 0.91@+0 → GEOMETRY OK
+L3 dir-row9-fixed         band-hdup+1x-r9    [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 154, 191) dot 6px profile 0.93@+1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         band-hdup+2x-r9    [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 155, 191) dot 6px profile 0.87@+1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         band-hdup-2x-r9    [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (15, 180, 153, 191) dot 8px profile 0.87@-1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         dot2-left-r9       [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (13, 180, 153, 191) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         dot2-end-r9        [S] dir-style-02a android row9                             FAIL
+L3 dir-row9-fixed         stray2-gap-r9      [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         stray3-gap-r9      [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         stray3-above-r9    [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 177, 153, 191) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         stray3-inside-r9   [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         glyph2-r9          [S] dir-style-02a android row9                             FAIL
+L3 dir-row9-fixed         ghost+2y           [S] dir-style-02a android row9                             FAIL
+L3 dir-row9-fixed         ghost+3y           [S] dir-style-02a android row9                             FAIL
+L3 dir-row9-fixed         ghost-3y           [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 177, 153, 191) dot 6px profile 0.92@+0 rows 0.88@+0 → GEOMETRY OK
+L3 dir-row9-fixed         hdup+1x            [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 154, 191) dot 6px profile 0.93@+1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         hdup+2x            [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 155, 191) dot 6px profile 0.87@+1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         hdup-2x            [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (15, 180, 153, 191) dot 8px profile 0.87@-1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         tgt-ghost+3y       [S] dir-style-02a android row9                             FAIL
+L3 dir-row9-fixed         tgt-ghost-3y       [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 177, 153, 191) dot 6px profile 0.92@+0 rows 0.91@+0 → GEOMETRY OK
+L3 dir-row9-fixed         tgt-hdup+2x        [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 155, 191) dot 6px profile 0.87@+1 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         glyph2-small       [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         glyph2-mid      (no-op on every capture: not run)
+L3 dir-row9-fixed         stray2-first       [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         stray2-mid         [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         stray3-first       [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         stray3-mid         [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed         stray3-last        [S] dir-style-02a android row9                             PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 153, 195) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 bidi-fixed             ghost+2y           [S] bidi-tab-001 android rtl-rows                          FAIL
+L3 bidi-fixed             ghost+3y           [S] bidi-tab-001 android rtl-rows                          FAIL
+L3 bidi-fixed             ghost-3y           [S] bidi-tab-001 android rtl-rows                          FAIL
+L3 bidi-fixed             hdup+1x            [S] bidi-tab-001 android rtl-rows                          FAIL
+L3 bidi-fixed             hdup+2x            [S] bidi-tab-001 android rtl-rows                          FAIL
+L3 bidi-fixed             hdup-2x            [S] bidi-tab-001 android rtl-rows                          FAIL
+L3 bidi-fixed             tgt-ghost+3y       [S] bidi-tab-001 android rtl-rows                          FAIL
+L3 bidi-fixed             tgt-ghost-3y       [S] bidi-tab-001 android rtl-rows                          FAIL
+L3 bidi-fixed             tgt-hdup+2x        [S] bidi-tab-001 android rtl-rows                          FAIL
+L3 bidi-fixed             glyph2-small       [S] bidi-tab-001 android rtl-rows                          FAIL
+L3 bidi-fixed             glyph2-mid         [S] bidi-tab-001 android rtl-rows                          FAIL
+L3 bidi-fixed             stray2-first       [S] bidi-tab-001 android rtl-rows                          PASS   <- ACCEPTED: :(16, 36, 248) y106:(114, 135, 266) y186:(16, 36, 248) y226:(16, 36, 248) order [0.904, 0.974, 0.904, 0.904] boxes [(16, 66, 136, 149), (16, 166, 136, 249)] → GEOMETRY OK
+L3 bidi-fixed             stray2-mid         [S] bidi-tab-001 android rtl-rows                          PASS   <- ACCEPTED: :(16, 36, 248) y106:(114, 135, 266) y186:(16, 36, 248) y226:(16, 36, 248) order [0.904, 0.974, 0.904, 0.904] boxes [(16, 66, 136, 149), (16, 166, 136, 249)] → GEOMETRY OK
+L3 bidi-fixed             stray3-first       [S] bidi-tab-001 android rtl-rows                          PASS   <- ACCEPTED: :(16, 36, 248) y106:(114, 135, 266) y186:(16, 36, 248) y226:(16, 36, 248) order [0.904, 0.974, 0.904, 0.904] boxes [(16, 66, 136, 149), (16, 166, 136, 249)] → GEOMETRY OK
+L3 bidi-fixed             stray3-mid         [S] bidi-tab-001 android rtl-rows                          PASS   <- ACCEPTED: :(16, 36, 248) y106:(114, 135, 266) y186:(16, 36, 248) y226:(16, 36, 248) order [0.904, 0.974, 0.904, 0.904] boxes [(16, 66, 136, 149), (16, 166, 136, 249)] → GEOMETRY OK
+L3 bidi-fixed             stray3-last        [S] bidi-tab-001 android rtl-rows                          PASS   <- ACCEPTED: :(16, 36, 248) y106:(114, 135, 266) y186:(16, 36, 248) y226:(16, 36, 248) order [0.904, 0.974, 0.904, 0.904] boxes [(16, 66, 136, 149), (16, 166, 136, 249)] → GEOMETRY OK
+L3 stack-fixed            ghost+2y           [W] anchor-position-multicol-nested-001 android stack      FAIL
+L3 stack-fixed            ghost+3y           [W] anchor-position-multicol-nested-001 android stack      FAIL
+L3 stack-fixed            ghost-3y           [W] anchor-position-multicol-nested-001 android stack      FAIL
+L3 stack-fixed            hdup+1x            [W] anchor-position-multicol-nested-001 android stack      FAIL
+L3 stack-fixed            hdup+2x            [W] anchor-position-multicol-nested-001 android stack      FAIL
+L3 stack-fixed            hdup-2x            [W] anchor-position-multicol-nested-001 android stack      FAIL
+L3 stack-fixed            tgt-ghost+3y       [W] anchor-position-multicol-nested-001 android stack      FAIL
+L3 stack-fixed            tgt-ghost-3y       [W] anchor-position-multicol-nested-001 android stack      FAIL
+L3 stack-fixed            tgt-hdup+2x        [W] anchor-position-multicol-nested-001 android stack      FAIL
+L3 stack-fixed            glyph2-small       [W] anchor-position-multicol-nested-001 android stack      FAIL
+L3 stack-fixed            glyph2-mid         [W] anchor-position-multicol-nested-001 android stack      FAIL
+L3 stack-fixed            stray2-first       [W] anchor-position-multicol-nested-001 android stack      PASS   <- ACCEPTED: [W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] ring [0, 0, 0, 0] red 0 others 303 → GEOMETRY OK
+L3 stack-fixed            stray2-mid         [W] anchor-position-multicol-nested-001 android stack      PASS   <- ACCEPTED: [W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] ring [0, 0, 0, 0] red 0 others 304 → GEOMETRY OK
+L3 stack-fixed            stray3-first       [W] anchor-position-multicol-nested-001 android stack      PASS   <- ACCEPTED: [W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] ring [0, 0, 0, 0] red 0 others 308 → GEOMETRY OK
+L3 stack-fixed            stray3-mid         [W] anchor-position-multicol-nested-001 android stack      PASS   <- ACCEPTED: [W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] ring [0, 0, 0, 0] red 0 others 309 → GEOMETRY OK
+L3 stack-fixed            stray3-last        [W] anchor-position-multicol-nested-001 android stack      PASS   <- ACCEPTED: [W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] ring [0, 0, 0, 0] red 0 others 308 → GEOMETRY OK
+L3 001-fixed              ghost+2y           [S] dynamic-offset-rtl-001 android                         FAIL
+L3 001-fixed              ghost+3y           [S] dynamic-offset-rtl-001 android                         FAIL
+L3 001-fixed              ghost-3y           [S] dynamic-offset-rtl-001 android                         FAIL
+L3 001-fixed              hdup+1x            [S] dynamic-offset-rtl-001 android                         FAIL
+L3 001-fixed              hdup+2x            [S] dynamic-offset-rtl-001 android                         FAIL
+L3 001-fixed              hdup-2x            [S] dynamic-offset-rtl-001 android                         FAIL
+L3 001-fixed              tgt-ghost+3y       [S] dynamic-offset-rtl-001 android                         FAIL
+L3 001-fixed              tgt-ghost-3y       [S] dynamic-offset-rtl-001 android                         FAIL
+L3 001-fixed              tgt-hdup+2x        [S] dynamic-offset-rtl-001 android                         FAIL
+L3 001-fixed              glyph2-small       [S] dynamic-offset-rtl-001 android                         FAIL
+L3 001-fixed              glyph2-mid         [S] dynamic-offset-rtl-001 android                         FAIL
+L3 001-fixed              stray2-first       [S] dynamic-offset-rtl-001 android                         FAIL
+L3 001-fixed              stray2-mid         [S] dynamic-offset-rtl-001 android                         FAIL
+L3 001-fixed              stray3-first       [S] dynamic-offset-rtl-001 android                         FAIL
+L3 001-fixed              stray3-mid         [S] dynamic-offset-rtl-001 android                         FAIL
+L3 001-fixed              stray3-last        [S] dynamic-offset-rtl-001 android                         FAIL
+L3 002-fixed              ghost+2y           [W] dynamic-offset-rtl-002 android                         FAIL
+L3 002-fixed              ghost+3y           [W] dynamic-offset-rtl-002 android                         FAIL
+L3 002-fixed              ghost-3y           [W] dynamic-offset-rtl-002 android                         FAIL
+L3 002-fixed              hdup+1x            [W] dynamic-offset-rtl-002 android                         FAIL
+L3 002-fixed              hdup+2x            [W] dynamic-offset-rtl-002 android                         FAIL
+L3 002-fixed              hdup-2x            [W] dynamic-offset-rtl-002 android                         FAIL
+L3 002-fixed              tgt-ghost+3y       [W] dynamic-offset-rtl-002 android                         FAIL
+L3 002-fixed              tgt-ghost-3y       [W] dynamic-offset-rtl-002 android                         FAIL
+L3 002-fixed              tgt-hdup+2x        [W] dynamic-offset-rtl-002 android                         FAIL
+L3 002-fixed              glyph2-small       [W] dynamic-offset-rtl-002 android                         FAIL
+L3 002-fixed              glyph2-mid         [W] dynamic-offset-rtl-002 android                         FAIL
+L3 002-fixed              stray2-first       [W] dynamic-offset-rtl-002 android                         FAIL
+L3 002-fixed              stray2-mid         [W] dynamic-offset-rtl-002 android                         FAIL
+L3 002-fixed              stray3-first       [W] dynamic-offset-rtl-002 android                         FAIL
+L3 002-fixed              stray3-mid         [W] dynamic-offset-rtl-002 android                         FAIL
+L3 002-fixed              stray3-last        [W] dynamic-offset-rtl-002 android                         FAIL
+L3 r2-L3-vrl-rtl-001-fixed ghost+2y           [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+L3 r2-L3-vrl-rtl-001-fixed ghost+3y           [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+L3 r2-L3-vrl-rtl-001-fixed ghost-3y           [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+L3 r2-L3-vrl-rtl-001-fixed hdup+1x            [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+L3 r2-L3-vrl-rtl-001-fixed hdup+2x            [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+L3 r2-L3-vrl-rtl-001-fixed hdup-2x            [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+L3 r2-L3-vrl-rtl-001-fixed tgt-ghost+3y       [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+L3 r2-L3-vrl-rtl-001-fixed tgt-ghost-3y       [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+L3 r2-L3-vrl-rtl-001-fixed tgt-hdup+2x        [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+L3 r2-L3-vrl-rtl-001-fixed glyph2-small       [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+L3 r2-L3-vrl-rtl-001-fixed glyph2-mid         [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+L3 r2-L3-vrl-rtl-001-fixed stray2-first       [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+L3 r2-L3-vrl-rtl-001-fixed stray2-mid         [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+L3 r2-L3-vrl-rtl-001-fixed stray3-first       [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+L3 r2-L3-vrl-rtl-001-fixed stray3-mid         [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+L3 r2-L3-vrl-rtl-001-fixed stray3-last        [S] dynamic-offset-vrl-rtl-001 android                     FAIL
+
+167 key reads; ACCEPTED 83
+  ACCEPTED L3 dir-row6-fixed band-ghost+3y-r6 [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed band-ghost+5y-r6 [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed band-ghost+7y-r6 [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed band-ghost-3y-r6 [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed band-hdup+1x-r6 [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed band-hdup+2x-r6 [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed band-hdup-2x-r6 [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed dot2-left-r6 [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed stray2-gap-r6 [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed stray3-gap-r6 [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed stray3-above-r6 [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed stray3-inside-r6 [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed ghost-3y [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed hdup+1x [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed hdup+2x [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed hdup-2x [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed tgt-ghost-3y [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed tgt-hdup+2x [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed glyph2-small [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed stray2-first [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed stray2-mid [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed stray3-first [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed stray3-mid [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row6-fixed stray3-last [S] dir-style-02a android row6
+  ACCEPTED L3 dir-row7-fixed band-ghost+3y-r7 [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed band-ghost+5y-r7 [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed band-ghost+7y-r7 [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed band-ghost-3y-r7 [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed band-hdup+1x-r7 [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed band-hdup+2x-r7 [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed band-hdup-2x-r7 [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed dot2-left-r7 [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed stray2-gap-r7 [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed stray3-gap-r7 [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed stray3-above-r7 [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed stray3-inside-r7 [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed ghost+2y [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed ghost-3y [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed hdup+1x [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed hdup+2x [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed hdup-2x [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed tgt-ghost-3y [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed tgt-hdup+2x [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed glyph2-small [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed stray2-first [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed stray2-mid [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed stray3-first [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed stray3-mid [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row7-fixed stray3-last [S] dir-style-02a android row7
+  ACCEPTED L3 dir-row9-fixed band-ghost+3y-r9 [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed band-ghost+5y-r9 [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed band-ghost+7y-r9 [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed band-ghost-3y-r9 [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed band-hdup+1x-r9 [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed band-hdup+2x-r9 [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed band-hdup-2x-r9 [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed dot2-left-r9 [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed stray2-gap-r9 [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed stray3-gap-r9 [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed stray3-above-r9 [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed stray3-inside-r9 [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed ghost-3y [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed hdup+1x [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed hdup+2x [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed hdup-2x [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed tgt-ghost-3y [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed tgt-hdup+2x [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed glyph2-small [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed stray2-first [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed stray2-mid [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed stray3-first [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed stray3-mid [S] dir-style-02a android row9
+  ACCEPTED L3 dir-row9-fixed stray3-last [S] dir-style-02a android row9
+  ACCEPTED L3 bidi-fixed stray2-first [S] bidi-tab-001 android rtl-rows
+  ACCEPTED L3 bidi-fixed stray2-mid [S] bidi-tab-001 android rtl-rows
+  ACCEPTED L3 bidi-fixed stray3-first [S] bidi-tab-001 android rtl-rows
+  ACCEPTED L3 bidi-fixed stray3-mid [S] bidi-tab-001 android rtl-rows
+  ACCEPTED L3 bidi-fixed stray3-last [S] bidi-tab-001 android rtl-rows
+  ACCEPTED L3 stack-fixed stray2-first [W] anchor-position-multicol-nested-001 android stack
+  ACCEPTED L3 stack-fixed stray2-mid [W] anchor-position-multicol-nested-001 android stack
+  ACCEPTED L3 stack-fixed stray3-first [W] anchor-position-multicol-nested-001 android stack
+  ACCEPTED L3 stack-fixed stray3-mid [W] anchor-position-multicol-nested-001 android stack
+  ACCEPTED L3 stack-fixed stray3-last [W] anchor-position-multicol-nested-001 android stack

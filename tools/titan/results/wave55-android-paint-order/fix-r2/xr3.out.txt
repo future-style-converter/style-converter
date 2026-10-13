@@ -1,0 +1,44 @@
+# /opt/homebrew/bin/python3.12 -I -B fix-r2/xr3.py <gunzip fix-r2/fixr2-census-fix.tsv.gz> <gunzip fix-r2/fixr2-census-xr3.tsv.gz> <gunzip fix-r2/fixr2-census-md1.tsv.gz> tools/titan/runs/wave54-final/sections tools/titan/results/wave55-plan/expectations.json
+# TSV sha256 (uncompressed): fix b956343af80970210a15e5742b1d85beef8e469024421a92e501b535bdbabe5d · xr3 b956343af80970210a15e5742b1d85beef8e469024421a92e501b535bdbabe5d · md1 4b7b5167ea8665534e6a8a99145e657f3dfd2609851ce153b3715f0489d6c5ab
+# fix-r2/xr3.py — rows fix 10719 · xr3 10719 · md1 10719
+(1) IR scan, Overflow* declarations by (type, path):
+     2005  OverflowY            /*/properties
+     1997  OverflowX            /*/properties
+        2  OverflowClipMargin   /*/properties
+        1  OverflowWrap         /*/properties
+(2) specified (overflowX, overflowY) → Compose clipsX / clipsY / shouldClip, components:
+    10512  x=VISIBLE  y=VISIBLE  clipsX=false clipsY=false shouldClip=false
+      134  x=HIDDEN   y=HIDDEN   clipsX=true  clipsY=true  shouldClip=true
+       20  x=SCROLL   y=SCROLL   clipsX=true  clipsY=true  shouldClip=true
+       16  x=AUTO     y=AUTO     clipsX=true  clipsY=true  shouldClip=true
+        9  x=CLIP     y=CLIP     clipsX=true  clipsY=true  shouldClip=true
+        7  x=VISIBLE  y=CLIP     clipsX=false clipsY=true  shouldClip=true
+        7  x=CLIP     y=VISIBLE  clipsX=true  clipsY=false shouldClip=true
+        6  x=VISIBLE  y=AUTO     clipsX=true  clipsY=true  shouldClip=true
+        4  x=-        y=-        clipsX=-     clipsY=-     shouldClip=-
+        2  x=VISIBLE  y=SCROLL   clipsX=true  clipsY=true  shouldClip=true
+        1  x=VISIBLE  y=HIDDEN   clipsX=true  clipsY=true  shouldClip=true
+        1  x=AUTO     y=VISIBLE  clipsX=true  clipsY=true  shouldClip=true
+    clipsX != shouldClip (the only rows XR3 can touch): 7; ERR rows (no config): 4
+      wpt__css-multicol__abspos-multicol-in-second-outer-clipped abspos-multicol-in-second-outer-clipped__1__0-039 tag=- band=false legacyBand=false self=false sig=SizeElement>DrawWithContentElement
+      wpt__css-overflow__clip-002 wpt__css-overflow__clip-002__2-008 tag=- band=false legacyBand=false self=false sig=PaddingElement>LayoutElement>SizeElement>BackgroundElement>DrawWithContentElement
+      wpt__css-overflow__clip-003 clip-003__3__0-020 tag=- band=false legacyBand=false self=false sig=LayoutElement>SizeElement>BackgroundElement>DrawWithContentElement
+      wpt__css-overflow__clip-003 clip-003__4__0-023 tag=- band=false legacyBand=false self=false sig=LayoutElement>SizeElement>BackgroundElement>DrawWithContentElement
+      wpt__css-overflow__clip-004 wpt__css-overflow__clip-004__2-029 tag=- band=false legacyBand=false self=false sig=PaddingElement>LayoutElement>SizeElement>BackgroundElement>DrawWithContentElement>PaddingElement
+      wpt__css-overflow__clip-005 wpt__css-overflow__clip-005__2-035 tag=- band=false legacyBand=false self=false sig=PaddingElement>LayoutElement>SizeElement>DrawWithContentElement>BackgroundElement>DrawWithContentElement>PaddingElement
+      wpt__css-overflow__clip-007 clip-007__1__0-043 tag=- band=false legacyBand=false self=false sig=SizeElement>DrawWithContentElement
+    of them with a band: 0 · on the legacy band route: 0
+(3) census XR3-mutated tree vs fix tree: rows 10719, differing cells 0, differing rows 0
+(4) control MD1 (unconditional behind-content lines) vs fix tree: differing rows 18; all of them clipping legacy-band rows: True (clipping legacy-band rows 29)
+(5) pin P3a flex safe-001: wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-001__0-023 x=VISIBLE y=VISIBLE clipsX=false shouldClip=false band=true legacyBand=true
+(5) pin P3b-d background-clip-002: wpt__css-backgrounds__background-clip-002__2-095 x=VISIBLE y=VISIBLE clipsX=false shouldClip=false band=true legacyBand=true
+(5) pin P3h revert-layer-015: wpt__css-cascade__revert-layer-015__0-077 x=CLIP y=CLIP clipsX=true shouldClip=true band=true legacyBand=true
+(5) pin P3i anchor-scope-scroll: wpt__css-anchor-position__anchor-scope-scroll__0-781 x=VISIBLE y=HIDDEN clipsX=true shouldClip=true band=true legacyBand=true
+(5) pin P4b clip-path-filter-order: 5 components, clipsX != shouldClip on 0, banded 0
+(6) wpt__css-multicol__abspos-multicol-in-second-outer-clipped: named in expectations.json L6 = False
+(6) wpt__css-overflow__clip-002: named in expectations.json L6 = False
+(6) wpt__css-overflow__clip-003: named in expectations.json L6 = False
+(6) wpt__css-overflow__clip-004: named in expectations.json L6 = False
+(6) wpt__css-overflow__clip-005: named in expectations.json L6 = False
+(6) wpt__css-overflow__clip-007: named in expectations.json L6 = False
+exit 0

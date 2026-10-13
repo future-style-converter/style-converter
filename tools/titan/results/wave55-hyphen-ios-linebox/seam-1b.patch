@@ -1,0 +1,31 @@
+# seam-1b.patch — wave 55, lane L1 (hyphen-ios-linebox), CONTINGENCY unit NB-ios-b (lands only with
+#   `land-units.sh --contingency L1:NB-ios-b`, after the stage-1 probe prints `anchor: group 1 line 1 offset 1` and nothing else)
+# base: 611c9f932bcfefa147a35f6c5f356d42709ddf84 + unit-NB-ios.patch + seam-1.patch (NB-ios landed; L1:NB-ios < L1:NB-ios-b)
+# seam file: runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+# sha256 at base (NB-ios applied): 208e41bab6a08464549da734ba55822615b2426a61bd006c73bc76fff904c5f5 (6309 lines)
+# anchor (PLAN §3 .swift row 6b): PlaceholderLabel.body `.padding(.vertical, leading.halfLeading)` (611c9f93 :5335 → :5353
+#   after seam 1), the line right after the "// already centred in it). Zero when no line-height set." banner line →
+#   `.padding(NormalLineBox.verticalPads(halfLeading: leading.halfLeading, blinkPinned: effectiveLineHeight == nil && pinnedBoxHeight != nil))`.
+#   `effectiveLineHeight == nil && pinnedBoxHeight != nil` is exactly "Blink-pinned": a pin needs a non-nil used box, and with no
+#   effective box the used box is NormalLineBox's. Every other run gets EdgeInsets(half, 0, half, 0) = the old `.padding(.vertical, half)`.
+# Lands with unit-NB-ios-b.patch FIRST (applyOrder): it consumes NormalLineBox.verticalPads, which that patch adds.
+# Apply: git apply tools/titan/results/wave55-hyphen-ios-linebox/unit-NB-ios-b.patch tools/titan/results/wave55-hyphen-ios-linebox/seam-1b.patch
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+index 06cc4e93..03125a90 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+@@ -5350,7 +5350,13 @@ private struct PlaceholderLabel: View {
+             // + 2 × half-leading = line-height, the same box the
+             // minHeight frame below already produced (glyphs were
+             // already centred in it). Zero when no line-height set.
+-            .padding(.vertical, leading.halfLeading)
++            // Wave 55 (lane L1, NB-ios-b CONTINGENCY): the same band, split by
++            // NormalLineBox.verticalPads — 0 above / 2× below for a
++            // Blink-pinned declared-`normal` run (no effective box, pinned),
++            // (half, half) for every other run.
++            .padding(NormalLineBox.verticalPads(
++                halfLeading: leading.halfLeading,
++                blinkPinned: effectiveLineHeight == nil && pinnedBoxHeight != nil))
+             // CSS `line-height` — total line-box height. SwiftUI's
+             // `.lineSpacing` adds EXTRA between lines, which is invisible
+             // for a single-line placeholder. Force the text frame to be

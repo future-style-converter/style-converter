@@ -1,0 +1,6 @@
+# sweep-ship.txt — R9 + the pre-push checks on the ship tree: tree 56595fa7 + the docs / snapshot edits of this commit; 2026-10-13T09:13:58Z
+tooling: # tests 2351 # pass 2347 # fail 0 # skipped 4 
+doc-staleness rc=0
+conformance: IR conformance: all documents valid (v1 goldens + v2 goldens)
+smoke --quick: 09:14:43
+smoke --quick rc=0 (09:16:32);   Doc staleness: ✓ all doc claims match live source-of-truth output   Tier 5: ✓ 90 captured · 0 failed · 0 skipped (15 components × 6 states web side) [0;32m✓ all smoke tests passed[0m 

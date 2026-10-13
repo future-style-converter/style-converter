@@ -1,0 +1,22 @@
+abspos heading components firing (undeclared block edge, horizontal): 4 docs 4
+    ('wpt__css-text-decor__text-decoration-inset-005', 'text-decoration-inset-005__1__0-069', 'h1', ['top', 'bottom'], True)
+    ('wpt__css-text-decor__text-decoration-inset-006', 'text-decoration-inset-006__1__0-076', 'h1', ['top', 'bottom'], True)
+    ('wpt__css-text-decor__text-decoration-inset-011', 'text-decoration-inset-011__1__0-095', 'h1', ['top', 'bottom'], True)
+    ('wpt__css-text-decor__text-decoration-inset-014', 'text-decoration-inset-014__1__0-110', 'h1', ['top', 'bottom'], True)
+abspos heading components identity (both edges declared or vertical): 12 docs 12
+    wpt__css-text-decor__text-decoration-inset-001
+    wpt__css-text-decor__text-decoration-inset-002
+    wpt__css-text-decor__text-decoration-inset-003
+    wpt__css-text-decor__text-decoration-inset-004
+    wpt__css-text-decor__text-decoration-inset-007
+    wpt__css-text-decor__text-decoration-inset-008
+    wpt__css-text-decor__text-decoration-inset-009
+    wpt__css-text-decor__text-decoration-inset-012
+    wpt__css-text-decor__text-decoration-inset-013
+    wpt__css-text-decor__text-decoration-inset-015
+    wpt__css-text-decor__text-decoration-inset-016
+    wpt__css-text-decor__text-decoration-inset-024
+abspos <p> with an undeclared block edge (out of scope): 4 docs 3
+    wpt__CSS2__css21-errata__s-11-1-1b-005
+    wpt__CSS2__css21-errata__s-11-1-1b-006
+    wpt__css-anchor-position__anchor-center-safe-rtl

@@ -1,0 +1,20 @@
+{
+ "name": "A3-root-table",
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMargin.kt",
+ "pre": "3bb03d886fb06ced20e65dc170197cb27310068371d575c120554f809e998a65",
+ "mutated": "0639071acee6c9610fb4ec18022f628371d93a7fecd29b897cf8d2e397f37361",
+ "post": "3bb03d886fb06ced20e65dc170197cb27310068371d575c120554f809e998a65",
+ "red_rc": 1,
+ "red_failures": [
+  "UaPositionedHeadingMarginTest > author sizes - absolute px is the basis, parent-relative and shorthand-only are logged",
+  "UaPositionedHeadingMarginTest > inset-005, -006 and -011 - the abspos h1 takes 0_67 x its 32px UA face, face held or applied",
+  "UaPositionedHeadingMarginTest > RELATIVE and STICKY headings stay in flow - the SAME list, FIXED fires",
+  "UaPositionedHeadingMarginTest > an abspos h1 declaring only MarginTop takes the UA bottom only",
+  "UaPositionedHeadingMarginTest > the seam replay's own font step feeds the same margin",
+  "UaPositionedHeadingMarginTest > inset-014 - the monospace abspos h1 takes 0_67 x 26 (the 13px fixed default)"
+ ],
+ "red_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/6; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "green_rc": 0,
+ "green_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "verdict": "RED-THEN-GREEN"
+}

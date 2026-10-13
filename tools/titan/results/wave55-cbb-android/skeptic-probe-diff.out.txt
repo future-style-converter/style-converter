@@ -1,0 +1,16 @@
+compared 1243 android captures (missing in a base run: 0)
+base-run noise (wave54-final vs wave55-open differ): 0
+moved at wave54-probe (HEAD + 5b333c8a) vs both bases: 13
+  moved css-flexbox/wpt__css-flexbox__abspos__abspos-autopos-htb-ltr.png differing-pixels-vs-wave54-final 4400
+  moved css-flexbox/wpt__css-flexbox__abspos__abspos-autopos-htb-rtl.png differing-pixels-vs-wave54-final 7400
+  moved css-flexbox/wpt__css-flexbox__abspos__abspos-autopos-vlr-ltr.png differing-pixels-vs-wave54-final 4400
+  moved css-flexbox/wpt__css-flexbox__abspos__abspos-autopos-vlr-rtl.png differing-pixels-vs-wave54-final 3400
+  moved css-flexbox/wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr.png differing-pixels-vs-wave54-final 4400
+  moved css-flexbox/wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl.png differing-pixels-vs-wave54-final 3400
+  moved css-position/wpt__css-position__position-absolute-semi-replaced-stretch-button.png differing-pixels-vs-wave54-final 960
+  moved css-position/wpt__css-position__position-absolute-semi-replaced-stretch-input.png differing-pixels-vs-wave54-final 12640
+  moved css-position/wpt__css-position__position-absolute-semi-replaced-stretch-other.png differing-pixels-vs-wave54-final 9108
+  moved filter-effects/wpt__filter-effects__backdrop-filter-nested-border-radius-clip-2.png differing-pixels-vs-wave54-final 5267
+  moved filter-effects/wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3.png differing-pixels-vs-wave54-final 4449
+  moved filter-effects/wpt__filter-effects__backdrop-filter-nested-border-radius-clip-4.png differing-pixels-vs-wave54-final 3435
+  moved filter-effects/wpt__filter-effects__backdrop-filter-nested-border-radius-clip.png differing-pixels-vs-wave54-final 5249

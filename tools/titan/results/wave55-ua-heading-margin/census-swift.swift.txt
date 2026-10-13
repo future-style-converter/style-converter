@@ -1,0 +1,79 @@
+//
+//  L4CensusTests.swift — TEMPORARY census harness (wave 55 lane L4), NOT part of any unit:
+//  run-census-swift.sh copies it into the lane worktree's SwiftUI test target (placeholders
+//  filled), runs ONLY this class under Catalyst, and deletes it. It walks EVERY per-test IR
+//  document of a run through the production decoder and replays mergedProperties(now:) at every
+//  node (merge → ListStyleUaRule → UAElementFontRule with the HEAD flag AND with
+//  UAHeadingFoldGate → UAPositionedHeadingMargin), so the iOS radius is the shipped Swift code's.
+//
+
+import XCTest
+@testable import StyleConverterRuntime
+
+final class L4CensusTests: XCTestCase {
+
+    func testCensus() throws {
+        let root = URL(fileURLWithPath: "@@SHARED_ROOT@@/tools/titan/runs/@@RUN@@/sections")
+        let fm = FileManager.default
+        var out = ""
+        var docs = 0
+        var u1 = Set<String>(), u2 = Set<String>()
+        let marginTags: Set<String> = ["p", "ul", "ol", "blockquote", "pre", "figure", "h1", "h2", "h3", "h4", "h5", "h6"]
+        for sec in try fm.contentsOfDirectory(atPath: root.path).sorted() {
+            let dir = root.appendingPathComponent(sec).appendingPathComponent("per-test-ir")
+            guard let files = try? fm.contentsOfDirectory(atPath: dir.path) else { continue }
+            for name in files.filter({ $0.hasSuffix(".json") }).sorted() {
+                docs += 1
+                let doc = "\(sec)/\(name.replacingOccurrences(of: ".json", with: ""))"
+                let data = try Data(contentsOf: dir.appendingPathComponent(name))
+                guard let roots = try? JSONDecoder().decode(IRDocument.self, from: data).components else {
+                    out += "DECODE-FAIL \(doc)\n"; continue
+                }
+                func walk(_ node: IRComponent, _ inherited: [IRProperty], _ isRoot: Bool, _ consumed: Bool) {
+                    let own = node.properties
+                    let tag = (node.meta?.sourceTag ?? "").lowercased()
+                    let preUA = ListStyleUaRule.apply(sourceTag: node.meta?.sourceTag, own: own,
+                        merged: InheritedText.merge(own: InheritedText.resolvingCurrentColorOnColor(own), inherited: inherited))
+                    let inFlow = (node.children ?? []).filter { !ComponentRenderer.isOutOfFlow($0) }
+                    let oldFlag = node.children?.isEmpty == false
+                    let newFlag = UAHeadingFoldGate.standsDown(component: node, inFlowChildren: inFlow, mergedPreUA: preUA)
+                    let fontOld = UAElementFontRule.apply(sourceTag: node.meta?.sourceTag, own: own, merged: preUA, hasElementChildren: oldFlag)
+                    let fontNew = UAElementFontRule.apply(sourceTag: node.meta?.sourceTag, own: own, merged: preUA, hasElementChildren: newFlag)
+                    let mOld = UAPositionedHeadingMargin.apply(sourceTag: node.meta?.sourceTag, own: own, preUA: preUA, merged: fontOld, enabled: true)
+                    let mNew = UAPositionedHeadingMargin.apply(sourceTag: node.meta?.sourceTag, own: own, preUA: preUA, merged: fontNew, enabled: true)
+                    var anomalies: [String] = []
+                    if own.contains(where: { $0.type == "All" }) { anomalies.append("All") }
+                    if !(node.selectors ?? []).isEmpty || !(node.media ?? []).isEmpty { anomalies.append("buckets") }
+                    let pos = LayoutExtractor.extract(from: own)?.position
+                    let oof = pos == .absolute || pos == .fixed
+                    if marginTags.contains(tag) && oof {
+                        let addedNew = Array(mNew.dropFirst(fontNew.count)), addedOld = Array(mOld.dropFirst(fontOld.count))
+                        let fires = mNew != fontNew
+                        if fires && !consumed { u1.insert(doc) }
+                        let edges = (UABlockMargin.declaresBlockMarginTop(own) ? "T" : "") + (UABlockMargin.declaresBlockMarginBottom(own) ? "B" : "")
+                        let added = addedNew.map { "\($0.type)=\(ValueExtractors.extractPx($0.data).map { String(format: "%.4f", Double($0)) } ?? "?")" }
+                        out += "OOF \(doc) \(node.id) tag=\(tag) root=\(isRoot) decl=\(edges.isEmpty ? "-" : edges) fires=\(fires) " +
+                            "consumed=\(consumed) faceIndependent=\(addedNew == addedOld) added=[\(added.joined(separator: ","))]" +
+                            (anomalies.isEmpty ? "" : " ANOMALY=\(anomalies)") + "\n"
+                    } else if mNew != fontNew || mOld != fontOld {
+                        out += "UNEXPECTED-FIRE \(doc) \(node.id) tag=\(tag) oof=\(oof)\n"
+                    }
+                    if UAElementFontRule.isBold(forTag: tag) && oldFlag != newFlag {
+                        if !consumed { u2.insert(doc) }
+                        out += "U2-FLIP \(doc) \(node.id) tag=\(tag) old=\(oldFlag) new=\(newFlag) consumed=\(consumed) faceChanged=\(fontNew != fontOld)\n"
+                    }
+                    let folded = InlineRunFlow.fold(runs: node.meta?.runs, children: FlexboxApplier.sorted(inFlow),
+                                                    totalChildCount: node.children?.count ?? 0,
+                                                    containerProperties: mNew, containerLang: node.meta?.lang) != nil
+                    let next = InheritedText.inheritable(from: mNew)
+                    for child in node.children ?? [] { walk(child, next, false, consumed || folded) }
+                }
+                for r in roots { walk(r, [], true, false) }
+            }
+        }
+        out += "SUMMARY run=@@RUN@@ docs=\(docs) u1Docs=\(u1.count) u2Docs=\(u2.count)\n"
+        for d in u1.sorted() { out += "U1-DOC \(d)\n" }
+        for d in u2.sorted() { out += "U2-DOC \(d)\n" }
+        try out.write(toFile: "@@OUT@@", atomically: true, encoding: .utf8)
+    }
+}

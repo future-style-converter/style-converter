@@ -1,0 +1,4 @@
+001 ios · wave54-ab-drop-U3b 0.9778 · wave54-final 0.9611 · X 0.9611 · Rw 0.978 · Rm 0.978 · R0 0.9803 · Rd 0.9601 · R1 0.9628 · Rm1 0.9628
+002 ios · wave54-ab-drop-U3b 0.9692 · wave54-final 0.9534 · Rm 0.9691 · Rm1 0.9558
+003 ios · wave54-ab-drop-U3b 0.9758 · wave54-final 0.957 · X 0.957 · Rw 0.9759 · Rm 0.9759 · R0 0.9785 · Rd 0.9559 · R1 0.9592 · Rm1 0.9592
+004 ios · wave54-ab-drop-U3b 0.9742 · wave54-final 0.9477 · X 0.9477 · Rw 0.975 · Rm 0.975 · R0 0.9782 · Rd 0.9494 · R1 0.9556 · Rm1 0.9556

@@ -1,0 +1,14 @@
+        result = ClipPathApplier.applyClipPath(result, config.clipPath, collapsed)
+
+        // Apply mask
+=====
+
+        // Apply mask
+#####
+the plus-filter ref demands.
+        result = FilterApplier.applyForegroundFilters(result, config.filters)
+
+=====
+the plus-filter ref demands.
+        result = FilterApplier.applyForegroundFilters(result, config.filters)
+        result = ClipPathApplier.applyClipPath(result, config.clipPath, collapsed)

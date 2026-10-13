@@ -1,0 +1,40 @@
+{
+  "run": "wave54-final",
+  "rule": "iOS PlaceholderLabel run whose effective LineHeight is the declared keyword normal, under WPT capture, with an exact line count",
+  "captureCarriers": {
+    "web": [],
+    "android": [],
+    "ios": [
+      "wpt__css-text-decor__text-decoration-dotted-001",
+      "wpt__css-text-decor__text-decoration-dotted-002",
+      "wpt__css-text__boundary-shaping__boundary-shaping-001",
+      "wpt__css-text__boundary-shaping__boundary-shaping-002",
+      "wpt__css-text__boundary-shaping__boundary-shaping-003",
+      "wpt__css-text__boundary-shaping__boundary-shaping-004",
+      "wpt__css-text__boundary-shaping__boundary-shaping-005",
+      "wpt__css-text__boundary-shaping__boundary-shaping-006",
+      "wpt__css-text__boundary-shaping__boundary-shaping-007",
+      "wpt__css-text__boundary-shaping__boundary-shaping-008",
+      "wpt__css-text__hyphens__hyphenate-character-001",
+      "wpt__css-text__hyphens__hyphenate-character-002",
+      "wpt__css-text__hyphens__hyphenate-character-003",
+      "wpt__css-text__hyphens__hyphenate-character-004"
+    ]
+  },
+  "wireCarriers": [],
+  "mustNotMoveInRadius": {
+    "ios": [
+      "wpt__css-cascade__all-prop-001",
+      "wpt__css-counter-styles__counter-style-at-rule__disclosure-styles",
+      "wpt__css-tables__anonymous-table-ws-001",
+      "wpt__css-text__boundary-shaping__boundary-shaping-010",
+      "wpt__css-text__hyphens__hyphens-vertical-001"
+    ]
+  },
+  "targets": [
+    "wpt__css-text__hyphens__hyphenate-character-001",
+    "wpt__css-text__hyphens__hyphenate-character-002",
+    "wpt__css-text__hyphens__hyphenate-character-003",
+    "wpt__css-text__hyphens__hyphenate-character-004"
+  ]
+}

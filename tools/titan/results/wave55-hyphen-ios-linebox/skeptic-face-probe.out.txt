@@ -1,0 +1,23 @@
+# wave55 L1 skeptic — throwaway face-branch probe (SkepticFaceBranchProbe.swift, written in the skeptic worktree only, deleted after; NOT delivered)
+# registers the committed tools/titan/fonts/mono-pin/DejaVuSansMono.ttf as the document face 'monospace' (DocumentFontRegistry, as DocumentFaceMetricsTests does) and asserts
+#   faceMetrics(92, .monospaced, faceName: <resolved>) == that UIFont's (ascender, descender, leading)  and  Blink box(face) != Blink box(no-face design)
+## NB-ios state (green):
+SKEPTIC face DejaVuSansMono asc 85.396484375 desc -21.697265625 gap 0.0 lineHeight 107.0
+SKEPTIC blink box 92 px: face 107.0 vs design-only 108.0
+Test Case '-[StyleConverterRuntimeTests.SkepticFaceBranchProbe testDocumentFaceBranchIsMeasured]' passed (0.032 seconds).
+## SX1b mutated (faceMetrics skips the document face) — the probe goes RED while all 9 NormalLineBoxTests stay green:
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP1DejaVu16IsTheRefNineteenPixelPitch]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP2EachTermRoundsAloneNeverTheSum]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP3HalvesRoundAwayFromZero]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP4BlinkBoxOnlyUnderAllFourGuards]' passed (0.100 seconds).
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP5EffectiveValueIsReturnedVerbatim]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP6FaceResolutionMatchesLineBoxMetrics]' passed (0.014 seconds).
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP7VerbatimHostInputs]' passed (0.011 seconds).
+Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testP8VerticalRunIsDeclinedByTheHorizontalGuard]' passed (0.004 seconds).
+runtimes/swiftui/Tests/StyleConverterRuntimeTests/SkepticFaceBranchProbe.swift:25: error: -[StyleConverterRuntimeTests.SkepticFaceBranchProbe testDocumentFaceBranchIsMeasured] : XCTAssertEqual failed: ("[88.9453125, -19.40625, 0.0]") is not equal to ("[85.396484375, -21.697265625, 0.0]")
+runtimes/swiftui/Tests/StyleConverterRuntimeTests/SkepticFaceBranchProbe.swift:31: error: -[StyleConverterRuntimeTests.SkepticFaceBranchProbe testDocumentFaceBranchIsMeasured] : XCTAssertNotEqual failed: ("108.0") is equal to ("108.0")
+Test Case '-[StyleConverterRuntimeTests.SkepticFaceBranchProbe testDocumentFaceBranchIsMeasured]' failed (2.828 seconds).
+## restored (byte-exact, sha256 929108b6…c637), green:
+Test Case '-[StyleConverterRuntimeTests.SkepticFaceBranchProbe testDocumentFaceBranchIsMeasured]' passed (0.010 seconds).
+	 Executed 10 tests, with 1 test skipped and 0 failures (0 unexpected) in 0.133 (0.189) seconds
+	 Executed 10 tests, with 1 test skipped and 0 failures (0 unexpected) in 0.133 (0.191) seconds

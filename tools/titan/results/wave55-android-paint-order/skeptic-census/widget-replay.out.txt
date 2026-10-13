@@ -1,0 +1,4 @@
+revert-layer-015: 326 band px turned white
+first-line-and-placeholder: 326 band px turned white
+css-cascade/revert-layer-015 android  capture 0.9663  U2-replay 0.9707  Δ 0.0044  wptPass undefined → undefined
+css-pseudo/first-line-and-placeholder android  capture 0.9743  U2-replay 0.9765  Δ 0.0022  wptPass undefined → undefined

@@ -1,0 +1,18 @@
+U1 host-inactive Column-loop parents with oof children: 53 children 65 docs 17
+   of which RTL parents: 7
+U1 STACK docs (LTR parents, an oof child after an oof sibling of non-zero height): 3
+    wpt__css-anchor-position__anchor-position-multicol-004 ['anchor-position-multicol-004__1__0__1__3__1-665']
+    wpt__css-anchor-position__anchor-position-multicol-nested-001 ['anchor-position-multicol-nested-001__1__1__0__2__1-773', 'anchor-position-multicol-nested-001__1__1__0__2__2-774', 'anchor-position-multicol-nested-001__1__1__0__2__3-775', 'anchor-position-multicol-nested-001__1__2__1-778', 'anchor-position-multicol-nested-001__1__2__2-779', 'anchor-position-multicol-nested-001__1__2__3-780']
+    wpt__selectors__dir-style-02a ['dir-style-02a__4__0__1-098']
+U2 RTL parents with px Width and an inline-inset oof child: 11 docs 7
+    ('wpt__css-text__bidi__bidi-tab-001', 'bidi__bidi-tab-001__2__0-038', 'inactive')
+    ('wpt__css-text__bidi__bidi-tab-001', 'bidi__bidi-tab-001__3__0-041', 'inactive')
+    ('wpt__css-text__bidi__bidi-tab-001', 'bidi__bidi-tab-001__7__0-051', 'inactive')
+    ('wpt__css-text__bidi__bidi-tab-001', 'bidi__bidi-tab-001__9__0-057', 'inactive')
+    ('wpt__css-text__hyphens__hyphenate-character-005', 'hyphens__hyphenate-character-005__0__0-209', 'inactive')
+    ('wpt__css-writing-modes__dynamic-offset-rtl-001', 'wpt__css-writing-modes__dynamic-offset-rtl-001__1-752', 'active')
+    ('wpt__css-writing-modes__dynamic-offset-rtl-002', 'wpt__css-writing-modes__dynamic-offset-rtl-002__1-755', 'active')
+    ('wpt__css-writing-modes__dynamic-offset-vrl-rtl-001', 'wpt__css-writing-modes__dynamic-offset-vrl-rtl-001__1-764', 'active')
+    ('wpt__css-writing-modes__dynamic-offset-vrl-rtl-002', 'wpt__css-writing-modes__dynamic-offset-vrl-rtl-002__1-767', 'active')
+    ('wpt__selectors__dir-style-02a', 'dir-style-02a__3__2-092', 'inactive')
+    ('wpt__selectors__dir-style-02a', 'dir-style-02a__4__2-101', 'inactive')

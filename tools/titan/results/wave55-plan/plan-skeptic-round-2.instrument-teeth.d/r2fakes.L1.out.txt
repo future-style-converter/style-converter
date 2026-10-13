@@ -1,0 +1,25 @@
+L6 picked: {'abspos/flex-abspos-staticpos-align-self-safe-001': 'child@39,39 -3,+0', 'abspos/flex-abspos-staticpos-align-self-safe-002': 'child@44,272 -3,+0', 'abspos/grid-abspos-staticpos-align-self-001': 'child@19,30 +3,+0', 'abspos/grid-abspos-staticpos-justify-self-001': 'child@30,19 +3,+0', 'abspos/grid-abspos-staticpos-align-self-vertWM-001': 'child@18,19 +3,+0', 'abspos/grid-abspos-staticpos-align-self-rtl-001': 'child@33,18 +3,+0'}
+L1-one-hyph-removed                        gate-exit 1  hyphen-ios-linebox 003 ios                                 FAIL   rejected
+      , 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 0.801 → LINEBOX WRONG (glyphs: line 1 correlation 0.801 with the base's line (< 0.97: glyphs moved, not only the line box))
+L1-one-hyph-removed                        gate-exit 1  hyphen-ios-linebox 004 ios                                 FAIL   rejected
+      , 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 0.693 → LINEBOX WRONG (glyphs: line 1 correlation 0.693 with the base's line (< 0.97: glyphs moved, not only the line box))
+L1-g1l2-last-cell-cut                      gate-exit 1  hyphen-ios-linebox 001 ios                                 FAIL   rejected
+      , 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 0.794 → LINEBOX WRONG (glyphs: line 2 correlation 0.794 with the base's line (< 0.97: glyphs moved, not only the line box))
+L1-g1l2-last-cell-cut                      gate-exit 1  hyphen-ios-linebox 003 ios                                 FAIL   rejected
+      , 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 0.922 → LINEBOX WRONG (glyphs: line 2 correlation 0.922 with the base's line (< 0.97: glyphs moved, not only the line box))
+L1-g1l2-last-cell-cut                      gate-exit 1  hyphen-ios-linebox 004 ios                                 FAIL   rejected
+      , 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 0.928 → LINEBOX WRONG (glyphs: line 2 correlation 0.928 with the base's line (< 0.97: glyphs moved, not only the line box))
+L1-g3l2+1x                                 gate-exit 1  hyphen-ios-linebox 001 ios                                 FAIL   rejected
+       0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 0.731 → LINEBOX WRONG (glyphs: line 11 correlation 0.731 with the base's line (< 0.97: glyphs moved, not only the line box))
+L1-g3l2+1x                                 gate-exit 1  hyphen-ios-linebox 003 ios                                 FAIL   rejected
+       0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 0.747 → LINEBOX WRONG (glyphs: line 11 correlation 0.747 with the base's line (< 0.97: glyphs moved, not only the line box))
+L1-g3l2+1x                                 gate-exit 1  hyphen-ios-linebox 004 ios                                 FAIL   rejected
+       0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 0.591 → LINEBOX WRONG (glyphs: line 10 correlation 0.591 with the base's line (< 0.97: glyphs moved, not only the line box))
+L1-all+1x                                  gate-exit 1  hyphen-ios-linebox 001 ios                                 FAIL   rejected
+       0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 0.528 → LINEBOX WRONG (glyphs: line 13 correlation 0.528 with the base's line (< 0.97: glyphs moved, not only the line box))
+L1-all+1x                                  gate-exit 1  hyphen-ios-linebox 003 ios                                 FAIL   rejected
+       0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 0.587 → LINEBOX WRONG (glyphs: line 13 correlation 0.587 with the base's line (< 0.97: glyphs moved, not only the line box))
+L1-all+1x                                  gate-exit 1  hyphen-ios-linebox 004 ios                                 FAIL   rejected
+       0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 0.518 → LINEBOX WRONG (glyphs: line 13 correlation 0.518 with the base's line (< 0.97: glyphs moved, not only the line box))
+
+11 (fake, key) reads; ACCEPTED 0; rejected 11; other 0

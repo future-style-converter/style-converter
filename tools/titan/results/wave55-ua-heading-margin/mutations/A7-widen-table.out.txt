@@ -1,0 +1,15 @@
+{
+ "name": "A7-widen-table",
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMargin.kt",
+ "pre": "3bb03d886fb06ced20e65dc170197cb27310068371d575c120554f809e998a65",
+ "mutated": "a04db9f5e8a845bcbab385a0c985cbc48f36785d90f60d92ae4e6a6ef7a98277",
+ "post": "3bb03d886fb06ced20e65dc170197cb27310068371d575c120554f809e998a65",
+ "red_rc": 1,
+ "red_failures": [
+  "UaPositionedHeadingMarginTest > s-11-1-1b-005 - the abspos p is outside the heading scope - the SAME list, logged"
+ ],
+ "red_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/1; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "green_rc": 0,
+ "green_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "verdict": "RED-THEN-GREEN"
+}

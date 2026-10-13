@@ -1,0 +1,9 @@
+U2: markerText ending U+3001 by (doc, ListStylePosition):
+   ('wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001', 'INSIDE') 9
+   ('wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004', 'INSIDE') 23
+   ('wpt__css-counter-styles__cjk-decimal__css3-counter-styles-005', 'INSIDE') 2
+   ('wpt__css-counter-styles__counter-suffix', 'OUTSIDE') 2
+  total 36 docs 4
+U3: FontVariantNumeric declarers: {'wpt__css-counter-styles__counter-suffix': 6}
+U1: markers whose natural direction != item direction: {'wpt__css-counter-styles__counter-suffix': [('א.', 'LTR'), ('ב.', 'LTR')]}
+li with a U+3001 list-style but no baked markerText (unreached): 0 {}

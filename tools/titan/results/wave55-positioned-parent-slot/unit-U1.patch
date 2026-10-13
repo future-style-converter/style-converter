@@ -1,0 +1,372 @@
+# unit-U1.patch — wave 55, lane L3 (positioned-parent-slot), revert unit U1 (composed-capture engagement)
+# base: 611c9f932bcfefa147a35f6c5f356d42709ddf84 (= dev 0d0d3a3d + the committed wave-55 plan + the opening-gate records)
+# paths: NEW runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt, runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt (comment only), NEW runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGateTest.kt
+# applies BEFORE seam-1.patch (landing-manifest applyOrder); compiles and tests green without it (rule 2b).
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt
+index 32a14b76..04a835c1 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt
+@@ -84,9 +84,14 @@ package com.styleconverter.runtime.layout.position
+ //    also shrink the static parent's auto height — an unmeasured change on
+ //    four currently-passing Android cells.
+ //
+-// Host-gated like RC1: only the composed WPT capture (CanvasRootHoist.Host)
+-// activates it, so the dark-stage per-component canvas and every committed
+-// baseline keep the byte-identical legacy Column footprint.
++// Gated by PositionedParentSlotGate (wave 55, lane L3). Until wave 55 it
++// was host-gated like RC1 (CanvasRootHoist.LocalActive), which left every
++// composed capture whose host stayed inactive on the stacking Column
++// footprint (selectors/dir-style-02a's missing row-7 dot). The gate now
++// engages on the composed WPT capture itself for an LTR parent, keeps every
++// active-host mount, and owns the RTL parent's case (see its header). The
++// dark-stage per-component canvas and every committed baseline see no
++// composed capture, so they keep the byte-identical legacy Column footprint.
+ //
+ // Pure decisions live here (JVM-pinned by PositionedParentFlowSlotTest —
+ // no Robolectric in this suite); the measurement itself is
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt
+new file mode 100644
+index 00000000..da5a506f
+--- /dev/null
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt
+@@ -0,0 +1,140 @@
++package com.styleconverter.runtime.layout.position
++
++// Wave 55 (lane L3, positioned-parent-slot) — WHEN the positioned-parent
++// static-position flow slot (PositionedParentFlowSlot) mounts.
++//
++// ## The measured defect (wave54-final selectors/dir-style-02a android f 0.9425)
++// The mount was gated on CanvasRootHoist.LocalActive alone, which only an
++// ACTIVATED Host provides (CanvasRootHoist.hostActivates: some box hoists
++// or is RC1). A composed capture whose host stayed inactive kept the full
++// Column footprint for every out-of-flow child of an `absolute | fixed |
++// sticky` parent: dir-style-02a's row-7 dot (a `left: 0` run after a
++// 20-px-tall run) got 0 px of remaining height and never painted. The lane
++// census finds 53 such parents in 17 host-inactive documents.
++//
++// ## The fix (U1) — engage on the composed capture itself
++// CSS 2.1 §9.3.1 / §9.6, css-position-3 §2.1: an absolutely positioned box
++// is out of flow whatever else the document holds, so the gate is "a
++// composed WPT capture" (LocalWptComposedMode), not "the host activated".
++// LocalActive implies it (both are provided only inside the harness's
++// ComposedCaptureCanvas), so the dark stage, the inbox path and every
++// committed baseline see both false: the identity modifier, byte for byte.
++//
++// ## The RTL guard (why `!parentRtl`)
++// The mount reports 0×0 and an RTL Column aligns a 0-wide slot at its END
++// edge (Alignment.Start under Rtl = `space − size`): a mounted child of an
++// RTL parent lands at W + left (device-measured on the host-ACTIVE
++// dynamic-offset-rtl-001: magenta x186 = 16 + 100 + 70, ref x86). Mounting
++// RTL parents without a correction ("PLAIN") passes dir-style-02a
++// DEGENERATE at 0.9663 with rows 6/9 blank — never shipped. So a
++// host-inactive RTL parent stays UNMOUNTED, with a PropertyTracker
++// breadcrumb (no silent fallthrough); an active host keeps today's mount.
++//
++// Pure decisions only (JVM-pinned by PositionedParentSlotGateTest, no
++// Robolectric in this suite); the measurement is PositionedParentFlowSlot
++// .mount → CanvasRootHoist.zeroFlowAnchor, unchanged.
++
++import androidx.compose.ui.Modifier
++import com.styleconverter.runtime.PropertyTracker
++import com.styleconverter.runtime.core.ir.IRProperty
++
++object PositionedParentSlotGate {
++
++    /**
++     * The breadcrumb an RTL parent's withheld mount records. Namespaced like
++     * `ContainingBlock[…]` (OutOfFlowContainingBlock) so it can never collide
++     * with a real IR property type in `PropertyTracker.getReport()`.
++     */
++    const val RTL_UNMOUNTED_BREADCRUMB = "PositionedParentSlot[rtl-parent-unmounted]"
++
++    /**
++     * What the seam installs on one out-of-flow child's itemModifier channel.
++     * Named `SlotMount`, never a generic `Slot`: SeamReachabilityTest resolves
++     * every declared type name corpus-wide, so a common nested name would
++     * make this file look reachable with seam 1 un-applied (executed: the
++     * first cut's `enum class Slot` kept that pin green — lane note).
++     */
++    enum class SlotMount {
++        /** The identity Modifier: the child keeps its legacy Column footprint. */
++        IDENTITY,
++
++        /** PositionedParentFlowSlot.mount: zero footprint at the slot origin. */
++        MOUNT,
++    }
++
++    /**
++     * Does the zero-footprint mount engage for a child that
++     * [PositionedParentFlowSlot.applies] to?
++     *
++     * Truth table (pinned row by row in PositionedParentSlotGateTest):
++     *  - an active host mounts every parent, as before this wave;
++     *  - a host-inactive composed capture mounts an LTR parent;
++     *  - an RTL parent under an inactive host is withheld (file header);
++     *  - no composed capture (dark stage, inbox path) never mounts.
++     */
++    fun engages(hostActive: Boolean, composedCapture: Boolean, parentRtl: Boolean): Boolean =
++        // `hostActive` first: it keeps every pre-wave-55 mount unchanged.
++        hostActive || (composedCapture && !parentRtl)
++
++    /**
++     * The whole per-child decision, pure over the IR and three flags read at
++     * the seam: [parentRtl] is the PARENT's laid-out direction
++     * (`LocalLayoutDirection` inside its content scope), never the child's —
++     * a `direction: rtl` child under an LTR parent provides Rtl only around
++     * its own content, and its slot is placed by the LTR parent's Column.
++     */
++    fun decide(
++        childProperties: List<IRProperty>,
++        parentProperties: List<IRProperty>,
++        hostActive: Boolean,
++        composedCapture: Boolean,
++        parentRtl: Boolean,
++    ): SlotMount {
++        // Not an out-of-flow child of a Column-loop containing block: the
++        // slot has nothing to say (the frozen loop owns it).
++        if (!PositionedParentFlowSlot.applies(childProperties, parentProperties)) return SlotMount.IDENTITY
++        // Otherwise the engagement table above decides.
++        return if (engages(hostActive, composedCapture, parentRtl)) SlotMount.MOUNT else SlotMount.IDENTITY
++    }
++
++    /**
++     * True when the RTL guard — not the host or the capture mode — withheld
++     * a mount the slot applies to: the case the breadcrumb names.
++     */
++    internal fun withheldByRtlGuard(
++        hostActive: Boolean,
++        composedCapture: Boolean,
++        parentRtl: Boolean,
++    ): Boolean =
++        // Exactly the one row of the truth table that the guard flips.
++        !hostActive && composedCapture && parentRtl
++
++    /**
++     * The call-site helper ComponentRenderer's renderBlockChild rides on its
++     * itemModifier channel: [decide], then the mount or the identity, plus
++     * the breadcrumb when the RTL guard withheld the mount.
++     */
++    fun slotModifier(
++        childProperties: List<IRProperty>,
++        parentProperties: List<IRProperty>,
++        hostActive: Boolean,
++        composedCapture: Boolean,
++        parentRtl: Boolean,
++    ): Modifier = when (decide(childProperties, parentProperties, hostActive, composedCapture, parentRtl)) {
++        // The wave-46 mount, unchanged (PositionedParentFlowSlot.mount).
++        SlotMount.MOUNT -> PositionedParentFlowSlot.mount(childProperties)
++        // Identity — and, when it was the RTL guard that withheld an
++        // applying mount, say so (no silent fallthrough).
++        SlotMount.IDENTITY -> {
++            // Only an applying child is a withheld mount; a non-applying
++            // child was never the slot's to mount.
++            if (PositionedParentFlowSlot.applies(childProperties, parentProperties) &&
++                withheldByRtlGuard(hostActive, composedCapture, parentRtl)
++            ) {
++                PropertyTracker.markUnhandled(RTL_UNMOUNTED_BREADCRUMB)
++            }
++            // The identity Modifier keeps today's Column footprint.
++            Modifier
++        }
++    }
++}
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGateTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGateTest.kt
+new file mode 100644
+index 00000000..702303a0
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGateTest.kt
+@@ -0,0 +1,194 @@
++package com.styleconverter.runtime.layout.position
++
++// Wave 55 (lane L3, U1) — JVM pins for PositionedParentSlotGate, pure over
++// the IR and three flags (no Robolectric here; the seam reading the flags is
++// pinned by core/renderer/PositionedParentSlotSeamWiringTest):
++//   (a) the `engages` truth table, every row;
++//   (b) the verbatim selectors/dir-style-02a wire: exactly the children of
++//       the four LTR absolute parents take the plain mount, never those of
++//       the two RTL ones (the PLAIN trap, never shipped);
++//   (c) the call-site helper: identity off the composed capture, the
++//       one-element mount when engaged, the RTL guard's breadcrumb.
++// Mutations executed red → restore → green (sha256) in
++// tools/titan/results/wave55-positioned-parent-slot/_note.md.
++
++import androidx.compose.ui.Modifier
++import com.styleconverter.runtime.PropertyTracker
++import com.styleconverter.runtime.core.ir.IRProperty
++import com.styleconverter.runtime.typography.TextStyleApplier
++import kotlinx.serialization.json.Json
++import kotlinx.serialization.json.jsonArray
++import kotlinx.serialization.json.jsonObject
++import kotlinx.serialization.json.jsonPrimitive
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertSame
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class PositionedParentSlotGateTest {
++
++    @Test
++    fun `U1a engages - every row of the truth table`() {
++        // An active host keeps every pre-wave-55 mount, whatever the rest.
++        for (composed in listOf(true, false)) for (rtl in listOf(true, false)) {
++            assertTrue("active host, composed=$composed rtl=$rtl", PositionedParentSlotGate.engages(true, composed, rtl))
++        }
++        // A host-inactive composed capture mounts an LTR parent (the fix)…
++        assertTrue(PositionedParentSlotGate.engages(false, true, false))
++        // …and withholds the RTL parent (the PLAIN trap: x = W + left).
++        assertFalse(PositionedParentSlotGate.engages(false, true, true))
++        // No composed capture (dark stage / inbox path) never mounts.
++        assertFalse(PositionedParentSlotGate.engages(false, false, false))
++        assertFalse(PositionedParentSlotGate.engages(false, false, true))
++        // The breadcrumb names exactly the one row the RTL guard flips.
++        assertTrue(PositionedParentSlotGate.withheldByRtlGuard(false, true, true))
++        assertFalse(PositionedParentSlotGate.withheldByRtlGuard(true, true, true))
++        assertFalse(PositionedParentSlotGate.withheldByRtlGuard(false, false, true))
++        assertFalse(PositionedParentSlotGate.withheldByRtlGuard(false, true, false))
++    }
++
++    // One wire box: id, slot parent (null = a root) and its declarations.
++    private data class Box(val id: String, val parent: String?, val properties: List<IRProperty>)
++
++    // Decode a declaration list exactly as the per-test IR spells it.
++    private fun box(id: String, parent: String?, declarations: String) = Box(
++        id, parent,
++        Json.parseToJsonElement("[$declarations]").jsonArray.map {
++            IRProperty(it.jsonObject["type"]!!.jsonPrimitive.content, it.jsonObject["data"]!!)
++        },
++    )
++
++    // tools/titan/runs/wave54-final/sections/selectors/per-test-ir/
++    // wpt__selectors__dir-style-02a.json (byte-identical in wave55-open): the
++    // relative roots of rows 4-9 and their subtrees, each box's Position /
++    // Direction / Left / Top / Width / Height declarations VERBATIM, in wire
++    // order (the only types the gate and the RTL origin read). The host is
++    // inactive on this document (the lane census: nothing hoists, no RC1).
++    private val wire = listOf(
++        box("wpt__selectors__dir-style-02a__4-087", null,
++            """{"type":"Direction","data":"LTR"},{"type":"Position","data":"RELATIVE"},""" +
++            """{"type":"Width","data":{"type":"length","px":358}},{"type":"Height","data":{"type":"length","px":60}}"""),
++        box("dir-style-02a__3__0-088", "wpt__selectors__dir-style-02a__4-087",
++            """{"type":"Position","data":"ABSOLUTE"},{"type":"Width","data":{"type":"length","px":358}},""" +
++            """{"type":"Height","data":{"type":"length","px":20}},{"type":"Left","data":{"px":0}},""" +
++            """{"type":"Top","data":{"px":0}}"""),
++        box("dir-style-02a__3__0__0-089", "dir-style-02a__3__0-088",
++            """{"type":"Position","data":"ABSOLUTE"},{"type":"Left","data":{"px":0}},{"type":"Top","data":{"px":0}},""" +
++            """{"type":"Width","data":{"type":"length","px":227.78}},{"type":"Height","data":{"type":"length","px":20}},""" +
++            """{"type":"Direction","data":"LTR"}"""),
++        box("dir-style-02a__3__1-090", "wpt__selectors__dir-style-02a__4-087",
++            """{"type":"Direction","data":"LTR"},{"type":"Position","data":"ABSOLUTE"},""" +
++            """{"type":"Width","data":{"type":"length","px":358}},{"type":"Height","data":{"type":"length","px":20}},""" +
++            """{"type":"Left","data":{"px":0}},{"type":"Top","data":{"px":20}}"""),
++        box("dir-style-02a__3__1__0-091", "dir-style-02a__3__1-090",
++            """{"type":"Position","data":"ABSOLUTE"},{"type":"Left","data":{"px":0}},{"type":"Top","data":{"px":0}},""" +
++            """{"type":"Width","data":{"type":"length","px":137.47}},{"type":"Height","data":{"type":"length","px":20}},""" +
++            """{"type":"Direction","data":"LTR"}"""),
++        box("dir-style-02a__3__2-092", "wpt__selectors__dir-style-02a__4-087",
++            """{"type":"Direction","data":"RTL"},{"type":"Position","data":"ABSOLUTE"},""" +
++            """{"type":"Width","data":{"type":"length","px":358}},{"type":"Height","data":{"type":"length","px":20}},""" +
++            """{"type":"Left","data":{"px":0}},{"type":"Top","data":{"px":40}}"""),
++        box("dir-style-02a__3__2__0-093", "dir-style-02a__3__2-092",
++            """{"type":"Position","data":"ABSOLUTE"},{"type":"Left","data":{"px":4.61}},{"type":"Top","data":{"px":0}},""" +
++            """{"type":"Width","data":{"type":"length","px":133.88}},{"type":"Height","data":{"type":"length","px":20}},""" +
++            """{"type":"Direction","data":"LTR"}"""),
++        box("dir-style-02a__3__2__1-094", "dir-style-02a__3__2-092",
++            """{"type":"Position","data":"ABSOLUTE"},{"type":"Left","data":{"px":0}},{"type":"Top","data":{"px":0}},""" +
++            """{"type":"Width","data":{"type":"length","px":4.61}},{"type":"Height","data":{"type":"length","px":20}},""" +
++            """{"type":"Direction","data":"LTR"}"""),
++        box("wpt__selectors__dir-style-02a__5-095", null,
++            """{"type":"Direction","data":"LTR"},{"type":"Position","data":"RELATIVE"},""" +
++            """{"type":"Width","data":{"type":"length","px":358}},{"type":"Height","data":{"type":"length","px":60}}"""),
++        box("dir-style-02a__4__0-096", "wpt__selectors__dir-style-02a__5-095",
++            """{"type":"Position","data":"ABSOLUTE"},{"type":"Width","data":{"type":"length","px":358}},""" +
++            """{"type":"Height","data":{"type":"length","px":20}},{"type":"Left","data":{"px":0}},""" +
++            """{"type":"Top","data":{"px":0}}"""),
++        box("dir-style-02a__4__0__0-097", "dir-style-02a__4__0-096",
++            """{"type":"Position","data":"ABSOLUTE"},{"type":"Left","data":{"px":4.61}},{"type":"Top","data":{"px":0}},""" +
++            """{"type":"Width","data":{"type":"length","px":224.19}},{"type":"Height","data":{"type":"length","px":20}},""" +
++            """{"type":"Direction","data":"LTR"}"""),
++        box("dir-style-02a__4__0__1-098", "dir-style-02a__4__0-096",
++            """{"type":"Position","data":"ABSOLUTE"},{"type":"Left","data":{"px":0}},{"type":"Top","data":{"px":0}},""" +
++            """{"type":"Width","data":{"type":"length","px":4.61}},{"type":"Height","data":{"type":"length","px":20}},""" +
++            """{"type":"Direction","data":"LTR"}"""),
++        box("dir-style-02a__4__1-099", "wpt__selectors__dir-style-02a__5-095",
++            """{"type":"Direction","data":"LTR"},{"type":"Position","data":"ABSOLUTE"},""" +
++            """{"type":"Width","data":{"type":"length","px":358}},{"type":"Height","data":{"type":"length","px":20}},""" +
++            """{"type":"Left","data":{"px":0}},{"type":"Top","data":{"px":20}}"""),
++        box("dir-style-02a__4__1__0-100", "dir-style-02a__4__1-099",
++            """{"type":"Position","data":"ABSOLUTE"},{"type":"Left","data":{"px":0}},{"type":"Top","data":{"px":0}},""" +
++            """{"type":"Width","data":{"type":"length","px":137.47}},{"type":"Height","data":{"type":"length","px":20}},""" +
++            """{"type":"Direction","data":"LTR"}"""),
++        box("dir-style-02a__4__2-101", "wpt__selectors__dir-style-02a__5-095",
++            """{"type":"Direction","data":"RTL"},{"type":"Position","data":"ABSOLUTE"},""" +
++            """{"type":"Width","data":{"type":"length","px":358}},{"type":"Height","data":{"type":"length","px":20}},""" +
++            """{"type":"Left","data":{"px":0}},{"type":"Top","data":{"px":40}}"""),
++        box("dir-style-02a__4__2__0-102", "dir-style-02a__4__2-101",
++            """{"type":"Position","data":"ABSOLUTE"},{"type":"Left","data":{"px":4.61}},{"type":"Top","data":{"px":0}},""" +
++            """{"type":"Width","data":{"type":"length","px":133.88}},{"type":"Height","data":{"type":"length","px":20}},""" +
++            """{"type":"Direction","data":"LTR"}"""),
++        box("dir-style-02a__4__2__1-103", "dir-style-02a__4__2-101",
++            """{"type":"Position","data":"ABSOLUTE"},{"type":"Left","data":{"px":0}},{"type":"Top","data":{"px":0}},""" +
++            """{"type":"Width","data":{"type":"length","px":4.61}},{"type":"Height","data":{"type":"length","px":20}},""" +
++            """{"type":"Direction","data":"LTR"}"""),
++    )
++
++    // Compose's USED direction: the renderer provides Rtl for a
++    // `Direction: RTL` box (TextStyleApplier.extractDirection) and never
++    // re-provides Ltr below it, so a box lays out RTL iff it or an ancestor
++    // declares RTL.
++    private fun laidOutRtl(id: String?): Boolean {
++        val b = wire.firstOrNull { it.id == id } ?: return false
++        return TextStyleApplier.extractDirection(b.properties) == TextStyleApplier.DirectionMode.RTL ||
++            laidOutRtl(b.parent)
++    }
++
++    @Test
++    fun `U1b dir-style-02a - the plain mount takes the LTR parents' children only`() {
++        val byId = wire.associateBy { it.id }
++        // Every child whose decision is the PLAIN mount (no RTL origin).
++        val plain = wire.filter { child ->
++            val parent = child.parent?.let(byId::get) ?: return@filter false
++            PositionedParentSlotGate.decide(
++                child.properties, parent.properties,
++                hostActive = false, composedCapture = true, parentRtl = laidOutRtl(parent.id),
++            ) == PositionedParentSlotGate.SlotMount.MOUNT
++        }.map { it.id }.toSet()
++        // Rows 4/5 (__3__0, __3__1) and 7/8 (__4__0, __4__1): five runs.
++        assertEquals(
++            setOf(
++                "dir-style-02a__3__0__0-089", "dir-style-02a__3__1__0-091",
++                "dir-style-02a__4__0__0-097", "dir-style-02a__4__0__1-098",
++                "dir-style-02a__4__1__0-100",
++            ),
++            plain,
++        )
++        // Rows 6 and 9's parents lay out RTL: PLAIN would paint at W + left.
++        assertTrue(laidOutRtl("dir-style-02a__3__2-092") && laidOutRtl("dir-style-02a__4__2-101"))
++        assertFalse(laidOutRtl("dir-style-02a__4__0-096"))
++    }
++
++    // A plain `absolute` box with an optional `left`, as the reader emits it.
++    private fun abs(left: Double? = null) = buildList {
++        add(IRProperty("Position", Json.parseToJsonElement("\"ABSOLUTE\"")))
++        left?.let { add(IRProperty("Left", Json.parseToJsonElement("""{"px":$it}"""))) }
++    }
++
++    @Test
++    fun `U1c slotModifier - identity, the one-element mount, the RTL breadcrumb`() {
++        // Dark stage / inbox: the identity Modifier itself, byte-stable.
++        assertSame(Modifier, PositionedParentSlotGate.slotModifier(abs(4.61), abs(), false, false, false))
++        // A host-inactive composed capture of an LTR parent: the mount.
++        val mounted = PositionedParentSlotGate.slotModifier(abs(4.61), abs(), false, true, false)
++        assertEquals(1, mounted.foldIn(0) { n, _ -> n + 1 })
++        // A non-applying child (static parent) is never the slot's.
++        assertSame(Modifier, PositionedParentSlotGate.slotModifier(abs(4.61), emptyList(), true, true, false))
++        // An RTL parent with no px Width (no origin correction can apply, in
++        // any state): withheld, and the breadcrumb is counted once.
++        val key = PositionedParentSlotGate.RTL_UNMOUNTED_BREADCRUMB
++        val before = PropertyTracker.getOccurrences(key)
++        assertSame(Modifier, PositionedParentSlotGate.slotModifier(abs(4.61), abs(), false, true, true))
++        assertEquals(before + 1, PropertyTracker.getOccurrences(key))
++    }
++}

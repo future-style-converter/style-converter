@@ -1,0 +1,32 @@
+run: ../../runs/wave54-final
+documents: 1435
+out-of-flow UA-margin-tag components: 22 in 21 documents
+FIRES: 4 components in 4 documents
+  identity + breadcrumb tag:p                   wpt__CSS2__css21-errata__s-11-1-1b-005  id=css21-errata__s-11-1-1b-005__0-140 tag=p pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=-
+  identity + breadcrumb tag:p                   wpt__CSS2__css21-errata__s-11-1-1b-006  id=wpt__css2__css21-errata__s-11-1-1b-006__3-144 tag=p pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=['ROOT (T6 territory)']
+  identity + breadcrumb tag:p                   wpt__css-anchor-position__anchor-center-safe-rtl  id=anchor-center-safe-rtl__1__0-476 tag=p pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=-
+  identity + breadcrumb tag:p                   wpt__css-anchor-position__anchor-center-safe-rtl  id=anchor-center-safe-rtl__3__0-481 tag=p pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=-
+  identity: both edges declared                 wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3  id=background-attachment-local__attachment-local-positioning-3__0__0__0-081 tag=p pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=-
+  identity: both edges declared                 wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4  id=background-attachment-local__attachment-local-positioning-4__0__0__0-085 tag=p pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=-
+  identity: both edges declared                 wpt__css-text-decor__text-decoration-inset-001  id=text-decoration-inset-001__1__0-053 tag=h1 pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=-
+  identity: both edges declared                 wpt__css-text-decor__text-decoration-inset-002  id=text-decoration-inset-002__1__0-057 tag=h1 pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=-
+  identity: both edges declared                 wpt__css-text-decor__text-decoration-inset-003  id=text-decoration-inset-003__1__0-061 tag=h1 pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=-
+  identity: both edges declared                 wpt__css-text-decor__text-decoration-inset-004  id=text-decoration-inset-004__1__0-065 tag=h1 pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=-
+  FIRES margin 21.44 on edges TB                wpt__css-text-decor__text-decoration-inset-005  id=text-decoration-inset-005__1__0-069 tag=h1 pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=-
+  FIRES margin 21.44 on edges TB                wpt__css-text-decor__text-decoration-inset-006  id=text-decoration-inset-006__1__0-076 tag=h1 pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=-
+  identity: both edges declared                 wpt__css-text-decor__text-decoration-inset-007  id=text-decoration-inset-007__1__0-083 tag=h1 pos=['ABSOLUTE'] wm=None base=16.0 fam=["times new roman", "serif"] hazards=-
+  identity: both edges declared                 wpt__css-text-decor__text-decoration-inset-008  id=text-decoration-inset-008__1__0-087 tag=h1 pos=['ABSOLUTE'] wm=None base=16.0 fam=["times new roman", "serif"] hazards=-
+  identity: both edges declared                 wpt__css-text-decor__text-decoration-inset-009  id=text-decoration-inset-009__1__0-091 tag=h1 pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=-
+  FIRES margin 21.44 on edges TB                wpt__css-text-decor__text-decoration-inset-011  id=text-decoration-inset-011__1__0-095 tag=h1 pos=['ABSOLUTE'] wm=None base=16.0 fam=["times new roman", "serif"] hazards=-
+  identity: both edges declared                 wpt__css-text-decor__text-decoration-inset-012  id=text-decoration-inset-012__1__0-102 tag=h1 pos=['ABSOLUTE'] wm=VERTICAL_RL base=16.0 fam=None hazards=-
+  identity: both edges declared                 wpt__css-text-decor__text-decoration-inset-013  id=text-decoration-inset-013__1__0-106 tag=h1 pos=['ABSOLUTE'] wm=SIDEWAYS_LR base=16.0 fam=None hazards=-
+  FIRES margin 17.42 on edges TB                wpt__css-text-decor__text-decoration-inset-014  id=text-decoration-inset-014__1__0-110 tag=h1 pos=['ABSOLUTE'] wm=None base=13.0 fam=monospace hazards=-
+  identity: both edges declared                 wpt__css-text-decor__text-decoration-inset-015  id=text-decoration-inset-015__1__0-115 tag=h1 pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=-
+  identity: both edges declared                 wpt__css-text-decor__text-decoration-inset-016  id=text-decoration-inset-016__1__0-119 tag=h1 pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=-
+  identity: both edges declared                 wpt__css-text-decor__text-decoration-inset-024  id=text-decoration-inset-024__1__0-123 tag=h1 pos=['ABSOLUTE'] wm=None base=16.0 fam=None hazards=-
+
+heading hosts (h1-h6 with >= 1 child; the U2 gate population): 4
+  wpt__css-text-decor__text-decoration-inset-005  id=text-decoration-inset-005__1__0-069 tag=h1 children=1 pos=['ABSOLUTE']
+  wpt__css-text-decor__text-decoration-inset-006  id=text-decoration-inset-006__1__0-076 tag=h1 children=1 pos=['ABSOLUTE']
+  wpt__css-text-decor__text-decoration-inset-011  id=text-decoration-inset-011__1__0-095 tag=h1 children=3 pos=['ABSOLUTE']
+  wpt__css-text-decor__text-decoration-inset-014  id=text-decoration-inset-014__1__0-110 tag=h1 children=1 pos=['ABSOLUTE']

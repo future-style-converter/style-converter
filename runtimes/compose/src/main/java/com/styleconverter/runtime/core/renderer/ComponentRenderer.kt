@@ -1947,8 +1947,12 @@ object ComponentRenderer {
         val childContainingBlock = androidx.compose.runtime.remember(
             effectiveProperties, containingBlock, component.children, wptCaptureModeForStretch,
         ) {
+            // Wave 54 (lane L4, CBB-android): under the composed WPT capture an
+            // unset box-sizing is drawn content-box, so the block published
+            // for the children is the declared size, bands outside
+            // (ContainingBlockBands); the dark stage keeps the subtraction.
             val declared = com.styleconverter.runtime.core.variables.DynamicValueResolver
-                .childContainingBlock(effectiveProperties, containingBlock)
+                .childContainingBlock(effectiveProperties, containingBlock, wptCaptureMode = wptCaptureModeForStretch)
             // Wave-33 lane C — the auto-height ABSPOS fallback. When the
             // declared channel above found no block size (this box's height
             // is `auto`), evaluate CSS 2.2 §10.6.3 statically over the
@@ -3641,24 +3645,28 @@ object ComponentRenderer {
                         // apart). The zero-footprint anchor is the RC1 mount
                         // (CanvasRootHoist.zeroFlowAnchor) applied one level
                         // deeper; the decision table and the documented
-                        // limits live in PositionedParentFlowSlot. Host-gated
-                        // exactly like RC1, so hostless paths (dark stage,
-                        // every committed baseline) keep the identity
-                        // modifier here — and a `relative`/transform-CB
-                        // parent never reaches this loop (its children take
-                        // the positioned-container Box branch above).
+                        // limits live in PositionedParentFlowSlot. Wave 55
+                        // (lane L3): engaged by PositionedParentSlotGate on the
+                        // composed capture itself, not only an ACTIVE canvas
+                        // host (a host-inactive capture stacked dir-style-02a's
+                        // row-7 dot out of its 20-px row); an RTL parent's
+                        // slot is the gate's own case. Hostless paths (dark
+                        // stage, every committed baseline) see no composed
+                        // capture and keep the identity modifier — and a
+                        // `relative`/transform-CB parent never reaches this
+                        // loop (its children take the Box branch above).
+                        // `parentRtl` is read HERE, in the parent's content
+                        // scope, never in the child's measure scope.
                         val outOfFlowSlotMount: Modifier =
-                            if (com.styleconverter.runtime.layout.position.CanvasRootHoist
-                                    .LocalActive.current &&
-                                com.styleconverter.runtime.layout.position
-                                    .PositionedParentFlowSlot
-                                    .applies(child.properties, component.properties)
-                            ) {
-                                com.styleconverter.runtime.layout.position
-                                    .PositionedParentFlowSlot.mount(child.properties)
-                            } else {
-                                Modifier
-                            }
+                            com.styleconverter.runtime.layout.position.PositionedParentSlotGate
+                                .slotModifier(
+                                    child.properties,
+                                    component.properties,
+                                    hostActive = com.styleconverter.runtime.layout.position
+                                        .CanvasRootHoist.LocalActive.current,
+                                    composedCapture = LocalWptComposedMode.current,
+                                    parentRtl = LocalLayoutDirection.current == LayoutDirection.Rtl,
+                                )
                         // The child's style chain, with the margin override
                         // when one applies (§8.3.1 plan or §9.5.2 clearance —
                         // both ride the same LocalCollapsedMargin channel).
@@ -4200,8 +4208,9 @@ object ComponentRenderer {
      *
      * STILL DEFERRED — an `inside` marker on an item that DOES have text
      * still displaces that item's box (the Row below), and the gap is
-     * still the fixed [ListMarkerRow.gapDp] rather than the UA's
-     * per-counter-style marker padding.
+     * ListMarkerSuffixGap's stand-in (wave 55: 0 after a U+3001 suffix,
+     * else [ListMarkerRow.gapDp]) rather than the UA's per-counter-style
+     * marker padding.
      */
     @Composable
     private fun RenderListItemMarker(
@@ -4477,9 +4486,14 @@ object ComponentRenderer {
             val hangAligns = ListMarkerRow.alignsByBaseline(
                 exposesBaseline, markerSharesSnappedLineGrid)
             com.styleconverter.runtime.lists.ListMarkerOutsideHang.Hang(
-                // ONE gap constant for both placements: the Row's
-                // `padding(end = gapDp)` becomes the hang's offset.
-                gapPx = with(markerSnapDensity) { ListMarkerRow.gapDp.roundToPx() },
+                // The Row's end padding becomes the hang's offset. Wave 55
+                // (lane L5, U2o-android): it is the stand-in for the
+                // suffix's trimmed space, keyed on the RAW marker string —
+                // 0 after a U+3001 suffix (css-counter-styles-3 §6.1), else
+                // ListMarkerRow.gapDp (ListMarkerSuffixGap).
+                gapPx = with(markerSnapDensity) {
+                    com.styleconverter.runtime.lists.ListMarkerSuffixGap.gapDp(marker).roundToPx()
+                },
                 alignsByBaseline = hangAligns,
                 // An EMPTY item's one line box is the marker's (seam-3's
                 // ListMarkerEmptyItem rule, outside half).
@@ -4662,7 +4676,9 @@ object ComponentRenderer {
                     // so the snap's reported height — which the Row's pitch
                     // depends on — is untouched.
                     .then(markerHalfLeadingCompensation)
-                    .padding(end = ListMarkerRow.gapDp)
+                    // Wave 55 (lane L5, U2i-android): the same string-keyed
+                    // stand-in gap as the hang (ListMarkerSuffixGap).
+                    .padding(end = com.styleconverter.runtime.lists.ListMarkerSuffixGap.gapDp(marker))
             )
             RenderComponent(child, markerBaselineClaim(aligns))
         }

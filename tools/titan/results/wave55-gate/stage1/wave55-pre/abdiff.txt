@@ -1,0 +1,54 @@
+section CSS2: absent from wave55-pre — not compared
+section css-anchor-position: absent from wave55-pre — not compared
+section css-backgrounds: absent from wave55-pre — not compared
+section css-break: absent from wave55-pre — not compared
+section css-cascade: absent from wave55-pre — not compared
+section css-color: absent from wave55-pre — not compared
+section css-contain: absent from wave55-pre — not compared
+section css-display: absent from wave55-pre — not compared
+section css-gaps: absent from wave55-pre — not compared
+section css-images: absent from wave55-pre — not compared
+section css-lists: absent from wave55-pre — not compared
+section css-multicol: absent from wave55-pre — not compared
+section css-overflow: absent from wave55-pre — not compared
+section css-position: absent from wave55-pre — not compared
+section css-pseudo: absent from wave55-pre — not compared
+section css-sizing: absent from wave55-pre — not compared
+section css-tables: absent from wave55-pre — not compared
+section css-transforms: absent from wave55-pre — not compared
+section css-ui: absent from wave55-pre — not compared
+section css-values: absent from wave55-pre — not compared
+section css-view-transitions: absent from wave55-pre — not compared
+A/B  exclude=wave55-open  include=wave55-pre  sections=CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-color,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-grid,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-pseudo,css-sizing,css-tables,css-text,css-text-decor,css-transforms,css-ui,css-values,css-view-transitions,css-writing-modes,filter-effects,selectors  platforms=web,ios,android
+compared 1262 cells: 31 differ (flip, or |Δ| ≥ 0.002), 1231 within threshold
+  flip f→P     ios      f 0.9238  → P 0.9936  Δ+0.0698  css/css-text-decor/text-decoration-inset-014.html
+  flip f→P     android  f 0.923   → P 0.9867  Δ+0.0637  css/css-text-decor/text-decoration-inset-014.html
+  flip f→P     android  f 0.9425  → P 0.9854  Δ+0.0429  css/selectors/dir-style-02a.html
+  flip f→P     android  f 0.9574  → P 0.9999  Δ+0.0425  css/filter-effects/backdrop-filter-nested-border-radius-clip-3.html
+  flip P→f     ios      P 0.9534  → f 0.9165  Δ-0.0369  css/css-text/hyphens/hyphenate-character-002.html
+  flip f→P     ios      f 0.9477  → P 0.975   Δ+0.0273  css/css-text/hyphens/hyphenate-character-004.html
+  mover        android  P 0.9649  → P 1       Δ+0.0351  css/filter-effects/backdrop-filter-nested-border-radius-clip.html
+  mover        android  P 0.9619  → P 0.9943  Δ+0.0324  css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html
+  mover        android  P 0.9689  → P 1       Δ+0.0311  css/filter-effects/backdrop-filter-nested-border-radius-clip-2.html
+  mover        ios      f 0.8995  → f 0.93    Δ+0.0305  css/css-text-decor/text-decoration-inset-005.html
+  mover        android  P 0.9635  → P 0.9932  Δ+0.0297  css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html
+  mover        ios      f 0.8987  → f 0.9284  Δ+0.0297  css/css-text-decor/text-decoration-inset-006.html
+  mover        android  P 0.977   → P 0.9999  Δ+0.0229  css/filter-effects/backdrop-filter-nested-border-radius-clip-4.html
+  mover        ios      P 0.957   → P 0.9759  Δ+0.0189  css/css-text/hyphens/hyphenate-character-003.html
+  mover        ios      P 0.9611  → P 0.978   Δ+0.0169  css/css-text/hyphens/hyphenate-character-001.html
+  mover        android  f 0.8993  → f 0.9147  Δ+0.0154  css/css-text-decor/text-decoration-inset-006.html
+  mover        android  f 0.9     → f 0.9147  Δ+0.0147  css/css-text-decor/text-decoration-inset-005.html
+  mover        android  P 0.9805  → P 0.9929  Δ+0.0124  css/css-text/bidi/bidi-tab-001.html
+  mover        ios      f 0.6999  → f 0.7123  Δ+0.0124  css/css-text-decor/text-decoration-inset-011.html
+  mover        android  P 0.9601  → P 0.9724  Δ+0.0123  css/css-grid/abspos/descendant-static-position-002.html
+  mover        android  P 0.9892  → P 0.9991  Δ+0.0099  css/css-grid/abspos/descendant-static-position-001.html
+  mover        android  P 0.9869  → P 0.9966  Δ+0.0097  css/css-flexbox/abspos/abspos-autopos-htb-rtl.html
+  mover        android  f 0.6852  → f 0.6913  Δ+0.0061  css/css-text-decor/text-decoration-inset-011.html
+  mover        android  P 0.9952  → P 1       Δ+0.0048  css/css-writing-modes/dynamic-offset-rtl-001.html
+  mover        android  P 0.9952  → P 1       Δ+0.0048  css/css-writing-modes/dynamic-offset-vrl-rtl-001.html
+  mover        ios      P 0.9873  → P 0.992   Δ+0.0047  css/css-counter-styles/counter-suffix.html
+  mover        ios      f 0.5426  → f 0.5472  Δ+0.0046  css/css-text-decor/text-decoration-dotted-002.html
+  mover        ios      P 0.993   → P 0.9971  Δ+0.0041  css/css-counter-styles/cjk-decimal/css3-counter-styles-005.html
+  mover        ios      f 0.5318  → f 0.5355  Δ+0.0037  css/css-text-decor/text-decoration-dotted-001.html
+  mover        android  f 0.904   → f 0.9076  Δ+0.0036  css/filter-effects/backdrop-filter-basic-blur.html
+  mover        android  P 0.989   → P 0.9924  Δ+0.0034  css/css-counter-styles/counter-suffix.html

@@ -1,0 +1,77 @@
+# seam-3.patch — wave 55 lane L4 (ua-heading-margin), revert unit U2-android
+# seam file: runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+# base tree: 611c9f93 + unit-U1-android.patch + seam-1.patch (seam 3 sits on seam 1's 3-line context: apply 1 → 3, revert 3 → 1)
+# seam file sha256 at base 611c9f93: 2445d9ea2674576fc0946e3f630f48b88d48f0f9d8c98df3249ba67d7a026aa5
+# anchor (PLAN §3 .kt row 2): :1161 `standsDown = …UAElementFontRule.headingStandsDown(component),` →
+#   `UAHeadingFoldGate.standsDown(component, listUaProperties)`, with the font-step comment (:1152-1156) re-trued;
+#   replaces wave54-ua-heading-face/held/seam-1.foldgate.patch, which no longer applies at HEAD
+# patch-borne: the UAElementFontRuleSeamWiringTest.kt fontStep token; the SeamReachabilityTest.kt module line for
+#   typography/UAHeadingFoldGate.kt directly under seam 1's at the :159 anchor (C10)
+# needs, in the SAME commit: unit-U2-android.patch (typography/UAHeadingFoldGate.kt); needs U1-android landed first
+# check: git apply --check tools/titan/results/wave55-ua-heading-margin/seam-3.patch (on HEAD + U1-android)
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+index babee508..db1dba49 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -1149,16 +1149,19 @@ object ComponentRenderer {
+         // bold }` and `sub, sup { font-size: smaller }` (HTML §15.3) beat the
+         // inherited body face and lose to the author's own. It runs BEFORE
+         // DynamicValueResolver (below) so `em` / `ch` on the heading resolve
+-        // against the UA face. The heading half stands down for an element
+-        // that hosts child boxes (headingStandsDown - iOS's wave-40 gate,
+-        // verbatim). Same list instance for every untagged component (the
+-        // 327-pair corpus carries no `_tag`), so no committed capture moves.
++        // against the UA face. Wave 55 (lane L4, U2-android): the heading
++        // half stands down only for a host whose runs do not FOLD (it would
++        // still paint stacked) - UAHeadingFoldGate on this PRE-UA list; a
++        // folded host takes the face like a leaf. Same list instance for every
++        // untagged component (the 327-pair corpus carries no `_tag`), so no
++        // committed capture moves.
+         // UAElementFontRuleSeamWiringTest pins this call's exact arguments.
+         val rawProperties = com.styleconverter.runtime.typography.UAElementFontRule.apply(
+             component._tag,
+             allReset.own,
+             listUaProperties,
+-            standsDown = com.styleconverter.runtime.typography.UAElementFontRule.headingStandsDown(component),
++            standsDown = com.styleconverter.runtime.typography.UAHeadingFoldGate
++                .standsDown(component, listUaProperties),
+         )
+         // Wave 55 (lane L4, U1-android) - the THIRD tag-keyed UA step: an
+         // OUT-OF-FLOW h1…h6 takes its UA `margin-block` (HTML §15.3, .67em
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
+index 0de6a0c2..880132a2 100644
+--- a/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
+@@ -160,6 +160,9 @@ class SeamReachabilityTest {
+             // Wave 55 (lane L4, U1-android) — the out-of-flow heading's UA
+             // margin; its ONLY caller is seam-1, which carries this line.
+             "spacing/UaPositionedHeadingMargin.kt",
++            // Wave 55 (lane L4, U2-android) — the fold-aware heading face
++            // gate; its ONLY caller is seam-3, which carries this line.
++            "typography/UAHeadingFoldGate.kt",
+             // A5 — currentcolor / background-color inheritance / color-mix.
+             "color/CurrentColorBackground.kt",
+             "color/BackgroundColorInheritance.kt",
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt
+index b345ca26..b15828b9 100644
+--- a/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt
+@@ -13,7 +13,8 @@ package com.styleconverter.runtime.typography
+ // execute, so this is a SOURCE-level pin of the four facts the replay
+ // assumes: (1) the UA step reads the ListStyleUaRule output, (2) with the
+ // element's tag and post-reset OWN list, (3) with `standsDown =
+-// UAElementFontRule.headingStandsDown(component)`, and (4) its result is the
++// UAHeadingFoldGate.standsDown(component, listUaProperties)` (wave 55, lane L4
++// seam-3; it was UAElementFontRule.headingStandsDown), and (4) its result is the
+ // list DynamicValueResolver resolves — the step runs BEFORE the resolver, so
+ // `em` / `ch` on a heading read the UA face. Wave 55 (lane L4, seam-1): (4)
+ // now passes through UaPositionedHeadingMargin, which only APPENDS the UA
+@@ -52,7 +53,7 @@ class UAElementFontRuleSeamWiringTest {
+     /** (2) + (3) The UA font step, verbatim: tag, OWN list, the list above, the stand-down verdict. */
+     private val fontStep = "val rawProperties = com.styleconverter.runtime.typography.UAElementFontRule.apply( " +
+         "component._tag, allReset.own, listUaProperties, " +
+-        "standsDown = com.styleconverter.runtime.typography.UAElementFontRule.headingStandsDown(component), )"
++        "standsDown = com.styleconverter.runtime.typography.UAHeadingFoldGate .standsDown(component, listUaProperties), )"
+ 
+     @Test
+     fun `the UA font step wraps the list UA rule's output with the tag, own list and stand-down verdict`() {

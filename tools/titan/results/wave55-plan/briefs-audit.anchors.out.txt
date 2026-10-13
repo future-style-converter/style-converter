@@ -1,0 +1,314 @@
+=== hyphen-ios-linebox.md
+  L10 _note.md:201 [file] | - **drop-U3b** (css-text, 3 platforms; arm tree 286f4740): 144 cells compared, **12 differ**, all `hyphenate-c
+  L111 InlineRunFlow.swift:451-455 [file] | if breakMembers > 0, glyphMembers == 0 {
+  L133 mono-pin.mjs:19 [file] | //   ref+web   Menlo (Chromium/mac)  1233/2048     1901 / 483      ← frozen refs
+  L144 ComponentRenderer.swift:4737 [bare] | private struct PlaceholderLabel: View {
+  L144 ComponentRenderer.swift:4870 [bare] | var body: some View {
+  L145 ComponentRenderer.swift:5046 [bare-prevline] | let effectiveLineHeight = ComponentRenderer.effectiveLineHeight(
+  L146 ComponentRenderer.swift:669-670 [bare-prevline] | case .natural:
+  L146 LineHeightNormal.swift:126 [file] | static func lineBoxSource(hasDeclaredValue: Bool,
+  L147 LineBoxMetrics.swift:80 [file] | static func leading(lineHeightPx: CGFloat?,
+  L149 LineBoxMetrics.swift:131 [file] | /// whatever the face measures, ROUNDED UP by the platform's text engine,
+  L190 ComponentRenderer.swift:5055-5069 [bare-prevline] | // Fidelity wave 3 — CSS line-box leading split (CSS 2.1 §10.8):
+  L192 ComponentRenderer.swift:5151-5152 [bare-prevline] | let lineCountIsExact = (singleLineText || textConfig.noWrap
+  L195 ComponentRenderer.swift:5154 [bare-prevline] | lineHeightPx: effectiveLineHeight,
+  L198 BARE :5295 (no file in context)
+  L198 BARE :5335 (no file in context)
+  L198 BARE :5385 (no file in context)
+  L200 BARE :5175 (no file in context)
+  L200 BARE :5365 (no file in context)
+  L215 ComponentRenderer.swift:343 [bare] | return UAElementFontRule.apply(
+  L216 ComponentRenderer.swift:4716 [bare-prevline] | .frame(height: ComponentRenderer.effectiveLineHeight(
+  L217 ComponentRenderer.swift:5055-5160 [bare-prevline] | // Fidelity wave 3 — CSS line-box leading split (CSS 2.1 §10.8):
+  L234 LineBoxMetrics.swift:42 [file] | static func contentHeight(fontSizePx: CGFloat, design: Font.Design,
+  L252 LineBoxMetrics.swift:138 [file] | ///     box = ceil(19.359375) + (20 − 19.359375) = 20.640625   (want 20)
+  L275 LineBoxMetrics.swift:151 [file] | /// Mac Catalyst — the ONLY surface the unit tests can run on — CANNOT
+  L303 BARE :5335 (no file in context)
+  L329 InheritedText.swift:47 [file] | "LetterSpacing", "LineHeight", "WordSpacing",
+  L537 ComponentRenderer.swift:5055-5160 [bare] | // Fidelity wave 3 — CSS line-box leading split (CSS 2.1 §10.8):
+  L538 ComponentRenderer.swift:343 [bare-prevline] | return UAElementFontRule.apply(
+  L538 ComponentRenderer.swift:4716 [bare-prevline] | .frame(height: ComponentRenderer.effectiveLineHeight(
+  L538 ComponentRenderer.swift:5011 [bare-prevline] | hyphenChar: textConfig.hyphenateCharacter ?? AutoHyphenation.defaultHyphenCharacter,
+  L538 ComponentRenderer.swift:5026 [bare-prevline] | let overlong = GreedyLineBreaker.hasUnbreakableOverflowingLine(
+=== cbb-android.md
+  L33 SizingApplier.kt:254-256 [file] | *   * PERCENT — routes to fillMaxWidth/Height (fractional; a px band
+  L33 SizingApplier.kt:288 [bare] | else -> v
+  L34 SizingApplier.kt:362 [bare-prevline] | m.fillMaxWidth((v.value.toFloat() / 100f).coerceIn(0f, 1f))
+  L34 SizingApplier.kt:437 [bare-prevline] | m.fillMaxHeight((v.value.toFloat() / 100f).coerceIn(0f, 1f))
+  L117 SizingApplier.kt:311-316 [file] | internal fun effectiveBoxSizing(
+  L142 BARE :276 (no file in context)
+  L143 BARE :288 (no file in context)
+  L144 BARE :254 (no file in context)
+  L144 BARE :362 (no file in context)
+  L146 StyleApplier.kt:702 [file] | result = LayoutFacade.applyToModifier(result, config.layout, collapsedMargin, spacingCtx)
+  L146 StyleApplier.kt:758 [bare] | result = OverflowApplier.applyOverflow(result, config.overflow)
+  L146 StyleApplier.kt:786 [bare] | result = LayoutFacade.applyPaddingOnly(result, config.layout)
+  L147 StyleApplier.kt:437 [bare-prevline] | // self-contained and easy to unit test.
+  L153 ComponentRenderer.kt:1289 [file] | val pctResolved = resolveOutOfFlowPercentSizes(animatedProperties, absposCb)
+  L153 ComponentRenderer.kt:5018 [bare] | internal fun resolveOutOfFlowPercentSizes(
+  L158 BARE :219 (no file in context)
+  L185 DynamicValueResolver.kt:207-210 [bare-prevline] | fun childContainingBlock(
+  L185 DynamicValueResolver.kt:238 [bare-prevline] | val contentW = w?.let {
+  L195 SizingApplier.kt:123 [bare-prevline] | if (pctW != null) r = r.percentWidthClamped(pctW.fraction, pctW.minDp, pctW.maxDp)
+  L195 SizingApplier.kt:132 [bare-prevline] | if (pctH != null) r = r.percentHeightClamped(pctH.fraction, pctH.minDp, pctH.maxDp)
+  L196 SizingApplier.kt:254-256 [bare-prevline] | *   * PERCENT — routes to fillMaxWidth/Height (fractional; a px band
+  L204 ComponentRenderer.kt:1950-1951 [bare-prevline] | val declared = com.styleconverter.runtime.core.variables.DynamicValueResolver
+  L209 ComponentRenderer.kt:1930 [bare-prevline] | val inheritableForChildren = effectiveProperties.filter {
+  L216 ContentBoxRelativeInflationTest.kt:176-184 [bare-prevline] | @Test fun `percent stays fractional - documented pass-through`() {
+  L224 ComponentRenderer.kt:1940-1990 [bare-prevline] | if (p.type == "Color" && isCurrentColorValue(p.data)) {
+  L264 BARE :123 (no file in context)
+  L266 BARE :132 (no file in context)
+  L271 StyleApplier.kt:702 [file] | result = LayoutFacade.applyToModifier(result, config.layout, collapsedMargin, spacingCtx)
+  L271 StyleApplier.kt:758 [bare] | result = OverflowApplier.applyOverflow(result, config.overflow)
+  L271 StyleApplier.kt:786 [bare] | result = LayoutFacade.applyPaddingOnly(result, config.layout)
+  L497 BARE :1940 (no file in context)
+=== positioned-parent-slot.md
+  L33 ComponentRenderer.kt:3650-3661 [file] | val outOfFlowSlotMount: Modifier =
+  L39 OUT-OF-RANGE tools/titan/results/wave54-plan/rtl-marker-bake.census.mjs:3504-3512 (136 lines) [bare-prevline]
+  L131 ComponentRenderer.kt:3598 [bare] | val renderBlockChild: @Composable (Int, IRComponent) -> Unit = { index, child ->
+  L131 ComponentRenderer.kt:3650-3661 [bare] | val outOfFlowSlotMount: Modifier =
+  L137 PositionedParentFlowSlot.kt:127 [file] | fun applies(
+  L138 CanvasRootHoist.kt:991 [file] | fun Host(
+  L139 CanvasRootHoist.kt:669 [bare-prevline] | fun hostActivates(roots: List<IRComponent>): Boolean =
+  L139 CanvasRootHoist.kt:572 [bare-prevline] | internal fun anyOutOfFlowBox(
+  L139 CanvasRootHoist.kt:322 [bare-prevline] | fun shouldHoistToCanvasRoot(
+  L140 CanvasRootHoist.kt:380 [bare-prevline] | fun rendersInFlowAsStaticPosition(
+  L140 CanvasRootHoist.kt:1041 [bare-prevline] | if (!activates) {
+  L141 ScreenshotCaptureScreen.kt:2062 [file] | com.styleconverter.runtime.layout.position.CanvasRootHoist.Host(
+  L142 ScreenshotCaptureScreen.kt:587 [bare-prevline] | LocalWptComposedMode provides true
+  L145 PositionedParentFlowSlot.kt:87-89 [file] | // Host-gated like RC1: only the composed WPT capture (CanvasRootHoist.Host)
+  L158 PositionApplier.kt:227-238 [file] | // Wave 12: absoluteOffset, NOT offset. CSS top/right/bottom/left
+  L159 ComponentRenderer.kt:2189-2195 [file] | if (direction == TextStyleApplier.DirectionMode.RTL) {
+  L177 BARE :806 (no file in context)
+  L227 PositionedParentFlowSlot.kt:87-89 [bare] | // Host-gated like RC1: only the composed WPT capture (CanvasRootHoist.Host)
+  L235 ComponentRenderer.kt:3633-3661 [bare-prevline] | // ── Wave 46 (lane Y6): the abspos STATIC-POSITION
+  L238 ComponentRenderer.kt:22 [bare-prevline] | import androidx.compose.ui.platform.LocalLayoutDirection
+  L238 ComponentRenderer.kt:27 [bare-prevline] | import androidx.compose.ui.unit.LayoutDirection
+  L248 ScreenshotCaptureScreen.kt:1821 [file] | com.styleconverter.runtime.layout.position.CanvasRootHoist.hostActivates(roots)
+  L249 PositionedParentFlowSlotTest.kt:161 [bare] | val mount = PositionedParentFlowSlot.mount(positioned("ABSOLUTE", left = 50.0))
+  L358 BARE :3504 (no file in context)
+  L578 _note.md:225-227 [file] | - BACKLOG re-true for the orchestrator (brief §11 item 1): "one row LATE" → "one RUN height (+20 px); the thir
+=== ua-heading-margin.md
+  L190 BARE :109 (no file in context)
+  L191 BARE :200 (no file in context)
+  L202 ComponentRenderer.kt:473 [bare] | internal fun blockCollapsePlanFor(
+  L202 ComponentRenderer.kt:598 [bare] | com.styleconverter.runtime.spacing.uaChildBlockEdges(
+  L203 MarginCollapsePlanner.swift:151 [bare] | edges.append(UABlockMargin.childBlockEdges(tag: child.meta?.sourceTag,
+  L204 ComponentRenderer.kt:534 [bare] | return CollapsePlanResult(null, "out-of-flow child")
+  L205 MarginCollapsePlanner.swift:82-89 [bare] | // B4 — any absolutely/fixed-positioned child bails the WHOLE
+  L208 UaBlockMargins.kt:594 [bare] | fun composedRootStackPlan(root: IRComponent, hostActive: Boolean): RootStackMargin {
+  L209 ComposedRootStack.swift:428 [bare] | static func composedRootStackPlan(_ root: IRComponent) -> RootStackMargin {
+  L210 ComposedRootStack.swift:429-431 [bare-prevline] | // Shape 1 — the RC1 static-position slot (wave-52 L2 T1).
+  L213 UaBlockMargins.kt:651 [bare] | fun withUaBlockMarginOnHoistedRoot(root: IRComponent): IRComponent {
+  L213 ScreenshotCaptureScreen.kt:1769 [bare] | withCanvasOwnedBodyMargin(roots, canvasMargin).map(::withUaBlockMarginOnHoistedRoot), rootImagePlan)
+  L214 ComposedRootStack.swift:650 [bare] | static func withUaBlockMarginOnHoistedRoot(_ root: IRComponent) -> IRComponent {
+  L215 CaptureCanvas.swift:391 [bare-prevline] | .map(UABlockMargin.withUaBlockMarginOnHoistedRoot))
+  L219 ComponentRenderer.kt:1416 [bare] | StyleApplier.applyProperties(
+  L220 ComponentRenderer.kt:4707 [bare-prevline] | private fun RenderAbsoluteChild(child: IRComponent) {
+  L221 ComponentRenderer.kt:433 [bare-prevline] | *    but filtering it would break the index-map alignment with the
+  L222 ComponentRenderer.kt:2094 [bare-prevline] | .LocalInheritedTransform provides
+  L227 BARE :1930 (no file in context)
+  L302 ComponentRenderer.kt:1138 [file] | // for every non-container and every own-declaring container, so no
+  L310 UAElementFontRuleTest.kt:178 [bare] | internal object UAHeadingFaceReplay {
+  L310 UAElementFontRuleTest.kt:220 [bare] | internal object UAHeadingFaceWire {
+  L313 BARE :1161 (no file in context)
+  L314 BARE :124 (no file in context)
+  L315 BARE :356 (no file in context)
+  L316 BARE :780 (no file in context)
+  L333 UAElementFontRule.kt:26-27 [bare-prevline] | // gated. UA heading MARGINS stay with spacing/UaBlockChildMargins.kt + the
+  L338 UAElementFontRuleTest.kt:96 [bare-prevline] | fun `GO-SMALL - every heading host with child boxes keeps its list (005, 006, 014 held, 011 control)`() {
+  L339 UAElementFontRuleTest.kt:210 [bare-prevline] | fun seam(site: Site): List<IRProperty> = UAElementFontRule.apply(
+  L352 UAElementFontRule.swift:69 [bare-prevline] | //   * The UA heading MARGINS (`h1 { margin: 0.67em 0 }` …) are NOT injected
+  L354 UABlockMargin.swift:160-171 [bare-prevline] | /// container keeps its first child's top margin inside it, CSS 2.1
+  L391 OUT-OF-RANGE runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt:1161 (243 lines) [bare]
+  L391 OUT-OF-RANGE runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt:1162 (243 lines) [bare]
+  L399 ComponentRenderer.kt:4898 [bare] | val placeable = measurable.measure(androidx.compose.ui.unit.Constraints())
+  L586 BARE :2094 (no file in context)
+  L591 BARE :4898 (no file in context)
+  L613 ComponentRenderer.kt:1141-1165 [bare] | val listUaProperties = com.styleconverter.runtime.lists.ListStyleUaRule.apply(
+  L624 ComponentRenderer.kt:534 [bare-prevline] | return CollapsePlanResult(null, "out-of-flow child")
+  L625 ComponentRenderer.kt:82-89 [bare-prevline] | import com.styleconverter.runtime.container.ContainerQueryApplier
+  L635 UAElementFontRuleTest.kt:210 [bare] | fun seam(site: Site): List<IRProperty> = UAElementFontRule.apply(
+  L650 ComponentRenderer.kt:1157-1165 [bare-prevline] | val rawProperties = com.styleconverter.runtime.typography.UAElementFontRule.apply(
+  L660 ComponentRenderer.swift:340-356 [bare-prevline] | // The UA tag rules and the merge below all read the POST-reset own
+  L666 ComponentRenderer.swift:138 [bare-prevline] | @Environment(\.wptCaptureMode) private var wptCaptureMode
+  L669 ComponentRenderer.kt:1161 [bare] | standsDown = com.styleconverter.runtime.typography.UAElementFontRule.headingStandsDown(component),
+  L674 ComponentRenderer.swift:352-356 [bare] | // The heading half stands down for a heading that hosts child
+=== counter-suffix-rows.md
+  L26 cell-review.second-reader.json:219-236 [file] | "cell": "css-counter-styles/counter-suffix.html android",
+  L35 counter-style-table.mjs:19-27 [file] | // SUFFIX NOTE — the one deliberate deviation from a literal transcription.
+  L41 FontVariantNumericApplier.swift:14 [file] | _ = cfg; _ = agg   // no-op; TODO(phase-6+): UIFontDescriptor feature routing.
+  L109 ComponentRenderer.swift:4602 [bare-prevline] | Text(ScriptFallbackFonts.annotate(markerText,
+  L110 ComponentRenderer.swift:4626 [bare-prevline] | Text(ScriptFallbackFonts.annotate(markerText,
+  L111 ComponentRenderer.swift:4650 [bare-prevline] | Text(ScriptFallbackFonts.annotate(markerText,
+  L118 ListMarkerTextStyle.kt:75 [file] | fun forItem(inherited: TextStyle, textColor: Color? = null): TextStyle =
+  L149 ListMarkerOutsideHang.swift:81 [file] | let markerX = -(markerSize.width + gap)
+  L150 ListMarkerRow.swift:144 [file] | static let gapPt: CGFloat = 4
+  L150 ComponentRenderer.swift:4618 [file] | gap: ListMarkerRow.gapPt,
+  L151 ListMarkerRow.kt:70 [file] | val gapDp = 4.dp
+  L151 ComponentRenderer.kt:4482 [file] | gapPx = with(markerSnapDensity) { ListMarkerRow.gapDp.roundToPx() },
+  L154 counter-style-table.mjs:19-27 [file] | // SUFFIX NOTE — the one deliberate deviation from a literal transcription.
+  L161 ComponentRenderer.swift:4646 [file] | spacing: ListMarkerRow.gapPt) {
+  L162 ComponentRenderer.kt:4665 [file] | .padding(end = ListMarkerRow.gapDp)
+  L174 ListMarkerText.swift:45-49 [file] | case .cjkDecimal: return "\(cjkDecimal(index + 1))."
+  L178 counter-style-author.mjs:121 [file] | if (d.suffix !== undefined) entry.suffix = String(d.suffix).replace(/ +$/, '');
+  L190 FontVariantNumericApplier.swift:14 [file] | _ = cfg; _ = agg   // no-op; TODO(phase-6+): UIFontDescriptor feature routing.
+  L192 ComponentRenderer.swift:5430-5539 [file] | private func labelFont(for textConfig: TextConfig) -> Font {
+  L193 ComponentRenderer.swift:5537 [bare-prevline] | if textConfig.smallCaps { f = f.smallCaps() }
+  L193 StyleBuilder.swift:505 [file] | s.text.smallCaps = agg.smallCaps
+  L195 ComponentRenderer.kt:6955-6964 [file] | val fontVariantConfig = try {
+  L196 FontVariantApplier.kt:88 [file] | NumericSpacing.TABULAR_NUMS -> features.add("\"tnum\" 1")
+  L199 InheritedText.swift:43 [file] | static let inheritedTypes: Set<String> = [
+  L208 ListMarkerOutsideHang.swift:33-41 [file] | //  ## RTL (BACKLOG (c⁴): RTL markers are BLOCKED UPSTREAM)
+  L220 ListMarkerOutsideHang.kt:36-41 [file] | // ## RTL (BACKLOG (c⁴): RTL markers are BLOCKED UPSTREAM)
+  L223 KoreanHangulFormal.swift:35-58 [file] | //  ## TWIN DIVERGENCE — stated, not hidden
+  L226 ListStyleConfig.kt:47 [file] | KOREAN_HANGUL_FORMAL,
+  L226 ListStyleExtractor.kt:182 [file] | "korean_hangul_formal" -> ListStyleType.KOREAN_HANGUL_FORMAL
+  L226 ListStyleApplier.kt:54 [file] | ListStyleType.KOREAN_HANGUL_FORMAL ->
+  L229 ListMarkerText.swift:10-14 [file] | //  ONE EXCEPTION since wave 50 (lane B4), stated here so the twin claim
+  L231 ListMarkerStyle.swift:43-47 [file] | // §7.1 longhand East Asian — the ONLY member modelled (wave 50, lane B4:
+  L234 counter-style-table.mjs:21-23 [file] | // the §6.1 bullet styles use " ". Both native runtimes already own that
+  L235 ComponentRenderer.kt:4524 [file] | // Wave 28 (lane MC) — the trailing space is GONE. It was
+  L243 ListMarkerRow.swift:131-143 [bare] | /// Inline gap between the marker box and the item's principal box.
+  L246 TypographyAggregate.swift:68 [bare] | var smallCaps: Bool = false
+  L248 StyleBuilder.swift:117 [bare] | var smallCaps: Bool           = false
+  L249 StyleBuilder.swift:505 [bare-prevline] | s.text.smallCaps = agg.smallCaps
+  L253 ListMarkerAbsposItemRasterTests.swift:308 [file] | XCTAssertEqual(ListMarkerRow.gapPt, 4)
+  L258 ListMarkerRow.kt:60-69 [bare] | * Inline gap between the marker box and the item's principal box.
+  L260 ListMarkerRowTest.kt:209 [file] | assertEquals(4.dp, ListMarkerRow.gapDp)
+  L273 ComponentRenderer.swift:3973 [bare-prevline] | markerPlacement(child: child, markerText: markerText,
+  L273 ComponentRenderer.swift:4561 [bare-prevline] | private func markerPlacement(child: IRComponent, markerText: String,
+  L277 ComponentRenderer.swift:4602 [bare-prevline] | Text(ScriptFallbackFonts.annotate(markerText,
+  L277 ComponentRenderer.swift:4626 [bare-prevline] | Text(ScriptFallbackFonts.annotate(markerText,
+  L277 ComponentRenderer.swift:4650 [bare-prevline] | Text(ScriptFallbackFonts.annotate(markerText,
+  L281 ComponentRenderer.swift:4618 [bare] | gap: ListMarkerRow.gapPt,
+  L283 ComponentRenderer.swift:4646 [bare] | spacing: ListMarkerRow.gapPt) {
+  L286 ComponentRenderer.kt:4482 [bare-prevline] | gapPx = with(markerSnapDensity) { ListMarkerRow.gapDp.roundToPx() },
+  L289 ComponentRenderer.kt:4665 [bare-prevline] | .padding(end = ListMarkerRow.gapDp)
+  L291 ComponentRenderer.swift:5537 [bare-prevline] | if textConfig.smallCaps { f = f.smallCaps() }
+  L341 counter-style-table.mjs:19-27 [file] | // SUFFIX NOTE — the one deliberate deviation from a literal transcription.
+  L342 counter-style-author.mjs:121 [file] | if (d.suffix !== undefined) entry.suffix = String(d.suffix).replace(/ +$/, '');
+  L351 TypographyApplier.swift:184 [file] | if agg.smallCaps         { f = f.smallCaps() }
+  L380 ListMarkerOutsideHang.swift:33-41 [file] | //  ## RTL (BACKLOG (c⁴): RTL markers are BLOCKED UPSTREAM)
+  L380 ListMarkerOutsideHang.swift:36-41 [bare] | //  FloatBlockLayout.placedX), so the physical `-(w + gap)` handed in here
+  L391 KoreanHangulFormal.swift:35-58 [file] | //  ## TWIN DIVERGENCE — stated, not hidden
+  L391 ListMarkerText.swift:10-14 [file] | //  ONE EXCEPTION since wave 50 (lane B4), stated here so the twin claim
+  L391 ListMarkerStyle.swift:43-47 [file] | // §7.1 longhand East Asian — the ONLY member modelled (wave 50, lane B4:
+  L582 ComponentRenderer.swift:5521-5524 [file] | let base = UIFont(name: name, size: size) {
+  L594 counter-style-table.mjs:21-23 [file] | // the §6.1 bullet styles use " ". Both native runtimes already own that
+  L599 ListMarkerText.swift:45-49 [file] | case .cjkDecimal: return "\(cjkDecimal(index + 1))."
+=== android-paint-order.md
+  L38 BorderSideApplier.kt:98-99 [file] | return modifier.drawWithContent {
+  L45 EffectsFacade.kt:168 [file] | result = ClipPathApplier.applyClipPath(result, config.clipPath, collapsed)
+  L46 EffectsFacade.kt:234 [bare-prevline] | result = FilterApplier.applyForegroundFilters(result, config.filters)
+  L47 FilterApplier.kt:127 [file] | result = applyDropShadow(result, shadow)
+  L47 FilterApplier.kt:422-465 [bare] | private fun applyDropShadow(modifier: Modifier, shadow: FilterFunction.DropShadow): Modifier {
+  L49 FilterExtractorDropShadowInkTest.kt:78-95 [file] | @Test
+  L58 InlineRunFold.kt:546 [file] | return Outcome.Bailed("br-stacked-equivalent")
+  L171 BorderRadiusApplier.kt:207 [file] | result = result.border(
+  L176 BorderRadiusSelfPaintTest.kt:187-236 [file] | @Test
+  L180 BordersFacade.kt:85-98 [file] | fun apply(modifier: Modifier, config: BordersConfig): Modifier {
+  L181 BorderSideApplier.kt:79-83 [file] | if (config.isUniform && config.top.hasBorder && config.top.style == LineStyle.SOLID) {
+  L182 BorderSideApplier.kt:98-124 [bare-prevline] | return modifier.drawWithContent {
+  L182 BorderSideApplier.kt:86-97 [bare-prevline] | // We use `drawWithContent` (not `drawBehind`) so the border strokes
+  L189 ComponentRenderer.kt:3063-3068 [file] | Box(
+  L190 ComponentRenderer.kt:3512-3549 [bare-prevline] | if (isPositionedContainer) {
+  L226 BARE :162 (no file in context)
+  L227 BARE :168 (no file in context)
+  L228 BARE :192 (no file in context)
+  L228 BARE :205 (no file in context)
+  L228 BARE :225 (no file in context)
+  L229 BARE :234 (no file in context)
+  L229 FilterApplier.kt:127 [file] | result = applyDropShadow(result, shadow)
+  L229 FilterApplier.kt:422-465 [bare] | private fun applyDropShadow(modifier: Modifier, shadow: FilterFunction.DropShadow): Modifier {
+  L235 FilterExtractor.kt:176-196 [file] | "drop-shadow" -> {
+  L235 FilterExtractorDropShadowInkTest.kt:78-85 [file] | @Test
+  L248 FilterApplier.kt:127 [file] | result = applyDropShadow(result, shadow)
+  L249 FilterApplier.kt:446-462 [bare-prevline] | val paint = Paint().apply {
+  L249 FilterApplier.kt:429-437 [bare-prevline] | // The previous implementation drew a FULL-SIZE rect at
+  L267 InlineRunFold.kt:530-547 [file] | // Wave 47 (lane Z6) — BR STACKED-EQUIVALENCE: a {text, <br>}*-only
+  L277 BorderRadiusApplier.kt:207 [bare] | result = result.border(
+  L277 BorderRadiusApplier.kt:165-185 [bare] | * Self-paint mode: round the element's OWN paint, clip nothing.
+  L279 BorderRadiusSelfPaintTest.kt:158-185 [bare] | @Test
+  L280 BorderSideApplier.kt:71 [bare] | fun applyBorders(modifier: Modifier, config: AllBordersConfig): Modifier {
+  L280 BorderSideApplier.kt:82 [bare] | return modifier.border(width, color)
+  L280 BorderSideApplier.kt:98-99 [bare] | return modifier.drawWithContent {
+  L282 StyleApplier.kt:753-754 [bare] | result = BordersFacade.apply(result, paint.borders)
+  L297 StyleApplier.kt:753 [bare-prevline] | result = BordersFacade.apply(result, paint.borders)
+  L329 BARE :207 (no file in context)
+  L347 StyleApplier.kt:1079 [file] | fun applyVisualsOnly(modifier: Modifier, config: StyleConfig): Modifier {
+  L348 StyleApplier.kt:1090-1092 [bare-prevline] | // `absoluteOffset` of ours for the backdrop node to compensate for —
+  L362 BackfaceCullChainTest.kt:82 [file] | StyleApplier.applyConfig(Modifier, StyleApplier.extractConfig(props))
+  L615 InlineRunFold.kt:530-547 [file] | // Wave 47 (lane Z6) — BR STACKED-EQUIVALENCE: a {text, <br>}*-only
+=== instruments.md
+  L25 flex-zero-gap-rules.geometry.py:89 [file] | 'blueRuns': {x: runs_on(px, h, x, blue, False) for x in COLS},
+  L70 InlineRuns.ts:174 [file] | 'end of the word they split (hyphens: auto, InertOutOfFlowWordJoin) — reader deviation from spec 03 §4.1 rule 
+  L108 BARE :89 (no file in context)
+  L131 wl3-wire-differential.sh:46-64 [bare-prevline] | node - "$OUT" <<'JS'
+  L131 wl3-wire-differential.sh:26 [bare-prevline] | #   Any other changed document is an extraction/converter LEAK: stop (revert rule 5).
+  L132 wl3-wire-differential.sh:47-63 [bare-prevline] | const fs = require('fs'), path = require('path'); const OUT = process.argv[2];
+  L136 wl3-wire-differential.sh:37-42 [bare-prevline] | W="$OUT/$tag/$sec"; mkdir -p "$W/out"
+  L138 _note.md:65-69 [file] | - **[W-L3]** the gate-flag wire differential (30 sections, pre 1cde1f48 vs post d64d4c6e, worktrees with the g
+  L140 _note.md:39-40 [bare-prevline] | - Per-test IR `wave53-final` → `wave54-open`: 1435 / 1435 byte-identical (the control above).
+  L141 _note.md:43 [bare-prevline] | pre-registered `controlCalibrations`: **C2** `wave53-final → wave54-open` HOLDS, 0 changed / 0 wire / 0 renumb
+  L142 _note.md:35 [bare-prevline] | 
+  L143 _note.md:50 [bare-prevline] | 
+  L146 _note.md:48 [bare-prevline] | attribution differs). The instrument is calibrated both ways before any lane lands.
+  L160 ab-arms54.sh:32 [file] | if grep -q 'attempt 1 starting' "$log"; then bash $G/installed-build-hash.sh "$run (A/B arm: $arm = HEAD minus
+  L161 installed-build-hash.sh:50 [file] | } | tee -a "$OUT"
+  L162 installed-build-hash.sh:35 [bare-prevline] | {
+  L164 ab-diff.mjs:36 [bare] | const delta = +(b.ssim - a.ssim).toFixed(4);
+  L171 BARE :39 (no file in context)
+  L180 InlineRunFold.kt:460-467 [file] | } else if (tag in TEXT_MEMBER_TAGS && InertOutOfFlowMember.admits(child)) {
+  L183 ComponentRenderer.kt:3905-3906 [file] | (if (runFold.droppedOutOfFlowMembers > 0)
+  L186 03-children.md:191 [file] | 2. **Authoritative when present.** A reader that honours `runs` paints
+  L195 _note.md:321-327 [file] | > A reader MAY render a `{child}` run member away from its wire slot — or, in a folded paragraph, not mount it
+  L199 05-versioning.md:85-97 [bare] | ## Change process
+  L203 05-versioning.md:66-69 [bare-prevline] | - **Defect repairs** from 02-values.md: the phantom `"u"` discriminator
+  L206 NodeRenderer.ts:342 [file] | // children the list did NOT name (spec 03 §4.1 rule 4), so a
+  L207 IRDocumentDecoder.kt:528 [file] | * dangling case, which spec 03 §4.1 rule 5 makes a warn-and-skip — is
+  L207 extract-fixture.mjs:3702 [file] | // entry. That distinction is the whole point (spec 03 §4.1 rule 6):
+  L207 extract-fixture.mjs:3719 [file] | //   words render welded. CSS Text §4.1 rule 4 collapses that space to one
+  L209 extract-fixture.mjs:210-214 [bare-prevline] | const re = /<link\b[^>]*?rel=["']?stylesheet\b[\s\S]*?>/gi;
+  L209 extract-fixture.mjs:216 [bare-prevline] | }
+  L211 bidi-marker-paint.mjs:32 [file] | // TODO(S6 residue): `mask-image` and `mix-blend-mode` are group effects of the
+  L225 BARE :150 (no file in context)
+  L245 InertOutOfFlowWordJoin.ts:32 [bare] | *     its source slot (a reader deviation from spec 03 §4.1 rule 1);
+  L246 InlineRuns.ts:52 [bare] | * from spec 03 §4.1 rule 1, counted here AND warned by resolveRuns on the
+  L246 InlineRuns.ts:167 [bare] | // deviation from spec 03 §4.1 rule 1), so it is announced on the SAME channel
+  L246 InlineRuns.ts:174 [bare] | 'end of the word they split (hyphens: auto, InertOutOfFlowWordJoin) — reader deviation from spec 03 §4.1 rule 
+  L248 ComposedRootSeparator.ts:13 [bare] | // one Inter 16-px space advance (web-root-separator.md §2).
+  L298 doc-staleness-check.sh:77 [bare-prevline] | [[ "$FAILED" -eq 0 ]] && log "✓ all 3 docs match live coverage"
+  L327 section-runner.sh:375 [file] | POST_LOAD_EXTRACT=1 BIDI_BAKE=1 VT_BAKE=1 node "$TITAN_DIR/extract-fixture.mjs" "${TESTS[@]}" >"$EXTRACT_LOG" 
+  L327 section-runner.sh:416 [bare] | node "$TITAN_DIR/build-combined-fixture.mjs" --out "$COMBINED_FIXTURE" --tests "$TESTS_LIST"
+  L327 section-runner.sh:435 [bare] | if ! ./gradlew --no-daemon :converter:run --args="convert --from css --to ir -i $REL_INPUT -o $GRADLE_OUT_DIR"
+  L327 section-runner.sh:620 [bare] | node "$TITAN_DIR/split-combined-ir.mjs" --in "$GRADLE_OUT_DIR/tmpOutput.json" --out "$PERTEST_DIR" \
+  L394 ab-arms54.sh:16-21 [file] | ARMS=(
+  L459 InertOutOfFlowWordJoin.ts:98-119 [file] | export function isInertOutOfFlowMember(member: ComposedNode): boolean {
+  L460 InertOutOfFlowMember.kt:89-114 [file] | fun admits(member: IRComponent): Boolean {
+  L461 InlineRunFold.kt:177 [file] | private val TEXT_MEMBER_TAGS = setOf("span", "time", "data")
+  L462 InlineRunFold.kt:460-467 [bare-prevline] | } else if (tag in TEXT_MEMBER_TAGS && InertOutOfFlowMember.admits(child)) {
+  L463 ComponentRenderer.kt:3905-3906 [file] | (if (runFold.droppedOutOfFlowMembers > 0)
+  L464 InlineRuns.ts:172-175 [file] | console.warn(
+  L469 InertOutOfFlowWordJoin.ts:32 [file] | *     its source slot (a reader deviation from spec 03 §4.1 rule 1);
+  L469 InlineRuns.ts:52 [file] | * from spec 03 §4.1 rule 1, counted here AND warned by resolveRuns on the
+  L469 InlineRuns.ts:167 [bare] | // deviation from spec 03 §4.1 rule 1), so it is announced on the SAME channel
+  L470 InlineRuns.ts:174 [file] | 'end of the word they split (hyphens: auto, InertOutOfFlowWordJoin) — reader deviation from spec 03 §4.1 rule 
+  L471 InertOutOfFlowWordJoin.test.tsx:167-177 [file] | it('(i) each join is warned once on the `[InlineRuns]` channel; a no-join host stays silent (S1 S4)', () => {
+  L490 BARE :32 (no file in context)
+  L491 bidi-bake.test.mjs:1307-1308 [bare] | const effects = { opacity: '0.5', transform: 'matrix(1, 0, 0, 1, 5, 0)', filter: 'blur(1px)', clipPath: 'inset
+  L492 bidi-bake.test.mjs:1310 [bare-prevline] | assert.deepEqual(Object.keys(effects), Object.keys(MARKER_PAINT_INITIAL));
+  L511 HyphenateCharacterExtractor.kt:36 [file] | val prop = properties.lastOrNull { it.type == IR_TYPE } ?: return null
+  L512 PreBreakPipeline.kt:222 [file] | GreedyLineBreaker.clampLines(lines, GreedyLineBreaker.Clamp(it), wrapWidthPx, measure, source = text, hyphenCh
+  L513 PreBreakPipeline.kt:77 [bare-prevline] | */
+  L513 SoftHyphenCuts.kt:38 [file] | return walk(text, lines, hyphenChar) ?: legacyCount(text, lines, hyphenChar)
+  L522 InertOutOfFlowWordJoin.ts:102 [file] | if (member.children.length > 0 || (c.meta?.runs?.length ?? 0) > 0 || (c.meta?.decorations?.length ?? 0) > 0) r
+  L523 InertOutOfFlowWordJoin.ts:45 [bare-prevline] | const OUT_OF_FLOW_POSITIONS: ReadonlySet<string> = new Set(['ABSOLUTE', 'FIXED']);
+  L524 InertOutOfFlowWordJoin.ts:154 [bare-prevline] | const pushText = (t: string) => {
+  L525 InertOutOfFlowWordJoin.ts:89 [bare-prevline] | return a <= 0;
+  L528 label-chrome-check.mjs:163 [file] | for (const node of hits) {                                                     // EVERY same-named node must j
+  L529 label-chrome-check.mjs:110 [bare-prevline] | if (wouldBe.length && lit === wouldBe.length) problems.push(`(iv) ${PLATFORMS[k]}: ${lit}/${wouldBe.length} la
+  L537 ComponentRenderer.kt:214 [file] | "OverflowWrap", "WordWrap", "WordBreak", "Hyphens",
+  L537 InheritedText.swift:77 [file] | "OverflowWrap", "WordWrap", "WordBreak", "Hyphens",
+  L543 ComposedRootSeparator.ts:60 [file] | * PLAN §2 L6 pre-registers it. TODO(wave-55+): measure, then drop.
+  L687 05-versioning.md:85-97 [file] | ## Change process

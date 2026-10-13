@@ -1,0 +1,32 @@
+wire-differential (run)
+  PRE     <wt:wl7a-pre>
+  POST    <wt:wl7a-post>
+  OUT     /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave55-wl7a
+  EXPECT  <scratch>/wl7a-expect-empty.txt (0 expected line(s))
+  RUN     /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave55-open (sections: css-anchor-position css-backgrounds css-counter-styles css-text css-writing-modes selectors)
+[pre css-anchor-position] 48 tests
+pre	css-anchor-position	0	0	0	0	extracted=48	fail=0
+[pre css-backgrounds] 48 tests
+pre	css-backgrounds	0	0	0	0	extracted=48	fail=0
+[pre css-counter-styles] 48 tests
+pre	css-counter-styles	0	0	0	0	extracted=48	fail=0
+[pre css-text] 48 tests
+pre	css-text	0	0	0	0	extracted=48	fail=0
+[pre css-writing-modes] 48 tests
+pre	css-writing-modes	0	0	0	0	extracted=48	fail=0
+[pre selectors] 48 tests
+pre	selectors	0	0	0	0	extracted=48	fail=0
+[post css-anchor-position] 48 tests
+post	css-anchor-position	0	0	0	0	extracted=48	fail=0
+[post css-backgrounds] 48 tests
+post	css-backgrounds	0	0	0	0	extracted=48	fail=0
+[post css-counter-styles] 48 tests
+post	css-counter-styles	0	0	0	0	extracted=48	fail=0
+[post css-text] 48 tests
+post	css-text	0	0	0	0	extracted=48	fail=0
+[post css-writing-modes] 48 tests
+post	css-writing-modes	0	0	0	0	extracted=48	fail=0
+[post selectors] 48 tests
+post	selectors	0	0	0	0	extracted=48	fail=0
+identical 288 · content-changed 0 · renumbered 0 · one-sided 0 · renumbered-anomalous 0
+verdict: exit 0 — nothing unexpected

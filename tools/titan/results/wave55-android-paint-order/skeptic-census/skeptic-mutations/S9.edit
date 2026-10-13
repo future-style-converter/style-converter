@@ -1,0 +1,3 @@
+if (behindContent) drawInOrder({ paintSides() }, { drawContent() })
+=====
+if (behindContent) drawInOrder({ drawContent() }, { paintSides() })

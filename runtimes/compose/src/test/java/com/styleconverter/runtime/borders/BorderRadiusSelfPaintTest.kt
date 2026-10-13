@@ -13,7 +13,8 @@ package com.styleconverter.runtime.borders
 //
 // The fix is a MODE SPLIT decided by the pure truth table pinned here
 // (selfPaintsWithoutClip): eligible elements shape their own paint with
-// `background(color, shape)` + `border(w, c, shape)` and clip NOTHING;
+// `background(color, shape)` + `behindContentBorder(w, c, shape)` (wave 55,
+// L6 U1: the band behind the content; was androidx `border`) and clip NOTHING;
 // everything else (overflow clips, layered backgrounds, mixed borders)
 // keeps the legacy clip byte-identically. JVM-only chain introspection, no
 // Robolectric — the same foldIn technique as FilterGroupApplierTest.
@@ -166,7 +167,13 @@ class BorderRadiusSelfPaintTest {
             )
         )
         assertTrue("expected a background element in $names", names.any { it.contains("Background") })
-        assertTrue("expected a border element in $names", names.any { it.contains("Border") })
+        // Wave 55 (L6 U1): the band element is the behind-content one, never
+        // androidx BorderModifierNodeElement (it draws the content first).
+        assertTrue("expected the behind-content band in $names", names.any { it.endsWith(".BehindContentBorderElement") })
+        assertFalse("androidx border must not install in $names", names.any { it.endsWith(".BorderModifierNodeElement") })
+        // Background OUTER of the band: the fill paints first, the band on its edge.
+        assertTrue("background before band in $names",
+            names.indexOfFirst { it.contains("Background") } < names.indexOfFirst { it.endsWith(".BehindContentBorderElement") })
         assertFalse("no clip layer may install in $names", names.any { it.contains("GraphicsLayer") })
     }
 
@@ -179,7 +186,8 @@ class BorderRadiusSelfPaintTest {
             )
         )
         assertFalse("no background may install in $names", names.any { it.contains("Background") })
-        assertTrue("expected a border element in $names", names.any { it.contains("Border") })
+        // Wave 55 (L6 U1): exactly the behind-content band, no androidx border node.
+        assertEquals(listOf("com.styleconverter.runtime.borders.BehindContentBorderElement"), names)
     }
 
     // ── End-to-end reachability on the measured WPT wire ─────────────────

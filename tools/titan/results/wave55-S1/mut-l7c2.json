@@ -1,0 +1,4 @@
+[
+ {"label":"S1-L7c2","what":"L7 U6-web re-check: same mutation (transparent ink no longer required), run against BOTH word-join test files (wave-54 + U6-web)","file":"runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts","old":"  return outOfFlow && transparentInk;","new":"  return outOfFlow;","test":"cd runtimes/web && npx vitest run tests/renderer/InertOutOfFlowWordJoin.test.tsx tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx"},
+ {"label":"S1-L7d","what":"L7 U6-web: a FIXED member is no longer out of flow (W2's branch)","file":"runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts","old":"if (OUT_OF_FLOW_POSITIONS.has(keywordOf(p.data)?.toUpperCase() ?? ''))","new":"if ((keywordOf(p.data)?.toUpperCase() ?? '') === 'ABSOLUTE')","test":"cd runtimes/web && npx vitest run tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx"}
+]

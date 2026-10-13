@@ -1,0 +1,1 @@
+    fun placementOffset(childPx: Int, reportedPx: Int): Int = (reportedPx - childPx) / 2

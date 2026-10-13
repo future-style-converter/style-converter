@@ -1,0 +1,36 @@
+== full (unit-U1 + seam-1 + unit-U2)
+  bd3910015afa ComponentRenderer.kt
+  be07853b2433 PositionedParentFlowSlot.kt
+  b1a137e81b33 SeamReachabilityTest.kt
+  754085db42a0 PositionedParentSlotGate.kt
+  dc7a408e1a27 PositionedParentRtlOrigin.kt
+revertState full: gradle exit 0; focused 60 tests, 0 failures, 0 skipped; CanvasRootHoistTest=29 OutOfFlowContainingBlockTest=8 PositionedParentFlowSlotTest=8 PositionedParentRtlOriginTest=5 PositionedParentSlotGateTest=3 PositionedParentSlotSeamWiringTest=2 SeamReachabilityTest=3 StaticPositionSeamWiringTest=2
+== U2 reverted (unit-U1 + seam-1)
+  bd3910015afa ComponentRenderer.kt
+  e19c76568a98 PositionedParentFlowSlot.kt
+  b7af25c90ab4 SeamReachabilityTest.kt
+  3f9584c4d714 PositionedParentSlotGate.kt
+  absent PositionedParentRtlOrigin.kt
+revertState U1: gradle exit 0; focused 55 tests, 0 failures, 0 skipped; CanvasRootHoistTest=29 OutOfFlowContainingBlockTest=8 PositionedParentFlowSlotTest=8 PositionedParentSlotGateTest=3 PositionedParentSlotSeamWiringTest=2 SeamReachabilityTest=3 StaticPositionSeamWiringTest=2
+== unit-U1 without seam-1 (rule 2b)
+  2445d9ea2674 ComponentRenderer.kt
+  e19c76568a98 PositionedParentFlowSlot.kt
+  7a1b061f1de5 SeamReachabilityTest.kt
+  3f9584c4d714 PositionedParentSlotGate.kt
+  absent PositionedParentRtlOrigin.kt
+revertState U1-noseam: gradle exit 0; focused 53 tests, 0 failures, 0 skipped; CanvasRootHoistTest=29 OutOfFlowContainingBlockTest=8 PositionedParentFlowSlotTest=8 PositionedParentSlotGateTest=3 SeamReachabilityTest=3 StaticPositionSeamWiringTest=2
+== base 611c9f93 (revertOrder [U2, U1] complete)
+  2445d9ea2674 ComponentRenderer.kt
+  67d69d61bcc6 PositionedParentFlowSlot.kt
+  7a1b061f1de5 SeamReachabilityTest.kt
+  absent PositionedParentSlotGate.kt
+  absent PositionedParentRtlOrigin.kt
+  git status: 0 entries
+revertState base: gradle exit 0; focused 50 tests, 0 failures, 0 skipped; CanvasRootHoistTest=29 OutOfFlowContainingBlockTest=8 PositionedParentFlowSlotTest=8 SeamReachabilityTest=3 StaticPositionSeamWiringTest=2
+== restored full
+  bd3910015afa ComponentRenderer.kt
+  be07853b2433 PositionedParentFlowSlot.kt
+  b1a137e81b33 SeamReachabilityTest.kt
+  754085db42a0 PositionedParentSlotGate.kt
+  dc7a408e1a27 PositionedParentRtlOrigin.kt
+revertState full-restored: gradle exit 0; focused 60 tests, 0 failures, 0 skipped; CanvasRootHoistTest=29 OutOfFlowContainingBlockTest=8 PositionedParentFlowSlotTest=8 PositionedParentRtlOriginTest=5 PositionedParentSlotGateTest=3 PositionedParentSlotSeamWiringTest=2 SeamReachabilityTest=3 StaticPositionSeamWiringTest=2

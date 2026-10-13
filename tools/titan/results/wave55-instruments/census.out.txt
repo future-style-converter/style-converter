@@ -1,0 +1,63 @@
+# census.mjs — run wave54-final; 8 delivered patches: unit-U2.patch, unit-U3.patch, unit-U4.patch, unit-U5.patch, unit-U6-compose.patch, unit-U6-swift.patch, unit-U6-tooling.patch, unit-U6-web.patch
+
+## (1) what executes each touched path (gate closure: 45 scripts from gate-driver.sh / section-runner.sh / test-all.sh)
+  apps/web-harness/src/ui/ComposedRootSeparator.ts                                                 unit-U4                harness source — built into every WEB capture
+  runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlockBranchesTest.kt unit-U6-compose        test — suite only, never the gate
+  runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/HyphenateCharacterExtractorTest.kt unit-U6-compose        test — suite only, never the gate
+  runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipelineClampHyphenTest.kt unit-U6-compose        test — suite only, never the gate
+  runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCutsTest.kt unit-U6-compose        test — suite only, never the gate
+  runtimes/swiftui/Tests/StyleConverterRuntimeTests/HyphenateCharacterCascadeTests.swift           unit-U6-swift          test — suite only, never the gate
+  runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockBranchesTests.swift    unit-U6-swift          test — suite only, never the gate
+  runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts                                              unit-U4                runtime source — built into every WEB capture
+  runtimes/web/src/renderer/InlineRuns.ts                                                          unit-U4                runtime source — built into every WEB capture
+  runtimes/web/tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx                             unit-U6-web            test — suite only, never the gate
+  runtimes/web/tests/renderer/InlineRunsLatitudeCitation.test.ts                                   unit-U4                test — suite only, never the gate
+  schema/spec/03-children.md                                                                       unit-U4                prose — no tool parses it at the gate
+  tools/titan/bidi-bake.test.mjs                                                                   unit-U5                test — suite only, never the gate
+  tools/titan/bidi-marker-paint.mjs                                                                unit-U5                EXECUTED by the gate (extract / convert / capture tooling)
+  tools/titan/results/wave55-gate/ab-arms55.selftest.out.txt                                       unit-U3                records / probe — read by readers, never the gate
+  tools/titan/results/wave55-gate/ab-arms55.selftest.sh                                            unit-U3                records / probe — read by readers, never the gate
+  tools/titan/results/wave55-gate/ab-arms55.sh                                                     unit-U3                records / probe — read by readers, never the gate
+  tools/titan/wire-differential.mjs                                                                unit-U2                NOT on the gate route (no gate script references it)
+  tools/titan/wire-differential.sh                                                                 unit-U2                NOT on the gate route (no gate script references it)
+  tools/titan/wire-differential.test.mjs                                                           unit-U2                test — suite only, never the gate
+  tools/visual/label-chrome-check.test.mjs                                                         unit-U6-tooling        test — suite only, never the gate
+  gate scripts naming wire-differential / ab-arms55 / flex-zero-gap-rules: none
+
+## (2) the executed sources: what kind of bytes change
+  apps/web-harness/src/ui/ComposedRootSeparator.ts: code lines −0 +0 → COMMENTS ONLY
+  runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts: code lines −0 +0 → COMMENTS ONLY
+  runtimes/web/src/renderer/InlineRuns.ts: code lines −1 +1 → STRING LITERALS ONLY (same code shape)
+      + 'end of the word they split (hyphens: auto, InertOutOfFlowWordJoin) — reader deviation from spec 03 §4.1 rule 2 (renderer latitude)',
+  tools/titan/bidi-marker-paint.mjs: code lines −0 +2 → CODE
+      + maskImage: 'none',
+      + mixBlendMode: 'normal',
+
+## (3) U5 — the marker paint decline reads a chain only for list items inside a bidi bake root (wave54-final)
+  documents 1435 · bidiBaked 17 · stamped marker-not-baked 0
+    css/css-anchor-position/anchor-center-safe-rtl.html                                  list item false · mask/blend false · markerText-carrying components (any bake) 0
+    css/css-backgrounds/background-attachment-local/attachment-local-positioning-3.html  list item false · mask/blend false · markerText-carrying components (any bake) 0
+    css/css-backgrounds/background-attachment-local/attachment-local-positioning-4.html  list item false · mask/blend false · markerText-carrying components (any bake) 0
+    css/css-counter-styles/arabic-indic/css3-counter-styles-101.html                     list item true · mask/blend false · markerText-carrying components (any bake) 9
+    css/css-counter-styles/arabic-indic/css3-counter-styles-102.html                     list item true · mask/blend false · markerText-carrying components (any bake) 24
+    css/css-counter-styles/arabic-indic/css3-counter-styles-103.html                     list item true · mask/blend false · markerText-carrying components (any bake) 2
+    css/css-counter-styles/counter-suffix.html                                           list item true · mask/blend false · markerText-carrying components (any bake) 6
+    css/css-text/bidi/bidi-lines-001.html                                                list item false · mask/blend false · markerText-carrying components (any bake) 0
+    css/css-text/bidi/bidi-lines-002.html                                                list item false · mask/blend false · markerText-carrying components (any bake) 0
+    css/css-text/bidi/bidi-tab-001.html                                                  list item false · mask/blend false · markerText-carrying components (any bake) 0
+    css/css-text/boundary-shaping/boundary-shaping-009.html                              list item false · mask/blend false · markerText-carrying components (any bake) 0
+    css/css-text/hyphens/hyphenate-character-005.html                                    list item false · mask/blend false · markerText-carrying components (any bake) 0
+    css/css-writing-modes/bidi-plaintext-br-001.html                                     list item false · mask/blend false · markerText-carrying components (any bake) 0
+    css/selectors/dir-selector-change-003.html                                           list item false · mask/blend false · markerText-carrying components (any bake) 0
+    css/selectors/dir-selector-change-004.html                                           list item false · mask/blend false · markerText-carrying components (any bake) 0
+    css/selectors/dir-style-02a.html                                                     list item false · mask/blend false · markerText-carrying components (any bake) 0
+    css/selectors/dir-style-03a.html                                                     list item false · mask/blend false · markerText-carrying components (any bake) 0
+  bidi-baked with a list item (the [W-L7a] spelling radius): 4 · of them with mask / mix-blend-mode in the source: 0
+  ALL 1435 sources: list item AND mask / mix-blend-mode: 0
+
+## (4) carriers (the lane predicts no corpus picture and no wire byte)
+  mine:     captures {"web":[],"ios":[],"android":[]} · wire []
+  expected: captures {"web":[],"ios":[],"android":[]} · wire []
+  revert units expected U1 U2 U3 U4 U5 U6-compose U6-swift U6-web U6-tooling · delivered unit patches U2 U3 U4 U5 U6-compose U6-swift U6-tooling U6-web · optional, no patch: U1
+  unknown delivered units: none
+  census delta vs expectations.json: IDENTICAL (0 capture, 0 wire carriers)

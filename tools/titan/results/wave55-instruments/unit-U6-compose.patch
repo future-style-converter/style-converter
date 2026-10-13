@@ -1,0 +1,192 @@
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlockBranchesTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlockBranchesTest.kt
+new file mode 100644
+index 00000000..2db2f6da
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/OutOfFlowContainingBlockBranchesTest.kt
+@@ -0,0 +1,67 @@
++package com.styleconverter.runtime.layout.position
++
++import com.styleconverter.runtime.PropertyTracker
++import com.styleconverter.runtime.core.ir.IRProperty
++import kotlinx.serialization.json.Json
++import kotlinx.serialization.json.jsonArray
++import kotlinx.serialization.json.jsonObject
++import kotlinx.serialization.json.jsonPrimitive
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertTrue
++import org.junit.Before
++import org.junit.Test
++
++// Wave 55 (lane L7, unit U6-compose, pins C4-C7 — wave-54 L4 skeptic K-X4, S-X7's Compose twin, and the two
++// breadcrumbs no test read). OutOfFlowContainingBlock's rule table (wave 54, lane L4) is pinned on the converter's
++// EMITTED shapes by OutOfFlowContainingBlockTest P1; these pins reach the branches the corpus never carries, so a
++// regression there would pass every corpus read:
++//   C4 filter-effects-1 §5 — a `filter` leaf that is an OBJECT (`url(…)` / an unresolved expression: the author
++//      wrote something other than none) establishes. 0 corpus Filter object leaves at wave54-final.
++//   C5 css-contain-2 §3.4 — `contain: paint` as a bare string PRIMITIVE (PerformanceExtractor's string branch, the
++//      space-separated form; the converter emits arrays) establishes.
++//   C6 no silent fallthrough — a Contain leaf the decoder THROWS on answers false AND leaves CONTAIN_DECODE_BREADCRUMB.
++//   C7 a declared content-visibility (css-contain-2 §4: implied layout/paint containment, named but not claimed)
++//      leaves IMPLIED_CONTAINMENT_BREADCRUMB — read on the VERBATIM component
++//      content-visibility-auto-shared-element__3__2__0-092 (tools/titan/runs/wave54-final/sections/
++//      css-view-transitions/per-test-ir/wpt__css-view-transitions__content-visibility-auto-shared-element.json,
++//      sha256 fae6d09f…, byte-identical at wave55-open), which carries no candidate type: the crumb fires on the
++//      fast-bail path too.
++// MUTATIONS (executed red → restore → green, sha256 in tools/titan/results/wave55-instruments/_note.md):
++//   C4 `is JsonObject -> false` in filterListIsUsed · C5 PerformanceExtractor's JsonPrimitive branch returns
++//   emptySet() · C6 the catch's markUnhandled deleted · C7 the IMPLIED_TYPES markUnhandled deleted.
++class OutOfFlowContainingBlockBranchesTest {
++
++    // One wire property from a JSON literal.
++    private fun prop(type: String, json: String) = IRProperty(type, Json.parseToJsonElement(json))
++
++    // The tracker is process-global: every pin starts from an empty one.
++    @Before fun resetTracker() = PropertyTracker.reset()
++
++    @Test fun `C4 a filter object leaf (url or unresolved expression) establishes`() {
++        assertTrue(OutOfFlowContainingBlock.establishes(listOf(prop("Filter", """{"url":"#f"}"""))))
++    }
++
++    @Test fun `C5 contain paint as a bare string primitive establishes`() {
++        assertTrue(OutOfFlowContainingBlock.establishes(listOf(prop("Contain", "\"paint\""))))
++    }
++
++    @Test fun `C6 an undecodable contain leaf answers false and leaves the decode breadcrumb`() {
++        // `jsonPrimitive` throws on the object under "paint" (PerformanceExtractor's object branch).
++        assertFalse(OutOfFlowContainingBlock.establishes(listOf(prop("Contain", """{"paint":{"bad":1}}"""))))
++        assertTrue(PropertyTracker.isUnhandled(OutOfFlowContainingBlock.CONTAIN_DECODE_BREADCRUMB))
++    }
++
++    /** content-visibility-auto-shared-element__3__2__0-092, verbatim. */
++    private val cvAuto = """{"id":"content-visibility-auto-shared-element__3__2__0-092","name":"content-visibility-auto-shared-element__3__2__0","properties":[{"type":"ContentVisibility","data":"AUTO"},{"type":"ContainIntrinsicSize","data":{"type":"length","px":500}},{"type":"Position","data":"STATIC"},{"type":"Width","data":{"type":"length","px":98}},{"type":"Height","data":{"type":"length","px":500}},{"type":"BoxSizing","data":"CONTENT_BOX"},{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"BorderTopWidth","data":{"px":0}},{"type":"BorderRightWidth","data":{"px":0}},{"type":"BorderBottomWidth","data":{"px":0}},{"type":"BorderLeftWidth","data":{"px":0}},{"type":"BorderTopStyle","data":"NONE"},{"type":"BorderRightStyle","data":"NONE"},{"type":"BorderBottomStyle","data":"NONE"},{"type":"BorderLeftStyle","data":"NONE"},{"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":{"r":0,"g":0,"b":0,"a":0}}},{"type":"Display","data":"BLOCK"},{"type":"OverflowX","data":"VISIBLE"},{"type":"OverflowY","data":"VISIBLE"}],"slot":{"parent":"content-visibility-auto-shared-element__3__2-091"},"text":"descendant c-v"}"""
++
++    @Test fun `C7 a declared content-visibility leaves the implied-containment breadcrumb`() {
++        // The verbatim component's own properties, in wire order.
++        val props = Json.parseToJsonElement(cvAuto).jsonObject["properties"]!!.jsonArray.map {
++            IRProperty(it.jsonObject["type"]!!.jsonPrimitive.content, it.jsonObject["data"]!!)
++        }
++        // No Contain / Filter / BackdropFilter / WillChange: not an establisher …
++        assertFalse(OutOfFlowContainingBlock.establishes(props))
++        // … but the implied containment is named, never silent.
++        assertTrue(PropertyTracker.isUnhandled(OutOfFlowContainingBlock.IMPLIED_CONTAINMENT_BREADCRUMB))
++    }
++}
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/HyphenateCharacterExtractorTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/HyphenateCharacterExtractorTest.kt
+index 659f258f..491ff3c8 100644
+--- a/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/HyphenateCharacterExtractorTest.kt
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/HyphenateCharacterExtractorTest.kt
+@@ -98,4 +98,13 @@ class HyphenateCharacterExtractorTest {
+         // A bare primitive is no reader shape: breadcrumb + auto, never a guess.
+         assertEquals(HyphenateCharacterConfig(null), HyphenateCharacterExtractor.extract(prop("\"x\"")))
+     }
++
++    @Test
++    fun ofTwoDeclarationsInOneBlockTheLastWins() {
++        // Wave 55 (L7 U6-compose, pin C1 — wave-54 L3 SK-X1; mutation `lastOrNull` → `firstOrNull`
++        // executed, tools/titan/results/wave55-instruments/_note.md): css-cascade-4 §6.1 sorts equal
++        // declarations by order of appearance, so the later one wins — -004's "/-/" then -003's "•".
++        val both = prop("""{"type":"string","value":"/-/"}""") + prop("""{"type":"string","value":"•"}""")
++        assertEquals(HyphenateCharacterConfig("•"), HyphenateCharacterExtractor.extract(both))
++    }
+ }
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipelineClampHyphenTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipelineClampHyphenTest.kt
+new file mode 100644
+index 00000000..359d4717
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipelineClampHyphenTest.kt
+@@ -0,0 +1,55 @@
++package com.styleconverter.runtime.typography.wrapping
++
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++// Wave 55 (lane L7, unit U6-compose, pin C2 — wave-54 L3 skeptic SK-X2).
++//
++// A FIRED run under a drawn-marker clamp is trimmed to the cap by
++// GreedyLineBreaker.clampLines (wave 52 F4), which may hide line N back to an
++// untaken soft hyphen — and a soft-hyphen break paints the hyphenate-character
++// (css-text-3 §5.3; css-text-4 §6.3). Wave 54 threaded the run's own
++// `hyphenate-character` into that call (PreBreakPipeline.kt, the clampLines
++// call's `hyphenChar = hyphenChar`), but no test reached it: every clamp pin
++// ran with the UA hyphen, where forgetting the argument changes nothing.
++//
++// The run: `ab cd<SHY>ef ghijkl<SHY>mnop` at 7 monospace cells, `hyphens:
++// manual`, hyphenate-character "•" (WPT -003's decoded `\2022`). The fold
++// takes the second soft hyphen (`ghijkl•`), so the pipeline FIRES (the F5
++// trigger); a one-line clamp then cannot fit `ab cdef…`, hides back to the
++// first soft hyphen and must paint "•" there, not U+2010.
++//
++// MUTATION (executed red → restore → green, sha256 in
++// tools/titan/results/wave55-instruments/_note.md): drop
++// `hyphenChar = hyphenChar` from the clampLines call → the head ends `‐…`.
++class PreBreakPipelineClampHyphenTest {
++
++    // A monospace measure: every code point one 10-px cell; U+00AD has no
++    // advance (an untaken soft hyphen is invisible, css-text-3 §5.3).
++    private val mono: (String) -> Float = { s -> s.codePoints().filter { it != 0xAD }.count() * 10f }
++
++    // The run under test, soft hyphens explicit.
++    private val text = "ab cd­ef ghijkl­mnop"
++
++    // One preBreak call: composed-WPT capture, soft wrap on, manual hyphens.
++    private fun run(clamp: Int?) = PreBreakPipeline.preBreak(
++        text, 70f, enabled = true, softWrapAllowed = true, allowMidWordBreak = false,
++        preservesSpaces = false, dictionaryHyphenation = false, clampLines = clamp, hyphenChar = "•", measure = mono)
++
++    @Test fun `C2 control - unclamped, the fold takes the second soft hyphen and paints the run's hyphenate-character`() {
++        val r = run(null)
++        // The F5 trigger fired: a soft-hyphen break was taken.
++        assertTrue(r.fired)
++        // Three lines; the taken break paints "•", the untaken one paints nothing.
++        assertEquals("ab cdef\nghijkl•\nmnop", r.text)
++    }
++
++    @Test fun `C2 a one-line clamp hides back to the first soft hyphen and paints the run's hyphenate-character there`() {
++        val r = run(1)
++        // Still fired (the clamp only trims a fired run).
++        assertTrue(r.fired)
++        // `ab cdef` + marker overflows 7 cells; the latest opportunity that fits is cd|ef.
++        assertEquals("ab cd•" + GreedyLineBreaker.BLOCK_ELLIPSIS_MARKER, r.text)
++    }
++}
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCutsTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCutsTest.kt
+new file mode 100644
+index 00000000..3e97a0c6
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/wrapping/SoftHyphenCutsTest.kt
+@@ -0,0 +1,34 @@
++package com.styleconverter.runtime.typography.wrapping
++
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++// Wave 55 (lane L7, unit U6-compose, pin C3 — wave-54 L3 skeptic SK-X3).
++//
++// SoftHyphenCuts.took answers "did the fold take a soft-hyphen break?" by a
++// WALK that aligns the display lines with the source words, and falls back to
++// the wave-52 COUNT (legacyCount) only when the lines cannot be explained by
++// the fold (SoftHyphenCuts.kt `walk(…) ?: legacyCount(…)`). Every existing pin
++// asserts the walk aligns, so the fallback was never reached.
++//
++// Traced: for `im<SHY>ple` the fold's display word is `imple` with one
++// hyphenation op at offset 2. The line `im‐ple` (a U+2010 INSIDE the word, not
++// at a line end) neither starts with `imple` nor ends at an op head (`im‐`),
++// so the walk returns null; the count then sees one U+2010 in the lines and
++// none in the source → true. So the answer below is the FALLBACK's.
++//
++// MUTATION (executed red → restore → green, sha256 in
++// tools/titan/results/wave55-instruments/_note.md): `?: legacyCount(…)` →
++// `?: false`.
++class SoftHyphenCutsTest {
++
++    @Test fun `C3 lines the walk cannot align are answered by the wave-52 count, not dropped`() {
++        val text = "im­ple"
++        val lines = listOf("im‐ple", "x")
++        // The walk cannot explain these lines as the fold's output …
++        assertFalse(SoftHyphenCuts.walkAligns(text, lines, "‐"))
++        // … so the fallback answers: one hyphen more in the lines than in the source.
++        assertTrue(SoftHyphenCuts.took(text, lines, "‐"))
++    }
++}

@@ -1,0 +1,18 @@
+L1: geometry-gate exit 1; gating keys 3: PASS 0 FAIL 3
+    geometry-gate <scratch>/fakeruns/combo-L1 (base wave54-final · sections css-text (NOT PROBED 2)): 27 keys — PASS 13 · FAIL 14 (gating 3) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+      by class: gating 3 (PASS 0 FAIL 3) · control 15 (PASS 13 FAIL 2) · report 9 (PASS 0 FAIL 9) · withdrawn 0 (PASS 0 FAIL 0)
+L2: geometry-gate exit 1; gating keys 8: PASS 0 FAIL 8
+    geometry-gate <scratch>/fakeruns/combo-L2 (base wave54-final · sections css-flexbox,filter-effects (NOT PROBED 0)): 33 keys — PASS 22 · FAIL 11 (gating 8) · UNMEASURED 0 (gating 0) · probe self-check 
+      by class: gating 8 (PASS 0 FAIL 8) · control 22 (PASS 22 FAIL 0) · report 3 (PASS 0 FAIL 3) · withdrawn 0 (PASS 0 FAIL 0)
+L3: geometry-gate exit 1; gating keys 7: PASS 0 FAIL 7
+    geometry-gate <scratch>/fakeruns/combo-L3 (base wave54-final · sections selectors,css-text,css-anchor-position,css-writing-modes (NOT PROBED 11)): 30 keys — PASS 21 · FAIL 9 (gating 7) · UNMEASURED 0 
+      by class: gating 7 (PASS 0 FAIL 7) · control 21 (PASS 21 FAIL 0) · report 2 (PASS 0 FAIL 2) · withdrawn 0 (PASS 0 FAIL 0)
+L4: geometry-gate exit 1; gating keys 12: PASS 3 FAIL 9
+    geometry-gate <scratch>/fakeruns/combo-L4 (base wave54-final · sections css-text-decor (NOT PROBED 7)): 47 keys — PASS 34 · FAIL 13 (gating 9) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+      by class: gating 12 (PASS 3 FAIL 9) · control 27 (PASS 27 FAIL 0) · report 8 (PASS 4 FAIL 4) · withdrawn 0 (PASS 0 FAIL 0)
+L5: geometry-gate exit 1; gating keys 6: PASS 0 FAIL 6
+    geometry-gate <scratch>/fakeruns/combo-L5 (base wave54-final · sections css-counter-styles (NOT PROBED 0)): 24 keys — PASS 16 · FAIL 8 (gating 6) · UNMEASURED 0 (gating 0) · probe self-check failures 
+      by class: gating 6 (PASS 0 FAIL 6) · control 16 (PASS 16 FAIL 0) · report 2 (PASS 0 FAIL 2) · withdrawn 0 (PASS 0 FAIL 0)
+L6: geometry-gate exit 1; gating keys 7: PASS 0 FAIL 7
+    geometry-gate <scratch>/fakeruns/combo-L6 (base wave54-final · sections css-flexbox,css-grid,filter-effects (NOT PROBED 9)): 28 keys — PASS 20 · FAIL 8 (gating 7) · UNMEASURED 0 (gating 0) · probe sel
+      by class: gating 7 (PASS 0 FAIL 7) · control 20 (PASS 20 FAIL 0) · report 1 (PASS 0 FAIL 1) · withdrawn 0 (PASS 0 FAIL 0)

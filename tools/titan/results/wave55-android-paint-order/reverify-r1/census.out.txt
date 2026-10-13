@@ -1,0 +1,51 @@
+# reverify-r1/census.py census-base.tsv census-fix.tsv ../skeptic-census/skeptic-census-full.tsv (gunzip first); base = clean 611c9f93, fix = unit-U1/U2/U3.patch sha256 8044c1c2…/4fb42fff…/1c21d849… applied
+components 10719 · documents 1435 · ERR rows base/fix 4/4
+banded 1973: U1 self-paint 10 (clipping among them, must be 0: 0) · U2 legacy 1963 of which CLIPPING 29 in 26 documents
+[I1] clipping legacy chains == base chains (must be 29): 29
+[I2] clipping legacy chains with BehindContentBorderElement (must be 0): 0
+[I3] non-clipping legacy FAST rows carrying BehindContentBorderElement (must be all 1485): 1485
+[I4] unbanded rows whose chain changed vs base (must be 0): 0
+[I5] builder→fix chain changes outside the clipping legacy rows (must be 0): 0 · inside them: 18
+
+plan set (HEAD 611c9f93): carriers 27 · mayMove 240 · sharedStems 12 · ring 1
+builder movers (every band; the skeptic run): exposed documents 283 · inside the plan set 279 · GROWTH 4
+   wpt__css-cascade__revert-layer-015 [nobody; android cell SCORED] 0-077 tag:input U2
+   wpt__css-display__display-contents-dynamic-pseudo-insertion-001 [nobody; android cell unscored] 0-132 pseudo U2
+   wpt__css-images__gradient__gradient-hue-direction [nobody; android cell SCORED] 4-070 tag:hr+meta:lang U2; 7-073 tag:hr+meta:lang U2; 10-076 tag:hr+meta:lang U2
+   wpt__css-pseudo__first-line-and-placeholder [nobody; android cell SCORED] 0-199 tag:input U2
+fix-r1 movers (U1 + non-clipping U2): exposed documents 261 · inside the plan set 260 · GROWTH 1
+   wpt__css-display__display-contents-dynamic-pseudo-insertion-001 [nobody; android cell unscored] 0-132 pseudo U2
+D1 row wpt__css-cascade__revert-layer-015__0-077: tag input clip true self false fast false · mover False · chain == base True · chain == builder False
+D1 wpt__css-cascade__revert-layer-015: exposed under fix False · in plan set False · scored android True
+D1 row first-line-and-placeholder__0__0-199: tag input clip true self false fast false · mover False · chain == base True · chain == builder False
+D1 wpt__css-pseudo__first-line-and-placeholder: exposed under fix False · in plan set False · scored android True
+
+documents exposed under the builder, not under fix-r1: 22
+   wpt__css-anchor-position__anchor-scope-scroll [mayMove]
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-1 [mayMove]
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-2 [mayMove]
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-3 [mayMove]
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-4 [mayMove]
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-5 [mayMove]
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-6 [mayMove]
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-1 [mayMove]
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-2 [mayMove]
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-3 [mayMove]
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-4 [mayMove]
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-5 [mayMove]
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-6 [mayMove]
+   wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-2 [mayMove]
+   wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3 [mayMove]
+   wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4 [mayMove]
+   wpt__css-cascade__all-prop-001 [mayMove]
+   wpt__css-cascade__revert-layer-015 [OUTSIDE]
+   wpt__css-display__display-contents-suppression-dynamic-001 [mayMove]
+   wpt__css-images__gradient__gradient-hue-direction [OUTSIDE]
+   wpt__css-pseudo__first-line-and-placeholder [OUTSIDE]
+   wpt__filter-effects__backdrop-filter-edge-behavior [mayMove]
+withdrawn (clipping) band documents ∩ L6 capture carriers: []
+withdrawn band documents whose basename is a geometry-key test: []
+withdrawn band documents ∩ prediction cells: []
+revertUnit U1: 2 android captures; each keeps an exposed mover on its route under fix-r1: True []
+revertUnit U2: 25 android captures; each keeps an exposed mover on its route under fix-r1: True []
+revertUnit U3: 0 android captures; each keeps an exposed mover on its route under fix-r1: True []

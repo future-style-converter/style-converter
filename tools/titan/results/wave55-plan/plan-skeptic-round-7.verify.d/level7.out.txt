@@ -1,0 +1,11 @@
+{'new probe-level px 0': 1112, 'new probe-level px > 0': 10} of 1122 distinct MF1 fakes
+   (7, 'F-faint50-+1+0-inzone', 'counter-suffix.html ios', 141)
+   (7, 'F-faint50-+1+0-free', 'counter-suffix.html ios', 141)
+   (2, 'F-faint25-+1+0-inzone', 'css3-counter-styles-005.html android', 191)
+   (2, 'F-faint25-+1+0-free', 'css3-counter-styles-005.html android', 191)
+   (1, 'F-faint50-+1+0-inzone', 'counter-suffix.html android', 174)
+   (1, 'F-faint50-+1+0-free', 'counter-suffix.html android', 174)
+   (1, 'F-faint25-+2+1-inzone', 'counter-suffix.html android', 191)
+   (1, 'F-faint25-+2+1-free', 'counter-suffix.html android', 191)
+   (1, 'F-faint25-+1+0-inzone', 'counter-suffix.html ios', 198)
+   (1, 'F-faint25-+1+0-free', 'counter-suffix.html ios', 198)

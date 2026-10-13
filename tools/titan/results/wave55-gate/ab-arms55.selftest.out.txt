@@ -1,0 +1,61 @@
+# ab-arms55.selftest.out.txt — 2026-10-11T20:42:58Z; runner sha256 021c78458a5d930c…; scratch /private/var/folders/34/h7173byn5kb_lddtbn4hqt9w0000gn/T/tmp.2TrKZJy5ek
+
+## T1. --run, two arms (drop-U, drop-V)
+  as required  T1 exit 0 (got 0)
+  as required  T1 HEAD restored: main at the head commit
+  as required  T1 the arm branches are gone (refs/heads = main)
+  as required  T1 '== wave55-ab-drop-U' block exactly once in build-hashes.txt (1)
+  as required  T1 final/ab-drop-U.txt and final/ab-drop-U.driver.txt written
+  as required  T1 '== wave55-ab-drop-V' block exactly once in build-hashes.txt (1)
+  as required  T1 final/ab-drop-V.txt and final/ab-drop-V.driver.txt written
+  as required  T1 build-hashes.txt = the opening block + exactly one block per arm (3 '== ' lines)
+  as required  T1 drop-U's driver ran on the U-reverted tree (branch wave55-ab-drop-U, a0, b1)
+  as required  T1 drop-V's driver ran on the V-reverted tree (branch wave55-ab-drop-V, a1, b0)
+  as required  T1 each hash block was read on its arm tree (HEAD in the block != the head commit)
+  as required  T1 the stub pool's provisioned-* markers removed
+  as required  T1 the only tracked change is build-hashes.txt (the records await the orchestrator's commit)
+  as required  T1 the records were written after the last restore (runner log order)
+  as required  T1 the reusable T1 check set reads 0 failures on the real runner
+
+## T2. M-L18 — the wave-54 order (records on the arm branch, then git checkout -f)
+  as required  T2 M-L18 is RED: 4 T1 check(s) fail (exit 7; drop-U blocks 0, drop-V blocks 0)
+  as required  T2 … and the read-outs survived (untracked), exactly as in wave 54
+
+## T3. M-per-arm — the records after EACH restore (the brief's literal step 8), two arms
+  as required  T3 M-per-arm is RED: 4 T1 check(s) fail (exit 6; arm drop-V: the tree is not at 4412462, clean, on main before the arm — stopping (records in /private/var/fo)
+
+## T4. the dry run: default mode and --dry-run leave refs and files byte-identical; M-dry turns that red
+  as required  T4 no mode flag = the dry run: exit 0, 'DRY RUN OK', refs + files identical
+  as required  T4 --dry-run: exit 0, refs + files identical, the pool markers untouched
+  as required  T4 the dry run printed the driver's own --plan for both arms
+  as required  T4 M-dry is RED: the identity check sees the changed refs/files (exit 0)
+
+## T5. refusals: exit 2 and nothing touched
+  as required  T5a tracked change, --run — exit 2, 'tracked changes in the tree (git status --porcelain --untracked-files=no):  M src/c.txt '
+  as required  T5b an UNTRACKED file outside the code paths does not block — exit 0
+  as required  T5b2 an UNTRACKED file under a code path (runtimes/) refuses — a device run would build it — exit 2, 'code differs from HEAD (tracked, staged or UNTRACKED; results and *.md excepted): ?? runti'
+  as required  T5c detached HEAD, --run — exit 2, 'detached HEAD: there is no branch to restore to'
+  as required  T5d a sha that is not an ancestor of HEAD — exit 2, 'arm drop-S: e361d92 is not an ancestor of HEAD (nothing to revert on this branch)'
+  as required  T5e shas parent first (must be child first) — exit 2, 'arm drop-UV: 3b8a8a5 is not older than the sha before it (list the shas child first)'
+  as required  T5f a duplicate arm name (expectations abArms has two drop-U2) — exit 2, 'arm 2: duplicate arm name drop-U (its run dir, branch, read-out and hash label would colli'
+  as required  T5g a section the driver does not know — exit 2, 'arm drop-U: section css-nope is not one of gate-driver.sh's corpus sections'
+  as required  T5h a platform that is not web / ios / android — exit 2, 'arm drop-U: platform mac is not web / ios / android'
+  as required  T5i the arm's run dir already exists (never overwrite a capture) — exit 2, 'arm drop-U: tools/titan/runs/wave55-ab-drop-U already exists (never overwrite an arm's cap'
+  as required  T5j a revert that does not apply to HEAD (W rewrote U's line) — exit 2, 'arm drop-U: the revert of 06b8403 does not apply to 6668dcf: error: patch failed: src/a.tx'
+  as required  T5k a branch with the arm's run name already exists — exit 2, 'arm drop-U: branch wave55-ab-drop-U already exists (checkout -B would reset it)'
+  as required  T5l 'drop-UW W U' (child first; W rewrites U's line; not a chain) dry-runs exit 0 — revert check: arm drop-UW — the reverse of 6668dcf 06b8403 applies to the tree at 6668dc
+  as required  T5m 'drop-NB B N' (N creates n.txt, B extends it; not a chain) dry-runs exit 0
+  as required  T5m M-onebyone is RED on 'drop-NB B N' (each reverse alone: N's deletion does not apply over B) — exit 2
+  as required  T5l M-onebyone is RED on 'drop-UW W U' — exit 2
+
+## T6. a failing driver (drop-V rc 1) and a driver that never reaches attempt 1 (drop-U)
+  as required  T6a driver rc 1 on drop-V → exit 1, both arms recorded once, tree restored
+  as required  T6b no 'attempt 1 starting' on drop-U → a NOT READ block (once), exit 1, drop-V read normally
+  as required  T6c ab-diff.mjs exits 2 on drop-V → exit 7, its failure named, both blocks once, tree restored
+  as required  T6c M-abdiff is RED: the same failed read-out exits 0, not 7
+
+## T7. outside the throwaway repos
+  as required  T7 this repo's refs, worktrees and stash unchanged
+  as required  T7 the real /tmp/titan-device-pool unchanged (listing with mtimes, 8 lines)
+
+ab-arms55.selftest: every check as required (mutants M-L18, M-per-arm, M-dry, M-abdiff RED)

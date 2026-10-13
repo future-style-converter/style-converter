@@ -1,0 +1,10 @@
+label=M-U2f-centred file=runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt
+sha256 pre=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 mutated=bfc7392f035a48d6a61af75c2773b067a55b5ce95b8d371706149b6af13f7519 post=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 restored=OK
+mutation applied=yes
+mutated run rc=1 (RED)
+  red: PercentContentBoxBandTest > P-U2-4 the oversized box is start-anchored, never centred FAILED
+  red: 8 tests completed, 1 failed
+  red: > Task :runtime:testDebugUnitTest FAILED
+restored run rc=0 (GREEN)
+  green: BUILD SUCCESSFUL in 4s
+  green tally: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"

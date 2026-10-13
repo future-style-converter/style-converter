@@ -1,0 +1,5 @@
+ref green outside cells (+0/+1/+2 ring): [2900, 2858, 2812] total green 3300
+web green outside cells (+0/+1/+2 ring): [300, 300, 300] total green 700
+ios green outside cells (+0/+1/+2 ring): [300, 300, 300] total green 700
+android green outside cells (+0/+1/+2 ring): [600, 590, 580] total green 700
+U1 green outside cells (+0/+1/+2 ring): [300, 300, 300] total green 700

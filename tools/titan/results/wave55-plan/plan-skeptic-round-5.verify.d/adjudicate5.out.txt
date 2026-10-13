@@ -1,0 +1,99 @@
+
+## L1: 29 fake runs · 85 faked zones · 141 key reads of a faked zone · ACCEPTED 9 faked zones (MUST-FIX > 2 px: 6; floor ≤ 2 px: 3)
+  hyphen-ios-linebox.geometry.py hyphen-ios-linebox 001 ios  reads  27 · accepted > 2 px   2 · faint 2 / other-colour 0 / own-colour 0 · largest +30 px (f50-ln-open class (0, 0, 0) bbox (18, 523, 47, 523))
+  hyphen-ios-linebox.geometry.py hyphen-ios-linebox 003 ios  reads  29 · accepted > 2 px   2 · faint 2 / other-colour 0 / own-colour 0 · largest +30 px (f50-ln-open class (0, 0, 0) bbox (18, 513, 47, 513))
+  hyphen-ios-linebox.geometry.py hyphen-ios-linebox 004 ios  reads  29 · accepted > 2 px   2 · faint 2 / other-colour 0 / own-colour 0 · largest +30 px (f50-ln-open class (0, 0, 0) bbox (18, 513, 47, 513))
+  hyphenate-character.geometry.py hyphenate-character-001 ios reads  27 · accepted > 2 px   0
+  hyphenate-character.geometry.py hyphenate-character-003 ios reads  29 · accepted > 2 px   0
+  variants accepted (> 2 px): f50-ln-open ×3, f50-sp3-open ×3
+  where the accepted (> 2 px) paint went: onto the zone background only 6, over other colours only 0, both 0
+  floor (≤ 2 px) acceptances: sp1-touch-mid ×3
+
+## L2: 194 fake runs · 454 faked zones · 548 key reads of a faked zone · ACCEPTED 293 faked zones (MUST-FIX > 2 px: 280; floor ≤ 2 px: 13)
+  cbb-android.geometry.py backdrop-filter-nested-border-radius-clip-3 android reads  94 · accepted > 2 px  46 · faint 24 / other-colour 22 / own-colour 0 · largest +14900 px (f50-dup-end class (0, 128, 0) bbox (238, 36, 389, 135))
+  compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-htb-ltr android reads  50 · accepted > 2 px  37 · faint 21 / other-colour 16 / own-colour 0 · largest +10000 px (f50-dup-end class (0, 128, 0) bbox (118, 88, 217, 187))
+  compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vlr-ltr android reads  50 · accepted > 2 px  37 · faint 21 / other-colour 16 / own-colour 0 · largest +10000 px (f50-dup-end class (0, 128, 0) bbox (118, 88, 217, 187))
+  compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vrl-ltr android reads  50 · accepted > 2 px  37 · faint 21 / other-colour 16 / own-colour 0 · largest +10000 px (f50-dup-end class (0, 128, 0) bbox (118, 88, 217, 187))
+  compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip android reads  89 · accepted > 2 px  46 · faint 23 / other-colour 23 / own-colour 0 · largest +15900 px (f50-dup-end class (0, 128, 0) bbox (228, 26, 389, 125))
+  compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-2 android reads  52 · accepted > 2 px  27 · faint 17 / other-colour 10 / own-colour 0 · largest +15880 px (f50-dup-end class (0, 128, 0) bbox (228, 26, 389, 125))
+  compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-3 android reads  94 · accepted > 2 px  58 · faint 29 / other-colour 29 / own-colour 0 · largest +14900 px (f50-dup-end class (0, 128, 0) bbox (238, 36, 389, 135))
+  compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-4 android reads  69 · accepted > 2 px  38 · faint 20 / other-colour 18 / own-colour 0 · largest +12528 px (f50-dup-end class (0, 128, 0) bbox (188, 26, 347, 105))
+  variants accepted (> 2 px): dup-below ×8, dup-end ×8, dup-gap ×3, f50-all+3x+2y ×19, f50-dup-end ×15, f50-ink+1x ×12, f50-ink+1y ×14, f50-ink+2x+1y ×12, f50-ink+4x ×11, f50-ink+5y ×11, f50-ink-3x+3y ×11, f50-ln-open ×19, f50-ln-strike ×4, f50-sp3-gap ×5, f50-sp3-open ×19, ln-open ×12, ln-over ×12, ln-strike ×4, ln-under ×8, ln-vgap ×3, sp2-gap ×8, sp2-open ×12, sp2-touch-last ×12, sp2-touch-mid ×6, sp3-gap ×4, sp3-open ×12, sp3-touch-last ×12, sp3-touch-mid ×4
+  where the accepted (> 2 px) paint went: onto the zone background only 222, over other colours only 36, both 22
+  floor (≤ 2 px) acceptances: sp1-touch-mid ×13
+
+## L3: 309 fake runs · 309 faked zones · 309 key reads of a faked zone · ACCEPTED 116 faked zones (MUST-FIX > 2 px: 104; floor ≤ 2 px: 12)
+  positioned-parent-slot.geometry.py [S] bidi-tab-001 android rtl-rows reads  39 · accepted > 2 px  19 · faint 16 / other-colour 3 / own-colour 0 · largest +278 px (f50-all+3x+2y class (255, 255, 0) bbox (37, 88, 139, 245))
+  positioned-parent-slot.geometry.py [S] dir-style-02a android row6 reads  26 · accepted > 2 px   0
+  positioned-parent-slot.geometry.py [S] dir-style-02a android row7 reads  28 · accepted > 2 px   0
+  positioned-parent-slot.geometry.py [S] dir-style-02a android row9 reads  26 · accepted > 2 px   0
+  positioned-parent-slot.geometry.py [S] dynamic-offset-rtl-001 android reads  44 · accepted > 2 px  15 · faint 14 / other-colour 0 / own-colour 1 · largest +9900 px (f50-dup-end class (255, 255, 0) bbox (118, 16, 217, 115))
+      own-colour: sp2-touch-mid    class (255, 255, 0) +4 px bbox (86, 34, 87, 35) — dynamic-offset-rtl-001 android whole
+  positioned-parent-slot.geometry.py [S] dynamic-offset-vrl-rtl-001 android reads  44 · accepted > 2 px   0
+  positioned-parent-slot.geometry.py [W] anchor-position-multicol-nested-001 android stack reads  58 · accepted > 2 px  40 · faint 24 / other-colour 16 / own-colour 0 · largest +1493 px (f50-all+3x+2y class (0, 128, 0) bbox (19, 38, 372, 179))
+  positioned-parent-slot.geometry.py [W] dynamic-offset-rtl-002 android reads  44 · accepted > 2 px  15 · faint 14 / other-colour 0 / own-colour 1 · largest +9900 px (f50-dup-end class (255, 255, 0) bbox (118, 16, 217, 115))
+      own-colour: sp2-touch-mid    class (255, 255, 0) +4 px bbox (34, 34, 35, 35) — dynamic-offset-rtl-002 android whole
+  (tally only) css-writing-modes/dynamic-offset-vrl-rtl-001.html android: 15
+  variants accepted (> 2 px): dup-below ×1, dup-end ×1, dup-gap ×1, f50-all+3x+2y ×10, f50-dup-end ×10, f50-ink+1x ×7, f50-ink+1y ×7, f50-ink+2x+1y ×6, f50-ink+4x ×6, f50-ink+5y ×6, f50-ink-3x+3y ×6, f50-ln-open ×8, f50-ln-strike ×4, f50-sp3-gap ×2, f50-sp3-open ×10, ln-open ×1, ln-over ×1, ln-strike ×2, ln-under ×1, ln-vgap ×1, sp2-gap ×1, sp2-open ×1, sp2-touch-last ×1, sp2-touch-mid ×5, sp3-gap ×1, sp3-open ×1, sp3-touch-last ×1, sp3-touch-mid ×2
+  where the accepted (> 2 px) paint went: onto the zone background only 67, over other colours only 29, both 8
+  floor (≤ 2 px) acceptances: sp1-touch-mid ×12
+
+## L4: 87 fake runs · 603 faked zones · 717 key reads of a faked zone · ACCEPTED 72 faked zones (MUST-FIX > 2 px: 45; floor ≤ 2 px: 27)
+  ua-heading-margin.geometry.py [F] text-decoration-inset-005 ios reads  27 · accepted > 2 px   2 · faint 2 / other-colour 0 / own-colour 0 · largest +30 px (f50-ln-open class (0, 0, 0) bbox (17, 306, 46, 306))
+  ua-heading-margin.geometry.py [F] text-decoration-inset-006 ios reads  29 · accepted > 2 px   2 · faint 2 / other-colour 0 / own-colour 0 · largest +30 px (f50-ln-open class (0, 0, 0) bbox (17, 306, 46, 306))
+  ua-heading-margin.geometry.py [F] text-decoration-inset-014 android reads  29 · accepted > 2 px   2 · faint 2 / other-colour 0 / own-colour 0 · largest +30 px (f50-ln-open class (0, 0, 0) bbox (18, 293, 47, 293))
+  ua-heading-margin.geometry.py [F] text-decoration-inset-014 ios reads  29 · accepted > 2 px   2 · faint 2 / other-colour 0 / own-colour 0 · largest +30 px (f50-ln-open class (0, 0, 0) bbox (18, 293, 47, 293))
+  ua-heading-margin.geometry.py [M] text-decoration-inset-005 android reads  84 · accepted > 2 px   6 · faint 6 / other-colour 0 / own-colour 0 · largest +30 px (f50-ln-open class (0, 0, 0) bbox (17, 306, 46, 306))
+  ua-heading-margin.geometry.py [M] text-decoration-inset-005 ios reads  85 · accepted > 2 px   9 · faint 6 / other-colour 0 / own-colour 3 · largest +30 px (f50-ln-open class (0, 0, 0) bbox (17, 306, 46, 306))
+      own-colour: sp2-open         class (127, 127, 127) +4 px bbox (102, 156, 103, 157) — text-decoration-inset-005 ios heading
+      own-colour: sp3-open         class (127, 127, 127) +9 px bbox (102, 156, 104, 158) — text-decoration-inset-005 ios heading
+      own-colour: ln-open          class (127, 127, 127) +30 px bbox (17, 276, 46, 276) — text-decoration-inset-005 ios heading
+  ua-heading-margin.geometry.py [M] text-decoration-inset-006 android reads  86 · accepted > 2 px   5 · faint 5 / other-colour 0 / own-colour 0 · largest +30 px (f50-ln-open class (0, 0, 0) bbox (17, 306, 46, 306))
+  ua-heading-margin.geometry.py [M] text-decoration-inset-006 ios reads  87 · accepted > 2 px   9 · faint 6 / other-colour 0 / own-colour 3 · largest +30 px (f50-ln-open class (0, 0, 0) bbox (17, 306, 46, 306))
+      own-colour: sp2-open         class (127, 127, 127) +4 px bbox (105, 156, 106, 157) — text-decoration-inset-006 ios heading
+      own-colour: sp3-open         class (127, 127, 127) +9 px bbox (105, 156, 107, 158) — text-decoration-inset-006 ios heading
+      own-colour: ln-open          class (127, 127, 127) +30 px bbox (17, 276, 46, 276) — text-decoration-inset-006 ios heading
+  ua-heading-margin.geometry.py [M] text-decoration-inset-011 android reads  58 · accepted > 2 px   4 · faint 4 / other-colour 0 / own-colour 0 · largest +30 px (f50-ln-open class (0, 0, 0) bbox (41, 368, 70, 368))
+  ua-heading-margin.geometry.py [M] text-decoration-inset-011 ios reads  58 · accepted > 2 px   4 · faint 4 / other-colour 0 / own-colour 0 · largest +30 px (f50-ln-open class (0, 0, 0) bbox (40, 367, 69, 367))
+  ua-heading-margin.geometry.py [M] text-decoration-inset-014 android reads  87 · accepted > 2 px   5 · faint 5 / other-colour 0 / own-colour 0 · largest +30 px (f50-ln-open class (0, 0, 0) bbox (18, 293, 47, 293))
+  ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios reads  58 · accepted > 2 px   3 · faint 3 / other-colour 0 / own-colour 0 · largest +30 px (f50-ln-open class (0, 0, 0) bbox (18, 293, 47, 293))
+  variants accepted (> 2 px): f50-ln-open ×21, f50-sp3-open ×18, ln-open ×2, sp2-open ×2, sp3-open ×2
+  where the accepted (> 2 px) paint went: onto the zone background only 45, over other colours only 0, both 0
+  floor (≤ 2 px) acceptances: f50-ink+1x ×5, f50-ink+1y ×1, sp1-touch-mid ×21
+
+## L5: 75 fake runs · 148 faked zones · 148 key reads of a faked zone · ACCEPTED 10 faked zones (MUST-FIX > 2 px: 0; floor ≤ 2 px: 10)
+  counter-suffix-rows.geometry.py [C] counter-suffix android reads  24 · accepted > 2 px   0
+  counter-suffix-rows.geometry.py [C] counter-suffix ios     reads  24 · accepted > 2 px   0
+  counter-suffix-rows.geometry.py [H] counter-suffix ios     reads  23 · accepted > 2 px   0
+  counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 android reads  28 · accepted > 2 px   0
+  counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 ios reads  27 · accepted > 2 px   0
+  counter-suffix-rows.geometry.py [T] counter-suffix ios     reads  22 · accepted > 2 px   0
+  variants accepted (> 2 px): 
+  where the accepted (> 2 px) paint went: onto the zone background only 0, over other colours only 0, both 0
+  floor (≤ 2 px) acceptances: f50-ink+1x ×2, f50-ln-strike ×1, ln-strike ×1, sp1-touch-mid ×6
+
+## L6: 207 fake runs · 525 faked zones · 525 key reads of a faked zone · ACCEPTED 289 faked zones (MUST-FIX > 2 px: 269; floor ≤ 2 px: 20)
+  android-paint-order.geometry.py [PO] backdrop-filter-clip-rect android reads 123 · accepted > 2 px  56 · faint 24 / other-colour 18 / own-colour 14 · largest +6294 px (f50-all+3x+2y class (255, 0, 0) bbox (19, 38, 372, 373))
+      own-colour: sp2-touch-last   class (255, 127, 255) +4 px bbox (316, 167, 317, 168) — backdrop-filter-clip-rect android whole
+      own-colour: sp3-touch-last   class (255, 127, 255) +9 px bbox (316, 166, 318, 168) — backdrop-filter-clip-rect android whole
+      own-colour: sp2-open         class (255, 127, 255) +4 px bbox (214, 113, 215, 114) — backdrop-filter-clip-rect android whole
+      own-colour: sp3-open         class (255, 127, 255) +9 px bbox (214, 112, 216, 114) — backdrop-filter-clip-rect android whole
+      own-colour: ln-open          class (255, 127, 255) +30 px bbox (116, 485, 145, 485) — backdrop-filter-clip-rect android whole
+      own-colour: sp2-touch-mid    class (0, 0, 255) +4 px bbox (265, 167, 266, 168) — backdrop-filter-clip-rect android whole
+      own-colour: sp2-touch-last   class (0, 0, 255) +4 px bbox (370, 184, 371, 185) — backdrop-filter-clip-rect android whole
+      own-colour: sp3-touch-last   class (0, 0, 255) +9 px bbox (370, 183, 372, 185) — backdrop-filter-clip-rect android whole
+      own-colour: sp2-gap          class (0, 0, 255) +4 px bbox (88, 218, 89, 219) — backdrop-filter-clip-rect android whole
+      own-colour: sp3-gap          class (0, 0, 255) +9 px bbox (85, 217, 87, 219) — backdrop-filter-clip-rect android whole
+      own-colour: sp2-open         class (0, 0, 255) +4 px bbox (218, 113, 219, 114) — backdrop-filter-clip-rect android whole
+      own-colour: sp3-open         class (0, 0, 255) +9 px bbox (217, 112, 219, 114) — backdrop-filter-clip-rect android whole
+      … 2 more own-colour acceptances
+  android-paint-order.geometry.py [X] flex-abspos-staticpos-align-self-safe-001 android reads  69 · accepted > 2 px  29 · faint 12 / other-colour 17 / own-colour 0 · largest +4405 px (f50-dup-end class (255, 255, 0) bbox (110, 39, 178, 107))
+  android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-001 android reads  84 · accepted > 2 px  46 · faint 22 / other-colour 24 / own-colour 0 · largest +2056 px (f50-all+3x+2y class (0, 128, 128) bbox (19, 18, 178, 232))
+  android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-rtl-001 android reads  83 · accepted > 2 px  45 · faint 22 / other-colour 23 / own-colour 0 · largest +2418 px (f50-all+3x+2y class (0, 128, 128) bbox (19, 18, 178, 232))
+  android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-vertWM-001 android reads  83 · accepted > 2 px  45 · faint 22 / other-colour 23 / own-colour 0 · largest +2398 px (f50-all+3x+2y class (0, 128, 128) bbox (19, 18, 208, 215))
+  android-paint-order.geometry.py [X] grid-abspos-staticpos-justify-self-001 android reads  83 · accepted > 2 px  48 · faint 24 / other-colour 24 / own-colour 0 · largest +2379 px (f50-all+3x+2y class (0, 128, 128) bbox (19, 18, 208, 215))
+  variants accepted (> 2 px): dup-below ×4, dup-end ×10, dup-gap ×1, f50-all+3x+2y ×20, f50-dup-end ×15, f50-ink+1x ×6, f50-ink+1y ×5, f50-ink+2x+1y ×4, f50-ink+4x ×6, f50-ink+5y ×4, f50-ink-3x+3y ×4, f50-ln-open ×20, f50-ln-strike ×7, f50-sp3-gap ×15, f50-sp3-open ×20, ln-open ×14, ln-over ×5, ln-strike ×1, ln-under ×5, ln-vgap ×9, sp2-gap ×10, sp2-open ×14, sp2-touch-last ×14, sp2-touch-mid ×12, sp3-gap ×10, sp3-open ×14, sp3-touch-last ×14, sp3-touch-mid ×6
+  where the accepted (> 2 px) paint went: onto the zone background only 206, over other colours only 13, both 50
+  floor (≤ 2 px) acceptances: sp1-touch-mid ×20
+
+ALL LANES: MUST-FIX acceptances (> 2 px) 704; floor (≤ 2 px) 85
