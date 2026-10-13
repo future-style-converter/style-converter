@@ -73,3 +73,10 @@ ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=ff158a4ed2
 ios      MATCH
 asset    sha1 ios=05118ad1084ef6166ddd9c47a705219e0b4e717e android=05118ad1084ef6166ddd9c47a705219e0b4e717e  (the last test-all IR both bundles embed: compare digests only with the same asset line)
 
+== wave55-ab-drop-L6-U2 (A/B arm of wave55: drop-L6-U2 = 0b29be14 minus 103deb33; sections css-anchor-position,css-flexbox,css-gaps,css-grid,css-images,css-position,filter-effects; arm tree 8de866d8; read against wave55-final) — 2026-10-13T07:56:55Z — HEAD 8de866d8
+android  serial=emulator-5554  built app-debug.apk sha1=951f48803369b7d80578e4af5d93f84d5ae07616  installed base.apk sha1=951f48803369b7d80578e4af5d93f84d5ae07616
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28  installed .app digest=ff158a4ed26dce2a2fb368602ff2e0de928e1c28
+ios      MATCH
+asset    sha1 ios=05118ad1084ef6166ddd9c47a705219e0b4e717e android=05118ad1084ef6166ddd9c47a705219e0b4e717e  (the last test-all IR both bundles embed: compare digests only with the same asset line)
+

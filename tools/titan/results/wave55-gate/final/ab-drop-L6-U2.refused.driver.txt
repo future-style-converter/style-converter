@@ -1,0 +1,4 @@
+[gate-driver 07:49:47] run-id=wave55-ab-drop-L6-U2 sections=7 max-tests=48 android=1 ios=1 timeout=50min resume=0
+[gate-driver 07:49:48] [own-processes] kill_own_gradle_daemons roots=[/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf]: stopped [] left []
+[gate-driver 07:49:53] host after stopping our processes: load1=6.11 free+inactive=2958MB (ceiling load 6, floor 2048MB)
+[gate-driver 07:49:53] REFUSED: 1-min load 6.11 >= 6 — not a quiet host (close browsers / other sessions' emulators; --force to override)
