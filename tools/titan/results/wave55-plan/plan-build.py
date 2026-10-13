@@ -81,6 +81,7 @@ _REVERTED_FILE = _opt('--reverted') or os.path.join(DECISIONS, 'reverted.json')
 _RESTATE_FILE = _opt('--restate') or os.path.join(DECISIONS, 'restate.json')
 _CONTINGENCY_FILE = _opt('--contingency') or os.path.join(DECISIONS, 'contingency.json')
 _HOLDS_FILE = os.path.join(DECISIONS, 'holds.json')
+_LOOKS_FILE = _opt('--looks') or os.path.join(DECISIONS, 'looks.json')       # stage 2 (PLAN §10 item 17): the may-move looks
 INPUTS = {}                                # every file this generator reads → sha256 (generatedWith; round 1, S3)
 def _track(path):
     import hashlib
@@ -93,6 +94,21 @@ RUN = 'wave54-final'                       # the gate of record every "from" is 
 BASE = 'wave55-open'                       # the opening gate; every probe and the closing gate read Δ against it
 load = lambda name: json.load(open(_track(os.path.join(HERE, name))))
 PLATS = ('web', 'ios', 'android')
+# ── may-move looks (stage 2, PLAN §10 item 17). mayMoveRule: "a may-move non-carrier with |Δ| > 0.002 stops the ship until its
+# picture shows one of three pre-registered pictures" — the plan said what decides it and nothing said how adjudicate.mjs
+# (which reads the complement, not the may-move class) learns the decision. A look recorded here (append-only, like the other
+# decision files) is ENCODED as a non-gating, undirected prediction row of the lane that owns the may-move class: R4 asks
+# nothing of it, rule 2 exempts it (read and labelled), probe-readout prints it as a prediction, and it leaves the complement, so
+# R5 no longer holds it to the band. Never a tolerance: the band stays 0.002 for every other may-move cell, and a look names its
+# picture (one of the three) and its evidence (a §10 item). A row for a cell that is not a may-move stem, or whose picture is not
+# one of the three, is refused.
+MAY_MOVE_PICTURES = ('a band now under its child', "the band now inside the element's opacity group", 'a UA-widget replica now over the band')
+LOOKS = json.load(open(_track(_LOOKS_FILE)))
+for _k in LOOKS:
+    assert set(_k) >= {'lane', 'cell', 'run', 'open', 'probe', 'picture', 'why'}, f'probe-decisions/looks.json row needs lane / cell / run / open / probe / picture / why: {_k}'
+    assert _k['picture'] in MAY_MOVE_PICTURES, f"looks.json {_k['cell']}: the picture must be one of mayMoveRule's three: {_k['picture']}"
+LOOKED = {k['cell'] for k in LOOKS}
+assert len(LOOKED) == len(LOOKS), 'looks.json: one row per cell'
 CAPDIR = {'web': 'screenshots', 'ios': 'ios-screenshots', 'android': 'android-screenshots'}
 # C14: ONE interpreter for every probe. /opt/homebrew/bin/python3.12 carries PIL 12.2 in its OWN site-packages;
 # /usr/bin/python3 (Xcode 3.9) reaches PIL 11.3 only through the user site (~/Library/Python/3.9), which `-s` / `-I`
@@ -1156,9 +1172,18 @@ for name, lane in lanes.items():
 
 # ── the complement (C1): every scored cell outside the union carriers and the ring-fence, not already named by a lane ─
 named = {c for l in lanes.values() for c in l['mustNotMove']}
-complement = sorted(k for k in CELLS if carrier_of(k) is None and k.rsplit(' ', 1)[0] != RING and k not in named)
+# ── the may-move looks (stage 2, PLAN §10 item 17) become prediction rows of their lane and leave the complement ──
+for _k in LOOKS:
+    _lane = lanes[_k['lane']]; _stem = 'wpt__' + _k['cell'].rsplit(' ', 1)[0].replace('.html', '').replace('/', '__')
+    assert _stem in _lane.get('mayMove', {}).get('android', []), f"looks.json {_k['cell']}: not a may-move stem of {_k['lane']} (withdrawn, or never one)"
+    assert carrier_of(_k['cell']) is None and _k['cell'] not in named, f"looks.json {_k['cell']}: a carrier or a named must-not-move cell, not a may-move non-carrier"
+    _lane['predictions'].append(pred(_k['cell'], _k['open'], _k['probe'], f"may-move stem looked at ({_k['run']}): {_k['picture']} — never claimed", 'MED',
+                                     units=('U2',), direction='undirected',
+                                     directionWhy=f"a may-move non-carrier beyond the 0.002 band whose picture is mayMoveRule's \"{_k['picture']}\" ({_k['why'].split(':')[0]}); read and labelled, never a revert by itself (rule 2 exempt)",
+                                     lookedAt={'run': _k['run'], 'picture': _k['picture'], 'why': _k['why']}))
+complement = sorted(k for k in CELLS if carrier_of(k) is None and k.rsplit(' ', 1)[0] != RING and k not in named and k not in LOOKED)
 carrier_cells = sorted(k for k in CELLS if carrier_of(k) is not None)
-assert len(named) + len(complement) + len(carrier_cells) + len(ring_cells) == len(CELLS), 'the complement does not partition the scored cells'
+assert len(named) + len(complement) + len(carrier_cells) + len(ring_cells) + len(LOOKED) == len(CELLS), 'the complement does not partition the scored cells'
 
 # ── every carrier stem has a capture in the run of record (and a per-test IR document if it is a wire carrier) ─────
 for plat in PLATS:
@@ -1178,7 +1203,9 @@ for name, lane in lanes.items():
         assert all(x in lane['revertUnits'] for x in u['revertOrder']), f'{name}: revertOrder names an unknown unit {u["revertOrder"]}'
     for p in lane['predictions']:
         assert all(u in lane['revertUnits'] for u in p['units']), f'{name} {p["cell"]} names an unknown unit {p["units"]}'
-        if p['kind'] != 'non-corpus':
+        # a may-move look row (stage 2, PLAN §10 item 17) is the one prediction on a NON-carrier: a may-move stem is a cell L6 U2
+        # moves without carrying it (its band is the class's); the row only labels the recorded look
+        if p['kind'] != 'non-corpus' and 'lookedAt' not in p:
             test, plat = p['cell'].rsplit(' ', 1)
             assert carrier_of(p['cell']) == name, f'{name} predicts {p["cell"]} but it is not its carrier ({carrier_of(p["cell"])})'
             for u in p['units']:
@@ -1253,6 +1280,8 @@ if os.path.exists(_installed):
     for _l in _prev.get('lanes', {}).values():
         for _p in _l.get('predictions', []):
             assert 'restated' not in _p or _p['cell'] in RESTATE, f"RESTATE row dropped: {_p['cell']} (append-only)"
+    for r in ((_prev.get('probeDecisions') or {}).get('looks') or []):
+        assert any(k['cell'] == r['cell'] and k['run'] == r['run'] for k in LOOKS), f"looks row dropped: {r['cell']} at {r['run']} (append-only)"
 
 def key_units(probe_, key):
     """The units a gating key needs on the tree (its `requires` entry, else the units its `gating` value names)."""
@@ -1691,6 +1720,8 @@ expectations['pictureCorrectTally'] = dict({p: [e for e in TALLY[p] if not set(e
                                            paintOrderOnlyRule=expectations['pictureCorrectTally']['paintOrderOnlyRule'])
 if _pd:
     expectations['probeDecisions'] = _pd
+if LOOKS:
+    expectations['probeDecisions'] = dict(expectations.get('probeDecisions') or {}, looks=LOOKS)     # stage 2 (PLAN §10 item 17)
 if CONTINGENCY:
     expectations['contingencyLanded'] = CONTINGENCY
 # The honesty list and the rows agree (wave-54 S1 should-fix 8): each entry names a prediction row; each row whose kind

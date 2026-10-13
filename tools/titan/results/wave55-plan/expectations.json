@@ -18,6 +18,7 @@
    "tools/titan/results/wave55-plan/positioned-parent-slot.census.out.txt": "3301bfe3d5ee5af7b6e3d3e7785bf2a42e5ea520c412f5054fd6994346d4354c",
    "tools/titan/results/wave55-plan/probe-decisions/contingency.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
    "tools/titan/results/wave55-plan/probe-decisions/holds.json": "46f3918f5e6eb1cccd109ada475a11cd5cf1a135516bbdabd03d89ee68a735ea",
+   "tools/titan/results/wave55-plan/probe-decisions/looks.json": "4e909d7bcd0a636e27db27a9e086d98fb4134117cf1be45589b48642251c366a",
    "tools/titan/results/wave55-plan/probe-decisions/restate.json": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
    "tools/titan/results/wave55-plan/probe-decisions/reverted.json": "996aff9a993ee3ca866f4d6d7a36aa056cf922081f16152502e3b1fc48e25afd",
    "tools/titan/results/wave55-plan/ua-heading-margin.census.json": "d7b1990061efd20c3aa92c0cffa85190ad031ac30bcea6e25c9f5132c2025a98",
@@ -711,7 +712,7 @@
  },
  "mustNotMoveComplement": {
   "rule": "C1: every scored cell of wave54-final outside the union capture carriers and the ring-fenced test, not already named by a lane's mustNotMove; within 0.002, never lost / gained (adjudicate R5). L6 may-move cells are here or in a lane's named list (round-2 generator-truth N1): their 0.002 band IS this rule",
-  "count": 3352,
+  "count": 3349,
   "cells": [
    "CSS2/abspos/between-float-and-text.html android",
    "CSS2/abspos/between-float-and-text.html ios",
@@ -1952,10 +1953,8 @@
    "css-gaps/flex/flex-gap-decorations-050.html android",
    "css-gaps/flex/flex-gap-decorations-050.html ios",
    "css-gaps/flex/flex-gap-decorations-050.html web",
-   "css-grid/abspos/descendant-static-position-001.html android",
    "css-grid/abspos/descendant-static-position-001.html ios",
    "css-grid/abspos/descendant-static-position-001.html web",
-   "css-grid/abspos/descendant-static-position-002.html android",
    "css-grid/abspos/descendant-static-position-002.html ios",
    "css-grid/abspos/descendant-static-position-002.html web",
    "css-grid/abspos/descendant-static-position-003.html android",
@@ -3790,7 +3789,6 @@
    "css-view-transitions/auto-name.html android",
    "css-view-transitions/auto-name.html ios",
    "css-view-transitions/auto-name.html web",
-   "css-view-transitions/break-inside-avoid-child.html android",
    "css-view-transitions/break-inside-avoid-child.html ios",
    "css-view-transitions/break-inside-avoid-child.html web",
    "css-view-transitions/capture-with-offscreen-child-translated.html android",
@@ -8141,6 +8139,75 @@
       "U3"
      ],
      "direction": null
+    },
+    {
+     "cell": "css-grid/abspos/descendant-static-position-001.html android",
+     "from": "P 0.9892",
+     "to": "P ≈0.9991 (device: wave55-probe; identical at wave55-final)",
+     "kind": "may-move stem looked at (wave55-probe): a band now under its child — never claimed",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U2"
+     ],
+     "direction": "undirected",
+     "requires": [
+      "U2"
+     ],
+     "directionWhy": "a may-move non-carrier beyond the 0.002 band whose picture is mayMoveRule's \"a band now under its child\" (PLAN §10 items 16-17); read and labelled, never a revert by itself (rule 2 exempt)",
+     "lookedAt": {
+      "run": "wave55-probe",
+      "picture": "a band now under its child",
+      "why": "PLAN §10 items 16-17: 400 px black → grey at x44-52 — the grid's black side band now under its grey abspos children, as the ref draws it (the look at wave55-probe against wave55-open and the ref)"
+     }
+    },
+    {
+     "cell": "css-grid/abspos/descendant-static-position-002.html android",
+     "from": "P 0.9601",
+     "to": "P ≈0.9724 (device: wave55-probe; identical at wave55-final)",
+     "kind": "may-move stem looked at (wave55-probe): a band now under its child — never claimed",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U2"
+     ],
+     "direction": "undirected",
+     "requires": [
+      "U2"
+     ],
+     "directionWhy": "a may-move non-carrier beyond the 0.002 band whose picture is mayMoveRule's \"a band now under its child\" (PLAN §10 items 16-17); read and labelled, never a revert by itself (rule 2 exempt)",
+     "lookedAt": {
+      "run": "wave55-probe",
+      "picture": "a band now under its child",
+      "why": "PLAN §10 items 16-17: 800 px black → grey at x39-58 — the same band under the children (the look at wave55-probe)"
+     }
+    },
+    {
+     "cell": "css-view-transitions/break-inside-avoid-child.html android",
+     "from": "P 0.9735",
+     "to": "P ≈0.9872 (device: wave55-probe; identical at wave55-final)",
+     "kind": "may-move stem looked at (wave55-probe): a band now under its child — never claimed",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "U2"
+     ],
+     "direction": "undirected",
+     "requires": [
+      "U2"
+     ],
+     "directionWhy": "a may-move non-carrier beyond the 0.002 band whose picture is mayMoveRule's \"a band now under its child\" (PLAN §10 items 16-17); read and labelled, never a revert by itself (rule 2 exempt)",
+     "lookedAt": {
+      "run": "wave55-probe",
+      "picture": "a band now under its child",
+      "why": "PLAN §10 items 16-17: 300 px black → light blue on row y317 — the bottom band now under its child box, as the ref (the look at wave55-probe)"
+     }
     }
    ],
    "mustNotMove": [
@@ -9159,6 +9226,35 @@
      },
      "wire": []
     }
+   }
+  ],
+  "looks": [
+   {
+    "lane": "L6-android-paint-order",
+    "cell": "css-grid/abspos/descendant-static-position-001.html android",
+    "run": "wave55-probe",
+    "open": "P 0.9892",
+    "probe": "P ≈0.9991 (device: wave55-probe; identical at wave55-final)",
+    "picture": "a band now under its child",
+    "why": "PLAN §10 items 16-17: 400 px black → grey at x44-52 — the grid's black side band now under its grey abspos children, as the ref draws it (the look at wave55-probe against wave55-open and the ref)"
+   },
+   {
+    "lane": "L6-android-paint-order",
+    "cell": "css-grid/abspos/descendant-static-position-002.html android",
+    "run": "wave55-probe",
+    "open": "P 0.9601",
+    "probe": "P ≈0.9724 (device: wave55-probe; identical at wave55-final)",
+    "picture": "a band now under its child",
+    "why": "PLAN §10 items 16-17: 800 px black → grey at x39-58 — the same band under the children (the look at wave55-probe)"
+   },
+   {
+    "lane": "L6-android-paint-order",
+    "cell": "css-view-transitions/break-inside-avoid-child.html android",
+    "run": "wave55-probe",
+    "open": "P 0.9735",
+    "probe": "P ≈0.9872 (device: wave55-probe; identical at wave55-final)",
+    "picture": "a band now under its child",
+    "why": "PLAN §10 items 16-17: 300 px black → light blue on row y317 — the bottom band now under its child box, as the ref (the look at wave55-probe)"
    }
   ]
  },

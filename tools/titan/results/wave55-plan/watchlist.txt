@@ -4,7 +4,7 @@
 #   node tools/titan/score-gate.mjs wave55-open <run> --watch tools/titan/results/wave55-plan/watchlist.txt
 # One watch per line: "<sec>/<path>.html <platform>". The ".html" suffix makes each line match exactly ONE test under
 # score-gate.mjs watchCells' substring rule (asserted by plan-build.py). A line already written under an earlier lane is
-# not repeated. The COMPLEMENT (3352 cells: every other non-carrier scored cell) is not watched line by line: it is
+# not repeated. The COMPLEMENT (3349 cells: every other non-carrier scored cell) is not watched line by line: it is
 # expectations.json mustNotMoveComplement, read by adjudicate.mjs R5 over the --movers 0 record, and by control-check R4.
 # Precondition before any gate read-out: RUN=wave55-open WATCH=tools/titan/results/wave55-plan/watchlist.txt node tools/titan/results/wave52-plan/watchlist-check.mjs
 # must print "unmatched 0".
@@ -691,6 +691,9 @@ css-grid/abspos/grid-abspos-staticpos-align-self-safe-001.html android
 css-images/gradient/gradient-powerless-hue-hsl.html android
 css-images/gradient/gradient-powerless-hue-hwb.html android
 css-images/gradient/gradient-powerless-hue-lch.html android
+css-grid/abspos/descendant-static-position-001.html android
+css-grid/abspos/descendant-static-position-002.html android
+css-view-transitions/break-inside-avoid-child.html android
 # L6 android-paint-order — must not move
 CSS2/css21-errata/s-11-1-1b-001.html android
 css-backgrounds/background-clip-002.html android

@@ -1,0 +1,8 @@
+[
+ {"lane": "L6-android-paint-order", "cell": "css-grid/abspos/descendant-static-position-001.html android", "run": "wave55-probe", "open": "P 0.9892", "probe": "P ≈0.9991 (device: wave55-probe; identical at wave55-final)",
+  "picture": "a band now under its child", "why": "PLAN §10 items 16-17: 400 px black → grey at x44-52 — the grid's black side band now under its grey abspos children, as the ref draws it (the look at wave55-probe against wave55-open and the ref)"},
+ {"lane": "L6-android-paint-order", "cell": "css-grid/abspos/descendant-static-position-002.html android", "run": "wave55-probe", "open": "P 0.9601", "probe": "P ≈0.9724 (device: wave55-probe; identical at wave55-final)",
+  "picture": "a band now under its child", "why": "PLAN §10 items 16-17: 800 px black → grey at x39-58 — the same band under the children (the look at wave55-probe)"},
+ {"lane": "L6-android-paint-order", "cell": "css-view-transitions/break-inside-avoid-child.html android", "run": "wave55-probe", "open": "P 0.9735", "probe": "P ≈0.9872 (device: wave55-probe; identical at wave55-final)",
+  "picture": "a band now under its child", "why": "PLAN §10 items 16-17: 300 px black → light blue on row y317 — the bottom band now under its child box, as the ref (the look at wave55-probe)"}
+]

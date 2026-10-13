@@ -38,7 +38,7 @@ regeneration is followed by `plan-prose.py --fill` and `--check` in the same com
 
 <!-- gen:header (plan-prose.py; do not edit by hand) -->
 - Run of record **`wave54-final`**: web 1243/1372 · ios 1131/1362 · android 1128/1362, 4096 scored cells (`cells-wave54-final.json` `totals`, written by `snapshot-cells.mjs` with the scorer's own `loadRun`).
-- `expectations.json` sha256 `e65366b69eebf74555835a88dff1024c35d54380f6d5b9fc68a9fe0c141e46e3`: readAgainst `wave54-final`, base `wave55-open`, interpreter `/opt/homebrew/bin/python3.12 -B`.
+- `expectations.json` sha256 `77a06f6797d26cccfcb2e45fd4b81967809729dfcd3abd517a7260e8da70ea00`: readAgainst `wave54-final`, base `wave55-open`, interpreter `/opt/homebrew/bin/python3.12 -B`.
 - Opening gate (`expectations.json` `openingGate.recorded`): tools/titan/results/wave55-gate/_note.md and score-open.* / control-open.* (commit 640276a0): 0 gained / 0 lost / 0 movers at any Δ / 0 newly measured / 0 unmeasured-now over 4096 cells; control identity 1435/1435 on web, iOS, Android and the wire; fixture net exit 0 ×9 — so every "from" this generator verified against wave54-final holds against wave55-open; no restatement is needed (§10 empty)
 <!-- /gen:header -->
 
@@ -628,10 +628,10 @@ must-not-move exclusions (another lane's carrier on that platform, or the ring-f
 | L3-positioned-parent-slot | 0 / 0 / 9 | 0 | 0 | 187 | 9 | 6 | 2 |
 | L4-ua-heading-margin | 0 / 4 / 4 | 0 | 0 | 46 | 8 | 0 | 4 |
 | L5-counter-suffix-rows | 0 / 5 / 4 | 0 | 0 | 116 | 7 | 4 | 7 (+ 1 contingency) |
-| L6-android-paint-order | 0 / 0 / 27 | 0 | 241 | 65 | 29 | 7 | 3 |
+| L6-android-paint-order | 0 / 0 / 27 | 0 | 241 | 65 | 32 | 7 | 3 |
 | L7-instruments | 0 / 0 / 0 | 0 | 0 | 42 | 6 | 0 | 9 |
 
-Union (`expectations.json`): capture carriers web 0 · iOS 23 · Android 58; wire carriers 0; may-move captures web 0 · iOS 0 · Android 241; `mustNotMoveComplement` 3352 cells — C1: every scored cell of wave54-final outside the union capture carriers and the ring-fenced test, not already named by a lane's mustNotMove; within 0.002, never lost / gained (adjudicate R5). L6 may-move cells are here or in a lane's named list (round-2 generator-truth N1): their 0.002 band IS this rule
+Union (`expectations.json`): capture carriers web 0 · iOS 23 · Android 58; wire carriers 0; may-move captures web 0 · iOS 0 · Android 241; `mustNotMoveComplement` 3349 cells — C1: every scored cell of wave54-final outside the union capture carriers and the ring-fenced test, not already named by a lane's mustNotMove; within 0.002, never lost / gained (adjudicate R5). L6 may-move cells are here or in a lane's named list (round-2 generator-truth N1): their 0.002 band IS this rule
 - `wireRenumbering.rule`: Unchanged from wave 53 (BACKLOG "Wave 53 lessons"): a per-test IR document byte-different ONLY because an earlier content-changed document of the same section changed its component count — identical once the id counter is stripped from id / slot.parent, every id shifted by the same amount, equal to the running component-count delta of the content-changed documents before it — is RENUMBERED, not a leak.
 - `wireRenumbering.expectedShadow`: {} — every wave-55 unit: L1-L6 change no converter / extractor byte; L7 U5 is predicted wire-identical and lands only behind [W-L7a] (content-changed 0, renumbered 0)
 <!-- /gen:union -->
@@ -1519,6 +1519,9 @@ cells. **Three units: U1 PO-selfpaint-android, U2 PO-sides-android, U3 FO-pin (t
 | filter-effects/backdrop-filter-clip-rect-zoom.html android: unscored (scoreEligible false) — overlap rows red 416 / blue 0 under U1, read by its [PO] report key | — (not a scored cell) | — | — · not gating | — | U1 | — |
 | U3 FO-pin: EffectsClipFilterOrderTest red under both mutations (clip below the filter; drop-shadow dropped), green restored — its only gate is its mutation log | — (not a scored cell) | — | — · not gating | — | U3 | — |
 | [W1] optional evidence window: Filter_DropShadow_NoBlur android #111-class strip ≥ 900 px → 0(k)(2) closes as "rendered"; 0 → a next-wave unit (radius 3 components); cropped frame → UNMEASURABLE | — (not a scored cell) | — | — · not gating | — | U3 | — |
+| `css-grid/abspos/descendant-static-position-001.html android` | P 0.9892 → P ≈0.9991 (device: wave55-probe; identical at wave55-final) | MED | — · not gating | undirected | U2 | — |
+| `css-grid/abspos/descendant-static-position-002.html android` | P 0.9601 → P ≈0.9724 (device: wave55-probe; identical at wave55-final) | MED | — · not gating | undirected | U2 | — |
+| `css-view-transitions/break-inside-avoid-child.html android` | P 0.9735 → P ≈0.9872 (device: wave55-probe; identical at wave55-final) | MED | — · not gating | undirected | U2 | — |
 <!-- /gen:L6-predictions -->
 
 **Geometry probes** (`lanes.L6-android-paint-order.geometryProbes`). The `[X]` replay of flex safe-002 keeps 50 crossing px
