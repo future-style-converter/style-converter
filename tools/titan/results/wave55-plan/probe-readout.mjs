@@ -114,6 +114,11 @@ for (const [laneId, lane] of Object.entries(EXP.lanes)) {
   }
 }
 const mayMove = new Map(Object.entries(EXP.unionMayMoveCaptures || {}).map(([p, stems]) => [p, new Set(stems)]));
+// Stage 2 (PLAN §10 item 17): a may-move stem whose look is RECORDED (probe-decisions/looks.json → probeDecisions.looks, and a
+// `lookedAt` prediction row of its lane) is no longer a leak signal: it was looked at, its picture named (one of mayMoveRule's
+// three) and the record cited; it is printed as LOOKED with that picture. A may-move move beyond the band with no recorded look
+// keeps the LOOK instruction and the leak count (the proof: the same record read with the pre-looks expectations).
+const looked = new Map(((EXP.probeDecisions && EXP.probeDecisions.looks) || []).map((k) => [k.cell, k]));
 const ring = EXP.ringFenced && typeof EXP.ringFenced === 'object' ? new Set(EXP.ringFenced.cells || []) : new Set();
 const withdrawn = new Set(decisions.flatMap((d) => d.withdrawnPredictions || []));
 const named = new Map();     // `${lane} ${unit}` -> [reasons]
@@ -178,6 +183,7 @@ for (const [cell, c] of byKey) {
     if (!moved) continue;
     const d = delta(c);
     if (c.list === 'movers' && d != null && Math.abs(d) <= 0.002) { mayWithin++; console.log(`  may-move  ${cell}  ${show(c)} Δ${d} — within L6's 0.002 band`); continue; }
+    if (looked.has(cell)) { const k = looked.get(cell); console.log(`  LOOKED    ${cell}  ${show(c)} [${c.list}] — beyond L6's 0.002 band, looked at (${k.run}): "${k.picture}" — ${k.why.split(':')[0]}; kept, never claimed`); continue; }
     fired.leak++; name('L6-android-paint-order', ['U2'], `may-move beyond 0.002 ${cell}`);
     console.log(`  MAY-MOVE  ${cell}  ${show(c)} [${c.list}] — beyond L6's 0.002 band: LOOK — a band now under its child → keep U2 and record it; anything else → revert L6 U2`);
     continue;

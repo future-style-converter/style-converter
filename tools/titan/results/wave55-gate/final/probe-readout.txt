@@ -1,0 +1,62 @@
+probe-readout  wave55-open → wave55-final   (Δ = wave55-final − wave55-open; a gain prints +, a fall −)
+  sections read (26): CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-grid,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-tables,css-text,css-text-decor,css-transforms,css-values,css-view-transitions,css-writing-modes,filter-effects,selectors
+  lanes that decide: all
+
+rule 1 — lost carriers (P on the base, f on the probe):
+  none
+
+rules 2 / 3 — prediction rows:
+  ok        L2-cbb-android  filter-effects/backdrop-filter-nested-border-radius-clip-3.html android  f 0.9574 → P 0.9999 Δ+0.0425  (predicted P ≈0.999 (replay on Android's own re-laid probe pixels 0.9999; siblings at device probe 1 / 1 / 0.9999); MED-HIGH, gating floor 0.95)
+  ok        L2-cbb-android  filter-effects/backdrop-filter-nested-border-radius-clip.html android  P 0.9649 → P 1 Δ+0.0351  (predicted P ≈1 (device: wave54-probe 1); HIGH, gating floor 0.95)
+  ok        L2-cbb-android  filter-effects/backdrop-filter-nested-border-radius-clip-2.html android  P 0.9689 → P 1 Δ+0.0311  (predicted P ≈1 (device: wave54-probe 1); HIGH, gating floor 0.95)
+  ok        L2-cbb-android  filter-effects/backdrop-filter-nested-border-radius-clip-4.html android  P 0.977 → P 0.9999 Δ+0.0229  (predicted P ≈0.9999 (device: wave54-probe); HIGH, gating floor 0.95)
+  ok        L2-cbb-android  css-flexbox/abspos/abspos-autopos-htb-ltr.html android  P 0.9966 → P 0.9967 Δ+0.0001  (predicted P 0.9967 faithful (device: wave54-probe); HIGH, gating floor 0.95)
+  ok        L2-cbb-android  css-flexbox/abspos/abspos-autopos-vlr-ltr.html android  P 0.9966 → P 0.9967 Δ+0.0001  (predicted P 0.9967 faithful (device: wave54-probe); HIGH, gating floor 0.95)
+  ok        L2-cbb-android  css-flexbox/abspos/abspos-autopos-vrl-ltr.html android  P 0.9966 → P 0.9967 Δ+0.0001  (predicted P 0.9967 faithful (device: wave54-probe); HIGH, gating floor 0.95)
+  ok        L2-cbb-android  css-flexbox/abspos/abspos-autopos-htb-rtl.html android  P 0.9869 → P 0.9966 Δ+0.0097  (predicted P 0.9966 (device: wave54-probe); the picture becomes the iOS line (GEOMETRY WRONG); HIGH, gating floor 0.95)
+  ok        L2-cbb-android  css-flexbox/abspos/abspos-autopos-vlr-rtl.html android  P 0.9966 → P 0.9966 Δ+0  (predicted P 0.9966 (device Δ 0); the picture changes to the iOS line; HIGH, gating floor 0.95)
+  ok        L2-cbb-android  css-flexbox/abspos/abspos-autopos-vrl-rtl.html android  P 0.9966 → P 0.9966 Δ+0  (predicted P 0.9966 (device Δ 0); the picture changes to the iOS line; HIGH, gating floor 0.95)
+  ok        L2-cbb-android  css-position/position-absolute-semi-replaced-stretch-button.html android  f 0.9739 → f 0.9843 Δ+0.0104  (predicted f ≈0.9843 (device: wave54-probe), stays f; HIGH, floor n/a (stays f))
+  ok        L2-cbb-android  css-position/position-absolute-semi-replaced-stretch-input.html android  f 0.4117 → f 0.4555 Δ+0.0438  (predicted f ≈0.4555 (device: wave54-probe), stays f; HIGH, floor n/a (stays f))
+  ok        L2-cbb-android  css-position/position-absolute-semi-replaced-stretch-other.html android  f 0.4396 → f 0.4685 Δ+0.0289  (predicted f ≈0.4679 (device: wave54-probe), stays f; HIGH, floor n/a (stays f))
+  ok        L3-positioned-parent-slot  selectors/dir-style-02a.html android  f 0.9425 → P 0.9854 Δ+0.0429  (predicted P ≈0.987 (replay U1+U2 0.9866, no veto); MED-HIGH, gating floor 0.95)
+  ok        L3-positioned-parent-slot  css-text/bidi/bidi-tab-001.html android  P 0.9805 → P 0.9929 Δ+0.0124  (predicted P ≈0.990 (replay 0.9901); MED-HIGH, gating floor 0.95)
+  ok        L3-positioned-parent-slot  css-writing-modes/dynamic-offset-rtl-001.html android  P 0.9952 → P 1 Δ+0.0048  (predicted P ≈1 (replay 1); MED-HIGH, gating floor 0.95)
+  ok        L3-positioned-parent-slot  css-writing-modes/dynamic-offset-rtl-002.html android  P 0.9953 → P 0.9956 Δ+0.0003  (predicted P ≈0.9956 (web's picture); MED, gating floor 0.95)
+  ok        L3-positioned-parent-slot  css-writing-modes/dynamic-offset-vrl-rtl-001.html android  P 0.9952 → P 1 Δ+0.0048  (predicted P ≈1 (replay 1); MED, gating floor 0.95)
+  ok        L3-positioned-parent-slot  css-writing-modes/dynamic-offset-vrl-rtl-002.html android  P 0.9952 → P 0.9955 Δ+0.0003  (predicted P ≈0.9955 (web's picture); MED, gating floor 0.95)
+  ok        L3-positioned-parent-slot  css-anchor-position/anchor-position-multicol-nested-001.html android  f 0.9573 → f 0.9688 Δ+0.0115  (predicted f ≈0.969 (replay 0.9688; the coverage veto holds: ratio 2.07 > 2) — NOT a flip; MED, floor n/a (stays f))
+  ok        L5-counter-suffix-rows  css-counter-styles/counter-suffix.html ios  P 0.9873 → P 0.992 Δ+0.0047  (predicted P ≈0.993 (replay, all three arms; U1 0.9897 · U2o 0.9903 · U3 0.9875 · U1+U2o 0.9927 — the replay grafted only row 9's '1': U3-ios's five other tabular glyphs, ≤ 0.31 px each toward the ref's advances, are not modelled (L5 fix-r1)); MED, gating floor 0.95)
+  ok        L5-counter-suffix-rows  css-counter-styles/counter-suffix.html android  P 0.989 → P 0.9924 Δ+0.0034  (predicted P ≈0.9924 (replay U2o); MED-HIGH, gating floor 0.95)
+  ok        L5-counter-suffix-rows  css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios  P 0.993 → P 0.9971 Δ+0.0041  (predicted P ≈0.997 (replay 0.9971); MED, gating floor 0.95)
+  ok        L5-counter-suffix-rows  css-counter-styles/cjk-decimal/css3-counter-styles-005.html android  P 0.9759 → P 0.9741 Δ-0.0018  (predicted P ≈0.974 (replay 0.9741: down 0.0018, pre-registered); LOW-MED, gating floor 0.95, pre-registered Δ-0.0018)
+  ok        L6-android-paint-order  filter-effects/backdrop-filter-clip-rect.html android  P 0.9559 → P 0.9574 Δ+0.0015  (predicted P ≈0.957 (replay 0.9574); HIGH, gating floor 0.95)
+  ok        L6-android-paint-order  css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html android  P 0.9619 → P 0.9943 Δ+0.0324  (predicted P ≈0.994 (replay 0.9938); MED-HIGH, gating floor 0.95)
+  ok        L6-android-paint-order  css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html android  P 0.9635 → P 0.9932 Δ+0.0297  (predicted P ≈0.991 (replay 0.991, a lower bound: §7); MED-HIGH, gating floor 0.95)
+  ok        L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-001.html android  P 0.9673 → P 0.9671 Δ-0.0002  (predicted P ≈0.9672 (replay); MED, gating floor 0.95)
+  ok        L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-justify-self-001.html android  P 0.9667 → P 0.9667 Δ+0  (predicted P ≈0.9667 (replay); MED, gating floor 0.95)
+  ok        L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html android  P 0.9612 → P 0.9613 Δ+0.0001  (predicted P ≈0.9613 (replay); MED, gating floor 0.95)
+  ok        L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html android  P 0.9646 → P 0.9645 Δ-0.0001  (predicted P ≈0.9645 (replay); MED, gating floor 0.95)
+  ok        L6-android-paint-order  css-grid/abspos/descendant-static-position-001.html android  P 0.9892 → P 0.9991 Δ+0.0099  (predicted P ≈0.9991 (device: wave55-probe; identical at wave55-final); MED, undirected)
+  ok        L6-android-paint-order  css-grid/abspos/descendant-static-position-002.html android  P 0.9601 → P 0.9724 Δ+0.0123  (predicted P ≈0.9724 (device: wave55-probe; identical at wave55-final); MED, undirected)
+  ok        L6-android-paint-order  css-view-transitions/break-inside-avoid-child.html android  P 0.9735 → P 0.9872 Δ+0.0137  (predicted P ≈0.9872 (device: wave55-probe; identical at wave55-final); MED, undirected)
+
+non-carrier cells — must-not-move (any move = leak signal), L6 may-move (0.002 band), ring-fenced (report only):
+  may-move  css-display/display-contents-fieldset-002.html android  f 0.4786 → f 0.4785 Δ-0.0001 — within L6's 0.002 band
+  may-move  css-gaps/flex/flex-gap-decorations-008.html android  P 0.999 → P 0.9991 Δ0.0001 — within L6's 0.002 band
+  may-move  css-gaps/flex/flex-gap-decorations-023.html android  P 0.9541 → P 0.9548 Δ0.0007 — within L6's 0.002 band
+  LOOKED    css-grid/abspos/descendant-static-position-001.html android  P 0.9892 → P 0.9991 [movers] — beyond L6's 0.002 band, looked at (wave55-probe): "a band now under its child" — PLAN §10 items 16-17; kept, never claimed
+  LOOKED    css-grid/abspos/descendant-static-position-002.html android  P 0.9601 → P 0.9724 [movers] — beyond L6's 0.002 band, looked at (wave55-probe): "a band now under its child" — PLAN §10 items 16-17; kept, never claimed
+  may-move  css-grid/abspos/descendant-static-position-004.html android  P 0.9729 → P 0.9736 Δ0.0007 — within L6's 0.002 band
+  may-move  css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-001.html android  P 0.9947 → P 0.9948 Δ0.0001 — within L6's 0.002 band
+  may-move  css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-001.html android  P 0.9948 → P 0.9949 Δ0.0001 — within L6's 0.002 band
+  may-move  css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-002.html android  P 0.9948 → P 0.9949 Δ0.0001 — within L6's 0.002 band
+  may-move  css-overflow/line-clamp/block-ellipsis-032.tentative.html android  f 0.9457 → f 0.9452 Δ-0.0005 — within L6's 0.002 band
+  may-move  css-tables/border-conflict-resolution.html android  f 0.8394 → f 0.839 Δ-0.0004 — within L6's 0.002 band
+  LOOKED    css-view-transitions/break-inside-avoid-child.html android  P 0.9735 → P 0.9872 [movers] — beyond L6's 0.002 band, looked at (wave55-probe): "a band now under its child" — PLAN §10 items 16-17; kept, never claimed
+  RING-FENCED filter-effects/backdrop-filter-basic-blur.html android  f 0.904 → f 0.9076 [movers] — report plainly in the PR; never a target, never a revert
+  3484 non-carrier cells read (3269 must-not-move lines, 212 L6 may-move of which 9 moved within the band); 0 leak signal(s)
+
+summary: rule 1 fired 0 · rule 2 fired 0 · rule 3 fired 0 · leak signals 0 · undirected falls read 0 · unmeasured 0 · recorded for another lane 0
+
+PROBE: rules 1, 2, 3 and the must-not-move read hold

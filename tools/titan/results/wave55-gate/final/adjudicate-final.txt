@@ -1,0 +1,106 @@
+record  wave55-open → wave55-final
+  prev  web 1243/1372  ios 1131/1362  android 1128/1362
+  cur   web 1243/1372  ios 1131/1362  android 1130/1362
+  gained 2  lost 0  newly-measured 0  unmeasured-now 0  movers 4094
+
+ok   R1  lost 0; pre-registered 0; outside the list 0
+ok   R2  unmeasured-now 0 (unexpected 0), newly measured 0 (unexpected 0)
+ok   R3  missing sections 0, short columns 0
+
+predictions (gating ones enforced):
+  ~ L1-hyphen-ios-linebox  css-text/hyphens/hyphenate-character-001.html ios: WITHDRAWN at wave55-pre (unit NB-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L1-hyphen-ios-linebox  css-text/hyphens/hyphenate-character-003.html ios: WITHDRAWN at wave55-pre (unit NB-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L1-hyphen-ios-linebox  css-text/hyphens/hyphenate-character-004.html ios: WITHDRAWN at wave55-pre (unit NB-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L1-hyphen-ios-linebox  css-text/hyphens/hyphenate-character-002.html ios: WITHDRAWN at wave55-pre (unit NB-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-001.html ios: WITHDRAWN at wave55-pre (unit NB-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-002.html ios: WITHDRAWN at wave55-pre (unit NB-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-003.html ios: WITHDRAWN at wave55-pre (unit NB-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-004.html ios: WITHDRAWN at wave55-pre (unit NB-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-005.html ios: WITHDRAWN at wave55-pre (unit NB-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-006.html ios: WITHDRAWN at wave55-pre (unit NB-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-007.html ios: WITHDRAWN at wave55-pre (unit NB-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-008.html ios: WITHDRAWN at wave55-pre (unit NB-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L1-hyphen-ios-linebox  css-text-decor/text-decoration-dotted-001.html ios: WITHDRAWN at wave55-pre (unit NB-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L1-hyphen-ios-linebox  css-text-decor/text-decoration-dotted-002.html ios: WITHDRAWN at wave55-pre (unit NB-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+    L2-cbb-android  filter-effects/backdrop-filter-nested-border-radius-clip-3.html android: predicted f 0.9574 → P ≈0.999 (replay on Android's own re-laid probe pixels 0.9999; siblings at device probe 1 / 1 / 0.9999) (MED-HIGH, gating, floor 0.95) — measured P 0.9999
+    L2-cbb-android  filter-effects/backdrop-filter-nested-border-radius-clip.html android: predicted P 0.9649 → P ≈1 (device: wave54-probe 1) (HIGH, gating, floor 0.95) — measured P 1
+    L2-cbb-android  filter-effects/backdrop-filter-nested-border-radius-clip-2.html android: predicted P 0.9689 → P ≈1 (device: wave54-probe 1) (HIGH, gating, floor 0.95) — measured P 1
+    L2-cbb-android  filter-effects/backdrop-filter-nested-border-radius-clip-4.html android: predicted P 0.977 → P ≈0.9999 (device: wave54-probe) (HIGH, gating, floor 0.95) — measured P 0.9999
+    L2-cbb-android  css-flexbox/abspos/abspos-autopos-htb-ltr.html android: predicted P 0.9966 DEGENERATE → P 0.9967 faithful (device: wave54-probe) (HIGH, gating, floor 0.95) — measured P 0.9967
+    L2-cbb-android  css-flexbox/abspos/abspos-autopos-vlr-ltr.html android: predicted P 0.9966 DEGENERATE → P 0.9967 faithful (device: wave54-probe) (HIGH, gating, floor 0.95) — measured P 0.9967
+    L2-cbb-android  css-flexbox/abspos/abspos-autopos-vrl-ltr.html android: predicted P 0.9966 DEGENERATE → P 0.9967 faithful (device: wave54-probe) (HIGH, gating, floor 0.95) — measured P 0.9967
+    L2-cbb-android  css-flexbox/abspos/abspos-autopos-htb-rtl.html android: predicted P 0.9869 → P 0.9966 (device: wave54-probe); the picture becomes the iOS line (GEOMETRY WRONG) (HIGH, gating, floor 0.95) — measured P 0.9966
+    L2-cbb-android  css-flexbox/abspos/abspos-autopos-vlr-rtl.html android: predicted P 0.9966 → P 0.9966 (device Δ 0); the picture changes to the iOS line (HIGH, gating, floor 0.95) — measured P 0.9966
+    L2-cbb-android  css-flexbox/abspos/abspos-autopos-vrl-rtl.html android: predicted P 0.9966 → P 0.9966 (device Δ 0); the picture changes to the iOS line (HIGH, gating, floor 0.95) — measured P 0.9966
+    L2-cbb-android  css-position/position-absolute-semi-replaced-stretch-button.html android: predicted f 0.9739 → f ≈0.9843 (device: wave54-probe), stays f (HIGH) — measured f 0.9843
+    L2-cbb-android  css-position/position-absolute-semi-replaced-stretch-input.html android: predicted f 0.4117 → f ≈0.4555 (device: wave54-probe), stays f (HIGH) — measured f 0.4555
+    L2-cbb-android  css-position/position-absolute-semi-replaced-stretch-other.html android: predicted f 0.4396 → f ≈0.4679 (device: wave54-probe), stays f (HIGH) — measured f 0.4685
+    L2-cbb-android  css-gaps/flex/flex-gap-decorations-006.html android: predicted f 0.8223 → f 0.8223 (device Δ 0) (MED) — measured f 0.8223
+    L3-positioned-parent-slot  selectors/dir-style-02a.html android: predicted f 0.9425 → P ≈0.987 (replay U1+U2 0.9866, no veto) (MED-HIGH, gating, floor 0.95) — measured P 0.9854
+    L3-positioned-parent-slot  css-text/bidi/bidi-tab-001.html android: predicted P 0.9805 → P ≈0.990 (replay 0.9901) (MED-HIGH, gating, floor 0.95) — measured P 0.9929
+    L3-positioned-parent-slot  css-writing-modes/dynamic-offset-rtl-001.html android: predicted P 0.9952 → P ≈1 (replay 1) (MED-HIGH, gating, floor 0.95) — measured P 1
+    L3-positioned-parent-slot  css-writing-modes/dynamic-offset-rtl-002.html android: predicted P 0.9953 → P ≈0.9956 (web's picture) (MED, gating, floor 0.95) — measured P 0.9956
+    L3-positioned-parent-slot  css-writing-modes/dynamic-offset-vrl-rtl-001.html android: predicted P 0.9952 → P ≈1 (replay 1) (MED, gating, floor 0.95) — measured P 1
+    L3-positioned-parent-slot  css-writing-modes/dynamic-offset-vrl-rtl-002.html android: predicted P 0.9952 → P ≈0.9955 (web's picture) (MED, gating, floor 0.95) — measured P 0.9955
+    L3-positioned-parent-slot  css-anchor-position/anchor-position-multicol-nested-001.html android: predicted f 0.9573 → f ≈0.969 (replay 0.9688; the coverage veto holds: ratio 2.07 > 2) — NOT a flip (MED) — measured f 0.9688
+    L3-positioned-parent-slot  css-anchor-position/anchor-position-multicol-004.html android: predicted P 0.9686 → P, |Δ| ≤ 0.01 (red unchanged) (LOW) — measured P 0.9686
+    L3-positioned-parent-slot  css-text/hyphens/hyphenate-character-005.html android: predicted f 0.9474 → f, undirected (its kashida run moves 4.5 px left) (LOW) — measured f 0.9475
+  ~ L4-ua-heading-margin  css-text-decor/text-decoration-inset-005.html ios: WITHDRAWN at wave55-pre (unit U1-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L4-ua-heading-margin  css-text-decor/text-decoration-inset-006.html ios: WITHDRAWN at wave55-pre (unit U1-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L4-ua-heading-margin  css-text-decor/text-decoration-inset-014.html ios: WITHDRAWN at wave55-pre (unit U1-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L4-ua-heading-margin  css-text-decor/text-decoration-inset-014.html android: WITHDRAWN at wave55-pre (unit U1-android) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L4-ua-heading-margin  css-text-decor/text-decoration-inset-005.html android: WITHDRAWN at wave55-pre (unit U1-android) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L4-ua-heading-margin  css-text-decor/text-decoration-inset-006.html android: WITHDRAWN at wave55-pre (unit U1-android) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L4-ua-heading-margin  css-text-decor/text-decoration-inset-011.html ios: WITHDRAWN at wave55-pre (unit U1-ios) (its units were reverted — probeDecisions); held to must-not-move instead
+  ~ L4-ua-heading-margin  css-text-decor/text-decoration-inset-011.html android: WITHDRAWN at wave55-pre (unit U1-android) (its units were reverted — probeDecisions); held to must-not-move instead
+    L5-counter-suffix-rows  css-counter-styles/counter-suffix.html ios: predicted P 0.9873 → P ≈0.993 (replay, all three arms; U1 0.9897 · U2o 0.9903 · U3 0.9875 · U1+U2o 0.9927 — the replay grafted only row 9's '1': U3-ios's five other tabular glyphs, ≤ 0.31 px each toward the ref's advances, are not modelled (L5 fix-r1)) (MED, gating, floor 0.95) — measured P 0.992
+    L5-counter-suffix-rows  css-counter-styles/counter-suffix.html android: predicted P 0.989 → P ≈0.9924 (replay U2o) (MED-HIGH, gating, floor 0.95) — measured P 0.9924
+    L5-counter-suffix-rows  css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios: predicted P 0.993 → P ≈0.997 (replay 0.9971) (MED, gating, floor 0.95) — measured P 0.9971
+    L5-counter-suffix-rows  css-counter-styles/cjk-decimal/css3-counter-styles-005.html android: predicted P 0.9759 → P ≈0.974 (replay 0.9741: down 0.0018, pre-registered) (LOW-MED, gating, floor 0.95) — measured P 0.9741
+    L5-counter-suffix-rows  css-counter-styles/counter-style-at-rule/disclosure-styles.html ios: predicted f 0.6127 → f 0.6127, byte-identical (read the picture if it moves) (MED) — measured f 0.6127
+  L5-counter-suffix-rows  css-counter-styles/cjk-decimal/css3-counter-styles-001.html ios / android: unscored (scoreExcluded native-font-parity) — the item text moves −3 / −4 px under U2i (capture carriers only): - → - (not a corpus cell — read elsewhere)
+  L5-counter-suffix-rows  css-counter-styles/cjk-decimal/css3-counter-styles-004.html ios / android: unscored (scoreExcluded native-font-parity) — the item text moves −3 / −4 px under U2i (capture carriers only): - → - (not a corpus cell — read elsewhere)
+    L6-android-paint-order  filter-effects/backdrop-filter-clip-rect.html android: predicted P 0.9559 → P ≈0.957 (replay 0.9574) (HIGH, gating, floor 0.95) — measured P 0.9574
+    L6-android-paint-order  css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html android: predicted P 0.9619 → P ≈0.994 (replay 0.9938) (MED-HIGH, gating, floor 0.95) — measured P 0.9943
+    L6-android-paint-order  css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html android: predicted P 0.9635 → P ≈0.991 (replay 0.991, a lower bound: §7) (MED-HIGH, gating, floor 0.95) — measured P 0.9932
+    L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-001.html android: predicted P 0.9673 → P ≈0.9672 (replay) (MED, gating, floor 0.95) — measured P 0.9671
+    L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-justify-self-001.html android: predicted P 0.9667 → P ≈0.9667 (replay) (MED, gating, floor 0.95) — measured P 0.9667
+    L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html android: predicted P 0.9612 → P ≈0.9613 (replay) (MED, gating, floor 0.95) — measured P 0.9613
+    L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html android: predicted P 0.9646 → P ≈0.9645 (replay) (MED, gating, floor 0.95) — measured P 0.9645
+    L6-android-paint-order  css-flexbox/abspos/flex-abspos-staticpos-fallback-justify-content-001.html android: predicted P 0.9873 → P ±0.0005 (replay); crossings expected 0, not keyed (MED) — measured P 0.9873
+    L6-android-paint-order  css-flexbox/abspos/flex-abspos-staticpos-justify-self-001.html android: predicted P 0.9997 → P ±0.0005 (replay); crossings expected 0, not keyed (MED) — measured P 1
+    L6-android-paint-order  css-flexbox/abspos/flex-abspos-staticpos-margin-001.html android: predicted P 0.9998 → P ±0.0005 (replay); crossings expected 0, not keyed (MED) — measured P 1
+    L6-android-paint-order  css-flexbox/abspos/flex-abspos-staticpos-margin-002.html android: predicted P 0.9778 → P ±0.0005 (replay); crossings expected 0, not keyed (MED) — measured P 0.9775
+    L6-android-paint-order  css-flexbox/abspos/flex-abspos-staticpos-margin-003.html android: predicted P 0.9798 → P ±0.0005 (replay); crossings expected 0, not keyed (MED) — measured P 0.9794
+    L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-002.html android: predicted P 0.9791 → P ±0.0005 (replay); crossings expected 0, not keyed (MED) — measured P 0.9789
+    L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-img-001.html android: predicted P 0.964 → P ±0.0005 (replay); crossings expected 0, not keyed (MED) — measured P 0.964
+    L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-img-002.html android: predicted P 0.9998 → P ±0.0005 (replay); crossings expected 0, not keyed (MED) — measured P 1
+    L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-rtl-002.html android: predicted P 0.9646 → P ±0.0005 (replay); crossings expected 0, not keyed (MED) — measured P 0.9645
+    L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-rtl-003.html android: predicted P 0.9778 → P ±0.0005 (replay); crossings expected 0, not keyed (MED) — measured P 0.9778
+    L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-rtl-004.html android: predicted P 0.9778 → P ±0.0005 (replay); crossings expected 0, not keyed (MED) — measured P 0.9778
+    L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-002.html android: predicted P 0.9614 → P ±0.0005 (replay); crossings expected 0, not keyed (MED) — measured P 0.9615
+    L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-003.html android: predicted P 0.9667 → P ±0.0005 (replay); crossings expected 0, not keyed (MED) — measured P 0.9669
+    L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-004.html android: predicted P 0.9682 → P ±0.0005 (replay); crossings expected 0, not keyed (MED) — measured P 0.9683
+    L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-justify-self-002.html android: predicted P 0.9823 → P ±0.0005 (replay); crossings expected 0, not keyed (MED) — measured P 0.9823
+    L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-safe-001.html android: predicted f 0.9441 → f ≈0.9448 (replay), stays f (LOW) — measured f 0.9448
+    L6-android-paint-order  css-images/gradient/gradient-powerless-hue-hsl.html android: predicted f 0.7542 → +0.0002-0.0003 (replay), stays f (LOW) — measured f 0.7542
+    L6-android-paint-order  css-images/gradient/gradient-powerless-hue-hwb.html android: predicted f 0.755 → +0.0002-0.0003 (replay), stays f (LOW) — measured f 0.755
+    L6-android-paint-order  css-images/gradient/gradient-powerless-hue-lch.html android: predicted f 0.7013 → +0.0002-0.0003 (replay), stays f (LOW) — measured f 0.7013
+  L6-android-paint-order  filter-effects/backdrop-filter-clip-rect-zoom.html android: unscored (scoreEligible false) — overlap rows red 416 / blue 0 under U1, read by its [PO] report key: - → - (not a corpus cell — read elsewhere)
+  L6-android-paint-order  U3 FO-pin: EffectsClipFilterOrderTest red under both mutations (clip below the filter; drop-shadow dropped), green restored — its only gate is its mutation log: - → - (not a corpus cell — read elsewhere)
+  L6-android-paint-order  [W1] optional evidence window: Filter_DropShadow_NoBlur android #111-class strip ≥ 900 px → 0(k)(2) closes as "rendered"; 0 → a next-wave unit (radius 3 components); cropped frame → UNMEASURABLE: - → - (not a corpus cell — read elsewhere)
+    L6-android-paint-order  css-grid/abspos/descendant-static-position-001.html android: predicted P 0.9892 → P ≈0.9991 (device: wave55-probe; identical at wave55-final) (MED) — measured P 0.9991
+    L6-android-paint-order  css-grid/abspos/descendant-static-position-002.html android: predicted P 0.9601 → P ≈0.9724 (device: wave55-probe; identical at wave55-final) (MED) — measured P 0.9724
+    L6-android-paint-order  css-view-transitions/break-inside-avoid-child.html android: predicted P 0.9735 → P ≈0.9872 (device: wave55-probe; identical at wave55-final) (MED) — measured P 0.9872
+  L7-instruments  U2 wire-differential: calibration on the parked wave-54 trees prints `identical 1397 · content-changed 23 · renumbered 15 · one-sided 0`, exit 0; with counter-suffix deleted from the expect file exit 5; the mis-invocation shape exit 4 — HIGH: - → - (not a corpus cell — read elsewhere)
+  L7-instruments  U2 pins P1-P6 green; mutations M1-M5 each red then restored — HIGH: - → - (not a corpus cell — read elsewhere)
+  L7-instruments  U3 ab-arms55.selftest.sh: exit 0, HEAD restored, the hash block present once, final/ab-drop-U.{txt,driver.txt} written, the real pool dir untouched, this repo's refs unchanged; M-L18 red, M-dry byte-identical — HIGH: - → - (not a corpus cell — read elsewhere)
+  L7-instruments  U4: node schema/conformance/run.mjs 39/39 valid, byte-identical; InlineRunsLatitudeCitation pins (a) / (b) red under their mutations — HIGH: - → - (not a corpus cell — read elsewhere)
+  L7-instruments  U5 [W-L7a] (Chromium + converter, no device): `::marker` and chain maskImage / mixBlendMode read `none` / `normal`; wire-differential over css-anchor-position, css-backgrounds, css-counter-styles, css-text, css-writing-modes, selectors → exit 0, content-changed 0 · renumbered 0 · one-sided 0; --classify-only with counter-suffix pre-registered → exit 5. Any other result: U5 does not land (C3: U5's claim is wire-only): - → - (not a corpus cell — read elsewhere)
+  L7-instruments  U6: 21 pins (C1-C7, S1-S6, W1-W6, T1-T2), each mutation red → restore → green, sha256-verified, in a throwaway worktree — HIGH: - → - (not a corpus cell — read elsewhere)
+ok   R4  gating predictions 27, missed 0
+ok   R5  must-not-move cells 4084, moved 0
+
+gained 2: web 0  ios 0  android 2
+
+ADJUDICATION: R1–R5 hold
