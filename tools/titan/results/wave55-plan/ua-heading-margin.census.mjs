@@ -163,7 +163,7 @@ const firing = real.filter((h) => h.cls !== 'hoisted' && h.fires);
 out.push(`NEW-RULE FIRES (rc1 + nested, at least one undeclared block edge): ${firing.length} components in ${new Set(firing.map((h) => h.stem)).size} documents`);
 out.push('');
 for (const r of rows) {
-  out.push(`${r.sec}/${r.stem.replace(/^wpt__[^_]+(?:-[^_]+)*__/, '')}   web ${r.cells.web} · ios ${r.cells.ios} · android ${r.cells.android}`);
+  out.push(`${r.sec}/${r.stem.replace(/^wpt__[^_-]+(?:-[^_-]+)*__/, '')}   web ${r.cells.web} · ios ${r.cells.ios} · android ${r.cells.android}`);
   for (const h of r.hits) {
     if (h.cls === 'bucket-only') { out.push(`   ${h.tag} ${h.id}  bucket-only Position (not a carrier)`); continue; }
     const decl = `${h.declTop ? 'T' : '-'}${h.declBottom ? 'B' : '-'}`;
