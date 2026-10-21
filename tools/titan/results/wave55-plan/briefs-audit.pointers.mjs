@@ -78,7 +78,7 @@ for (const b of BRIEFS) {
       if (/^https?:/.test(tok) || /^[0-9.]+$/.test(tok)) continue;
       if (/^(?:css|filter-effects|selectors|CSS2|compositing)\b.*\.html$/.test(tok) && !tok.includes('tools/')) {
         // a WPT source path cited as "WPT 9b5435e5 css/…": the mirror is gitignored; check on disk.
-        const wp = path.join(ROOT, 'tools/wpt', tok.replace(/^css\//, 'css/'));
+        const wp = path.join(ROOT, 'tools/wpt', tok);
         counts.paths++; const ok = fs.existsSync(wp) || fs.existsSync(path.join(ROOT, 'tools/wpt', tok));
         if (!ok) { counts.fail++; out.push(`  L${ln} PATH-MISSING(wpt) ${tok}`); } else counts.ok++;
         continue;
