@@ -239,7 +239,7 @@ for (const sec of Object.keys(run.sections).sort()) {
 
 const docsOf = (rows) => [...new Set(rows.map((r) => `${r.sec}/${r.stem}`))];
 const byClass = (rows) => { const o = {}; for (const r of rows) for (const h of r.hits) o[h.cls] = (o[h.cls] ?? 0) + 1; return o; };
-const line = (r) => `  ${r.sec}/${r.stem.replace(/^wpt__[^_]+(?:-[^_]+)*__/, '')}  ${r.id}  [${r.hits.map((h) => h.cls).join(',')}]  web ${r.cells.web} · ios ${r.cells.ios} · android ${r.cells.android}`;
+const line = (r) => `  ${r.sec}/${r.stem.replace(/^wpt__[^_-]+(?:-[^_-]+)*__/, '')}  ${r.id}  [${r.hits.map((h) => h.cls).join(',')}]  web ${r.cells.web} · ios ${r.cells.ios} · android ${r.cells.android}`;
 
 console.log(`run ${runId}: ${docs} per-test IR documents`);
 console.log(`bordered components: self-paint route (radius + uniform-solid band) ${selfPaintBordered} · legacy route ${legacyBordered}`);
