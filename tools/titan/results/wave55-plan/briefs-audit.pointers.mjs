@@ -61,7 +61,7 @@ const EXT = '(?:kts|kt|swift|tsx|ts|mjs|cjs|js|py|sh|md|json|txt|png|html|otf|tt
 const PATH_RE = new RegExp(`([A-Za-z0-9_@…{},*./+-]*[A-Za-z0-9_}*-]\\.${EXT})(?::(\\d+)(?:[-–](\\d+))?)?(?![A-Za-z0-9])`, 'g');
 const SECS = Object.keys((runs['wave54-final'] || { sections: {} }).sections);
 // A full cell: optional run id, <sec>/<test...> <platform> <P|f> <num>.
-const CELL_RE = new RegExp(`(?:\\b(wave5\\d-[A-Za-z0-9-]+)\\s+)?\\b((?:${SECS.map((s) => s.replace(/[-]/g, '\\-')).join('|')})/[A-Za-z0-9_./-]+?)\\s+(web|ios|android)\\s+\\**(P|f)\\s+(\\d+(?:\\.\\d+)?)`, 'g');
+const CELL_RE = new RegExp(`(?:\\b(wave5\\d-[A-Za-z0-9-]+)\\s+)?\\b((?:${SECS.map((s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})/[A-Za-z0-9_./-]+?)\\s+(web|ios|android)\\s+\\**(P|f)\\s+(\\d+(?:\\.\\d+)?)`, 'g');
 
 const out = [];
 const counts = { paths: 0, ok: 0, fail: 0, cells: 0, cellsOk: 0, cellsFail: 0 };
