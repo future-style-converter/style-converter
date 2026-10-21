@@ -1,0 +1,108 @@
+# seam-4.patch — wave55 L5 (counter-suffix-rows) unit U2o-android — SEAM patch (one seam file + its patch-borne test files)
+# seam file: runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+# base tree 611c9f93; cut on: 611c9f93 (SeamReachabilityTest.kt: cut on HEAD at the PINNED anchor after "images/ImageCandidateChain.kt", (:167), round 1 M1)
+# seam file sha256 at base 611c9f93: 2445d9ea2674576fc0946e3f630f48b88d48f0f9d8c98df3249ba67d7a026aa5
+# content anchor: ':4482 gapPx = with(markerSnapDensity) { ListMarkerRow.gapDp.roundToPx() },' (+ its 2-line comment) in RenderListItemMarker's ListMarkerOutsideHang.Hang call; patch-borne: the SeamReachabilityTest.kt module line "lists/ListMarkerSuffixGap.kt" (C10; SeamReachabilityTest.kt sha256 at base 7a1b061f1de5d288af6581d81b35744de9b579a41a7e9388d4ded1c0d9b08f56) + NEW lists/ListMarkerSuffixGapHangSeamTest.kt
+# check: git apply --check <this file> (in landing order, after the patches named in "cut on")
+# fix-r1 re-cut: the SeamReachabilityTest.kt comment no longer claims seam 4 is the ONLY caller (seam 5 calls it too; skeptic nit 3) — comment-only
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+index 044cf241..b65f37ce 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -4477,9 +4477,14 @@ object ComponentRenderer {
+             val hangAligns = ListMarkerRow.alignsByBaseline(
+                 exposesBaseline, markerSharesSnappedLineGrid)
+             com.styleconverter.runtime.lists.ListMarkerOutsideHang.Hang(
+-                // ONE gap constant for both placements: the Row's
+-                // `padding(end = gapDp)` becomes the hang's offset.
+-                gapPx = with(markerSnapDensity) { ListMarkerRow.gapDp.roundToPx() },
++                // The Row's end padding becomes the hang's offset. Wave 55
++                // (lane L5, U2o-android): it is the stand-in for the
++                // suffix's trimmed space, keyed on the RAW marker string —
++                // 0 after a U+3001 suffix (css-counter-styles-3 §6.1), else
++                // ListMarkerRow.gapDp (ListMarkerSuffixGap).
++                gapPx = with(markerSnapDensity) {
++                    com.styleconverter.runtime.lists.ListMarkerSuffixGap.gapDp(marker).roundToPx()
++                },
+                 alignsByBaseline = hangAligns,
+                 // An EMPTY item's one line box is the marker's (seam-3's
+                 // ListMarkerEmptyItem rule, outside half).
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
+index c7901fd2..f02630b1 100644
+--- a/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
+@@ -165,6 +165,10 @@ class SeamReachabilityTest {
+             "columns/MulticolSpannerContainingBlock.kt",
+             // A3 — the css-images-4 §2.5 candidate walk.
+             "images/ImageCandidateChain.kt",
++            // Wave 55 (lane L5, U2o-android) — the string-keyed marker gap: seam 4's
++            // outside hang calls it (and seam 5's inside Row while U2i-android is on);
++            // this line rides in seam 4; ListMarkerSuffixGapHangSeamTest pins seam 4's call.
++            "lists/ListMarkerSuffixGap.kt",
+             // A7 — percentage inset resolution against the containing block.
+             "layout/position/PercentInsetResolve.kt",
+             "layout/position/PercentInsetPositioned.kt",
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/lists/ListMarkerSuffixGapHangSeamTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/lists/ListMarkerSuffixGapHangSeamTest.kt
+new file mode 100644
+index 00000000..19673d49
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/lists/ListMarkerSuffixGapHangSeamTest.kt
+@@ -0,0 +1,58 @@
++package com.styleconverter.runtime.lists
++
++// Wave 55, lane L5 (U2o-android) — the SEAM pin for the outside hang's
++// offset. SHIPS INSIDE seam-4.patch (tools/titan/results/
++// wave55-counter-suffix-rows/), never on its own: it reads the renderer
++// source, so it is red on a tree without the seam by design.
++//
++// WHY A SOURCE-LEVEL PIN: `runtimes/compose` unit tests are plain JVM JUnit
++// (no Compose UI test), so ListMarkerOutsideHang.Hang cannot be laid out
++// here; the device key `[C] counter-suffix android` is the picture
++// evidence. The SeamReachabilityTest module line this seam also carries
++// cannot tell this hunk from seam-5's (either one reaches the module —
++// executed: the lane note's M10), so this pins the hang's own call: its
++// `gapPx` reads ListMarkerSuffixGap.gapDp(marker), not the bare stand-in.
++// Same strip-then-match idiom as core/renderer/SeamReachabilityTest.
++//
++// Mutation EXECUTED by the lane (bracketed in the lane note, M10'): with
++// the seam-4 hunk reverse-applied to ComponentRenderer.kt this goes red.
++
++import java.io.File
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class ListMarkerSuffixGapHangSeamTest {
++
++    /** The renderer source, found by walking up to the repo root (the
++     *  module's Gradle rootDir is apps/android-harness). */
++    private val renderer: File by lazy {
++        val rel = "runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt"
++        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
++        while (dir != null && !File(dir, rel).exists()) dir = dir.parentFile
++        File(requireNotNull(dir) { "repo root not found" }, rel)
++    }
++
++    /** Source minus block comments, line comments and string literals. */
++    private fun code(): String =
++        renderer.readText()
++            .replace(Regex("""/\*[\s\S]*?\*/"""), " ")
++            .replace(Regex("""//[^\n]*"""), " ")
++            .replace(Regex(""""(?:[^"\\\n]|\\.)*""""), " ")
++
++    @Test
++    fun `the outside hang offset is the string-keyed suffix gap`() {
++        val src = code()
++        // The seam: Hang(gapPx = …) resolves the marker's own gap to px.
++        assertTrue(
++            "the hang's gapPx does not read ListMarkerSuffixGap.gapDp(marker)",
++            Regex("""gapPx\s*=\s*with\(markerSnapDensity\)\s*\{\s*com\.styleconverter\.runtime\.lists\.ListMarkerSuffixGap\.gapDp\(marker\)\.roundToPx\(\)\s*\}""")
++                .containsMatchIn(src)
++        )
++        // …and the bare 4dp stand-in no longer feeds it.
++        assertFalse(
++            "the hang still offsets by the bare ListMarkerRow.gapDp",
++            Regex("""ListMarkerRow\.gapDp\.roundToPx\(\)""").containsMatchIn(src)
++        )
++    }
++}

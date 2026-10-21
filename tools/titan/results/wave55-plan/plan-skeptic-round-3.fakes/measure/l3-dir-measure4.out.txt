@@ -1,0 +1,11 @@
+True /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin/selectors/dir-style-02a.png
+ref      r6~r3: xor@bbox 0 (shift +0) best±1 0 | r9~r3: xor@bbox 0 (shift +0) best±1 0 | r5~r2: xor@bbox 0 (shift +0) best±1 0 | r8~r2: xor@bbox 0 (shift +0) best±1 0 | r9~r6: xor@bbox 0 (shift +0) best±1 0
+web      r6~r3: xor@bbox 0 (shift +0) best±1 0 | r9~r3: xor@bbox 0 (shift +0) best±1 0 | r5~r2: xor@bbox 0 (shift +0) best±1 0 | r8~r2: xor@bbox 0 (shift +0) best±1 0 | r9~r6: xor@bbox 0 (shift +0) best±1 0
+ios      r6~r3: xor@bbox 634 (shift +219) best±1 634 | r9~r3: xor@bbox 634 (shift +219) best±1 634 | r5~r2: xor@bbox 0 (shift +0) best±1 0 | r8~r2: xor@bbox 0 (shift +0) best±1 0 | r9~r6: xor@bbox 0 (shift +0) best±1 0
+android  r6~r3: xor@bbox 646 (shift +229) best±1 642 | r9~r3: xor@bbox 646 (shift +229) best±1 642 | r5~r2: xor@bbox 0 (shift +0) best±1 0 | r8~r2: xor@bbox 0 (shift +0) best±1 0 | r9~r6: xor@bbox 0 (shift +0) best±1 0
+U1U2     r6~r3: xor@bbox 0 (shift +0) best±1 0 | r9~r3: xor@bbox 0 (shift +0) best±1 0 | r5~r2: xor@bbox 0 (shift +0) best±1 0 | r8~r2: xor@bbox 0 (shift +0) best±1 0 | r9~r6: xor@bbox 0 (shift +0) best±1 0
+U1       r6~r3: xor@bbox 646 (shift +229) best±1 642 | r9~r3: xor@bbox 646 (shift +229) best±1 642 | r5~r2: xor@bbox 0 (shift +0) best±1 0 | r8~r2: xor@bbox 0 (shift +0) best±1 0 | r9~r6: xor@bbox 0 (shift +0) best±1 0
+ref      r7 text vs base: xor 0 best±1 0
+web      r7 text vs base: xor 0 best±1 0
+U1U2     r7 text vs base: xor 0 best±1 0
+U1       r7 text vs base: xor 0 best±1 0

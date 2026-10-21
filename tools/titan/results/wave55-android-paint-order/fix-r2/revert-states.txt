@@ -1,0 +1,6 @@
+revertStatesCompiled: U3 reverted (U3 chain [U3]) (kept: U1 U2): compileDebugKotlin+compileDebugUnitTestKotlin rc=0; focused :runtime suites → SUMMARY suites=76 tests=616 failed=0 
+revertStatesCompiled: U2 reverted (U2 chain [U2] = U1 chain step 1) (kept: U1 U3): compileDebugKotlin+compileDebugUnitTestKotlin rc=0; focused :runtime suites → SUMMARY suites=76 tests=609 failed=0 
+revertStatesCompiled: U2 then U1 reverted (U1 chain [U2, U1] end) (kept: U3): compileDebugKotlin+compileDebugUnitTestKotlin rc=0; focused :runtime suites → SUMMARY suites=75 tests=595 failed=0 
+revertStatesCompiled: U2 and U3 reverted (combined) (kept: U1): compileDebugKotlin+compileDebugUnitTestKotlin rc=0; focused :runtime suites → SUMMARY suites=75 tests=607 failed=0 
+revertStatesCompiled: base 4e789976 (no L6 unit) (kept: none): compileDebugKotlin+compileDebugUnitTestKotlin rc=0; focused :runtime suites → SUMMARY suites=74 tests=593 failed=0 
+revertStatesCompiled: full (U1 U2 U3, the final restore) (kept: U1 U2 U3): compileDebugKotlin+compileDebugUnitTestKotlin rc=0; focused :runtime suites → SUMMARY suites=77 tests=618 failed=0 

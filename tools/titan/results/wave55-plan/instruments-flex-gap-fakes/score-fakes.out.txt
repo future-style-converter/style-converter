@@ -1,0 +1,6 @@
+wave55-plan/instruments-flex-gap-fakes/fake-blue-r1-lshort2 ssim 0.9997  >= pass 0.95
+wave55-plan/instruments-flex-gap-fakes/fake-blue-r1-split1 ssim 0.9999  >= pass 0.95
+wave55-plan/instruments-flex-gap-fakes/fake-blue-r1-moved5 ssim 0.998  >= pass 0.95
+wave55-plan/instruments-flex-gap-fakes/fake-blue-r2-hshift2 ssim 0.9993  >= pass 0.95
+wave55-plan/instruments-flex-gap-fakes/fake-blue-none      ssim 0.9644  >= pass 0.95
+wave55-plan/instruments-flex-gap-fakes/fake-blue-r1-short1 ssim 0.9998  >= pass 0.95

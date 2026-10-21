@@ -1,0 +1,3 @@
+if (hairline) 1f else ceil(widthPx)
+=====
+if (hairline) 1f else widthPx

@@ -1,0 +1,10 @@
+# round-3 verifier: expectations.json beforeEveryDeviceRun (sha256 56dbcfc0…) parsed, never executed (-n: noexec)
+$ bash -n -c "<the string verbatim>"
+bash: -c: line 0: syntax error near unexpected token `('
+bash: -c: line 0: `[[ -z "$(git --no-optional-locks status --porcelain --untracked-files=all -- runtimes apps converter tools/titan Package.swift ':(exclude)tools/titan/results' ':(exclude)*.md')" ]] || { echo "the tree differs from HEAD in code (tracked, staged or untracked): a device run would build it (round-1 S9, round-2 S1)"; exit 2; }; (( $(df -g . | awk 'NR==2{print $4}') >= 20 )) || { echo "disk < 20 GiB free (round-2 S5)"; exit 2; }; source tools/titan/own-processes.sh && kill_own_gradle_daemons "$PROJECT_ROOT" $(sed -n 's/^TREES: *\([^ ]*\).*/\1/p' tools/titan/results/wave55-*/_note.md) $(git worktree list --porcelain | sed -n 's/^worktree //p' | grep -E '/wave55-')   (never ./gradlew --stop; the /wave55- filter keeps other sessions' worktrees out, so no foreign process is stopped)'
+exit 2
+$ zsh -n -c "<the string verbatim>"
+zsh:1: unmatched '
+exit 1
+$ bash -n on the string cut before its trailing note "   (never ./gradlew --stop; …)"
+exit 0

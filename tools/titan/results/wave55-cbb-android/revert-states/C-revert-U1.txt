@@ -1,0 +1,34 @@
+> Task :runtime:preBuild UP-TO-DATE
+> Task :runtime:preDebugBuild UP-TO-DATE
+> Task :runtime:generateDebugResources UP-TO-DATE
+> Task :runtime:packageDebugResources UP-TO-DATE
+> Task :runtime:processDebugNavigationResources UP-TO-DATE
+> Task :runtime:parseDebugLocalResources UP-TO-DATE
+> Task :runtime:generateDebugRFile UP-TO-DATE
+> Task :runtime:javaPreCompileDebug UP-TO-DATE
+> Task :runtime:preDebugUnitTestBuild UP-TO-DATE
+> Task :runtime:generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :runtime:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :runtime:compileDebugKotlin
+> Task :runtime:compileDebugJavaWithJavac NO-SOURCE
+> Task :runtime:processDebugJavaRes UP-TO-DATE
+> Task :runtime:bundleLibRuntimeToJarDebug
+> Task :runtime:bundleLibCompileToJarDebug
+> Task :runtime:compileDebugUnitTestKotlin
+> Task :runtime:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :runtime:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :runtime:testDebugUnitTest
+
+BUILD SUCCESSFUL in 6s
+15 actionable tasks: 5 executed, 10 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html
+core.renderer.VerticalBlockFlowSeamGuardTest" tests="1" skipped="0" failures="0" errors="0"
+core.variables.DynamicValueResolverTest" tests="27" skipped="0" failures="0" errors="0"
+images.ReplacedBoxSizingConstraintTest" tests="20" skipped="0" failures="0" errors="0"
+sizing.BoxSizingContentBoxTest" tests="9" skipped="0" failures="0" errors="0"
+sizing.ContentBoxPercentInflationTest" tests="3" skipped="0" failures="0" errors="0"
+sizing.ContentBoxRelativeInflationTest" tests="7" skipped="0" failures="0" errors="0"
+sizing.SizingMinMaxClampTest" tests="15" skipped="0" failures="0" errors="0"
+sizing.SizingOverflowWidthTest" tests="7" skipped="0" failures="0" errors="0"
+sizing.WptBoxSizingDefaultTest" tests="6" skipped="0" failures="0" errors="0"
+typography.UAElementFontRuleSeamWiringTest" tests="1" skipped="0" failures="0" errors="0"

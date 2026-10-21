@@ -1,0 +1,70 @@
+# fix-r4.measure.out.txt — round-4 measured margins (fix-r4.measure.py); every number below is executed, none typed
+
+## §1 L4 `face xor:` — the fixed arms as the probe prints them (FACE_XOR_TOL 2) and web's face (computed here, not judged)
+  arm C  [M] text-decoration-inset-005 ios      xor b1:0,b2:0    GEOMETRY OK
+  arm C  [F] text-decoration-inset-005 ios      xor b1:0,b2:0    GEOMETRY OK
+  arm C  [M] text-decoration-inset-005 android  xor b1:0,b2:0    GEOMETRY OK
+  arm C  [F] text-decoration-inset-005 android  xor b1:0,b2:0    GEOMETRY OK
+  arm C  [M] text-decoration-inset-006 ios      xor b1:0,b2:0    GEOMETRY OK
+  arm C  [F] text-decoration-inset-006 ios      xor b1:0,b2:0    GEOMETRY OK
+  arm C  [M] text-decoration-inset-006 android  xor b1:0,b2:0    GEOMETRY OK
+  arm C  [F] text-decoration-inset-006 android  xor b1:0,b2:0    GEOMETRY OK
+  arm C  [M] text-decoration-inset-014 ios      xor b1:0,b2:0    GEOMETRY OK
+  arm C  [F] text-decoration-inset-014 ios      xor b1:0,b2:0    GEOMETRY OK
+  arm C  [M] text-decoration-inset-014 android  xor b1:0,b2:0    GEOMETRY OK
+  arm C  [F] text-decoration-inset-014 android  xor b1:0,b2:0    GEOMETRY OK
+  arm D  [M] text-decoration-inset-005 ios      xor b1:0,b2:0    GEOMETRY OK
+  arm D  [F] text-decoration-inset-005 ios      xor b1:0,b2:0    GEOMETRY OK
+  arm D  [M] text-decoration-inset-005 android  xor b1:0         GEOMETRY OK
+  arm D  [F] text-decoration-inset-005 android  xor b1:0         GEOMETRY WRONG
+  arm D  [M] text-decoration-inset-006 ios      xor b1:0,b2:0    GEOMETRY OK
+  arm D  [F] text-decoration-inset-006 ios      xor b1:0,b2:0    GEOMETRY OK
+  arm D  [M] text-decoration-inset-006 android  xor b1:0         GEOMETRY OK
+  arm D  [F] text-decoration-inset-006 android  xor b1:0         GEOMETRY WRONG
+  arm D  [M] text-decoration-inset-014 ios      xor b1:0,b2:0    GEOMETRY OK
+  arm D  [F] text-decoration-inset-014 ios      xor b1:0,b2:0    GEOMETRY OK
+  arm D  [M] text-decoration-inset-014 android  xor b1:0,b2:0    GEOMETRY OK
+  arm D  [F] text-decoration-inset-014 android  xor b1:0,b2:0    GEOMETRY OK
+  web  text-decoration-inset-005: bands 2 vs ref 2; per-band xor [101, 1] (Chromium vs the web harness's underline / AA: why web keeps the round-3 reads)
+  web  text-decoration-inset-006: bands 2 vs ref 2; per-band xor [101, 1] (Chromium vs the web harness's underline / AA: why web keeps the round-3 reads)
+  web  text-decoration-inset-014: bands 2 vs ref 2; per-band xor [64, 31] (Chromium vs the web harness's underline / AA: why web keeps the round-3 reads)
+
+## §2 L4 the device-face distance — inset-001…004 (the natives already paint the 2em bold face) vs the ref, y96-259
+  inset-001 ios      dark px 3527 vs ref 3272 (+7.8 %); level XOR 2478 at dx +0 dy +1
+  inset-001 android  dark px 3106 vs ref 3272 (-5.1 %); level XOR 1832 at dx +0 dy +0
+  inset-002 ios      dark px 3527 vs ref 3368 (+4.7 %); level XOR 2414 at dx +0 dy +1
+  inset-002 android  dark px 3106 vs ref 3368 (-7.8 %); level XOR 1768 at dx +0 dy +0
+  inset-003 ios      dark px 3527 vs ref 3224 (+9.4 %); level XOR 2510 at dx +0 dy +1
+  inset-003 android  dark px 3106 vs ref 3224 (-3.7 %); level XOR 1864 at dx +0 dy +0
+  inset-004 ios      dark px 4517 vs ref 4584 (-1.5 %); level XOR 2403 at dx +0 dy +2
+  inset-004 android  dark px 3948 vs ref 4584 (-13.9 %); level XOR 1956 at dx +0 dy +0
+  → a ref tolerance re-set to a device face would admit added ink up to that distance: stage 1 re-pins FACE_RUN instead (D39)
+
+## §3 L5 the new reads on ok-all (as the probe prints them) and the cross-renderer distances
+  [H] counter-suffix ios      … ink 0 vs wave54-final android → GEOMETRY OK
+  [C] counter-suffix ios      … → GEOMETRY OK
+  [T] counter-suffix ios      row9 digit (139, 145, 215, 225) ink 0 vs wave54-final android → GEOMETRY OK
+  [H] counter-suffix android  … ink 0 vs wave54-final android → GEOMETRY OK
+  [C] counter-suffix android  … → GEOMETRY OK
+  [T] counter-suffix android  row9 digit (139, 145, 215, 225) ink 0 vs wave54-final android → GEOMETRY OK
+  [I] cjk-decimal/css3-counter-styles-005 ios      … → GEOMETRY OK
+  [I] cjk-decimal/css3-counter-styles-005 android  … → GEOMETRY OK
+  [T] row-9 digit window: android vs ref level XOR at the best offset 22
+  [T] row-9 digit window: android vs web level XOR at the best offset 22
+  [T] row-9 digit window: android vs ios level XOR at the best offset 35   (iOS base: the PROPORTIONAL '1' U3-ios replaces)
+  [H] row 3 marker zone: iOS base level px 74 vs Android base 70 (other glyph shapes and order: why iOS reads its OWN glyphs, moved)
+  [H] row 4 marker zone: iOS base level px 62 vs Android base 59 (other glyph shapes and order: why iOS reads its OWN glyphs, moved)
+
+## §4 L6 `extra` under four allowed regions (≤ 1 passes) — the U2 replays, then every strictly-additive fake of the [X] group
+  replay flex-abspos-staticpos-align-self-safe-001        0 | 0 | 0 | 0
+  replay flex-abspos-staticpos-align-self-safe-002        0 | 0 | 0 | 0
+  replay grid-abspos-staticpos-align-self-001             0 | 0 | 0 | 0
+  replay grid-abspos-staticpos-justify-self-001           0 | 0 | 0 | 0
+  replay grid-abspos-staticpos-align-self-vertWM-001      0 | 0 | 0 | 0
+  replay grid-abspos-staticpos-align-self-rtl-001         0 | 0 | 0 | 0
+  (columns: dilate1(fill ∪ band) [round 3] | fill ∪ band [undilated] | fill ∪ dilate1(band) | fill ∪ band ∪ (dilate1(band) ∩ base not white) [round 4])
+  288 faked [X] captures (safe-002 left out: no passing fixed picture, round-3 N5); faked captures read ≤ 1 under each region:
+    dilate1(fill ∪ band) [round 3]                                52   e.g. c0:dg-first-smear; c0:dg-mid-smear; c0:hd-tgt+1; c0:hd-tgt-1; c0:st-vbar; c0:st1-far4; c0:vd-tgt+1; c0:vd-tgt-1
+    fill ∪ band [undilated]                                        5   e.g. c0:st1-far4
+    fill ∪ dilate1(band)                                          11   e.g. c0:hd-tgt-1; c0:st-vbar; c0:st1-far4; hd-whole-min-1
+    fill ∪ band ∪ (dilate1(band) ∩ base not white) [round 4]       5   e.g. c0:st1-far4

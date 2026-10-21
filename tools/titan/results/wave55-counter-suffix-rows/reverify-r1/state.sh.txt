@@ -1,0 +1,26 @@
+#!/bin/bash
+# state.sh <label> <suites: swift,compose,node> <contingency: 0|1> <reverted patch...>
+# Builds the state FORWARD (kept patches on a clean 611c9f93, landing order) and REVERSE (all 11 [+LRM], then the reverted
+# patches reverse-applied in the given order), compares the two code snapshots, leaves the FORWARD state, runs the suites.
+WT=<wt>
+SP=<scratch>/reverify-L5-out
+LD=<shared>/tools/titan/results/wave55-counter-suffix-rows
+label=$1; suites=$2; cont=$3; shift 3; rev=("$@")
+ORDER=(unit-U1-ios seam-1 unit-U2o-ios seam-2 seam-3 unit-U2o-android seam-4 seam-5 unit-U3-ios seam-6 unit-D)
+[ "$cont" = 1 ] && ORDER+=(unit-U1-ios-LRM)
+cd $WT
+reset() { git checkout -q -- . && git clean -fdq -- runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists runtimes/swiftui/Tests/StyleConverterRuntimeTests runtimes/compose/src/main/java/com/styleconverter/runtime/lists runtimes/compose/src/test/java/com/styleconverter/runtime/lists; }
+snap() { { git diff; git status --porcelain --untracked-files=all -- runtimes tools/titan/counter-style-table.mjs; git ls-files --others --exclude-standard -- runtimes | sort | xargs shasum -a 256; } | shasum -a 256 | cut -c1-16; }
+reset; ok=ok
+for p in "${ORDER[@]}"; do keep=1; for r in "${rev[@]}"; do [ "$p" = "$r" ] && keep=0; done; [ $keep = 1 ] && { git apply $LD/$p.patch || ok="FAIL($p)"; }; done
+fwd=$(snap)
+reset; for p in "${ORDER[@]}"; do git apply $LD/$p.patch || ok="FAILALL($p)"; done
+for r in "${rev[@]}"; do git apply -R $LD/$r.patch || ok="FAILREV($r)"; done
+rv=$(snap)
+reset; for p in "${ORDER[@]}"; do keep=1; for r in "${rev[@]}"; do [ "$p" = "$r" ] && keep=0; done; [ $keep = 1 ] && git apply $LD/$p.patch; done
+same=no; [ "$fwd" = "$rv" ] && same=yes
+echo "STATE $label reverted=[${rev[*]}] contingency=$cont apply=$ok forward==reverse: $same ($fwd)"
+[[ $suites == *swift* ]] && $SP/swift.sh $label
+[[ $suites == *compose* ]] && $SP/compose.sh $label
+[[ $suites == *node* ]] && (cd $WT && node --test tools/titan/counter-style-bake.test.mjs tools/titan/counter-style-author.test.mjs > $SP/node-$label.log 2>&1; echo "NODE $label rc=$? $(grep -E '^# (pass|fail|skipped)' $SP/node-$label.log | tr '\n' ' ')")
+exit 0

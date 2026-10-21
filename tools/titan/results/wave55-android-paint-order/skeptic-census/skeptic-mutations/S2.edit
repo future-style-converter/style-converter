@@ -1,0 +1,7 @@
+import com.styleconverter.runtime.borders.behindContentBorder
+=====
+import androidx.compose.foundation.border
+#####
+result = result.behindContentBorder(
+=====
+result = result.border(

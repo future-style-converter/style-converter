@@ -1,0 +1,20 @@
+# fix-r2 device-run guard proof — 2026-10-11T17:23:37Z; expectations.json sha256 56dbcfc021c3ae60…; throwaway at 640276a0
+  shared tree, the new clause 1 (from its root): exit 0 — it lists 0 path(s) today
+## G0 control: the throwaway clean
+  new clause 1: exit 0
+  old clause 1: exit 0
+## G1 the E8 fixture: two UNTRACKED runtime sources (a lane's NEW files written on the wrong tree)
+  new clause 1: exit 2 — the tree differs from HEAD in code (tracked, staged or untracked): a device run would build it (round-1 S9, round-2 S1)    ← refused
+  old clause 1: exit 0   ← the defect: the device run would build them
+  hash block, new '+ uncommitted' test: exit 0 —  + uncommitted code changes (tracked or untracked) 
+  hash block, old '+ uncommitted' test: exit 0 — (clean) 
+  ab-arms55.sh --dry-run: exit 2 — code differs from HEAD (tracked, staged or UNTRACKED; results and *.md excepted)
+## G2 an edited root Package.swift (the iOS harness builds it: project.yml path ../..)
+  new clause 1: exit 2 — the tree differs from HEAD in code (tracked, staged or untracked): a device run would build it (round-1 S9, round-2 S1)    ← refused
+  old clause 1: exit 0   ← the defect: Package.swift is outside its paths
+## G3 control: a TRACKED edit under runtimes/ (both refuse)
+  new clause 1: exit 2 — the tree differs from HEAD in code (tracked, staged or untracked): a device run would build it (round-1 S9, round-2 S1) 
+  old clause 1: exit 2 — the tree differs from HEAD in code: a device run would build it (round-1 S9) 
+## G4 restored: clean again
+  new clause 1: exit 0
+  (the throwaway's runs symlink restored; its code-path status lists: 0 path(s) outside tools/titan)

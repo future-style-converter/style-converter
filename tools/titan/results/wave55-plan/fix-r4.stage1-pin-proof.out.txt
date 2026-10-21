@@ -1,0 +1,52 @@
+# fix-r4.stage1-pin-proof.out.txt — the FACE_RUN / TWIN_RUN stage-1 mechanism, proven on stand-in device runs (scratch fake runs)
+
+## L4 — the stand-in device face as the capture
+    [M] text-decoration-inset-005 ios Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:314 → GEOMETRY WRONG (face xor: band 1 ink differs from the face reference (ref) by 314 px at its best whole-px shif
+    [F] text-decoration-inset-005 ios Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:314 → GEOMETRY WRONG (face xor: band 1 ink differs from the face reference (ref) by 314 px at its best whole-px shif
+    [M] text-decoration-inset-005 android Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:314 → GEOMETRY WRONG (face xor: band 1 ink differs from the face reference (ref) by 314 px at its best whole-px 
+    [F] text-decoration-inset-005 android Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:314 → GEOMETRY WRONG (face xor: band 1 ink differs from the face reference (ref) by 314 px at its best whole-px 
+    [M] text-decoration-inset-006 ios Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:314 → GEOMETRY WRONG (face xor: band 1 ink differs from the face reference (ref) by 314 px at its best whole-px shif
+    [F] text-decoration-inset-006 ios Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:314 → GEOMETRY WRONG (face xor: band 1 ink differs from the face reference (ref) by 314 px at its best whole-px shif
+    [M] text-decoration-inset-006 android Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:314 → GEOMETRY WRONG (face xor: band 1 ink differs from the face reference (ref) by 314 px at its best whole-px 
+    [F] text-decoration-inset-006 android Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:314 → GEOMETRY WRONG (face xor: band 1 ink differs from the face reference (ref) by 314 px at its best whole-px 
+    [M] text-decoration-inset-014 ios Δx1 +0 profile 1.000 ink b1:17/17c+0.0%,b2:9/9c+0.0% xor b1:277 → GEOMETRY WRONG (face xor: band 1 ink differs from the face reference (ref) by 277 px at its best whole-px shif
+    [F] text-decoration-inset-014 ios Δx1 +0 profile 1.000 ink b1:17/17c+0.0%,b2:9/9c+0.0% xor b1:277 → GEOMETRY WRONG (face xor: band 1 ink differs from the face reference (ref) by 277 px at its best whole-px shif
+    [M] text-decoration-inset-014 android Δx1 +0 profile 1.000 ink b1:17/17c+0.0%,b2:9/9c+0.0% xor b1:277 → GEOMETRY WRONG (face xor: band 1 ink differs from the face reference (ref) by 277 px at its best whole-px 
+    [F] text-decoration-inset-014 android Δx1 +0 profile 1.000 ink b1:17/17c+0.0%,b2:9/9c+0.0% xor b1:277 → GEOMETRY WRONG (face xor: band 1 ink differs from the face reference (ref) by 277 px at its best whole-px 
+  as required  against the frozen ref (FACE_RUN None): another rasterizer's AA — `face xor:` its only reason: 12 line(s) WRONG
+    [M] text-decoration-inset-005 ios Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:0,b2:0 → GEOMETRY OK
+    [F] text-decoration-inset-005 ios Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:0,b2:0 → GEOMETRY OK
+    [M] text-decoration-inset-005 android Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:0,b2:0 → GEOMETRY OK
+    [F] text-decoration-inset-005 android Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:0,b2:0 → GEOMETRY OK
+    [M] text-decoration-inset-006 ios Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:0,b2:0 → GEOMETRY OK
+    [F] text-decoration-inset-006 ios Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:0,b2:0 → GEOMETRY OK
+    [M] text-decoration-inset-006 android Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:0,b2:0 → GEOMETRY OK
+    [F] text-decoration-inset-006 android Δx1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:0,b2:0 → GEOMETRY OK
+    [M] text-decoration-inset-014 ios Δx1 +0 profile 1.000 ink b1:17/17c+0.0%,b2:9/9c+0.0% xor b1:0,b2:0 → GEOMETRY OK
+    [F] text-decoration-inset-014 ios Δx1 +0 profile 1.000 ink b1:17/17c+0.0%,b2:9/9c+0.0% xor b1:0,b2:0 → GEOMETRY OK
+    [M] text-decoration-inset-014 android Δx1 +0 profile 1.000 ink b1:17/17c+0.0%,b2:9/9c+0.0% xor b1:0,b2:0 → GEOMETRY OK
+    [F] text-decoration-inset-014 android Δx1 +0 profile 1.000 ink b1:17/17c+0.0%,b2:9/9c+0.0% xor b1:0,b2:0 → GEOMETRY OK
+  as required  --face-run <the decided device run>: the same picture reads XOR 0: 12 line(s) OK
+    [M] text-decoration-inset-005 ios Δx1 +0 profile 1.000 ink b1:23/22c+0.1% xor b1:8 → GEOMETRY WRONG (face ink: band 1 23 glyph components vs ref 22 (an added / doubled / lost glyph or blob) (2em face present))
+    [F] text-decoration-inset-005 ios Δx1 +0 profile 1.000 ink b1:23/22c+0.1% xor b1:8 → GEOMETRY WRONG (face ink: band 1 23 glyph components vs ref 22 (an added / doubled / lost glyph or blob))
+    [M] text-decoration-inset-005 android Δx1 +0 profile 1.000 ink b1:23/22c+0.1% xor b1:8 → GEOMETRY WRONG (face ink: band 1 23 glyph components vs ref 22 (an added / doubled / lost glyph or blob))
+    [F] text-decoration-inset-005 android Δx1 +0 profile 1.000 ink b1:23/22c+0.1% xor b1:8 → GEOMETRY WRONG (face ink: band 1 23 glyph components vs ref 22 (an added / doubled / lost glyph or blob))
+    [M] text-decoration-inset-006 ios Δx1 +0 profile 1.000 ink b1:23/22c+0.1% xor b1:8 → GEOMETRY WRONG (face ink: band 1 23 glyph components vs ref 22 (an added / doubled / lost glyph or blob) (2em face present))
+    [F] text-decoration-inset-006 ios Δx1 +0 profile 1.000 ink b1:23/22c+0.1% xor b1:8 → GEOMETRY WRONG (face ink: band 1 23 glyph components vs ref 22 (an added / doubled / lost glyph or blob))
+    [M] text-decoration-inset-006 android Δx1 +0 profile 1.000 ink b1:23/22c+0.1% xor b1:8 → GEOMETRY WRONG (face ink: band 1 23 glyph components vs ref 22 (an added / doubled / lost glyph or blob))
+    [F] text-decoration-inset-006 android Δx1 +0 profile 1.000 ink b1:23/22c+0.1% xor b1:8 → GEOMETRY WRONG (face ink: band 1 23 glyph components vs ref 22 (an added / doubled / lost glyph or blob))
+    [M] text-decoration-inset-014 ios Δx1 +0 profile 1.000 ink b1:18/17c+0.2% xor b1:8 → GEOMETRY WRONG (face ink: band 1 18 glyph components vs ref 17 (an added / doubled / lost glyph or blob) (2em face present))
+    [F] text-decoration-inset-014 ios Δx1 +0 profile 1.000 ink b1:18/17c+0.2% xor b1:8 → GEOMETRY WRONG (face ink: band 1 18 glyph components vs ref 17 (an added / doubled / lost glyph or blob))
+    [M] text-decoration-inset-014 android Δx1 +0 profile 1.000 ink b1:18/17c+0.2% xor b1:8 → GEOMETRY WRONG (face ink: band 1 18 glyph components vs ref 17 (an added / doubled / lost glyph or blob) (2em face presen
+    [F] text-decoration-inset-014 android Δx1 +0 profile 1.000 ink b1:18/17c+0.2% xor b1:8 → GEOMETRY WRONG (face ink: band 1 18 glyph components vs ref 17 (an added / doubled / lost glyph or blob))
+  as required  --face-run <device run>, capture + a 2×2 blob beside line 1's first glyph: still rejected (xor 8): 12 line(s) WRONG
+
+## L5 — a stand-in device tabular '1' (the ref's, XOR 22 from Android's) in ok-all iOS's digit window
+    [T] counter-suffix ios row9 digit (138, 144, 214, 225) ink 22 vs wave54-final android → GEOMETRY WRONG (ink: row 9 digit window x136-150 differs from wave54-final android's tabular '1' by 22 px at its best whol
+  as required  [T] ios against Android's '1' (TWIN_RUN None): another rasterizer's glyph: 1 line(s) WRONG
+    [T] counter-suffix ios row9 digit (138, 144, 214, 225) ink 0 vs <scratch run>
+  as required  --twin-run <the decided device run>: the same '1' reads 0: 1 line(s) OK
+    [T] counter-suffix ios row9 digit (138, 144, 214, 225) ink 8 vs <scratch run>
+  as required  --twin-run <device run>, + a 2×2 blob beside the '1': still rejected: 1 line(s) WRONG
+
+stage-1 pin proof: every case as required

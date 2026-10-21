@@ -1,0 +1,9 @@
+# S1 Swift re-runs (Catalyst, -derivedDataPath <wt>/.dd), throwaway worktree
+## L5 [D] revert state re-run (git revert --no-commit 5bbc2a41):
+	 Executed 2273 tests, with 1 test skipped and 0 failures (0 unexpected) in 68.716 (101.433) seconds
+** TEST SUCCEEDED **
+## landed 5bbc2a41, two runs:
+run1 rc=0 	 Executed 2273 tests, with 1 test skipped and 0 failures (0 unexpected) in 67.478 (102.120) seconds 
+run2 rc=0 	 Executed 2273 tests, with 1 test skipped and 0 failures (0 unexpected) in 56.186 (84.164) seconds 
+
+[exited with code 0]

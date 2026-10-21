@@ -1,0 +1,59 @@
+# checks7.out.txt — plan-skeptic round 7 verify, §1 rows 1-8 (commands and outputs; scratchpad / throwaway paths written as placeholders)
+
+## 1 geometry-gate --self-test (wave54-final --base wave54-final)
+exit 0
+
+geometry-gate wave54-final (base wave54-final): 230 keys — PASS 160 · FAIL 70 (gating 43) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 43 (PASS 0 FAIL 43) · control 160 (PASS 160 FAIL 0) · report 27 (PASS 0 FAIL 27) · withdrawn 0 (PASS 0 FAIL 0)
+  residual (round 6): 48 gating / tally key reads on 35 cells — OK 48 · FAIL 0 · MISSING 0
+revert rule 4 names: L1-hyphen-ios-linebox NB-ios, L2-cbb-android U1, L2-cbb-android U2, L3-positioned-parent-slot U1, L3-positioned-parent-slot U2, L4-ua-heading-margin U1-android, L4-ua-heading-margin U1-ios, L4-ua-heading-margin U2-android, L4-ua-heading-margin U2-ios, L5-counter-suffix-rows U1-ios, L5-counter-suffix-rows U2i-android, L5-counter-suffix-rows U2i-ios, L5-counter-suffix-rows U2o-android, L5-counter-suffix-rows U2o-ios, L5-counter-suffix-rows U3-ios, L6-android-paint-order U1, L6-android-paint-order U2
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)
+
+## 2 plan-prose --check (installed PLAN.md; and a scratch copy)
+copy exit 0
+plan-prose --check ../../../../../../../..<scratchpad>/r7/v7/checks/PLAN.copy.md against expectations.json sha256 8fbfc83a9ba3fdaa…: 36 gen blocks · 42 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
+plan-prose --check: HOLDS
+installed exit 0
+plan-prose --check tools/titan/results/wave55-plan/PLAN.md against expectations.json sha256 8fbfc83a9ba3fdaa…: 36 gen blocks · 42 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
+plan-prose --check: HOLDS
+
+## 3 watchlist unmatched (wave54-final)
+exit 0
+  ok      1  css-writing-modes/dynamic-offset-rtl-001.html ios
+  ok      1  css-anchor-position/anchor-position-multicol-007.html android
+  unmatched 0
+watchlist output BYTE-IDENTICAL to watchlist-check.wave54-final.out.txt
+
+## 4 plan-build --out (dry run)
+exit 0
+expectations.json BYTE-IDENTICAL
+watchlist.txt BYTE-IDENTICAL
+expectations.json
+watchlist.txt
+stdout = plan-build.out.txt
+
+## 5 fix-r6.verdicts.sh in the throwaway (<throwaway>) — exit 0
+# fix-r6.verdicts-preserved.out.txt — 2026-10-12T07:39:02Z; HEAD 7566fb03; round-4 bytes vs current bytes, verdict per line
+fix-r6.verdicts: every verdict preserved
+  body vs the installed fix-r6.verdicts-preserved.out.txt (throwaway path → <throwaway>):
+  IDENTICAL
+
+## 6 fix-r3.verdicts.sh (scratch copy fix-r3.verdicts.r7.sh: HERE pinned to <throwaway>, OUT to the scratchpad, dot-file .r7v2old.*) — exit 0
+fix-r3.verdicts: every verdict preserved
+  body vs the installed fix-r6.verdicts-vs-round2.out.txt (paths normalised):
+  IDENTICAL
+
+## 7 fix-r6.teeth-r5-equiv.py in the throwaway
+346 pinned cases, 788 faked captures: 788 byte-identical to the verifier's generator with its record's added px and bbox, 0 differ
+  BYTE-IDENTICAL to the installed fix-r6.teeth-r5-equiv.out.txt
+
+## 9 / 10: fixed7.out.txt (the fixed pictures through the gate) and arms7.out.txt (the residual over every replay / arm)
+## the base: wave55-open = wave54-final pixel for pixel on all 35 key cells (35 same, 0 differ)
+
+## 8 probes-selfcheck.py (shared tree, read-only: --scratch <scratchpad>/r7/selfcheck --wt <throwaway> --out <scratchpad>) — exit 0, 09:44 → 10:49
+  diff against the installed probes-selfcheck.txt (808ceb16…, 1612 lines):
+    3c3
+    < # HEAD 7566fb03; read-only over tools/titan/runs/{wave54-final,wave54-probe,wave54-open}, the frozen refs and the replay folders beside the briefs
+    ---
+    > # HEAD 4e789976; read-only over tools/titan/runs/{wave54-final,wave54-probe,wave54-open}, the frozen refs and the replay folders beside the briefs
+  only line 3 (HEAD: the orchestrator's 09:28 commit moved it) differs; with line 3 restored the re-run's sha256 is 808ceb164ea36a33 (installed 808ceb164ea36a33)

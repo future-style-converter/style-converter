@@ -1,0 +1,46 @@
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox stack text-decoration-dotted-001 ios    NOT PROBED [section css-text-decor not in --sections]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox stack text-decoration-dotted-002 ios    NOT PROBED [section css-text-decor not in --sections]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 001 web                                 PASS       [control: expected to stay PASS]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 001 ios                                 PASS       [GATING -> revert NB-ios]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 001 android                             PASS       [control: expected to stay PASS]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 003 web                                 PASS       [control: expected to stay PASS]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 003 ios                                 PASS       [GATING -> revert NB-ios]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 003 android                             PASS       [control: expected to stay PASS]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 004 web                                 PASS       [control: expected to stay PASS]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 004 ios                                 PASS       [GATING -> revert NB-ios]
+   L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 004 android                             PASS       [control: expected to stay PASS]
+ - L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox 002 ios                                 FAIL       [report: expected WRONG until the target is fixed]
+     line: , -1, -2, -2] in-group spread [0, 1, 0, 0] → LINEBOX WRONG (pitch: group 2 line 4 offset -2 vs its line 1 -1 (run pitch ≠ the ref line box); drift: group-first offsets [0, -1, -2, -2] (want non-decreasing, each 0 or +1))
+ - L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox stack boundary-shaping__boundary-shaping-001 ios FAIL       [report: expected WRONG until the target is fixed]
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-001 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+ - L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox stack boundary-shaping__boundary-shaping-002 ios FAIL       [report: expected WRONG until the target is fixed]
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-002 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+ - L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox stack boundary-shaping__boundary-shaping-003 ios FAIL       [report: expected WRONG until the target is fixed]
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-003 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+ - L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox stack boundary-shaping__boundary-shaping-004 ios FAIL       [report: expected WRONG until the target is fixed]
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-004 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+ - L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox stack boundary-shaping__boundary-shaping-005 ios FAIL       [report: expected WRONG until the target is fixed]
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-005 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+ - L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox stack boundary-shaping__boundary-shaping-006 ios FAIL       [report: expected WRONG until the target is fixed]
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-006 ios tops [23, 65, 113] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+ - L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox stack boundary-shaping__boundary-shaping-007 ios FAIL       [report: expected WRONG until the target is fixed]
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-007 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+ - L1-hyphen-ios-linebox    hyphen-ios-linebox.geometry.py             hyphen-ios-linebox stack boundary-shaping__boundary-shaping-008 ios FAIL       [report: expected WRONG until the target is fixed]
+     line: hyphen-ios-linebox stack boundary-shaping__boundary-shaping-008 ios tops [23, 65, 109] → STACK WRONG (displacement [0, 0, 0] vs wave54-final, want [0, -1, -2])
+   L1-hyphen-ios-linebox    hyphenate-character.geometry.py            hyphenate-character-001 web                                PASS       [control: expected to stay PASS]
+   L1-hyphen-ios-linebox    hyphenate-character.geometry.py            hyphenate-character-001 ios                                PASS       [control: expected to stay PASS]
+   L1-hyphen-ios-linebox    hyphenate-character.geometry.py            hyphenate-character-001 android                            PASS       [control: expected to stay PASS]
+   L1-hyphen-ios-linebox    hyphenate-character.geometry.py            hyphenate-character-003 web                                PASS       [control: expected to stay PASS]
+!c L1-hyphen-ios-linebox    hyphenate-character.geometry.py            hyphenate-character-003 ios                                FAIL       [control: expected to stay PASS]
+     line: hyphenate-character-003 ios groups 5 4 3 3 → GEOMETRY WRONG (glyph: group 1 line 1 ink x17-32 end-cell 9px vs ref x18-42 end-cell 5px)
+   L1-hyphen-ios-linebox    hyphenate-character.geometry.py            hyphenate-character-003 android                            PASS       [control: expected to stay PASS]
+   L1-hyphen-ios-linebox    hyphenate-character.geometry.py            hyphenate-character-004 web                                PASS       [control: expected to stay PASS]
+!c L1-hyphen-ios-linebox    hyphenate-character.geometry.py            hyphenate-character-004 ios                                FAIL       [control: expected to stay PASS]
+     line: hyphenate-character-004 ios groups 4 4 4 3 → GEOMETRY WRONG (glyph: group 1 line 1 ink x17-32 end-cell 9px vs ref x18-62 end-cell 11px)
+   L1-hyphen-ios-linebox    hyphenate-character.geometry.py            hyphenate-character-004 android                            PASS       [control: expected to stay PASS]
+
+geometry-gate ../../../../../../../../../../..<scratch>/teeth/fakeruns/combo-L1 (base wave54-final · sections css-text (NOT PROBED 2)): 27 keys — PASS 16 · FAIL 11 (gating 0) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 3 (PASS 3 FAIL 0) · control 15 (PASS 13 FAIL 2) · report 9 (PASS 0 FAIL 9) · withdrawn 0 (PASS 0 FAIL 0)
+CONTROL FAILS (2) — a must-not-move picture moved; diagnose through rule 5 / R4 (a control on a carrier: the cell review):
+   L1-hyphen-ios-linebox hyphenate-character.geometry.py hyphenate-character-003 ios
+   L1-hyphen-ios-linebox hyphenate-character.geometry.py hyphenate-character-004 ios

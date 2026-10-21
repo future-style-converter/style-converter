@@ -1,0 +1,14 @@
+== base wave54-final
+!! L6-android-paint-order android-paint-order.geometry.py [X] flex-abspos-staticpos-align-self-safe-001 android FAIL [GATING -> revert U2]
+!! L6-android-paint-order android-paint-order.geometry.py [X] flex-abspos-staticpos-align-self-safe-002 android FAIL [GATING -> revert U2]
+!! L6-android-paint-order android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-001 android FAIL [GATING -> revert U2]
+!! L6-android-paint-order android-paint-order.geometry.py [X] grid-abspos-staticpos-justify-self-001 android FAIL [GATING -> revert U2]
+!! L6-android-paint-order android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-vertWM-001 android FAIL [GATING -> revert U2]
+!! L6-android-paint-order android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-rtl-001 android FAIL [GATING -> revert U2]
+== base L6-X-child+3x
+ L6-android-paint-order android-paint-order.geometry.py [X] flex-abspos-staticpos-align-self-safe-001 android PASS [GATING -> revert U2]
+!! L6-android-paint-order android-paint-order.geometry.py [X] flex-abspos-staticpos-align-self-safe-002 android FAIL [GATING -> revert U2]
+ L6-android-paint-order android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-001 android PASS [GATING -> revert U2]
+ L6-android-paint-order android-paint-order.geometry.py [X] grid-abspos-staticpos-justify-self-001 android PASS [GATING -> revert U2]
+ L6-android-paint-order android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-vertWM-001 android PASS [GATING -> revert U2]
+ L6-android-paint-order android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-rtl-001 android PASS [GATING -> revert U2]

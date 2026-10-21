@@ -1,0 +1,106 @@
+L1 fixed        faint50     hyphen-ios-linebox 001 ios                                     FAIL
+L1 fixed        faint50     hyphen-ios-linebox 003 ios                                     FAIL
+L1 fixed        faint50     hyphen-ios-linebox 004 ios                                     FAIL
+L1 fixed        gray-ink    hyphen-ios-linebox 001 ios                                     FAIL
+L1 fixed        gray-ink    hyphen-ios-linebox 003 ios                                     FAIL
+L1 fixed        gray-ink    hyphen-ios-linebox 004 ios                                     FAIL
+L2 U1-fixed     faint50     abspos/abspos-autopos-htb-ltr android                          FAIL
+L2 U1-fixed     faint50     abspos/abspos-autopos-vlr-ltr android                          FAIL
+L2 U1-fixed     faint50     abspos/abspos-autopos-vrl-ltr android                          FAIL
+L2 U1-fixed     faint50     backdrop-filter-nested-border-radius-clip android              FAIL
+L2 U1-fixed     faint50     backdrop-filter-nested-border-radius-clip-2 android            FAIL
+L2 U1-fixed     faint50     backdrop-filter-nested-border-radius-clip-4 android            FAIL
+L2 U1-fixed     gray-ink    abspos/abspos-autopos-htb-ltr android                          PASS   <- ACCEPTED: abspos/abspos-autopos-htb-ltr android {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0, 'xorPx': 0} → GEOMETRY OK
+L2 U1-fixed     gray-ink    abspos/abspos-autopos-vlr-ltr android                          PASS   <- ACCEPTED: abspos/abspos-autopos-vlr-ltr android {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0, 'xorPx': 0} → GEOMETRY OK
+L2 U1-fixed     gray-ink    abspos/abspos-autopos-vrl-ltr android                          PASS   <- ACCEPTED: abspos/abspos-autopos-vrl-ltr android {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0, 'xorPx': 0} → GEOMETRY OK
+L2 U1-fixed     gray-ink    backdrop-filter-nested-border-radius-clip android              PASS   <- ACCEPTED: backdrop-filter-nested-border-radius-clip android {'green': (26, 26, 225, 125), 'greenPx': 19384, 'failInkPx': 0, 'xorPx': 28} → GEOMETRY OK
+L2 U1-fixed     gray-ink    backdrop-filter-nested-border-radius-clip-2 android            PASS   <- ACCEPTED: ackdrop-filter-nested-border-radius-clip-2 android {'green': (26, 26, 225, 125), 'greenPx': 19464, 'failInkPx': 0, 'xorPx': 8} → GEOMETRY OK
+L2 U1-fixed     gray-ink    backdrop-filter-nested-border-radius-clip-4 android            PASS   <- ACCEPTED: ckdrop-filter-nested-border-radius-clip-4 android {'green': (26, 26, 185, 105), 'greenPx': 12559, 'failInkPx': 0, 'xorPx': 17} → GEOMETRY OK
+L2 U2-fixed     faint50     backdrop-filter-nested-border-radius-clip-3 android            FAIL
+L2 U2-fixed     faint50     backdrop-filter-nested-border-radius-clip-3 android            FAIL
+L2 U2-fixed     gray-ink    backdrop-filter-nested-border-radius-clip-3 android            PASS   <- ACCEPTED: ckdrop-filter-nested-border-radius-clip-3 android {'green': (36, 36, 235, 135), 'greenPx': 19384, 'failInkPx': 0, 'xorPx': 23} → GEOMETRY OK
+L2 U2-fixed     gray-ink    backdrop-filter-nested-border-radius-clip-3 android            PASS   <- ACCEPTED: en (36, 36, 235, 135) greenPx 19384 corner [254, 254, 254, 254] row blue[16..25] grey[26..35] green[36..235] xor 23 failInk 0} → GEOMETRY OK
+L3 dir-row6-fixed faint50     [S] dir-style-02a android row6                                 FAIL
+L3 dir-row6-fixed gray-ink    [S] dir-style-02a android row6                                 PASS   <- ACCEPTED: [S] dir-style-02a android row6 ink (17, 120, 153, 131) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row7-fixed faint50     [S] dir-style-02a android row7                                 FAIL
+L3 dir-row7-fixed gray-ink    [S] dir-style-02a android row7                                 PASS   <- ACCEPTED: [S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 dir-row9-fixed faint50     [S] dir-style-02a android row9                                 FAIL
+L3 dir-row9-fixed gray-ink    [S] dir-style-02a android row9                                 PASS   <- ACCEPTED: [S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px profile 0.92@+0 rows 1.00@+0 → GEOMETRY OK
+L3 bidi-fixed   faint50     [S] bidi-tab-001 android rtl-rows                              FAIL
+L3 bidi-fixed   gray-ink    [S] bidi-tab-001 android rtl-rows                              PASS   <- ACCEPTED:  266) y186:(16, 36, 248) y226:(16, 36, 248) order [0.904, 0.974, 0.904, 0.904] boxes [(16, 66, 136, 149), (16, 166, 136, 249)] → GEOMETRY OK
+L3 stack-fixed  faint50     [W] anchor-position-multicol-nested-001 android stack          FAIL
+L3 stack-fixed  gray-ink    [W] anchor-position-multicol-nested-001 android stack          PASS   <- ACCEPTED: [W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] ring [0, 0, 0, 0] red 0 others 300 → GEOMETRY OK
+L3 001-fixed    faint50     [S] dynamic-offset-rtl-001 android                             FAIL
+L3 001-fixed    gray-ink    [S] dynamic-offset-rtl-001 android                             PASS   <- ACCEPTED: [S] dynamic-offset-rtl-001 android magenta (86, 26, 95, 35) n 100 parent (16, 16, 115, 115) n 10000 → GEOMETRY OK
+L3 002-fixed    faint50     [W] dynamic-offset-rtl-002 android                             FAIL
+L3 002-fixed    gray-ink    [W] dynamic-offset-rtl-002 android                             PASS   <- ACCEPTED: [W] dynamic-offset-rtl-002 android magenta (26, 26, 35, 35) n 100 parent (16, 16, 115, 115) n 10000 → GEOMETRY OK
+L4 C-fixed      faint50     [M] text-decoration-inset-005 ios                              FAIL
+L4 C-fixed      faint50     [M] text-decoration-inset-005 android                          FAIL
+L4 C-fixed      faint50     [M] text-decoration-inset-006 ios                              FAIL
+L4 C-fixed      faint50     [M] text-decoration-inset-006 android                          FAIL
+L4 C-fixed      faint50     [M] text-decoration-inset-014 ios                              FAIL
+L4 C-fixed      faint50     [M] text-decoration-inset-014 android                          FAIL
+L4 C-fixed      faint50     [M] text-decoration-inset-011 ios                              FAIL
+L4 C-fixed      faint50     [M] text-decoration-inset-011 android                          FAIL
+L4 C-fixed      faint50     [F] text-decoration-inset-005 ios                              FAIL
+L4 C-fixed      faint50     [F] text-decoration-inset-006 ios                              FAIL
+L4 C-fixed      faint50     [F] text-decoration-inset-014 ios                              FAIL
+L4 C-fixed      faint50     [F] text-decoration-inset-014 android                          FAIL
+L4 C-fixed      gray-ink    [M] text-decoration-inset-005 ios                              FAIL
+L4 C-fixed      gray-ink    [M] text-decoration-inset-005 android                          FAIL
+L4 C-fixed      gray-ink    [M] text-decoration-inset-006 ios                              FAIL
+L4 C-fixed      gray-ink    [M] text-decoration-inset-006 android                          FAIL
+L4 C-fixed      gray-ink    [M] text-decoration-inset-014 ios                              FAIL
+L4 C-fixed      gray-ink    [M] text-decoration-inset-014 android                          FAIL
+L4 C-fixed      gray-ink    [M] text-decoration-inset-011 ios                              FAIL
+L4 C-fixed      gray-ink    [M] text-decoration-inset-011 android                          FAIL
+L4 C-fixed      gray-ink    [F] text-decoration-inset-005 ios                              FAIL
+L4 C-fixed      gray-ink    [F] text-decoration-inset-006 ios                              FAIL
+L4 C-fixed      gray-ink    [F] text-decoration-inset-014 ios                              FAIL
+L4 C-fixed      gray-ink    [F] text-decoration-inset-014 android                          FAIL
+L4 U1-fixed     faint50     [M] text-decoration-inset-005 ios                              FAIL
+L4 U1-fixed     faint50     [M] text-decoration-inset-005 android                          FAIL
+L4 U1-fixed     faint50     [M] text-decoration-inset-006 ios                              FAIL
+L4 U1-fixed     faint50     [M] text-decoration-inset-006 android                          FAIL
+L4 U1-fixed     faint50     [M] text-decoration-inset-014 ios                              FAIL
+L4 U1-fixed     faint50     [M] text-decoration-inset-014 android                          FAIL
+L4 U1-fixed     faint50     [M] text-decoration-inset-011 ios                              FAIL
+L4 U1-fixed     faint50     [M] text-decoration-inset-011 android                          FAIL
+L4 U1-fixed     gray-ink    [M] text-decoration-inset-005 ios                              FAIL
+L4 U1-fixed     gray-ink    [M] text-decoration-inset-005 android                          FAIL
+L4 U1-fixed     gray-ink    [M] text-decoration-inset-006 ios                              FAIL
+L4 U1-fixed     gray-ink    [M] text-decoration-inset-006 android                          FAIL
+L4 U1-fixed     gray-ink    [M] text-decoration-inset-014 ios                              FAIL
+L4 U1-fixed     gray-ink    [M] text-decoration-inset-014 android                          FAIL
+L4 U1-fixed     gray-ink    [M] text-decoration-inset-011 ios                              FAIL
+L4 U1-fixed     gray-ink    [M] text-decoration-inset-011 android                          FAIL
+L5 fixed        faint50     [H] counter-suffix ios                                         FAIL
+L5 fixed        faint50     [C] counter-suffix ios                                         FAIL
+L5 fixed        faint50     [C] counter-suffix android                                     FAIL
+L5 fixed        faint50     [T] counter-suffix ios                                         FAIL
+L5 fixed        faint50     [I] cjk-decimal/css3-counter-styles-005 ios                    FAIL
+L5 fixed        faint50     [I] cjk-decimal/css3-counter-styles-005 android                FAIL
+L5 fixed        faint50     [K] counter-suffix ios                                         FAIL
+L5 fixed        faint50     [K] counter-suffix android                                     FAIL
+L5 fixed        gray-ink    [H] counter-suffix ios                                         FAIL
+L5 fixed        gray-ink    [C] counter-suffix ios                                         FAIL
+L5 fixed        gray-ink    [C] counter-suffix android                                     FAIL
+L5 fixed        gray-ink    [T] counter-suffix ios                                         FAIL
+L5 fixed        gray-ink    [I] cjk-decimal/css3-counter-styles-005 ios                    FAIL
+L5 fixed        gray-ink    [I] cjk-decimal/css3-counter-styles-005 android                FAIL
+L5 fixed        gray-ink    [K] counter-suffix ios                                         FAIL
+L5 fixed        gray-ink    [K] counter-suffix android                                     FAIL
+L6 X-fixed      faint50     [X] flex-abspos-staticpos-align-self-safe-001 android          FAIL
+L6 X-fixed      faint50     [X] grid-abspos-staticpos-align-self-001 android               FAIL
+L6 X-fixed      faint50     [X] grid-abspos-staticpos-justify-self-001 android             FAIL
+L6 X-fixed      faint50     [X] grid-abspos-staticpos-align-self-vertWM-001 android        FAIL
+L6 X-fixed      faint50     [X] grid-abspos-staticpos-align-self-rtl-001 android           FAIL
+L6 X-fixed      gray-ink    [X] flex-abspos-staticpos-align-self-safe-001 android          FAIL
+L6 X-fixed      gray-ink    [X] grid-abspos-staticpos-align-self-001 android               FAIL
+L6 X-fixed      gray-ink    [X] grid-abspos-staticpos-justify-self-001 android             FAIL
+L6 X-fixed      gray-ink    [X] grid-abspos-staticpos-align-self-vertWM-001 android        FAIL
+L6 X-fixed      gray-ink    [X] grid-abspos-staticpos-align-self-rtl-001 android           FAIL
+L6 PO-fixed     faint50     [PO] backdrop-filter-clip-rect android                         FAIL
+L6 PO-fixed     gray-ink    [PO] backdrop-filter-clip-rect android                         PASS   <- ACCEPTED: [PO] backdrop-filter-clip-rect android | overlap red 416 blue 0 | navbar band blue 320/320 whole 851 | pink 10000 | red n 1552 → GEOMETRY OK
+
+104 key reads on 15 fixed pictures x 2 added-ink transforms; ACCEPTED 16

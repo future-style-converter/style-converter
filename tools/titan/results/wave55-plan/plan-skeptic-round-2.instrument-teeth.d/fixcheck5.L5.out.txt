@@ -1,0 +1,31 @@
+## L5 [C] rows 5-6: ideograph stroke count and ink rows; [H] rows 3-4: letter column-profile corr vs the ref letter, period ink rows
+  ref                                r5 (1, (123, 123)) | r6 (2, (143, 152)) | r3 letter-colcorr 1.0 period-rows (80, 81) (ref (80, 81)) | r4 letter-colcorr 1.0 period-rows (104, 105) (ref (104, 105))
+  ok-web                             r5 (1, (123, 123)) | r6 (2, (143, 152)) | r3 letter-colcorr 1.0 period-rows (80, 81) (ref (80, 81)) | r4 letter-colcorr 1.0 period-rows (104, 105) (ref (104, 105))
+  ok-ios                             r5 (1, (124, 124)) | r6 (2, (143, 153)) | r3 letter-colcorr 0.952 period-rows (80, 81) (ref (80, 81)) | r4 letter-colcorr 0.852 period-rows (104, 105) (ref (104, 105))
+  ok-android                         r5 (1, (123, 123)) | r6 (1, (143, 143)) | r3 letter-colcorr 0.952 period-rows (80, 81) (ref (80, 81)) | r4 letter-colcorr 0.852 period-rows (104, 105) (ref (104, 105))
+  C-ideographs-swapped-5-6-ios       r5 (2, (119, 129)) | r6 (1, (148, 148)) | r3 letter-colcorr 0.952 period-rows (80, 81) (ref (80, 81)) | r4 letter-colcorr 0.852 period-rows (104, 105) (ref (104, 105))
+  C-ideographs-swapped-5-6-android   r5 (1, (119, 119)) | r6 (1, (147, 147)) | r3 letter-colcorr 0.952 period-rows (80, 81) (ref (80, 81)) | r4 letter-colcorr 0.852 period-rows (104, 105) (ref (104, 105))
+  C-ideograph+3y-ios                 r5 (1, (127, 127)) | r6 (2, (146, 156)) | r3 letter-colcorr 0.952 period-rows (80, 81) (ref (80, 81)) | r4 letter-colcorr 0.852 period-rows (104, 105) (ref (104, 105))
+  C-ideograph+3y-android             r5 (1, (126, 126)) | r6 (1, (146, 146)) | r3 letter-colcorr 0.952 period-rows (80, 81) (ref (80, 81)) | r4 letter-colcorr 0.852 period-rows (104, 105) (ref (104, 105))
+  H-letters-swapped-3-4-ios          r5 (1, (124, 124)) | r6 (2, (143, 153)) | r3 letter-colcorr 0.534 period-rows (80, 81) (ref (80, 81)) | r4 letter-colcorr 0.795 period-rows (104, 105) (ref (104, 105))
+  H-letters-swapped-3-4-android      r5 (1, (123, 123)) | r6 (1, (143, 143)) | r3 letter-colcorr 0.534 period-rows (80, 81) (ref (80, 81)) | r4 letter-colcorr 0.795 period-rows (104, 105) (ref (104, 105))
+  H-period-3y-ios                    r5 (1, (124, 124)) | r6 (2, (143, 153)) | r3 letter-colcorr 0.952 period-rows (77, 78) (ref (80, 81)) | r4 letter-colcorr 0.852 period-rows (101, 102) (ref (104, 105))
+  H-period-3y-android                r5 (1, (123, 123)) | r6 (1, (143, 143)) | r3 letter-colcorr 0.952 period-rows (77, 78) (ref (80, 81)) | r4 letter-colcorr 0.852 period-rows (101, 102) (ref (104, 105))
+
+## L5 [I] css3-counter-styles-005: first marker blob stroke count + ink rows per line
+  ref                                  y95 (1, (102, 103)) | y121 (2, (125, 142))
+  ok-web                               y95 (1, (102, 103)) | y121 (2, (125, 142))
+  ok-ios                               y95 (1, (102, 103)) | y121 (2, (125, 142))
+  ok-android                           y95 (1, (104, 105)) | y121 (2, (129, 144))
+  I-line1-ideograph-is-line2s-ios      y95 (1, (109, 110)) | y121 (2, (125, 142))
+  I-line1-ideograph-is-line2s-android  y95 (2, (97, 112)) | y121 (2, (129, 144))
+  I-line1-marker+3y-ios                y95 (1, (105, 106)) | y121 (2, (125, 142))
+  I-line1-marker+3y-android            y95 (1, (107, 108)) | y121 (2, (129, 144))
+
+## L5 [K] ios: what the ok-all replay changes in row 9 (y208-231) vs wave54-final, by column range
+  ios: 65 px differ in row 9; columns (137, 145)
+    T-row9-text-erased: px differing from ok-all in row 9 OUTSIDE the digit window x136-150: 161
+    T-row9-text-3x: px differing from ok-all in row 9 OUTSIDE the digit window x136-150: 266
+  android: 0 px differ in row 9; columns None
+    T-row9-text-erased: px differing from ok-all in row 9 OUTSIDE the digit window x136-150: 163
+    T-row9-text-3x: px differing from ok-all in row 9 OUTSIDE the digit window x136-150: 273

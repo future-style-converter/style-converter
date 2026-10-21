@@ -165,6 +165,10 @@ class SeamReachabilityTest {
             "columns/MulticolSpannerContainingBlock.kt",
             // A3 — the css-images-4 §2.5 candidate walk.
             "images/ImageCandidateChain.kt",
+            // Wave 55 (lane L5, U2o-android) — the string-keyed marker gap: seam 4's
+            // outside hang calls it (and seam 5's inside Row while U2i-android is on);
+            // this line rides in seam 4; ListMarkerSuffixGapHangSeamTest pins seam 4's call.
+            "lists/ListMarkerSuffixGap.kt",
             // A7 — percentage inset resolution against the containing block.
             "layout/position/PercentInsetResolve.kt",
             "layout/position/PercentInsetPositioned.kt",
@@ -180,6 +184,8 @@ class SeamReachabilityTest {
             // dead runtime code (the wave-49 S5 class).
             "transforms/BackfaceCull.kt",
             "transforms/TransformInheritance.kt",
+            "layout/position/PositionedParentSlotGate.kt", // wave 55 L3 U1: called only by seam 1
+            "layout/position/PositionedParentRtlOrigin.kt", // wave 55 L3 U2: the gate's RTL branch
         )
         val dead = modules.filterNot { File(runtimeTree, it) in reachable }
         assertTrue(

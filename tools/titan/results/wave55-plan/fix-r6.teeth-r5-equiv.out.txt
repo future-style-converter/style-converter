@@ -1,0 +1,9 @@
+# fix-r6.teeth-r5-equiv — probes-teeth-r5.py 897be4ed7d08c108, added_ink5.py 5bf23bfee442f40b vs the verifier's fakes5.py 1d84784e8fdb26d5 (its builders, executed in-process with its own hard-coded plan path)
+  L1: 2 pinned cases, 6 faked captures; keys pre-registered FAIL 10
+  L2: 124 pinned cases, 311 faked captures; keys pre-registered FAIL 326
+  L3: 104 pinned cases, 104 faked captures; keys pre-registered FAIL 104
+  L4: 9 pinned cases, 66 faked captures; keys pre-registered FAIL 53
+  L5: 0 pinned cases, 0 faked captures; keys pre-registered FAIL 0
+  L6: 107 pinned cases, 301 faked captures; keys pre-registered FAIL 269
+
+346 pinned cases, 788 faked captures: 788 byte-identical to the verifier's generator with its record's added px and bbox, 0 differ

@@ -1,0 +1,7 @@
+A/B  exclude=wave55-ab-drop-L6-U2  include=wave55-final  sections=css-anchor-position,css-flexbox,css-gaps,css-grid,css-images,css-position,filter-effects  platforms=android
+compared 309 cells: 5 differ (flip, or |Δ| ≥ 0.002), 304 within threshold
+  mover        android  P 0.9619  → P 0.9943  Δ+0.0324  css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html
+  mover        android  P 0.9635  → P 0.9932  Δ+0.0297  css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html
+  mover        android  P 0.9601  → P 0.9724  Δ+0.0123  css/css-grid/abspos/descendant-static-position-002.html
+  mover        android  P 0.9892  → P 0.9991  Δ+0.0099  css/css-grid/abspos/descendant-static-position-001.html
+  mover        android  f 0.904   → f 0.9076  Δ+0.0036  css/filter-effects/backdrop-filter-basic-blur.html

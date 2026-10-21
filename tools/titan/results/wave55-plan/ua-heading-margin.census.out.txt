@@ -1,0 +1,62 @@
+run wave54-final: 1435 per-test IR documents; 21 carry an out-of-flow (ABSOLUTE|FIXED) UA-margin tag
+components: 22 (hoisted 1 · rc1 0 · nested 21); bucket-only Position: 0
+NEW-RULE FIRES (rc1 + nested, at least one undeclared block edge): 7 components in 6 documents
+
+CSS2/css21-errata__s-11-1-1b-005   web P 0.9658 · ios f 0.9536 · android f 0.9307
+   p css21-errata__s-11-1-1b-005__0-140  nested ABSOLUTE+inset posAnc=- decl=-- ownFS=n mono=n face=16 shape=leaf  → FIRES margin 16 px on top+bottom (table basis would give 16)
+CSS2/css21-errata__s-11-1-1b-006   web P 1 · ios P 0.9992 · android P 0.9983
+   p wpt__css2__css21-errata__s-11-1-1b-006__3-144  hoisted ABSOLUTE+inset posAnc=- decl=-- ownFS=n mono=n face=16 shape=leaf  → T6 (already has the UA margin)
+css-anchor-position/anchor-center-safe-rtl   web — · ios — · android —
+   p anchor-center-safe-rtl__1__0-476  nested ABSOLUTE+inset posAnc=FIXED decl=-- ownFS=n mono=n face=16 shape=children  → FIRES margin 16 px on top+bottom (table basis would give 16)
+   p anchor-center-safe-rtl__3__0-481  nested ABSOLUTE+inset posAnc=FIXED decl=-- ownFS=n mono=n face=16 shape=children  → FIRES margin 16 px on top+bottom (table basis would give 16)
+css-backgrounds/background-attachment-local__attachment-local-positioning-3   web — · ios — · android —
+   p background-attachment-local__attachment-local-positioning-3__0__0__0-081  nested ABSOLUTE+inset posAnc=ABSOLUTE decl=TB ownFS=n mono=n face=16 shape=children  → declares both edges (author wins: identity)
+css-backgrounds/background-attachment-local__attachment-local-positioning-4   web — · ios — · android —
+   p background-attachment-local__attachment-local-positioning-4__0__0__0-085  nested ABSOLUTE+inset posAnc=ABSOLUTE decl=TB ownFS=n mono=n face=16 shape=children  → declares both edges (author wins: identity)
+css-text-decor/text-decoration-inset-001   web P 0.987 · ios P 0.9707 · android P 0.9848
+   h1 text-decoration-inset-001__1__0-053  nested ABSOLUTE posAnc=RELATIVE decl=TB ownFS=y mono=n face=32 shape=leaf  → declares both edges (author wins: identity)
+css-text-decor/text-decoration-inset-002   web P 0.989 · ios P 0.9706 · android P 0.9858
+   h1 text-decoration-inset-002__1__0-057  nested ABSOLUTE posAnc=RELATIVE decl=TB ownFS=y mono=n face=32 shape=leaf  → declares both edges (author wins: identity)
+css-text-decor/text-decoration-inset-003   web P 0.9859 · ios P 0.9706 · android P 0.984
+   h1 text-decoration-inset-003__1__0-061  nested ABSOLUTE posAnc=RELATIVE decl=TB ownFS=y mono=n face=32 shape=leaf  → declares both edges (author wins: identity)
+css-text-decor/text-decoration-inset-004   web P 0.9935 · ios P 0.9634 · android P 0.9859
+   h1 text-decoration-inset-004__1__0-065  nested ABSOLUTE posAnc=RELATIVE decl=TB ownFS=y mono=n face=32 shape=leaf  → declares both edges (author wins: identity)
+css-text-decor/text-decoration-inset-005   web P 0.9983 · ios f 0.8995 · android f 0.9
+   h1 text-decoration-inset-005__1__0-069  nested ABSOLUTE posAnc=RELATIVE decl=-- ownFS=n mono=n face=32 shape=runs-host  → FIRES margin 21.44 px on top+bottom (table basis would give 21)
+css-text-decor/text-decoration-inset-006   web P 0.9985 · ios f 0.8987 · android f 0.8993
+   h1 text-decoration-inset-006__1__0-076  nested ABSOLUTE posAnc=RELATIVE decl=-- ownFS=n mono=n face=32 shape=runs-host  → FIRES margin 21.44 px on top+bottom (table basis would give 21)
+css-text-decor/text-decoration-inset-007   web P 0.9913 · ios f 0.8732 · android f 0.8579
+   h1 text-decoration-inset-007__1__0-083  nested ABSOLUTE posAnc=RELATIVE decl=TB ownFS=y mono=n face=32 shape=leaf  → declares both edges (author wins: identity)
+css-text-decor/text-decoration-inset-008   web P 0.9917 · ios f 0.8762 · android f 0.8637
+   h1 text-decoration-inset-008__1__0-087  nested ABSOLUTE posAnc=RELATIVE decl=TB ownFS=y mono=n face=32 shape=leaf  → declares both edges (author wins: identity)
+css-text-decor/text-decoration-inset-009   web P 0.9715 · ios P 0.9585 · android P 0.9638
+   h1 text-decoration-inset-009__1__0-091  nested ABSOLUTE posAnc=RELATIVE decl=TB ownFS=y mono=n face=32 shape=leaf  → declares both edges (author wins: identity)
+css-text-decor/text-decoration-inset-011   web P 0.9948 · ios f 0.6999 · android f 0.6852
+   h1 text-decoration-inset-011__1__0-095  nested ABSOLUTE posAnc=RELATIVE decl=-- ownFS=n mono=n face=32 shape=runs-host  → FIRES margin 21.44 px on top+bottom (table basis would give 21)
+css-text-decor/text-decoration-inset-012   web f 0.9405 · ios f 0.8932 · android f 0.881
+   h1 text-decoration-inset-012__1__0-102  nested ABSOLUTE posAnc=RELATIVE decl=TB ownFS=y mono=n face=32 shape=leaf  → declares both edges (author wins: identity)
+css-text-decor/text-decoration-inset-013   web f 0.9417 · ios f 0.8968 · android f 0.9162
+   h1 text-decoration-inset-013__1__0-106  nested ABSOLUTE posAnc=RELATIVE decl=TB ownFS=y mono=n face=32 shape=leaf  → declares both edges (author wins: identity)
+css-text-decor/text-decoration-inset-014   web P 0.9975 · ios f 0.9238 · android f 0.923
+   h1 text-decoration-inset-014__1__0-110  nested ABSOLUTE posAnc=RELATIVE decl=-- ownFS=n mono=y face=26 shape=runs-host  → FIRES margin 17.42 px on top+bottom (table basis would give 21)
+css-text-decor/text-decoration-inset-015   web P 0.9806 · ios P 0.971 · android P 0.9812
+   h1 text-decoration-inset-015__1__0-115  nested ABSOLUTE posAnc=RELATIVE decl=TB ownFS=y mono=n face=32 shape=leaf  → declares both edges (author wins: identity)
+css-text-decor/text-decoration-inset-016   web P 0.9761 · ios P 0.9659 · android P 0.9758
+   h1 text-decoration-inset-016__1__0-119  nested ABSOLUTE posAnc=RELATIVE decl=TB ownFS=y mono=n face=32 shape=leaf  → declares both edges (author wins: identity)
+css-text-decor/text-decoration-inset-024   web P 0.9869 · ios P 0.9707 · android P 0.9812
+   h1 text-decoration-inset-024__1__0-123  nested ABSOLUTE posAnc=RELATIVE decl=TB ownFS=y mono=n face=32 shape=leaf  → declares both edges (author wins: identity)
+
+CARRIER STEMS (the new rule fires on ≥1 component):
+   CSS2/wpt__CSS2__css21-errata__s-11-1-1b-005
+   css-anchor-position/wpt__css-anchor-position__anchor-center-safe-rtl
+   css-text-decor/wpt__css-text-decor__text-decoration-inset-005
+   css-text-decor/wpt__css-text-decor__text-decoration-inset-006
+   css-text-decor/wpt__css-text-decor__text-decoration-inset-011
+   css-text-decor/wpt__css-text-decor__text-decoration-inset-014
+
+U2 RADIUS — every h1–h6 with slot children (any position):
+   css-text-decor/wpt__css-text-decor__text-decoration-inset-005 h1 text-decoration-inset-005__1__0-069 pos=ABSOLUTE runs=y ownFS=n ownFW=n   web P 0.9983 · ios f 0.8995 · android f 0.9
+   css-text-decor/wpt__css-text-decor__text-decoration-inset-006 h1 text-decoration-inset-006__1__0-076 pos=ABSOLUTE runs=y ownFS=n ownFW=n   web P 0.9985 · ios f 0.8987 · android f 0.8993
+   css-text-decor/wpt__css-text-decor__text-decoration-inset-011 h1 text-decoration-inset-011__1__0-095 pos=ABSOLUTE runs=y ownFS=n ownFW=n   web P 0.9948 · ios f 0.6999 · android f 0.6852
+   css-text-decor/wpt__css-text-decor__text-decoration-inset-014 h1 text-decoration-inset-014__1__0-110 pos=ABSOLUTE runs=y ownFS=n ownFW=n   web P 0.9975 · ios f 0.9238 · android f 0.923
+   total: 4 heading hosts with children

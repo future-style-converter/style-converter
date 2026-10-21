@@ -1,0 +1,11 @@
+label=M-U2e-call-site-deleted file=runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt
+sha256 pre=e8f62e4926a01e131e28b5ded6c5228ab93a7af06ad32e0bea32be54a3e7b2a2 mutated=70f40877bb2868df15ce367fb6537604f3a06c4e5e97a330e35d82fe22a30a2f post=e8f62e4926a01e131e28b5ded6c5228ab93a7af06ad32e0bea32be54a3e7b2a2 restored=OK
+mutation applied=yes
+mutated run rc=1 (RED)
+  red: PercentContentBoxBandTest > P-U2-5 source - applySizing asks the band lane before the clamp and the fill FAILED
+  red: PercentContentBoxBandTest > P-U2-5 live chain - middle gets both band nodes outside its clip, background and padding FAILED
+  red: 8 tests completed, 2 failed
+  red: > Task :runtime:testDebugUnitTest FAILED
+restored run rc=0 (GREEN)
+  green: BUILD SUCCESSFUL in 8s
+  green tally: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"

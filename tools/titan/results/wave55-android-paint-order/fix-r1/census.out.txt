@@ -1,0 +1,54 @@
+components 10719 · documents 1435 · extraction errors 4 ['wpt__css-images__conic-gradient-line-height-relative-units-003', 'wpt__css-images__conic-gradient-line-height-relative-units-004']
+banded 1973: U1 self-paint 10 · U2 legacy 1963 (fast 1494, slow 469)
+legacy bands on a CLIPPING box (overflow.shouldClip): 29 in 26 documents
+  fix: clipping legacy chains equal to base (must be all): 29/29 []
+  builder: clipping legacy chains that MOVED (now withdrawn): 18
+signature changes: builder 1875 · fix 1857 · unbanded among them (must be 0): 0 / 0
+behavioural movers: builder 1973 · fix 1944 (withdrawn: the 29 clipping legacy bands)
+builder ≠ fix by signature: 18 components, all clipping legacy bands: True; fix movers whose chain differs from the builder's (must be 0): 0
+
+== exposed documents: builder 283 · fix 261 (plan set 279: carriers 27 · mayMove 240 · sharedStems 12 · ring 1)
+builder: inside the plan set 279 · GROWTH 4
+   wpt__css-cascade__revert-layer-015: wpt__css-cascade__revert-layer-015__0-077 tag:input U2
+   wpt__css-display__display-contents-dynamic-pseudo-insertion-001: wpt__css-display__display-contents-dynamic-pseudo-insertion-001__0-132 pseudos U2
+   wpt__css-images__gradient__gradient-hue-direction: wpt__css-images__gradient__gradient-hue-direction__7-073 tag:hr U2; wpt__css-images__gradient__gradient-hue-direction__4-070 tag:hr U2; wpt__css-images__gradient__gradient-hue-direction__10-076 tag:hr U2
+   wpt__css-pseudo__first-line-and-placeholder: first-line-and-placeholder__0__0-199 tag:input U2
+fix: inside the plan set 260 · GROWTH 1
+   wpt__css-display__display-contents-dynamic-pseudo-insertion-001: wpt__css-display__display-contents-dynamic-pseudo-insertion-001__0-132 pseudos U2
+documents exposed under the builder, no longer under the fix: 22
+   wpt__css-anchor-position__anchor-scope-scroll [mayMove]: wpt__css-anchor-position__anchor-scope-scroll__0-781 child
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-1 [mayMove]: wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-1__0-040 child
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-2 [mayMove]: wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-2__0-043 child
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-3 [mayMove]: wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-3__0-046 child
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-4 [mayMove]: wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-4__0-049 child
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-5 [mayMove]: wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-5__0-052 child
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-6 [mayMove]: wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-color-6__0-055 child
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-1 [mayMove]: wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-1__0-058 child
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-2 [mayMove]: wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-2__0-061 child
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-3 [mayMove]: wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-3__0-064 child
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-4 [mayMove]: wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-4__0-067 child
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-5 [mayMove]: wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-5__0-070 child
+   wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-6 [mayMove]: wpt__css-backgrounds__background-attachment-local__attachment-local-clipping-image-6__0-073 child
+   wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-2 [mayMove]: wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-2__0-076 child
+   wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3 [mayMove]: wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3__0-079 child
+   wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4 [mayMove]: wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4__0-083 child
+   wpt__css-cascade__all-prop-001 [mayMove]: wpt__css-cascade__all-prop-001__1-002 child+text+runs; all-prop-001__1__0-003 text
+   wpt__css-cascade__revert-layer-015 [OUTSIDE]: wpt__css-cascade__revert-layer-015__0-077 tag:input
+   wpt__css-display__display-contents-suppression-dynamic-001 [mayMove]: wpt__css-display__display-contents-suppression-dynamic-001__1-248 text+tag:textarea
+   wpt__css-images__gradient__gradient-hue-direction [OUTSIDE]: wpt__css-images__gradient__gradient-hue-direction__7-073 tag:hr; wpt__css-images__gradient__gradient-hue-direction__4-070 tag:hr; wpt__css-images__gradient__gradient-hue-direction__10-076 tag:hr
+   wpt__css-pseudo__first-line-and-placeholder [OUTSIDE]: first-line-and-placeholder__0__0-199 tag:input
+   wpt__filter-effects__backdrop-filter-edge-behavior [mayMove]: wpt__filter-effects__backdrop-filter-edge-behavior__2-098 child
+
+revertUnit U1: 2 android captures; each keeps an exposed mover on its route: True []
+revertUnit U2: 25 android captures; each keeps an exposed mover on its route: True []
+revertUnit U3: 0 android captures; each keeps an exposed mover on its route: True []
+
+== UA-widget tags with a legacy band (UAWidgetsResolve.kindFor tags; Appearance none = devolved)
+   MOVES  wpt__css-display__display-contents-button wpt__css-display__display-contents-button__2-036 tag=button type=- appearance=- clips=false expo=text+tag:button in-plan=True
+   MOVES  wpt__css-gaps__flex__flex-gap-decorations-023 wpt__css-gaps__flex__flex-gap-decorations-023__2-182 tag=button type=- appearance=- clips=false expo=text+tag:button in-plan=True
+     2 × button type=- clips=false moves=True
+     2 × input type=- clips=true moves=False
+     1 × input type=text clips=true moves=False
+     1 × textarea type=- clips=true moves=False
+
+opacity<1 movers (band into the group): 49 components in 2 documents ['wpt__css-anchor-position__anchor-center-overflow-003', 'wpt__filter-effects__backdrop-filter-basic-blur']

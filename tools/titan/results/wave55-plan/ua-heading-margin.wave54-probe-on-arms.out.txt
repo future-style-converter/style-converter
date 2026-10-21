@@ -1,0 +1,18 @@
+=== wave-54 probe, natives from arm U1
+text-decoration-inset-005      ios      bands [(130, 151, 16, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(130, 151, 16, 191)]))
+text-decoration-inset-005      android  bands [(128, 152, 17, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(128, 152, 17, 191)]))
+text-decoration-inset-006      ios      bands [(130, 151, 16, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(130, 151, 16, 194)]))
+text-decoration-inset-006      android  bands [(128, 152, 17, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(128, 152, 17, 194)]))
+text-decoration-inset-014      ios      bands [(128, 138, 17, 133), (145, 154, 16, 84)] → GEOMETRY WRONG (line-1 band 11 px tall (< 20: the 2em face is missing))
+text-decoration-inset-014      android  bands [(128, 139, 17, 132), (144, 155, 16, 84)] → GEOMETRY WRONG (line-1 band 12 px tall (< 20: the 2em face is missing))
+text-decoration-inset-011      ios      bands [(158, 172, 57, 184), (190, 207, 85, 183), (229, 229, 170, 185), (286, 303, 39, 184)] → GEOMETRY WRONG (control moved: [(158, 172, 57, 184), (190, 207, 85, 183), (229, 229, 170, 185), (286, 303, 39, 184), (318, 329, 151, 184)])
+text-decoration-inset-011      android  bands [(157, 176, 57, 184), (189, 208, 80, 184), (230, 230, 166, 180), (286, 304, 41, 184)] → GEOMETRY WRONG (control moved: [(157, 176, 57, 184), (189, 208, 80, 184), (230, 230, 166, 180), (286, 304, 41, 184), (320, 329, 150, 184)])
+=== wave-54 probe, natives from arm D
+text-decoration-inset-005      ios      bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+text-decoration-inset-005      android  bands [(134, 173, 16, 389)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(134, 173, 16, 389)]))
+text-decoration-inset-006      ios      bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+text-decoration-inset-006      android  bands [(134, 173, 16, 389)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(134, 173, 16, 389)]))
+text-decoration-inset-014      ios      bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+text-decoration-inset-014      android  bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+text-decoration-inset-011      ios      bands [(158, 172, 57, 184), (190, 207, 85, 183), (229, 229, 170, 185), (286, 303, 39, 184)] → GEOMETRY WRONG (control moved: [(158, 172, 57, 184), (190, 207, 85, 183), (229, 229, 170, 185), (286, 303, 39, 184), (318, 329, 151, 184)])
+text-decoration-inset-011      android  bands [(157, 176, 57, 184), (189, 208, 80, 184), (230, 230, 166, 180), (286, 304, 41, 184)] → GEOMETRY WRONG (control moved: [(157, 176, 57, 184), (189, 208, 80, 184), (230, 230, 166, 180), (286, 304, 41, 184), (320, 329, 150, 184)])

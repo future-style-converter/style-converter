@@ -1,0 +1,18 @@
+columns: re-frozen ref | wave55-open | wave55-pre
+movers-01 row 1: css/css-flexbox/abspos/abspos-autopos-htb-rtl.html [android] 0.9869 → 0.9966
+movers-01 row 2: css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html [android] 0.9619 → 0.9943
+movers-01 row 3: css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html [android] 0.9635 → 0.9932
+movers-01 row 4: css/css-grid/abspos/descendant-static-position-001.html [android] 0.9892 → 0.9991
+movers-01 row 5: css/css-grid/abspos/descendant-static-position-002.html [android] 0.9601 → 0.9724
+movers-01 row 6: css/css-text-decor/text-decoration-inset-005.html [android] 0.9 → 0.9147
+movers-02 row 1: css/css-text-decor/text-decoration-inset-005.html [ios] 0.8995 → 0.93
+movers-02 row 2: css/css-text-decor/text-decoration-inset-006.html [android] 0.8993 → 0.9147
+movers-02 row 3: css/css-text-decor/text-decoration-inset-006.html [ios] 0.8987 → 0.9284
+movers-02 row 4: css/css-text-decor/text-decoration-inset-011.html [android] 0.6852 → 0.6913
+movers-02 row 5: css/css-text-decor/text-decoration-inset-011.html [ios] 0.6999 → 0.7123
+movers-02 row 6: css/css-text/bidi/bidi-tab-001.html [android] 0.9805 → 0.9929
+movers-03 row 1: css/css-text/hyphens/hyphenate-character-001.html [ios] 0.9611 → 0.978
+movers-03 row 2: css/css-text/hyphens/hyphenate-character-003.html [ios] 0.957 → 0.9759
+movers-03 row 3: css/filter-effects/backdrop-filter-nested-border-radius-clip-2.html [android] 0.9689 → 1
+movers-03 row 4: css/filter-effects/backdrop-filter-nested-border-radius-clip-4.html [android] 0.977 → 0.9999
+movers-03 row 5: css/filter-effects/backdrop-filter-nested-border-radius-clip.html [android] 0.9649 → 1

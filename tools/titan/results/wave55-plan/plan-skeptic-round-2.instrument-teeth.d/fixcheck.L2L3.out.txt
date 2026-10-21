@@ -1,0 +1,34 @@
+## L2 — fail ink and green-mask XOR vs the ref
+  abspos-autopos-htb-ltr                       web: xor 0 bad 0 | ios: xor 0 bad 0 | fixed-android: xor 0 bad 0 | L2-fail-ink-sliver: xor 0 bad 200 | L2-notch7: xor 49 bad 0
+  abspos-autopos-vlr-ltr                       web: xor 0 bad 0 | ios: xor 0 bad 0 | fixed-android: xor 0 bad 0 | L2-fail-ink-sliver: xor 0 bad 200 | L2-notch7: xor 49 bad 0
+  abspos-autopos-vrl-ltr                       web: xor 0 bad 0 | ios: xor 0 bad 0 | fixed-android: xor 0 bad 0 | L2-fail-ink-sliver: xor 0 bad 200 | L2-notch7: xor 49 bad 0
+  backdrop-filter-nested-border-radius-clip    web: xor 16 bad 0 | ios: xor 20 bad 0 | fixed-android: xor 28 bad 0 | L2-fail-ink-sliver: xor 28 bad 200 | L2-notch7: xor 77 bad 0 | L2-radius-moved: xor 339 bad 0
+  backdrop-filter-nested-border-radius-clip-2  web: xor 5 bad 0 | ios: xor 8 bad 0 | fixed-android: xor 8 bad 0 | L2-fail-ink-sliver: xor 8 bad 200 | L2-notch7: xor 57 bad 0 | L2-radius-moved: xor 283 bad 0
+  backdrop-filter-nested-border-radius-clip-4  web: xor 0 bad 0 | ios: xor 7 bad 0 | fixed-android: xor 17 bad 0 | L2-fail-ink-sliver: xor 17 bad 200 | L2-notch7: xor 66 bad 0 | L2-radius-moved: xor 329 bad 0
+
+## L3 dir rows — row profile (ink px per row) shift vs the ref, and the 2-D correlation at (0,0)
+  row6: web: rowprof (1.0, 0) 2d 1.0 | fixed-android: rowprof (0.996, 0) 2d 0.865 | text+2y: rowprof (0.996, 2) 2d 0.47 | text-2y: rowprof (0.996, -2) 2d 0.445 | text-vflip: rowprof (0.947, -3) 2d 0.497 | r1:gut: rowprof (0.47, 0) 2d 0.107 | r1:mirror-words: rowprof (0.996, 0) 2d 0.528 | r1:text+3x: rowprof (0.996, 0) 2d 0.336
+  row7: web: rowprof (1.0, 0) 2d 1.0 | fixed-android: rowprof (0.997, 0) 2d 0.845 | text+2y: rowprof (0.997, 2) 2d 0.429 | text-2y: rowprof (0.997, -2) 2d 0.397 | text-vflip: rowprof (0.961, -3) 2d 0.438 | r1:gut: rowprof (0.463, 0) 2d 0.079 | r1:mirror-words: rowprof (0.997, 0) 2d 0.271 | r1:text+3x: rowprof (0.997, 0) 2d 0.267
+  row9: web: rowprof (1.0, 0) 2d 1.0 | fixed-android: rowprof (0.996, 0) 2d 0.865 | text+2y: rowprof (0.996, 2) 2d 0.47 | text-2y: rowprof (0.995, -2) 2d 0.445 | text-vflip: rowprof (0.947, -3) 2d 0.497 | r1:gut: rowprof (0.469, 0) 2d 0.107 | r1:mirror-words: rowprof (0.996, 0) 2d 0.528 | r1:text+3x: rowprof (0.996, 0) 2d 0.336
+
+## L3 bidi — per RTL band: blue column-profile corr at shift 0 vs the ref, blue row-profile shift; yellow bbox per box
+  web                      colcorr@0 [0.999, 0.999, 0.999, 0.999] rowshift [0, 0, 0, 0] yellow [(16, 66, 135, 149), (16, 166, 135, 249)] (ref [(16, 66, 135, 149), (16, 166, 135, 249)])
+  ios                      colcorr@0 [0.866, 0.85, 0.866, 0.866] rowshift [0, 0, 0, 0] yellow [(16, 66, 135, 149), (16, 166, 135, 249)] (ref [(16, 66, 135, 149), (16, 166, 135, 249)])
+  fixed-android            colcorr@0 [0.904, 0.974, 0.904, 0.904] rowshift [0, 0, 0, 0] yellow [(16, 66, 136, 149), (16, 166, 136, 249)] (ref [(16, 66, 135, 149), (16, 166, 135, 249)])
+  rtl-run-order-mirrored   colcorr@0 [0.648, 0.701, 0.648, 0.648] rowshift [0, 0, 0, 0] yellow [(16, 66, 136, 149), (16, 166, 136, 249)] (ref [(16, 66, 135, 149), (16, 166, 135, 249)])
+  rtl-runs+2y              colcorr@0 [0.89, 0.966, 0.89, 0.89] rowshift [0, 0, 0, 0] yellow [(16, 66, 136, 149), (16, 166, 136, 249)] (ref [(16, 66, 135, 149), (16, 166, 135, 249)])
+  yellow-boxes-erased      colcorr@0 [0.904, 0.974, 0.904, 0.904] rowshift [0, 0, 0, 0] yellow [None, None] (ref [(16, 66, 135, 149), (16, 166, 135, 249)])
+
+## L3 stack — red px and green px outside the four cells (ring 2), vs web
+  ref                    red 0 green outside cells 2812 xor-vs-web 2600
+  web                    red 0 green outside cells 300 xor-vs-web 0
+  ios                    red 0 green outside cells 300 xor-vs-web 180
+  fixed-android          red 0 green outside cells 300 xor-vs-web 276
+  today-android          red 0 green outside cells 580 xor-vs-web 1020
+  red-shown              red 100 green outside cells 300 xor-vs-web 276
+  other-squares-erased   red 0 green outside cells 0 xor-vs-web 300
+
+## L3 dynamic-offset — yellow parent bbox + (yellow + magenta inside it) count
+  dynamic-offset-rtl-001       ref: ((16, 16, 115, 115), 10000) | web: ((16, 16, 115, 115), 10000) | ios: ((16, 16, 115, 115), 10000) | fixed-android: ((16, 16, 115, 115), 10000) | parent-erased: (None, 0) | parent+3x: ((19, 16, 118, 115), 10000)
+  dynamic-offset-vrl-rtl-001   ref: ((16, 16, 115, 115), 10000) | web: ((16, 16, 115, 115), 10000) | ios: ((16, 16, 115, 115), 10000) | fixed-android: ((16, 16, 115, 115), 10000)
+  dynamic-offset-rtl-002       ref: ((16, 16, 115, 115), 10000) | web: ((16, 16, 115, 115), 10000) | ios: ((16, 16, 115, 115), 10000) | fixed-android: ((16, 16, 115, 115), 10000) | parent-erased: (None, 0) | parent+3x: ((19, 16, 118, 115), 10000)

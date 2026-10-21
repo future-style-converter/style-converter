@@ -1,0 +1,2 @@
+# synthetic arms (plan-skeptic instrument-teeth): one valid arm, lane-qualified
+drop-L4-U2 css-text-decor ios,android 640276a0

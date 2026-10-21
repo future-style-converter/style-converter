@@ -1,0 +1,16 @@
+(1) [X] fixed U2 replays: abspos children vs the ref (component bbox top-left, Chebyshev distance to the nearest ref child)
+  flex-abspos-staticpos-align-self-safe-001      yellow ref children   4  fixed   4  displaced >2 px:   0  worst 0
+  flex-abspos-staticpos-align-self-safe-002      yellow ref children   3  fixed   3  displaced >2 px:   0  worst 0
+  grid-abspos-staticpos-align-self-001           teal   ref children  22  fixed  22  displaced >2 px:  22  worst 10
+  grid-abspos-staticpos-justify-self-001         teal   ref children  26  fixed  26  displaced >2 px:  26  worst 10
+  grid-abspos-staticpos-align-self-vertWM-001    teal   ref children  26  fixed  26  displaced >2 px:  26  worst 22
+  grid-abspos-staticpos-align-self-rtl-001       teal   ref children  26  fixed  26  displaced >2 px:  26  worst 9
+(2) [K] zone extension x64-389 y64-159 (rows 3-6 item text): differing px vs wave54-final
+  ios      ok-all (fixed)     0 px → OK
+  ios      H-item-text-gone   307 px → WRONG
+  android  ok-all (fixed)     0 px → OK
+  android  H-item-text-gone   299 px → WRONG
+icpos-align-self-001 yellow containers ref 11 fixed 11 container displacement max 0 (0 = containers in place)
+   teal displacement histogram [(3, 10), (7, 1), (8, 3), (9, 6), (10, 2)]
+lign-self-vertWM-001 yellow containers ref 13 fixed 13 container displacement max 0 (0 = containers in place)
+   teal displacement histogram [(3, 2), (4, 2), (8, 5), (10, 1), (11, 3), (12, 3), (15, 1), (17, 6), (22, 3)]

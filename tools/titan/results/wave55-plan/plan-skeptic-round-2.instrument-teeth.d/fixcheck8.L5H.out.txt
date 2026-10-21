@@ -1,0 +1,5 @@
+  [H] ref                          row3 vs ref(row3,row4) [1.0, 0.789]  row4 vs ref(row3,row4) [0.789, 1.0]  → nearest: row3=3 row4=4
+  [H] ok-web                       row3 vs ref(row3,row4) [1.0, 0.789]  row4 vs ref(row3,row4) [0.789, 1.0]  → nearest: row3=3 row4=4
+  [H] ok-ios                       row3 vs ref(row3,row4) [0.949, 0.795]  row4 vs ref(row3,row4) [0.532, 0.852]  → nearest: row3=3 row4=4
+  [H] ok-android                   row3 vs ref(row3,row4) [0.949, 0.795]  row4 vs ref(row3,row4) [0.532, 0.852]  → nearest: row3=3 row4=4
+  [H] H-letters-swapped-3-4 ios    row3 vs ref(row3,row4) [0.532, 0.852]  row4 vs ref(row3,row4) [0.949, 0.795]  → nearest: row3=4 row4=3

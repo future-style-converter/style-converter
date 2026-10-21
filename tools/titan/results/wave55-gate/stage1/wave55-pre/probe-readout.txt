@@ -1,0 +1,78 @@
+probe-readout  wave55-open → wave55-pre   (Δ = wave55-pre − wave55-open; a gain prints +, a fall −)
+  sections read (9, --sections): css-counter-styles,css-flexbox,css-grid,css-masking,css-text,css-text-decor,css-writing-modes,filter-effects,selectors
+  lanes that decide: all
+
+rule 1 — lost carriers (P on the base, f on the probe):
+  FIRES     css-text/hyphens/hyphenate-character-002.html ios  P 0.9534 → f 0.9165  [carrier of L1-hyphen-ios-linebox NB-ios]
+
+rules 2 / 3 — prediction rows:
+  ok        L1-hyphen-ios-linebox  css-text/hyphens/hyphenate-character-001.html ios  P 0.9611 → P 0.978 Δ+0.0169  (predicted P ≈0.978 (replay Rm 0.978; drop-U3b arm 0.9778; ceiling R0 0.9803; §9 R1 risk arm 0.9628); MED, gating floor 0.95)
+  ok        L1-hyphen-ios-linebox  css-text/hyphens/hyphenate-character-003.html ios  P 0.957 → P 0.9759 Δ+0.0189  (predicted P ≈0.976 (Rm 0.9759; arm 0.9758; R0 0.9785; R1 0.9592); MED, gating floor 0.95)
+  ok        L1-hyphen-ios-linebox  css-text/hyphens/hyphenate-character-004.html ios  f 0.9477 → P 0.975 Δ+0.0273  (predicted P ≈0.975 (Rm 0.975; arm 0.9742; R0 0.9782; R1 0.9556); MED, gating floor 0.95)
+  FIRES     L1-hyphen-ios-linebox  css-text/hyphens/hyphenate-character-002.html ios  P 0.9534 → f 0.9165 Δ-0.0369  (predicted P ≈0.969 (Rm 0.9691; arm 0.9692); the TextKit emergency breaks stay; MED)  — rule 2 Δ-0.0369 <= -0.002
+  ok        L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-001.html ios  P 0.9792 → P 0.9792 Δ+0  (predicted P, the same to ±0.0001 (radius replay U 0.9792); MED-HIGH, gating floor 0.95)
+  ok        L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-002.html ios  P 0.9695 → P 0.9694 Δ-0.0001  (predicted P, the same to ±0.0001 (radius replay U 0.9694); MED-HIGH, gating floor 0.95)
+  ok        L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-003.html ios  P 0.9781 → P 0.9781 Δ+0  (predicted P, the same to ±0.0001 (radius replay U 0.9781); MED-HIGH, gating floor 0.95)
+  ok        L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-004.html ios  P 0.9774 → P 0.9774 Δ+0  (predicted P, the same to ±0.0001 (radius replay U 0.9774); MED-HIGH, gating floor 0.95)
+  ok        L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-005.html ios  P 0.9774 → P 0.9774 Δ+0  (predicted P, the same to ±0.0001 (radius replay U 0.9774); MED-HIGH, gating floor 0.95)
+  ok        L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-006.html ios  P 0.9714 → P 0.9716 Δ+0.0002  (predicted P, the same to ±0.0001 (radius replay U 0.9714); MED-HIGH, gating floor 0.95)
+  ok        L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-007.html ios  P 0.9764 → P 0.9764 Δ+0  (predicted P, the same to ±0.0001 (radius replay U 0.9764); MED-HIGH, gating floor 0.95)
+  ok        L1-hyphen-ios-linebox  css-text/boundary-shaping/boundary-shaping-008.html ios  P 0.9789 → P 0.9789 Δ+0  (predicted P, the same to ±0.0001 (radius replay U 0.9789); MED-HIGH, gating floor 0.95)
+  ok        L1-hyphen-ios-linebox  css-text-decor/text-decoration-dotted-001.html ios  f 0.5318 → f 0.5355 Δ+0.0037  (predicted f ≈0.5355 (radius replay U), stays f; LOW-MED, floor n/a (stays f))
+  ok        L1-hyphen-ios-linebox  css-text-decor/text-decoration-dotted-002.html ios  f 0.5426 → f 0.5472 Δ+0.0046  (predicted f ≈0.5472 (radius replay U), stays f; LOW-MED, floor n/a (stays f))
+  ok        L2-cbb-android  filter-effects/backdrop-filter-nested-border-radius-clip-3.html android  f 0.9574 → P 0.9999 Δ+0.0425  (predicted P ≈0.999 (replay on Android's own re-laid probe pixels 0.9999; siblings at device probe 1 / 1 / 0.9999); MED-HIGH, gating floor 0.95)
+  ok        L2-cbb-android  filter-effects/backdrop-filter-nested-border-radius-clip.html android  P 0.9649 → P 1 Δ+0.0351  (predicted P ≈1 (device: wave54-probe 1); HIGH, gating floor 0.95)
+  ok        L2-cbb-android  filter-effects/backdrop-filter-nested-border-radius-clip-2.html android  P 0.9689 → P 1 Δ+0.0311  (predicted P ≈1 (device: wave54-probe 1); HIGH, gating floor 0.95)
+  ok        L2-cbb-android  filter-effects/backdrop-filter-nested-border-radius-clip-4.html android  P 0.977 → P 0.9999 Δ+0.0229  (predicted P ≈0.9999 (device: wave54-probe); HIGH, gating floor 0.95)
+  ok        L2-cbb-android  css-flexbox/abspos/abspos-autopos-htb-ltr.html android  P 0.9966 → P 0.9967 Δ+0.0001  (predicted P 0.9967 faithful (device: wave54-probe); HIGH, gating floor 0.95)
+  ok        L2-cbb-android  css-flexbox/abspos/abspos-autopos-vlr-ltr.html android  P 0.9966 → P 0.9967 Δ+0.0001  (predicted P 0.9967 faithful (device: wave54-probe); HIGH, gating floor 0.95)
+  ok        L2-cbb-android  css-flexbox/abspos/abspos-autopos-vrl-ltr.html android  P 0.9966 → P 0.9967 Δ+0.0001  (predicted P 0.9967 faithful (device: wave54-probe); HIGH, gating floor 0.95)
+  ok        L2-cbb-android  css-flexbox/abspos/abspos-autopos-htb-rtl.html android  P 0.9869 → P 0.9966 Δ+0.0097  (predicted P 0.9966 (device: wave54-probe); the picture becomes the iOS line (GEOMETRY WRONG); HIGH, gating floor 0.95)
+  ok        L2-cbb-android  css-flexbox/abspos/abspos-autopos-vlr-rtl.html android  P 0.9966 → P 0.9966 Δ+0  (predicted P 0.9966 (device Δ 0); the picture changes to the iOS line; HIGH, gating floor 0.95)
+  ok        L2-cbb-android  css-flexbox/abspos/abspos-autopos-vrl-rtl.html android  P 0.9966 → P 0.9966 Δ+0  (predicted P 0.9966 (device Δ 0); the picture changes to the iOS line; HIGH, gating floor 0.95)
+  ok        L3-positioned-parent-slot  selectors/dir-style-02a.html android  f 0.9425 → P 0.9854 Δ+0.0429  (predicted P ≈0.987 (replay U1+U2 0.9866, no veto); MED-HIGH, gating floor 0.95)
+  ok        L3-positioned-parent-slot  css-text/bidi/bidi-tab-001.html android  P 0.9805 → P 0.9929 Δ+0.0124  (predicted P ≈0.990 (replay 0.9901); MED-HIGH, gating floor 0.95)
+  ok        L3-positioned-parent-slot  css-writing-modes/dynamic-offset-rtl-001.html android  P 0.9952 → P 1 Δ+0.0048  (predicted P ≈1 (replay 1); MED-HIGH, gating floor 0.95)
+  ok        L3-positioned-parent-slot  css-writing-modes/dynamic-offset-rtl-002.html android  P 0.9953 → P 0.9956 Δ+0.0003  (predicted P ≈0.9956 (web's picture); MED, gating floor 0.95)
+  ok        L3-positioned-parent-slot  css-writing-modes/dynamic-offset-vrl-rtl-001.html android  P 0.9952 → P 1 Δ+0.0048  (predicted P ≈1 (replay 1); MED, gating floor 0.95)
+  ok        L3-positioned-parent-slot  css-writing-modes/dynamic-offset-vrl-rtl-002.html android  P 0.9952 → P 0.9955 Δ+0.0003  (predicted P ≈0.9955 (web's picture); MED, gating floor 0.95)
+  FIRES     L4-ua-heading-margin  css-text-decor/text-decoration-inset-005.html ios  f 0.8995 → f 0.93 Δ+0.0305  (predicted P ≈0.966 (arm C 0.9976 minus the iOS raster allowance: 0.9631-0.9695); MED, gating floor 0.95)  — rule 3 below floor 0.95
+  FIRES     L4-ua-heading-margin  css-text-decor/text-decoration-inset-006.html ios  f 0.8987 → f 0.9284 Δ+0.0297  (predicted P ≈0.966 (0.9632-0.9696); MED, gating floor 0.95)  — rule 3 below floor 0.95
+  ok        L4-ua-heading-margin  css-text-decor/text-decoration-inset-014.html ios  f 0.9238 → P 0.9936 Δ+0.0698  (predicted P ≈0.967 (0.9635-0.9699; no monospace anchor, R6); MED-LOW, gating floor 0.95)
+  ok        L4-ua-heading-margin  css-text-decor/text-decoration-inset-014.html android  f 0.923 → P 0.9867 Δ+0.0637  (predicted P ≈0.985 (0.9832-0.9861); MED, gating floor 0.95)
+  FIRES     L4-ua-heading-margin  css-text-decor/text-decoration-inset-005.html android  f 0.9 → f 0.9147 Δ+0.0147  (predicted P ≈0.967 (0.9655-0.9684); MED-LOW, gating floor 0.95)  — rule 3 below floor 0.95
+  FIRES     L4-ua-heading-margin  css-text-decor/text-decoration-inset-006.html android  f 0.8993 → f 0.9147 Δ+0.0154  (predicted P ≈0.967 (0.9656-0.9685); MED-LOW, gating floor 0.95)  — rule 3 below floor 0.95
+  ok        L4-ua-heading-margin  css-text-decor/text-decoration-inset-011.html ios  f 0.6999 → f 0.7123 Δ+0.0124  (predicted f ≈0.712 (arm M 0.7106-0.714); MED, floor n/a (stays f))
+  ok        L4-ua-heading-margin  css-text-decor/text-decoration-inset-011.html android  f 0.6852 → f 0.6913 Δ+0.0061  (predicted f ≈0.691 (arm M 0.6896-0.6933); MED, floor n/a (stays f))
+  ok        L5-counter-suffix-rows  css-counter-styles/counter-suffix.html ios  P 0.9873 → P 0.992 Δ+0.0047  (predicted P ≈0.993 (replay, all three arms; U1 0.9897 · U2o 0.9903 · U3 0.9875 · U1+U2o 0.9927 — the replay grafted only row 9's '1': U3-ios's five other tabular glyphs, ≤ 0.31 px each toward the ref's advances, are not modelled (L5 fix-r1)); MED, gating floor 0.95)
+  ok        L5-counter-suffix-rows  css-counter-styles/counter-suffix.html android  P 0.989 → P 0.9924 Δ+0.0034  (predicted P ≈0.9924 (replay U2o); MED-HIGH, gating floor 0.95)
+  ok        L5-counter-suffix-rows  css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios  P 0.993 → P 0.9971 Δ+0.0041  (predicted P ≈0.997 (replay 0.9971); MED, gating floor 0.95)
+  ok        L5-counter-suffix-rows  css-counter-styles/cjk-decimal/css3-counter-styles-005.html android  P 0.9759 → P 0.9741 Δ-0.0018  (predicted P ≈0.974 (replay 0.9741: down 0.0018, pre-registered); LOW-MED, gating floor 0.95, pre-registered Δ-0.0018)
+  ok        L6-android-paint-order  filter-effects/backdrop-filter-clip-rect.html android  P 0.9559 → P 0.9574 Δ+0.0015  (predicted P ≈0.957 (replay 0.9574); HIGH, gating floor 0.95)
+  ok        L6-android-paint-order  css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html android  P 0.9619 → P 0.9943 Δ+0.0324  (predicted P ≈0.994 (replay 0.9938); MED-HIGH, gating floor 0.95)
+  ok        L6-android-paint-order  css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html android  P 0.9635 → P 0.9932 Δ+0.0297  (predicted P ≈0.991 (replay 0.991, a lower bound: §7); MED-HIGH, gating floor 0.95)
+  ok        L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-001.html android  P 0.9673 → P 0.9671 Δ-0.0002  (predicted P ≈0.9672 (replay); MED, gating floor 0.95)
+  ok        L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-justify-self-001.html android  P 0.9667 → P 0.9667 Δ+0  (predicted P ≈0.9667 (replay); MED, gating floor 0.95)
+  ok        L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html android  P 0.9612 → P 0.9613 Δ+0.0001  (predicted P ≈0.9613 (replay); MED, gating floor 0.95)
+  ok        L6-android-paint-order  css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html android  P 0.9646 → P 0.9645 Δ-0.0001  (predicted P ≈0.9645 (replay); MED, gating floor 0.95)
+
+non-carrier cells — must-not-move (any move = leak signal), L6 may-move (0.002 band), ring-fenced (report only):
+  MAY-MOVE  css-grid/abspos/descendant-static-position-001.html android  P 0.9892 → P 0.9991 [movers] — beyond L6's 0.002 band: LOOK — a band now under its child → keep U2 and record it; anything else → revert L6 U2
+  MAY-MOVE  css-grid/abspos/descendant-static-position-002.html android  P 0.9601 → P 0.9724 [movers] — beyond L6's 0.002 band: LOOK — a band now under its child → keep U2 and record it; anything else → revert L6 U2
+  may-move  css-grid/abspos/descendant-static-position-004.html android  P 0.9729 → P 0.9736 Δ0.0007 — within L6's 0.002 band
+  may-move  css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-001.html android  P 0.9947 → P 0.9948 Δ0.0001 — within L6's 0.002 band
+  may-move  css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-001.html android  P 0.9948 → P 0.9949 Δ0.0001 — within L6's 0.002 band
+  may-move  css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-002.html android  P 0.9948 → P 0.9949 Δ0.0001 — within L6's 0.002 band
+  RING-FENCED filter-effects/backdrop-filter-basic-blur.html android  f 0.904 → f 0.9076 [movers] — report plainly in the PR; never a target, never a revert
+  1195 non-carrier cells read (1111 must-not-move lines, 81 L6 may-move of which 4 moved within the band); 2 leak signal(s)
+
+summary: rule 1 fired 1 · rule 2 fired 1 · rule 3 fired 4 · leak signals 2 · undirected falls read 0 · unmeasured 0 · recorded for another lane 0
+units named (revert rule 6: each unit with its revertOrder, latest first; re-probe between steps):
+  L1-hyphen-ios-linebox NB-ios  (revertOrder NB-ios): 2 reason(s) — rule 1 css-text/hyphens/hyphenate-character-002.html ios; rule 2 Δ-0.0369 <= -0.002 css-text/hyphens/hyphenate-character-002.html ios
+  L4-ua-heading-margin U1-ios  (revertOrder U2-ios → U1-ios): 2 reason(s) — rule 3 below floor 0.95 css-text-decor/text-decoration-inset-005.html ios; rule 3 below floor 0.95 css-text-decor/text-decoration-inset-006.html ios
+  L4-ua-heading-margin U2-ios  (revertOrder U2-ios): 2 reason(s) — rule 3 below floor 0.95 css-text-decor/text-decoration-inset-005.html ios; rule 3 below floor 0.95 css-text-decor/text-decoration-inset-006.html ios
+  L4-ua-heading-margin U1-android  (revertOrder U2-android → U1-android): 2 reason(s) — rule 3 below floor 0.95 css-text-decor/text-decoration-inset-005.html android; rule 3 below floor 0.95 css-text-decor/text-decoration-inset-006.html android
+  L4-ua-heading-margin U2-android  (revertOrder U2-android): 2 reason(s) — rule 3 below floor 0.95 css-text-decor/text-decoration-inset-005.html android; rule 3 below floor 0.95 css-text-decor/text-decoration-inset-006.html android
+  L6-android-paint-order U2  (revertOrder U2): 2 reason(s) — may-move beyond 0.002 css-grid/abspos/descendant-static-position-001.html android; may-move beyond 0.002 css-grid/abspos/descendant-static-position-002.html android
+
+PROBE: revert rules fired — revert the named units (leaks: bisect; may-move: look first)

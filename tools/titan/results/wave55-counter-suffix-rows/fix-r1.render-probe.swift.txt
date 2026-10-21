@@ -1,0 +1,39 @@
+// fix-r1.render-probe.swift.txt — the throwaway Catalyst render class behind fix-r1.catalyst-{full,noU1}.png (kept as text, never
+// delivered as a test; <out-dir> was the fix lane's scratch dir, the PNGs were then copied into this lane dir).
+// THROWAWAY fix-lane probe (wave55-fix-L5 worktree only; never delivered). Run ALONE: it registers the harness's Inter
+// faces for this test process. Renders the VERBATIM wave54-final counter-suffix per-test IR through ComponentHost (the real
+// marker / label paths) at the capture's 390x600 and writes the PNG to the fix lane's scratch dir under LABEL.
+import XCTest
+import SwiftUI
+import CoreText
+import ImageIO
+import UniformTypeIdentifiers
+@testable import StyleConverterRuntime
+
+final class ZZFixL5RenderTests: XCTestCase {
+    static let label = "LABEL"   // "full" (every L5 patch) or "noU1" (the [all − U1-ios] revert state)
+    static let doc = "/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave54-final/sections/css-counter-styles/per-test-ir/wpt__css-counter-styles__counter-suffix.json"
+
+    @MainActor
+    func testRender() throws {
+        var dir = URL(fileURLWithPath: #filePath)
+        for _ in 0..<5 { dir.deleteLastPathComponent() }
+        for f in ["Inter-Regular", "Inter-Medium", "Inter-Bold", "Inter-Black"] {
+            CTFontManagerRegisterFontsForURL(dir.appendingPathComponent("apps/ios-harness/StyleConverterTest/Resources/\(f).otf") as CFURL, .process, nil)
+        }
+        let raw = try String(contentsOfFile: Self.doc, encoding: .utf8)
+        let d = try JSONDecoder().decode(IRDocument.self, from: Data(raw.utf8))
+        let view = VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(d.components.enumerated()), id: \.offset) { _, c in ComponentHost(component: c) }
+        }.frame(width: 358, alignment: .topLeading).padding(16)
+            .frame(width: 390, height: 600, alignment: .topLeading).background(Color.white)
+            .environment(\.wptCaptureMode, true)
+            .environment(\.styleViewport, StyleViewport(width: 390, height: 844, rootContainingBlock: 358))
+        let r = ImageRenderer(content: view); r.scale = 1
+        let cg = try XCTUnwrap(r.cgImage)
+        let url = URL(fileURLWithPath: "<out-dir>/fix-r1.catalyst-\(Self.label).png") as CFURL
+        let dst = try XCTUnwrap(CGImageDestinationCreateWithURL(url, UTType.png.identifier as CFString, 1, nil))
+        CGImageDestinationAddImage(dst, cg, nil); XCTAssertTrue(CGImageDestinationFinalize(dst))
+        print("FXRENDER \(Self.label) \(cg.width)x\(cg.height)")
+    }
+}

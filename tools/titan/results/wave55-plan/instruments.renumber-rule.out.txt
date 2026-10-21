@@ -1,0 +1,2 @@
+documents visited in tests.list order 1435 of 1435 per-test-ir files
+renumbered (suffix-strip, the wave-54 class) 15 · of them uniform shift == running delta 15

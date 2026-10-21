@@ -1,0 +1,54 @@
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [H] counter-suffix web                                     PASS       [control: expected to stay PASS]
+!! L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [H] counter-suffix ios                                     FAIL       [GATING -> revert U1-ios]
+     line: [H] counter-suffix ios row3:x48-48,x51-57 row4:x48-48,x51-58 → GEOMETRY WRONG (row 3 period x48-48 before the letter x51-57 (suffix on the wrong side: first-strong RTL base direction))
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [H] counter-suffix android                                 PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [C] counter-suffix web                                     PASS       [control: expected to stay PASS]
+!! L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [C] counter-suffix ios                                     FAIL       [GATING -> revert U2o-ios]
+     line: uffix ios row5:x29-42,x46-48|item x64|strokes 1 y(123, 124) row6:x29-42,x46-48|item x65|strokes 2 y(142, 153) → GEOMETRY WRONG (row 5 marker left x29 vs ref x33±1 (suffix gap: the "、" must end flush at the content edge))
+!! L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [C] counter-suffix android                                 FAIL       [GATING -> revert U2o-android]
+     line: x android row5:x29-42,x45-48|item x65|strokes 1 y(123, 124) row6:x30-41,x45-48|item x65|strokes 2 y(143, 153) → GEOMETRY WRONG (row 5 marker left x29 vs ref x33±1 (suffix gap: the "、" must end flush at the content edge))
+!c L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [T] counter-suffix web                                     FAIL       [control: expected to stay PASS]
+     line: [T] counter-suffix web row9 digit (138, 144, 214, 225) → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-open (75 px))
+!! L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [T] counter-suffix ios                                     FAIL       [GATING -> revert U3-ios]
+     line: [T] counter-suffix ios row9 digit (138, 141, 214, 225) → GEOMETRY WRONG (digit ink x138-141 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+!c L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [T] counter-suffix android                                 FAIL       [control: expected to stay PASS]
+     line: [T] counter-suffix android row9 digit (139, 145, 215, 225) → GEOMETRY WRONG (zone x0-135×y208-231 differs from wave54-open (171 px))
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [L] counter-suffix web                                     PASS       [control: expected to stay PASS]
+ - L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [L] counter-suffix ios                                     FAIL       [report: expected WRONG until the target is fixed]
+     line: [L] counter-suffix ios row1 digit (49, 52, 22, 33) → GEOMETRY WRONG (digit ink x49-52 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+ - L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [L] counter-suffix android                                 FAIL       [report: expected WRONG until the target is fixed]
+     line: [L] counter-suffix android row1 digit (49, 52, 23, 33) → GEOMETRY WRONG (digit ink x49-52 4 px wide vs ref 7 (proportional '1': tabular-nums not applied))
+!c L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [K] counter-suffix web                                     FAIL       [control: expected to stay PASS]
+     line: [K] counter-suffix web zones y0-599 vs wave54-open → GEOMETRY WRONG (zone y0-599 differs from wave54-open (533 px))
+!c L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [K] counter-suffix ios                                     FAIL       [control: expected to stay PASS]
+     line: [K] counter-suffix ios zones y0-63,y160-207,y232-599,x64-389×y64-159,x0-135×y208-231,x151-end×y208-231 vs wave54-open → GEOMETRY WRONG (zone y232-599 differs from wave54-open (185 px))
+!c L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [K] counter-suffix android                                 FAIL       [control: expected to stay PASS]
+     line: [K] counter-suffix android zones y0-111,y160-599,x64-389×y64-159 vs wave54-open → GEOMETRY WRONG (zone y160-599 differs from wave54-open (1496 px))
+   L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [I] cjk-decimal/css3-counter-styles-005 web                PASS       [control: expected to stay PASS]
+!! L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [I] cjk-decimal/css3-counter-styles-005 ios                FAIL       [GATING -> revert U2i-ios]
+     line: ker x217-249 (2, fill 0.96, strokes 1 y(102, 103)) item x271 y121:marker x218-249 (2, fill 0.2, strokes 2 y(125, 142)) item x272 → GEOMETRY WRONG (line y95 item text left x271 vs ref x268±1 (inside "、" marker not flush))
+!! L5-counter-suffix-rows   counter-suffix-rows.geometry.py            [I] cjk-decimal/css3-counter-styles-005 android            FAIL       [GATING -> revert U2i-android]
+     line: er x217-248 (2, fill 0.98, strokes 1 y(104, 105)) item x271 y121:marker x218-248 (2, fill 0.11, strokes 2 y(128, 145)) item x272 → GEOMETRY WRONG (line y95 item text left x271 vs ref x268±1 (inside "、" marker not flush))
+   L5-counter-suffix-rows   rtl-marker-bake.geometry.py                [M] counter-suffix web                                     PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   rtl-marker-bake.geometry.py                [M] counter-suffix ios                                     PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   rtl-marker-bake.geometry.py                [M] counter-suffix android                                 PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   lists-bakes.geometry.py                    counter-suffix web                                         PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   lists-bakes.geometry.py                    counter-suffix ios                                         PASS       [control: expected to stay PASS]
+   L5-counter-suffix-rows   lists-bakes.geometry.py                    counter-suffix android                                     PASS       [control: expected to stay PASS]
+
+geometry-gate wave54-final (base wave54-open): 24 keys — PASS 11 · FAIL 13 (gating 6) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 6 (PASS 0 FAIL 6) · control 16 (PASS 11 FAIL 5) · report 2 (PASS 0 FAIL 2) · withdrawn 0 (PASS 0 FAIL 0)
+revert rule 4 names: L5-counter-suffix-rows U1-ios, L5-counter-suffix-rows U2i-android, L5-counter-suffix-rows U2i-ios, L5-counter-suffix-rows U2o-android, L5-counter-suffix-rows U2o-ios, L5-counter-suffix-rows U3-ios
+CONTROL FAILS (5) — a must-not-move picture moved; diagnose through rule 5 / R4 (a control on a carrier: the cell review):
+   L5-counter-suffix-rows counter-suffix-rows.geometry.py [T] counter-suffix web
+   L5-counter-suffix-rows counter-suffix-rows.geometry.py [T] counter-suffix android
+   L5-counter-suffix-rows counter-suffix-rows.geometry.py [K] counter-suffix web
+   L5-counter-suffix-rows counter-suffix-rows.geometry.py [K] counter-suffix ios
+   L5-counter-suffix-rows counter-suffix-rows.geometry.py [K] counter-suffix android
+SELF-TEST VIOLATION control FAIL: L5-counter-suffix-rows counter-suffix-rows.geometry.py [T] counter-suffix web
+SELF-TEST VIOLATION control FAIL: L5-counter-suffix-rows counter-suffix-rows.geometry.py [T] counter-suffix android
+SELF-TEST VIOLATION control FAIL: L5-counter-suffix-rows counter-suffix-rows.geometry.py [K] counter-suffix web
+SELF-TEST VIOLATION control FAIL: L5-counter-suffix-rows counter-suffix-rows.geometry.py [K] counter-suffix ios
+SELF-TEST VIOLATION control FAIL: L5-counter-suffix-rows counter-suffix-rows.geometry.py [K] counter-suffix android
+self-test: FAILS — 5 violation(s), 0 self-check failure(s)
+base wave54-open exit 1

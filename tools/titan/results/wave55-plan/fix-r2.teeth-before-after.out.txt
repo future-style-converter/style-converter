@@ -1,0 +1,240 @@
+# fix-r2.teeth-before-after.out.txt — instrument-teeth M6: the standing set (probes-teeth.py round 1 + probes-teeth-r2.py round 2, every
+# gating key and every pictureCorrectTally key) through the real geometry-gate.py on the GENERATED expectations.json sha256 56dbcfc021c3ae60…
+## BEFORE: the ROUND-1 probe bytes (the ones skeptic round 2 attacked), in a throwaway worktree (removed after) — must exit 1
+round-1 probe in the throwaway: positioned-parent-slot.geometry.py sha256 684efbba3d9ab660… (the shared tree's round-2 copy: 96832289b0424735…)
+round-1 probe in the throwaway: compose-wpt-content-box-cb.geometry.py sha256 2c9afe724fb33687… (the shared tree's round-2 copy: 7c83a63eaa3d9c2a…)
+round-1 probe in the throwaway: cbb-android.geometry.py sha256 da18870320d4b3f1… (the shared tree's round-2 copy: 1fa595a11152a03a…)
+round-1 probe in the throwaway: counter-suffix-rows.geometry.py sha256 988c9d16f3a97b3e… (the shared tree's round-2 copy: 532358161f48c3f5…)
+round-1 probe in the throwaway: ua-heading-margin.geometry.py sha256 3c0902864a9f045a… (the shared tree's round-2 copy: 08024cf0319b8509…)
+round-1 probe in the throwaway: android-paint-order.geometry.py sha256 3c38ae47f143e262… (the shared tree's round-2 copy: dd06fcae0700a713…)
+  L1 fixed                        gate exit 0: as pre-registered (3 key(s))
+  L1 hyph-removed                 gate exit 1: as pre-registered (2 key(s))
+  L1 lines-2-3-swapped            gate exit 1: as pre-registered (3 key(s))
+  L1 right-half-cut               gate exit 1: as pre-registered (3 key(s))
+  L1 text+3x                      gate exit 1: as pre-registered (3 key(s))
+  L1 text-2x                      gate exit 1: as pre-registered (3 key(s))
+  L1 g2l1+3x                      gate exit 1: as pre-registered (3 key(s))
+  L1 r2-L1-tally-fixed            gate exit 0: as pre-registered (2 key(s))
+  L1 r2-L1-one-hyph-removed       gate exit 1: as pre-registered (3 key(s))
+  L1 r2-L1-g1l2-last-cell-cut     gate exit 1: as pre-registered (5 key(s))
+  L1 r2-L1-g3l2+1x                gate exit 1: as pre-registered (3 key(s))
+  L1 r2-L1-all+1x                 gate exit 1: as pre-registered (3 key(s))
+  L2 U1-fixed                     gate exit 1: as pre-registered (6 key(s))
+  L2 U1-hollow                    gate exit 1: as pre-registered (6 key(s))
+  L2 U1-corners2                  gate exit 1: as pre-registered (6 key(s))
+  L2 U1-stripe30                  gate exit 1: as pre-registered (6 key(s))
+  L2 U1-shift+2x                  gate exit 1: as pre-registered (6 key(s))
+  L2 U1-shift-3y                  gate exit 1: as pre-registered (6 key(s))
+  L2 U1-short3                    gate exit 1: as pre-registered (6 key(s))
+  L2 U2-fixed                     gate exit 1: as pre-registered (2 key(s))
+  L2 U2-gut-cross                 gate exit 1: as pre-registered (2 key(s))
+  L2 U2-square-3-corners          gate exit 1: as pre-registered (2 key(s))
+  L2 U2-shift+2x                  gate exit 1: as pre-registered (2 key(s))
+  L2 U2-stripe30                  gate exit 1: as pre-registered (2 key(s))
+  L2 r2-L2-fail-ink-sliver        gate exit 1: VIOLATION (6 key(s))
+  L2 r2-L2-notch7                 gate exit 1: VIOLATION (6 key(s))
+  L2 r2-L2-radius-moved           gate exit 1: VIOLATION (3 key(s))
+  L2 r2-L2-c3-pink-sliver-off-scanlines gate exit 1: VIOLATION (2 key(s))
+  L2 r2-L2-c3-notch-off-scanlines gate exit 1: VIOLATION (2 key(s))
+  L3 dir-row6-fixed               gate exit 0: as pre-registered (1 key(s))
+  L3 dir-row6-gut                 gate exit 1: as pre-registered (1 key(s))
+  L3 dir-row6-mirror-words        gate exit 1: as pre-registered (1 key(s))
+  L3 dir-row6-text+2x             gate exit 1: as pre-registered (1 key(s))
+  L3 dir-row6-text-3x             gate exit 1: as pre-registered (1 key(s))
+  L3 dir-row6-text+3x             gate exit 1: as pre-registered (1 key(s))
+  L3 dir-row7-fixed               gate exit 0: as pre-registered (1 key(s))
+  L3 dir-row7-gut                 gate exit 1: as pre-registered (1 key(s))
+  L3 dir-row7-mirror-words        gate exit 1: as pre-registered (1 key(s))
+  L3 dir-row7-text+2x             gate exit 1: as pre-registered (1 key(s))
+  L3 dir-row7-text-3x             gate exit 1: as pre-registered (1 key(s))
+  L3 dir-row7-text+3x             gate exit 1: as pre-registered (1 key(s))
+  L3 dir-row9-fixed               gate exit 0: as pre-registered (1 key(s))
+  L3 dir-row9-gut                 gate exit 1: as pre-registered (1 key(s))
+  L3 dir-row9-mirror-words        gate exit 1: as pre-registered (1 key(s))
+  L3 dir-row9-text+2x             gate exit 1: as pre-registered (1 key(s))
+  L3 dir-row9-text-3x             gate exit 1: as pre-registered (1 key(s))
+  L3 dir-row9-text+3x             gate exit 1: as pre-registered (1 key(s))
+  L3 bidi-fixed                   gate exit 0: as pre-registered (1 key(s))
+  L3 bidi-gut                     gate exit 1: as pre-registered (1 key(s))
+  L3 bidi-rtl+2x                  gate exit 1: as pre-registered (1 key(s))
+  L3 bidi-rtl-3x                  gate exit 1: as pre-registered (1 key(s))
+  L3 stack-fixed                  gate exit 0: as pre-registered (1 key(s))
+  L3 stack-grown30                gate exit 1: as pre-registered (1 key(s))
+  L3 stack-slab                   gate exit 1: as pre-registered (1 key(s))
+  L3 stack-dup-stacked            gate exit 1: as pre-registered (1 key(s))
+  L3 stack-shift+1x               gate exit 1: as pre-registered (1 key(s))
+  L3 001-fixed                    gate exit 1: as pre-registered (1 key(s))
+  L3 001-hollow                   gate exit 1: as pre-registered (1 key(s))
+  L3 001-shift+2x                 gate exit 1: as pre-registered (1 key(s))
+  L3 002-fixed                    gate exit 1: as pre-registered (1 key(s))
+  L3 002-shift+3y                 gate exit 1: as pre-registered (1 key(s))
+  L3 002-shift-3y                 gate exit 1: as pre-registered (1 key(s))
+  L3 002-wider+5                  gate exit 1: as pre-registered (1 key(s))
+  L3 002-hollow                   gate exit 1: as pre-registered (1 key(s))
+  L3 r2-L3-dir-row6-text+2y       gate exit 0: VIOLATION (1 key(s))
+  L3 r2-L3-dir-row6-text-2y       gate exit 0: VIOLATION (1 key(s))
+  L3 r2-L3-dir-row6-text-vflip    gate exit 0: VIOLATION (1 key(s))
+  L3 r2-L3-dir-row7-text+2y       gate exit 0: VIOLATION (1 key(s))
+  L3 r2-L3-dir-row7-text-2y       gate exit 0: VIOLATION (1 key(s))
+  L3 r2-L3-dir-row7-text-vflip    gate exit 0: VIOLATION (1 key(s))
+  L3 r2-L3-dir-row9-text+2y       gate exit 0: VIOLATION (1 key(s))
+  L3 r2-L3-dir-row9-text-2y       gate exit 0: VIOLATION (1 key(s))
+  L3 r2-L3-dir-row9-text-vflip    gate exit 0: VIOLATION (1 key(s))
+  L3 r2-L3-bidi-rtl-run-order-mirrored gate exit 0: VIOLATION (1 key(s))
+  L3 r2-L3-bidi-yellow-boxes-erased gate exit 0: VIOLATION (1 key(s))
+  L3 r2-L3-stack-red-shown        gate exit 0: VIOLATION (1 key(s))
+  L3 r2-L3-stack-other-squares-erased gate exit 0: VIOLATION (1 key(s))
+  L3 r2-L3-vrl-rtl-001-fixed      gate exit 1: as pre-registered (1 key(s))
+  L3 r2-L3-rtl-001-parent-erased  gate exit 1: VIOLATION (1 key(s))
+  L3 r2-L3-rtl-001-parent+3x      gate exit 1: VIOLATION (1 key(s))
+  L3 r2-L3-rtl-002-parent-erased  gate exit 1: VIOLATION (1 key(s))
+  L3 r2-L3-rtl-002-parent+3x      gate exit 1: VIOLATION (1 key(s))
+  L3 r2-L3-vrl-rtl-001-parent-erased gate exit 1: VIOLATION (1 key(s))
+  L3 r2-L3-vrl-rtl-001-parent+3x  gate exit 1: VIOLATION (1 key(s))
+  L4 C-fixed                      gate exit 0: as pre-registered (12 key(s))
+  L4 C-heading+3y                 gate exit 1: as pre-registered (12 key(s))
+  L4 C-heading-2y                 gate exit 1: as pre-registered (12 key(s))
+  L4 C-heading+12x                gate exit 1: as pre-registered (12 key(s))
+  L4 C-line2-removed              gate exit 1: as pre-registered (8 key(s))
+  L4 C-line1-truncated            gate exit 1: as pre-registered (12 key(s))
+  L4 U1-fixed                     gate exit 1: as pre-registered (12 key(s))
+  L4 U1-heading+3y                gate exit 1: as pre-registered (12 key(s))
+  L4 U1-heading-2y                gate exit 1: as pre-registered (12 key(s))
+  L4 U1-heading+12x               gate exit 1: as pre-registered (12 key(s))
+  L4 U1-line2-removed             gate exit 1: as pre-registered (6 key(s))
+  L4 U1-line1-truncated           gate exit 1: as pre-registered (12 key(s))
+  L4 r2-L4-C-line1-mirrored       gate exit 1: VIOLATION (10 key(s))
+  L4 r2-L4-U1-line1-mirrored      gate exit 1: VIOLATION (6 key(s))
+  L4 r2-L4-C-line1-thirds-swapped gate exit 1: VIOLATION (10 key(s))
+  L4 r2-L4-U1-line1-thirds-swapped gate exit 1: VIOLATION (6 key(s))
+  L4 r2-L4-C-line1-clipped-10px   gate exit 1: as pre-registered (10 key(s))
+  L4 r2-L4-011-C-band1-mirrored   gate exit 1: VIOLATION (2 key(s))
+  L4 r2-L4-011-U1-band1-mirrored  gate exit 1: VIOLATION (2 key(s))
+  L5 fixed                        gate exit 0: as pre-registered (8 key(s))
+  L5 I-comma-removed              gate exit 1: as pre-registered (2 key(s))
+  L5 I-marker-block               gate exit 1: as pre-registered (2 key(s))
+  L5 T-1-down3                    gate exit 1: as pre-registered (1 key(s))
+  L5 T-1-bar7                     gate exit 1: as pre-registered (1 key(s))
+  L5 C-ideograph-gutted           gate exit 1: as pre-registered (2 key(s))
+  L5 H-letter-block               gate exit 1: as pre-registered (1 key(s))
+  L5 H-item-text-gone             gate exit 0: as pre-registered (2 key(s))
+  L5 r2-L5-C-ideographs-swapped-5-6 gate exit 0: VIOLATION (2 key(s))
+  L5 r2-L5-C-ideograph+3y         gate exit 0: VIOLATION (2 key(s))
+  L5 r2-L5-H-letters-swapped-3-4  gate exit 0: VIOLATION (1 key(s))
+  L5 r2-L5-H-period-3y            gate exit 0: VIOLATION (1 key(s))
+  L5 r2-L5-T-row9-text-erased     gate exit 0: VIOLATION (3 key(s))
+  L5 r2-L5-T-row9-text-3x         gate exit 0: VIOLATION (3 key(s))
+  L5 r2-L5-I-line1-ideograph-is-line2s gate exit 0: VIOLATION (2 key(s))
+  L5 r2-L5-I-line1-marker+3y      gate exit 0: VIOLATION (2 key(s))
+  L6 X-fixed                      gate exit 1: as pre-registered (6 key(s))
+  L6 X-border-erased              gate exit 1: as pre-registered (6 key(s))
+  L6 X-child+3x                   gate exit 1: as pre-registered (6 key(s))
+  L6 X-child-3y                   gate exit 1: as pre-registered (6 key(s))
+  L6 X-child-shrunk8%             gate exit 1: as pre-registered (6 key(s))
+  L6 X-child-scrambled            gate exit 1: as pre-registered (6 key(s))
+  L6 PO-fixed                     gate exit 0: as pre-registered (1 key(s))
+  L6 PO-navbar-sides-erased       gate exit 1: as pre-registered (1 key(s))
+  L6 PO-menus+1y                  gate exit 1: as pre-registered (1 key(s))
+  L6 PO-menus+2y                  gate exit 1: as pre-registered (1 key(s))
+  L6 r2-L6-X-one-child-moved-3px  gate exit 1: VIOLATION (5 key(s))
+130 cases; violations 92; gating + tally keys with ≥ 1 rejected fake 47 / 48
+  VIOLATION L2 r2-L2-fail-ink-sliver: compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-htb-ltr android printed PASS, pre-registered FAIL — abspos/abspos-autopos-htb-ltr android {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 200} → GEOMETRY OK
+  VIOLATION L2 r2-L2-fail-ink-sliver: compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vlr-ltr android printed PASS, pre-registered FAIL — abspos/abspos-autopos-vlr-ltr android {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 200} → GEOMETRY OK
+  VIOLATION L2 r2-L2-fail-ink-sliver: compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vrl-ltr android printed PASS, pre-registered FAIL — abspos/abspos-autopos-vrl-ltr android {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 200} → GEOMETRY OK
+  VIOLATION L2 r2-L2-fail-ink-sliver: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip android printed PASS, pre-registered FAIL — backdrop-filter-nested-border-radius-clip android {'green': (26, 26, 225, 125), 'greenPx': 19384, 'failInkPx': 200} → GEOMETRY OK
+  VIOLATION L2 r2-L2-fail-ink-sliver: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-2 android printed PASS, pre-registered FAIL — backdrop-filter-nested-border-radius-clip-2 android {'green': (26, 26, 225, 125), 'greenPx': 19464, 'failInkPx': 200} → GEOMETRY OK
+  VIOLATION L2 r2-L2-fail-ink-sliver: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-4 android printed PASS, pre-registered FAIL — backdrop-filter-nested-border-radius-clip-4 android {'green': (26, 26, 185, 105), 'greenPx': 12559, 'failInkPx': 200} → GEOMETRY OK
+  VIOLATION L2 r2-L2-notch7: compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-htb-ltr android printed PASS, pre-registered FAIL — abspos/abspos-autopos-htb-ltr android {'green': (16, 88, 115, 187), 'greenPx': 9951, 'failInkPx': 0} → GEOMETRY OK
+  VIOLATION L2 r2-L2-notch7: compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vlr-ltr android printed PASS, pre-registered FAIL — abspos/abspos-autopos-vlr-ltr android {'green': (16, 88, 115, 187), 'greenPx': 9951, 'failInkPx': 0} → GEOMETRY OK
+  VIOLATION L2 r2-L2-notch7: compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vrl-ltr android printed PASS, pre-registered FAIL — abspos/abspos-autopos-vrl-ltr android {'green': (16, 88, 115, 187), 'greenPx': 9951, 'failInkPx': 0} → GEOMETRY OK
+  VIOLATION L2 r2-L2-notch7: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip android printed PASS, pre-registered FAIL — backdrop-filter-nested-border-radius-clip android {'green': (26, 26, 225, 125), 'greenPx': 19335, 'failInkPx': 0} → GEOMETRY OK
+  VIOLATION L2 r2-L2-notch7: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-2 android printed PASS, pre-registered FAIL — backdrop-filter-nested-border-radius-clip-2 android {'green': (26, 26, 225, 125), 'greenPx': 19415, 'failInkPx': 0} → GEOMETRY OK
+  VIOLATION L2 r2-L2-notch7: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-4 android printed PASS, pre-registered FAIL — backdrop-filter-nested-border-radius-clip-4 android {'green': (26, 26, 185, 105), 'greenPx': 12510, 'failInkPx': 0} → GEOMETRY OK
+  VIOLATION L2 r2-L2-radius-moved: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip android printed PASS, pre-registered FAIL — backdrop-filter-nested-border-radius-clip android {'green': (26, 26, 225, 125), 'greenPx': 19369, 'failInkPx': 0} → GEOMETRY OK
+  VIOLATION L2 r2-L2-radius-moved: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-2 android printed PASS, pre-registered FAIL — backdrop-filter-nested-border-radius-clip-2 android {'green': (26, 26, 225, 125), 'greenPx': 19451, 'failInkPx': 0} → GEOMETRY OK
+  VIOLATION L2 r2-L2-radius-moved: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-4 android printed PASS, pre-registered FAIL — backdrop-filter-nested-border-radius-clip-4 android {'green': (26, 26, 185, 105), 'greenPx': 12549, 'failInkPx': 0} → GEOMETRY OK
+  VIOLATION L2 r2-L2-c3-pink-sliver-off-scanlines: cbb-android.geometry.py backdrop-filter-nested-border-radius-clip-3 android printed PASS, pre-registered FAIL — -radius-clip-3 android {green (36, 36, 235, 135) greenPx 19384 corner [254, 254, 254, 254] row blue[16..25] grey[26..35] green[36..235]} → GEOMETRY OK
+  VIOLATION L2 r2-L2-c3-pink-sliver-off-scanlines: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-3 android printed PASS, pre-registered FAIL — backdrop-filter-nested-border-radius-clip-3 android {'green': (36, 36, 235, 135), 'greenPx': 19384, 'failInkPx': 80} → GEOMETRY OK
+  VIOLATION L2 r2-L2-c3-notch-off-scanlines: cbb-android.geometry.py backdrop-filter-nested-border-radius-clip-3 android printed PASS, pre-registered FAIL — -radius-clip-3 android {green (36, 36, 235, 135) greenPx 19335 corner [254, 254, 254, 254] row blue[16..25] grey[26..35] green[36..235]} → GEOMETRY OK
+  VIOLATION L2 r2-L2-c3-notch-off-scanlines: compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-3 android printed PASS, pre-registered FAIL — backdrop-filter-nested-border-radius-clip-3 android {'green': (36, 36, 235, 135), 'greenPx': 19335, 'failInkPx': 0} → GEOMETRY OK
+  VIOLATION L3 r2-L3-dir-row6-text+2y: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL — [S] dir-style-02a android row6 ink (17, 122, 153, 133) dot 4px profile 0.92@+0 → GEOMETRY OK
+  VIOLATION L3 r2-L3-dir-row6-text-2y: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL — [S] dir-style-02a android row6 ink (17, 118, 153, 131) dot 4px profile 0.92@+0 → GEOMETRY OK
+  VIOLATION L3 r2-L3-dir-row6-text-vflip: positioned-parent-slot.geometry.py [S] dir-style-02a android row6 printed PASS, pre-registered FAIL — [S] dir-style-02a android row6 ink (17, 120, 153, 131) dot 4px profile 0.92@+0 → GEOMETRY OK
+  VIOLATION L3 r2-L3-dir-row7-text+2y: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL — [S] dir-style-02a android row7 ink (17, 142, 243, 153) dot 4px profile 0.92@+0 → GEOMETRY OK
+  VIOLATION L3 r2-L3-dir-row7-text-2y: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL — [S] dir-style-02a android row7 ink (17, 138, 243, 151) dot 4px profile 0.92@+0 → GEOMETRY OK
+  VIOLATION L3 r2-L3-dir-row7-text-vflip: positioned-parent-slot.geometry.py [S] dir-style-02a android row7 printed PASS, pre-registered FAIL — [S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px profile 0.92@+0 → GEOMETRY OK
+  VIOLATION L3 r2-L3-dir-row9-text+2y: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL — [S] dir-style-02a android row9 ink (17, 182, 153, 193) dot 4px profile 0.92@+0 → GEOMETRY OK
+  VIOLATION L3 r2-L3-dir-row9-text-2y: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL — [S] dir-style-02a android row9 ink (17, 178, 153, 191) dot 4px profile 0.92@+0 → GEOMETRY OK
+  VIOLATION L3 r2-L3-dir-row9-text-vflip: positioned-parent-slot.geometry.py [S] dir-style-02a android row9 printed PASS, pre-registered FAIL — [S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px profile 0.92@+0 → GEOMETRY OK
+  VIOLATION L3 r2-L3-bidi-rtl-run-order-mirrored: positioned-parent-slot.geometry.py [S] bidi-tab-001 android rtl-rows printed PASS, pre-registered FAIL — [S] bidi-tab-001 android rtl-rows y86:(16, 36, 248) y106:(114, 135, 266) y186:(16, 36, 248) y226:(16, 36, 248) → GEOMETRY OK
+  VIOLATION L3 r2-L3-bidi-yellow-boxes-erased: positioned-parent-slot.geometry.py [S] bidi-tab-001 android rtl-rows printed PASS, pre-registered FAIL — [S] bidi-tab-001 android rtl-rows y86:(16, 36, 248) y106:(114, 135, 266) y186:(16, 36, 248) y226:(16, 36, 248) → GEOMETRY OK
+  VIOLATION L3 r2-L3-stack-red-shown: positioned-parent-slot.geometry.py [W] anchor-position-multicol-nested-001 android stack printed PASS, pre-registered FAIL — [W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] ring [0, 0, 0, 0] → GEOMETRY OK
+  VIOLATION L3 r2-L3-stack-other-squares-erased: positioned-parent-slot.geometry.py [W] anchor-position-multicol-nested-001 android stack printed PASS, pre-registered FAIL — [W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] ring [0, 0, 0, 0] → GEOMETRY OK
+  VIOLATION L3 r2-L3-rtl-001-parent-erased: positioned-parent-slot.geometry.py [S] dynamic-offset-rtl-001 android printed PASS, pre-registered FAIL — [S] dynamic-offset-rtl-001 android magenta (86, 26, 95, 35) n 100 → GEOMETRY OK
+  VIOLATION L3 r2-L3-rtl-001-parent+3x: positioned-parent-slot.geometry.py [S] dynamic-offset-rtl-001 android printed PASS, pre-registered FAIL — [S] dynamic-offset-rtl-001 android magenta (86, 26, 95, 35) n 100 → GEOMETRY OK
+  VIOLATION L3 r2-L3-rtl-002-parent-erased: positioned-parent-slot.geometry.py [W] dynamic-offset-rtl-002 android printed PASS, pre-registered FAIL — [W] dynamic-offset-rtl-002 android magenta (26, 26, 35, 35) n 100 → GEOMETRY OK
+  VIOLATION L3 r2-L3-rtl-002-parent+3x: positioned-parent-slot.geometry.py [W] dynamic-offset-rtl-002 android printed PASS, pre-registered FAIL — [W] dynamic-offset-rtl-002 android magenta (26, 26, 35, 35) n 100 → GEOMETRY OK
+  VIOLATION L3 r2-L3-vrl-rtl-001-parent-erased: positioned-parent-slot.geometry.py [S] dynamic-offset-vrl-rtl-001 android printed PASS, pre-registered FAIL — [S] dynamic-offset-vrl-rtl-001 android magenta (86, 26, 95, 35) n 100 → GEOMETRY OK
+  VIOLATION L3 r2-L3-vrl-rtl-001-parent+3x: positioned-parent-slot.geometry.py [S] dynamic-offset-vrl-rtl-001 android printed PASS, pre-registered FAIL — [S] dynamic-offset-vrl-rtl-001 android magenta (86, 26, 95, 35) n 100 → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-mirrored: ua-heading-margin.geometry.py [F] text-decoration-inset-005 ios printed PASS, pre-registered FAIL — [F] text-decoration-inset-005 ios bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-mirrored: ua-heading-margin.geometry.py [F] text-decoration-inset-006 ios printed PASS, pre-registered FAIL — [F] text-decoration-inset-006 ios bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-mirrored: ua-heading-margin.geometry.py [F] text-decoration-inset-014 android printed PASS, pre-registered FAIL — [F] text-decoration-inset-014 android bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-mirrored: ua-heading-margin.geometry.py [F] text-decoration-inset-014 ios printed PASS, pre-registered FAIL — [F] text-decoration-inset-014 ios bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL — [M] text-decoration-inset-005 android bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-005 ios printed PASS, pre-registered FAIL — [M] text-decoration-inset-005 ios bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL — [M] text-decoration-inset-006 android bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-006 ios printed PASS, pre-registered FAIL — [M] text-decoration-inset-006 ios bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-014 android printed PASS, pre-registered FAIL — [M] text-decoration-inset-014 android bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios printed PASS, pre-registered FAIL — [M] text-decoration-inset-014 ios bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-U1-line1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL — [M] text-decoration-inset-005 android bands [(128, 152, 17, 191)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-U1-line1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-005 ios printed PASS, pre-registered FAIL — [M] text-decoration-inset-005 ios bands [(130, 151, 16, 191)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-U1-line1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL — [M] text-decoration-inset-006 android bands [(128, 152, 17, 194)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-U1-line1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-006 ios printed PASS, pre-registered FAIL — [M] text-decoration-inset-006 ios bands [(130, 151, 16, 194)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-U1-line1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-014 android printed PASS, pre-registered FAIL — [M] text-decoration-inset-014 android bands [(128, 139, 17, 132), (144, 155, 16, 84)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-U1-line1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios printed PASS, pre-registered FAIL — [M] text-decoration-inset-014 ios bands [(128, 138, 17, 133), (145, 154, 16, 84)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-thirds-swapped: ua-heading-margin.geometry.py [F] text-decoration-inset-005 ios printed PASS, pre-registered FAIL — [F] text-decoration-inset-005 ios bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-thirds-swapped: ua-heading-margin.geometry.py [F] text-decoration-inset-006 ios printed PASS, pre-registered FAIL — [F] text-decoration-inset-006 ios bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-thirds-swapped: ua-heading-margin.geometry.py [F] text-decoration-inset-014 android printed PASS, pre-registered FAIL — [F] text-decoration-inset-014 android bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-thirds-swapped: ua-heading-margin.geometry.py [F] text-decoration-inset-014 ios printed PASS, pre-registered FAIL — [F] text-decoration-inset-014 ios bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-thirds-swapped: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL — [M] text-decoration-inset-005 android bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-thirds-swapped: ua-heading-margin.geometry.py [M] text-decoration-inset-005 ios printed PASS, pre-registered FAIL — [M] text-decoration-inset-005 ios bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-thirds-swapped: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL — [M] text-decoration-inset-006 android bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-thirds-swapped: ua-heading-margin.geometry.py [M] text-decoration-inset-006 ios printed PASS, pre-registered FAIL — [M] text-decoration-inset-006 ios bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-thirds-swapped: ua-heading-margin.geometry.py [M] text-decoration-inset-014 android printed PASS, pre-registered FAIL — [M] text-decoration-inset-014 android bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-C-line1-thirds-swapped: ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios printed PASS, pre-registered FAIL — [M] text-decoration-inset-014 ios bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-U1-line1-thirds-swapped: ua-heading-margin.geometry.py [M] text-decoration-inset-005 android printed PASS, pre-registered FAIL — [M] text-decoration-inset-005 android bands [(128, 152, 17, 191)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-U1-line1-thirds-swapped: ua-heading-margin.geometry.py [M] text-decoration-inset-005 ios printed PASS, pre-registered FAIL — [M] text-decoration-inset-005 ios bands [(130, 151, 16, 191)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-U1-line1-thirds-swapped: ua-heading-margin.geometry.py [M] text-decoration-inset-006 android printed PASS, pre-registered FAIL — [M] text-decoration-inset-006 android bands [(128, 152, 17, 194)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-U1-line1-thirds-swapped: ua-heading-margin.geometry.py [M] text-decoration-inset-006 ios printed PASS, pre-registered FAIL — [M] text-decoration-inset-006 ios bands [(130, 151, 16, 194)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-U1-line1-thirds-swapped: ua-heading-margin.geometry.py [M] text-decoration-inset-014 android printed PASS, pre-registered FAIL — [M] text-decoration-inset-014 android bands [(128, 139, 17, 132), (144, 155, 16, 84)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-U1-line1-thirds-swapped: ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios printed PASS, pre-registered FAIL — [M] text-decoration-inset-014 ios bands [(128, 138, 17, 133), (145, 154, 16, 84)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-011-C-band1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-011 android printed PASS, pre-registered FAIL — [M] text-decoration-inset-011 android bands [(157, 176, 57, 184), (189, 208, 80, 184), (230, 230, 166, 180), (286, 304, 41, 184)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-011-C-band1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-011 ios printed PASS, pre-registered FAIL — [M] text-decoration-inset-011 ios bands [(158, 172, 57, 184), (190, 207, 85, 183), (229, 229, 170, 185), (286, 303, 39, 184)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-011-U1-band1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-011 android printed PASS, pre-registered FAIL — [M] text-decoration-inset-011 android bands [(157, 176, 57, 184), (189, 208, 80, 184), (230, 230, 166, 180), (286, 304, 41, 184)] → GEOMETRY OK
+  VIOLATION L4 r2-L4-011-U1-band1-mirrored: ua-heading-margin.geometry.py [M] text-decoration-inset-011 ios printed PASS, pre-registered FAIL — [M] text-decoration-inset-011 ios bands [(158, 172, 57, 184), (190, 207, 85, 183), (229, 229, 170, 185), (286, 303, 39, 184)] → GEOMETRY OK
+  VIOLATION L5 r2-L5-C-ideographs-swapped-5-6: counter-suffix-rows.geometry.py [C] counter-suffix android printed PASS, pre-registered FAIL — [C] counter-suffix android row5:x34-45,x49-52|item x65 row6:x33-46,x49-52|item x65 → GEOMETRY OK
+  VIOLATION L5 r2-L5-C-ideographs-swapped-5-6: counter-suffix-rows.geometry.py [C] counter-suffix ios printed PASS, pre-registered FAIL — [C] counter-suffix ios row5:x33-46,x50-52|item x64 row6:x33-46,x50-52|item x65 → GEOMETRY OK
+  VIOLATION L5 r2-L5-C-ideograph+3y: counter-suffix-rows.geometry.py [C] counter-suffix android printed PASS, pre-registered FAIL — [C] counter-suffix android row5:x33-46,x49-52|item x65 row6:x34-45,x49-52|item x65 → GEOMETRY OK
+  VIOLATION L5 r2-L5-C-ideograph+3y: counter-suffix-rows.geometry.py [C] counter-suffix ios printed PASS, pre-registered FAIL — [C] counter-suffix ios row5:x33-46,x50-52|item x64 row6:x33-46,x50-52|item x65 → GEOMETRY OK
+  VIOLATION L5 r2-L5-H-letters-swapped-3-4: counter-suffix-rows.geometry.py [H] counter-suffix ios printed PASS, pre-registered FAIL — [H] counter-suffix ios row3:x47-53,x57-57 row4:x46-53,x57-57 → GEOMETRY OK
+  VIOLATION L5 r2-L5-H-period-3y: counter-suffix-rows.geometry.py [H] counter-suffix ios printed PASS, pre-registered FAIL — [H] counter-suffix ios row3:x46-53,x57-57 row4:x47-53,x57-57 → GEOMETRY OK
+  VIOLATION L5 r2-L5-T-row9-text-erased: counter-suffix-rows.geometry.py [K] counter-suffix ios printed PASS, pre-registered FAIL — [K] counter-suffix ios zones y0-63,y160-207,y232-599,x64-389×y64-159 vs wave54-final → GEOMETRY OK
+  VIOLATION L5 r2-L5-T-row9-text-erased: counter-suffix-rows.geometry.py [T] counter-suffix ios printed PASS, pre-registered FAIL — [T] counter-suffix ios row9 digit (139, 145, 215, 225) → GEOMETRY OK
+  VIOLATION L5 r2-L5-T-row9-text-3x: counter-suffix-rows.geometry.py [K] counter-suffix ios printed PASS, pre-registered FAIL — [K] counter-suffix ios zones y0-63,y160-207,y232-599,x64-389×y64-159 vs wave54-final → GEOMETRY OK
+  VIOLATION L5 r2-L5-T-row9-text-3x: counter-suffix-rows.geometry.py [T] counter-suffix ios printed PASS, pre-registered FAIL — [T] counter-suffix ios row9 digit (139, 145, 215, 225) → GEOMETRY OK
+  VIOLATION L5 r2-L5-I-line1-ideograph-is-line2s: counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 android printed PASS, pre-registered FAIL — ] cjk-decimal/css3-counter-styles-005 android y95:marker x218-248 (2, fill 0.11) item x267 y121:marker x218-248 (2, fill 0.11) item x268 → GEOMETRY OK
+  VIOLATION L5 r2-L5-I-line1-ideograph-is-line2s: counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 ios printed PASS, pre-registered FAIL — [I] cjk-decimal/css3-counter-styles-005 ios y95:marker x218-249 (2, fill 1.0) item x267 y121:marker x218-249 (2, fill 0.2) item x268 → GEOMETRY OK
+  VIOLATION L5 r2-L5-I-line1-marker+3y: counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 android printed PASS, pre-registered FAIL — ] cjk-decimal/css3-counter-styles-005 android y95:marker x217-248 (2, fill 0.98) item x267 y121:marker x218-248 (2, fill 0.11) item x268 → GEOMETRY OK
+  VIOLATION L5 r2-L5-I-line1-marker+3y: counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 ios printed PASS, pre-registered FAIL — [I] cjk-decimal/css3-counter-styles-005 ios y95:marker x217-249 (2, fill 0.96) item x267 y121:marker x218-249 (2, fill 0.2) item x268 → GEOMETRY OK
+  VIOLATION L6 r2-L6-X-one-child-moved-3px: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-001 android printed PASS, pre-registered FAIL — -staticpos-align-self-001 android | crossings 0 | child fill 1000 (ref 1056) base 914 | bbox (19, 30, 158, 230) | band 1542 (floor 1541) → GEOMETRY OK
+  VIOLATION L6 r2-L6-X-one-child-moved-3px: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-rtl-001 android printed PASS, pre-registered FAIL — icpos-align-self-rtl-001 android | crossings 0 | child fill 1234 (ref 1152) base 1110 | bbox (19, 18, 172, 230) | band 1794 (floor 1828) → GEOMETRY OK
+  VIOLATION L6 r2-L6-X-one-child-moved-3px: android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-vertWM-001 android printed PASS, pre-registered FAIL — os-align-self-vertWM-001 android | crossings 0 | child fill 1248 (ref 1200) base 1120 | bbox (18, 19, 179, 213) | band 1796 (floor 1828) → GEOMETRY OK
+  VIOLATION L6 r2-L6-X-one-child-moved-3px: android-paint-order.geometry.py [X] grid-abspos-staticpos-justify-self-001 android printed PASS, pre-registered FAIL — aticpos-justify-self-001 android | crossings 0 | child fill 1248 (ref 1248) base 1118 | bbox (18, 19, 203, 213) | band 1794 (floor 1823) → GEOMETRY OK
+  NO FAKE REJECTED ('positioned-parent-slot.geometry.py', '[S] dynamic-offset-vrl-rtl-001 android')
+probes-teeth.py on the ROUND-1 probes: exit 1
+(throwaway removed)
+
+## AFTER: the round-2 probe bytes (this pass), probes-selfcheck.py §T on the shared tree's files — must exit 0
+## §T the standing rejection set (probes-teeth.py): every gating key on its own fixed picture + one defect per fake class, through the real gate
+  §T: 130 cases; violations 0; gating + tally keys with ≥ 1 rejected plausible fake 48 / 48
+gating keys 43: able to fail 43 (today FAIL on device, or a fake rejected); with a fixed picture accepted 41; §T standing rejection set HOLDS (48 / 48 gating + tally keys reject a plausible fake, 0 violation(s)); geometry-gate self-test HOLDS

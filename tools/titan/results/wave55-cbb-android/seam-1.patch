@@ -1,0 +1,82 @@
+# seam-1.patch — wave 55 lane L2 (cbb-android), unit U1 (CBB-android re-landed, 5b333c8a), Compose seam (PLAN.md §3 .kt row 3; seam-registry.md §1 order 3).
+# Base: campaign/applier-campaign HEAD 611c9f932bcfefa147a35f6c5f356d42709ddf84 (= dev 0d0d3a3d + the committed wave-55 plan and opening-gate records);
+#       runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt sha256 2445d9ea2674576fc0946e3f630f48b88d48f0f9d8c98df3249ba67d7a026aa5 at base (8488 lines, byte-identical to 0d0d3a3d's).
+# Anchor (content, unique in the file at base): `                .childContainingBlock(effectiveProperties, containingBlock)` — :1950-1951 inside
+#         `val childContainingBlock = androidx.compose.runtime.remember(effectiveProperties, containingBlock, component.children, wptCaptureModeForStretch)`;
+#         `wptCaptureModeForStretch` (:1268 `val wptCaptureModeForStretch = LocalWptCaptureMode.current`) is already that remember's key.
+# Hunks: (1) ComponentRenderer.kt — the named argument `wptCaptureMode = wptCaptureModeForStretch` (+4 comment lines); body identical to
+#            tools/titan/results/wave54-oof-layout/seam-1.patch (whose header offsets :1930 / :1933-1934 are stale), re-cut here on 611c9f93;
+#        (2) NEW runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/ChildContainingBlockSeamWiringTest.kt — the patch-borne
+#            source pin for (1) (the wave-53 FloatAvoidSeamWiringTest precedent: the tree never carries a red-by-construction pin).
+# Needs (same commit, unit U1): unit-U1.patch — NEW core/variables/ContainingBlockBands.kt and the defaulted
+#        DynamicValueResolver.childContainingBlock(…, wptCaptureMode: Boolean = false). unit-U1.patch compiles WITHOUT this patch (the default false).
+# Landing (PLAN §4; seam-registry §6): ComponentRenderer.kt takes L4 s1 → L4 s3 → L2 s1 → L3 s1 → L5 s4 → L5 s5 (cross-lane hunks ≥ 785 lines apart).
+# Apply from the repo root after `git apply --check`: git apply tools/titan/results/wave55-cbb-android/seam-1.patch
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+index 044cf241..24560d62 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -1947,8 +1947,12 @@ object ComponentRenderer {
+         val childContainingBlock = androidx.compose.runtime.remember(
+             effectiveProperties, containingBlock, component.children, wptCaptureModeForStretch,
+         ) {
++            // Wave 54 (lane L4, CBB-android): under the composed WPT capture an
++            // unset box-sizing is drawn content-box, so the block published
++            // for the children is the declared size, bands outside
++            // (ContainingBlockBands); the dark stage keeps the subtraction.
+             val declared = com.styleconverter.runtime.core.variables.DynamicValueResolver
+-                .childContainingBlock(effectiveProperties, containingBlock)
++                .childContainingBlock(effectiveProperties, containingBlock, wptCaptureMode = wptCaptureModeForStretch)
+             // Wave-33 lane C — the auto-height ABSPOS fallback. When the
+             // declared channel above found no block size (this box's height
+             // is `auto`), evaluate CSS 2.2 §10.6.3 statically over the
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/ChildContainingBlockSeamWiringTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/ChildContainingBlockSeamWiringTest.kt
+new file mode 100644
+index 00000000..d0f46369
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/ChildContainingBlockSeamWiringTest.kt
+@@ -0,0 +1,44 @@
++package com.styleconverter.runtime.core.renderer
++
++// Wave 54 (lane L4 · CBB-android) — the SEAM WIRING pin, shipped INSIDE
++// the seam patch with the hunk it pins (the wave-53 FloatAvoidSeamWiringTest
++// precedent), so the tree never carries a pin that is red by construction.
++// Wave 55 (lane L2, unit U1) re-lands it, assertions unchanged, inside
++// tools/titan/results/wave55-cbb-android/seam-1.patch (wave 54's was
++// tools/titan/results/wave54-oof-layout/seam-1.patch, reverted by 8deddc19).
++//
++// Why: DynamicValueResolverTest pins ContainingBlockBands' rule (WPT
++// content-box → declared size; dark stage → frozen subtraction), but nothing
++// there proves the renderer PASSES the capture mode. The call sits inside a
++// @Composable remember block that this module's plain JVM JUnit tests cannot
++// execute, so this is a SOURCE-level pin — the module's idiom
++// (SeamReachabilityTest, WptBoxSizingDefaultTest's threading scan).
++//
++// Mutation (wave-55 PLAN.md §2 L2, U1 pins), executed and logged in the
++// lane note: the renderer with the named argument dropped turns this test red.
++
++import java.io.File
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class ChildContainingBlockSeamWiringTest {
++
++    /** ComponentRenderer.kt, found by walking up to the repo root (the SeamReachabilityTest walk-up). */
++    private val renderer: String by lazy {
++        val anchor = "runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt"
++        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
++        while (dir != null && !File(dir, anchor).exists()) dir = dir.parentFile
++        File(requireNotNull(dir) { "repo root not found" }, anchor).readText()
++    }
++
++    @Test
++    fun `the child containing block is computed with the WPT capture mode`() {
++        // The ONE caller of DynamicValueResolver.childContainingBlock threads the
++        // same flag the sizing path draws the box-sizing with (both read
++        // LocalWptCaptureMode.current), so frame and block cannot disagree.
++        assertTrue(renderer.contains(
++            ".childContainingBlock(effectiveProperties, containingBlock, wptCaptureMode = wptCaptureModeForStretch)"))
++        // …and that flag is the capture-mode CompositionLocal, read in the same frame.
++        assertTrue(renderer.contains("val wptCaptureModeForStretch = LocalWptCaptureMode.current"))
++    }
++}

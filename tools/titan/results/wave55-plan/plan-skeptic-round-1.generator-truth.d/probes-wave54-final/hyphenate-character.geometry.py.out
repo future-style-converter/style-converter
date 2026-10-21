@@ -1,0 +1,12 @@
+hyphenate-character-001 ref      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-001 web      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-001 ios      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-001 android  groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-003 ref      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-003 web      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-003 ios      groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-003 android  groups 5 4 3 3   → GEOMETRY OK
+hyphenate-character-004 ref      groups 4 4 4 3   → GEOMETRY OK
+hyphenate-character-004 web      groups 4 4 4 3   → GEOMETRY OK
+hyphenate-character-004 ios      groups 4 4 4 3   → GEOMETRY OK
+hyphenate-character-004 android  groups 4 4 4 3   → GEOMETRY OK

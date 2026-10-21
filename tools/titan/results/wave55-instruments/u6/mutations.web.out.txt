@@ -1,0 +1,78 @@
+=== U6-W1 — mutated runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts (python rc 0; sha256 now 0027d1667ff866a4…)
+--- red run: bash -c cd runtimes/web && npx vitest run tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx
+     × W1 a member with its own child, runs or decorations is not one inert box → joined 0 (SK6-w1) 10ms
+ FAIL  tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx > InertOutOfFlowWordJoin — the branches no wave-54 test reached (wave-55 L7 U6-web) > W1 a member with its own child, runs or decorations is not one inert box → joined 0 (SK6-w1)
+AssertionError: expected 1 to be +0 // Object.is equality
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+red run rc=1
+--- green run
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+green run rc=0
+
+=== U6-W2 — mutated runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts (python rc 0; sha256 now bee44b9767d23a00…)
+--- red run: bash -c cd runtimes/web && npx vitest run tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx
+     × W2 a FIXED inert member is out of flow too (CSS 2.1 §9.3.1) → joined 1 (SK6-w2) 7ms
+ FAIL  tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx > InertOutOfFlowWordJoin — the branches no wave-54 test reached (wave-55 L7 U6-web) > W2 a FIXED inert member is out of flow too (CSS 2.1 §9.3.1) → joined 1 (SK6-w2)
+AssertionError: expected +0 to be 1 // Object.is equality
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+red run rc=1
+--- green run
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+green run rc=0
+
+=== U6-W3 — mutated runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts (python rc 0; sha256 now 97dcf497811dc908…)
+--- red run: bash -c cd runtimes/web && npx vitest run tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx
+     × W3 [text, M, text, text]: the word runs on into the next entry, and the member lands at ITS first space (SK6-w5) 11ms
+ FAIL  tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx > InertOutOfFlowWordJoin — the branches no wave-54 test reached (wave-55 L7 U6-web) > W3 [text, M, text, text]: the word runs on into the next entry, and the member lands at ITS first space (SK6-w5)
+AssertionError: expected [ Array(3) ] to deeply equal [ Array(4) ]
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+red run rc=1
+--- green run
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+green run rc=0
+
+=== U6-W4 — mutated runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts (python rc 0; sha256 now c51b6ce19a3ef28a…)
+--- red run: bash -c cd runtimes/web && npx vitest run tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx
+     × W4 alpha 0.3 paints → joined 0 (only alpha ≤ 0 is inert) 3ms
+ FAIL  tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx > InertOutOfFlowWordJoin — the branches no wave-54 test reached (wave-55 L7 U6-web) > W4 alpha 0.3 paints → joined 0 (only alpha ≤ 0 is inert)
+AssertionError: expected 1 to be +0 // Object.is equality
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+red run rc=1
+--- green run
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+green run rc=0
+
+=== U6-W5 — mutated runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts (python rc 0; sha256 now 3155055c48a4b4fa…)
+--- red run: bash -c cd runtimes/web && npx vitest run tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx
+     × W5 `srgb.a` as the decimal string "0" reads as 0 (Kotlin floatOrNull) → joined 1 (SK6-w9) 4ms
+ FAIL  tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx > InertOutOfFlowWordJoin — the branches no wave-54 test reached (wave-55 L7 U6-web) > W5 `srgb.a` as the decimal string "0" reads as 0 (Kotlin floatOrNull) → joined 1 (SK6-w9)
+AssertionError: expected +0 to be 1 // Object.is equality
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+red run rc=1
+--- green run
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+green run rc=0
+
+=== U6-W6 — mutated runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts (python rc 0; sha256 now c77c232628b86fa8…)
+--- red run: bash -c cd runtimes/web && npx vitest run tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx
+     × W6 Position as the `{keyword}` object dialect (ValueExtractors.extractKeyword) → joined 1 (SK6-w10) 9ms
+ FAIL  tests/renderer/InertOutOfFlowWordJoin.branches.test.tsx > InertOutOfFlowWordJoin — the branches no wave-54 test reached (wave-55 L7 U6-web) > W6 Position as the `{keyword}` object dialect (ValueExtractors.extractKeyword) → joined 1 (SK6-w10)
+AssertionError: expected +0 to be 1 // Object.is equality
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+red run rc=1
+--- green run
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+green run rc=0
+

@@ -1,0 +1,51 @@
+components 10719 · documents 1435 · extraction errors 4 ['wpt__css-images__conic-gradient-line-height-relative-units-003', 'wpt__css-images__conic-gradient-line-height-relative-units-004']
+banded 1973: U1 self-paint 10 (fast 10) · U2 legacy 1963 (fast 1494, slow 469)
+fast-path rows whose full-tree chain lacks BehindContentBorderElement (must be 0): 0 []
+unbanded rows carrying BehindContentBorderElement (must be 0): 0 []
+
+== U1: 10 banded components in 10 documents
+  inert: 7 components in 7 documents
+  child: 3 components in 3 documents
+
+== U2: 1963 banded components in 365 documents
+  child: 955 components in 196 documents
+  inert: 550 components in 116 documents
+  text: 233 components in 51 documents
+  opacity<1: 49 components in 2 documents
+  child+tag:fieldset: 41 components in 4 documents
+  text+meta:lang: 35 components in 11 documents
+  child+text+runs: 25 components in 14 documents
+  child+meta:lang: 18 components in 4 documents
+  pseudo+tag:legend: 14 components in 1 documents
+  child+text+runs+meta:lang: 8 components in 3 documents
+  br-only-child+text+runs: 6 components in 4 documents
+  child+tag:legend: 4 components in 2 documents
+  child+pseudo: 3 components in 1 documents
+  tag:hr+meta:lang: 3 components in 1 documents
+  br-only-child: 2 components in 2 documents
+  child+pseudo+tag:fieldset: 2 components in 2 documents
+  tag:input: 2 components in 2 documents
+  text+tag:button: 2 components in 2 documents
+  tag:hr: 2 components in 2 documents
+  child+text+runs+tag:details: 1 components in 1 documents
+  text+tag:summary: 1 components in 1 documents
+  pseudo: 1 components in 1 documents
+  child+text+runs+tag:legend: 1 components in 1 documents
+  child+text+runs+tag:fieldset: 1 components in 1 documents
+  text+tag:legend: 1 components in 1 documents
+  tag:input+meta:attrs: 1 components in 1 documents
+  text+tag:textarea: 1 components in 1 documents
+  text+meta:decorations: 1 components in 1 documents
+
+== documents with an exposed banded component: 283; inside carriers ∪ mayMove ∪ sharedStems ∪ ring: 279
+GROWTH (outside the plan set): 4
+  wpt__css-cascade__revert-layer-015 [nobody] wpt__css-cascade__revert-layer-015__0-077 tag:input U2
+  wpt__css-display__display-contents-dynamic-pseudo-insertion-001 [nobody] wpt__css-display__display-contents-dynamic-pseudo-insertion-001__0-132 pseudo U2
+  wpt__css-images__gradient__gradient-hue-direction [nobody] wpt__css-images__gradient__gradient-hue-direction__4-070 tag:hr+meta:lang U2; wpt__css-images__gradient__gradient-hue-direction__7-073 tag:hr+meta:lang U2; wpt__css-images__gradient__gradient-hue-direction__10-076 tag:hr+meta:lang U2
+  wpt__css-pseudo__first-line-and-placeholder [nobody] first-line-and-placeholder__0__0-199 tag:input U2
+banded rows in display-contents stems (not subtracted here): 17
+plan stems with no exposed banded component: 0
+plan carriers covered: 27/27; missing []
+revertUnit U1: 2 android captures; each has an exposed component on its route: True []
+revertUnit U2: 25 android captures; each has an exposed component on its route: True []
+revertUnit U3: 0 android captures; each has an exposed component on its route: True []

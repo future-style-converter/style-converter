@@ -1,0 +1,89 @@
+L3 dir-style-02a rows: column-profile cross-correlation vs the ref: best shift 0±1 and peak >= 0.75
+  row6                   web wave54-final             peak 1.000 at shift +0                                       → OK
+  row6                   android wave54-final (today) peak 0.000 at shift +6                                       → WRONG
+  row6                   fixed U1U2                   peak 0.920 at shift +0                                       → OK
+  row6                   gut                          peak 0.187 at shift +0                                       → WRONG
+  row6                   mirror-words                 peak 0.767 at shift +5                                       → WRONG
+  row6                   text+2x                      peak 0.918 at shift +2                                       → WRONG
+  row6                   text+3x                      peak 0.918 at shift +3                                       → WRONG
+  row6                   text-3x                      peak 0.918 at shift -3                                       → WRONG
+  row7                   web wave54-final             peak 1.000 at shift +0                                       → OK
+  row7                   android wave54-final (today) peak 0.915 at shift +0                                       → OK
+  row7                   fixed U1U2                   peak 0.915 at shift +0                                       → OK
+  row7                   gut                          peak 0.145 at shift +0                                       → WRONG
+  row7                   mirror-words                 peak 0.681 at shift -2                                       → WRONG
+  row7                   text+2x                      peak 0.914 at shift +2                                       → WRONG
+  row7                   text+3x                      peak 0.914 at shift +3                                       → WRONG
+  row7                   text-3x                      peak 0.914 at shift -3                                       → WRONG
+  row9                   web wave54-final             peak 1.000 at shift +0                                       → OK
+  row9                   android wave54-final (today) peak 0.000 at shift +6                                       → WRONG
+  row9                   fixed U1U2                   peak 0.920 at shift +0                                       → OK
+  row9                   gut                          peak 0.187 at shift +0                                       → WRONG
+  row9                   mirror-words                 peak 0.767 at shift +5                                       → WRONG
+  row9                   text+2x                      peak 0.918 at shift +2                                       → WRONG
+  row9                   text+3x                      peak 0.918 at shift +3                                       → WRONG
+  row9                   text-3x                      peak 0.918 at shift -3                                       → WRONG
+L3 stack: + the 1-px ring outside each cell has the ref's green count ±4 (the square ends where the ref's does)
+  stack                  web wave54-final             rings [0, 0, 0, 0] (ref [0, 21, 21, 0])                      → WRONG
+  stack                  fixed U1                     rings [0, 0, 0, 0] (ref [0, 21, 21, 0])                      → WRONG
+  stack                  grown30                      rings [21, 21, 21, 21] (ref [0, 21, 21, 0])                  → WRONG
+  stack                  slab                         rings [21, 21, 21, 21] (ref [0, 21, 21, 0])                  → WRONG
+  stack                  dup-stacked                  rings [10, 10, 10, 10] (ref [0, 21, 21, 0])                  → WRONG
+L1: + every line's ink crop = the wave54-final iOS line, translated vertically only (correlation >= 0.97)
+  hyphen 001 ios         fixed Rm                     15 lines, worst line correlation 1.000                       → OK
+  hyphen 001 ios         hyph-removed                 15 lines, worst line correlation 1.000                       → OK
+  hyphen 001 ios         lines-2-3-swapped            16 lines vs base 15                                          → WRONG
+  hyphen 001 ios         text+3x                      15 lines, worst line correlation 0.142                       → WRONG
+  hyphen 001 ios         text-2x                      15 lines, worst line correlation 0.167                       → WRONG
+  hyphen 001 ios         g2l1+3x                      15 lines, worst line correlation 0.246                       → WRONG
+  hyphen 003 ios         fixed Rm                     15 lines, worst line correlation 1.000                       → OK
+  hyphen 003 ios         hyph-removed                 15 lines, worst line correlation 0.801                       → WRONG
+  hyphen 003 ios         lines-2-3-swapped            16 lines vs base 15                                          → WRONG
+  hyphen 003 ios         text+3x                      15 lines, worst line correlation 0.162                       → WRONG
+  hyphen 003 ios         text-2x                      15 lines, worst line correlation 0.239                       → WRONG
+  hyphen 003 ios         g2l1+3x                      15 lines, worst line correlation 0.245                       → WRONG
+  hyphen 004 ios         fixed Rm                     15 lines, worst line correlation 1.000                       → OK
+  hyphen 004 ios         hyph-removed                 15 lines, worst line correlation 0.316                       → WRONG
+  hyphen 004 ios         lines-2-3-swapped            15 lines, worst line correlation 0.692                       → WRONG
+  hyphen 004 ios         text+3x                      15 lines, worst line correlation 0.099                       → WRONG
+  hyphen 004 ios         text-2x                      15 lines, worst line correlation 0.135                       → WRONG
+  hyphen 004 ios         g2l1+3x                      15 lines, worst line correlation 0.172                       → WRONG
+L4 [M]/[F] (face present): + the heading's bands = the ref's bands, each edge ±2, same count
+  005 ios                fixed C                      [(134, 173, 16, 336), (188, 212, 16, 64)]                    → OK
+  005 ios                heading+3y                   [(137, 176, 16, 336), (191, 215, 16, 64)]                    → WRONG
+  005 ios                heading-2y                   [(132, 171, 16, 336), (186, 210, 16, 64)]                    → OK
+  005 ios                heading+12x                  [(134, 173, 28, 348), (188, 212, 28, 76)]                    → WRONG
+  005 ios                line2-removed                [(134, 173, 16, 336)]                                        → WRONG
+  005 ios                line1-truncated              [(143, 171, 16, 143), (188, 212, 16, 64)]                    → WRONG
+  005 android            fixed C                      [(134, 173, 16, 336), (188, 212, 16, 64)]                    → OK
+  005 android            heading+3y                   [(137, 176, 16, 336), (191, 215, 16, 64)]                    → WRONG
+  005 android            heading-2y                   [(132, 171, 16, 336), (186, 210, 16, 64)]                    → OK
+  005 android            heading+12x                  [(134, 173, 28, 348), (188, 212, 28, 76)]                    → WRONG
+  005 android            line2-removed                [(134, 173, 16, 336)]                                        → WRONG
+  005 android            line1-truncated              [(143, 171, 16, 143), (188, 212, 16, 64)]                    → WRONG
+  014 ios                fixed C                      [(129, 154, 17, 258), (163, 186, 16, 155)]                   → OK
+  014 ios                heading+3y                   [(132, 157, 17, 258), (166, 189, 16, 155)]                   → WRONG
+  014 ios                heading-2y                   [(127, 152, 17, 258), (161, 184, 16, 155)]                   → OK
+  014 ios                heading+12x                  [(129, 154, 29, 270), (163, 186, 28, 167)]                   → WRONG
+  014 ios                line2-removed                [(129, 154, 17, 258)]                                        → WRONG
+  014 ios                line1-truncated              [(130, 153, 17, 112), (163, 186, 16, 155)]                   → WRONG
+  014 android            fixed C                      [(129, 154, 17, 258), (163, 186, 16, 155)]                   → OK
+  014 android            heading+3y                   [(132, 157, 17, 258), (166, 189, 16, 155)]                   → WRONG
+  014 android            heading-2y                   [(127, 152, 17, 258), (161, 184, 16, 155)]                   → OK
+  014 android            heading+12x                  [(129, 154, 29, 270), (163, 186, 28, 167)]                   → WRONG
+  014 android            line2-removed                [(129, 154, 17, 258)]                                        → WRONG
+  014 android            line1-truncated              [(130, 153, 17, 112), (163, 186, 16, 155)]                   → WRONG
+L5: the proposed extra reads, ref vs fixed (ok-all) vs the fakes that passed
+  [I] 005 ios            fixed                        marker blobs/right [(2, np.int64(249)), (2, np.int64(249))] (ref [(2, np.int64(249)), (2, np.int64(249))]) → OK
+  [I] 005 ios            I-comma-removed              marker blobs/right [(1, np.int64(239)), (1, np.int64(238))] (ref [(2, np.int64(249)), (2, np.int64(249))]) → WRONG
+  [T] ios                fixed                        digit bbox (139, 215, 145, 225) ink 20 (ref (138, 214, 144, 225) 33) → WRONG
+  [T] ios                T-1-bar7                     digit bbox (139, 215, 145, 225) ink 77 (ref (138, 214, 144, 225) 33) → WRONG
+  [T] ios                T-1-down3                    digit bbox (139, 218, 145, 228) ink 20 (ref (138, 214, 144, 225) 33) → WRONG
+  [H] ios                fixed                        letter ink [24, 18] (ref [32, 33])                           → WRONG
+  [H] ios                H-letter-block               letter ink [72, 63] (ref [32, 33])                           → WRONG
+  [C] ios                fixed                        ideograph width [np.int64(13), np.int64(13)] (ref [np.int64(13), np.int64(13)]) → OK
+  [C] ios                C-ideograph-gutted           ideograph width [np.int64(0), np.int64(0)] (ref [np.int64(13), np.int64(13)]) → WRONG
+  [I] 005 android        fixed                        marker blobs/right [(2, np.int64(248)), (2, np.int64(248))] (ref [(2, np.int64(249)), (2, np.int64(249))]) → OK
+  [I] 005 android        I-comma-removed              marker blobs/right [(1, np.int64(239)), (1, np.int64(238))] (ref [(2, np.int64(249)), (2, np.int64(249))]) → WRONG
+  [C] android            fixed                        ideograph width [np.int64(13), np.int64(11)] (ref [np.int64(13), np.int64(13)]) → OK
+  [C] android            C-ideograph-gutted           ideograph width [np.int64(0), np.int64(0)] (ref [np.int64(13), np.int64(13)]) → WRONG

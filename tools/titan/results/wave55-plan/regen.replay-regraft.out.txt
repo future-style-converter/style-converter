@@ -1,0 +1,12 @@
+# regen.replay-regraft.py — boxes [(130, 208, 136, 232), (130, 232, 151, 256), (130, 256, 136, 280), (130, 280, 136, 304)] from tools/titan/runs/wave54-final/sections/css-counter-styles/android-screenshots/wpt__css-counter-styles__counter-suffix.png (sha256 b8476f9fcd566e0a…)
+  C-nocomma       91 px changed, bbox x133-145 y224-298 (0 px outside the boxes) · pre 3ff66c0867dfca42… → post 13acc9b9f1f3fbbf… (decoded pixels re-read equal)
+  C-shift8        91 px changed, bbox x133-145 y224-298 (0 px outside the boxes) · pre 9f81eeeffd354334… → post 7301fd35557c2a92… (decoded pixels re-read equal)
+  C-space-only    91 px changed, bbox x133-145 y224-298 (0 px outside the boxes) · pre 9f81eeeffd354334… → post 7301fd35557c2a92… (decoded pixels re-read equal)
+  H-broken        91 px changed, bbox x133-145 y224-298 (0 px outside the boxes) · pre 9f81eeeffd354334… → post 7301fd35557c2a92… (decoded pixels re-read equal)
+  H-flush         91 px changed, bbox x133-145 y224-298 (0 px outside the boxes) · pre 7e5e0c0fe5d3a7a6… → post 79478b79ae145f53… (decoded pixels re-read equal)
+  H-low           91 px changed, bbox x133-145 y224-298 (0 px outside the boxes) · pre ff15bf19770ec1fc… → post f7bfd2caf1958835… (decoded pixels re-read equal)
+  H-nodot         91 px changed, bbox x133-145 y224-298 (0 px outside the boxes) · pre 7b2eb665196a207a… → post 001a7081bdf8bc1c… (decoded pixels re-read equal)
+  I-wholeline     91 px changed, bbox x133-145 y224-298 (0 px outside the boxes) · pre 3ff66c0867dfca42… → post 13acc9b9f1f3fbbf… (decoded pixels re-read equal)
+  K-leak          91 px changed, bbox x133-145 y224-298 (0 px outside the boxes) · pre 8f7379ac2d6c6138… → post 6ffdbc853ca1dddc… (decoded pixels re-read equal)
+  ok-all          91 px changed, bbox x133-145 y224-298 (0 px outside the boxes) · pre 3ff66c0867dfca42… → post 13acc9b9f1f3fbbf… (decoded pixels re-read equal)
+re-grafted 10 tags

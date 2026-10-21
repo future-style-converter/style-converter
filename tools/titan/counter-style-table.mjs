@@ -19,12 +19,18 @@
 // SUFFIX NOTE — the one deliberate deviation from a literal transcription.
 // The spec's initial `suffix` is "\2E\20" (a full stop THEN A SPACE), and
 // the §6.1 bullet styles use " ". Both native runtimes already own that
-// trailing gap themselves — Compose renders `Text("$marker ")` with a 4dp
-// end padding and SwiftUI an `HStack(spacing: 4)` — and their existing
-// tables (ListMarkerText.marker / StyleListApplier.getMarker) emit "1.",
-// never "1. ". Emitting the space here would double it. So every suffix
-// below is the spec's minus the trailing U+0020, which makes this table a
-// strict superset of the two native tables rather than a rival to them.
+// trailing gap themselves — a 4 dp / 4 pt stand-in between the marker box
+// and the item (Compose `Text(marker)` with the end padding / hang offset,
+// SwiftUI the HStack spacing / hang gap; Compose's old trailing-space
+// `Text("$marker ")` is gone since wave 28) — and their existing tables
+// (ListMarkerText.marker / ListStyleApplier.getMarker) emit "1.", never
+// "1. ". Emitting the space here would double it. So every suffix below is
+// the spec's minus the trailing U+0020, which makes this table a strict
+// superset of the two native tables rather than a rival to them. The
+// U+3001 suffix of the cjk-decimal family (§6.1 / §6.2 / §6.4) has NO
+// trailing space, so it has no stand-in gap either: the natives read the
+// gap through ListMarkerSuffixGap (wave 55), which answers 0 for a marker
+// string ending in U+3001.
 //
 // SCOPE: §6.1 (bullets) is deliberately ABSENT — those markers are
 // ordinal-INDEPENDENT, the natives already paint them, and re-baking them

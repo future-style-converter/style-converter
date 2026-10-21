@@ -1,0 +1,13 @@
+# patch-series-check.out.txt — wave55 L5: export-tree check of the delivered patches (git archive of 611c9f93's runtimes/ + counter-style-table.mjs; git apply as a plain patch tool)
+# forward series in landing-manifest order, byte-compare with the lane worktree's full state, every revertOrder chain reverse-applied (C12 included), the contingency on top
+forward: 11 patches apply in landing order on 611c9f93
+series result == worktree full state (every modified/new path byte-identical)
+  ok revert [U1-ios] reverse-applies on the full L5 series
+  ok revert [D U2i-ios U2o-ios] reverse-applies on the full L5 series
+  ok revert [U2i-ios] reverse-applies on the full L5 series
+  ok revert [D U2i-android U2o-android] reverse-applies on the full L5 series
+  ok revert [U2i-android] reverse-applies on the full L5 series
+  ok revert [U3-ios] reverse-applies on the full L5 series
+  ok revert [D] reverse-applies on the full L5 series
+contingency: unit-U1-ios-LRM.patch applies on top of the full L5 series
+  ok revert [U1-ios-LRM U1-ios] reverse-applies on the full series + the contingency

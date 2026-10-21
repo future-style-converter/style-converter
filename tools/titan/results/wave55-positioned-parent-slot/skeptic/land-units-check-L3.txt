@@ -1,0 +1,80 @@
+land-units.sh — wave 55 (CHECK: read-only)
+root    /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+HEAD    611c9f93 (campaign/applier-campaign)   export dir (private, removed at exit): /private/var/folders/34/h7173byn5kb_lddtbn4hqt9w0000gn/T/land-units.xaXPrM
+
+ORDER (2 unit commits + records; hold: none; only: L3)
+  00   records  the selected lane dirs → 1 commit
+  01   L7  U1           -- skipped: not in --only
+  02   L7  U2           -- skipped: not in --only
+  03   L7  U3           -- skipped: not in --only
+  04   L7  U4           -- skipped: not in --only
+  05   L7  U6-compose   -- skipped: not in --only
+  06   L7  U6-swift     -- skipped: not in --only
+  07   L7  U6-web       -- skipped: not in --only
+  08   L7  U6-tooling   -- skipped: not in --only
+  09   L7  U5           -- skipped: not in --only
+  10   L6  U1           -- skipped: not in --only
+  11   L6  U2           -- skipped: not in --only
+  12   L6  U3           -- skipped: not in --only
+  13   L4  U1-android   -- skipped: not in --only
+  14   L4  U1-ios       -- skipped: not in --only
+  15   L4  U2-android   -- skipped: not in --only
+  16   L4  U2-ios       -- skipped: not in --only
+  17   L2  U1           -- skipped: not in --only
+  18   L2  U2           -- skipped: not in --only
+  19   L3  U1           wave55-positioned-parent-slot/unit-U1.patch wave55-positioned-parent-slot/seam-1.patch 
+  20   L3  U2           wave55-positioned-parent-slot/unit-U2.patch 
+  21   L5  U1-ios       -- skipped: not in --only
+  22   L5  U2o-ios      -- skipped: not in --only
+  23   L5  U2i-ios      -- skipped: not in --only
+  24   L5  U2o-android  -- skipped: not in --only
+  25   L5  U2i-android  -- skipped: not in --only
+  26   L1  NB-ios       -- skipped: not in --only
+  27   L5  U3-ios       -- skipped: not in --only
+  28   L5  D            -- skipped: not in --only
+  29   L1  NB-ios-b     -- skipped: not in --only
+  30   L5  U1-ios-LRM   -- skipped: not in --only
+
+HOST, INDEX, MANIFEST
+  host    no gate / probe / A/B arm process in this tree
+  index   nothing staged
+  manifest in sync with the tables (landing-manifest.json, sha256 f6716e2f80f1…)
+  plan    28 plan revert units (+ 2 contingency) agree with the table: lane dirs, unit names, revertOrders (expectations.json)
+
+RECORDS (committed first)
+  ok      tools/titan/results/wave55-positioned-parent-slot/  (18 files)
+  WARN    written less than 120s ago (an instrument may still be writing; the landing refuses): tools/titan/results/wave55-positioned-parent-slot/skeptic/skeptic-mutate.py tools/titan/results/wave55-positioned-parent-slot/skeptic/mutation-log.txt
+
+PATCHES (each: present · parsed · its paths · the rules · alone on the current tree)
+  wave55-positioned-parent-slot/unit-U1.patch                    (L3:U1)
+            ~ runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt
+            + runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt
+            + runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGateTest.kt
+            alone: applies on the current tree
+  wave55-positioned-parent-slot/seam-1.patch                     (L3:U1)
+            ~ runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+            + runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/PositionedParentSlotSeamWiringTest.kt
+            ~ runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
+            alone: applies on the current tree
+  wave55-positioned-parent-slot/unit-U2.patch                    (L3:U2)
+            ~ runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt
+            + runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt
+            ~ runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt
+            ~ runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
+            + runtimes/compose/src/test/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOriginTest.kt
+            alone: does not apply on the current tree — STACKED (expected; the cumulative check decides): runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentFlowSlot.kt on L3:U1; runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt on L3:U1; runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt on L3:U1;
+
+TOUCHED PATHS (clean at HEAD on the current tree; a created path absent)
+  ok      8 paths (5 created, the rest clean at HEAD 611c9f93)
+
+CUMULATIVE (the series in landing order, `git apply --check` of one concatenated input on the current tree)
+  ok      3 patches apply in order on 611c9f93 (+ the records commit, which touches no patched path)
+
+REVERT DRY-RUNS (every selected unit's revertOrder, reverse-applied on the fully landed series; export tree)
+  ok      L3:U1           revert [ U2 U1 ] reverse-applies on the landed series
+  ok      L3:U2           revert [ U2 ] reverse-applies on the landed series
+
+CONTINGENCY (not landed by this run)
+  none in the selected lanes
+
+SUMMARY  0 error(s), 1 warning(s) — landable (--check touched nothing: no checkout, no rm, no apply on the tree)

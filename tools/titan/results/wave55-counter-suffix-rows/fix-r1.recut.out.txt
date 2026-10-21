@@ -1,0 +1,47 @@
+# fix-r1.recut.out.txt — output of fix-r1.recut.sh (re-cut of every L5 patch in landing order on a clean 611c9f93 worktree), plus the byte checks run after it
+cut unit-U1-ios: 2 file(s)
+cut seam-1: 2 file(s)
+cut unit-U2o-ios: 3 file(s)
+cut seam-2: 2 file(s)
+cut seam-3: 2 file(s)
+cut unit-U2o-android: 3 file(s)
+cut seam-4: 3 file(s)
+cut seam-5: 2 file(s)
+cut unit-U3-ios: 4 file(s)
+cut seam-6: 2 file(s)
+cut unit-D: 6 file(s)
+cut unit-U1-ios-LRM: 2 file(s)
+FULL state (the 11 landing patches applied) byte-identical before / after the re-cut: tracked diff, porcelain status and every untracked runtime file's sha256 compared — identical
+hunk comparison against the builder's cut (index lines ignored: the hash abbreviation differs, 7 → 8 hex, on the cumulative seam cuts):
+  hunks identical: seam-1.patch
+  hunks identical: seam-2.patch
+  hunks identical: seam-3.patch
+  hunks CHANGED: seam-4.patch
+  hunks identical: seam-5.patch
+  hunks identical: seam-6.patch
+  hunks identical: unit-D.patch
+  hunks identical: unit-U1-ios-LRM.patch
+  hunks identical: unit-U1-ios.patch
+  hunks identical: unit-U2o-android.patch
+  hunks identical: unit-U2o-ios.patch
+  hunks CHANGED: unit-U3-ios.patch
+the changed hunks' lines (builder → fix-r1), every one a comment line:
+  seam-4.patch: < +            // Wave 55 (lane L5, U2o-android) — the string-keyed marker gap
+  seam-4.patch: < +            // whose ONLY caller is the renderer seam (seam-4): this line
+  seam-4.patch: < +            // rides in that seam patch, so a merge without it fails here.
+  seam-4.patch: > +            // Wave 55 (lane L5, U2o-android) — the string-keyed marker gap: seam 4's
+  seam-4.patch: > +            // outside hang calls it (and seam 5's inside Row while U2i-android is on);
+  seam-4.patch: > +            // this line rides in seam 4; ListMarkerSuffixGapHangSeamTest pins seam 4's call.
+  unit-U3-ios.patch: > +//  ## Radius inside a run (fix-r1: more than the digit)
+  unit-U3-ios.patch: > +//  `monospacedDigit()` turns on the face's whole `tnum` feature for the
+  unit-U3-ios.patch: > +//  run, and Inter's `tnum` maps punctuation as well as digits (61 single
+  unit-U3-ios.patch: > +//  substitutions): `period` → `period.tf` (advance 4.609 → 4.297 px at
+  unit-U3-ios.patch: > +//  16 px) and `two` → `two.tf` repaint too. So all six carrier runs — the
+  unit-U3-ios.patch: > +//  `.` / `1` / `.` / `2` runs of rows 9-10 and the period of rows 11-12's
+  unit-U3-ios.patch: > +//  `א.` / `ב.` (the Hebrew letters come from a fallback face, no Inter
+  unit-U3-ios.patch: > +//  `tnum`) — change ink, toward the ref: Chromium applied the same feature
+  unit-U3-ios.patch: > +//  (the wire's `.` runs are 4.3 px wide = `period.tf`).
+  unit-U3-ios.patch: > +//
+  unit-U3-ios.patch: < +//    Harmless for the 6 carriers (`white-space: pre` single-glyph runs).
+  unit-U3-ios.patch: > +//    Harmless for the 6 carriers: `white-space: pre` runs of one or two
+  unit-U3-ios.patch: > +//    glyphs that never break (the run's wire width sizes its frame).

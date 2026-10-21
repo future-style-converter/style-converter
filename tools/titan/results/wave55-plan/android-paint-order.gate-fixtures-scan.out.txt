@@ -1,0 +1,10 @@
+fixtures/visual-test.json: bordered 8 · with children 0 · with opacity 0 · with text 0
+fixtures/composition-test.json: bordered 1 · with children 1 · with opacity 0 · with text 0
+    Nested_BoxModel_PaddingBorder  children 1  padding 16px  opacity None
+fixtures/properties/effects/filter-sepia-amounts.json: bordered 0 · with children 0 · with opacity 0 · with text 0
+fixtures/combinations/nested-transforms.json: bordered 0 · with children 0 · with opacity 0 · with text 0
+fixtures/combinations/radius-overflow-transform.json: bordered 0 · with children 0 · with opacity 0 · with text 0
+fixtures/combinations/transform-abspos-pivot.json: bordered 0 · with children 0 · with opacity 0 · with text 0
+fixtures/combinations/blend-isolation.json: bordered 0 · with children 0 · with opacity 0 · with text 0
+fixtures/combinations/opacity-blend.json: bordered 0 · with children 0 · with opacity 0 · with text 0
+fixtures/combinations/all-then-color.json: bordered 0 · with children 0 · with opacity 0 · with text 0

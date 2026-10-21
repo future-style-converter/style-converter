@@ -1,0 +1,83 @@
+### A-clean: land-units.sh --check --only L6 -> exit 0
+CUMULATIVE (the series in landing order, `git apply --check` of one concatenated input on the current tree)
+  ok      3 patches apply in order on 640276a0 (+ the records commit, which touches no patched path)
+  ok      L6:U1           revert [ U2 U1 ] reverse-applies on the landed series
+  ok      L6:U2           revert [ U2 ] reverse-applies on the landed series
+  ok      L6:U3           revert [ U3 ] reverse-applies on the landed series
+SUMMARY  0 error(s), 0 warning(s) — landable (--check touched nothing: no checkout, no rm, no apply on the tree)
+  snapshot (HEAD, index sha256+mtime, refs, stash, worktrees, status --untracked-files=all): IDENTICAL
+  files newer than the pre-run stamp in the work tree (.git excluded): 0 
+  export dirs left in TMPDIR: 0
+
+### canaries: untracked loose copy at U1's CREATED path, the U2 file dirty, a stray in the lane dir, a stray at the tree root
+  canary sha256 before: fb6545930a860fc4 03cf8f58cde7e2d4 ed4c918103b23750 d3d3e36fe7aedfd9 
+### B-canaries: land-units.sh --check --only L6 -> exit 1
+  ERROR   tools/titan/results/wave55-android-paint-order/unit-U1.patch does NOT apply on the current tree and stacks on nothing: error: runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindCo
+  ERROR   tools/titan/results/wave55-android-paint-order/unit-U2.patch does NOT apply on the current tree and stacks on nothing: error: patch failed: runtimes/compose/src/main/java/com/styleconverter/runtime/bo
+  ERROR   runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt exists on disk, but its first patch CREATES it (a lane copied it in? the patch is the record — the landing re
+  ERROR   runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BordersFacade.kt is MODIFIED in the working tree (a lane edited the shared tree? the landing never rewinds it — refuses)
+CUMULATIVE (the series in landing order, `git apply --check` of one concatenated input on the current tree)
+  ERROR   the series STOPS at wave55-android-paint-order/unit-U1.patch (L6:U1): error: runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt: already exists in working directo
+SUMMARY  5 error(s), 0 warning(s) — NOT landable as is (--check touched nothing: no checkout, no rm, no apply on the tree)
+  snapshot (HEAD, index sha256+mtime, refs, stash, worktrees, status --untracked-files=all): IDENTICAL
+  files newer than the pre-run stamp in the work tree (.git excluded): 0 
+  export dirs left in TMPDIR: 0
+  canary sha256 after:  fb6545930a860fc4 03cf8f58cde7e2d4 ed4c918103b23750 d3d3e36fe7aedfd9  (byte-identical)
+### C-real-path-refuses: land-units.sh --only L6 -> exit 1
+  ERROR   tools/titan/results/wave55-android-paint-order/unit-U1.patch does NOT apply on the current tree and stacks on nothing: error: runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindCo
+  ERROR   tools/titan/results/wave55-android-paint-order/unit-U2.patch does NOT apply on the current tree and stacks on nothing: error: patch failed: runtimes/compose/src/main/java/com/styleconverter/runtime/bo
+  ERROR   runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt exists on disk, but its first patch CREATES it (a lane copied it in? the patch is the record — the landing re
+  ERROR   runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BordersFacade.kt is MODIFIED in the working tree (a lane edited the shared tree? the landing never rewinds it — refuses)
+CUMULATIVE (the series in landing order, `git apply --check` of one concatenated input on the current tree)
+  ERROR   the series STOPS at wave55-android-paint-order/unit-U1.patch (L6:U1): error: runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt: already exists in working directo
+land-units: the preflight found 5 error(s) — nothing was touched
+  snapshot (HEAD, index sha256+mtime, refs, stash, worktrees, status --untracked-files=all): IDENTICAL
+  files newer than the pre-run stamp in the work tree (.git excluded): 0 
+  export dirs left in TMPDIR: 0
+  canary sha256 after:  fb6545930a860fc4 03cf8f58cde7e2d4 ed4c918103b23750 d3d3e36fe7aedfd9  (byte-identical)
+
+### canaries removed (plain rm / cp of the original bytes): status now: 10 entr(y/ies) — ?? tools/titan/results/wave55-android-paint-order/_note.md ?? tools/titan/results/wave55-android-paint-order/unit-U1.patch ?? tools/titan/results/wave55-android-paint-order/unit-U2.patch ?? tools/titan/results/wave55-android-paint-order/unit-U3.patch ?? tools/titan/results/wave55-gate/ab-arms55.selftest.out.txt ?? tools/titan/results/wave55-gate/ab-arms55.selftest.sh ?? tools/titan/results/wave55-gate/ab-arms55.sh ?? tools/titan/results/wave55-plan/expectations.json ?? tools/titan/results/wave55-plan/land-units.sh ?? tools/titan/results/wave55-plan/landing-manifest.json 
+### D-stale-patch: land-units.sh --check --only L6 -> exit 1
+  ERROR   tools/titan/results/wave55-android-paint-order/unit-U9.patch is not a patch the ORDER table names for this lane (a stale dead-attempt patch? delete it)
+  ERROR   tools/titan/results/wave55-android-paint-order/_note.md names no 'patch: unit-U9.patch sha256 <64 hex>' line (write it after the final restore)
+CUMULATIVE (the series in landing order, `git apply --check` of one concatenated input on the current tree)
+  ok      3 patches apply in order on 640276a0 (+ the records commit, which touches no patched path)
+  ok      L6:U1           revert [ U2 U1 ] reverse-applies on the landed series
+  ok      L6:U2           revert [ U2 ] reverse-applies on the landed series
+  ok      L6:U3           revert [ U3 ] reverse-applies on the landed series
+SUMMARY  2 error(s), 0 warning(s) — NOT landable as is (--check touched nothing: no checkout, no rm, no apply on the tree)
+  snapshot (HEAD, index sha256+mtime, refs, stash, worktrees, status --untracked-files=all): IDENTICAL
+  files newer than the pre-run stamp in the work tree (.git excluded): 0 
+  export dirs left in TMPDIR: 0
+### E-recut-after-note: land-units.sh --check --only L6 -> exit 1
+  ERROR   tools/titan/results/wave55-android-paint-order/unit-U2.patch sha256 ccd16afc2428d7e1c476ca24804b024b469aa8c4dd0670ea8b81e1fe443c298f differs from the note's b5a5bb626880ea341c138c796973cf1a6b7b07f784d
+CUMULATIVE (the series in landing order, `git apply --check` of one concatenated input on the current tree)
+  ok      3 patches apply in order on 640276a0 (+ the records commit, which touches no patched path)
+  ok      L6:U1           revert [ U2 U1 ] reverse-applies on the landed series
+  ok      L6:U2           revert [ U2 ] reverse-applies on the landed series
+  ok      L6:U3           revert [ U3 ] reverse-applies on the landed series
+SUMMARY  1 error(s), 0 warning(s) — NOT landable as is (--check touched nothing: no checkout, no rm, no apply on the tree)
+  snapshot (HEAD, index sha256+mtime, refs, stash, worktrees, status --untracked-files=all): IDENTICAL
+  files newer than the pre-run stamp in the work tree (.git excluded): 0 
+  export dirs left in TMPDIR: 0
+### F-partial-note: land-units.sh --check --only L6 -> exit 1
+  ERROR   tools/titan/results/wave55-android-paint-order/_note.md: STATUS: PARTIAL — killed — a lane lands only on STATUS: COMPLETE (resume a killed / PARTIAL lane first: PLAN §8 step 3)
+CUMULATIVE (the series in landing order, `git apply --check` of one concatenated input on the current tree)
+  ok      3 patches apply in order on 640276a0 (+ the records commit, which touches no patched path)
+  ok      L6:U1           revert [ U2 U1 ] reverse-applies on the landed series
+  ok      L6:U2           revert [ U2 ] reverse-applies on the landed series
+  ok      L6:U3           revert [ U3 ] reverse-applies on the landed series
+SUMMARY  1 error(s), 0 warning(s) — NOT landable as is (--check touched nothing: no checkout, no rm, no apply on the tree)
+  snapshot (HEAD, index sha256+mtime, refs, stash, worktrees, status --untracked-files=all): IDENTICAL
+  files newer than the pre-run stamp in the work tree (.git excluded): 0 
+  export dirs left in TMPDIR: 0
+### G-restored: land-units.sh --check --only L6 -> exit 0
+CUMULATIVE (the series in landing order, `git apply --check` of one concatenated input on the current tree)
+  ok      3 patches apply in order on 640276a0 (+ the records commit, which touches no patched path)
+  ok      L6:U1           revert [ U2 U1 ] reverse-applies on the landed series
+  ok      L6:U2           revert [ U2 ] reverse-applies on the landed series
+  ok      L6:U3           revert [ U3 ] reverse-applies on the landed series
+SUMMARY  0 error(s), 0 warning(s) — landable (--check touched nothing: no checkout, no rm, no apply on the tree)
+  snapshot (HEAD, index sha256+mtime, refs, stash, worktrees, status --untracked-files=all): IDENTICAL
+  files newer than the pre-run stamp in the work tree (.git excluded): 0 
+  export dirs left in TMPDIR: 0

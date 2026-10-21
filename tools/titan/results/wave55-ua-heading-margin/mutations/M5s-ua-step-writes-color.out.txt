@@ -1,0 +1,15 @@
+{
+ "name": "M5s-ua-step-writes-color",
+ "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAElementFontRule.swift",
+ "pre": "911e6e1f2d54c902694122a0a172ca6af31974b9819c15c475aff67e6b3c2e81",
+ "mutated": "5a1bc9c3a8d3ce76129111327603c51b2140f78e018f1288efdd4bba06fc14b7",
+ "post": "911e6e1f2d54c902694122a0a172ca6af31974b9819c15c475aff67e6b3c2e81",
+ "red_rc": 65,
+ "red_failures": [
+  "UAHeadingFoldGateTests.testFoldVerdictIsInvariantUnderTheUAFace"
+ ],
+ "red_counts": "Executed 39, 3 failures",
+ "green_rc": 0,
+ "green_counts": "Executed 39, 0 failures",
+ "verdict": "RED-THEN-GREEN"
+}

@@ -1,0 +1,121 @@
+land-units.sh — wave 55 (CHECK: read-only)
+root    /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+HEAD    611c9f93 (campaign/applier-campaign)   export dir (private, removed at exit): /private/var/folders/34/h7173byn5kb_lddtbn4hqt9w0000gn/T/land-units.HeqeDi
+
+ORDER (7 unit commits + records; hold: none; only: L5)
+  00   records  the selected lane dirs → 1 commit
+  01   L7  U1           -- skipped: not in --only
+  02   L7  U2           -- skipped: not in --only
+  03   L7  U3           -- skipped: not in --only
+  04   L7  U4           -- skipped: not in --only
+  05   L7  U6-compose   -- skipped: not in --only
+  06   L7  U6-swift     -- skipped: not in --only
+  07   L7  U6-web       -- skipped: not in --only
+  08   L7  U6-tooling   -- skipped: not in --only
+  09   L7  U5           -- skipped: not in --only
+  10   L6  U1           -- skipped: not in --only
+  11   L6  U2           -- skipped: not in --only
+  12   L6  U3           -- skipped: not in --only
+  13   L4  U1-android   -- skipped: not in --only
+  14   L4  U1-ios       -- skipped: not in --only
+  15   L4  U2-android   -- skipped: not in --only
+  16   L4  U2-ios       -- skipped: not in --only
+  17   L2  U1           -- skipped: not in --only
+  18   L2  U2           -- skipped: not in --only
+  19   L3  U1           -- skipped: not in --only
+  20   L3  U2           -- skipped: not in --only
+  21   L5  U1-ios       wave55-counter-suffix-rows/unit-U1-ios.patch wave55-counter-suffix-rows/seam-1.patch 
+  22   L5  U2o-ios      wave55-counter-suffix-rows/unit-U2o-ios.patch wave55-counter-suffix-rows/seam-2.patch 
+  23   L5  U2i-ios      wave55-counter-suffix-rows/seam-3.patch 
+  24   L5  U2o-android  wave55-counter-suffix-rows/unit-U2o-android.patch wave55-counter-suffix-rows/seam-4.patch 
+  25   L5  U2i-android  wave55-counter-suffix-rows/seam-5.patch 
+  26   L1  NB-ios       -- skipped: not in --only
+  27   L5  U3-ios       wave55-counter-suffix-rows/unit-U3-ios.patch wave55-counter-suffix-rows/seam-6.patch 
+  28   L5  D            wave55-counter-suffix-rows/unit-D.patch 
+  29   L1  NB-ios-b     -- skipped: not in --only
+  30   L5  U1-ios-LRM   -- skipped: contingency (lands only by --contingency)
+
+HOST, INDEX, MANIFEST
+  host    no gate / probe / A/B arm process in this tree
+  index   nothing staged
+  manifest in sync with the tables (landing-manifest.json, sha256 f6716e2f80f1…)
+  plan    28 plan revert units (+ 2 contingency) agree with the table: lane dirs, unit names, revertOrders (expectations.json)
+
+RECORDS (committed first)
+  ok      tools/titan/results/wave55-counter-suffix-rows/  (24 files)
+  WARN    written less than 120s ago (an instrument may still be writing; the landing refuses): tools/titan/results/wave55-counter-suffix-rows/census-l5.out.txt tools/titan/results/wave55-counter-suffix-rows/unit-U1-ios-LRM.patch tools/titan/results/wave55-counter-suffix-rows/census-l5.py tools/titan/results/wave55-counter-suffix-rows/unit-U3-ios.patch tools/titan/results/wave55-counter-suffix-rows/unit-U2o-android.patch tools/titan/results/wave55-counter-suffix-rows/seam-2.patch tools/titan/results/wave55-counter-suffix-rows/census-l5.wave55-open.out.txt tools/titan/results/wave55-counter-suffix-rows/unit-U2o-ios.patch tools/titan/results/wave55-counter-suffix-rows/unit-D.patch tools/titan/results/wave55-counter-suffix-rows/seam-6.patch tools/titan/results/wave55-counter-suffix-rows/_note.md tools/titan/results/wave55-counter-suffix-rows/seam-4.patch tools/titan/results/wave55-counter-suffix-rows/patch-series-check.out.txt tools/titan/results/wave55-counter-suffix-rows/seam-3.patch tools/titan/results/wave55-counter-suffix-rows/seam-1.patch tools/titan/results/wave55-counter-suffix-rows/seam-5.patch tools/titan/results/wave55-counter-suffix-rows/unit-U1-ios.patch
+
+PATCHES (each: present · parsed · its paths · the rules · alone on the current tree)
+  wave55-counter-suffix-rows/unit-U1-ios.patch                   (L5:U1-ios)
+            + runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerBidi.swift
+            + runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerBidiTests.swift
+            alone: applies on the current tree
+  wave55-counter-suffix-rows/seam-1.patch                        (L5:U1-ios)
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+            + runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerBidiSeamRasterTests.swift
+            alone: applies on the current tree
+  wave55-counter-suffix-rows/unit-U2o-ios.patch                  (L5:U2o-ios)
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerRow.swift
+            + runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerSuffixGap.swift
+            + runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerSuffixGapTests.swift
+            alone: applies on the current tree
+  wave55-counter-suffix-rows/seam-2.patch                        (L5:U2o-ios)
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+            + runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerSuffixGapHangRasterTests.swift
+            alone: applies on the current tree (stacked: runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift on L5:U1-ios;)
+  wave55-counter-suffix-rows/seam-3.patch                        (L5:U2i-ios)
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+            + runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerSuffixGapInsideRasterTests.swift
+            alone: applies on the current tree (stacked: runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift on L5:U1-ios; runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift on L5:U2o-ios;)
+  wave55-counter-suffix-rows/unit-U2o-android.patch              (L5:U2o-android)
+            ~ runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerRow.kt
+            + runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerSuffixGap.kt
+            + runtimes/compose/src/test/java/com/styleconverter/runtime/lists/ListMarkerSuffixGapTest.kt
+            alone: applies on the current tree
+  wave55-counter-suffix-rows/seam-4.patch                        (L5:U2o-android)
+            ~ runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+            ~ runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/SeamReachabilityTest.kt
+            + runtimes/compose/src/test/java/com/styleconverter/runtime/lists/ListMarkerSuffixGapHangSeamTest.kt
+            alone: applies on the current tree
+  wave55-counter-suffix-rows/seam-5.patch                        (L5:U2i-android)
+            ~ runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+            + runtimes/compose/src/test/java/com/styleconverter/runtime/lists/ListMarkerSuffixGapRowSeamTest.kt
+            alone: applies on the current tree (stacked: runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt on L5:U2o-android;)
+  wave55-counter-suffix-rows/unit-U3-ios.patch                   (L5:U3-ios)
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/StyleBuilder.swift
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/TypographyAggregate.swift
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/font-variant/FontVariantNumericApplier.swift
+            + runtimes/swiftui/Tests/StyleConverterRuntimeTests/FontVariantNumericTabularTests.swift
+            alone: applies on the current tree
+  wave55-counter-suffix-rows/seam-6.patch                        (L5:U3-ios)
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+            + runtimes/swiftui/Tests/StyleConverterRuntimeTests/FontVariantNumericTabularRasterTests.swift
+            alone: applies on the current tree (stacked: runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift on L5:U1-ios; runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift on L5:U2o-ios; runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift on L5:U2i-ios;)
+  wave55-counter-suffix-rows/unit-D.patch                        (L5:D)
+            ~ runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerOutsideHang.kt
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/KoreanHangulFormal.swift
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerOutsideHang.swift
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerStyle.swift
+            ~ runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerText.swift
+            ~ tools/titan/counter-style-table.mjs
+            alone: applies on the current tree
+
+TOUCHED PATHS (clean at HEAD on the current tree; a created path absent)
+  ok      27 paths (13 created, the rest clean at HEAD 611c9f93)
+
+CUMULATIVE (the series in landing order, `git apply --check` of one concatenated input on the current tree)
+  ok      11 patches apply in order on 611c9f93 (+ the records commit, which touches no patched path)
+
+REVERT DRY-RUNS (every selected unit's revertOrder, reverse-applied on the fully landed series; export tree)
+  ok      L5:U1-ios       revert [ U1-ios ] reverse-applies on the landed series  (C12)
+  ok      L5:U2o-ios      revert [ D U2i-ios U2o-ios ] reverse-applies on the landed series
+  ok      L5:U2i-ios      revert [ U2i-ios ] reverse-applies on the landed series
+  ok      L5:U2o-android  revert [ D U2i-android U2o-android ] reverse-applies on the landed series
+  ok      L5:U2i-android  revert [ U2i-android ] reverse-applies on the landed series
+  ok      L5:U3-ios       revert [ U3-ios ] reverse-applies on the landed series
+  ok      L5:D            revert [ D ] reverse-applies on the landed series
+
+CONTINGENCY (not landed by this run)
+  ok      L5:U1-ios-LRM (contingency) applies on top of the series
+
+SUMMARY  0 error(s), 1 warning(s) — landable (--check touched nothing: no checkout, no rm, no apply on the tree)

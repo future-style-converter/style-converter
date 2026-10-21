@@ -1,0 +1,6131 @@
+{
+ "prev": "wave55-open",
+ "cur": "wave55-probe",
+ "totals": {
+  "prev": {
+   "web": {
+    "passing": 1243,
+    "measured": 1372
+   },
+   "ios": {
+    "passing": 1131,
+    "measured": 1362
+   },
+   "android": {
+    "passing": 1128,
+    "measured": 1362
+   }
+  },
+  "cur": {
+   "web": {
+    "passing": 1075,
+    "measured": 1186
+   },
+   "ios": {
+    "passing": 970,
+    "measured": 1176
+   },
+   "android": {
+    "passing": 969,
+    "measured": 1176
+   }
+  }
+ },
+ "sections": {
+  "CSS2": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   }
+  },
+  "css-anchor-position": {
+   "prev": {
+    "web": {
+     "passing": 30,
+     "measured": 32
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 32
+    },
+    "android": {
+     "passing": 27,
+     "measured": 32
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 30,
+     "measured": 32
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 32
+    },
+    "android": {
+     "passing": 27,
+     "measured": 32
+    }
+   }
+  },
+  "css-backgrounds": {
+   "prev": {
+    "web": {
+     "passing": 26,
+     "measured": 29
+    },
+    "ios": {
+     "passing": 26,
+     "measured": 29
+    },
+    "android": {
+     "passing": 26,
+     "measured": 29
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 26,
+     "measured": 29
+    },
+    "ios": {
+     "passing": 26,
+     "measured": 29
+    },
+    "android": {
+     "passing": 26,
+     "measured": 29
+    }
+   }
+  },
+  "css-break": {
+   "prev": {
+    "web": {
+     "passing": 37,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 29,
+     "measured": 48
+    },
+    "android": {
+     "passing": 32,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 37,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 29,
+     "measured": 48
+    },
+    "android": {
+     "passing": 32,
+     "measured": 48
+    }
+   }
+  },
+  "css-cascade": {
+   "prev": {
+    "web": {
+     "passing": 37,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 41
+    },
+    "android": {
+     "passing": 36,
+     "measured": 41
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 37,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 41
+    },
+    "android": {
+     "passing": 36,
+     "measured": 41
+    }
+   }
+  },
+  "css-color": {
+   "prev": {
+    "web": {
+     "passing": 43,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 43,
+     "measured": 48
+    },
+    "android": {
+     "passing": 44,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 0,
+     "measured": 0
+    },
+    "ios": {
+     "passing": 0,
+     "measured": 0
+    },
+    "android": {
+     "passing": 0,
+     "measured": 0
+    }
+   }
+  },
+  "css-contain": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   }
+  },
+  "css-counter-styles": {
+   "prev": {
+    "web": {
+     "passing": 40,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 28,
+     "measured": 37
+    },
+    "android": {
+     "passing": 28,
+     "measured": 37
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 40,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 28,
+     "measured": 37
+    },
+    "android": {
+     "passing": 28,
+     "measured": 37
+    }
+   }
+  },
+  "css-display": {
+   "prev": {
+    "web": {
+     "passing": 45,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 45,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   }
+  },
+  "css-flexbox": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 45,
+     "measured": 47
+    },
+    "android": {
+     "passing": 45,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 45,
+     "measured": 47
+    },
+    "android": {
+     "passing": 45,
+     "measured": 47
+    }
+   }
+  },
+  "css-gaps": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   }
+  },
+  "css-grid": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   }
+  },
+  "css-images": {
+   "prev": {
+    "web": {
+     "passing": 43,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 47
+    },
+    "android": {
+     "passing": 35,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 43,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 47
+    },
+    "android": {
+     "passing": 35,
+     "measured": 47
+    }
+   }
+  },
+  "css-lists": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   }
+  },
+  "css-masking": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   }
+  },
+  "css-multicol": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 43,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 43,
+     "measured": 48
+    }
+   }
+  },
+  "css-overflow": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 47
+    },
+    "android": {
+     "passing": 46,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 47
+    },
+    "android": {
+     "passing": 46,
+     "measured": 47
+    }
+   }
+  },
+  "css-position": {
+   "prev": {
+    "web": {
+     "passing": 37,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 41
+    },
+    "android": {
+     "passing": 33,
+     "measured": 41
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 37,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 41
+    },
+    "android": {
+     "passing": 33,
+     "measured": 41
+    }
+   }
+  },
+  "css-pseudo": {
+   "prev": {
+    "web": {
+     "passing": 33,
+     "measured": 42
+    },
+    "ios": {
+     "passing": 32,
+     "measured": 42
+    },
+    "android": {
+     "passing": 31,
+     "measured": 42
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 0,
+     "measured": 0
+    },
+    "ios": {
+     "passing": 0,
+     "measured": 0
+    },
+    "android": {
+     "passing": 0,
+     "measured": 0
+    }
+   }
+  },
+  "css-sizing": {
+   "prev": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 44,
+     "measured": 48
+    },
+    "android": {
+     "passing": 45,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 0,
+     "measured": 0
+    },
+    "ios": {
+     "passing": 0,
+     "measured": 0
+    },
+    "android": {
+     "passing": 0,
+     "measured": 0
+    }
+   }
+  },
+  "css-tables": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 47
+    },
+    "android": {
+     "passing": 37,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 47
+    },
+    "android": {
+     "passing": 37,
+     "measured": 47
+    }
+   }
+  },
+  "css-text": {
+   "prev": {
+    "web": {
+     "passing": 39,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 39,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 39,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 39,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   }
+  },
+  "css-text-decor": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 31,
+     "measured": 48
+    },
+    "android": {
+     "passing": 29,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 31,
+     "measured": 48
+    },
+    "android": {
+     "passing": 29,
+     "measured": 48
+    }
+   }
+  },
+  "css-transforms": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 47
+    },
+    "android": {
+     "passing": 43,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 47
+    },
+    "android": {
+     "passing": 43,
+     "measured": 47
+    }
+   }
+  },
+  "css-ui": {
+   "prev": {
+    "web": {
+     "passing": 45,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 0,
+     "measured": 0
+    },
+    "ios": {
+     "passing": 0,
+     "measured": 0
+    },
+    "android": {
+     "passing": 0,
+     "measured": 0
+    }
+   }
+  },
+  "css-values": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 40,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 40,
+     "measured": 48
+    }
+   }
+  },
+  "css-view-transitions": {
+   "prev": {
+    "web": {
+     "passing": 32,
+     "measured": 45
+    },
+    "ios": {
+     "passing": 27,
+     "measured": 46
+    },
+    "android": {
+     "passing": 29,
+     "measured": 46
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 32,
+     "measured": 45
+    },
+    "ios": {
+     "passing": 27,
+     "measured": 46
+    },
+    "android": {
+     "passing": 29,
+     "measured": 46
+    }
+   }
+  },
+  "css-writing-modes": {
+   "prev": {
+    "web": {
+     "passing": 36,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 30,
+     "measured": 48
+    },
+    "android": {
+     "passing": 27,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 36,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 30,
+     "measured": 48
+    },
+    "android": {
+     "passing": 27,
+     "measured": 48
+    }
+   }
+  },
+  "filter-effects": {
+   "prev": {
+    "web": {
+     "passing": 41,
+     "measured": 46
+    },
+    "ios": {
+     "passing": 37,
+     "measured": 46
+    },
+    "android": {
+     "passing": 36,
+     "measured": 46
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 41,
+     "measured": 46
+    },
+    "ios": {
+     "passing": 37,
+     "measured": 46
+    },
+    "android": {
+     "passing": 37,
+     "measured": 46
+    }
+   }
+  },
+  "selectors": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 39,
+     "measured": 48
+    }
+   }
+  }
+ },
+ "gained": [
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-nested-border-radius-clip-3.html",
+   "platform": "android",
+   "prev": 0.9574,
+   "cur": 0.9999,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "selectors",
+   "test": "css/selectors/dir-style-02a.html",
+   "platform": "android",
+   "prev": 0.9425,
+   "cur": 0.9854,
+   "prevPass": false,
+   "curPass": true
+  }
+ ],
+ "lost": [],
+ "movers": [
+  {
+   "sec": "css-anchor-position",
+   "test": "css/css-anchor-position/anchor-position-multicol-nested-001.html",
+   "platform": "android",
+   "prev": 0.9573,
+   "cur": 0.9688,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0115
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/abspos-autopos-htb-rtl.html",
+   "platform": "android",
+   "prev": 0.9869,
+   "cur": 0.9966,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0097
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html",
+   "platform": "android",
+   "prev": 0.9619,
+   "cur": 0.9943,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0324
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html",
+   "platform": "android",
+   "prev": 0.9635,
+   "cur": 0.9932,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0297
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/descendant-static-position-001.html",
+   "platform": "android",
+   "prev": 0.9892,
+   "cur": 0.9991,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0099
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/descendant-static-position-002.html",
+   "platform": "android",
+   "prev": 0.9601,
+   "cur": 0.9724,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0123
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-semi-replaced-stretch-button.html",
+   "platform": "android",
+   "prev": 0.9739,
+   "cur": 0.9843,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0104
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-semi-replaced-stretch-input.html",
+   "platform": "android",
+   "prev": 0.4117,
+   "cur": 0.4555,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0438
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-semi-replaced-stretch-other.html",
+   "platform": "android",
+   "prev": 0.4396,
+   "cur": 0.4685,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0289
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/bidi/bidi-tab-001.html",
+   "platform": "android",
+   "prev": 0.9805,
+   "cur": 0.9929,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0124
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/break-inside-avoid-child.html",
+   "platform": "android",
+   "prev": 0.9735,
+   "cur": 0.9872,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0137
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-nested-border-radius-clip-2.html",
+   "platform": "android",
+   "prev": 0.9689,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0311
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-nested-border-radius-clip-4.html",
+   "platform": "android",
+   "prev": 0.977,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0229
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-nested-border-radius-clip.html",
+   "platform": "android",
+   "prev": 0.9649,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0351
+  }
+ ],
+ "newlyMeasured": [],
+ "unmeasuredNow": [
+  {
+   "sec": "css-color",
+   "test": "css/css-color/a98rgb-001.html",
+   "platform": "android",
+   "prev": 0.9982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/a98rgb-001.html",
+   "platform": "ios",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/a98rgb-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/a98rgb-002.html",
+   "platform": "android",
+   "prev": 0.9981,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/a98rgb-002.html",
+   "platform": "ios",
+   "prev": 0.9989,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/a98rgb-002.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/a98rgb-003.html",
+   "platform": "android",
+   "prev": 0.9976,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/a98rgb-003.html",
+   "platform": "ios",
+   "prev": 0.9985,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/a98rgb-003.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/a98rgb-004.html",
+   "platform": "android",
+   "prev": 0.9973,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/a98rgb-004.html",
+   "platform": "ios",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/a98rgb-004.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/animation/contrast-color-interpolation.html",
+   "platform": "android",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/animation/contrast-color-interpolation.html",
+   "platform": "ios",
+   "prev": 0.9551,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/animation/contrast-color-interpolation.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/at-color-profile-001.html",
+   "platform": "android",
+   "prev": 0.9327,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/at-color-profile-001.html",
+   "platform": "ios",
+   "prev": 0.9335,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/at-color-profile-001.html",
+   "platform": "web",
+   "prev": 0.9346,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-hsl-001.html",
+   "platform": "android",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-hsl-001.html",
+   "platform": "ios",
+   "prev": 0.9995,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-hsl-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-hsl-002.html",
+   "platform": "android",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-hsl-002.html",
+   "platform": "ios",
+   "prev": 0.9994,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-hsl-002.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-hsl-003.html",
+   "platform": "android",
+   "prev": 0.9992,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-hsl-003.html",
+   "platform": "ios",
+   "prev": 0.9996,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-hsl-003.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-hsl-004.html",
+   "platform": "android",
+   "prev": 0.9989,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-hsl-004.html",
+   "platform": "ios",
+   "prev": 0.9994,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-hsl-004.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-rgb-001.html",
+   "platform": "android",
+   "prev": 0.9993,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-rgb-001.html",
+   "platform": "ios",
+   "prev": 0.9996,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-rgb-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-rgb-002.html",
+   "platform": "android",
+   "prev": 0.9993,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-rgb-002.html",
+   "platform": "ios",
+   "prev": 0.9996,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-rgb-002.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-rgb-003.html",
+   "platform": "android",
+   "prev": 0.9992,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-rgb-003.html",
+   "platform": "ios",
+   "prev": 0.9996,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/background-color-rgb-003.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/border-color-currentcolor.html",
+   "platform": "android",
+   "prev": 0.9914,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/border-color-currentcolor.html",
+   "platform": "ios",
+   "prev": 0.9922,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/border-color-currentcolor.html",
+   "platform": "web",
+   "prev": 0.9038,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/clip-opacity-out-of-flow.html",
+   "platform": "android",
+   "prev": 0.9271,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/clip-opacity-out-of-flow.html",
+   "platform": "ios",
+   "prev": 0.9271,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/clip-opacity-out-of-flow.html",
+   "platform": "web",
+   "prev": 0.9271,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-001.html",
+   "platform": "android",
+   "prev": 0.9992,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-001.html",
+   "platform": "ios",
+   "prev": 0.9993,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-002.html",
+   "platform": "android",
+   "prev": 0.9987,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-002.html",
+   "platform": "ios",
+   "prev": 0.9994,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-002.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-003.html",
+   "platform": "android",
+   "prev": 0.9992,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-003.html",
+   "platform": "ios",
+   "prev": 0.9993,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-003.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-layers-no-blend-mode.html",
+   "platform": "android",
+   "prev": 0.5189,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-layers-no-blend-mode.html",
+   "platform": "ios",
+   "prev": 0.5189,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-layers-no-blend-mode.html",
+   "platform": "web",
+   "prev": 0.5189,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-basic-001.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-basic-001.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-basic-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-001.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-001.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-002.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-002.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-002.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-003.html",
+   "platform": "android",
+   "prev": 0.994,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-003.html",
+   "platform": "ios",
+   "prev": 0.9919,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-003.html",
+   "platform": "web",
+   "prev": 0.9912,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-nested-for-color-property.html",
+   "platform": "android",
+   "prev": 0.9911,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-nested-for-color-property.html",
+   "platform": "ios",
+   "prev": 0.9884,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-nested-for-color-property.html",
+   "platform": "web",
+   "prev": 0.9873,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-visited.html",
+   "platform": "android",
+   "prev": 0.9929,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-visited.html",
+   "platform": "ios",
+   "prev": 0.9904,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-visited.html",
+   "platform": "web",
+   "prev": 0.9975,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-non-srgb-001.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-non-srgb-001.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-non-srgb-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-percents-01.html",
+   "platform": "android",
+   "prev": 0.9982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-percents-01.html",
+   "platform": "ios",
+   "prev": 0.9989,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-percents-01.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-percents-02.html",
+   "platform": "android",
+   "prev": 0.9981,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-percents-02.html",
+   "platform": "ios",
+   "prev": 0.9988,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-percents-02.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/composited-filters-under-opacity.html",
+   "platform": "android",
+   "prev": 0.9982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/composited-filters-under-opacity.html",
+   "platform": "ios",
+   "prev": 0.9991,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/composited-filters-under-opacity.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-001.html",
+   "platform": "android",
+   "prev": 0.9982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-001.html",
+   "platform": "ios",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-002.html",
+   "platform": "android",
+   "prev": 0.9982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-002.html",
+   "platform": "ios",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-002.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-003.html",
+   "platform": "android",
+   "prev": 0.7794,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-003.html",
+   "platform": "ios",
+   "prev": 0.7707,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-003.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-004.html",
+   "platform": "android",
+   "prev": 0.9901,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-004.html",
+   "platform": "ios",
+   "prev": 0.9913,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-004.html",
+   "platform": "web",
+   "prev": 0.9999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-visited-fallback.html",
+   "platform": "android",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-visited-fallback.html",
+   "platform": "ios",
+   "prev": 0.9991,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-visited-fallback.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-001.html",
+   "platform": "android",
+   "prev": 0.9982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-001.html",
+   "platform": "ios",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-002.html",
+   "platform": "android",
+   "prev": 0.9981,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-002.html",
+   "platform": "ios",
+   "prev": 0.9989,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-002.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-003.html",
+   "platform": "android",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-003.html",
+   "platform": "ios",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-003.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-004.html",
+   "platform": "android",
+   "prev": 0.9973,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-004.html",
+   "platform": "ios",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-004.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-005.html",
+   "platform": "android",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-005.html",
+   "platform": "ios",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-005.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-006.html",
+   "platform": "android",
+   "prev": 0.998,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-006.html",
+   "platform": "ios",
+   "prev": 0.9988,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-006.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-001.html",
+   "platform": "android",
+   "prev": 0.9982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-001.html",
+   "platform": "ios",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-002.html",
+   "platform": "android",
+   "prev": 0.9981,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-002.html",
+   "platform": "ios",
+   "prev": 0.9989,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-002.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-003.html",
+   "platform": "android",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-003.html",
+   "platform": "ios",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-003.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-004.html",
+   "platform": "android",
+   "prev": 0.9973,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-004.html",
+   "platform": "ios",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-004.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-005.html",
+   "platform": "android",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-005.html",
+   "platform": "ios",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-005.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-006.html",
+   "platform": "android",
+   "prev": 0.998,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-006.html",
+   "platform": "ios",
+   "prev": 0.9988,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-006.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/hex-001.html",
+   "platform": "android",
+   "prev": 0.9982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/hex-001.html",
+   "platform": "ios",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/hex-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/hex-002.html",
+   "platform": "android",
+   "prev": 0.9982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/hex-002.html",
+   "platform": "ios",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/hex-002.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/active-selection-056.html",
+   "platform": "android",
+   "prev": 0.9986,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/active-selection-056.html",
+   "platform": "ios",
+   "prev": 0.9994,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/active-selection-056.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/active-selection-057.html",
+   "platform": "android",
+   "prev": 0.9986,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/active-selection-057.html",
+   "platform": "ios",
+   "prev": 0.9994,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/active-selection-057.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/before-as-flex-container.html",
+   "platform": "android",
+   "prev": 0.9986,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/before-as-flex-container.html",
+   "platform": "ios",
+   "prev": 0.9986,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/before-as-flex-container.html",
+   "platform": "web",
+   "prev": 0.9985,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/before-dynamic-display-none.html",
+   "platform": "android",
+   "prev": 0.9979,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/before-dynamic-display-none.html",
+   "platform": "ios",
+   "prev": 0.9991,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/before-dynamic-display-none.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/before-preceding-whitespace-dynamic.html",
+   "platform": "android",
+   "prev": 0.9931,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/before-preceding-whitespace-dynamic.html",
+   "platform": "ios",
+   "prev": 0.9949,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/before-preceding-whitespace-dynamic.html",
+   "platform": "web",
+   "prev": 0.9884,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-001.html",
+   "platform": "android",
+   "prev": 0.9717,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-001.html",
+   "platform": "ios",
+   "prev": 0.9726,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-001.html",
+   "platform": "web",
+   "prev": 0.9806,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-002.html",
+   "platform": "android",
+   "prev": 0.9799,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-002.html",
+   "platform": "ios",
+   "prev": 0.9807,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-002.html",
+   "platform": "web",
+   "prev": 0.9821,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-003.html",
+   "platform": "android",
+   "prev": 0.9826,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-003.html",
+   "platform": "ios",
+   "prev": 0.9835,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-003.html",
+   "platform": "web",
+   "prev": 0.9849,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-004.html",
+   "platform": "android",
+   "prev": 0.9617,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-004.html",
+   "platform": "ios",
+   "prev": 0.9794,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-004.html",
+   "platform": "web",
+   "prev": 0.9985,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-005.html",
+   "platform": "android",
+   "prev": 0.9224,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-005.html",
+   "platform": "ios",
+   "prev": 0.9054,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-005.html",
+   "platform": "web",
+   "prev": 0.9248,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-and-sibling-display-change.html",
+   "platform": "android",
+   "prev": 0.9993,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-and-sibling-display-change.html",
+   "platform": "ios",
+   "prev": 0.9993,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-and-sibling-display-change.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-and-whitespace.html",
+   "platform": "android",
+   "prev": 0.9952,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-and-whitespace.html",
+   "platform": "ios",
+   "prev": 0.9966,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-and-whitespace.html",
+   "platform": "web",
+   "prev": 0.9981,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-background-image-dynamic.html",
+   "platform": "android",
+   "prev": 0.9976,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-background-image-dynamic.html",
+   "platform": "ios",
+   "prev": 0.9977,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-background-image-dynamic.html",
+   "platform": "web",
+   "prev": 0.9978,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-background-image.html",
+   "platform": "android",
+   "prev": 0.9976,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-background-image.html",
+   "platform": "ios",
+   "prev": 0.9977,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-background-image.html",
+   "platform": "web",
+   "prev": 0.9978,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-block-to-inline.html",
+   "platform": "android",
+   "prev": 0.9993,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-block-to-inline.html",
+   "platform": "ios",
+   "prev": 0.9993,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-block-to-inline.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-capitalize-supplementary-char.html",
+   "platform": "android",
+   "prev": 0.9747,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-capitalize-supplementary-char.html",
+   "platform": "ios",
+   "prev": 0.9925,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-capitalize-supplementary-char.html",
+   "platform": "web",
+   "prev": 0.9996,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-digraph.html",
+   "platform": "android",
+   "prev": 0.9679,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-digraph.html",
+   "platform": "ios",
+   "prev": 0.932,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-digraph.html",
+   "platform": "web",
+   "prev": 0.9778,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-block-child-marker.html",
+   "platform": "android",
+   "prev": 0.8525,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-block-child-marker.html",
+   "platform": "ios",
+   "prev": 0.86,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-block-child-marker.html",
+   "platform": "web",
+   "prev": 0.8489,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-inline-child-marker.html",
+   "platform": "android",
+   "prev": 0.7551,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-inline-child-marker.html",
+   "platform": "ios",
+   "prev": 0.7363,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-inline-child-marker.html",
+   "platform": "web",
+   "prev": 0.7361,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-inline-marker.html",
+   "platform": "android",
+   "prev": 0.8466,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-inline-marker.html",
+   "platform": "ios",
+   "prev": 0.8346,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-inline-marker.html",
+   "platform": "web",
+   "prev": 0.8311,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-insert-text-node-dynamic.html",
+   "platform": "android",
+   "prev": 0.9018,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-insert-text-node-dynamic.html",
+   "platform": "ios",
+   "prev": 0.9024,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-insert-text-node-dynamic.html",
+   "platform": "web",
+   "prev": 0.9031,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-list-item-dynamic-001.html",
+   "platform": "android",
+   "prev": 0.9987,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-list-item-dynamic-001.html",
+   "platform": "ios",
+   "prev": 0.9995,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-list-item-dynamic-001.html",
+   "platform": "web",
+   "prev": 0.9999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-opacity-001.html",
+   "platform": "android",
+   "prev": 0.9983,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-opacity-001.html",
+   "platform": "ios",
+   "prev": 0.9982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-opacity-001.html",
+   "platform": "web",
+   "prev": 0.9982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-opacity-float-001.html",
+   "platform": "android",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-opacity-float-001.html",
+   "platform": "ios",
+   "prev": 0.9975,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-opacity-float-001.html",
+   "platform": "web",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-punctuation-and-space.html",
+   "platform": "android",
+   "prev": 0.9931,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-punctuation-and-space.html",
+   "platform": "ios",
+   "prev": 0.9834,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-punctuation-and-space.html",
+   "platform": "web",
+   "prev": 0.9986,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-punctuation-dynamic.html",
+   "platform": "android",
+   "prev": 0.9944,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-punctuation-dynamic.html",
+   "platform": "ios",
+   "prev": 0.9947,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-punctuation-dynamic.html",
+   "platform": "web",
+   "prev": 0.9957,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-empty-span-nested.html",
+   "platform": "android",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-empty-span-nested.html",
+   "platform": "ios",
+   "prev": 0.9993,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-empty-span-nested.html",
+   "platform": "web",
+   "prev": 0.9999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-empty-span.html",
+   "platform": "android",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-empty-span.html",
+   "platform": "ios",
+   "prev": 0.9993,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-empty-span.html",
+   "platform": "web",
+   "prev": 0.9999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-marker.html",
+   "platform": "android",
+   "prev": 0.9664,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-marker.html",
+   "platform": "ios",
+   "prev": 0.9664,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-marker.html",
+   "platform": "web",
+   "prev": 0.9638,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-text-and-display-change.html",
+   "platform": "android",
+   "prev": 0.9822,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-text-and-display-change.html",
+   "platform": "ios",
+   "prev": 0.987,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-text-and-display-change.html",
+   "platform": "web",
+   "prev": 0.9882,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-width-2.html",
+   "platform": "android",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-width-2.html",
+   "platform": "ios",
+   "prev": 0.9994,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-width-2.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-width.html",
+   "platform": "android",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-width.html",
+   "platform": "ios",
+   "prev": 0.9994,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-width.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-before-after.html",
+   "platform": "android",
+   "prev": 0.993,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-before-after.html",
+   "platform": "ios",
+   "prev": 0.9988,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-before-after.html",
+   "platform": "web",
+   "prev": 0.9907,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-preceding-new-line.html",
+   "platform": "android",
+   "prev": 0.998,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-preceding-new-line.html",
+   "platform": "ios",
+   "prev": 0.9834,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-preceding-new-line.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-quote.html",
+   "platform": "android",
+   "prev": 0.9948,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-quote.html",
+   "platform": "ios",
+   "prev": 0.9948,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-quote.html",
+   "platform": "web",
+   "prev": 0.9999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-span.html",
+   "platform": "android",
+   "prev": 0.9998,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-span.html",
+   "platform": "ios",
+   "prev": 0.9999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-span.html",
+   "platform": "web",
+   "prev": 0.9999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-and-marker.html",
+   "platform": "android",
+   "prev": 0.9725,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-and-marker.html",
+   "platform": "ios",
+   "prev": 0.9739,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-and-marker.html",
+   "platform": "web",
+   "prev": 0.9538,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-and-placeholder.html",
+   "platform": "android",
+   "prev": 0.9743,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-and-placeholder.html",
+   "platform": "ios",
+   "prev": 0.9743,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-and-placeholder.html",
+   "platform": "web",
+   "prev": 0.9834,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-inherited-no-transition.html",
+   "platform": "android",
+   "prev": 0.9755,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-inherited-no-transition.html",
+   "platform": "ios",
+   "prev": 0.9593,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-inherited-no-transition.html",
+   "platform": "web",
+   "prev": 0.9927,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-inherited-with-transition.html",
+   "platform": "android",
+   "prev": 0.9299,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-inherited-with-transition.html",
+   "platform": "ios",
+   "prev": 0.9504,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-inherited-with-transition.html",
+   "platform": "web",
+   "prev": 0.9853,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-insert-text-node-dynamic.html",
+   "platform": "android",
+   "prev": 0.8973,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-insert-text-node-dynamic.html",
+   "platform": "ios",
+   "prev": 0.8967,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-insert-text-node-dynamic.html",
+   "platform": "web",
+   "prev": 0.8983,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-line-height-001.html",
+   "platform": "android",
+   "prev": 0.6914,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-line-height-001.html",
+   "platform": "ios",
+   "prev": 0.689,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-line-height-001.html",
+   "platform": "web",
+   "prev": 0.6812,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-001.html",
+   "platform": "android",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-001.html",
+   "platform": "ios",
+   "prev": 0.9992,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-002.html",
+   "platform": "android",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-002.html",
+   "platform": "ios",
+   "prev": 0.9992,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-002.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-003.html",
+   "platform": "android",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-003.html",
+   "platform": "ios",
+   "prev": 0.9992,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-003.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-004.html",
+   "platform": "android",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-004.html",
+   "platform": "ios",
+   "prev": 0.9992,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-004.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-005.html",
+   "platform": "android",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-005.html",
+   "platform": "ios",
+   "prev": 0.9992,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-005.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-006.html",
+   "platform": "android",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-006.html",
+   "platform": "ios",
+   "prev": 0.9992,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-006.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-007.html",
+   "platform": "android",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-007.html",
+   "platform": "ios",
+   "prev": 0.9992,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-007.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-008.html",
+   "platform": "android",
+   "prev": 0.9984,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-008.html",
+   "platform": "ios",
+   "prev": 0.9992,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-008.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-001.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-001.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-001.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-002.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-002.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-002.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-003.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-003.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-003.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-004.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-004.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-004.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-005.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-005.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-005.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-006.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-006.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-006.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-007.html",
+   "platform": "android",
+   "prev": 0.9525,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-007.html",
+   "platform": "ios",
+   "prev": 0.9532,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-007.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-008.html",
+   "platform": "android",
+   "prev": 0.6409,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-008.html",
+   "platform": "ios",
+   "prev": 0.9682,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-008.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-009.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-009.html",
+   "platform": "ios",
+   "prev": 0.9027,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-009.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-010.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-010.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-010.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-011.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-011.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-011.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-012.html",
+   "platform": "android",
+   "prev": 0.9696,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-012.html",
+   "platform": "ios",
+   "prev": 0.9703,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-012.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-013.html",
+   "platform": "android",
+   "prev": 0.9692,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-013.html",
+   "platform": "ios",
+   "prev": 0.9699,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-013.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-014.html",
+   "platform": "android",
+   "prev": 0.6409,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-014.html",
+   "platform": "ios",
+   "prev": 0.9532,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-014.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-015.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-015.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-015.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-016.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-016.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-016.html",
+   "platform": "web",
+   "prev": 0.9043,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-017.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-017.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-017.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-018.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-018.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-018.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-019.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-019.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-019.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-020.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-020.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-020.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-021.html",
+   "platform": "android",
+   "prev": 0.9527,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-021.html",
+   "platform": "ios",
+   "prev": 0.9534,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-021.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/auto-margins-001.html",
+   "platform": "android",
+   "prev": 0.9692,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/auto-margins-001.html",
+   "platform": "ios",
+   "prev": 0.9091,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/auto-margins-001.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-001.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-001.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-001.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-002.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-002.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-002.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-003.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-003.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-003.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-004.html",
+   "platform": "android",
+   "prev": 0.9696,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-004.html",
+   "platform": "ios",
+   "prev": 0.9703,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-004.html",
+   "platform": "web",
+   "prev": 0.9719,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-005.html",
+   "platform": "android",
+   "prev": 0.9533,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-005.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-005.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-006.html",
+   "platform": "android",
+   "prev": 0.9692,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-006.html",
+   "platform": "ios",
+   "prev": 0.9699,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-006.html",
+   "platform": "web",
+   "prev": 0.9716,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-007.html",
+   "platform": "android",
+   "prev": 0.9527,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-007.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-007.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-008.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-008.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-008.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-009.html",
+   "platform": "android",
+   "prev": 0.9696,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-009.html",
+   "platform": "ios",
+   "prev": 0.9703,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-009.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-010.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-010.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-010.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-011.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-011.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-011.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-012.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-012.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-012.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-013.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-013.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-013.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-014.html",
+   "platform": "android",
+   "prev": 0.9692,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-014.html",
+   "platform": "ios",
+   "prev": 0.9699,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-014.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-015.html",
+   "platform": "android",
+   "prev": 0.9692,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-015.html",
+   "platform": "ios",
+   "prev": 0.9699,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-015.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-016.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-016.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-016.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-017.html",
+   "platform": "android",
+   "prev": 0.9696,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-017.html",
+   "platform": "ios",
+   "prev": 0.9703,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-017.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-018.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-018.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/block-aspect-ratio-018.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/accent-color-parent-currentcolor.html",
+   "platform": "android",
+   "prev": 0.9928,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/accent-color-parent-currentcolor.html",
+   "platform": "ios",
+   "prev": 0.9932,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/accent-color-parent-currentcolor.html",
+   "platform": "web",
+   "prev": 0.9997,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/accent-color-visited.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/accent-color-visited.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/accent-color-visited.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-auto-001.html",
+   "platform": "android",
+   "prev": 0.9939,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-auto-001.html",
+   "platform": "ios",
+   "prev": 0.9948,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-auto-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-auto-details-list-item.html",
+   "platform": "android",
+   "prev": 0.968,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-auto-details-list-item.html",
+   "platform": "ios",
+   "prev": 0.9677,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-auto-details-list-item.html",
+   "platform": "web",
+   "prev": 0.9674,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-auto-input-non-widget-001.html",
+   "platform": "android",
+   "prev": 0.9582,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-auto-input-non-widget-001.html",
+   "platform": "ios",
+   "prev": 0.958,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-auto-input-non-widget-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-auto-non-html-namespace-001.html",
+   "platform": "android",
+   "prev": 0.9988,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-auto-non-html-namespace-001.html",
+   "platform": "ios",
+   "prev": 0.9992,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-auto-non-html-namespace-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-button-001.html",
+   "platform": "android",
+   "prev": 0.9939,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-button-001.html",
+   "platform": "ios",
+   "prev": 0.9948,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-button-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-checkbox-001.html",
+   "platform": "android",
+   "prev": 0.9939,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-checkbox-001.html",
+   "platform": "ios",
+   "prev": 0.9948,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-checkbox-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-listbox-001.html",
+   "platform": "android",
+   "prev": 0.9939,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-listbox-001.html",
+   "platform": "ios",
+   "prev": 0.9948,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-listbox-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-menulist-001.html",
+   "platform": "android",
+   "prev": 0.9939,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-menulist-001.html",
+   "platform": "ios",
+   "prev": 0.9948,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-menulist-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-menulist-button-001.html",
+   "platform": "android",
+   "prev": 0.9939,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-menulist-button-001.html",
+   "platform": "ios",
+   "prev": 0.9948,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-menulist-button-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-meter-001.html",
+   "platform": "android",
+   "prev": 0.9939,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-meter-001.html",
+   "platform": "ios",
+   "prev": 0.9948,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-meter-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-progress-bar-001.html",
+   "platform": "android",
+   "prev": 0.9939,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-progress-bar-001.html",
+   "platform": "ios",
+   "prev": 0.9948,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-progress-bar-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-progress-bar-002.html",
+   "platform": "android",
+   "prev": 0.9845,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-progress-bar-002.html",
+   "platform": "ios",
+   "prev": 0.9845,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-progress-bar-002.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-radio-001.html",
+   "platform": "android",
+   "prev": 0.9939,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-radio-001.html",
+   "platform": "ios",
+   "prev": 0.9948,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-radio-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "platform": "android",
+   "prev": 0.9895,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "platform": "ios",
+   "prev": 0.9897,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-searchfield-001.html",
+   "platform": "android",
+   "prev": 0.9939,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-searchfield-001.html",
+   "platform": "ios",
+   "prev": 0.9948,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-searchfield-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-textarea-001.html",
+   "platform": "android",
+   "prev": 0.9939,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-textarea-001.html",
+   "platform": "ios",
+   "prev": 0.9948,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-textarea-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-textfield-001.html",
+   "platform": "android",
+   "prev": 0.9939,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-textfield-001.html",
+   "platform": "ios",
+   "prev": 0.9948,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/appearance-textfield-001.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-001.html",
+   "platform": "android",
+   "prev": 0.9761,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-001.html",
+   "platform": "ios",
+   "prev": 0.9769,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-001.html",
+   "platform": "web",
+   "prev": 0.9779,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-003.html",
+   "platform": "android",
+   "prev": 0.9761,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-003.html",
+   "platform": "ios",
+   "prev": 0.9769,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-003.html",
+   "platform": "web",
+   "prev": 0.9779,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-005.html",
+   "platform": "android",
+   "prev": 0.9761,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-005.html",
+   "platform": "ios",
+   "prev": 0.9769,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-005.html",
+   "platform": "web",
+   "prev": 0.9779,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-007.html",
+   "platform": "android",
+   "prev": 0.9844,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-007.html",
+   "platform": "ios",
+   "prev": 0.9845,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-007.html",
+   "platform": "web",
+   "prev": 0.9854,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-008.html",
+   "platform": "android",
+   "prev": 0.9712,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-008.html",
+   "platform": "ios",
+   "prev": 0.9726,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-008.html",
+   "platform": "web",
+   "prev": 0.9741,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-009.html",
+   "platform": "android",
+   "prev": 0.9789,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-009.html",
+   "platform": "ios",
+   "prev": 0.9799,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-009.html",
+   "platform": "web",
+   "prev": 0.9811,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-010.html",
+   "platform": "android",
+   "prev": 0.9811,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-010.html",
+   "platform": "ios",
+   "prev": 0.982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-010.html",
+   "platform": "web",
+   "prev": 0.9843,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-011.html",
+   "platform": "android",
+   "prev": 0.9811,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-011.html",
+   "platform": "ios",
+   "prev": 0.982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-011.html",
+   "platform": "web",
+   "prev": 0.9843,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-012.html",
+   "platform": "android",
+   "prev": 0.9489,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-012.html",
+   "platform": "ios",
+   "prev": 0.9503,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-012.html",
+   "platform": "web",
+   "prev": 0.9725,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-013.html",
+   "platform": "android",
+   "prev": 0.9436,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-013.html",
+   "platform": "ios",
+   "prev": 0.945,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-013.html",
+   "platform": "web",
+   "prev": 0.9725,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-014.html",
+   "platform": "android",
+   "prev": 0.9811,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-014.html",
+   "platform": "ios",
+   "prev": 0.982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-014.html",
+   "platform": "web",
+   "prev": 0.9843,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-015.html",
+   "platform": "android",
+   "prev": 0.9811,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-015.html",
+   "platform": "ios",
+   "prev": 0.982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-015.html",
+   "platform": "web",
+   "prev": 0.9843,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-016.html",
+   "platform": "android",
+   "prev": 0.9811,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-016.html",
+   "platform": "ios",
+   "prev": 0.982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-016.html",
+   "platform": "web",
+   "prev": 0.9843,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-017.html",
+   "platform": "android",
+   "prev": 0.9811,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-017.html",
+   "platform": "ios",
+   "prev": 0.982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-017.html",
+   "platform": "web",
+   "prev": 0.9843,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-018.html",
+   "platform": "android",
+   "prev": 0.9811,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-018.html",
+   "platform": "ios",
+   "prev": 0.982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-018.html",
+   "platform": "web",
+   "prev": 0.9843,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-019.html",
+   "platform": "android",
+   "prev": 0.9811,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-019.html",
+   "platform": "ios",
+   "prev": 0.982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-019.html",
+   "platform": "web",
+   "prev": 0.9843,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-020.html",
+   "platform": "android",
+   "prev": 0.9811,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-020.html",
+   "platform": "ios",
+   "prev": 0.982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-020.html",
+   "platform": "web",
+   "prev": 0.9843,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-021.html",
+   "platform": "android",
+   "prev": 0.9811,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-021.html",
+   "platform": "ios",
+   "prev": 0.982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-021.html",
+   "platform": "web",
+   "prev": 0.9843,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-022.html",
+   "platform": "android",
+   "prev": 0.8773,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-022.html",
+   "platform": "ios",
+   "prev": 0.8788,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-022.html",
+   "platform": "web",
+   "prev": 0.9725,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-023.html",
+   "platform": "android",
+   "prev": 0.9344,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-023.html",
+   "platform": "ios",
+   "prev": 0.9358,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-023.html",
+   "platform": "web",
+   "prev": 0.9726,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-024.html",
+   "platform": "android",
+   "prev": 0.9811,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-024.html",
+   "platform": "ios",
+   "prev": 0.982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-024.html",
+   "platform": "web",
+   "prev": 0.9843,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-025.html",
+   "platform": "android",
+   "prev": 0.9811,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-025.html",
+   "platform": "ios",
+   "prev": 0.982,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-025.html",
+   "platform": "web",
+   "prev": 0.9843,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-026.html",
+   "platform": "android",
+   "prev": 0.9967,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-026.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/box-sizing-026.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-color-bar-shape-text-color.html",
+   "platform": "android",
+   "prev": 0.998,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-color-bar-shape-text-color.html",
+   "platform": "ios",
+   "prev": 0.9907,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-color-bar-shape-text-color.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-color-block-shape-text-color-001.html",
+   "platform": "android",
+   "prev": 0.8631,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-color-block-shape-text-color-001.html",
+   "platform": "ios",
+   "prev": 0.8615,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-color-block-shape-text-color-001.html",
+   "platform": "web",
+   "prev": 0.8608,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-color-block-shape-text-color-002.html",
+   "platform": "android",
+   "prev": 0.9666,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-color-block-shape-text-color-002.html",
+   "platform": "ios",
+   "prev": 0.962,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-color-block-shape-text-color-002.html",
+   "platform": "web",
+   "prev": 0.9674,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-color-block-shape-text-color-004.html",
+   "platform": "android",
+   "prev": 0.9626,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-color-block-shape-text-color-004.html",
+   "platform": "ios",
+   "prev": 0.9583,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-color-block-shape-text-color-004.html",
+   "platform": "web",
+   "prev": 0.9635,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-color-underscore-shape-text-color.html",
+   "platform": "android",
+   "prev": 0.998,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-color-underscore-shape-text-color.html",
+   "platform": "ios",
+   "prev": 0.9907,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-color-underscore-shape-text-color.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-shape-block-color-001.html",
+   "platform": "android",
+   "prev": 0.9822,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-shape-block-color-001.html",
+   "platform": "ios",
+   "prev": 0.9758,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-ui",
+   "test": "css/css-ui/caret-shape-block-color-001.html",
+   "platform": "web",
+   "prev": 0.9842,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  }
+ ],
+ "missingSections": [
+  "css-color",
+  "css-pseudo",
+  "css-sizing",
+  "css-ui"
+ ],
+ "columnShorts": []
+}

@@ -1,0 +1,8 @@
+        result = FilterApplier.applyForegroundFilters(result, config.filters)
+        result = ClipPathApplier.applyClipPath(result, config.clipPath, collapsed)
+
+        return result
+    }
+
+    /**
+     * Apply all effects to a modifier, with support for rounded corner shadows.

@@ -1,0 +1,515 @@
+diff --git a/tools/titan/wire-differential.mjs b/tools/titan/wire-differential.mjs
+new file mode 100644
+index 00000000..8b6fee56
+--- /dev/null
++++ b/tools/titan/wire-differential.mjs
+@@ -0,0 +1,180 @@
++#!/usr/bin/env node
++// tools/titan/wire-differential.mjs — the CLASSIFIER of tools/titan/wire-differential.sh (wave 55 L7 U2, BACKLOG 0(m)(2)).
++//
++// Why it exists: the wave-54 [W-L3] differential (results/wave54-hyphenate-character/wl3-wire-differential.sh) could not
++// fail. It ended in a node block that only printed (exit 0 whatever it counted), walked the sections of the PRE side only,
++// and called a document RENUMBERED once the `-<n>` id suffix was stripped — weaker than the wave-53 rule it claimed to
++// apply. This classifier decides, and its exit code is the verdict:
++//   IDENTICAL            the two per-test IR documents are byte-equal;
++//   RENUMBERED           equal once the id counter is stripped from `id` / `slot.parent`, AND every id moved by ONE amount
++//                        equal to the running component-count delta of the changed documents before it in tests.list
++//                        order (the wave-53 rule, wave54-plan/expectations.json wireRenumbering.rule): the converter
++//                        numbers the components of a whole section in one sequence, so a document that gains k
++//                        components shifts every later document of the section by exactly k;
++//   RENUMBERED-ANOMALOUS strip-equal but not that uniform shift — a leak, never a renumbering;
++//   CONTENT-CHANGED      anything else;
++//   ONE-SIDED            a document, a section, or a section's per-test-ir present on one side only.
++// Exit (highest wins): 0 nothing below · 3 pipeline (a combine / convert / split rc != 0, extract rc or FAIL sets that
++// differ between the sides, an unreadable document, nothing compared) · 4 ONE-SIDED · 5 the changed set differs from the
++// expect file (UNEXPECTED / MISSING) or any RENUMBERED-ANOMALOUS · 2 usage (returned at once).
++//
++// Usage: wire-differential.mjs classify --pre <dir> --post <dir> --expect <file> --tests-root <run>/sections
++//          (--status <status.tsv> | --no-status) [--sections a,b]
++//   <dir>/<section>/per-test-ir/*.json on each side (the layout wire-differential.sh writes, and the parked wave-54 trees).
++//   Expect file: lines `CONTENT-CHANGED <sec>/<file>` / `RENUMBERED <sec>/<file>`, `#` comments; empty = "no change".
++import fs from 'node:fs';                                   // synchronous reads: a few thousand small JSON files
++import path from 'node:path';                               // section / document paths
++import { fileURLToPath } from 'node:url';                   // to know whether this module is the entry point
++import { fixtureStem, safe } from './safe-name.mjs';        // THE stem rule split-combined-ir.mjs names documents by
++
++// The exit codes, one place (the .sh and the tests read the same numbers).
++export const EXIT = { OK: 0, USAGE: 2, PIPELINE: 3, ONE_SIDED: 4, UNEXPECTED: 5 };
++// The wave-54 suffix strip, verbatim (wl3-wire-differential.sh:48): only `id` and `slot.parent` carry the counter —
++// `{"child": <key>}` run entries name the authoring key, never the id (schema/spec/03-children.md §4.1).
++export const strip = (s) => s.replace(/("(?:id|parent)":\s*"[^"]*?)-\d+"/g, '$1"');
++// Every counter-carrying string of a document, in document order (each component's id, then its slot.parent).
++const idsOf = (doc) => (doc.components ?? []).flatMap((c) => [c.id, c.slot?.parent].filter((v) => typeof v === 'string'));
++// The numeric counter at the end of an id (`…-657` → 657); NaN when there is none, which can never be a uniform shift.
++const counter = (s) => { const m = /-(\d+)$/.exec(s); return m ? Number(m[1]) : NaN; };
++// The per-test-ir file of a tests.list entry: split-combined-ir writes `safe(wpt__<section>__<stem>).json`.
++export const docName = (test) => `${safe(`wpt__${String(test).split('/')[1]}__${fixtureStem(test)}`)}.json`;
++// A directory listing that is empty (not an exception) when the directory is absent: absence is classified, not thrown.
++const ls = (d) => (fs.existsSync(d) ? fs.readdirSync(d) : []);
++// Directories only (a pre/ side also holds status files in other layouts).
++const dirs = (d) => ls(d).filter((e) => fs.statSync(path.join(d, e)).isDirectory());
++
++// The expect file → Map('<sec>/<file>' → class). An unparseable line is a usage error: a typo must never read as "no change".
++export function readExpect(file) {
++  const want = new Map();                                                     // key → expected class
++  for (const [i, raw] of fs.readFileSync(file, 'utf8').split('\n').entries()) {
++    const line = raw.replace(/#.*$/, '').trim();                              // comments and blank lines carry nothing
++    if (!line) continue;                                                      // (an empty file = no change expected)
++    const m = /^(CONTENT-CHANGED|RENUMBERED) ([^\s/]+\/\S+\.json)$/.exec(line);   // one class, one <sec>/<file>
++    if (!m) throw new Error(`expect file ${file}:${i + 1}: cannot read "${raw.trim()}"`);
++    want.set(m[2], m[1]);                                                     // the last line for a key wins (none repeat)
++  }
++  return want;
++}
++
++// The pipeline status (status.tsv + fail-<tag>-<sec>.txt beside it) → problems (exit 3) and notes, per section in scope.
++export function readStatus(tsv, sections) {
++  const problems = [], notes = [];                                             // problems set exit 3; notes are printed only
++  if (!fs.existsSync(tsv)) return { problems: [`no status file ${tsv} (the pipeline did not run, or wrote elsewhere)`], notes };
++  const rows = new Map();                                                      // '<tag> <sec>' → its row
++  for (const line of fs.readFileSync(tsv, 'utf8').split('\n')) {
++    if (!line.trim() || line.startsWith('#')) continue;                        // the header comment
++    const [tag, sec, rx, rb, rv, rs, ext, fail] = line.trim().split(/\s+/);    // the row wire-differential.sh writes
++    rows.set(`${tag} ${sec}`, { rx, rb, rv, rs, ext: Number(String(ext).split('=')[1]), fail });
++  }
++  const fails = (tag, sec) => {                                                // the extract FAIL lines → the failed tests
++    const f = path.join(path.dirname(tsv), `fail-${tag}-${sec}.txt`);
++    return new Set(fs.existsSync(f)                                            // no fail file = no FAIL line on that side
++      ? fs.readFileSync(f, 'utf8').split('\n').filter(Boolean).map((l) => l.replace(/^FAIL\s+/, '').replace(/:.*$/, '')) : []);
++  };
++  for (const sec of sections) {
++    const a = rows.get(`pre ${sec}`), b = rows.get(`post ${sec}`);             // both sides must have run the section
++    if (!a || !b) { problems.push(`${sec}: no status row for ${!a ? 'pre' : 'post'}`); continue; }
++    for (const [tag, r] of [['pre', a], ['post', b]]) {
++      for (const [step, rc] of [['combine', r.rb], ['convert', r.rv], ['split', r.rs]]) {   // the gate's steps 3-5
++        if (rc !== '0') problems.push(`${sec}: ${tag} ${step} rc ${rc}`);                    // '-' = never ran = a failure
++      }
++      if (!(r.ext > 0)) problems.push(`${sec}: ${tag} extracted ${r.ext} documents (nothing to compare)`);
++    }
++    if (a.rx !== b.rx) problems.push(`${sec}: extract rc differs (pre ${a.rx}, post ${b.rx})`);   // a symmetric rc is a NOTE
++    const fa = fails('pre', sec), fb = fails('post', sec);                     // FAIL sets: only a DIFFERENCE is a failure
++    for (const t of fa) if (!fb.has(t)) problems.push(`${sec}: extract FAIL only on pre: ${t}`);
++    for (const t of fb) if (!fa.has(t)) problems.push(`${sec}: extract FAIL only on post: ${t}`);
++    for (const t of fa) if (fb.has(t)) notes.push(`NOTE ${sec}: symmetric extract FAIL ${t} (both sides; accepted)`);
++  }
++  return { problems, notes };
++}
++
++// One section, in tests.list order: the classes, and the running delta the RENUMBERED rule needs.
++function classifySection(sec, pre, post, testsRoot, out) {
++  const A = path.join(pre, sec, 'per-test-ir'), B = path.join(post, sec, 'per-test-ir');   // the two document dirs
++  const onA = fs.existsSync(path.join(pre, sec)), onB = fs.existsSync(path.join(post, sec));
++  if (!onA || !onB) return out.oneSided.push(`${sec} (section only on ${onA ? 'pre' : 'post'})`);
++  if (!fs.existsSync(A) || !fs.existsSync(B)) {                                 // the wave-54 mis-invocation shape
++    return out.oneSided.push(`${sec} (no per-test-ir on ${!fs.existsSync(A) && !fs.existsSync(B) ? 'either side' : !fs.existsSync(A) ? 'pre' : 'post'})`);
++  }
++  const list = path.join(testsRoot, sec, 'tests.list');                        // the order the converter numbered in
++  if (!fs.existsSync(list)) throw Object.assign(new Error(`no ${list}: cannot order ${sec}`), { usage: true });
++  const order = fs.readFileSync(list, 'utf8').split('\n').filter(Boolean).map(docName);
++  const extra = [...new Set([...ls(A), ...ls(B)])].filter((f) => f.endsWith('.json') && !order.includes(f)).sort();
++  for (const f of extra) out.notes.push(`NOTE ${sec}/${f} is not in tests.list (classified after it)`);
++  let delta = 0;                                                                // Σ component-count change so far
++  const count = (d) => (d ? (d.components ?? []).length : 0);                   // a missing side counts 0 components
++  for (const f of [...order, ...extra]) {
++    const key = `${sec}/${f}`, pa = path.join(A, f), pb = path.join(B, f);
++    const x = fs.existsSync(pa) ? fs.readFileSync(pa, 'utf8') : null, y = fs.existsSync(pb) ? fs.readFileSync(pb, 'utf8') : null;
++    if (x === null && y === null) { out.notes.push(`NOTE ${key} absent on both sides`); continue; }
++    out.compared++;                                                             // the vacuity guard counts these
++    let X = null, Y = null;                                                     // parsed documents (null = absent)
++    try { X = x === null ? null : JSON.parse(x); Y = y === null ? null : JSON.parse(y); }
++    catch (e) { out.pipeline.push(`${key}: unreadable per-test IR (${e.message.slice(0, 80)})`); continue; }
++    if (x === null || y === null) { out.oneSided.push(`${key} (${x === null ? 'post' : 'pre'} only)`); delta += count(Y) - count(X); continue; }
++    if (x === y) { out.identical++; continue; }                                 // byte-equal
++    if (strip(x) === strip(y)) {                                                // same document but for the counter
++      const ia = idsOf(X), ib = idsOf(Y);                                       // strip-equal ⇒ the same id positions
++      const shifts = [...new Set(ia.map((s, i) => counter(ib[i]) - counter(s)))];
++      if (shifts.length === 1 && shifts[0] === delta) out.renumbered.push(`${key} (shift ${delta >= 0 ? '+' : ''}${delta} = the running delta)`);
++      else out.anomalous.push(`${key} (shifts {${shifts.join(', ')}} vs running delta ${delta})`);
++      continue;                                                                 // a renumbering adds no components
++    }
++    out.changed.push(`${key} (components ${count(X)} → ${count(Y)})`);           // content: it moves the counter for the rest
++    delta += count(Y) - count(X);
++  }
++}
++
++// The whole read: { lines, exit, counts }.
++export function classify({ pre, post, expect, testsRoot, status, sections }) {
++  const out = { identical: 0, compared: 0, changed: [], renumbered: [], anomalous: [], oneSided: [], pipeline: [], notes: [] };
++  const want = readExpect(expect);                                              // throws (usage) on a bad line
++  const scope = sections?.length ? sections : [...new Set([...dirs(pre), ...dirs(post)])].sort();   // the UNION of both sides
++  for (const sec of scope) {
++    if (!fs.existsSync(path.join(pre, sec)) && !fs.existsSync(path.join(post, sec))) { out.pipeline.push(`${sec}: requested, produced on neither side`); continue; }
++    classifySection(sec, pre, post, testsRoot, out);
++  }
++  if (out.compared === 0 && out.oneSided.length === 0) out.pipeline.push('nothing compared (no per-test IR document on either side)');
++  const st = status === null ? { problems: [], notes: ['pipeline status NOT READ (--no-status: classify-only calibration)'] } : readStatus(status, scope);
++  const key = (s) => s.split(' ')[0];                                           // '<sec>/<file> (detail)' → '<sec>/<file>'
++  const seen = new Map([...out.changed.map((s) => [key(s), 'CONTENT-CHANGED']), ...out.renumbered.map((s) => [key(s), 'RENUMBERED'])]);
++  const unexpected = [...seen].filter(([k, c]) => want.get(k) !== c).map(([k, c]) => `UNEXPECTED ${c} ${k}`);
++  const unread = (k) => out.oneSided.some((s) => key(s) === k || key(s) === k.split('/')[0]);   // its doc / section is one-sided
++  const missing = [...want].filter(([k, c]) => seen.get(k) !== c && !unread(k)).map(([k, c]) => `MISSING ${c} ${k} (expected, not observed)`);
++  const notRead = [...want].filter(([k, c]) => seen.get(k) !== c && unread(k)).map(([k, c]) => `UNREAD ${c} ${k} (one-sided: exit 4 already)`);
++  const lines = [...out.changed.map((s) => `CONTENT-CHANGED ${s}`), ...out.renumbered.map((s) => `RENUMBERED ${s}`),
++    ...out.anomalous.map((s) => `RENUMBERED-ANOMALOUS ${s}`), ...out.oneSided.map((s) => `ONE-SIDED ${s}`),
++    ...out.notes, ...st.notes, ...[...out.pipeline, ...st.problems].map((s) => `PIPELINE ${s}`), ...unexpected, ...missing, ...notRead];
++  let exit = EXIT.OK;                                                           // highest wins
++  if (out.pipeline.length || st.problems.length) exit = EXIT.PIPELINE;
++  if (out.oneSided.length) exit = EXIT.ONE_SIDED;
++  if (unexpected.length || missing.length || out.anomalous.length) exit = EXIT.UNEXPECTED;
++  lines.push(`identical ${out.identical} · content-changed ${out.changed.length} · renumbered ${out.renumbered.length} · one-sided ${out.oneSided.length} · renumbered-anomalous ${out.anomalous.length}`);
++  lines.push(`verdict: exit ${exit} — ${['nothing unexpected', '', '', 'PIPELINE failure', 'ONE-SIDED', 'changed set differs from the expect file'][exit]}`);
++  return { lines, exit, counts: { identical: out.identical, changed: out.changed.length, renumbered: out.renumbered.length, oneSided: out.oneSided.length, anomalous: out.anomalous.length } };
++}
++
++// The CLI: parse, classify, print, exit with the verdict. Every usage problem is exit 2, never a silent default.
++function main(argv) {
++  const usage = (why) => { console.error(`usage: wire-differential.mjs classify --pre <dir> --post <dir> --expect <file> --tests-root <dir> (--status <tsv> | --no-status) [--sections a,b]\n  REFUSED — ${why}`); return EXIT.USAGE; };
++  if (argv[0] !== 'classify') return usage('the first argument must be the subcommand `classify`');
++  const o = { status: undefined };                                             // undefined = neither status flag given
++  for (let i = 1; i < argv.length; i++) {
++    const a = argv[i], v = argv[i + 1];                                        // every flag but --no-status takes a value
++    if (a === '--no-status') { o.status = null; continue; }
++    const k = { '--pre': 'pre', '--post': 'post', '--expect': 'expect', '--tests-root': 'testsRoot', '--status': 'status', '--sections': 'sections' }[a];
++    if (!k) return usage(`unknown argument ${a}`);
++    if (v === undefined || v.startsWith('--')) return usage(`${a} needs a value`);
++    o[k] = k === 'sections' ? v.split(',').filter(Boolean) : path.resolve(v); i++;   // paths absolute before anything reads them
++  }
++  for (const k of ['pre', 'post', 'expect', 'testsRoot']) if (!o[k]) return usage(`--${k === 'testsRoot' ? 'tests-root' : k} is required`);
++  if (o.status === undefined) return usage('give --status <status.tsv> (a pipeline run) or --no-status (classify-only calibration)');
++  for (const k of ['pre', 'post', 'testsRoot']) if (!fs.existsSync(o[k])) return usage(`${o[k]} does not exist`);
++  if (!fs.existsSync(o.expect)) return usage(`expect file ${o.expect} does not exist (an EMPTY file means "no change")`);
++  try { const r = classify(o); console.log(r.lines.join('\n')); return r.exit; }
++  catch (e) { return usage(e.message); }                                       // a bad expect line, a missing tests.list
++}
++
++// Run only as the entry point (the test imports the functions without executing the CLI).
++if (process.argv[1] && fileURLToPath(import.meta.url) === fs.realpathSync(process.argv[1])) process.exitCode = main(process.argv.slice(2));
+diff --git a/tools/titan/wire-differential.sh b/tools/titan/wire-differential.sh
+new file mode 100755
+index 00000000..34ee2c7a
+--- /dev/null
++++ b/tools/titan/wire-differential.sh
+@@ -0,0 +1,144 @@
++#!/usr/bin/env bash
++# tools/titan/wire-differential.sh — a GATE-FLAG wire differential that can fail (wave 55 L7 U2, BACKLOG 0(m)(2)).
++#
++# What it answers: did a change between two trees move any byte of the IR the gate would hand the runtimes? For each tree
++# and each section of a gate run it runs EXACTLY the gate's own steps (tools/titan/section-runner.sh), then
++# wire-differential.mjs classifies the two per-test IR trees document by document and its exit code is the verdict.
++#   :375  POST_LOAD_EXTRACT=1 BIDI_BAKE=1 VT_BAKE=1 node tools/titan/extract-fixture.mjs <tests.list…>
++#   :416  node tools/titan/build-combined-fixture.mjs --out fixtures/wpt/_section-<sec>.json --tests <tests.list>
++#   :435  ./gradlew --no-daemon :converter:run --args="convert --from css --to ir -i fixtures/wpt/_section-<sec>.json -o <out>"
++#   :620  node tools/titan/split-combined-ir.mjs --in <out>/tmpOutput.json --out <per-test-ir>
++# It STARTS CHROMIUM (the post-load / bidi / view-transition bakes) and the converter: an orchestrator window, never a
++# builder lane, never while a gate runs on this host.
++#
++# Why a new script (the wave-54 record wave54-hyphenate-character/wl3-wire-differential.sh stays as it is): that one
++# exited 0 whatever it counted, used a relative out dir inside `( cd "$TREE" … )` (30 ONE-SIDED, exit 0 — the record's
++# first [W-L3] attempt), ignored the extract result, printed only WARN on a failed step, skipped a section with no
++# tests.list silently, read the sections of the PRE side only, and called any suffix-strip match RENUMBERED.
++#
++# Usage: wire-differential.sh <pre-tree> <post-tree> <out-dir> --expect <file> [--run <id|dir>] [--sections a,b]
++#                             [--dry-run | --classify-only]
++#   <pre-tree> <post-tree>  throwaway checkouts (`git worktree add --detach …`) holding node_modules, tools/wpt and
++#                           tools/titan/wpt-buckets.json (gitignored: symlink them from the main checkout — without the
++#                           bucket index extract-fixture silently drops its lossy and wall tags, so the IR would not be the
++#                           gate's) and the root local.properties; JDK 21 (JAVA_HOME, else java_home -v 21).
++#   <out-dir>               created first; must not already hold pre/ or post/ (a differential is never overwritten).
++#                           Bulky: put it under the gitignored tools/titan/runs/<id>/.
++#   --expect <file>         `CONTENT-CHANGED <sec>/<file>` / `RENUMBERED <sec>/<file>` lines; an EMPTY file = "no change".
++#   --run <id|dir>          the gate run whose sections/<sec>/tests.list are read (default wave55-open; an id resolves
++#                           under THIS checkout's tools/titan/runs/, a value with a `/` is a run directory).
++#   --sections a,b          the sections to run (default: every section of the run; each needs a tests.list).
++#   --dry-run               resolve, check every refusal, print the plan; run nothing, write nothing.
++#   --classify-only         skip the pipeline; classify <out-dir>/{pre,post} with <out-dir>/status.tsv.
++# Exit: 2 usage or refusal (an unresolvable path; PRE == POST, or both in one checkout; either tree = THIS script's
++#   checkout — extraction writes fixtures/wpt/<sec>/ inside the tree and the shared tree is where gates run; a tree
++#   missing its extraction inputs; no <run>/sections; a section without tests.list; an out dir holding a previous
++#   differential) · otherwise the classifier's: 0 · 3 pipeline · 4 one-sided · 5 changed set != expect (see the .mjs).
++set -uo pipefail
++
++usage() { sed -n '19,32p' "$0" >&2; echo "  REFUSED — $*" >&2; exit 2; }    # every usage problem is exit 2
++refuse() { echo "wire-differential: REFUSED — $*" >&2; exit 2; }          # a refusal names its reason, never silent
++absdir() { (cd -P "$1" 2>/dev/null && pwd -P); }                          # an existing dir → its physical absolute path
++abs_nocreate() {                                                          # a dir that may not exist yet → absolute, physical
++  local p="$1" rest=""                                                    # (the dry run must not create the out dir)
++  while [[ ! -d "$p" ]]; do rest="/$(basename "$p")$rest"; p="$(dirname "$p")"; done   # climb to the deepest existing ancestor
++  echo "$(absdir "$p")$rest"                                              # resolve it, then re-append the missing tail
++}
++top_of() {                                                                # the checkout a dir belongs to (itself if none)
++  local t; t="$(git -C "$1" rev-parse --show-toplevel 2>/dev/null)" && absdir "$t" || echo "$1"
++}
++
++HERE="$(absdir "$(dirname "$0")")" || refuse "cannot resolve the script's own directory"   # tools/titan of this checkout
++SELF_TOP="$(top_of "$HERE")"                                               # this script's checkout (never a tree under test)
++POS=(); EXPECT=""; RUN=wave55-open; SECS_CSV=""; MODE=run                  # defaults: a real run against wave55-open
++while (( $# )); do                                                        # flags anywhere; three positionals
++  case "$1" in
++    --expect|--run|--sections) [[ $# -ge 2 && -n "$2" && "$2" != --* ]] || usage "$1 needs a value"
++      case "$1" in --expect) EXPECT="$2" ;; --run) RUN="$2" ;; --sections) SECS_CSV="$2" ;; esac; shift 2 ;;
++    --dry-run) MODE=dry; shift ;;                                          # plan only
++    --classify-only) MODE=classify; shift ;;                               # read an existing out dir
++    -h|--help) sed -n '2,36p' "$0"; exit 0 ;;                              # the header is the manual
++    -*) usage "unknown flag $1" ;;                                         # no silently ignored flag
++    *) POS+=("$1"); shift ;;
++  esac
++done
++(( ${#POS[@]} == 3 )) || usage "need <pre-tree> <post-tree> <out-dir> (got ${#POS[@]} positional arguments)"
++[[ -n "$EXPECT" ]] || usage "--expect <file> is required (an EMPTY file means 'no change expected')"
++
++# Every path absolute and physical BEFORE any cd (the wave-54 relative-OUT defect): the subshells below cd into the trees.
++PRE="$(absdir "${POS[0]}")" || refuse "pre-tree ${POS[0]} is not a directory"
++POST="$(absdir "${POS[1]}")" || refuse "post-tree ${POS[1]} is not a directory"
++if [[ "$MODE" == run ]]; then mkdir -p "${POS[2]}" || refuse "cannot create out-dir ${POS[2]}"; OUT="$(absdir "${POS[2]}")"
++else OUT="$(abs_nocreate "${POS[2]}")"; fi                                  # dry / classify: resolve, never create
++[[ -n "$OUT" && "$OUT" == /* ]] || refuse "out-dir ${POS[2]} did not resolve to an absolute path"
++[[ "$OUT" != *[[:space:]]* ]] || refuse "out-dir $OUT contains whitespace (gradle --args splits on it)"
++EXPECT_DIR="$(absdir "$(dirname "$EXPECT")")" || refuse "expect file $EXPECT: its directory does not exist"
++EXPECT="$EXPECT_DIR/$(basename "$EXPECT")"; [[ -f "$EXPECT" ]] || refuse "expect file $EXPECT does not exist (an EMPTY file means 'no change')"
++if [[ "$RUN" == */* ]]; then RUN_DIR="$(absdir "$RUN")" || refuse "run dir $RUN does not exist"
++else RUN_DIR="$SELF_TOP/tools/titan/runs/$RUN"; fi                         # an id: this checkout's gitignored runs/
++[[ -d "$RUN_DIR/sections" ]] || refuse "no $RUN_DIR/sections (a missing run)"
++
++# The trees: two distinct checkouts, neither of them this one.
++[[ "$PRE" != "$POST" ]] || refuse "PRE == POST ($PRE): a tree compared with itself proves nothing"
++TOP_PRE="$(top_of "$PRE")"; TOP_POST="$(top_of "$POST")"                  # a subdir of a checkout resolves to the checkout
++[[ "$TOP_PRE" != "$TOP_POST" ]] || refuse "PRE and POST are in one checkout ($TOP_PRE)"
++for T in "$PRE" "$POST"; do
++  [[ "$(top_of "$T")" != "$SELF_TOP" ]] || refuse "$T is this script's own checkout ($SELF_TOP): extraction writes fixtures/wpt/<sec>/ inside the tree, and the shared tree is where gates run — use throwaway worktrees"
++  [[ "$(top_of "$T")" == "$T" ]] || refuse "$T is inside the checkout $(top_of "$T"), not its top (the steps run from the tree root)"
++  if [[ "$MODE" != classify ]]; then                                       # the pipeline's inputs, all gitignored
++    for need in node_modules tools/wpt tools/titan/wpt-buckets.json tools/titan/extract-fixture.mjs; do
++      [[ -e "$T/$need" ]] || refuse "$T has no $need (symlink node_modules, tools/wpt and tools/titan/wpt-buckets.json from the main checkout): a vacuous or non-gate extraction on both sides would read 'identical'"
++    done
++  fi
++done
++
++# The sections: the requested ones, or every section of the run — each with its tests.list, no silent skip.
++if [[ -n "$SECS_CSV" ]]; then IFS=',' read -r -a SECS <<<"$SECS_CSV"
++else SECS=(); for d in "$RUN_DIR/sections"/*/; do SECS+=("$(basename "$d")"); done; fi
++(( ${#SECS[@]} > 0 )) || refuse "no section to run in $RUN_DIR/sections"
++for sec in "${SECS[@]}"; do [[ -f "$RUN_DIR/sections/$sec/tests.list" ]] || refuse "section $sec has no $RUN_DIR/sections/$sec/tests.list"; done
++SECS_CSV="$(IFS=,; echo "${SECS[*]}")"                                     # the classifier reads exactly these
++if [[ "$MODE" == run ]]; then for tag in pre post; do [[ ! -e "$OUT/$tag" ]] || refuse "$OUT/$tag already exists (never overwrite a differential: use a fresh out-dir)"; done; fi
++
++echo "wire-differential ($MODE)"                                          # the resolved plan, every mode
++echo "  PRE     $PRE"
++echo "  POST    $POST"
++echo "  OUT     $OUT"
++echo "  EXPECT  $EXPECT ($(grep -cvE '^[[:space:]]*(#|$)' "$EXPECT") expected line(s))"
++echo "  RUN     $RUN_DIR (sections: ${SECS[*]})"
++if [[ "$MODE" == dry ]]; then
++  echo "  per tree and section: extract (POST_LOAD_EXTRACT=1 BIDI_BAKE=1 VT_BAKE=1) → combine → convert (gradle --no-daemon) → split → $OUT/<tag>/<sec>/per-test-ir; status → $OUT/status.tsv"
++  echo "DRY RUN OK — nothing run, nothing written"; exit 0
++fi
++
++if [[ "$MODE" == run ]]; then
++  export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 21 2>/dev/null)}"   # the converter's toolchain (CLAUDE.md)
++  printf '# tag\tsection\trc_extract\trc_combine\trc_convert\trc_split\textracted\tfail\n' >"$OUT/status.tsv"
++  for tag in pre post; do
++    TREE="$PRE"; [[ "$tag" == post ]] && TREE="$POST"                      # the same steps, the two trees
++    for sec in "${SECS[@]}"; do
++      LIST="$RUN_DIR/sections/$sec/tests.list"; W="$OUT/$tag/$sec"; mkdir -p "$W/out"   # W is absolute: safe inside the cd
++      TESTS=(); while IFS= read -r t || [[ -n "$t" ]]; do [[ -n "$t" ]] && TESTS+=("$t"); done <"$LIST"   # bash 3.2-safe; keeps an unterminated last line
++      echo "[$tag $sec] ${#TESTS[@]} tests"
++      ( cd "$TREE" && POST_LOAD_EXTRACT=1 BIDI_BAKE=1 VT_BAKE=1 nice -n 10 node tools/titan/extract-fixture.mjs "${TESTS[@]}" ) >"$W/extract.txt" 2>&1; rx=$?
++      grep '^FAIL ' "$W/extract.txt" >"$OUT/fail-$tag-$sec.txt"            # the FAIL set the classifier compares
++      ne="$(grep -c '^extracted ' "$W/extract.txt")"; nf="$(grep -c . "$OUT/fail-$tag-$sec.txt")"
++      ( cd "$TREE" && node tools/titan/build-combined-fixture.mjs --out "fixtures/wpt/_section-$sec.json" --tests "$LIST" ) >"$W/combine.txt" 2>&1; rb=$?
++      rv=-; rs=-                                                           # '-' = not run (a failure to the classifier)
++      if [[ "$rb" == 0 ]]; then
++        ( cd "$TREE" && ./gradlew --no-daemon :converter:run --args="convert --from css --to ir -i fixtures/wpt/_section-$sec.json -o $W/out" --quiet ) >"$W/convert.txt" 2>&1; rv=$?
++      fi
++      if [[ "$rv" == 0 ]]; then
++        ( cd "$TREE" && node tools/titan/split-combined-ir.mjs --in "$W/out/tmpOutput.json" --out "$W/per-test-ir" ) >"$W/split.txt" 2>&1; rs=$?
++      fi
++      printf '%s\t%s\t%s\t%s\t%s\t%s\textracted=%s\tfail=%s\n' "$tag" "$sec" "$rx" "$rb" "$rv" "$rs" "$ne" "$nf" | tee -a "$OUT/status.tsv"
++    done
++  done
++fi
++
++# The verdict is the classifier's exit code (0 / 3 / 4 / 5), passed through unchanged. A --classify-only re-read writes
++# its own file (named by its expect file), so it never overwrites the pipeline run's classify.txt.
++CLS="$OUT/classify.txt"; [[ "$MODE" == classify ]] && CLS="$OUT/classify-only.$(basename "$EXPECT").txt"
++node "$HERE/wire-differential.mjs" classify --pre "$OUT/pre" --post "$OUT/post" --expect "$EXPECT" \
++  --tests-root "$RUN_DIR/sections" --status "$OUT/status.tsv" --sections "$SECS_CSV" | tee "$CLS"
++exit "${PIPESTATUS[0]}"
+diff --git a/tools/titan/wire-differential.test.mjs b/tools/titan/wire-differential.test.mjs
+new file mode 100644
+index 00000000..af2ec5c0
+--- /dev/null
++++ b/tools/titan/wire-differential.test.mjs
+@@ -0,0 +1,173 @@
++// tools/titan/wire-differential.test.mjs — pins P1–P6 of tools/titan/wire-differential.{sh,mjs} (wave 55 L7 U2).
++// Synthetic per-test IR trees under os.tmpdir(): no Chromium, no gradle, no device. Each pin names the wave-54 defect it
++// guards (instruments.md §2.2): (a) no verdict, (b) a relative out dir, (c) a swallowed pipeline failure, (d) sections
++// read from PRE only, (e) a RENUMBERED class weaker than the wave-53 rule; (f) a symmetric extract FAIL is accepted.
++import test, { after } from 'node:test';                      // the tooling suite's runner (node --test)
++import assert from 'node:assert/strict';                      // strict equality: an exit code is a number, not "truthy"
++import fs from 'node:fs';                                     // the synthetic trees
++import os from 'node:os';                                     // their temp root
++import path from 'node:path';                                 // path joins
++import { spawnSync } from 'node:child_process';               // the CLI is the contract: run it, read its exit code
++import { fileURLToPath } from 'node:url';                     // this file's directory
++
++const HERE = path.dirname(fileURLToPath(import.meta.url));    // tools/titan
++const MJS = path.join(HERE, 'wire-differential.mjs');         // the classifier under test
++const SH = path.join(HERE, 'wire-differential.sh');           // the pipeline wrapper under test
++const TMP = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'wire-diff-')));   // physical (macOS /var → /private/var)
++after(() => fs.rmSync(TMP, { recursive: true, force: true }));   // leave nothing behind
++
++const TESTS = ['css/s1/a.html', 'css/s1/b.html', 'css/s1/c.html'];   // one section, tests.list order a → b → c
++const FILE = (t) => `wpt__s1__${t}.json`;                     // split-combined-ir's name for css/s1/<t>.html
++// A document of k components numbered from n (the converter's section-wide counter): a root and k-1 children of it.
++const doc = (stem, n, k, prop = 'x') => ({ irVersion: 2, minReaderVersion: 2, components: Array.from({ length: k }, (_, i) => ({
++  id: `${stem}__${i}-${n + i}`, name: `${stem}__${i}`, properties: [{ type: 'P', data: prop }],
++  ...(i ? { slot: { parent: `${stem}__0-${n}` } } : {}) })) });
++const BASE = { a: doc('a', 0, 3), b: doc('b', 3, 2), c: doc('c', 5, 2) };   // a 0-2, b 3-4, c 5-6
++const write = (f, s) => { fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, s); };
++const ROW = (tag, sec, rc = '0\t0\t0\t0') => `${tag}\t${sec}\t${rc}\textracted=3\tfail=0\n`;   // a status.tsv row
++
++let n = 0;                                                    // one directory per scenario
++// Build a scenario and run the classifier → { code, out }.
++function classify({ pre = BASE, post = BASE, expect = '', rows, fails = {}, extraPostSection = false, status = true }) {
++  const R = path.join(TMP, `case${++n}`);
++  write(path.join(R, 'run/sections/s1/tests.list'), TESTS.join('\n') + '\n');
++  for (const [tag, docs] of [['pre', pre], ['post', post]]) {
++    fs.mkdirSync(path.join(R, 'out', tag, 's1', 'per-test-ir'), { recursive: true });   // an empty section is still a section
++    for (const [t, d] of Object.entries(docs)) write(path.join(R, 'out', tag, 's1', 'per-test-ir', FILE(t)), JSON.stringify(d) + '\n');
++  }
++  if (extraPostSection) write(path.join(R, 'out/post/s2/per-test-ir', 'wpt__s2__z.json'), JSON.stringify(doc('z', 0, 1)) + '\n');
++  write(path.join(R, 'out/status.tsv'), rows ?? (ROW('pre', 's1') + ROW('post', 's1')));
++  for (const [tag, lines] of Object.entries(fails)) write(path.join(R, 'out', `fail-${tag}-s1.txt`), lines.join('\n') + '\n');
++  write(path.join(R, 'expect.txt'), expect);
++  const r = spawnSync(process.execPath, [MJS, 'classify', '--pre', path.join(R, 'out/pre'), '--post', path.join(R, 'out/post'),
++    '--expect', path.join(R, 'expect.txt'), '--tests-root', path.join(R, 'run/sections'),
++    ...(status ? ['--status', path.join(R, 'out/status.tsv')] : ['--no-status'])], { encoding: 'utf8' });
++  return { code: r.status, out: r.stdout + r.stderr };
++}
++const changed = (d) => ({ ...d, components: d.components.map((c, i) => (i ? c : { ...c, properties: [{ type: 'P', data: 'y' }] })) });
++
++test('P1 identical trees with an empty expect file → exit 0', () => {
++  const r = classify({});
++  assert.equal(r.code, 0, r.out);
++  assert.match(r.out, /identical 3 · content-changed 0 · renumbered 0 · one-sided 0/);
++});
++
++test('P2 one content change: expected → 0; unexpected → 5 UNEXPECTED; expected but absent → 5 MISSING (defect a)', () => {
++  const post = { ...BASE, b: changed(BASE.b) };              // same component count: no renumbering after it
++  assert.equal(classify({ post, expect: `CONTENT-CHANGED s1/${FILE('b')}\n` }).code, 0);
++  const u = classify({ post });
++  assert.equal(u.code, 5, u.out);
++  assert.match(u.out, /UNEXPECTED CONTENT-CHANGED s1\/wpt__s1__b\.json/);
++  const m = classify({ expect: `# a comment\nCONTENT-CHANGED s1/${FILE('b')}\n` });
++  assert.equal(m.code, 5, m.out);
++  assert.match(m.out, /MISSING CONTENT-CHANGED s1\/wpt__s1__b\.json/);
++});
++
++test('P3 a uniform +2 shift after a +2 content change is RENUMBERED; a non-uniform or wrong shift is ANOMALOUS (defect e)', () => {
++  const expect = `CONTENT-CHANGED s1/${FILE('a')}\nRENUMBERED s1/${FILE('b')}\nRENUMBERED s1/${FILE('c')}\n`;
++  const grown = doc('a', 0, 5);                              // a gains 2 components: b and c move by +2
++  const ok = classify({ post: { a: grown, b: doc('b', 5, 2), c: doc('c', 7, 2) }, expect });
++  assert.equal(ok.code, 0, ok.out);
++  assert.match(ok.out, /RENUMBERED s1\/wpt__s1__b\.json \(shift \+2 = the running delta\)/);
++  const skew = doc('b', 5, 2); skew.components[1].id = 'b__1-7';   // +2 on the root, +3 on the child: strip-equal, not uniform
++  const bad = classify({ post: { a: grown, b: skew, c: doc('c', 7, 2) }, expect });
++  assert.equal(bad.code, 5, bad.out);
++  assert.match(bad.out, /RENUMBERED-ANOMALOUS s1\/wpt__s1__b\.json \(shifts \{2, 3\} vs running delta 2\)/);
++  const wrong = classify({ post: { a: grown, b: doc('b', 4, 2), c: doc('c', 7, 2) }, expect });   // uniform +1, delta +2
++  assert.equal(wrong.code, 5, wrong.out);
++  assert.match(wrong.out, /RENUMBERED-ANOMALOUS s1\/wpt__s1__b\.json \(shifts \{1\} vs running delta 2\)/);
++});
++
++test('P4 a one-sided document → 4; a section present only on POST → 4 (defect d)', () => {
++  const d = classify({ post: { a: BASE.a, b: BASE.b } });
++  assert.equal(d.code, 4, d.out);
++  assert.match(d.out, /ONE-SIDED s1\/wpt__s1__c\.json \(pre only\)/);
++  const s = classify({ extraPostSection: true, rows: ROW('pre', 's1') + ROW('post', 's1') + ROW('pre', 's2') + ROW('post', 's2') });
++  assert.equal(s.code, 4, s.out);
++  assert.match(s.out, /ONE-SIDED s2 \(section only on post\)/);
++});
++
++test('P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)', () => {
++  const rc = classify({ rows: ROW('pre', 's1') + ROW('post', 's1', '0\t0\t1\t-') });
++  assert.equal(rc.code, 3, rc.out);
++  assert.match(rc.out, /PIPELINE s1: post convert rc 1/);
++  const asym = classify({ fails: { post: ['FAIL css/s1/b.html: boom'] } });
++  assert.equal(asym.code, 3, asym.out);
++  assert.match(asym.out, /PIPELINE s1: extract FAIL only on post: css\/s1\/b\.html/);
++  const sym = classify({ fails: { pre: ['FAIL css/s1/b.html: boom'], post: ['FAIL css/s1/b.html: boom'] } });
++  assert.equal(sym.code, 0, sym.out);
++  assert.match(sym.out, /NOTE s1: symmetric extract FAIL css\/s1\/b\.html \(both sides; accepted\)/);
++});
++
++test('P5b the wave-54 mis-invocation shape (no per-test-ir on either side) → 4; nothing at all → 3; --no-status is printed', () => {
++  const R = path.join(TMP, 'mis'); for (const t of ['pre', 'post']) write(path.join(R, t, 's1', 'extract.log'), '');
++  write(path.join(R, 'run/sections/s1/tests.list'), TESTS.join('\n')); write(path.join(R, 'e.txt'), '');
++  const args = (p, q) => [MJS, 'classify', '--pre', p, '--post', q, '--expect', path.join(R, 'e.txt'), '--tests-root', path.join(R, 'run/sections'), '--no-status'];
++  const mis = spawnSync(process.execPath, args(path.join(R, 'pre'), path.join(R, 'post')), { encoding: 'utf8' });
++  assert.equal(mis.status, 4, mis.stdout);
++  assert.match(mis.stdout, /ONE-SIDED s1 \(no per-test-ir on either side\)/);
++  assert.match(mis.stdout, /pipeline status NOT READ/);
++  fs.mkdirSync(path.join(R, 'empty-a')); fs.mkdirSync(path.join(R, 'empty-b'));
++  const none = spawnSync(process.execPath, args(path.join(R, 'empty-a'), path.join(R, 'empty-b')), { encoding: 'utf8' });
++  assert.equal(none.status, 3, none.stdout);                  // a vacuous read is a pipeline failure, never "identical"
++  assert.equal(classify({ status: false }).code, 0);          // calibration mode still decides
++  assert.equal(classify({ expect: 'CHANGED s1/x.json\n' }).code, 2);   // a typo in the expect file is a usage error
++});
++
++// The .sh refusals and its path resolution (defect b), dry-run only: nothing is extracted or converted.
++const tree = (name) => { const t = path.join(TMP, name); for (const p of ['node_modules', 'tools/wpt']) fs.mkdirSync(path.join(t, p), { recursive: true });
++  write(path.join(t, 'tools/titan/extract-fixture.mjs'), ''); write(path.join(t, 'tools/titan/wpt-buckets.json'), '{}'); return t; };
++const sh = (args, cwd) => spawnSync('bash', [SH, ...args], { encoding: 'utf8', cwd });
++const RUN = path.join(TMP, 'shrun'); write(path.join(RUN, 'sections/s1/tests.list'), TESTS.join('\n')); write(path.join(TMP, 'sh-expect.txt'), '');
++
++test('P6 --dry-run from another cwd with a relative OUT prints an absolute OUT equal to its realpath, and creates nothing', () => {
++  const cwd = path.join(TMP, 'elsewhere'); fs.mkdirSync(cwd);
++  const r = sh([tree('tA'), tree('tB'), 'rel/out', '--expect', path.join(TMP, 'sh-expect.txt'), '--run', RUN, '--dry-run'], cwd);
++  assert.equal(r.status, 0, r.stdout + r.stderr);
++  assert.match(r.stdout, new RegExp(`^  OUT     ${path.join(fs.realpathSync(cwd), 'rel/out').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'm'));
++  assert.equal(fs.existsSync(path.join(cwd, 'rel')), false);  // the dry run wrote nothing
++});
++
++test('P6 PRE == POST → 2; PRE = this script\'s own checkout → 2', () => {
++  const same = sh([tree('tC'), tree('tC'), path.join(TMP, 'o1'), '--expect', path.join(TMP, 'sh-expect.txt'), '--run', RUN, '--dry-run']);
++  assert.equal(same.status, 2, same.stdout + same.stderr);
++  assert.match(same.stderr, /PRE == POST/);
++  const own = sh([path.resolve(HERE, '../..'), tree('tD'), path.join(TMP, 'o2'), '--expect', path.join(TMP, 'sh-expect.txt'), '--run', RUN, '--dry-run']);
++  assert.equal(own.status, 2, own.stdout + own.stderr);
++  assert.match(own.stderr, /this script's own checkout/);
++});
++
++// The run path itself (the four steps, status.tsv, the classifier call), on trees whose four tools are STUBS: the real
++// extraction needs Chromium and the converter, so the first real run is the orchestrator's [W-L7a] window.
++const stubTree = (name, failConvert) => {
++  const t = tree(name);                                       // node_modules + tools/wpt + an extract stub path
++  write(path.join(t, 'tools/titan/extract-fixture.mjs'), "for (const t of process.argv.slice(2)) console.log('extracted ' + t);\n");
++  write(path.join(t, 'tools/titan/build-combined-fixture.mjs'), "import fs from 'node:fs'; const a = process.argv; fs.mkdirSync(a[a.indexOf('--out') + 1].replace(/[^/]*$/, ''), { recursive: true }); fs.writeFileSync(a[a.indexOf('--out') + 1], '{}');\n");
++  write(path.join(t, 'gradlew'), `#!/bin/sh\no=$(printf '%s' "$*" | sed -n 's/.* -o \\([^ ]*\\).*/\\1/p'); mkdir -p "$o"; echo '{}' > "$o/tmpOutput.json"; exit ${failConvert ? 1 : 0}\n`);
++  fs.chmodSync(path.join(t, 'gradlew'), 0o755);
++  write(path.join(t, 'tools/titan/split-combined-ir.mjs'), `import fs from 'node:fs'; const o = process.argv[process.argv.indexOf('--out') + 1]; fs.mkdirSync(o, { recursive: true });
++for (const [k, d] of Object.entries(${JSON.stringify(BASE)})) fs.writeFileSync(o + '/wpt__s1__' + k + '.json', JSON.stringify(d) + '\\n');\n`);
++  return t;
++};
++
++test('P7 the run path: stub steps on both trees → status.tsv rows and exit 0; a failing convert on POST is never a WARN', () => {
++  const ok = sh([stubTree('sA'), stubTree('sB'), path.join(TMP, 'run-ok'), '--expect', path.join(TMP, 'sh-expect.txt'), '--run', RUN]);
++  assert.equal(ok.status, 0, ok.stdout + ok.stderr);
++  assert.match(ok.stdout, /^post\ts1\t0\t0\t0\t0\textracted=3\tfail=0$/m);
++  assert.match(ok.stdout, /identical 3 · content-changed 0 · renumbered 0 · one-sided 0/);
++  const bad = sh([stubTree('sC'), stubTree('sD', true), path.join(TMP, 'run-bad'), '--expect', path.join(TMP, 'sh-expect.txt'), '--run', RUN]);
++  assert.equal(bad.status, 4, bad.stdout + bad.stderr);       // POST has no per-test-ir: ONE-SIDED (4) outranks PIPELINE (3)
++  assert.match(bad.stdout, /PIPELINE s1: post convert rc 1/);  // … and the cause is printed (the wave-54 script printed WARN, exit 0)
++  assert.match(bad.stdout, /ONE-SIDED s1 \(no per-test-ir on post\)/);
++  const again = sh([stubTree('sE'), stubTree('sF'), path.join(TMP, 'run-ok'), '--expect', path.join(TMP, 'sh-expect.txt'), '--run', RUN]);
++  assert.equal(again.status, 2, again.stderr);                // a previous differential is never overwritten
++  // [W-L7a] step 3's shape: re-classify the same out dir with a change PRE-REGISTERED that did not happen → 5,
++  // written beside (never over) the run's own classify.txt.
++  write(path.join(TMP, 'w3-expect.txt'), `CONTENT-CHANGED s1/${FILE('b')}\n`);
++  const before = fs.readFileSync(path.join(TMP, 'run-ok/classify.txt'), 'utf8');
++  const re = sh([path.join(TMP, 'sA'), path.join(TMP, 'sB'), path.join(TMP, 'run-ok'), '--expect', path.join(TMP, 'w3-expect.txt'), '--run', RUN, '--classify-only']);
++  assert.equal(re.status, 5, re.stdout + re.stderr);
++  assert.match(re.stdout, /MISSING CONTENT-CHANGED s1\/wpt__s1__b\.json/);
++  assert.equal(fs.readFileSync(path.join(TMP, 'run-ok/classify.txt'), 'utf8'), before);
++  assert.ok(fs.existsSync(path.join(TMP, 'run-ok/classify-only.w3-expect.txt.txt')));
++});

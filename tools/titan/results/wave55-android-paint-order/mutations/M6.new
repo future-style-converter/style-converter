@@ -1,0 +1,2 @@
+            result = BordersFacade.apply(result, paint.borders)
+            result = ColorApplier.applyColors(result, paint.colors)

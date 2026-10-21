@@ -1,0 +1,4 @@
+percentage axes 122 by type {'Width': 76, 'Height': 46, 'InlineSize': 0, 'BlockSize': 0}
+non-zero band 2
+   ('wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3', 'backdrop-filter-nested-border-radius-clip-3__0__0-172', 'Width', 20.0, None, 'RELATIVE', False)
+   ('wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3', 'backdrop-filter-nested-border-radius-clip-3__0__0-172', 'Height', 20.0, None, 'RELATIVE', False)

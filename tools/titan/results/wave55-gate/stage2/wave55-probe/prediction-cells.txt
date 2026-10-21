@@ -1,0 +1,17 @@
+node:path:1354
+      validateString(arg, 'path');
+      ^
+
+TypeError [ERR_INVALID_ARG_TYPE]: The "path" argument must be of type string. Received null
+    at Object.join (node:path:1354:7)
+    at loadRun (file:///Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/score-gate.mjs:56:28)
+    at file:///Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave52-gate/cells.mjs:22:36
+    at Array.map (<anonymous>)
+    at file:///Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave52-gate/cells.mjs:22:21
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_INVALID_ARG_TYPE'
+}
+
+Node.js v22.21.0

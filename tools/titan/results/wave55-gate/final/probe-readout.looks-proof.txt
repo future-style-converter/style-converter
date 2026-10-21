@@ -1,0 +1,20 @@
+# probe-readout.looks-proof.txt — the same closing record (score-final.json) read twice: with the installed expectations.json (77a06f67, probeDecisions.looks = 3 rows) and with the pre-looks expectations (e65366b6, --exp): the looked cells are LOOKED / not leak signals only when their look is recorded
+
+## installed expectations
+non-carrier cells — must-not-move (any move = leak signal), L6 may-move (0.002 band), ring-fenced (report only):
+  LOOKED    css-grid/abspos/descendant-static-position-001.html android  P 0.9892 → P 0.9991 [movers] — beyond L6's 0.002 band, looked at (wave55-probe): "a band now under its child" — PLAN §10 items 16-17; kept, never clai
+  LOOKED    css-grid/abspos/descendant-static-position-002.html android  P 0.9601 → P 0.9724 [movers] — beyond L6's 0.002 band, looked at (wave55-probe): "a band now under its child" — PLAN §10 items 16-17; kept, never clai
+  LOOKED    css-view-transitions/break-inside-avoid-child.html android  P 0.9735 → P 0.9872 [movers] — beyond L6's 0.002 band, looked at (wave55-probe): "a band now under its child" — PLAN §10 items 16-17; kept, never claim
+  3484 non-carrier cells read (3269 must-not-move lines, 212 L6 may-move of which 9 moved within the band); 0 leak signal(s)
+summary: rule 1 fired 0 · rule 2 fired 0 · rule 3 fired 0 · leak signals 0 · undirected falls read 0 · unmeasured 0 · recorded for another lane 0
+PROBE: rules 1, 2, 3 and the must-not-move read hold
+exit 0
+
+## --exp <scratch>/regen-s1/expectations.stage2.json (pre-looks, sha e65366b6)
+non-carrier cells — must-not-move (any move = leak signal), L6 may-move (0.002 band), ring-fenced (report only):
+  MAY-MOVE  css-grid/abspos/descendant-static-position-001.html android  P 0.9892 → P 0.9991 [movers] — beyond L6's 0.002 band: LOOK — a band now under its child → keep U2 and record it; anything else → revert L6 U2
+  MAY-MOVE  css-grid/abspos/descendant-static-position-002.html android  P 0.9601 → P 0.9724 [movers] — beyond L6's 0.002 band: LOOK — a band now under its child → keep U2 and record it; anything else → revert L6 U2
+  MAY-MOVE  css-view-transitions/break-inside-avoid-child.html android  P 0.9735 → P 0.9872 [movers] — beyond L6's 0.002 band: LOOK — a band now under its child → keep U2 and record it; anything else → revert L6 U2
+  3484 non-carrier cells read (3269 must-not-move lines, 212 L6 may-move of which 9 moved within the band); 3 leak signal(s)
+summary: rule 1 fired 0 · rule 2 fired 0 · rule 3 fired 0 · leak signals 3 · undirected falls read 0 · unmeasured 0 · recorded for another lane 0
+PROBE: revert rules fired — revert the named units (leaks: bisect; may-move: look first)

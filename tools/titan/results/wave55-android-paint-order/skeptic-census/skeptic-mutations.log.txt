@@ -1,0 +1,65 @@
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [S1]
+  S1 mutated  → rc=1 SUMMARY suites=4 tests=28 failed=1 BehindContentBorderTest::P1a - drawInOrder paints the band, then the content
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [S1; post == pre: yes]
+  S1 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/radius/BorderRadiusApplier.kt sha256 3ad5a63a2f652bd01ae0e2bd0825c1592c4f3a686f475b747e22c03892503236   [S2]
+  S2 mutated  → rc=1 SUMMARY suites=4 tests=28 failed=3 BehindContentBorderTest::P1b - self-paint installs BehindContentBorderElement and no androidx border node | BorderRadiusSelfPaintTest::self-paint installs shaped background and border and NO clip layer | BorderRadiusSelfPaintTest::self-paint without background installs only the border band
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/radius/BorderRadiusApplier.kt sha256 3ad5a63a2f652bd01ae0e2bd0825c1592c4f3a686f475b747e22c03892503236   [S2; post == pre: yes]
+  S2 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [S3]
+  S3 mutated  → rc=1 SUMMARY suites=4 tests=28 failed=1 BehindContentBorderTest::P2b - fractional widths round UP, as androidx ceil does
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [S3; post == pre: yes]
+  S3 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [S4]
+  S4 mutated  → rc=1 SUMMARY suites=4 tests=28 failed=1 BehindContentBorderTest::P2e - inner corners shrink by the stroke and floor at 0
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [S4; post == pre: yes]
+  S4 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [S5]
+  S5 mutated  → rc=1 SUMMARY suites=4 tests=28 failed=1 BehindContentBorderTest::P1c - the node draws only through drawInOrder, band first
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [S5; post == pre: yes]
+  S5 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 5a8c9da1ab86bb94d5b0a936f06ef7050789a6e7b561fe75157894dbaeff28c4   [S6]
+  S6 mutated  → rc=1 SUMMARY suites=4 tests=28 failed=4 BorderSidesBehindContentTest::P3b - with a background the fast-path band sits AFTER (inner of) the Background element | BorderSidesBehindContentTest::P3a - the verbatim flex wire chains the band INNER of the background-less colors step | BorderSidesBehindContentTest::P3d - under opacity the band joins the element's group (css-color-4 §3_3) | BorderSidesBehindContentTest::P3c - the verbatim DOTTED wire's slow-path draw node sits AFTER the Background element
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 5a8c9da1ab86bb94d5b0a936f06ef7050789a6e7b561fe75157894dbaeff28c4   [S6; post == pre: yes]
+  S6 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/effects/EffectsFacade.kt sha256 c2d5f2c9330e0f9867940daac7013aea32177b84d27a861445ca4167a477ae4a   [S7]
+  S7 mutated  → rc=1 SUMMARY suites=4 tests=28 failed=2 EffectsClipFilterOrderTest::P4b - the full StyleApplier chain keeps that order | EffectsClipFilterOrderTest::P4a - EffectsFacade installs the clip outer of the drop-shadow
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/effects/EffectsFacade.kt sha256 c2d5f2c9330e0f9867940daac7013aea32177b84d27a861445ca4167a477ae4a   [S7; post == pre: yes]
+  S7 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/effects/filter/FilterExtractor.kt sha256 21af6aa54ce44d973b21c55c3c7a24ede1580b181461a8f4360b4a0dcb076fda   [S8]
+  S8 mutated  → rc=1 SUMMARY suites=4 tests=28 failed=2 EffectsClipFilterOrderTest::P4b - the full StyleApplier chain keeps that order | EffectsClipFilterOrderTest::P4a - EffectsFacade installs the clip outer of the drop-shadow
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/effects/filter/FilterExtractor.kt sha256 21af6aa54ce44d973b21c55c3c7a24ede1580b181461a8f4360b4a0dcb076fda   [S8; post == pre: yes]
+  S8 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt sha256 cda285c3b08270824bc056146f828ae81204ceb3be35d5c30bcba5779f5be04c   [S9]
+  S9 mutated  → rc=1 SUMMARY suites=4 tests=28 failed=1 BorderSidesBehindContentTest::P3g - source - the slow path paints the sides first through drawInOrder
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt sha256 cda285c3b08270824bc056146f828ae81204ceb3be35d5c30bcba5779f5be04c   [S9; post == pre: yes]
+  S9 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [X1]
+  X1 mutated  → rc=0 SUMMARY suites=4 tests=28 failed=0 
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [X1; post == pre: yes]
+  X1 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [X2]
+  X2 mutated  → rc=0 SUMMARY suites=4 tests=28 failed=0 
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [X2; post == pre: yes]
+  X2 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [X3]
+  X3 mutated  → rc=0 SUMMARY suites=4 tests=28 failed=0 
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [X3; post == pre: yes]
+  X3 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [X4]
+  X4 mutated  → rc=0 SUMMARY suites=4 tests=28 failed=0 
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [X4; post == pre: yes]
+  X4 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 5a8c9da1ab86bb94d5b0a936f06ef7050789a6e7b561fe75157894dbaeff28c4   [X6]
+  X6 mutated  → rc=1 SUMMARY suites=4 tests=28 failed=3 BorderSidesBehindContentTest::P3b - with a background the fast-path band sits AFTER (inner of) the Background element | BorderSidesBehindContentTest::P3d - under opacity the band joins the element's group (css-color-4 §3_3) | BorderSidesBehindContentTest::P3c - the verbatim DOTTED wire's slow-path draw node sits AFTER the Background element
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 5a8c9da1ab86bb94d5b0a936f06ef7050789a6e7b561fe75157894dbaeff28c4   [X6; post == pre: yes]
+  X6 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [X7]
+  X7 mutated  → rc=0 SUMMARY suites=4 tests=28 failed=0 
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [X7; post == pre: yes]
+  X7 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [X8]
+  X8 mutated  → rc=1 SUMMARY suites=4 tests=28 failed=1 BehindContentBorderTest::P2c - the stroke caps at half the box and fills when the bands overlap
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt sha256 a0f6cf5b20833d6606568ceb1ffee5d81ef1cbe9069ea636aa2ec38609eed967   [X8; post == pre: yes]
+  X8 restored → rc=0 SUMMARY suites=4 tests=28 failed=0 
+DONE

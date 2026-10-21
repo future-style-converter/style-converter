@@ -1,0 +1,29 @@
+# S1 revert states (revert_states.sh over states-compose-tooling.txt; throwaway worktree at 5bbc2a41; each state: git revert --no-commit <chain in revertOrder>, the suite, then git reset --hard 5bbc2a41 and a clean-tree check).
+# The driver's 'FAILS:' grep column is dropped here: on rc=0 rows it matched only test NAMES containing 'FAILED' / 'never FAILED' and CoreData XPC log noise.
+L2 [U2,U1] reverted bc0678b9 5ade247e → 8 paths · suite compose rc=0 · 3559 testcases; BUILD SUCCESSFUL in 10s;  · 11s 
+L3 [U2,U1] reverted 0c6b071c 56c69e24 → 8 paths · suite compose rc=0 · 3564 testcases; BUILD SUCCESSFUL in 5s;  · 6s 
+L3 [U2] reverted 0c6b071c → 5 paths · suite compose rc=0 · 3569 testcases; BUILD SUCCESSFUL in 5s;  · 5s 
+L4 [U2-android,U1-android] reverted 69f95267 85afc360 → 10 paths · suite compose rc=0 · 3550 testcases; BUILD SUCCESSFUL in 5s;  · 5s 
+L4 [U2-android] reverted 69f95267 → 7 paths · suite compose rc=0 · 3565 testcases; BUILD SUCCESSFUL in 4s;  · 5s 
+L5 [U2i-android] reverted c5699c09 → 2 paths · suite compose rc=0 · 3573 testcases; BUILD SUCCESSFUL in 5s;  · 6s 
+L6 [U2,U1] reverted 103deb33 b9d210d9 → 8 paths · suite compose rc=0 · 3551 testcases; BUILD SUCCESSFUL in 4s;  · 5s 
+L6 [U2] reverted 103deb33 → 4 paths · suite compose rc=0 · 3565 testcases; BUILD SUCCESSFUL in 3s;  · 4s 
+L6 [U3] reverted 1f138c9e → 1 paths · suite compose rc=0 · 3572 testcases; BUILD SUCCESSFUL in 3s;  · 3s 
+L7 [U6-compose] reverted 1079534d → 4 paths · suite compose rc=0 · 3566 testcases; BUILD SUCCESSFUL in 2s;  · 3s 
+L7 [U2] reverted 4c1a3d66 → 3 paths · suite tooling rc=0 · # tests 2342 # pass 2317 # fail 0 # skipped 25  · 15s
+L7 [U3] reverted a8deff25 → 3 paths · suite tooling rc=0 · # tests 2351 # pass 2326 # fail 0 # skipped 25  · 15s
+L7 [U5] reverted b724b5af → 2 paths · suite tooling rc=0 · # tests 2351 # pass 2326 # fail 0 # skipped 25  · 23s
+L7 [U6-tooling] reverted b24526a9 → 1 paths · suite tooling rc=0 · # tests 2349 # pass 2324 # fail 0 # skipped 25  · 18s
+L7 [U4] reverted 1ed93e6b → 5 paths · suite web rc=0 ·  Tests 1388 passed (1388)  Tests 344 passed (344)  · 16s 
+L7 [U6-web] reverted 6d8c571d → 1 paths · suite web rc=0 ·  Tests 1383 passed (1383)  Tests 344 passed (344)  · 14s 
+L1 [NB-ios] reverted b7108a42 → 3 paths · suite swift rc=0 ·  Executed 2264 tests, with 0 failures (0 unexpected) in 11.140 (11.740) seconds; ** TEST SUCCEEDED ** · 213s
+L4 [U2-ios,U1-ios] reverted 1dc521c1 cac1d6a3 → 8 paths · suite swift rc=0 ·  Executed 2250 tests, with 1 test skipped and 0 failures (0 unexpected) in 11.436 (11.885) seconds; ** TEST SUCCEEDED ** · 209s
+L4 [U2-ios] reverted 1dc521c1 → 5 paths · suite swift rc=0 ·  Executed 2264 tests, with 1 test skipped and 0 failures (0 unexpected) in 68.677 (100.257) seconds; ** TEST SUCCEEDED ** · 203s
+L5 [U1-ios] reverted 2ca54bc8 → 4 paths · suite swift rc=0 ·  Executed 2262 tests, with 1 test skipped and 0 failures (0 unexpected) in 10.340 (10.719) seconds; ** TEST SUCCEEDED ** · 203s
+L5 [U2i-ios] reverted 5faec331 → 2 paths · suite swift rc=0 ·  Executed 2272 tests, with 1 test skipped and 0 failures (0 unexpected) in 57.264 (84.753) seconds; ** TEST SUCCEEDED ** · 203s
+L5 [U3-ios] reverted fc436181 → 6 paths · suite swift rc=0 ·  Executed 2268 tests, with 1 test skipped and 0 failures (0 unexpected) in 58.203 (90.696) seconds; ** TEST SUCCEEDED ** · 193s
+L5 [D] reverted 5bbc2a41 → 6 paths · suite both rc=65 · compose 3574 BUILD SUCCESSFUL in 7s · swift  Executed 2273 tests, with 1 test skipped and 1 failure (0 unexpected) in 72.346 (112.314) seconds ** TEST FAILED ** · titan-tooling # pass 1762 # fail 0  · 184s
+L5 [D,U2i-ios,U2o-ios] reverted 5bbc2a41 5faec331 3179cf60 → 12 paths · suite both rc=0 · compose 3574 BUILD SUCCESSFUL in 981ms · swift  Executed 2266 tests, with 1 test skipped and 0 failures (0 unexpected) in 10.962 (11.325) seconds ** TEST SUCCEEDED ** · titan-tooling # pass 1762 # fail 0  · 215s
+L5 [D,U2i-android,U2o-android] reverted 5bbc2a41 c5699c09 3a8249d2 → 13 paths · suite both rc=0 · compose 3568 BUILD SUCCESSFUL in 8s · swift  Executed 2273 tests, with 1 test skipped and 0 failures (0 unexpected) in 68.586 (100.824) seconds ** TEST SUCCEEDED ** · titan-tooling # pass 1762 # fail 0  · 221s
+L7 [U6-swift] reverted a888476c → 2 paths · suite swift rc=0 ·  Executed 2267 tests, with 1 test skipped and 0 failures (0 unexpected) in 63.638 (101.592) seconds; ** TEST SUCCEEDED ** · 158s
+# L5 [D] re-run on the same bytes (rerun-L5D.swift.log): rc 0, Executed 2273 tests, with 1 test skipped and 0 failures.

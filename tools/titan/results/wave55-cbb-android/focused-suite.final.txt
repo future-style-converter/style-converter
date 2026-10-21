@@ -1,0 +1,14 @@
+BUILD SUCCESSFUL in 6s
+core.renderer.ChildContainingBlockSeamWiringTest" tests="1" skipped="0" failures="0" errors="0"
+core.renderer.VerticalBlockFlowSeamGuardTest" tests="1" skipped="0" failures="0" errors="0"
+core.variables.DynamicValueResolverTest" tests="33" skipped="0" failures="0" errors="0"
+images.ReplacedBoxSizingConstraintTest" tests="20" skipped="0" failures="0" errors="0"
+sizing.BoxSizingContentBoxTest" tests="9" skipped="0" failures="0" errors="0"
+sizing.ContentBoxPercentInflationTest" tests="3" skipped="0" failures="0" errors="0"
+sizing.ContentBoxRelativeInflationTest" tests="7" skipped="0" failures="0" errors="0"
+sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"
+sizing.SizingMinMaxClampTest" tests="15" skipped="0" failures="0" errors="0"
+sizing.SizingOverflowWidthTest" tests="7" skipped="0" failures="0" errors="0"
+sizing.WptBoxSizingDefaultTest" tests="6" skipped="0" failures="0" errors="0"
+typography.UAElementFontRuleSeamWiringTest" tests="1" skipped="0" failures="0" errors="0"
+gradle rc=0

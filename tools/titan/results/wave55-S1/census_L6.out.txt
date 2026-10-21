@@ -1,0 +1,5 @@
+superset radius: 261 documents; carriers 27 mayMove 241
+carriers outside the superset: []
+UNDER-REPORT candidates (superset minus carriers/mayMove/other-lane carriers/ring): 1
+   wpt__css-contain__contain-animation-001 ['wpt__css-contain__contain-animation-001__1-002']
+mayMove outside the superset (over-coverage): 20

@@ -1,0 +1,34 @@
+M1 [round the SUM (not each term)] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 red tests ['testP2EachTermRoundsAloneNeverTheSum', 'testP3HalvesRoundAwayFromZero'] (want ['testP2EachTermRoundsAloneNeverTheSum']) built True -> RED as required
+   restored: exit 0 passed 9/9 failed [] -> GREEN
+   verdict OK
+M2 [ceil the sum] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 red tests ['testP2EachTermRoundsAloneNeverTheSum', 'testP3HalvesRoundAwayFromZero'] (want ['testP2EachTermRoundsAloneNeverTheSum']) built True -> RED as required
+   restored: exit 0 passed 9/9 failed [] -> GREEN
+   verdict OK
+M3 [.toNearestOrEven (banker's) instead of lroundf] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 red tests ['testP3HalvesRoundAwayFromZero'] (want ['testP3HalvesRoundAwayFromZero']) built True -> RED as required
+   restored: exit 0 passed 9/9 failed [] -> GREEN
+   verdict OK
+M4 [drop the exactness guard] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 red tests ['testP4BlinkBoxOnlyUnderAllFourGuards'] (want ['testP4BlinkBoxOnlyUnderAllFourGuards']) built True -> RED as required
+   restored: exit 0 passed 9/9 failed [] -> GREEN
+   verdict OK
+M5 [drop the WPT guard] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 red tests ['testP4BlinkBoxOnlyUnderAllFourGuards'] (want ['testP4BlinkBoxOnlyUnderAllFourGuards']) built True -> RED as required
+   restored: exit 0 passed 9/9 failed [] -> GREEN
+   verdict OK
+M6 [let the Blink box override a non-nil effective] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 red tests ['testP5EffectiveValueIsReturnedVerbatim'] (want ['testP5EffectiveValueIsReturnedVerbatim']) built True -> RED as required
+   restored: exit 0 passed 9/9 failed [] -> GREEN
+   verdict OK
+M7 [resolve every design to Inter in faceMetrics] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 red tests ['testP6FaceResolutionMatchesLineBoxMetrics'] (want ['testP6FaceResolutionMatchesLineBoxMetrics']) built True -> RED as required
+   restored: exit 0 passed 9/9 failed [] -> GREEN
+   verdict OK
+M8 [drop the horizontal-writing-mode guard (D22)] pre 929108b6946f5141 post 929108b6946f5141
+   mutated: exit 65 red tests ['testP4BlinkBoxOnlyUnderAllFourGuards', 'testP8VerticalRunIsDeclinedByTheHorizontalGuard'] (want ['testP4BlinkBoxOnlyUnderAllFourGuards', 'testP8VerticalRunIsDeclinedByTheHorizontalGuard']) built True -> RED as required
+   restored: exit 0 passed 9/9 failed [] -> GREEN
+   verdict OK
+mutations: ALL OK
+exit 0

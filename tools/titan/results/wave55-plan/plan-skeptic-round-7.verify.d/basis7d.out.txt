@@ -1,0 +1,49 @@
+MF5 [X]: revealed fill px on the base band / of them in a fill component with NO base-fill px (an orphan reveal)
+  fixed  flex-abspos-staticpos-align-self-safe-001.html andro (1188, 0)
+    fake T-L6-X-fill-over-band-3pct         (1228, 40)
+    fake T-L6-X-fill-over-band-6pct         (1269, 81)
+    fake T-L6-X-fill-over-band-9pct         (1310, 122)
+    fake A-class-speck2-edge                (1190, 0)
+  fixed  flex-abspos-staticpos-align-self-safe-002.html andro (974, 0)
+    fake T-L6-X-fill-over-band-3pct         (1016, 42)
+    fake T-L6-X-fill-over-band-6pct         (1059, 85)
+    fake T-L6-X-fill-over-band-9pct         (1102, 128)
+    fake A-class-speck2-edge                (974, 0)
+  fixed  grid-abspos-staticpos-align-self-001.html android    (86, 0)
+    fake T-L6-X-fill-over-band-3pct         (132, 46)
+    fake T-L6-X-fill-over-band-6pct         (178, 92)
+    fake T-L6-X-fill-over-band-9pct         (224, 138)
+    fake A-class-speck2-edge                (86, 0)
+  fixed  grid-abspos-staticpos-align-self-rtl-001.html androi (124, 0)
+    fake T-L6-X-fill-over-band-3pct         (178, 54)
+    fake T-L6-X-fill-over-band-6pct         (232, 108)
+    fake T-L6-X-fill-over-band-9pct         (286, 162)
+    fake A-class-speck2-edge                (126, 2)
+  fixed  grid-abspos-staticpos-align-self-vertWM-001.html and (128, 0)
+    fake T-L6-X-fill-over-band-3pct         (181, 53)
+    fake T-L6-X-fill-over-band-6pct         (235, 107)
+    fake T-L6-X-fill-over-band-9pct         (289, 161)
+    fake A-class-speck2-edge                (130, 2)
+  fixed  grid-abspos-staticpos-justify-self-001.html android  (130, 0)
+    fake T-L6-X-fill-over-band-3pct         (183, 53)
+    fake T-L6-X-fill-over-band-6pct         (237, 107)
+    fake T-L6-X-fill-over-band-9pct         (291, 161)
+    fake A-class-speck2-edge                (130, 0)
+MF6 [PO]: overlap rows (166/167/218/219 × x163-266) red / blue on the fixed U1 replay and the base
+  fixed U1  red 416 blue 0; red px in the picture 1552
+  base      red 0 blue 416; red px in the picture 1136
+MF7 stack: green3 outside the four cells' ±2 keep boxes, fixed vs base (XOR px), and on the fakes
+  fixed: green outside the keep boxes 300 px, XOR vs base 680
+  T-L3-stack-other-square-moved+24+0: green outside 300 px, XOR vs base 880
+  T-L3-stack-other-square-moved+0+30: green outside 300 px, XOR vs base 880
+  T-L3-stack-other-square-moved-40+10: green outside 300 px, XOR vs base 880
+  fixed U1 replay: green-outside-the-cells mask XOR web (wave55-open) 276 px
+  ios wave55-open: green-outside-the-cells mask XOR web (wave55-open) 180 px
+  T-L3-stack-other-square-moved+24+0: XOR web 384 px
+  T-L3-stack-other-square-moved+0+30: XOR web 384 px
+  T-L3-stack-other-square-moved-40+10: XOR web 384 px
+  one-sided: green outside the cells' keep boxes that the BASE does not have green at (U1 moves the four cells, never the others):
+    fixed U1 replay: 200 px
+    T-L3-stack-other-square-moved+24+0: 300 px
+    T-L3-stack-other-square-moved+0+30: 300 px
+    T-L3-stack-other-square-moved-40+10: 300 px

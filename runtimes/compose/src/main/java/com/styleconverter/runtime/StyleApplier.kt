@@ -750,8 +750,14 @@ object StyleApplier {
             // border-box including the padding band; background then paints
             // the full sized box, INCLUDING the padding region (padding is
             // applied in step 8 below, INSIDE bg in chain order).
-            result = BordersFacade.apply(result, paint.borders)
+            // Wave 55 (L6 U2): the sides chain INNER of the background and
+            // paint behind the content (CSS 2.1 Appendix E §E.2) — unless the
+            // box clips (css-overflow-3 §3: content is clipped at the PADDING
+            // edge, never reaching the band, while step 7's clip sits at the
+            // border box): there the band stays over the clipped content.
+            result = BordersFacade.apply(result, paint.borders, sidesBehindContent = !config.overflow.shouldClip)
             result = ColorApplier.applyColors(result, paint.colors)
+            if (!config.overflow.shouldClip) result = BordersFacade.applySidesBehindContent(result, paint.borders)
         }
 
         // 7. Overflow (clipping and scrolling)

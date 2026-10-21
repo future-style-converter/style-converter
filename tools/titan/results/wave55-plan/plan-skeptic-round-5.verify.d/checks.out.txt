@@ -1,0 +1,93 @@
+# plan-skeptic-round-5.verify.d/checks.out.txt — the round-5 verifier's executed checks (§1 of plan-skeptic-round-5.verify.md); scratch paths written <scratch>, the throwaway's root <SH>
+# 2026-10-11T23:42:23Z; HEAD 611c9f93; pinned interpreter /opt/homebrew/bin/python3.12 -B, nice -n 19
+
+## 1 geometry-gate.py wave54-final --base wave54-final --self-test
+
+geometry-gate wave54-final (base wave54-final): 230 keys — PASS 160 · FAIL 70 (gating 43) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 43 (PASS 0 FAIL 43) · control 160 (PASS 160 FAIL 0) · report 27 (PASS 0 FAIL 27) · withdrawn 0 (PASS 0 FAIL 0)
+revert rule 4 names: L1-hyphen-ios-linebox NB-ios, L2-cbb-android U1, L2-cbb-android U2, L3-positioned-parent-slot U1, L3-positioned-parent-slot U2, L4-ua-heading-margin U1-android, L4-ua-heading-margin U1-ios, L4-ua-heading-margin U2-android, L4-ua-heading-margin U2-ios, L5-counter-suffix-rows U1-ios, L5-counter-suffix-rows U2i-android, L5-counter-suffix-rows U2i-ios, L5-counter-suffix-rows U2o-android, L5-counter-suffix-rows U2o-ios, L5-counter-suffix-rows U3-ios, L6-android-paint-order U1, L6-android-paint-order U2
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)
+
+## 4b plan-prose --check (scratch copy, then installed)
+plan-prose --check ../../../../../../../..<scratch>/r5/checks/PLAN.copy.md against expectations.json sha256 980542d01c175500…: 36 gen blocks · 41 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
+plan-prose --check: HOLDS
+plan-prose --check tools/titan/results/wave55-plan/PLAN.md against expectations.json sha256 980542d01c175500…: 36 gen blocks · 41 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
+plan-prose --check: HOLDS
+PLAN.md sha before 35639d61a07fdfa8 after 35639d61a07fdfa8
+copy exit 0
+installed exit 0
+
+## 4c watchlist (RUN=wave54-final WATCH=wave55-plan/watchlist.txt node wave52-plan/watchlist-check.mjs)
+exit 0
+  unmatched 0
+output byte-identical to watchlist-check.wave54-final.out.txt: yes
+
+## 4d plan-build.py --out <scratch>
+exit 0
+expectations.json cmp identical (980542d01c175500…)
+watchlist.txt cmp identical (4b1a9cd5bb421e3b…)
+stdout identical to plan-build.out.txt
+expectations.json
+watchlist.txt
+
+## 5 / 6 fix-r3.verdicts.sh and fix-r4.verdicts.sh, run in the throwaway (bytes = the shared plan dir, diff -rq empty)
+nice -n 19 bash fix-r3.verdicts.sh > $S/r5/checks/fix-r3.verdicts.stdout 2>&1  59.17s user 2.15s system 96% cpu 1:03.48 total
+fix-r3.verdicts exit 0
+nice -n 19 bash fix-r4.verdicts.sh > $S/r5/checks/fix-r4.verdicts.stdout 2>&1  57.99s user 1.84s system 98% cpu 1:00.97 total
+fix-r4.verdicts exit 0
+  fix-r3 re-run vs committed fix-r3.verdicts-preserved.out.txt, body (path-normalised): identical (48 lines); last line: fix-r3.verdicts: every verdict preserved
+  fix-r3 re-run vs fix-r4.verdicts-vs-round2.out.txt, body: identical
+  fix-r4 re-run vs committed fix-r4.verdicts-preserved.out.txt, body: identical (48 lines); last line: fix-r4.verdicts: every verdict preserved
+
+## 7 OUT=<scratch> fix-r4.teeth-before-after.sh <scratch>/teeth-ba  (start 01:26:48 exit 0 end 01:36:44 )
+  vs committed fix-r4.teeth-before-after.out.txt: body (lines 2-171) byte-identical; line 1: # fix-r4.teeth-before-after — 2026-10-11T23:26:49Z; HEAD 611c9f93; throwaway wave55-plan-r4-teeth; expectations.json 980542d01c175500…
+  probes-teeth.py exit 1 — 265 cases; violations 145; gating + tally keys with ≥ 1 rejected fake 48 / 48
+  violations: 145 (round-4 cases: 145; the r2 clip-10 case: 0; other rounds 1-3: 0)
+  probes-teeth.py exit 0 — 265 cases; violations 0; gating + tally keys with ≥ 1 rejected fake 48 / 48
+  violations: 0 (round-4 cases: 0; the r2 clip-10 case: 0; other rounds 1-3: 0)
+throwaway removed (0 left)
+
+## 8 probes-selfcheck.py --scratch <scratch>/selfcheck --wt <throwaway> --out <scratch>/probes-selfcheck.r5.txt  (start 01:03:48 exit 0 end 01:40:27 )
+  vs committed probes-selfcheck.txt: BYTE-IDENTICAL, 1231 lines, sha256 682496d3e9cc7202…
+gating keys 43: able to fail 43 (today FAIL on device, or a fake rejected); with a fixed picture accepted 42; §T standing rejection set HOLDS (48 / 48 gating + tally keys reject a plausible fake, 0 violation(s); §T3 added-ink holes 0; §T4 strictly-additive IN-ZONE 0, > 2-px holes 0); geometry-gate self-test HOLDS
+  §T: 265 cases; violations 0; gating + tally keys with ≥ 1 rejected plausible fake 48 / 48
+  §T3: 987 key reads on faked captures; HOLES 0; named residuals 0; key reads that PASS a fake a sibling row of the same capture rejects: 148
+  §T4: IN-ZONE acceptances 0; fakes4 HOLES with > 2 new-ink px (any mask) 0; benign / floor acceptances 493 — the 2-px floor is a NAMED residual class (PLAN §0, D39): a fake adding ≤ 2 px under the probe's own mask passes every ±2 / XOR ≤ 2 read by co
+
+## 9 fix-r4.teeth-r4-equiv.py <scratch>/selfcheck/sweep4  (the §T4 run's fake runs: plan-skeptic-round-4.fakes/fakes4.py, the relative-path copy of the verifier's generator — the pictures are the same code)
+  body vs committed fix-r4.teeth-r4-equiv.out.txt (its line 1 is the caller's header): identical
+42 pinned round-4 cases, 286 native captures compared: 42 identical to fakes4.py's own fake runs, 0 differ
+  §T4 per-lane fakes4 summaries vs fix-r4.verifier-rerun.out.txt: the same 6 lines; zones4 IN-ZONE per lane: 0 0 0 0 0 0 
+
+## 10 fixed pictures (the round-5 sweep's FIXED runs): the owning keys that did NOT pass their fixed picture
+  NO PASSING FIXED PICTURE: L4 U1-fixed [F] text-decoration-inset-005 ios (FAIL)
+  NO PASSING FIXED PICTURE: L4 U1-fixed [F] text-decoration-inset-006 ios (FAIL)
+  NO PASSING FIXED PICTURE: L4 U1-fixed [F] text-decoration-inset-014 android (FAIL)
+  NO PASSING FIXED PICTURE: L4 U1-fixed [F] text-decoration-inset-014 ios (FAIL)
+  NO PASSING FIXED PICTURE: L6 X-fixed [X] flex-abspos-staticpos-align-self-safe-002 android (FAIL)
+
+## residual.py (fix basis for M1 / M2 / M5 / M6)
+L2 U1-fixed                     abspos-autopos-htb-ltr                               android  diff vs wave54-final  4400 px; outside strict green (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L2 U1-fixed                     abspos-autopos-vlr-ltr                               android  diff vs wave54-final  4400 px; outside strict green (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L2 U1-fixed                     abspos-autopos-vrl-ltr                               android  diff vs wave54-final  4400 px; outside strict green (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L2 U1-fixed                     backdrop-filter-nested-border-radius-clip            android  diff vs wave54-final  5249 px; outside strict green (fixed ∪ base) grown 0/1/2 px: 103 / 0 / 0
+L2 U1-fixed                     backdrop-filter-nested-border-radius-clip-2          android  diff vs wave54-final  5267 px; outside strict green (fixed ∪ base) grown 0/1/2 px: 69 / 0 / 0
+L2 U1-fixed                     backdrop-filter-nested-border-radius-clip-4          android  diff vs wave54-final  3435 px; outside strict green (fixed ∪ base) grown 0/1/2 px: 53 / 0 / 0
+L2 U2-fixed                     backdrop-filter-nested-border-radius-clip-3          android  diff vs wave54-final 10656 px; outside strict green (fixed ∪ base) grown 0/1/2 px: 708 / 573 / 494
+L3 dir-row6-fixed               dir-style-02a                                        android  diff vs wave54-final  2988 px; outside ink (min < 200) (fixed ∪ base) grown 0/1/2 px: 723 / 0 / 0
+L3 bidi-fixed                   bidi-tab-001                                         android  diff vs wave54-final  1048 px; outside blue (fixed ∪ base) grown 0/1/2 px: 587 / 93 / 24
+L3 stack-fixed                  anchor-position-multicol-nested-001                  android  diff vs wave54-final  1000 px; outside green (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L3 001-fixed                    dynamic-offset-rtl-001                               android  diff vs wave54-final   200 px; outside magenta + yellow (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L3 002-fixed                    dynamic-offset-rtl-002                               android  diff vs wave54-final   200 px; outside magenta + yellow (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L3 r2-L3-vrl-rtl-001-fixed      dynamic-offset-vrl-rtl-001                           android  diff vs wave54-final   200 px; outside magenta + yellow (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L6 X-fixed                      flex-abspos-staticpos-align-self-safe-001            android  diff vs wave54-final  1188 px; outside yellow fill + dark band (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L6 X-fixed                      flex-abspos-staticpos-align-self-safe-002            android  diff vs wave54-final  1016 px; outside yellow fill + dark band (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L6 X-fixed                      grid-abspos-staticpos-align-self-001                 android  diff vs wave54-final    86 px; outside teal fill + dark band (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L6 X-fixed                      grid-abspos-staticpos-justify-self-001               android  diff vs wave54-final   130 px; outside teal fill + dark band (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L6 X-fixed                      grid-abspos-staticpos-align-self-vertWM-001          android  diff vs wave54-final   128 px; outside teal fill + dark band (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L6 X-fixed                      grid-abspos-staticpos-align-self-rtl-001             android  diff vs wave54-final   124 px; outside teal fill + dark band (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+L6 PO-fixed                     backdrop-filter-clip-rect                            android  diff vs wave54-final   416 px; outside red + blue (fixed ∪ base) grown 0/1/2 px: 0 / 0 / 0
+
+## 2b plan-prose --check re-run on the PLAN.md another session appended to during this pass (01:40:45 local: the [W-L7a] paragraph at line 2671; sha 35639d61… → 10eeae071c3982a6…)
+plan-prose --check: HOLDS
+exit 0

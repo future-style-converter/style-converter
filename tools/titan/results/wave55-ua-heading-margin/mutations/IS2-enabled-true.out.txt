@@ -1,0 +1,16 @@
+{
+ "name": "IS2-enabled-true",
+ "file": "runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift",
+ "pre": "b5992e1a1b9b845702d6cf5693182b5e7b40df6c6a1b3c7a4999a6686f657906",
+ "mutated": "8cf705ae087c9b6feb137e72c91cdc15ecd4dba234f20eb19e51d2c7c7fa0b90",
+ "post": "b5992e1a1b9b845702d6cf5693182b5e7b40df6c6a1b3c7a4999a6686f657906",
+ "red_rc": 65,
+ "red_failures": [
+  "UAPositionedHeadingMarginSeamWiringTests.testTheHoistAndTheFontStepPrecedeIt",
+  "UAPositionedHeadingMarginSeamWiringTests.testTheMarginStepRunsOnceLastInMergedProperties"
+ ],
+ "red_counts": "Executed 39, 3 failures",
+ "green_rc": 0,
+ "green_counts": "Executed 39, 0 failures",
+ "verdict": "RED-THEN-GREEN"
+}

@@ -1,0 +1,1219 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test -scheme StyleConverterRuntime -destination "platform=macOS,variant=Mac Catalyst,arch=arm64" -derivedDataPath <wt:build-L4>/.dd "-only-testing:StyleConverterRuntimeTests/UAPositionedHeadingMarginTests" "-only-testing:StyleConverterRuntimeTests/UAPositionedHeadingMarginSeamWiringTests" "-only-testing:StyleConverterRuntimeTests/UAElementFontRuleTests" "-only-testing:StyleConverterRuntimeTests/UAHeadingFoldGateTests"
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  StyleConverterRuntime: <wt:build-L4>
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (4 targets)
+    Target 'StyleConverterRuntime-product' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntimeTests-product' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: bdb6a21159040008cc936d9778a35e08
+Build description path: <wt:build-L4>/.dd/Build/Intermediates.noindex/XCBuildData/bdb6a21159040008cc936d9778a35e08.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk <wt:build-L4>/.dd/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+    cd <wt:build-L4>/.swiftpm/xcode
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -o <wt:build-L4>/.dd/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+
+ProcessInfoPlistFile <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime_StyleConverterRuntime.bundle/Contents/Info.plist <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime_StyleConverterRuntime-b.build/empty-StyleConverterRuntime_StyleConverterRuntime.plist (in target 'StyleConverterRuntime_StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    builtin-infoPlistUtility <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime_StyleConverterRuntime-b.build/empty-StyleConverterRuntime_StyleConverterRuntime.plist -producttype com.apple.product-type.bundle -expandbuildsettings -platform macosx -o <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime_StyleConverterRuntime.bundle/Contents/Info.plist
+
+SwiftDriver StyleConverterRuntime normal arm64 com.apple.xcode.tools.swift.compiler (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -parse-as-library -module-name StyleConverterRuntime -Onone @<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.SwiftFileList -DSWIFT_PACKAGE -DDEBUG -DSWIFT_MODULE_RESOURCE_BUNDLE_AVAILABLE -DXcode -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-ios16.0-macabi -g -module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path <wt:build-L4>/.dd/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc <wt:build-L4>/.dd/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path <wt:build-L4>/.dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -sdk-module-cache-path <wt:build-L4>/.dd/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file <wt:build-L4>/.dd/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -package-name wave55_build_l4 -emit-const-values -const-gather-protocols-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime_const_extract_protocols.json -Xcc -I<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/include -Xcc -isystem -Xcc /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/usr/include -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources-normal/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-Swift.h -working-directory <wt:build-L4>/.swiftpm/xcode -experimental-emit-module-separately -disable-cmo
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ StyleConverterRuntime (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+
+SwiftCompile normal arm64 (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    
+
+SwiftCompile normal arm64 Compiling\ UAPositionedHeadingMargin.swift <wt:build-L4>/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/spacing/UAPositionedHeadingMargin.swift (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/spacing/UAPositionedHeadingMargin.swift (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UAPositionedHeadingMargin.swift
+
+SwiftDriverJobDiscovery normal arm64 Compiling UAPositionedHeadingMargin.swift (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+
+SwiftDriver\ Compilation StyleConverterRuntime normal arm64 com.apple.xcode.tools.swift.compiler (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -parse-as-library -module-name StyleConverterRuntime -Onone @<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.SwiftFileList -DSWIFT_PACKAGE -DDEBUG -DSWIFT_MODULE_RESOURCE_BUNDLE_AVAILABLE -DXcode -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-ios16.0-macabi -g -module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path <wt:build-L4>/.dd/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc <wt:build-L4>/.dd/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path <wt:build-L4>/.dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -sdk-module-cache-path <wt:build-L4>/.dd/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file <wt:build-L4>/.dd/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -package-name wave55_build_l4 -emit-const-values -const-gather-protocols-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime_const_extract_protocols.json -Xcc -I<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/include -Xcc -isystem -Xcc /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/usr/include -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources-normal/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-Swift.h -working-directory <wt:build-L4>/.swiftpm/xcode -experimental-emit-module-separately -disable-cmo
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for StyleConverterRuntime (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+
+SwiftDriver\ Compilation\ Requirements StyleConverterRuntime normal arm64 com.apple.xcode.tools.swift.compiler (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -parse-as-library -module-name StyleConverterRuntime -Onone @<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.SwiftFileList -DSWIFT_PACKAGE -DDEBUG -DSWIFT_MODULE_RESOURCE_BUNDLE_AVAILABLE -DXcode -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-ios16.0-macabi -g -module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path <wt:build-L4>/.dd/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc <wt:build-L4>/.dd/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path <wt:build-L4>/.dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -sdk-module-cache-path <wt:build-L4>/.dd/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file <wt:build-L4>/.dd/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -package-name wave55_build_l4 -emit-const-values -const-gather-protocols-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime_const_extract_protocols.json -Xcc -I<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/include -Xcc -isystem -Xcc /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/usr/include -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources-normal/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime-Swift.h -working-directory <wt:build-L4>/.swiftpm/xcode -experimental-emit-module-separately -disable-cmo
+
+Copy <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.swiftmodule/arm64-apple-ios-macabi.abi.json <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.abi.json (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.abi.json <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.swiftmodule/arm64-apple-ios-macabi.abi.json
+
+Copy <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.swiftmodule/Project/arm64-apple-ios-macabi.swiftsourceinfo <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.swiftsourceinfo (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.swiftsourceinfo <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.swiftmodule/Project/arm64-apple-ios-macabi.swiftsourceinfo
+
+Ld <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.o normal (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios16.0-macabi -r -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -O0 -Xlinker -no_warn_duplicate_libraries -F<wt:build-L4>/.dd/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-maccatalyst -F<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks -filelist <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.LinkFileList -nostdlib -Xlinker -object_path_lto -Xlinker <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime_lto.o -Xlinker -no_deduplicate -Xlinker -debug_variant -Xlinker -dependency_info -Xlinker <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx -L/System/iOSSupport/usr/lib/swift -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.swiftmodule -o <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.o
+
+ExtractAppIntentsMetadata (in target 'StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name StyleConverterRuntime --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk --xcode-version 27A266a --platform-family macOS --deployment-target 13.0 --bundle-identifier wave55-build-l4.StyleConverterRuntime --output <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.appintents --target-triple arm64-apple-ios16.0-macabi --binary-file <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntime.o --dependency-file <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime_dependency_info.dat --stringsdata-file <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.SwiftFileList --metadata-file-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/StyleConverterRuntime.DependencyMetadataFileList --static-metadata-file-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/StyleConverterRuntime.DependencyStaticMetadataFileList --swift-const-vals-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime-t.build/Objects-normal/arm64/StyleConverterRuntime.SwiftConstValuesFileList --force --compile-time-extraction --deployment-aware-processing --no-app-shortcuts-localization
+2026-10-11 22:49:34.165 appintentsmetadataprocessor[39832:10128221] Starting appintentsmetadataprocessor export
+2026-10-11 22:49:34.462 appintentsmetadataprocessor[39832:10128221] Extracted no relevant App Intents symbols, skipping writing output
+
+note: Removed stale file '<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/L4CensusTests.o'
+
+note: Removed stale file '<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/L4CensusTests.swiftconstvalues'
+
+WriteAuxiliaryFile <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.SwiftFileList (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    write-file <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.SwiftFileList
+
+WriteAuxiliaryFile <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.SwiftConstValuesFileList (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    write-file <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.SwiftConstValuesFileList
+
+WriteAuxiliaryFile <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.LinkFileList (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    write-file <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.LinkFileList
+
+WriteAuxiliaryFile <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests-OutputFileMap.json (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    write-file <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests-OutputFileMap.json
+
+ProcessInfoPlistFile <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Info.plist <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/empty-StyleConverterRuntimeTests.plist (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    builtin-infoPlistUtility <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/empty-StyleConverterRuntimeTests.plist -producttype com.apple.product-type.bundle.unit-test -expandbuildsettings -platform macosx -scanforprivacyfile <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Resources/StyleConverterRuntime_StyleConverterRuntime.bundle -o <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Info.plist
+
+SwiftDriver StyleConverterRuntimeTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -parse-as-library -module-name StyleConverterRuntimeTests -Onone @<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.SwiftFileList -DSWIFT_PACKAGE -DDEBUG -DXcode -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-ios17.0-macabi -g -module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path <wt:build-L4>/.dd/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/PackageFrameworks -F <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc <wt:build-L4>/.dd/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path <wt:build-L4>/.dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -sdk-module-cache-path <wt:build-L4>/.dd/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file <wt:build-L4>/.dd/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -package-name wave55_build_l4 -emit-const-values -const-gather-protocols-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests_const_extract_protocols.json -Xcc -I<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/include -Xcc -isystem -Xcc /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/usr/include -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/DerivedSources-normal/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/DerivedSources/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -working-directory <wt:build-L4>/.swiftpm/xcode -experimental-emit-module-separately -disable-cmo
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ StyleConverterRuntimeTests (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftCompile normal arm64 (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    
+
+SwiftCompile normal arm64 Compiling\ StaticEmMarginsTests.swift,\ TableBodyForestTests.swift,\ TableColumnWidthsTests.swift,\ TableSeparatedTracksTests.swift,\ TableUaDisplayTests.swift,\ TransformContainingBlockTests.swift,\ TransformInheritanceTests.swift,\ TransformOriginKeywordTests.swift,\ TransformsTests.swift,\ TransitionDeclaredFlipRasterTests.swift,\ TransitionFlipDetectionTests.swift,\ TypographyFontSizeFallbackTests.swift,\ TypographyTests.swift,\ UABlockChildMarginTests.swift,\ UABlockMarginFontBasisTests.swift,\ UABlockMarginTests.swift,\ UAControlFontMetricsTests.swift,\ UAElementFontRuleTests.swift,\ UAHeadingFoldGateTests.swift,\ UAPositionedHeadingMarginSeamWiringTests.swift,\ UAPositionedHeadingMarginTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/StaticEmMarginsTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TableBodyForestTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TableColumnWidthsTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TableSeparatedTracksTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TableUaDisplayTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TransformContainingBlockTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TransformInheritanceTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TransformOriginKeywordTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TransformsTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TransitionDeclaredFlipRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TransitionFlipDetectionTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TypographyFontSizeFallbackTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TypographyTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UABlockChildMarginTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UABlockMarginFontBasisTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UABlockMarginTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAControlFontMetricsTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAElementFontRuleTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAHeadingFoldGateTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginSeamWiringTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/StaticEmMarginsTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile StaticEmMarginsTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TableBodyForestTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile TableBodyForestTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TableColumnWidthsTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile TableColumnWidthsTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TableSeparatedTracksTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile TableSeparatedTracksTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TableUaDisplayTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile TableUaDisplayTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TransformContainingBlockTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile TransformContainingBlockTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TransformInheritanceTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile TransformInheritanceTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TransformOriginKeywordTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile TransformOriginKeywordTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TransformsTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile TransformsTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TransitionDeclaredFlipRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile TransitionDeclaredFlipRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TransitionFlipDetectionTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile TransitionFlipDetectionTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TypographyFontSizeFallbackTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile TypographyFontSizeFallbackTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TypographyTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile TypographyTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UABlockChildMarginTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UABlockChildMarginTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UABlockMarginFontBasisTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UABlockMarginFontBasisTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UABlockMarginTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UABlockMarginTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAControlFontMetricsTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UAControlFontMetricsTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAElementFontRuleTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UAElementFontRuleTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAHeadingFoldGateTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UAHeadingFoldGateTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginSeamWiringTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UAPositionedHeadingMarginSeamWiringTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UAPositionedHeadingMarginTests.swift
+
+SwiftCompile normal arm64 Compiling\ ComposedIcbClipTests.swift,\ ComposedRootStackTests.swift,\ ConformanceTests.swift,\ ContainingBlockHeightTests.swift,\ ContentsUnboxingTests.swift,\ CoreTypesTests.swift,\ CrossFadeMathTests.swift,\ CurrentColorBackgroundTests.swift,\ DecorationColorOpsTests.swift,\ DecorationInsetLineBoxTests.swift,\ DecorationOpsTests.swift,\ DecorationSkipSpacesTests.swift,\ DecorationWireTests.swift,\ DocumentFaceMetricsTests.swift,\ DocumentFontRegistryTests.swift,\ DynamicStylingTests.swift,\ DynamicValuesTests.swift,\ EasingReferenceTests.swift,\ EffectsTests.swift,\ EmptyFlexContainerTests.swift,\ FidelityWave1Tests.swift,\ FidelityWave2Tests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ComposedIcbClipTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ComposedRootStackTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ConformanceTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ContainingBlockHeightTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ContentsUnboxingTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/CoreTypesTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/CrossFadeMathTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/CurrentColorBackgroundTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DecorationColorOpsTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DecorationInsetLineBoxTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DecorationOpsTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DecorationSkipSpacesTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DecorationWireTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DocumentFaceMetricsTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DocumentFontRegistryTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DynamicStylingTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DynamicValuesTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/EasingReferenceTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/EffectsTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/EmptyFlexContainerTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FidelityWave1Tests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FidelityWave2Tests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ComposedIcbClipTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ComposedIcbClipTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ComposedRootStackTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ComposedRootStackTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ConformanceTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ConformanceTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ContainingBlockHeightTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ContainingBlockHeightTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ContentsUnboxingTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ContentsUnboxingTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/CoreTypesTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile CoreTypesTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/CrossFadeMathTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile CrossFadeMathTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/CurrentColorBackgroundTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile CurrentColorBackgroundTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DecorationColorOpsTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile DecorationColorOpsTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DecorationInsetLineBoxTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile DecorationInsetLineBoxTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DecorationOpsTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile DecorationOpsTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DecorationSkipSpacesTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile DecorationSkipSpacesTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DecorationWireTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile DecorationWireTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DocumentFaceMetricsTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile DocumentFaceMetricsTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DocumentFontRegistryTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile DocumentFontRegistryTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DynamicStylingTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile DynamicStylingTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/DynamicValuesTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile DynamicValuesTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/EasingReferenceTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile EasingReferenceTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/EffectsTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile EffectsTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/EmptyFlexContainerTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile EmptyFlexContainerTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FidelityWave1Tests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FidelityWave1Tests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FidelityWave2Tests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FidelityWave2Tests.swift
+
+SwiftCompile normal arm64 Compiling\ AbsposAutoMarginTests.swift,\ AbsposCbUsedHeightTests.swift,\ AbsposFlexOverlayRasterTests.swift,\ AbsposFlexStaticOffsetTests.swift,\ AbsposGridStaticPositionTests.swift,\ AbsposInsetStretchTests.swift,\ AbsposStaticAlignmentTests.swift,\ AbsposStaticOffsetSeamWiringTests.swift,\ AbsposStaticPositionTests.swift,\ AllResetTests.swift,\ AnchoredTransformOriginTests.swift,\ AnimationsTests.swift,\ AutoHyphenationTests.swift,\ BackdropContractParityTests.swift,\ BackdropMathTests.swift,\ BackdropTwoPassRasterTests.swift,\ Backface3DSubtreeRasterTests.swift,\ BackfacePreserve3DTests.swift,\ BackgroundBlendModeTests.swift,\ BackgroundColorInheritanceTests.swift,\ BackgroundImageCenterTests.swift,\ BackgroundImageExtractorImageNotationTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposAutoMarginTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposCbUsedHeightTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposFlexOverlayRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposFlexStaticOffsetTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposGridStaticPositionTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposInsetStretchTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposStaticAlignmentTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposStaticOffsetSeamWiringTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposStaticPositionTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AllResetTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AnchoredTransformOriginTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AnimationsTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AutoHyphenationTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackdropContractParityTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackdropMathTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackdropTwoPassRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Backface3DSubtreeRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackfacePreserve3DTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundBlendModeTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundColorInheritanceTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundImageCenterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundImageExtractorImageNotationTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposAutoMarginTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile AbsposAutoMarginTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposCbUsedHeightTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile AbsposCbUsedHeightTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposFlexOverlayRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile AbsposFlexOverlayRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposFlexStaticOffsetTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile AbsposFlexStaticOffsetTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposGridStaticPositionTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile AbsposGridStaticPositionTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposInsetStretchTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile AbsposInsetStretchTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposStaticAlignmentTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile AbsposStaticAlignmentTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposStaticOffsetSeamWiringTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile AbsposStaticOffsetSeamWiringTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposStaticPositionTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile AbsposStaticPositionTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AllResetTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile AllResetTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AnchoredTransformOriginTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile AnchoredTransformOriginTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AnimationsTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile AnimationsTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AutoHyphenationTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile AutoHyphenationTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackdropContractParityTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BackdropContractParityTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackdropMathTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BackdropMathTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackdropTwoPassRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BackdropTwoPassRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Backface3DSubtreeRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile Backface3DSubtreeRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackfacePreserve3DTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BackfacePreserve3DTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundBlendModeTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BackgroundBlendModeTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundColorInheritanceTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BackgroundColorInheritanceTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundImageCenterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BackgroundImageCenterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundImageExtractorImageNotationTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BackgroundImageExtractorImageNotationTests.swift
+
+SwiftCompile normal arm64 Compiling\ UAWidgetBlockLineTests.swift,\ UAWidgetZeroBoxRasterTests.swift,\ UAWidgetsTests.swift,\ UaHrSeparatorRuleRasterTests.swift,\ UprightChOrangeRasterTests.swift,\ UprightColTableRasterTests.swift,\ VerticalBlockFlowSeamGuardTests.swift,\ VerticalBlockFlowSeamWiringTests.swift,\ VerticalFragmentGeometryTests.swift,\ VerticalInlineAxisTests.swift,\ VerticalMulticolBakeGateTests.swift,\ VerticalTextFlowTests.swift,\ VisibilityBoxRulesTests.swift,\ WPTBlockChildFillTests.swift,\ WPTCaptureModeTests.swift,\ Wave12BoxSizingBasisTests.swift,\ Wave18CleanupParityTests.swift,\ Wave19InkClampBackfaceTests.swift,\ Wave32ZeroContainingBlockTests.swift,\ WordBreakOpportunitiesTests.swift,\ ZoomTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAWidgetBlockLineTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAWidgetZeroBoxRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAWidgetsTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UaHrSeparatorRuleRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UprightChOrangeRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UprightColTableRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalBlockFlowSeamGuardTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalBlockFlowSeamWiringTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalFragmentGeometryTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalInlineAxisTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalMulticolBakeGateTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalTextFlowTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VisibilityBoxRulesTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/WPTBlockChildFillTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/WPTCaptureModeTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Wave12BoxSizingBasisTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Wave18CleanupParityTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Wave19InkClampBackfaceTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Wave32ZeroContainingBlockTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/WordBreakOpportunitiesTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ZoomTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAWidgetBlockLineTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UAWidgetBlockLineTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAWidgetZeroBoxRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UAWidgetZeroBoxRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAWidgetsTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UAWidgetsTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UaHrSeparatorRuleRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UaHrSeparatorRuleRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UprightChOrangeRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UprightChOrangeRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UprightColTableRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile UprightColTableRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalBlockFlowSeamGuardTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile VerticalBlockFlowSeamGuardTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalBlockFlowSeamWiringTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile VerticalBlockFlowSeamWiringTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalFragmentGeometryTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile VerticalFragmentGeometryTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalInlineAxisTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile VerticalInlineAxisTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalMulticolBakeGateTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile VerticalMulticolBakeGateTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalTextFlowTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile VerticalTextFlowTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VisibilityBoxRulesTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile VisibilityBoxRulesTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/WPTBlockChildFillTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile WPTBlockChildFillTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/WPTCaptureModeTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile WPTCaptureModeTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Wave12BoxSizingBasisTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile Wave12BoxSizingBasisTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Wave18CleanupParityTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile Wave18CleanupParityTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Wave19InkClampBackfaceTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile Wave19InkClampBackfaceTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Wave32ZeroContainingBlockTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile Wave32ZeroContainingBlockTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/WordBreakOpportunitiesTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile WordBreakOpportunitiesTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ZoomTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ZoomTests.swift
+
+SwiftCompile normal arm64 Compiling\ LayoutTests.swift,\ LengthUnitFidelityTests.swift,\ LhUnitLineHeightTests.swift,\ LineBoxPinTests.swift,\ LineClampCapTests.swift,\ LineHeightNormalTests.swift,\ LineHeightWireTests.swift,\ ListItemMarkerGateTests.swift,\ ListMarkerAbsposItemRasterTests.swift,\ ListMarkerEmptyItemRasterTests.swift,\ ListMarkerEmptyItemTests.swift,\ ListMarkerInFlowItemRasterTests.swift,\ ListMarkerOutsideHangRasterTests.swift,\ ListMarkerOutsideHangTests.swift,\ ListMarkerSymbolTests.swift,\ ListMarkerTests.swift,\ ListOrdinalTests.swift,\ LogicalDirectionsTests.swift,\ MarginCollapseTests.swift,\ MaskFidelityTests.swift,\ MaskURLImageTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LayoutTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LengthUnitFidelityTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LhUnitLineHeightTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LineBoxPinTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LineClampCapTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LineHeightNormalTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LineHeightWireTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListItemMarkerGateTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerAbsposItemRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerEmptyItemRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerEmptyItemTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerInFlowItemRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerOutsideHangRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerOutsideHangTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerSymbolTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListOrdinalTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LogicalDirectionsTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MarginCollapseTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MaskFidelityTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MaskURLImageTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LayoutTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile LayoutTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LengthUnitFidelityTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile LengthUnitFidelityTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LhUnitLineHeightTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile LhUnitLineHeightTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LineBoxPinTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile LineBoxPinTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LineClampCapTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile LineClampCapTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LineHeightNormalTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile LineHeightNormalTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LineHeightWireTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile LineHeightWireTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListItemMarkerGateTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ListItemMarkerGateTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerAbsposItemRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ListMarkerAbsposItemRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerEmptyItemRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ListMarkerEmptyItemRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerEmptyItemTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ListMarkerEmptyItemTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerInFlowItemRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ListMarkerInFlowItemRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerOutsideHangRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ListMarkerOutsideHangRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerOutsideHangTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ListMarkerOutsideHangTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerSymbolTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ListMarkerSymbolTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ListMarkerTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListOrdinalTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ListOrdinalTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/LogicalDirectionsTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile LogicalDirectionsTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MarginCollapseTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MarginCollapseTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MaskFidelityTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MaskFidelityTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MaskURLImageTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MaskURLImageTests.swift
+
+SwiftCompile normal arm64 Compiling\ FidelityWave3Tests.swift,\ FidelityWave4Tests.swift,\ FidelityWave5Tests.swift,\ FilterBrightnessTests.swift,\ FilterDropShadowColorTests.swift,\ FixedHoistTests.swift,\ FlexNowrapIR.swift,\ FlexNowrapOuterTests.swift,\ FlexNowrapRasterTests.swift,\ FlexWrapPlanTests.swift,\ FlexWrapStretchTests.swift,\ FloatAvoidLayoutRasterTests.swift,\ FloatAvoidPlanTests.swift,\ FloatClearanceTests.swift,\ FloatClearanceWireTests.swift,\ FloatRowPackingTests.swift,\ FlowLayoutColumnWrapTests.swift,\ FlowLayoutDistributionTests.swift,\ FragmentGeometryTests.swift,\ GapDecorationBandsTests.swift,\ GapDecorationGrammarTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FidelityWave3Tests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FidelityWave4Tests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FidelityWave5Tests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FilterBrightnessTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FilterDropShadowColorTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FlexNowrapIR.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FlexNowrapOuterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FlexNowrapRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FlexWrapPlanTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FlexWrapStretchTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FloatAvoidLayoutRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FloatAvoidPlanTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FloatClearanceTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FloatClearanceWireTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FloatRowPackingTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FlowLayoutColumnWrapTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FlowLayoutDistributionTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FragmentGeometryTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationBandsTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationGrammarTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FidelityWave3Tests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FidelityWave3Tests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FidelityWave4Tests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FidelityWave4Tests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FidelityWave5Tests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FidelityWave5Tests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FilterBrightnessTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FilterBrightnessTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FilterDropShadowColorTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FilterDropShadowColorTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FixedHoistTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FlexNowrapIR.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FlexNowrapIR.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FlexNowrapOuterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FlexNowrapOuterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FlexNowrapRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FlexNowrapRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FlexWrapPlanTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FlexWrapPlanTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FlexWrapStretchTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FlexWrapStretchTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FloatAvoidLayoutRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FloatAvoidLayoutRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FloatAvoidPlanTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FloatAvoidPlanTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FloatClearanceTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FloatClearanceTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FloatClearanceWireTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FloatClearanceWireTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FloatRowPackingTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FloatRowPackingTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FlowLayoutColumnWrapTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FlowLayoutColumnWrapTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FlowLayoutDistributionTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FlowLayoutDistributionTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FragmentGeometryTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile FragmentGeometryTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationBandsTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile GapDecorationBandsTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationGrammarTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile GapDecorationGrammarTests.swift
+
+SwiftCompile normal arm64 Compiling\ MaskURLRenderTests.swift,\ MonoPinDocumentFaceTests.swift,\ MonospaceUAFontSizeTests.swift,\ MotionTests.swift,\ MulticolCloneGeometryTests.swift,\ MulticolClonePlanTests.swift,\ MulticolDiscardThreadingTests.swift,\ MulticolDistributionTests.swift,\ MulticolFloatStripSeamTests.swift,\ MulticolFloatStripTests.swift,\ MulticolLineSnapTests.swift,\ MulticolMathTests.swift,\ MulticolRunFragmentTests.swift,\ MulticolSpannerContainingBlockTests.swift,\ MulticolSpannerFlowTests.swift,\ MulticolSpannerHoistRasterTests.swift,\ OutOfFlowContainingBlockTests.swift,\ OutlineShadedRingTests.swift,\ OverflowAxisClipTests.swift,\ OverflowClipTransformOrderTests.swift,\ PercentInsetResolveTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MaskURLRenderTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MonoPinDocumentFaceTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MonospaceUAFontSizeTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MotionTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolCloneGeometryTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolClonePlanTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolDiscardThreadingTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolDistributionTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolFloatStripSeamTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolFloatStripTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolLineSnapTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolMathTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolRunFragmentTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolSpannerContainingBlockTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolSpannerFlowTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolSpannerHoistRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutlineShadedRingTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OverflowAxisClipTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OverflowClipTransformOrderTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/PercentInsetResolveTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MaskURLRenderTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MaskURLRenderTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MonoPinDocumentFaceTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MonoPinDocumentFaceTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MonospaceUAFontSizeTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MonospaceUAFontSizeTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MotionTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MotionTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolCloneGeometryTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MulticolCloneGeometryTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolClonePlanTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MulticolClonePlanTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolDiscardThreadingTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MulticolDiscardThreadingTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolDistributionTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MulticolDistributionTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolFloatStripSeamTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MulticolFloatStripSeamTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolFloatStripTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MulticolFloatStripTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolLineSnapTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MulticolLineSnapTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolMathTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MulticolMathTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolRunFragmentTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MulticolRunFragmentTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolSpannerContainingBlockTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MulticolSpannerContainingBlockTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolSpannerFlowTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MulticolSpannerFlowTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolSpannerHoistRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile MulticolSpannerHoistRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile OutOfFlowContainingBlockTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutlineShadedRingTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile OutlineShadedRingTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OverflowAxisClipTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile OverflowAxisClipTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OverflowClipTransformOrderTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile OverflowClipTransformOrderTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/PercentInsetResolveTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile PercentInsetResolveTests.swift
+
+SwiftCompile normal arm64 Compiling\ Phase10Tests.swift,\ PlacementTests.swift,\ PositionedContainerPaintOrderTests.swift,\ PseudoBoxBridgeTests.swift,\ PseudoTextFoldTests.swift,\ RadialGradientShapeKeyTests.swift,\ RatioInlineSizeTests.swift,\ ReplacedBoxSizingConstraintTests.swift,\ ReplacedImageChannelTests.swift,\ RootCanvasClipTests.swift,\ RootPseudoSpecTests.swift,\ ScriptRunFallbackTests.swift,\ SepiaMatrixTests.swift,\ SizingTests.swift,\ SkepticDecorWireSeamTests.swift,\ SkepticRtlGridPlacementTests.swift,\ SkepticUAControlFontProbeTests.swift,\ SkepticW20W3Probes.swift,\ SoftHyphenPolicyTests.swift,\ SpacingTests.swift,\ StaticColorMixTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Phase10Tests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/PlacementTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/PositionedContainerPaintOrderTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/PseudoBoxBridgeTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/PseudoTextFoldTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/RadialGradientShapeKeyTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/RatioInlineSizeTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ReplacedBoxSizingConstraintTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ReplacedImageChannelTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/RootCanvasClipTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/RootPseudoSpecTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ScriptRunFallbackTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SepiaMatrixTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SizingTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SkepticDecorWireSeamTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SkepticRtlGridPlacementTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SkepticUAControlFontProbeTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SkepticW20W3Probes.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SoftHyphenPolicyTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SpacingTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/StaticColorMixTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ReplacedImageChannelTests.swift:93:54: warning: assuming you mean 'Optional<LengthValue>.none'; did you mean 'LengthValue.none' instead?
+ 91 |         XCTAssertFalse(ReplacedBoxSizing.isDefinite(.auto))
+ 92 |         XCTAssertFalse(ReplacedBoxSizing.isDefinite(.intrinsic(kind: .maxContent)))
+ 93 |         XCTAssertFalse(ReplacedBoxSizing.isDefinite(.none))
+    |                                                     |`- warning: assuming you mean 'Optional<LengthValue>.none'; did you mean 'LengthValue.none' instead?
+    |                                                     |- note: explicitly specify 'Optional' to silence this warning
+    |                                                     `- note: use 'LengthValue.none' instead
+ 94 |         XCTAssertFalse(ReplacedBoxSizing.isDefinite(.unknown))
+ 95 |         // An ABSENT declaration is the overwhelmingly common case (the
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Phase10Tests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile Phase10Tests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/PlacementTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile PlacementTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/PositionedContainerPaintOrderTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile PositionedContainerPaintOrderTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/PseudoBoxBridgeTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile PseudoBoxBridgeTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/PseudoTextFoldTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile PseudoTextFoldTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/RadialGradientShapeKeyTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile RadialGradientShapeKeyTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/RatioInlineSizeTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile RatioInlineSizeTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ReplacedBoxSizingConstraintTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ReplacedBoxSizingConstraintTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ReplacedImageChannelTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ReplacedImageChannelTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/RootCanvasClipTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile RootCanvasClipTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/RootPseudoSpecTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile RootPseudoSpecTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ScriptRunFallbackTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ScriptRunFallbackTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SepiaMatrixTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile SepiaMatrixTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SizingTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile SizingTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SkepticDecorWireSeamTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile SkepticDecorWireSeamTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SkepticRtlGridPlacementTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile SkepticRtlGridPlacementTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SkepticUAControlFontProbeTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile SkepticUAControlFontProbeTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SkepticW20W3Probes.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile SkepticW20W3Probes.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SoftHyphenPolicyTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile SoftHyphenPolicyTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/SpacingTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile SpacingTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/StaticColorMixTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile StaticColorMixTests.swift
+
+SwiftCompile normal arm64 Compiling\ BackgroundImageNotationResolutionTests.swift,\ BackgroundImageURLTests.swift,\ BackgroundPositionShorthandTests.swift,\ BackgroundTileMathTests.swift,\ BlendGroupCompositingTests.swift,\ BlockLabelTests.swift,\ BorderBoxFloorTests.swift,\ BorderImageMathTests.swift,\ BorderImagePaintOrderTests.swift,\ BorderRadiusClipPolicyTests.swift,\ BorderRadiusOverflowFixtureTests.swift,\ BorderSideAbsentStyleTests.swift,\ BordersTests.swift,\ BoxShadowInsetGeometryTests.swift,\ BoxSizingTests.swift,\ CalcSizeValueTests.swift,\ CaptureCanvasMirror.swift,\ CaptureColorSpaceTests.swift,\ ChUnitInlineAxisTests.swift,\ ClipNoneKeywordTests.swift,\ ClipReferenceBoxTests.swift,\ ColorBackgroundTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundImageNotationResolutionTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundImageURLTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundPositionShorthandTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundTileMathTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BlendGroupCompositingTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BlockLabelTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BorderBoxFloorTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BorderImageMathTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BorderImagePaintOrderTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BorderRadiusClipPolicyTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BorderRadiusOverflowFixtureTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BorderSideAbsentStyleTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BordersTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BoxShadowInsetGeometryTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BoxSizingTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/CalcSizeValueTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/CaptureCanvasMirror.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/CaptureColorSpaceTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ChUnitInlineAxisTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ClipNoneKeywordTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ClipReferenceBoxTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ColorBackgroundTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundImageNotationResolutionTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BackgroundImageNotationResolutionTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundImageURLTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BackgroundImageURLTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundPositionShorthandTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BackgroundPositionShorthandTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundTileMathTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BackgroundTileMathTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BlendGroupCompositingTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BlendGroupCompositingTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BlockLabelTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BlockLabelTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BorderBoxFloorTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BorderBoxFloorTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BorderImageMathTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BorderImageMathTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BorderImagePaintOrderTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BorderImagePaintOrderTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BorderRadiusClipPolicyTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BorderRadiusClipPolicyTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BorderRadiusOverflowFixtureTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BorderRadiusOverflowFixtureTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BorderSideAbsentStyleTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BorderSideAbsentStyleTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BordersTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BordersTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BoxShadowInsetGeometryTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BoxShadowInsetGeometryTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/BoxSizingTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile BoxSizingTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/CalcSizeValueTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile CalcSizeValueTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/CaptureCanvasMirror.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile CaptureCanvasMirror.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/CaptureColorSpaceTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile CaptureColorSpaceTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ChUnitInlineAxisTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ChUnitInlineAxisTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ClipNoneKeywordTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ClipNoneKeywordTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ClipReferenceBoxTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ClipReferenceBoxTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ColorBackgroundTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile ColorBackgroundTests.swift
+
+SwiftCompile normal arm64 Compiling\ GapDecorationHookTests.swift,\ GapDecorationRasterTests.swift,\ GapDecorationSegmentsTests.swift,\ GapDecorationSurfaceTests.swift,\ GapDecorationsWireTests.swift,\ GradientStopResolverTests.swift,\ GreedyLineBreakerTests.swift,\ GridContentDistributionTests.swift,\ HarnessLabelChromeRasterTests.swift,\ IOSDecorationOwnershipTests.swift,\ IOSTextLaneTests.swift,\ IOSTextLaneWave5Tests.swift,\ IRDecodeSeamTests.swift,\ IRModelsTests.swift,\ InheritanceWave9Tests.swift,\ InlineAtomFlowTests.swift,\ InlineBlockAtomTests.swift,\ InlineRunFlowTests.swift,\ InlineRunPlanTests.swift,\ InlineSpanRingTests.swift,\ KoreanHangulFormalTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationHookTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSurfaceTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationsWireTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GradientStopResolverTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GridContentDistributionTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/HarnessLabelChromeRasterTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/IOSDecorationOwnershipTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/IOSTextLaneTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/IOSTextLaneWave5Tests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/IRDecodeSeamTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/IRModelsTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InheritanceWave9Tests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineAtomFlowTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineBlockAtomTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunPlanTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/KoreanHangulFormalTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationHookTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile GapDecorationHookTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile GapDecorationRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile GapDecorationSegmentsTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSurfaceTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile GapDecorationSurfaceTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationsWireTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile GapDecorationsWireTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GradientStopResolverTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile GradientStopResolverTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile GreedyLineBreakerTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GridContentDistributionTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile GridContentDistributionTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/HarnessLabelChromeRasterTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile HarnessLabelChromeRasterTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/IOSDecorationOwnershipTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile IOSDecorationOwnershipTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/IOSTextLaneTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile IOSTextLaneTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/IOSTextLaneWave5Tests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile IOSTextLaneWave5Tests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/IRDecodeSeamTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile IRDecodeSeamTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/IRModelsTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile IRModelsTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InheritanceWave9Tests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile InheritanceWave9Tests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineAtomFlowTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile InlineAtomFlowTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineBlockAtomTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile InlineBlockAtomTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile InlineRunFlowTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunPlanTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile InlineRunPlanTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile InlineSpanRingTests.swift
+
+SwiftCompile normal arm64 <wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/KoreanHangulFormalTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-SwiftPerFileCompile KoreanHangulFormalTests.swift
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for StyleConverterRuntimeTests (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftDriver\ Compilation\ Requirements StyleConverterRuntimeTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -parse-as-library -module-name StyleConverterRuntimeTests -Onone @<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.SwiftFileList -DSWIFT_PACKAGE -DDEBUG -DXcode -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-ios17.0-macabi -g -module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path <wt:build-L4>/.dd/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/PackageFrameworks -F <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc <wt:build-L4>/.dd/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path <wt:build-L4>/.dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -sdk-module-cache-path <wt:build-L4>/.dd/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file <wt:build-L4>/.dd/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -package-name wave55_build_l4 -emit-const-values -const-gather-protocols-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests_const_extract_protocols.json -Xcc -I<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/include -Xcc -isystem -Xcc /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/usr/include -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/DerivedSources-normal/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/DerivedSources/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -working-directory <wt:build-L4>/.swiftpm/xcode -experimental-emit-module-separately -disable-cmo
+
+SwiftDriverJobDiscovery normal arm64 Compiling Phase10Tests.swift, PlacementTests.swift, PositionedContainerPaintOrderTests.swift, PseudoBoxBridgeTests.swift, PseudoTextFoldTests.swift, RadialGradientShapeKeyTests.swift, RatioInlineSizeTests.swift, ReplacedBoxSizingConstraintTests.swift, ReplacedImageChannelTests.swift, RootCanvasClipTests.swift, RootPseudoSpecTests.swift, ScriptRunFallbackTests.swift, SepiaMatrixTests.swift, SizingTests.swift, SkepticDecorWireSeamTests.swift, SkepticRtlGridPlacementTests.swift, SkepticUAControlFontProbeTests.swift, SkepticW20W3Probes.swift, SoftHyphenPolicyTests.swift, SpacingTests.swift, StaticColorMixTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+Copy <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.swiftmodule/arm64-apple-ios-macabi.swiftmodule <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.swiftmodule (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.swiftmodule <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.swiftmodule/arm64-apple-ios-macabi.swiftmodule
+
+Copy <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.swiftmodule/arm64-apple-ios-macabi.abi.json <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.abi.json (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.abi.json <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.swiftmodule/arm64-apple-ios-macabi.abi.json
+
+Copy <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.swiftmodule/Project/arm64-apple-ios-macabi.swiftsourceinfo <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.swiftsourceinfo (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.swiftsourceinfo <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.swiftmodule/Project/arm64-apple-ios-macabi.swiftsourceinfo
+
+SwiftDriverJobDiscovery normal arm64 Compiling MaskURLRenderTests.swift, MonoPinDocumentFaceTests.swift, MonospaceUAFontSizeTests.swift, MotionTests.swift, MulticolCloneGeometryTests.swift, MulticolClonePlanTests.swift, MulticolDiscardThreadingTests.swift, MulticolDistributionTests.swift, MulticolFloatStripSeamTests.swift, MulticolFloatStripTests.swift, MulticolLineSnapTests.swift, MulticolMathTests.swift, MulticolRunFragmentTests.swift, MulticolSpannerContainingBlockTests.swift, MulticolSpannerFlowTests.swift, MulticolSpannerHoistRasterTests.swift, OutOfFlowContainingBlockTests.swift, OutlineShadedRingTests.swift, OverflowAxisClipTests.swift, OverflowClipTransformOrderTests.swift, PercentInsetResolveTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftDriverJobDiscovery normal arm64 Compiling BackgroundImageNotationResolutionTests.swift, BackgroundImageURLTests.swift, BackgroundPositionShorthandTests.swift, BackgroundTileMathTests.swift, BlendGroupCompositingTests.swift, BlockLabelTests.swift, BorderBoxFloorTests.swift, BorderImageMathTests.swift, BorderImagePaintOrderTests.swift, BorderRadiusClipPolicyTests.swift, BorderRadiusOverflowFixtureTests.swift, BorderSideAbsentStyleTests.swift, BordersTests.swift, BoxShadowInsetGeometryTests.swift, BoxSizingTests.swift, CalcSizeValueTests.swift, CaptureCanvasMirror.swift, CaptureColorSpaceTests.swift, ChUnitInlineAxisTests.swift, ClipNoneKeywordTests.swift, ClipReferenceBoxTests.swift, ColorBackgroundTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftDriverJobDiscovery normal arm64 Compiling StaticEmMarginsTests.swift, TableBodyForestTests.swift, TableColumnWidthsTests.swift, TableSeparatedTracksTests.swift, TableUaDisplayTests.swift, TransformContainingBlockTests.swift, TransformInheritanceTests.swift, TransformOriginKeywordTests.swift, TransformsTests.swift, TransitionDeclaredFlipRasterTests.swift, TransitionFlipDetectionTests.swift, TypographyFontSizeFallbackTests.swift, TypographyTests.swift, UABlockChildMarginTests.swift, UABlockMarginFontBasisTests.swift, UABlockMarginTests.swift, UAControlFontMetricsTests.swift, UAElementFontRuleTests.swift, UAHeadingFoldGateTests.swift, UAPositionedHeadingMarginSeamWiringTests.swift, UAPositionedHeadingMarginTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftDriverJobDiscovery normal arm64 Compiling FidelityWave3Tests.swift, FidelityWave4Tests.swift, FidelityWave5Tests.swift, FilterBrightnessTests.swift, FilterDropShadowColorTests.swift, FixedHoistTests.swift, FlexNowrapIR.swift, FlexNowrapOuterTests.swift, FlexNowrapRasterTests.swift, FlexWrapPlanTests.swift, FlexWrapStretchTests.swift, FloatAvoidLayoutRasterTests.swift, FloatAvoidPlanTests.swift, FloatClearanceTests.swift, FloatClearanceWireTests.swift, FloatRowPackingTests.swift, FlowLayoutColumnWrapTests.swift, FlowLayoutDistributionTests.swift, FragmentGeometryTests.swift, GapDecorationBandsTests.swift, GapDecorationGrammarTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftDriverJobDiscovery normal arm64 Compiling LayoutTests.swift, LengthUnitFidelityTests.swift, LhUnitLineHeightTests.swift, LineBoxPinTests.swift, LineClampCapTests.swift, LineHeightNormalTests.swift, LineHeightWireTests.swift, ListItemMarkerGateTests.swift, ListMarkerAbsposItemRasterTests.swift, ListMarkerEmptyItemRasterTests.swift, ListMarkerEmptyItemTests.swift, ListMarkerInFlowItemRasterTests.swift, ListMarkerOutsideHangRasterTests.swift, ListMarkerOutsideHangTests.swift, ListMarkerSymbolTests.swift, ListMarkerTests.swift, ListOrdinalTests.swift, LogicalDirectionsTests.swift, MarginCollapseTests.swift, MaskFidelityTests.swift, MaskURLImageTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftDriverJobDiscovery normal arm64 Compiling UAWidgetBlockLineTests.swift, UAWidgetZeroBoxRasterTests.swift, UAWidgetsTests.swift, UaHrSeparatorRuleRasterTests.swift, UprightChOrangeRasterTests.swift, UprightColTableRasterTests.swift, VerticalBlockFlowSeamGuardTests.swift, VerticalBlockFlowSeamWiringTests.swift, VerticalFragmentGeometryTests.swift, VerticalInlineAxisTests.swift, VerticalMulticolBakeGateTests.swift, VerticalTextFlowTests.swift, VisibilityBoxRulesTests.swift, WPTBlockChildFillTests.swift, WPTCaptureModeTests.swift, Wave12BoxSizingBasisTests.swift, Wave18CleanupParityTests.swift, Wave19InkClampBackfaceTests.swift, Wave32ZeroContainingBlockTests.swift, WordBreakOpportunitiesTests.swift, ZoomTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftDriverJobDiscovery normal arm64 Compiling AbsposAutoMarginTests.swift, AbsposCbUsedHeightTests.swift, AbsposFlexOverlayRasterTests.swift, AbsposFlexStaticOffsetTests.swift, AbsposGridStaticPositionTests.swift, AbsposInsetStretchTests.swift, AbsposStaticAlignmentTests.swift, AbsposStaticOffsetSeamWiringTests.swift, AbsposStaticPositionTests.swift, AllResetTests.swift, AnchoredTransformOriginTests.swift, AnimationsTests.swift, AutoHyphenationTests.swift, BackdropContractParityTests.swift, BackdropMathTests.swift, BackdropTwoPassRasterTests.swift, Backface3DSubtreeRasterTests.swift, BackfacePreserve3DTests.swift, BackgroundBlendModeTests.swift, BackgroundColorInheritanceTests.swift, BackgroundImageCenterTests.swift, BackgroundImageExtractorImageNotationTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ComposedIcbClipTests.swift, ComposedRootStackTests.swift, ConformanceTests.swift, ContainingBlockHeightTests.swift, ContentsUnboxingTests.swift, CoreTypesTests.swift, CrossFadeMathTests.swift, CurrentColorBackgroundTests.swift, DecorationColorOpsTests.swift, DecorationInsetLineBoxTests.swift, DecorationOpsTests.swift, DecorationSkipSpacesTests.swift, DecorationWireTests.swift, DocumentFaceMetricsTests.swift, DocumentFontRegistryTests.swift, DynamicStylingTests.swift, DynamicValuesTests.swift, EasingReferenceTests.swift, EffectsTests.swift, EmptyFlexContainerTests.swift, FidelityWave1Tests.swift, FidelityWave2Tests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftDriverJobDiscovery normal arm64 Compiling GapDecorationHookTests.swift, GapDecorationRasterTests.swift, GapDecorationSegmentsTests.swift, GapDecorationSurfaceTests.swift, GapDecorationsWireTests.swift, GradientStopResolverTests.swift, GreedyLineBreakerTests.swift, GridContentDistributionTests.swift, HarnessLabelChromeRasterTests.swift, IOSDecorationOwnershipTests.swift, IOSTextLaneTests.swift, IOSTextLaneWave5Tests.swift, IRDecodeSeamTests.swift, IRModelsTests.swift, InheritanceWave9Tests.swift, InlineAtomFlowTests.swift, InlineBlockAtomTests.swift, InlineRunFlowTests.swift, InlineRunPlanTests.swift, InlineSpanRingTests.swift, KoreanHangulFormalTests.swift (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+
+SwiftDriver\ Compilation StyleConverterRuntimeTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>/.swiftpm/xcode
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -parse-as-library -module-name StyleConverterRuntimeTests -Onone @<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.SwiftFileList -DSWIFT_PACKAGE -DDEBUG -DXcode -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -target arm64-apple-ios17.0-macabi -g -module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path <wt:build-L4>/.dd/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/PackageFrameworks -F <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -c -j10 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc <wt:build-L4>/.dd/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache -output-file-map <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests-OutputFileMap.json -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path <wt:build-L4>/.dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path <wt:build-L4>/.dd/ModuleCache.noindex -sdk-module-cache-path <wt:build-L4>/.dd/SDKExplicitPrecompiledModules -emit-dependencies -emit-module -emit-module-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.swiftmodule -serialize-diagnostics -dependency-scan-serialize-diagnostics-path <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests-dependency-scan.dia -validate-clang-modules-once -clang-build-session-file <wt:build-L4>/.dd/ModuleCache.noindex/Session.modulevalidation -Xcc -fmodules-prune-interval\=86400 -Xcc -fmodules-prune-after\=345600 -package-name wave55_build_l4 -emit-const-values -const-gather-protocols-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests_const_extract_protocols.json -Xcc -I<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/include -Xcc -isystem -Xcc /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/usr/include -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/DerivedSources-normal/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/DerivedSources/arm64 -Xcc -I<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -working-directory <wt:build-L4>/.swiftpm/xcode -experimental-emit-module-separately -disable-cmo
+
+Ld <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/MacOS/StyleConverterRuntimeTests normal (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -Xlinker -reproducible -target arm64-apple-ios17.0-macabi -Xlinker -bundle -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -Xlinker -no_warn_duplicate_libraries -L<wt:build-L4>/.dd/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-maccatalyst -L<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -L/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/usr/lib -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/maccatalyst -L/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -L/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/usr/lib -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/maccatalyst -F<wt:build-L4>/.dd/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-maccatalyst -F<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/PackageFrameworks -F<wt:build-L4>/.dd/Build/Products/Debug-maccatalyst -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/Frameworks -Fsystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/iOSSupport/System/Library/SubFrameworks @<wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.LinkFileList -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @loader_path -Xlinker -rpath -Xlinker <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/PackageFrameworks -Xlinker -rpath -Xlinker @loader_path/../../.. -Xlinker -rpath -Xlinker @loader_path/Frameworks -Xlinker -rpath -Xlinker @loader_path/../Frameworks -Xlinker -object_path_lto -Xlinker <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests_lto.o -Xclang-linker -rdynamic -Xlinker -no_deduplicate -Xlinker -debug_variant -Xlinker -dependency_info -Xlinker <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests_dependency_info.dat -link-objc-runtime -profile-generate -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx -L/System/iOSSupport/usr/lib/swift -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.swiftmodule -Xlinker -needed_framework -Xlinker XCTest -framework XCTest -Xlinker -needed-lXCTestSwiftSupport -lXCTestSwiftSupport -o <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/MacOS/StyleConverterRuntimeTests -no-stdlib-rpath
+
+CopySwiftLibs <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    builtin-swiftStdLibTool --copy --verbose --scan-executable <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/MacOS/StyleConverterRuntimeTests --scan-folder <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Frameworks --scan-folder <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/PlugIns --scan-folder <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Library/SystemExtensions --scan-folder <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Extensions --platform macosx --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Frameworks --strip-bitcode --scan-executable /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libXCTestSwiftSupport.dylib --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+Ignoring --strip-bitcode because --sign was not passed
+
+ExtractAppIntentsMetadata (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd <wt:build-L4>
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name StyleConverterRuntimeTests --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk --xcode-version 27A266a --platform-family macOS --deployment-target 14.0 --bundle-identifier wave55-build-l4.StyleConverterRuntimeTests --output <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Resources --target-triple arm64-apple-ios17.0-macabi --binary-file <wt:build-L4>/.dd/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/MacOS/StyleConverterRuntimeTests --dependency-file <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests_dependency_info.dat --stringsdata-file <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.SwiftFileList --metadata-file-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/StyleConverterRuntimeTests.DependencyMetadataFileList --static-metadata-file-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/StyleConverterRuntimeTests.DependencyStaticMetadataFileList --swift-const-vals-list <wt:build-L4>/.dd/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/Objects-normal/arm64/StyleConverterRuntimeTests.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --no-app-shortcuts-localization
+2026-10-11 22:49:57.869 appintentsmetadataprocessor[42970:10135750] Starting appintentsmetadataprocessor export
+2026-10-11 22:49:57.876 appintentsmetadataprocessor[42970:10135750] warning: Metadata extraction skipped, no AppIntents.framework dependency found
+
+PruneExplicitPrecompiledModules <wt:build-L4>/.dd/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules <wt:build-L4>/.dd/SDKExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules <wt:build-L4>/.dd/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+Test Suite 'Selected tests' started at 2026-10-11 22:52:33.472.
+Test Suite 'StyleConverterRuntimeTests.xctest' started at 2026-10-11 22:52:33.475.
+Test Suite 'UAElementFontRuleTests' started at 2026-10-11 22:52:33.475.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testBareH3TakesTheUAFace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testBareH3TakesTheUAFace]' passed (0.005 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testFontShorthandBlocksBothHalves]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testFontShorthandBlocksBothHalves]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingGatePredicate]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingGatePredicate]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingMultipliersMatchTheUASheet]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingMultipliersMatchTheUASheet]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingWithChildrenStandsDown]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testHeadingWithChildrenStandsDown]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testInheritedFontSizeIsSubstitutedInPlace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testInheritedFontSizeIsSubstitutedInPlace]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testInheritedSizeIsTheEmBase]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testInheritedSizeIsTheEmBase]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testMonospaceHeadingResolvesAgainstTheFixedDefault]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testMonospaceHeadingResolvesAgainstTheFixedDefault]' passed (0.003 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testOwnFontSizeAndWeightWin]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testOwnFontSizeAndWeightWin]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testProportionalHeadingResolvesAgainstSixteen]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testProportionalHeadingResolvesAgainstSixteen]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testStyleBuilderConsumesTheInjectedFace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testStyleBuilderConsumesTheInjectedFace]' passed (0.007 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testSupAndSubUseTheSmallerRatio]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testSupAndSubUseTheSmallerRatio]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testSupIsNotGatedByChildren]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testSupIsNotGatedByChildren]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntabledTagIsUnchanged]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntabledTagIsUnchanged]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntabledTagsAreInert]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntabledTagsAreInert]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntaggedComponentIsUnchanged]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testUntaggedComponentIsUnchanged]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testVerbatimBakedH1IsUntouched]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testVerbatimBakedH1IsUntouched]' passed (0.003 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testVerbatimLeafH1PaintsTheUAFace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAElementFontRuleTests testVerbatimLeafH1PaintsTheUAFace]' passed (0.002 seconds).
+Test Suite 'UAElementFontRuleTests' passed at 2026-10-11 22:52:35.561.
+	 Executed 18 tests, with 0 failures (0 unexpected) in 0.032 (2.086) seconds
+Test Suite 'UAHeadingFoldGateTests' started at 2026-10-11 22:52:35.561.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testFoldVerdictIsInvariantUnderTheUAFace]' started.
+[PropertyTracker] inline-run flow bail — member-prop:TextDecorationColor-divergence
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testFoldVerdictIsInvariantUnderTheUAFace]' passed (0.007 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset005FoldedHostTakesTheFace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset005FoldedHostTakesTheFace]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset006FoldedHostTakesTheFace]' started.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset006FoldedHostTakesTheFace]' passed (0.843 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset011BailingHostStandsDown]' started.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset011BailingHostStandsDown]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset014FoldedMonospaceHostTakesTwentySix]' started.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testInset014FoldedMonospaceHostTakesTwentySix]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testLeafHeadingApplies]' started.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testLeafHeadingApplies]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testNonHeadingWithChildrenKeepsTheOldFlag]' started.
+Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testNonHeadingWithChildrenKeepsTheOldFlag]' passed (0.002 seconds).
+Test Suite 'UAHeadingFoldGateTests' passed at 2026-10-11 22:52:36.421.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.859 (0.860) seconds
+Test Suite 'UAPositionedHeadingMarginSeamWiringTests' started at 2026-10-11 22:52:36.421.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginSeamWiringTests testTheHoistAndTheFontStepPrecedeIt]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginSeamWiringTests testTheHoistAndTheFontStepPrecedeIt]' passed (0.066 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginSeamWiringTests testTheMarginStepRunsOnceLastInMergedProperties]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginSeamWiringTests testTheMarginStepRunsOnceLastInMergedProperties]' passed (0.052 seconds).
+Test Suite 'UAPositionedHeadingMarginSeamWiringTests' passed at 2026-10-11 22:52:36.540.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.118 (0.119) seconds
+Test Suite 'UAPositionedHeadingMarginTests' started at 2026-10-11 22:52:36.541.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testAuthorSizesAbsolutePxIsTheBasisRelativeAndShorthandAreLogged]' started.
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift:195: error: -[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testAuthorSizesAbsolutePxIsTheBasisRelativeAndShorthandAreLogged] : XCTAssertEqual failed: ("[StyleConverterRuntime.IRProperty(type: "Position", data: StyleConverterRuntime.IRValue.string("ABSOLUTE")), StyleConverterRuntime.IRProperty(type: "FontSize", data: StyleConverterRuntime.IRValue.object(["original": StyleConverterRuntime.IRValue.object(["original": StyleConverterRuntime.IRValue.object(["v": StyleConverterRuntime.IRValue.double(2.0), "u": StyleConverterRuntime.IRValue.string("EM")]), "type": StyleConverterRuntime.IRValue.string("length")])])), StyleConverterRuntime.IRProperty(type: "MarginTop", data: StyleConverterRuntime.IRValue.object(["px": StyleConverterRuntime.IRValue.double(16.0)])), StyleConverterRuntime.IRProperty(type: "MarginBottom", data: StyleConverterRuntime.IRValue.object(["px": StyleConverterRuntime.IRValue.double(16.0)]))]") is not equal to ("[StyleConverterRuntime.IRProperty(type: "Position", data: StyleConverterRuntime.IRValue.string("ABSOLUTE")), StyleConverterRuntime.IRProperty(type: "FontSize", data: StyleConverterRuntime.IRValue.object(["original": StyleConverterRuntime.IRValue.object(["original": StyleConverterRuntime.IRValue.object(["v": StyleConverterRuntime.IRValue.double(2.0), "u": StyleConverterRuntime.IRValue.string("EM")]), "type": StyleConverterRuntime.IRValue.string("length")])]))]")
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift:196: error: -[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testAuthorSizesAbsolutePxIsTheBasisRelativeAndShorthandAreLogged] : XCTAssertTrue failed
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift:198: error: -[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testAuthorSizesAbsolutePxIsTheBasisRelativeAndShorthandAreLogged] : XCTAssertEqual failed: ("[StyleConverterRuntime.IRProperty(type: "Position", data: StyleConverterRuntime.IRValue.string("ABSOLUTE")), StyleConverterRuntime.IRProperty(type: "Font", data: StyleConverterRuntime.IRValue.string("bold 20px serif")), StyleConverterRuntime.IRProperty(type: "MarginTop", data: StyleConverterRuntime.IRValue.object(["px": StyleConverterRuntime.IRValue.double(21.28)])), StyleConverterRuntime.IRProperty(type: "MarginBottom", data: StyleConverterRuntime.IRValue.object(["px": StyleConverterRuntime.IRValue.double(21.28)]))]") is not equal to ("[StyleConverterRuntime.IRProperty(type: "Position", data: StyleConverterRuntime.IRValue.string("ABSOLUTE")), StyleConverterRuntime.IRProperty(type: "Font", data: StyleConverterRuntime.IRValue.string("bold 20px serif"))]")
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift:199: error: -[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testAuthorSizesAbsolutePxIsTheBasisRelativeAndShorthandAreLogged] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testAuthorSizesAbsolutePxIsTheBasisRelativeAndShorthandAreLogged]' failed (6.765 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testCaptureOffIsUnchanged]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testCaptureOffIsUnchanged]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testFoldVerdictsAreUnchangedByTheMarginStep]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testFoldVerdictsAreUnchangedByTheMarginStep]' passed (0.161 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInFlowHeadingsAreUnchanged]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInFlowHeadingsAreUnchanged]' passed (0.005 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset001DeclaresBothEdgesAndIsUnchanged]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset001DeclaresBothEdgesAndIsUnchanged]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied]' started.
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift:116: error: -[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied] : XCTAssertEqualWithAccuracy failed: ("10.72") is not equal to ("21.44") +/- ("1e-06") - text-decoration-inset-005__1__0-069 held=true
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift:117: error: -[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied] : XCTAssertEqualWithAccuracy failed: ("10.72") is not equal to ("21.44") +/- ("1e-06")
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift:116: error: -[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied] : XCTAssertEqualWithAccuracy failed: ("10.72") is not equal to ("21.44") +/- ("1e-06") - text-decoration-inset-006__1__0-076 held=true
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift:117: error: -[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied] : XCTAssertEqualWithAccuracy failed: ("10.72") is not equal to ("21.44") +/- ("1e-06")
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift:116: error: -[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied] : XCTAssertEqualWithAccuracy failed: ("10.72") is not equal to ("21.44") +/- ("1e-06") - text-decoration-inset-011__1__0-095 held=true
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift:117: error: -[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied] : XCTAssertEqualWithAccuracy failed: ("10.72") is not equal to ("21.44") +/- ("1e-06")
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied]' failed (1.312 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset014MonospaceTakesSeventeenPointFourTwo]' started.
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift:125: error: -[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset014MonospaceTakesSeventeenPointFourTwo] : XCTAssertEqualWithAccuracy failed: ("10.72") is not equal to ("17.42") +/- ("1e-06")
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift:126: error: -[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset014MonospaceTakesSeventeenPointFourTwo] : XCTAssertEqualWithAccuracy failed: ("10.72") is not equal to ("17.42") +/- ("1e-06")
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testInset014MonospaceTakesSeventeenPointFourTwo]' failed (0.006 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testOnlyMarginTopDeclaredTakesTheUABottomOnly]' started.
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift:141: error: -[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testOnlyMarginTopDeclaredTakesTheUABottomOnly] : XCTAssertEqualWithAccuracy failed: ("10.72") is not equal to ("21.44") +/- ("1e-06")
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testOnlyMarginTopDeclaredTakesTheUABottomOnly]' failed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testRelativeStickyStaticAreUnchangedAndFixedFires]' started.
+<wt:build-L4>/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAPositionedHeadingMarginTests.swift:169: error: -[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testRelativeStickyStaticAreUnchangedAndFixedFires] : XCTAssertEqualWithAccuracy failed: ("13.28") is not equal to ("19.92") +/- ("1e-06")
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testRelativeStickyStaticAreUnchangedAndFixedFires]' failed (0.010 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testS1111b005AbsposParagraphIsOutOfScopeAndLogged]' started.
+[PropertyTracker] UAPositionedHeadingMargin: out-of-flow <p>: UA margin-block not emitted (headings only)
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testS1111b005AbsposParagraphIsOutOfScopeAndLogged]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testUntaggedOrMarginlessTagsAreUnchanged]' started.
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testUntaggedOrMarginlessTagsAreUnchanged]' passed (1.412 seconds).
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testVerticalWritingModeIsUnchangedAndLogged]' started.
+[PropertyTracker] UAPositionedHeadingMargin: out-of-flow <h1> in a vertical writing mode: UA margin-block not emitted
+Test Case '-[StyleConverterRuntimeTests.UAPositionedHeadingMarginTests testVerticalWritingModeIsUnchangedAndLogged]' passed (0.001 seconds).
+Test Suite 'UAPositionedHeadingMarginTests' failed at 2026-10-11 22:52:46.223.
+	 Executed 12 tests, with 14 failures (0 unexpected) in 9.678 (9.683) seconds
+Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-11 22:52:46.224.
+	 Executed 39 tests, with 14 failures (0 unexpected) in 10.687 (12.749) seconds
+Test Suite 'Selected tests' failed at 2026-10-11 22:52:46.225.
+	 Executed 39 tests, with 14 failures (0 unexpected) in 10.687 (12.753) seconds
+
+Test session results, code coverage, and logs:
+	<wt:build-L4>/.dd/Logs/Test/Test-StyleConverterRuntime-2026.10.11_22-49-19-+0200.xcresult
+
+Testing started
+2026-10-11 22:49:18.604 xcodebuild[39101:10125731] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+2026-10-11 22:52:31.165 xcodebuild[39101:10125864]  DVTAssertions: Warning in IDEFrameworks/IDEFoundation/Execution/LaunchSystem/IDELaunchSession.m:395
+Details:  setRunnablePIDWithDiagnostics:logSection:andCompletionHandler: called without a completion handler - blocking until diagnostics setup completes. Callers should migrate to using a completion handler for better performance.
+Object:   <IDELaunchSession: 0x796222e400>
+Method:   -setRunnablePIDWithDiagnostics:logSection:andCompletionHandler:
+Thread:   <NSThread: 0x7961c2c5c0>{number = 20, name = (null)}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+2026-10-11 22:53:05.561 xcodebuild[39101:10125731] [MT] IDETestOperationsObserverDebug: 38.129 elapsed -- Testing started completed.
+2026-10-11 22:53:05.561 xcodebuild[39101:10125731] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-11 22:53:05.561 xcodebuild[39101:10125731] [MT] IDETestOperationsObserverDebug: 38.129 sec, +38.129 sec -- end
+Failing tests:
+	UAPositionedHeadingMarginTests.testAuthorSizesAbsolutePxIsTheBasisRelativeAndShorthandAreLogged()
+	UAPositionedHeadingMarginTests.testAuthorSizesAbsolutePxIsTheBasisRelativeAndShorthandAreLogged()
+	UAPositionedHeadingMarginTests.testAuthorSizesAbsolutePxIsTheBasisRelativeAndShorthandAreLogged()
+	UAPositionedHeadingMarginTests.testAuthorSizesAbsolutePxIsTheBasisRelativeAndShorthandAreLogged()
+	UAPositionedHeadingMarginTests.testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied()
+	UAPositionedHeadingMarginTests.testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied()
+	UAPositionedHeadingMarginTests.testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied()
+	UAPositionedHeadingMarginTests.testInset005_006_011TakeTwentyOnePointFourFourHeldOrApplied()
+	UAPositionedHeadingMarginTests.testInset014MonospaceTakesSeventeenPointFourTwo()
+	UAPositionedHeadingMarginTests.testInset014MonospaceTakesSeventeenPointFourTwo()
+	UAPositionedHeadingMarginTests.testOnlyMarginTopDeclaredTakesTheUABottomOnly()
+	UAPositionedHeadingMarginTests.testRelativeStickyStaticAreUnchangedAndFixedFires()
+
+** TEST FAILED **
+

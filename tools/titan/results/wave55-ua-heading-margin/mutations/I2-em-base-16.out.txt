@@ -1,0 +1,15 @@
+{
+ "name": "I2-em-base-16",
+ "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/spacing/UAPositionedHeadingMargin.swift",
+ "pre": "e9abac226c39167b1a1dc7d5b150a47ab3e963a2d252322da36e3bf6f2e18d80",
+ "mutated": "bf7402a59cf1a95dab835c3e6fe877bab7230bf8c5a944387937f43db9243971",
+ "post": "e9abac226c39167b1a1dc7d5b150a47ab3e963a2d252322da36e3bf6f2e18d80",
+ "red_rc": 65,
+ "red_failures": [
+  "UAPositionedHeadingMarginTests.testInset014MonospaceTakesSeventeenPointFourTwo"
+ ],
+ "red_counts": "Executed 39, 2 failures",
+ "green_rc": 0,
+ "green_counts": "Executed 39, 0 failures",
+ "verdict": "RED-THEN-GREEN"
+}

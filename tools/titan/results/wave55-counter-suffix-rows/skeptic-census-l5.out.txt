@@ -1,0 +1,128 @@
+# skeptic-census-l5.py wave54-final: 1435 per-test IR documents
+# marker rows by (platform, source, flow): {('android', 'baked', 'flow'): 217, ('android', 'table', 'flow'): 234, ('ios', 'baked', 'flow'): 217, ('ios', 'table', 'flow'): 234}
+# letters-only first-strong vs real Bidi_Class disagreements on baked markers: 0
+== U1-ios: 8 rows / 2 documents
+    wpt__css-counter-styles__counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__0__1__0-546 table:disc None item_rtl=True natural_rtl=False flow pos=inside
+    wpt__css-counter-styles__counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__0__1__1-547 table:disc None item_rtl=True natural_rtl=False flow pos=inside
+    wpt__css-counter-styles__counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__1__1__0-555 table:disc None item_rtl=True natural_rtl=False flow pos=inside
+    wpt__css-counter-styles__counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__1__1__1-556 table:disc None item_rtl=True natural_rtl=False flow pos=inside
+    wpt__css-counter-styles__counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__2__1__0-564 table:disc None item_rtl=True natural_rtl=False flow pos=inside
+    wpt__css-counter-styles__counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__2__1__1-565 table:disc None item_rtl=True natural_rtl=False flow pos=inside
+    wpt__css-counter-styles__counter-suffix counter-suffix__0__1__0-615 baked 'א.' item_rtl=False natural_rtl=True flow pos=outside
+    wpt__css-counter-styles__counter-suffix counter-suffix__0__1__1-616 baked 'ב.' item_rtl=False natural_rtl=True flow pos=outside
+== U2i-android: 34 rows / 3 documents
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__0-323 '一、' flow pos=inside text='一'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__1-324 '二、' flow pos=inside text='二'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__2-325 '三、' flow pos=inside text='三'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__3-326 '四、' flow pos=inside text='四'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__4-327 '五、' flow pos=inside text='五'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__5-328 '六、' flow pos=inside text='六'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__6-329 '七、' flow pos=inside text='七'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__7-330 '八、' flow pos=inside text='八'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__8-331 '九、' flow pos=inside text='九'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__0__0-335 '一〇、' flow pos=inside text='一〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__1__0-337 '一一、' flow pos=inside text='一一'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__2__0-339 '一二、' flow pos=inside text='一二'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__3__0-341 '四三、' flow pos=inside text='四三'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__4__0-343 '七七、' flow pos=inside text='七七'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__5__0-345 '八〇、' flow pos=inside text='八〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__6__0-347 '九九、' flow pos=inside text='九九'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__7__0-349 '一〇〇、' flow pos=inside text='一〇〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__8__0-351 '一〇一、' flow pos=inside text='一〇一'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__9__0-353 '二二二、' flow pos=inside text='二二二'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__10__0-355 '五四〇、' flow pos=inside text='五四〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__11__0-357 '九九九、' flow pos=inside text='九九九'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__12__0-359 '一〇〇〇、' flow pos=inside text='一〇〇〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__13__0-361 '一〇〇五、' flow pos=inside text='一〇〇五'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__14__0-363 '一〇六〇、' flow pos=inside text='一〇六〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__15__0-365 '一〇六五、' flow pos=inside text='一〇六五'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__16__0-367 '一八〇〇、' flow pos=inside text='一八〇〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__17__0-369 '一八六〇、' flow pos=inside text='一八六〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__18__0-371 '五八六五、' flow pos=inside text='五八六五'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__19__0-373 '七〇〇五、' flow pos=inside text='七〇〇五'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__20__0-375 '七八〇〇、' flow pos=inside text='七八〇〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__21__0-377 '七八六四、' flow pos=inside text='七八六四'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__22__0-379 '九九九九、' flow pos=inside text='九九九九'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-005 cjk-decimal__css3-counter-styles-005__1__0__0-383 '一、' flow pos=inside text='一、'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-005 cjk-decimal__css3-counter-styles-005__1__0__1-384 '二、' flow pos=inside text='二、'
+== U2i-ios: 34 rows / 3 documents
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__0-323 '一、' flow pos=inside text='一'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__1-324 '二、' flow pos=inside text='二'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__2-325 '三、' flow pos=inside text='三'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__3-326 '四、' flow pos=inside text='四'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__4-327 '五、' flow pos=inside text='五'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__5-328 '六、' flow pos=inside text='六'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__6-329 '七、' flow pos=inside text='七'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__7-330 '八、' flow pos=inside text='八'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001 cjk-decimal__css3-counter-styles-001__1__0__8-331 '九、' flow pos=inside text='九'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__0__0-335 '一〇、' flow pos=inside text='一〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__1__0-337 '一一、' flow pos=inside text='一一'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__2__0-339 '一二、' flow pos=inside text='一二'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__3__0-341 '四三、' flow pos=inside text='四三'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__4__0-343 '七七、' flow pos=inside text='七七'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__5__0-345 '八〇、' flow pos=inside text='八〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__6__0-347 '九九、' flow pos=inside text='九九'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__7__0-349 '一〇〇、' flow pos=inside text='一〇〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__8__0-351 '一〇一、' flow pos=inside text='一〇一'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__9__0-353 '二二二、' flow pos=inside text='二二二'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__10__0-355 '五四〇、' flow pos=inside text='五四〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__11__0-357 '九九九、' flow pos=inside text='九九九'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__12__0-359 '一〇〇〇、' flow pos=inside text='一〇〇〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__13__0-361 '一〇〇五、' flow pos=inside text='一〇〇五'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__14__0-363 '一〇六〇、' flow pos=inside text='一〇六〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__15__0-365 '一〇六五、' flow pos=inside text='一〇六五'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__16__0-367 '一八〇〇、' flow pos=inside text='一八〇〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__17__0-369 '一八六〇、' flow pos=inside text='一八六〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__18__0-371 '五八六五、' flow pos=inside text='五八六五'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__19__0-373 '七〇〇五、' flow pos=inside text='七〇〇五'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__20__0-375 '七八〇〇、' flow pos=inside text='七八〇〇'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__21__0-377 '七八六四、' flow pos=inside text='七八六四'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004 cjk-decimal__css3-counter-styles-004__1__22__0-379 '九九九九、' flow pos=inside text='九九九九'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-005 cjk-decimal__css3-counter-styles-005__1__0__0-383 '一、' flow pos=inside text='一、'
+    wpt__css-counter-styles__cjk-decimal__css3-counter-styles-005 cjk-decimal__css3-counter-styles-005__1__0__1-384 '二、' flow pos=inside text='二、'
+== U2o-android: 2 rows / 1 documents
+    wpt__css-counter-styles__counter-suffix counter-suffix__0__2__0-618 '一、' flow pos=outside text='foo'
+    wpt__css-counter-styles__counter-suffix counter-suffix__0__2__1-619 '二、' flow pos=outside text='bar'
+== U2o-ios: 2 rows / 1 documents
+    wpt__css-counter-styles__counter-suffix counter-suffix__0__2__0-618 '一、' flow pos=outside text='foo'
+    wpt__css-counter-styles__counter-suffix counter-suffix__0__2__1-619 '二、' flow pos=outside text='bar'
+== U3-ios: 6 rows / 1 documents
+    wpt__css-counter-styles__counter-suffix counter-suffix__0__4__2-628 text='.' fvn=['TABULAR_NUMS']
+    wpt__css-counter-styles__counter-suffix counter-suffix__0__4__3-629 text='1' fvn=['TABULAR_NUMS']
+    wpt__css-counter-styles__counter-suffix counter-suffix__0__4__4-630 text='.' fvn=['TABULAR_NUMS']
+    wpt__css-counter-styles__counter-suffix counter-suffix__0__4__5-631 text='2' fvn=['TABULAR_NUMS']
+    wpt__css-counter-styles__counter-suffix counter-suffix__0__5__2-637 text='א.' fvn=['TABULAR_NUMS']
+    wpt__css-counter-styles__counter-suffix counter-suffix__0__5__3-638 text='ב.' fvn=['TABULAR_NUMS']
+== capture sets per unit and platform
+   U1-ios                 ios      ['wpt__css-counter-styles__counter-style-at-rule__disclosure-styles', 'wpt__css-counter-styles__counter-suffix']
+   U2i-android            android  ['wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001', 'wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004', 'wpt__css-counter-styles__cjk-decimal__css3-counter-styles-005']
+   U2i-ios                ios      ['wpt__css-counter-styles__cjk-decimal__css3-counter-styles-001', 'wpt__css-counter-styles__cjk-decimal__css3-counter-styles-004', 'wpt__css-counter-styles__cjk-decimal__css3-counter-styles-005']
+   U2o-android            android  ['wpt__css-counter-styles__counter-suffix']
+   U2o-ios                ios      ['wpt__css-counter-styles__counter-suffix']
+   U3-ios                 ios      ['wpt__css-counter-styles__counter-suffix']
+== cross-check vs expectations.json revertUnits[*].captures (mine − plan = UNDER-REPORTED by the plan)
+   D            android  plan 0 mine 0 under-reported [] over []
+   D            ios      plan 0 mine 0 under-reported [] over []
+   D            web      plan 0 mine 0 under-reported [] over []
+   U1-ios       android  plan 0 mine 0 under-reported [] over []
+   U1-ios       ios      plan 2 mine 2 under-reported [] over []
+   U1-ios       web      plan 0 mine 0 under-reported [] over []
+   U2i-android  android  plan 3 mine 3 under-reported [] over []
+   U2i-android  ios      plan 0 mine 0 under-reported [] over []
+   U2i-android  web      plan 0 mine 0 under-reported [] over []
+   U2i-ios      android  plan 0 mine 0 under-reported [] over []
+   U2i-ios      ios      plan 3 mine 3 under-reported [] over []
+   U2i-ios      web      plan 0 mine 0 under-reported [] over []
+   U2o-android  android  plan 1 mine 1 under-reported [] over []
+   U2o-android  ios      plan 0 mine 0 under-reported [] over []
+   U2o-android  web      plan 0 mine 0 under-reported [] over []
+   U2o-ios      android  plan 0 mine 0 under-reported [] over []
+   U2o-ios      ios      plan 1 mine 1 under-reported [] over []
+   U2o-ios      web      plan 0 mine 0 under-reported [] over []
+   U3-ios       android  plan 0 mine 0 under-reported [] over []
+   U3-ios       ios      plan 1 mine 1 under-reported [] over []
+   U3-ios       web      plan 0 mine 0 under-reported [] over []
+   captureCarriers web      plan 0 mine 0 under-reported [] over []
+   captureCarriers ios      plan 5 mine 5 under-reported [] over []
+   captureCarriers android  plan 4 mine 4 under-reported [] over []
+   wireCarriers plan [] (no L5 path is on the extract route: mine [])

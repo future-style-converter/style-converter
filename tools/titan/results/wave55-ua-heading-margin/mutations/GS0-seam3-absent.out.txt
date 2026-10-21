@@ -1,0 +1,15 @@
+{
+ "name": "GS0-seam3-absent",
+ "file": "runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt",
+ "pre": "950c6d00482b377c4bef8bf8f6668b9aed2c8c092532b6522444154ce37fbe2b",
+ "mutated": "0479004f02338b4f2ff3367d545d21a53b7b60e655b92f46b6307744e12deebd",
+ "post": "950c6d00482b377c4bef8bf8f6668b9aed2c8c092532b6522444154ce37fbe2b",
+ "red_rc": 1,
+ "red_failures": [
+  "UAElementFontRuleTest > fold gate - the folded hosts take the face (005, 006 32, 014 26), the bailing 011 keeps its list"
+ ],
+ "red_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/1; UAHeadingFoldGateTest 9/0",
+ "green_rc": 0,
+ "green_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "verdict": "RED-THEN-GREEN"
+}

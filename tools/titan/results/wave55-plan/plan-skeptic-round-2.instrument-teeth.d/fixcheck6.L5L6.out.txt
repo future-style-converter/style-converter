@@ -1,0 +1,57 @@
+## L5 [C] / [I] with the ink predicate min channel < 200: ideograph stroke count + ink rows (vs ref; [I] android also vs wave54-final)
+  [C] ref                                r5 (1, (123, 124)) | r6 (2, (142, 152))
+  [C] ok-web                             r5 (1, (123, 124)) | r6 (2, (142, 152))
+  [C] ok-ios                             r5 (1, (123, 124)) | r6 (2, (142, 153))
+  [C] ok-android                         r5 (1, (123, 124)) | r6 (2, (143, 153))
+  [C] C-ideographs-swapped-5-6-ios       r5 (2, (118, 129)) | r6 (1, (147, 148))
+  [C] C-ideographs-swapped-5-6-android   r5 (2, (119, 129)) | r6 (1, (147, 148))
+  [C] C-ideograph+3y-ios                 r5 (1, (126, 127)) | r6 (2, (145, 156))
+  [C] C-ideograph+3y-android             r5 (1, (126, 127)) | r6 (2, (146, 156))
+  [I] ref                                  y95 (1, (101, 103)) | y121 (2, (125, 142))
+  [I] ok-web                               y95 (1, (101, 103)) | y121 (2, (125, 142))
+  [I] ok-ios                               y95 (1, (102, 103)) | y121 (2, (125, 142))
+  [I] ok-android                           y95 (1, (104, 105)) | y121 (2, (128, 145))
+  [I] base-ios                             y95 (1, (102, 103)) | y121 (2, (125, 142))
+  [I] base-android                         y95 (1, (104, 105)) | y121 (2, (128, 145))
+  [I] I-line1-ideograph-is-line2s-ios      y95 (1, (109, 110)) | y121 (2, (125, 142))
+  [I] I-line1-ideograph-is-line2s-android  y95 (2, (96, 113)) | y121 (2, (128, 145))
+  [I] I-line1-marker+3y-ios                y95 (1, (105, 106)) | y121 (2, (125, 142))
+  [I] I-line1-marker+3y-android            y95 (1, (107, 108)) | y121 (2, (128, 145))
+
+## L6 [X]: base fill ⊄ capture fill (px of the base child fill the capture lost) and capture fill ⊄ base fill ∪ base band dilated 1 (fill where neither was)
+  flex-abspos-staticpos-align-self-safe-001
+    fixed                      lost     0  extra     0
+    r2:one-child-moved-3px     lost   263  extra    23
+    r1:child+3x                lost  1034  extra   254
+    r1:child-scrambled         lost 11387  extra 10979
+    r1:child-shrunk8%          lost  1296  extra     0
+  flex-abspos-staticpos-align-self-safe-002
+    fixed                      lost     0  extra     0
+    r2:one-child-moved-3px     lost   263  extra    97
+    r1:child+3x                lost   973  extra   368
+    r1:child-scrambled         lost 10203  extra  9620
+    r1:child-shrunk8%          lost  1369  extra     0
+  grid-abspos-staticpos-align-self-001
+    fixed                      lost     0  extra     0
+    r2:one-child-moved-3px     lost    18  extra    12
+    r1:child+3x                lost   359  extra   256
+    r1:child-scrambled         lost   906  extra   893
+    r1:child-shrunk8%          lost    76  extra     0
+  grid-abspos-staticpos-justify-self-001
+    fixed                      lost     0  extra     0
+    r2:one-child-moved-3px     lost    24  extra    16
+    r1:child+3x                lost   585  extra   352
+    r1:child-scrambled         lost  1070  extra  1067
+    r1:child-shrunk8%          lost   152  extra     0
+  grid-abspos-staticpos-align-self-vertWM-001
+    fixed                      lost     0  extra     0
+    r2:one-child-moved-3px     lost    24  extra    16
+    r1:child+3x                lost   588  extra   416
+    r1:child-scrambled         lost  1072  extra  1067
+    r1:child-shrunk8%          lost   152  extra     0
+  grid-abspos-staticpos-align-self-rtl-001
+    fixed                      lost     0  extra     0
+    r2:one-child-moved-3px     lost    18  extra     0
+    r1:child+3x                lost   428  extra   154
+    r1:child-scrambled         lost  1092  extra  1097
+    r1:child-shrunk8%          lost   152  extra     0

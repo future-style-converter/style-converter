@@ -1,0 +1,250 @@
+# unit-D.patch — wave55 L5 (counter-suffix-rows) unit D: comment-only: ListMarkerOutsideHang.swift / .kt (re-cut of wave54 hunk-for-orchestrator-1.patch, its false sentence corrected), KoreanHangulFormal.swift, ListMarkerText.swift, ListMarkerStyle.swift + (C7) tools/titan/counter-style-table.mjs SUFFIX NOTE — lands after U2o on both natives
+# base tree 611c9f93 (campaign/applier-campaign; = dev 0d0d3a3d + the wave-55 plan + opening-gate records). Lane note: tools/titan/results/wave55-counter-suffix-rows/_note.md
+# fix-r1 re-cut (PLAN §8 step 3): every hunk identical to the builder's cut (only the index line's hash abbreviation may differ)
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerOutsideHang.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerOutsideHang.kt
+index 6abc6212..a34a3a49 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerOutsideHang.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerOutsideHang.kt
+@@ -33,13 +33,19 @@ package com.styleconverter.runtime.lists
+ // item's size and places the marker outside the bounds — the one shape
+ // that satisfies "content edge unchanged" and "marker visible" at once.
+ //
+-// ## RTL (BACKLOG (c⁴): RTL markers are BLOCKED UPSTREAM)
+-// css-lists-3 §3.5 hangs an `outside` marker on the inline-END side under
+-// `direction: rtl`. `Placeable.place` is NOT mirrored by Compose (unlike
+-// `placeRelative`), so the mirror is spelled here from the ambient
+-// LayoutDirection. The corpus's RTL rows still lack markers for an
+-// UPSTREAM reason (no `meta.markerText` reaches them), so this branch is
+-// pinned but does not move a cell this wave — stated, not hidden.
++// ## RTL
++// css-lists-3 §3.5 hangs an `outside` marker before the item's START edge,
++// which for an rtl item is the physical RIGHT. `Placeable.place` is NOT
++// mirrored by Compose (unlike `placeRelative`), so the mirror is spelled
++// here from the ambient LayoutDirection. No corpus `<li>` both inherits
++// `direction: rtl` and hangs outside (census tools/titan/results/
++// wave55-counter-suffix-rows/census-l5.out.txt): counter-suffix's two
++// `dir=rtl` lists are bidi-baked (bake root `direction: ltr`, items
++// absolutely positioned, markers baked as glyph runs owned by the root
++// since wave-54 M′, tools/titan/bidi-marker-bake.mjs), and the only rtl
++// items left (counter-style-at-rule/disclosure-styles, 6 `<li>`) are
++// `list-style-position: inside`. So this branch is pinned but moves no
++// corpus cell — stated, not hidden.
+ //
+ // Staged as a DEVICE A/B: the renderer seam that swaps the Row for this
+ // Layout is `tools/titan/results/wave52-counters-and-lists/seam-1.patch`,
+@@ -73,13 +79,14 @@ object ListMarkerOutsideHang {
+      * @param markerBaseline the marker's FirstBaseline, null if it exposes
+      *   none; [itemBaseline] likewise for the item's principal box.
+      * @param gapPx the inline gap between marker and item — the caller
+-     *   hands in [ListMarkerRow.gapDp] resolved to px, so the two
+-     *   placements share ONE gap constant.
++     *   hands in [ListMarkerSuffixGap.gapDp] resolved to px: the
++     *   [ListMarkerRow.gapDp] stand-in for the suffix's trimmed space, 0
++     *   after a U+3001 suffix.
+      * @param alignsByBaseline the row's per-item decision
+      *   ([ListMarkerRow.alignsByBaseline]); false ⇒ both boxes stack by
+      *   their tops (the baseline-less items and the snapped-grid case).
+-     * @param rtl hang on the inline-END side instead (css-lists-3 §3.5
+-     *   under `direction: rtl`).
++     * @param rtl hang on the physical right instead — an rtl item's
++     *   inline-START side (css-lists-3 §3.5 under `direction: rtl`).
+      * @param itemIsEmpty [ListMarkerEmptyItem.isEmpty]: the item has no
+      *   content, so the marker's line is the item's only line box and the
+      *   pair is at least the marker's height (header of that file).
+@@ -92,8 +99,8 @@ object ListMarkerOutsideHang {
+     ): Placement {
+         // Inline: the marker's END edge sits `gap` before the item's START
+         // edge — `markerX + markerWidth + gap == 0` is the pinned identity.
+-        // Under RTL the mirror image: the marker's START edge sits `gap`
+-        // after the item's END edge.
++        // Under RTL the mirror image: the marker's physical left edge sits
++        // `gap` right of the item's physical right (its inline-start) edge.
+         val markerX = if (rtl) itemWidth + gapPx else -(markerWidth + gapPx)
+         // Block: share the first line's baseline when the row aligns by
+         // baseline and BOTH boxes expose one (css-lists-3 §3.5 — the marker
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/KoreanHangulFormal.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/KoreanHangulFormal.swift
+index 6da264f1..b568898f 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/KoreanHangulFormal.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/KoreanHangulFormal.swift
+@@ -32,29 +32,16 @@
+ //  declares a `korean-*` list-style-type: counter-suffix's fourth `<ol>`
+ //  (`counter-suffix__0__3`). No other cell can move.
+ //
+-//  ## TWIN DIVERGENCE — stated, not hidden
+-//  ListMarkerText's header calls itself a byte-for-byte twin of Compose
+-//  `lists/ListStyleApplier.getMarker`, and that twin has NO korean arm
+-//  either — its counter-style enum stops at `KATAKANA_IROHA`, same as
+-//  this package did. This lane owns the iOS half only, so after it the
+-//  two natives ANSWER DIFFERENTLY for `korean-hangul-formal`: iOS "일,",
+-//  Compose "1.". That is tracked work, not a silent divergence — the
+-//  lane reports it for the backlog, and the port is this file plus three
+-//  edits in runtimes/compose/src/main/java/com/styleconverter/runtime/
+-//  lists/ (sites named by SYMBOL, since line numbers rot; each verified
+-//  present by wave-50 skeptic S4 and re-grepped by fix lane F2):
+-//
+-//   1. `ListStyleConfig.kt` — the `ListStyleType` enum: add
+-//      `KOREAN_HANGUL_FORMAL` after `KATAKANA_IROHA`.
+-//   2. `ListStyleExtractor.kt` — `typeFromKeyword`'s `when`: the key must
+-//      be the UNDERSCORED `"korean_hangul_formal"`, NOT the hyphenated
+-//      wire spelling, because that function normalises with
+-//      `rawKeyword.lowercase().replace("-", "_")` before matching. (The
+-//      wire value the converter emits really is `"korean-hangul-formal"`
+-//      — the hyphen is removed by the normaliser, not by the author.)
+-//   3. `ListStyleApplier.kt` — `getMarker`'s `when`: one arm beside
+-//      `ListStyleType.KATAKANA_IROHA`, returning this file's `expand`
+-//      plus `suffix` rather than the `"$n."` the other arms use.
++//  ## TWIN — closed in wave 52 (lane L6 T1, cdb8a845)
++//  Compose `lists/KoreanHangulFormal.kt` is the byte-parallel twin, wired
++//  through its three arms (named by SYMBOL, since line numbers rot):
++//  `ListStyleConfig.ListStyleType.KOREAN_HANGUL_FORMAL`,
++//  `ListStyleExtractor.typeFromKeyword`'s `"korean_hangul_formal"` (the
++//  UNDERSCORED key — that function normalises the wire's hyphens first)
++//  and `ListStyleApplier.getMarker`'s `expand` + `SUFFIX` arm. Device
++//  evidence: wave54-final counter-suffix android rows 7–8 read "일," /
++//  "이," within 1 px of the ref (marker ink x41-57 against the ref's
++//  x42-58, both rows).
+ //
+ //  ## Scope boundary (no silent fallthrough)
+ //  Only `korean-hangul-formal` is modelled. Its two siblings
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerOutsideHang.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerOutsideHang.swift
+index 2e36b019..8090c58b 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerOutsideHang.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerOutsideHang.swift
+@@ -30,15 +30,23 @@
+ //  start 18 px late. A `Layout` measures both, reports the item's size and
+ //  places the marker outside its bounds.
+ //
+-//  ## RTL (BACKLOG (c⁴): RTL markers are BLOCKED UPSTREAM)
++//  ## RTL
+ //  SwiftUI's Layout engine mirrors every `place(at:)` x about the layout
+ //  bounds under an RTL layoutDirection (probe-verified — see
+ //  FloatBlockLayout.placedX), so the physical `-(w + gap)` handed in here
+-//  lands at `width + gap`: the inline-END side css-lists-3 §3.5 asks for,
+-//  with no code of its own. (Compose's `place` is NOT mirrored, so the
+-//  Kotlin twin spells the mirror explicitly.) The corpus's RTL rows still
+-//  lack markers for an UPSTREAM reason (no `meta.markerText` reaches
+-//  them), so this does not move a cell this wave — stated, not hidden.
++//  lands at `width + gap`: the inline-START side of an rtl item (its start
++//  edge is the physical right), which is where css-lists-3 §3.5 puts an
++//  outside marker, with no code of its own. (Compose's `place` is NOT
++//  mirrored, so the Kotlin twin spells the mirror explicitly.) No corpus
++//  `<li>` both inherits `direction: rtl` and hangs outside (census
++//  tools/titan/results/wave55-counter-suffix-rows/census-l5.out.txt,
++//  ALL-ios): counter-suffix's two `dir=rtl` lists are bidi-baked (bake root
++//  `direction: ltr`, items absolutely positioned, markers baked as glyph
++//  runs owned by the root since wave-54 M′, tools/titan/
++//  bidi-marker-bake.mjs), and the only rtl items left
++//  (counter-style-at-rule/disclosure-styles, 6 `<li>`) are
++//  `list-style-position: inside`. So this branch moves no corpus cell —
++//  stated, not hidden.
+ //
+ //  Staged as a DEVICE A/B: the `markerPlacement` seam that swaps the HStack
+ //  for this Layout is tools/titan/results/wave52-counters-and-lists/
+@@ -65,8 +73,9 @@ enum ListMarkerOutsideHang {
+     /// - Parameters:
+     ///   - markerBaseline: the marker's first text baseline, nil if it
+     ///     exposes none; `itemBaseline` likewise for the item.
+-    ///   - gap: the inline gap — the caller hands in `ListMarkerRow.gapPt`
+-    ///     so both placements share ONE gap constant.
++    ///   - gap: the inline gap — the caller hands in
++    ///     `ListMarkerSuffixGap.points(forMarker:)`: the `ListMarkerRow.gapPt`
++    ///     stand-in for the suffix's trimmed space, 0 after a U+3001 suffix.
+     ///   - alignsByBaseline: the row's per-item decision
+     ///     (`ListMarkerRow.rowAlignment == .firstTextBaseline`); false ⇒
+     ///     both boxes stack by their tops.
+@@ -99,7 +108,8 @@ enum ListMarkerOutsideHang {
+ 
+ /// The Layout: subview 0 is the marker, subview 1 the item.
+ struct ListMarkerOutsideHangLayout: Layout {
+-    /// `ListMarkerRow.gapPt`, threaded so the constant has one home.
++    /// `ListMarkerSuffixGap.points(forMarker:)` — the string-keyed stand-in
++    /// gap (`ListMarkerRow.gapPt`, or 0 after a U+3001 suffix).
+     let gap: CGFloat
+     /// `ListMarkerRow.rowAlignment(itemExposesTextBaseline:) == .firstTextBaseline`.
+     let alignsByBaseline: Bool
+@@ -134,8 +144,8 @@ struct ListMarkerOutsideHangLayout: Layout {
+                                             itemIsEmpty: itemIsEmpty)
+         // The item at the origin, laid out as if the marker did not exist.
+         subviews[1].place(at: bounds.origin, anchor: .topLeading, proposal: proposal)
+-        // The marker outside the bounds (negative x; the engine mirrors it
+-        // to the end side under RTL — see the header).
++        // The marker outside the bounds (negative x; SwiftUI mirrors it to
++        // the physical right — an rtl item's start side — see the header).
+         subviews[0].place(at: CGPoint(x: bounds.minX + p.markerX, y: bounds.minY + p.markerY),
+                           anchor: .topLeading, proposal: .unspecified)
+     }
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerStyle.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerStyle.swift
+index 7f91de4b..7a9fbc9d 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerStyle.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerStyle.swift
+@@ -42,9 +42,9 @@ enum ListMarkerType: String, Equatable {
+     case hiraganaIroha, katakanaIroha
+     // §7.1 longhand East Asian — the ONLY member modelled (wave 50, lane B4:
+     // counter-suffix's fourth `<ol>` is its one corpus carrier; the hanja
+-    // siblings keep the documented nil path). It has NO Compose twin yet, so
+-    // the 1:1 claim above holds for every case but this one — tracked work,
+-    // not drift (KoreanHangulFormal.swift's TWIN DIVERGENCE banner).
++    // siblings keep the documented nil path). Its Compose twin
++    // `ListStyleType.KOREAN_HANGUL_FORMAL` landed in wave 52 (lane L6 T1),
++    // so the 1:1 claim above holds here too (KoreanHangulFormal.swift).
+     case koreanHangulFormal
+ }
+ 
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerText.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerText.swift
+index 08c557da..c9a2d96c 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerText.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerText.swift
+@@ -7,11 +7,10 @@
+ //  overflow-to-decimal behaviour, so a `<li>` renders the same characters
+ //  on both natives. css-counter-styles-3 §6 (predefined counter styles).
+ //
+-//  ONE EXCEPTION since wave 50 (lane B4), stated here so the twin claim
+-//  above is not read as unqualified: `.koreanHangulFormal` (§7.1) has no
+-//  Compose arm yet, so the two natives answer differently for that single
+-//  keyword. The port is tracked work — see KoreanHangulFormal.swift's TWIN
+-//  DIVERGENCE banner for the three edits it needs.
++//  `.koreanHangulFormal` (§7.1, wave 50 lane B4) is twinned too since
++//  wave 52 (lane L6 T1, cdb8a845): Compose `lists/KoreanHangulFormal.kt`
++//  through `ListStyleApplier.getMarker` — see KoreanHangulFormal.swift's
++//  TWIN banner.
+ //
+ 
+ import Foundation
+@@ -50,7 +49,7 @@ enum ListMarkerText {
+         // §7.1 longhand East Asian — the additive expansion and the
+         // suffix decision both live in KoreanHangulFormal (wave 50, lane
+         // B4), which also carries the measured cell, the one-component
+-        // corpus census, and the stated Compose-twin divergence.
++        // corpus census, and the Compose twin (closed in wave 52).
+         case .koreanHangulFormal:
+             return KoreanHangulFormal.expand(index + 1) + KoreanHangulFormal.suffix
+         }
+diff --git a/tools/titan/counter-style-table.mjs b/tools/titan/counter-style-table.mjs
+index 913b1119..6bcfcc30 100644
+--- a/tools/titan/counter-style-table.mjs
++++ b/tools/titan/counter-style-table.mjs
+@@ -19,12 +19,18 @@
+ // SUFFIX NOTE — the one deliberate deviation from a literal transcription.
+ // The spec's initial `suffix` is "\2E\20" (a full stop THEN A SPACE), and
+ // the §6.1 bullet styles use " ". Both native runtimes already own that
+-// trailing gap themselves — Compose renders `Text("$marker ")` with a 4dp
+-// end padding and SwiftUI an `HStack(spacing: 4)` — and their existing
+-// tables (ListMarkerText.marker / StyleListApplier.getMarker) emit "1.",
+-// never "1. ". Emitting the space here would double it. So every suffix
+-// below is the spec's minus the trailing U+0020, which makes this table a
+-// strict superset of the two native tables rather than a rival to them.
++// trailing gap themselves — a 4 dp / 4 pt stand-in between the marker box
++// and the item (Compose `Text(marker)` with the end padding / hang offset,
++// SwiftUI the HStack spacing / hang gap; Compose's old trailing-space
++// `Text("$marker ")` is gone since wave 28) — and their existing tables
++// (ListMarkerText.marker / ListStyleApplier.getMarker) emit "1.", never
++// "1. ". Emitting the space here would double it. So every suffix below is
++// the spec's minus the trailing U+0020, which makes this table a strict
++// superset of the two native tables rather than a rival to them. The
++// U+3001 suffix of the cjk-decimal family (§6.1 / §6.2 / §6.4) has NO
++// trailing space, so it has no stand-in gap either: the natives read the
++// gap through ListMarkerSuffixGap (wave 55), which answers 0 for a marker
++// string ending in U+3001.
+ //
+ // SCOPE: §6.1 (bullets) is deliberately ABSENT — those markers are
+ // ordinal-INDEPENDENT, the natives already paint them, and re-baking them

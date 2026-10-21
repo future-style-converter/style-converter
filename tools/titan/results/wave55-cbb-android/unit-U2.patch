@@ -1,0 +1,432 @@
+# unit-U2.patch — wave 55 lane L2 (cbb-android), unit U2: PercentContentBoxBand — the in-flow percentage of a content-box box gets its band at layout time.
+# Base: 611c9f932bcfefa147a35f6c5f356d42709ddf84 + unit-U1.patch + seam-1.patch (no shared path; applies on 611c9f93 alone as well).
+# NEW sizing/PercentContentBoxBand.kt (owns / fraction / targetPx / measureSpec / placementOffset, PercentFillPlusBandModifier,
+# Modifier.percentFillPlusBand, two breadcrumbs) · SizingApplier.kt (two call-site lines + one comment line in applySizing; the existing
+# clamp lines become `else if`) · NEW PercentContentBoxBandTest.kt (P-U2-1 … P-U2-6). Never landed or reverted without unit-U1.patch.
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt
+new file mode 100644
+index 00000000..5949b7c5
+--- /dev/null
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt
+@@ -0,0 +1,191 @@
++package com.styleconverter.runtime.sizing
++
++// Wave 55 (lane L2, unit U2) — PercentContentBoxBand: the in-flow PERCENTAGE
++// size of a content-box box gets its padding + border band at LAYOUT time
++// (split out of SizingApplier, which sits far past the house ceiling).
++//
++// ## The spec
++// css-ui-3 §3.1 (`box-sizing: content-box`, the UA initial value the WPT
++// capture emulates — SizingApplier.effectiveBoxSizing): width/height size
++// the CONTENT box; padding and border lie OUTSIDE it. CSS 2.1 §10.2 / §10.5:
++// a percentage resolves against the containing block. So the border box is
++// `fraction × containing-block size + bands`, and a box larger than its
++// container still lays out at that size and overflows (css-overflow-3 §3);
++// the container's own clip, if any, hides the excess.
++//
++// ## The measured defect (wave-55 brief cbb-android.md §2)
++// SizingApplier.inflateForContentBox passes a PERCENT size through untouched
++// (a px band cannot be added to a fraction statically), and
++// fillMaxWidth/Height(fraction) then makes the percentage the BORDER box —
++// the padding chained innermost (StyleApplier.applyConfig step 8) eats into
++// it. WPT filter-effects/backdrop-filter-nested-border-radius-clip-3's
++// #middle (`width/height: 100%; padding: 10px` inside #outer's 200×100
++// content box) drew as a 200×100 border box (content 180×80) where Chromium
++// draws 220×120 (content 200×100): the android green stopped 20 px short on
++// both axes, (36,36,215,115) against the ref's (36,36,235,135), measured on
++// the wave54-probe capture with the CBB-android channel fix (unit U1) applied.
++//
++// ## The mechanism
++// One layout step per axis: FillNode's own `round(max × fraction)` PLUS the
++// band, then ExactWidthOverflow's house overflow split — the child measures
++// at the target, the parent is told the incoming max (it must not grow, as
++// in the browser), and the placeable is START-anchored so the excess spills
++// toward the inline/block END (never centred like Compose's requiredWidth).
++// An UNBOUNDED axis is identity, FillNode parity (fillMax* is a no-op there).
++//
++// ## Radius (census, cbb-android.census.out.txt B, re-run by the lane)
++// 2 of the corpus's 122 percentage axes: #middle (0-172) W and H of
++// nested-border-radius-clip-3. WPT capture only; the dark stage keeps the
++// frozen fill and breadcrumbs (no committed fixture declares content-box +
++// a % size + a band, census C).
++// KNOWN LIMIT (named; 0 corpus carriers — the P-U2-6 census resolves every box
++// with blockLevelWidthAuto on): DynamicValueResolver.invalidWidthFallback stands
++// a guaranteed-invalid block `width` in as the wire's 100% shape, i.e. `auto`;
++// with a band this lane would draw it 100% + band where CSS auto fits the block.
++
++// PropertyTracker: the two named breadcrumbs (no silent fallthrough).
++import com.styleconverter.runtime.PropertyTracker
++// The size shapes the lane routes on (Relative PERCENT only).
++import com.styleconverter.runtime.core.types.LengthUnit
++import com.styleconverter.runtime.core.types.LengthValue
++// The custom measure hook — the same LayoutModifier shape CalcSizeMinModifier
++// uses, so a JVM chain test can find this node and read its inputs.
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.layout.LayoutModifier
++import androidx.compose.ui.layout.Measurable
++import androidx.compose.ui.layout.MeasureResult
++import androidx.compose.ui.layout.MeasureScope
++// Constraints.Infinity marks the unbounded (identity) axis.
++import androidx.compose.ui.unit.Constraints
++// CSS px == Dp in this runtime (SizingConfig's bands are CSS px).
++import androidx.compose.ui.unit.dp
++// FillNode's rounding (fastRoundToInt ≡ roundToInt on finite floats).
++import kotlin.math.roundToInt
++
++/** The pure half: JVM-pinned in PercentContentBoxBandTest. */
++internal object PercentContentBoxBand {
++
++    /** A dark-stage box that DECLARES content-box + a % size + a band keeps the frozen fill. */
++    const val DARK_STAGE_BREADCRUMB = "Sizing[dark-stage-percent-content-box-band]"
++
++    /** A % axis the min/max lane (PercentSizeClamp) owns does not get the band yet. */
++    const val CLAMP_BREADCRUMB = "Sizing[percent-clamp-content-box-band]"
++
++    /**
++     * Does this axis take the fill-plus-band lane? True iff ALL hold:
++     * WPT capture; the effective box-sizing is content-box; [raw] is a
++     * `Relative(_, PERCENT)` size; [bandPx] (SizingExtractor's
++     * contentBoxInflateX/Y) is non-zero; PercentSizeClamp does not own the
++     * axis ([clampOwnsAxis] = SizingClamps.percentClampSpec != null).
++     */
++    fun owns(raw: LengthValue?, cfg: SizingConfig, bandPx: Float, clampOwnsAxis: Boolean): Boolean {
++        // Only a percentage carries the fraction this lane adds a band to.
++        if (raw !is LengthValue.Relative || raw.unit != LengthUnit.PERCENT) return false
++        // Only an effective content-box puts the bands outside the percentage
++        // (a declared border-box, and the dark stage's unset null, keep the fill).
++        if (cfg.boxSizing != BoxSizingKeyword.CONTENT_BOX) return false
++        // A zero band changes nothing: the fill is already the border box.
++        if (bandPx == 0f) return false
++        // Dark stage (an explicit content-box): frozen fill, named not fixed.
++        if (!cfg.wptCaptureMode) return breadcrumb(DARK_STAGE_BREADCRUMB)
++        // The min/max lane owns the axis through one clamp: named limitation.
++        if (clampOwnsAxis) return breadcrumb(CLAMP_BREADCRUMB)
++        // Every condition holds: the band is added at layout time.
++        return true
++    }
++
++    /** Record [key] once per call site visit and decline the axis. */
++    private fun breadcrumb(key: String): Boolean {
++        // PropertyTracker is the module's breadcrumb channel (cf. ContainingBlockBands).
++        PropertyTracker.markUnhandled(key)
++        // Declining keeps the pre-existing fill / clamp chain on that axis.
++        return false
++    }
++
++    /**
++     * The fraction exactly as SizingApplier's fill branch computes it —
++     * `(value / 100).coerceIn(0, 1)` — so only the band is new. (A % above
++     * 100 stays clamped to the full fill, the pre-existing fillMax* limit.)
++     */
++    fun fraction(raw: LengthValue?): Float =
++        // A non-percent input never reaches here (owns gates it); 0 is inert.
++        (((raw as? LengthValue.Relative)?.value?.toFloat() ?: 0f) / 100f).coerceIn(0f, 1f)
++
++    /** The border-box target: `round(max × fraction + band)` (css-ui-3 §3.1 + CSS 2.1 §10.2). */
++    fun targetPx(fraction: Float, maxPx: Int, bandPx: Float): Int =
++        // FillNode's own product, the band added before the one rounding.
++        (maxPx * fraction + bandPx).roundToInt()
++
++    /**
++     * (child, reported) for one axis, or null when the axis is UNBOUNDED
++     * (identity — FillNode parity). The split is ExactWidthOverflow's: an
++     * oversized target is measured as is and reported as the incoming max.
++     */
++    fun measureSpec(fraction: Float, bandPx: Float, incomingMin: Int, incomingMax: Int): Pair<Int, Int>? {
++        // No containing-block size to resolve against: leave the axis alone.
++        if (incomingMax == Constraints.Infinity) return null
++        // The house overflow split (fitting: tight coercion; overflow: measure big, report max).
++        return ExactWidthOverflow.measureSpec(targetPx(fraction, incomingMax, bandPx), incomingMin, incomingMax)
++    }
++
++    /**
++     * Where the measured child's start edge sits in the reported box: 0,
++     * start-anchored, so an oversized box overflows toward the END edge
++     * (css-overflow-3 §3, as the browser draws #middle) — never Compose's
++     * requiredWidth centring at `(reported − child) / 2`.
++     */
++    @Suppress("UNUSED_PARAMETER") // the inputs name what the rule ignores
++    fun placementOffset(childPx: Int, reportedPx: Int): Int = 0
++}
++
++/**
++ * The modifier half: one axis of [PercentContentBoxBand] as a LayoutModifier
++ * (data class: equal inputs ⇒ an equal node, so recomposition does not
++ * re-layout). [bandCssPx] is the CSS-px band (Dp in this runtime).
++ */
++internal data class PercentFillPlusBandModifier(
++    // The axis fraction (PercentContentBoxBand.fraction).
++    val fraction: Float,
++    // contentBoxInflateX / Y: padding + painted border widths, CSS px.
++    val bandCssPx: Float,
++    // true → width axis, false → height axis.
++    val horizontal: Boolean,
++) : LayoutModifier {
++
++    override fun MeasureScope.measure(measurable: Measurable, constraints: Constraints): MeasureResult {
++        // CSS px → device px through the measure scope's density (roundToPx parity is in targetPx's rounding).
++        val bandPx = bandCssPx.dp.toPx()
++        // The incoming band on this axis only; the other axis passes through.
++        val spec = if (horizontal)
++            PercentContentBoxBand.measureSpec(fraction, bandPx, constraints.minWidth, constraints.maxWidth)
++        else PercentContentBoxBand.measureSpec(fraction, bandPx, constraints.minHeight, constraints.maxHeight)
++        // Unbounded: FillNode's identity — measure and report the child as is.
++        if (spec == null) {
++            // The incoming constraints, untouched.
++            val p = measurable.measure(constraints)
++            // Origin placement, as FillNode's layout().
++            return layout(p.width, p.height) { p.placeRelative(0, 0) }
++        }
++        // Child size to measure at, and size to report upward.
++        val (childPx, reportedPx) = spec
++        // Tight on this axis at the target (may exceed the incoming max: overflow).
++        val p = measurable.measure(
++            if (horizontal) constraints.copy(minWidth = childPx, maxWidth = childPx)
++            else constraints.copy(minHeight = childPx, maxHeight = childPx),
++        )
++        // Start-anchored offset of the (possibly oversized) placeable.
++        val offset = PercentContentBoxBand.placementOffset(childPx, reportedPx)
++        // Report the clamped size on this axis, the child's own on the other;
++        // placeRelative mirrors the x offset under RTL (inline-end overflow).
++        return if (horizontal) layout(reportedPx, p.height) { p.placeRelative(offset, 0) }
++        else layout(p.width, reportedPx) { p.placeRelative(0, offset) }
++    }
++}
++
++/**
++ * Chain [PercentFillPlusBandModifier] for one axis of [raw] — SizingApplier's
++ * call site, taken only when [PercentContentBoxBand.owns] said yes.
++ */
++internal fun Modifier.percentFillPlusBand(raw: LengthValue?, bandCssPx: Float, horizontal: Boolean): Modifier =
++    // The fraction is computed exactly as the fill branch would have.
++    this.then(PercentFillPlusBandModifier(PercentContentBoxBand.fraction(raw), bandCssPx, horizontal))
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt
+index e118a7fd..6970f598 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt
+@@ -120,7 +120,9 @@ object SizingApplier {
+         // Retro R2 (A11#10): the percent+min/max lane replaces the fill on
+         // its axis (pairs-01 PW_Background_Sizing_04: 50% + min 300 →
+         // 300, was 179); otherwise the pre-existing emission runs unchanged.
+-        if (pctW != null) r = r.percentWidthClamped(pctW.fraction, pctW.minDp, pctW.maxDp)
++        // Wave 55 (L2 U2): WPT content-box % + band → PercentContentBoxBand.kt (both axes; asked first so its clamp breadcrumb fires).
++        if (PercentContentBoxBand.owns(rawW, config, config.contentBoxInflateX, pctW != null)) r = r.percentFillPlusBand(rawW, config.contentBoxInflateX, horizontal = true)
++        else if (pctW != null) r = r.percentWidthClamped(pctW.fraction, pctW.minDp, pctW.maxDp)
+         else if (!minWCalcOwnsAxis) r = applyWidth(r, inflateForContentBox(
+             clampLength(rawW, minWv, maxWv, ctx),
+             // RC-B6b: the WPT flag rides the config into the width branch
+@@ -129,7 +131,8 @@ object SizingApplier {
+             // inflation so a content-box Relative resolves against the
+             // exact font/line-height basis the apply branch would use.
+             config.boxSizing, config.contentBoxInflateX, ctx), ctx, config.wptCaptureMode)
+-        if (pctH != null) r = r.percentHeightClamped(pctH.fraction, pctH.minDp, pctH.maxDp)
++        if (PercentContentBoxBand.owns(rawH, config, config.contentBoxInflateY, pctH != null)) r = r.percentFillPlusBand(rawH, config.contentBoxInflateY, horizontal = false)
++        else if (pctH != null) r = r.percentHeightClamped(pctH.fraction, pctH.minDp, pctH.maxDp)
+         else if (!minHCalcOwnsAxis) r = applyHeight(r, inflateForContentBox(
+             clampLength(rawH, minHv, maxHv, ctx),
+             // Wave 44 (lane U6): ctx threaded — see the width twin above.
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/sizing/PercentContentBoxBandTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/sizing/PercentContentBoxBandTest.kt
+new file mode 100644
+index 00000000..3d245389
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/sizing/PercentContentBoxBandTest.kt
+@@ -0,0 +1,199 @@
++package com.styleconverter.runtime.sizing
++
++// Wave 55 (lane L2, unit U2) — PercentContentBoxBand pins P-U2-1 … P-U2-6. Payloads are VERBATIM wave54-final
++// per-test IR (= wave55-open): …/filter-effects/per-test-ir/wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3.json
++// (#middle 0-172, #inner 0-173). Every pin was proven able to fail by an executed mutation (M-U2a … M-U2g),
++// bracketed with sha256 in tools/titan/results/wave55-cbb-android/_note.md.
++
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.unit.Constraints
++import com.styleconverter.runtime.PropertyTracker
++import com.styleconverter.runtime.StyleApplier
++import com.styleconverter.runtime.core.ir.IRDocumentDecoder
++import com.styleconverter.runtime.core.ir.IRProperty
++import com.styleconverter.runtime.core.types.LengthUnit
++import com.styleconverter.runtime.core.types.LengthValue
++import com.styleconverter.runtime.core.variables.DynamicValueResolver
++import com.styleconverter.runtime.lists.ListStyleUaRule
++import com.styleconverter.runtime.spacing.SpacingContext
++import java.io.File
++import kotlinx.serialization.json.Json
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertNotEquals
++import org.junit.Assert.assertTrue
++import org.junit.Assume.assumeTrue
++import org.junit.Test
++
++class PercentContentBoxBandTest {
++
++    // Parse one wire JSON literal into an IRProperty.
++    private fun prop(type: String, json: String) = IRProperty(type, Json.parseToJsonElement(json))
++
++    /** clip-3's #middle (0-172), every property verbatim, in wire order. */
++    private val middle = listOf(
++        prop("Position", "\"RELATIVE\""), prop("Width", """{"type":"percentage","value":100}"""),
++        prop("Height", """{"type":"percentage","value":100}"""), prop("PaddingTop", """{"px":10}"""),
++        prop("PaddingRight", """{"px":10}"""), prop("PaddingBottom", """{"px":10}"""), prop("PaddingLeft", """{"px":10}"""),
++        prop("BorderTopLeftRadius", """{"px":10}"""), prop("BorderTopRightRadius", """{"px":10}"""),
++        prop("BorderBottomRightRadius", """{"px":10}"""), prop("BorderBottomLeftRadius", """{"px":10}"""),
++        prop("OverflowX", "\"HIDDEN\""), prop("OverflowY", "\"HIDDEN\""), prop("BackgroundColor", """{"srgb":{"r":0.8,"g":0.8,"b":0.8},"original":"#cccccc"}"""))
++
++    /** clip-3's #inner (0-173), verbatim: #middle's first three entries, radius 25 ×4, overflow hidden, no band. */
++    private val inner = middle.take(3) + listOf("TopLeft", "TopRight", "BottomRight", "BottomLeft")
++        .map { prop("Border${it}Radius", """{"px":25}""") } + listOf(prop("OverflowX", "\"HIDDEN\""), prop("OverflowY", "\"HIDDEN\""))
++
++    // SizingExtractor over a property list, as LayoutFacade.extractConfig runs it.
++    private fun cfg(props: List<IRProperty>, wpt: Boolean) =
++        SizingExtractor.extractSizingConfig(props.map { it.type to it.data }, wpt)
++
++    // applySizing's own clamp question per axis (SizingClamps.percentClampSpec != null), width then height.
++    private fun clampW(c: SizingConfig) = SizingClamps.percentClampSpec(c.width, c.minWidth, c.maxWidth, SpacingContext()) != null
++    private fun clampH(c: SizingConfig) = SizingClamps.percentClampSpec(c.height, c.minHeight, c.maxHeight, SpacingContext()) != null
++
++    // owns() on the width axis exactly as applySizing asks it.
++    private fun ownsW(c: SizingConfig) = PercentContentBoxBand.owns(c.width, c, c.contentBoxInflateX, clampW(c))
++
++    @Test
++    fun `P-U2-1 middle's band is added to the fill and overflows as the house split`() {
++        // The verbatim payload's bands: padding 10 + 10 per axis, no border.
++        val c = cfg(middle, wpt = true)
++        assertEquals(20f to 20f, c.contentBoxInflateX to c.contentBoxInflateY)
++        // fraction exactly as the fill branch: 100% → 1.0.
++        val f = PercentContentBoxBand.fraction(c.width).also { assertEquals(1f, it, 0f) }
++        // #outer's content box 200×100 → measured 220 / 120, reported 200 / 100 (the parent must not grow).
++        assertEquals(220 to 200, PercentContentBoxBand.measureSpec(f, c.contentBoxInflateX, 0, 200))
++        assertEquals(120 to 100, PercentContentBoxBand.measureSpec(f, c.contentBoxInflateY, 0, 100))
++        // Fitting row: 50% of 400 + 20 = 220 fits → tight 220 / 220.
++        assertEquals(220 to 220, PercentContentBoxBand.measureSpec(0.5f, 20f, 0, 400))
++    }
++
++    @Test
++    fun `P-U2-2 owns exactly the WPT content-box percent axis with a band`() {
++        // A clean tracker: only this test's calls can set the breadcrumbs.
++        PropertyTracker.reset()
++        // #middle under WPT capture: both axes owned.
++        val wpt = cfg(middle, wpt = true)
++        assertTrue(ownsW(wpt))
++        assertTrue(PercentContentBoxBand.owns(wpt.height, wpt, wpt.contentBoxInflateY, clampH(wpt)))
++        // A declared border-box keeps the fill (css-ui-3 §3.1: the % IS the border box).
++        assertFalse(ownsW(cfg(middle + prop("BoxSizing", "\"BORDER_BOX\""), wpt = true)))
++        // #inner (band 0) is untouched: the fill is already right.
++        assertFalse(ownsW(cfg(inner, wpt = true)))
++        // Dark stage, unset box-sizing: the null tri-state is not a content-box — declined silently.
++        assertFalse(ownsW(cfg(middle, wpt = false)))
++        // None of those is a breadcrumb case.
++        assertFalse(PropertyTracker.isUnhandled(PercentContentBoxBand.DARK_STAGE_BREADCRUMB) || PropertyTracker.isUnhandled(PercentContentBoxBand.CLAMP_BREADCRUMB))
++        // Dark stage, DECLARED content-box (band 20): declined AND named.
++        val dark = cfg(middle + prop("BoxSizing", "\"CONTENT_BOX\""), wpt = false)
++        assertFalse(ownsW(dark.also { assertEquals(20f, it.contentBoxInflateX, 0f) }))
++        assertTrue(PropertyTracker.isUnhandled("Sizing[dark-stage-percent-content-box-band]"))
++        // A MaxWidth puts the axis in the PercentSizeClamp lane: declined AND named.
++        val clamp = cfg(middle + prop("MaxWidth", """{"type":"length","px":300}"""), wpt = true)
++        assertTrue(clampW(clamp) && !ownsW(clamp))
++        assertTrue(PropertyTracker.isUnhandled("Sizing[percent-clamp-content-box-band]"))
++        // Leave the global tracker clean.
++        PropertyTracker.reset()
++    }
++
++    @Test
++    fun `P-U2-3 an unbounded axis is identity - FillNode parity`() {
++        // No containing-block size: no spec, the modifier measures as is.
++        assertEquals(null, PercentContentBoxBand.measureSpec(1f, 20f, 0, Constraints.Infinity))
++    }
++
++    @Test
++    fun `P-U2-4 the oversized box is start-anchored, never centred`() {
++        // css-overflow-3 §3: #middle's excess spills toward the end edge.
++        assertEquals(0 to 0, PercentContentBoxBand.placementOffset(220, 200) to PercentContentBoxBand.placementOffset(120, 100))
++        // requiredWidth's centring would put the start edge at −10.
++        assertNotEquals((200 - 220) / 2, PercentContentBoxBand.placementOffset(220, 200))
++    }
++
++    /** The directory above Gradle's user.dir (the module or harness dir) that holds [rel], or null — the SeamReachabilityTest walk-up. */
++    private fun rootHolding(rel: String): File? {
++        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
++        while (dir != null && !File(dir, rel).exists()) dir = dir.parentFile
++        return dir
++    }
++
++    @Test
++    fun `P-U2-5 source - applySizing asks the band lane before the clamp and the fill`() {
++        // SizingApplier.kt's applySizing body (C13: cited by symbol, never by line); a missing file is a broken checkout.
++        val rel = "runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt"
++        val body = File(requireNotNull(rootHolding(rel)) { "repo root not found" }, rel).readText()
++            .substringAfter("fun applySizing(").substringBefore("private fun isDefiniteAxis(")
++        // Per axis: the band lane present, then the clamp lane, then the fill/inflate branch.
++        for ((a, x, clamp, fill) in listOf(listOf("W", "X", "pctW", "Width"), listOf("H", "Y", "pctH", "Height"))) {
++            val site = body.indexOf("if (PercentContentBoxBand.owns(raw$a, config, config.contentBoxInflate$x, $clamp != null)) " +
++                "r = r.percentFillPlusBand(raw$a, config.contentBoxInflate$x, horizontal = ${a == "W"})")
++            assertTrue("$a call site missing", site >= 0)
++            assertTrue(site < body.indexOf("else if ($clamp != null) r = r.percent${fill}Clamped("))
++            assertTrue(site < body.indexOf("r = apply$fill(r, inflateForContentBox("))
++        }
++    }
++
++    // Outermost → innermost class names of a modifier chain.
++    private fun chain(m: Modifier): List<String> = m.foldIn(emptyList<String>()) { acc, e -> acc + e.javaClass.name }
++
++    @Test
++    fun `P-U2-5 live chain - middle gets both band nodes outside its clip, background and padding`() {
++        // The chain ComponentRenderer builds for #middle under WPT capture.
++        val m = StyleApplier.applyProperties(middle, null, wptCaptureMode = true)
++        val names = chain(m)
++        // The two band nodes, width then height, with the verbatim inputs.
++        val bands = m.foldIn(emptyList<Modifier.Element>()) { acc, e -> acc + e }.filterIsInstance<PercentFillPlusBandModifier>()
++        assertEquals(listOf(PercentFillPlusBandModifier(1f, 20f, horizontal = true),
++            PercentFillPlusBandModifier(1f, 20f, horizontal = false)), bands)
++        // No stock fill is left on either axis.
++        assertFalse(names.toString(), names.any { it.endsWith("FillElement") })
++        // C13 order: sizing (the band) OUTSIDE #middle's paint, clip and padding.
++        val first = names.indexOfFirst { it.endsWith("PercentFillPlusBandModifier") }
++        assertTrue(names.toString(), first in 0 until names.indexOfLast { it.endsWith("PaddingElement") })
++        assertTrue(names.toString(), names.withIndex().any { (i, n) -> i > first && n.endsWith("BackgroundElement") })
++    }
++
++    @Test
++    fun `P-U2-5 live chain - the dark stage keeps the stock fill`() {
++        // wptCaptureMode false: box-sizing unset → no band node, two FillElements.
++        val names = chain(StyleApplier.applyProperties(middle, null, wptCaptureMode = false))
++        assertFalse(names.any { it.endsWith("PercentFillPlusBandModifier") })
++        assertEquals(names.toString(), 2, names.count { it.endsWith("FillElement") })
++    }
++
++    @Test
++    fun `P-U2-6 census - owns selects exactly middle W and H of clip-3 among the percentage axes`() {
++        // Local-only: tools/titan/runs is gitignored (assume, like the CBB census).
++        val run = "tools/titan/runs/wave54-final/sections"
++        val dir = rootHolding(run).also { assumeTrue("wave54-final corpus not present", it != null) }
++        // Every per-test IR document of the run (1435).
++        val files = File(dir, run).listFiles().orEmpty().flatMap { File(it, "per-test-ir").listFiles().orEmpty().toList() }
++            .filter { it.name.endsWith(".json") }.sortedBy { it.name }.also { assertEquals(1435, it.size) }
++        // blockLevelWidthAuto = true for EVERY box (a superset): the resolver rewrites a
++        // guaranteed-invalid block width to the wire's 100% shape, which would read as a % axis.
++        val ctx = DynamicValueResolver.Context(containingBlockWidthPx = 358f, blockLevelWidthAuto = true)
++        val (axes, owned) = mutableListOf<String>() to mutableListOf<String>()
++        for (f in files) for (c in IRDocumentDecoder.decode(f.readText()).components) {
++            // The runtime's tag-keyed UA padding (list containers), then the dynamic-value pre-pass.
++            val ua = ListStyleUaRule.apply(c._tag, c.properties, c.properties)
++            val k = cfg(DynamicValueResolver.resolve(ua, emptyMap(), ctx).properties, wpt = true)
++            // One axis: count it when it is a percentage, record it when owns() takes it.
++            fun axis(name: String, raw: LengthValue?, band: Float, clampOwns: Boolean) {
++                if (raw !is LengthValue.Relative || raw.unit != LengthUnit.PERCENT) return
++                val line = "${f.name} ${c.id.substringAfterLast("__")} $name ${raw.value}% band $band"
++                axes += line
++                if (PercentContentBoxBand.owns(raw, k, band, clampOwns)) owned += line
++            }
++            // Both physical slots (the extractor folds the logical sizes into them).
++            axis("W", k.width, k.contentBoxInflateX, clampW(k))
++            axis("H", k.height, k.contentBoxInflateY, clampH(k))
++        }
++        // The census record (read into the lane note by census.sh).
++        File(dir, "runtimes/compose/build/percent-content-box-band-census.now.txt")
++            .writeText((listOf("axes ${axes.size} owned ${owned.size}") + owned).joinToString("\n", postfix = "\n"))
++        // 122 percentage axes in the corpus (census B), exactly two owned.
++        assertEquals("percentage axes", 122, axes.size)
++        assertEquals("owned axes (${owned.size})", listOf("W", "H").map {
++            "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3.json 0-172 $it 100.0% band 20.0" }, owned)
++    }
++}

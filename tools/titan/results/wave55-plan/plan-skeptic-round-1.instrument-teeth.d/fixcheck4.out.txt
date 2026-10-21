@@ -1,0 +1,30 @@
+  005 ios      fixed U1         bands [(130, 151, 16, 191)] vs base+21 [(130, 151, 16, 191)] → OK
+  005 ios      heading-2y       bands [(128, 149, 16, 191)] vs base+21 [(130, 151, 16, 191)] → WRONG
+  005 ios      heading+12x      bands [(130, 151, 28, 203)] vs base+21 [(130, 151, 16, 191)] → WRONG
+  005 ios      line2-removed    bands [(130, 151, 16, 191)] vs base+21 [(130, 151, 16, 191)] → OK
+  005 ios      line1-truncated  bands [(133, 144, 16, 83), (151, 151, 45, 85)] vs base+21 [(130, 151, 16, 191)] → WRONG
+  005 android  fixed U1         bands [(128, 152, 17, 191)] vs base+21 [(128, 152, 17, 191)] → OK
+  005 android  heading-2y       bands [(126, 150, 17, 191)] vs base+21 [(128, 152, 17, 191)] → WRONG
+  005 android  heading+12x      bands [(128, 152, 29, 203)] vs base+21 [(128, 152, 17, 191)] → WRONG
+  005 android  line2-removed    bands [(128, 152, 17, 191)] vs base+21 [(128, 152, 17, 191)] → OK
+  005 android  line1-truncated  bands [(133, 143, 17, 76), (147, 147, 45, 85)] vs base+21 [(128, 152, 17, 191)] → WRONG
+  006 ios      fixed U1         bands [(130, 151, 16, 194)] vs base+21 [(130, 151, 16, 194)] → OK
+  006 ios      heading-2y       bands [(128, 149, 16, 194)] vs base+21 [(130, 151, 16, 194)] → WRONG
+  006 ios      heading+12x      bands [(130, 151, 28, 206)] vs base+21 [(130, 151, 16, 194)] → WRONG
+  006 ios      line2-removed    bands [(130, 151, 16, 194)] vs base+21 [(130, 151, 16, 194)] → OK
+  006 ios      line1-truncated  bands [(133, 144, 16, 86), (151, 151, 45, 86)] vs base+21 [(130, 151, 16, 194)] → WRONG
+  006 android  fixed U1         bands [(128, 152, 17, 194)] vs base+21 [(128, 152, 17, 194)] → OK
+  006 android  heading-2y       bands [(126, 150, 17, 194)] vs base+21 [(128, 152, 17, 194)] → WRONG
+  006 android  heading+12x      bands [(128, 152, 29, 206)] vs base+21 [(128, 152, 17, 194)] → WRONG
+  006 android  line2-removed    bands [(128, 152, 17, 194)] vs base+21 [(128, 152, 17, 194)] → OK
+  006 android  line1-truncated  bands [(133, 143, 17, 86), (147, 147, 45, 85)] vs base+21 [(128, 152, 17, 194)] → WRONG
+  014 ios      fixed U1         bands [(128, 138, 17, 133), (145, 154, 16, 84)] vs base+17 [(128, 138, 17, 133), (145, 154, 16, 84)] → OK
+  014 ios      heading-2y       bands [(126, 136, 17, 133), (143, 152, 16, 84)] vs base+17 [(128, 138, 17, 133), (145, 154, 16, 84)] → WRONG
+  014 ios      heading+12x      bands [(128, 138, 29, 145), (145, 154, 28, 96)] vs base+17 [(128, 138, 17, 133), (145, 154, 16, 84)] → WRONG
+  014 ios      line2-removed    bands [(128, 138, 17, 133)] vs base+17 [(128, 138, 17, 133), (145, 154, 16, 84)] → WRONG
+  014 ios      line1-truncated  bands [(128, 138, 17, 62), (145, 154, 16, 84)] vs base+17 [(128, 138, 17, 133), (145, 154, 16, 84)] → WRONG
+  014 android  fixed U1         bands [(128, 139, 17, 132), (144, 155, 16, 84)] vs base+17 [(128, 139, 17, 132), (144, 155, 16, 84)] → OK
+  014 android  heading-2y       bands [(126, 137, 17, 132), (142, 153, 16, 84)] vs base+17 [(128, 139, 17, 132), (144, 155, 16, 84)] → WRONG
+  014 android  heading+12x      bands [(128, 139, 29, 144), (144, 155, 28, 96)] vs base+17 [(128, 139, 17, 132), (144, 155, 16, 84)] → WRONG
+  014 android  line2-removed    bands [(128, 139, 17, 132)] vs base+17 [(128, 139, 17, 132), (144, 155, 16, 84)] → WRONG
+  014 android  line1-truncated  bands [(128, 139, 17, 62), (144, 155, 16, 84)] vs base+17 [(128, 139, 17, 132), (144, 155, 16, 84)] → WRONG

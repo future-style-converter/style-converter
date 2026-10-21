@@ -1,0 +1,10 @@
+label=M-U2g-unbounded-not-identity file=runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt
+sha256 pre=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 mutated=ca99ff35b4e4235fd5e3bcd095fcfa467ced2cc6e73dd92b5bacce84c2d9c97d post=ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9 restored=OK
+mutation applied=yes
+mutated run rc=1 (RED)
+  red: PercentContentBoxBandTest > P-U2-3 an unbounded axis is identity - FillNode parity FAILED
+  red: 8 tests completed, 1 failed
+  red: > Task :runtime:testDebugUnitTest FAILED
+restored run rc=0 (GREEN)
+  green: BUILD SUCCESSFUL in 4s
+  green tally: sizing.PercentContentBoxBandTest" tests="8" skipped="0" failures="0" errors="0"

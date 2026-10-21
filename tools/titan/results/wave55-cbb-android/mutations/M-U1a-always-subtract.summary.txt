@@ -1,0 +1,13 @@
+label=M-U1a-always-subtract file=runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt
+sha256 pre=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 mutated=4237459d15c7379726990b904f9268aa40870330864b59f540041a8a9051de57 post=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 restored=OK
+mutation applied=yes
+mutated run rc=1 (RED)
+  red: > Task :runtime:testDebugUnitTest FAILED
+  red: DynamicValueResolverTest > CBB the dark stage breadcrumbs a declared content-box and still subtracts FAILED
+  red: DynamicValueResolverTest > CBB WPT nested clip chain keeps 200 by 100 at both levels FAILED
+  red: DynamicValueResolverTest > CBB WPT content-box container publishes its declared size FAILED
+  red: DynamicValueResolverTest > CBB census - the readers that see a different block are exactly the carriers and the control FAILED
+  red: 33 tests completed, 4 failed
+restored run rc=0 (GREEN)
+  green: BUILD SUCCESSFUL in 2s
+  green tally: core.variables.DynamicValueResolverTest" tests="33" skipped="0" failures="0" errors="0"

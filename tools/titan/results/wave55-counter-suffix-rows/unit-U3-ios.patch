@@ -1,0 +1,208 @@
+# unit-U3-ios.patch — wave55 L5 (counter-suffix-rows) unit U3-ios: FontVariantNumericApplier.swift + TypographyAggregate.swift (+tabularNums) + StyleBuilder.swift (+2 lines) + NEW FontVariantNumericTabularTests.swift
+# base tree 611c9f93 (campaign/applier-campaign; = dev 0d0d3a3d + the wave-55 plan + opening-gate records). Lane note: tools/titan/results/wave55-counter-suffix-rows/_note.md
+# fix-r1 re-cut: FontVariantNumericApplier.swift's header now states the run-wide tnum radius (period.tf / two.tf; skeptic defect 1 + nit 4) — comment-only
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/StyleBuilder.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/StyleBuilder.swift
+index 699090a3..7b734091 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/StyleBuilder.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/StyleBuilder.swift
+@@ -115,6 +115,7 @@ struct TextConfig {
+     // level font from TypographyApplier), so the caps variant has to be
+     // composed into that font.
+     var smallCaps: Bool           = false
++    var tabularNums: Bool         = false  // Wave 55 (L5 U3): css-fonts-4 tabular-nums → labelFont's .monospacedDigit(), same reason as smallCaps
+     // Fidelity wave 2 — text-shadow layers applied at the GLYPH level
+     // (css-text-decor-3 §4). One `.shadow(...)` per layer chains onto
+     // the label's Text; the old box-level shadow haloed the container.
+@@ -503,6 +504,7 @@ enum StyleBuilder {
+             // and per-layer text-shadow (css-text-decor-3 §4).
+             s.text.noWrap = agg.noWrap
+             s.text.smallCaps = agg.smallCaps
++            if let t = agg.tabularNums { s.text.tabularNums = t }  // Wave 55 (L5 U3): declared numeric spacing only; nil keeps the face default
+             s.text.shadows = agg.textShadowLayers
+             // Wave 19 — mirror the aggregate's line cap (line-clamp /
+             // max-lines, css-overflow-4 §5) so the label's inner
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/TypographyAggregate.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/TypographyAggregate.swift
+index 7404564b..dbe4d183 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/TypographyAggregate.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/TypographyAggregate.swift
+@@ -66,6 +66,9 @@ struct TypographyAggregate: Equatable {
+     var fontStretchPercent: CGFloat? = nil
+     /// True when `small-caps` was specified via `font-variant-caps`.
+     var smallCaps: Bool = false
++    /// `font-variant-numeric` spacing: true = `tabular-nums`, false =
++    /// `proportional-nums`, nil = undeclared (FontVariantNumericApplier).
++    var tabularNums: Bool? = nil
+ 
+     // MARK: - Letter / word / line metrics
+ 
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/font-variant/FontVariantNumericApplier.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/font-variant/FontVariantNumericApplier.swift
+index 1de86979..b456e3b8 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/font-variant/FontVariantNumericApplier.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/font-variant/FontVariantNumericApplier.swift
+@@ -1,16 +1,71 @@
+ //
+ //  FontVariantNumericApplier.swift
+-//  StyleEngine/typography/font-variant — Phase 6.
++//  StyleEngine/typography/font-variant — Phase 6; wave 55, lane L5 (U3-ios).
+ //
+-//  SwiftUI Text has no direct API for `font-variant-numeric` — applier is
+-//  identity. Keyword data is still captured in the Config so a future
+-//  UIFontDescriptor-feature applier can route it without re-parsing the IR.
++//  css-fonts-4 `font-variant-numeric`: the numeric-spacing pair
++//  `tabular-nums` / `proportional-nums` (OpenType `tnum` / `pnum`) is
++//  routed to `TypographyAggregate.tabularNums`; StyleBuilder mirrors it into
++//  `TextConfig.tabularNums`, and the label's own face composes SwiftUI's
++//  `Font.monospacedDigit()` (iOS 15+, fixed-width digits) on it — the
++//  header's old claim that "SwiftUI Text has no direct API" was false.
++//
++//  ## The defect (measured on wave54-final)
++//  css-counter-styles/counter-suffix row 9: the bidi bake stamps the UA
++//  `::marker { font-variant-numeric: tabular-nums }` rule (css-lists-3
++//  §3.1.1) on each root-owned RTL marker run, and Chromium measured the
++//  tabular glyphs (`1` run 10.38 px = Inter's `one.tf`). Ref and Android
++//  paint the tabular `1` (ink x138-144/145, foot serif); iOS painted the
++//  proportional one (x138-141) because this applier was an identity.
++//  Reach: 6 components DECLARE it, all in counter-suffix — the property is
++//  not inherited on either native (InheritedText.inheritedTypes has no
++//  `FontVariantNumeric`), so it is declared-only here too.
++//
++//  ## Radius inside a run (fix-r1: more than the digit)
++//  `monospacedDigit()` turns on the face's whole `tnum` feature for the
++//  run, and Inter's `tnum` maps punctuation as well as digits (61 single
++//  substitutions): `period` → `period.tf` (advance 4.609 → 4.297 px at
++//  16 px) and `two` → `two.tf` repaint too. So all six carrier runs — the
++//  `.` / `1` / `.` / `2` runs of rows 9-10 and the period of rows 11-12's
++//  `א.` / `ב.` (the Hebrew letters come from a fallback face, no Inter
++//  `tnum`) — change ink, toward the ref: Chromium applied the same feature
++//  (the wire's `.` runs are 4.3 px wide = `period.tf`).
++//
++//  ## Scope boundary (no silent fallthrough)
++//  - The other keyword groups (lining/oldstyle figures, fractions,
++//    ordinal, slashed-zero) stay unrouted: no Font API, no corpus carrier.
++//  - TODO(wave55-L5): the CONTAINER-level font TypographyApplier builds
++//    (its `smallCaps` line) does not compose the flag — no corpus carrier;
++//    only the label's own face (PlaceholderLabel.labelFont) does.
++//  - The greedy pre-break's measurement UIFont does not carry the feature.
++//    Harmless for the 6 carriers: `white-space: pre` runs of one or two
++//    glyphs that never break (the run's wire width sizes its frame).
+ //
+ 
+ import Foundation
+ 
+ enum FontVariantNumericApplier {
++
++    /// The wire spellings of the two numeric-spacing keywords: the
++    /// converter emits the SHOUTY enum (`TABULAR_NUMS`), which
++    /// FontVariantKeywordParse lower-cases to `tabular_nums`; the
++    /// hyphenated CSS spelling is accepted too.
++    private static let tabular: Set<String> = ["tabular_nums", "tabular-nums"]
++    /// `proportional-nums` — the explicit opt-out (OpenType `pnum`).
++    private static let proportional: Set<String> = ["proportional_nums", "proportional-nums"]
++
+     static func contribute(_ cfg: FontVariantKeywordListConfig?, into agg: inout TypographyAggregate) {
+-        _ = cfg; _ = agg   // no-op; TODO(phase-6+): UIFontDescriptor feature routing.
++        // Undeclared → leave `tabularNums` unset (the face's own default).
++        guard let keywords = cfg?.keywords else { return }
++        if keywords.contains(where: { tabular.contains($0) }) {
++            // `tnum`: fixed-width digits; flip `touched` like the caps
++            // sibling so a component declaring only this still reaches
++            // TextConfig (no silent drop).
++            agg.tabularNums = true
++            agg.touched = true
++        } else if keywords.contains(where: { proportional.contains($0) }) {
++            // `pnum`: an explicit proportional request clears the flag.
++            agg.tabularNums = false
++        }
++        // `normal` and the other groups: unset (see the scope boundary).
+     }
+ }
+diff --git a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FontVariantNumericTabularTests.swift b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FontVariantNumericTabularTests.swift
+new file mode 100644
+index 00000000..401a3492
+--- /dev/null
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FontVariantNumericTabularTests.swift
+@@ -0,0 +1,84 @@
++//
++//  FontVariantNumericTabularTests.swift
++//  StyleConverterRuntimeTests — wave 55, lane L5 (U3-ios).
++//
++//  Pins the `font-variant-numeric` numeric-spacing route (css-fonts-4):
++//  FontVariantNumericApplier sets `TypographyAggregate.tabularNums` and
++//  StyleBuilder mirrors it into `TextConfig.tabularNums`, which the
++//  label's face composes as `Font.monospacedDigit()` (that last hop is the
++//  renderer seam; its raster pin rides with it in seam-6.patch).
++//
++//  The verbatim carrier is `counter-suffix__0__4__3` — the root-owned RTL
++//  marker run "1" of tools/titan/runs/wave54-final/sections/
++//  css-counter-styles/per-test-ir/wpt__css-counter-styles__counter-suffix
++//  .json, whose wire carries `{"type":"FontVariantNumeric","data":
++//  ["TABULAR_NUMS"]}` (the bake's copy of the UA `::marker` rule,
++//  css-lists-3 §3.1.1).
++//
++//  Mutation EXECUTED by the lane (bracketed in tools/titan/results/
++//  wave55-counter-suffix-rows/_note.md): restoring the identity applier
++//  (`_ = cfg; _ = agg`) turns the tabular and StyleBuilder pins red.
++//
++
++import XCTest
++@testable import StyleConverterRuntime
++
++final class FontVariantNumericTabularTests: XCTestCase {
++
++    /// One aggregate folded from a keyword list, the applier's only input.
++    private func fold(_ keywords: [String]?) -> TypographyAggregate {
++        var agg = TypographyAggregate()
++        // nil models "no FontVariantNumeric declared" (extractor → nil).
++        let cfg = keywords.map { FontVariantKeywordListConfig(keywords: $0) }
++        FontVariantNumericApplier.contribute(cfg, into: &agg)
++        return agg
++    }
++
++    /// The wire's SHOUTY enum, lower-cased by FontVariantKeywordParse, and
++    /// the hyphenated CSS spelling both select tabular digits.
++    func testTabularNumsSetsTheFlag() {
++        XCTAssertEqual(fold(["tabular_nums"]).tabularNums, true)
++        XCTAssertEqual(fold(["tabular-nums"]).tabularNums, true)
++        // A multi-keyword value still carries the spacing keyword.
++        XCTAssertEqual(fold(["lining_nums", "tabular_nums"]).tabularNums, true)
++        // `touched` flips so a tabular-only component reaches TextConfig.
++        XCTAssertTrue(fold(["tabular_nums"]).touched)
++    }
++
++    /// `proportional-nums` is the explicit opt-out.
++    func testProportionalNumsClearsTheFlag() {
++        XCTAssertEqual(fold(["proportional_nums"]).tabularNums, false)
++    }
++
++    /// Undeclared, `normal` and the other groups leave it unset.
++    func testOtherwiseUnset() {
++        XCTAssertNil(fold(nil).tabularNums)
++        XCTAssertNil(fold(["normal"]).tabularNums)
++        XCTAssertNil(fold(["slashed_zero"]).tabularNums)
++    }
++
++    /// End to end over the VERBATIM wire property list of the "1" run.
++    func testStyleBuilderMirrorsTheVerbatimCarrierIntoTextConfig() throws {
++        let json = """
++        [{"type":"Position","data":"ABSOLUTE"},{"type":"Left","data":{"px":120.59}},
++         {"type":"Top","data":{"px":2}},{"type":"Width","data":{"type":"length","px":10.38}},
++         {"type":"Height","data":{"type":"length","px":20}},
++         {"type":"LineHeight","data":{"original":{"type":"length","px":20}}},
++         {"type":"WhiteSpace","data":"PRE"},{"type":"Direction","data":"LTR"},
++         {"type":"TextAlign","data":"LEFT"},
++         {"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},
++         {"type":"FontFamily","data":["Inter","-apple-system","system-ui","Segoe UI","Roboto","Oxygen","Ubuntu","sans-serif"]},
++         {"type":"FontSize","data":{"px":16,"original":{"type":"length","px":16}}},
++         {"type":"FontStyle","data":"normal"},{"type":"FontWeight","data":400},
++         {"type":"FontVariantNumeric","data":["TABULAR_NUMS"]}]
++        """
++        let props = try JSONDecoder().decode([IRProperty].self, from: Data(json.utf8))
++        // The applier saw the wire keyword through the real extractor.
++        XCTAssertEqual(StyleBuilder.build(from: props).typography?.tabularNums, true)
++        // …and the label's TextConfig carries it to labelFont.
++        XCTAssertTrue(StyleBuilder.build(from: props).text.tabularNums)
++        // Without the declaration the label keeps the face default.
++        let without = props.filter { $0.type != "FontVariantNumeric" }
++        XCTAssertFalse(StyleBuilder.build(from: without).text.tabularNums)
++    }
++}

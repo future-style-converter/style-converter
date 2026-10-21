@@ -1,0 +1,92 @@
+# fix-r6.zones.py b40f0062bf838b30 — residual-read.py 40211eb03f6835cc, expectations.json 8fbfc83a9ba3fdaa, probes-teeth.py 90c8cb64be93dbe9, probes-teeth-r2.py 590a1858f748ee8a; base wave54-final (= wave55-open byte-identical)
+
+## 1. coverage: 43 gating + 5 tally-only keys = 48 keys on 35 cells; cells without a declaration: 0
+
+## 2. windows: each cell declaring `windows` read WITHOUT them; leftover clusters (bbox incl., px) → window = bbox + 1 px (half-open)
+   css-text/bidi/bidi-tab-001.html android                                  L3 bidi-fixed                without windows: outside 587 · vacated 54 · non-class 0
+      cluster x27-37 y86-105 (91 px)
+      cluster x27-37 y186-205 (91 px)
+      cluster x27-37 y226-245 (91 px)
+      cluster x113-122 y110-125 (63 px)
+      cluster x126-136 y86-105 (83 px)
+      cluster x126-136 y186-205 (83 px)
+      cluster x126-136 y226-245 (83 px)
+      cluster x210-219 y110-125 (56 px)
+   filter-effects/backdrop-filter-nested-border-radius-clip-2.html android  L2 U1-fixed                  without windows: outside 57 · vacated 12 · non-class 0
+      cluster x26-42 y26-42 (23 px)
+      cluster x26-42 y109-125 (23 px)
+      cluster x209-225 y109-125 (23 px)
+   filter-effects/backdrop-filter-nested-border-radius-clip-3.html android  L2 U2-fixed                  without windows: outside 708 · vacated 0 · non-class 0
+      cluster x16-59 y112-135 (285 px)
+      cluster x212-235 y16-59 (285 px)
+      cluster x212-235 y112-135 (138 px)
+   filter-effects/backdrop-filter-nested-border-radius-clip-4.html android  L2 U1-fixed                  without windows: outside 50 · vacated 3 · non-class 0
+      cluster x26-41 y27-49 (29 px)
+      cluster x26-34 y97-105 (12 px)
+      cluster x177-185 y97-105 (12 px)
+   filter-effects/backdrop-filter-nested-border-radius-clip.html android    L2 U1-fixed                  without windows: outside 93 · vacated 10 · non-class 0
+      cluster x26-45 y26-49 (33 px)
+      cluster x26-49 y102-125 (37 px)
+      cluster x202-225 y106-125 (33 px)
+
+WINDOWS = {
+    'css-text/bidi/bidi-tab-001.html android': [(26, 85, 39, 107), (26, 185, 39, 207), (26, 225, 39, 247), (112, 109, 124, 127), (125, 85, 138, 107), (125, 185, 138, 207), (125, 225, 138, 247), (209, 109, 221, 127)],
+    'filter-effects/backdrop-filter-nested-border-radius-clip-2.html android': [(25, 25, 44, 44), (25, 108, 44, 127), (208, 108, 227, 127)],
+    'filter-effects/backdrop-filter-nested-border-radius-clip-3.html android': [(15, 111, 61, 137), (211, 15, 237, 61), (211, 111, 237, 137)],
+    'filter-effects/backdrop-filter-nested-border-radius-clip-4.html android': [(25, 26, 43, 51), (25, 96, 36, 107), (176, 96, 187, 107)],
+    'filter-effects/backdrop-filter-nested-border-radius-clip.html android': [(25, 25, 47, 51), (25, 101, 51, 127), (201, 105, 227, 127)],
+}
+   installed WINDOWS literal == the derivation
+
+## 3. re-measure: every fixed picture of every declared cell with the FINAL declaration (outside / vacated / non-class; 0 / 0 / 0 required)
+      css-anchor-position/anchor-position-multicol-nested-001.html android     L3 stack-fixed               0 / 0 / 0   keys 1
+      css-counter-styles/cjk-decimal/css3-counter-styles-005.html android      L5 fixed                     0 / 0 / 0   keys 1
+      css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios          L5 fixed                     0 / 0 / 0   keys 1
+      css-counter-styles/counter-suffix.html android                           L5 fixed                     0 / 0 / 0   keys 2
+      css-counter-styles/counter-suffix.html ios                               L5 fixed                     0 / 0 / 0   keys 4
+      css-flexbox/abspos/abspos-autopos-htb-ltr.html android                   L2 U1-fixed                  0 / 0 / 0   keys 1
+      css-flexbox/abspos/abspos-autopos-vlr-ltr.html android                   L2 U1-fixed                  0 / 0 / 0   keys 1
+      css-flexbox/abspos/abspos-autopos-vrl-ltr.html android                   L2 U1-fixed                  0 / 0 / 0   keys 1
+      css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html android L6 X-fixed                   0 / 0 / 0   keys 1
+   ~~ css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html android L6 X-fixed                   42 / 0 / 0   keys 1   (round-3 N5: safe-002 has no passing fixed picture — its replay keeps 50 crossing px; not a window source)
+      css-grid/abspos/grid-abspos-staticpos-align-self-001.html android        L6 X-fixed                   0 / 0 / 0   keys 1
+      css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html android    L6 X-fixed                   0 / 0 / 0   keys 1
+      css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html android L6 X-fixed                   0 / 0 / 0   keys 1
+      css-grid/abspos/grid-abspos-staticpos-justify-self-001.html android      L6 X-fixed                   0 / 0 / 0   keys 1
+      css-text-decor/text-decoration-inset-005.html android                    L4 C-fixed                   0 / 0 / 0   keys 1
+      css-text-decor/text-decoration-inset-005.html android                    L4 U1-fixed                  0 / 0 / 0   keys 1
+      css-text-decor/text-decoration-inset-005.html ios                        L4 C-fixed                   0 / 0 / 0   keys 2
+      css-text-decor/text-decoration-inset-005.html ios                        L4 U1-fixed                  0 / 0 / 0   keys 2
+      css-text-decor/text-decoration-inset-006.html android                    L4 C-fixed                   0 / 0 / 0   keys 1
+      css-text-decor/text-decoration-inset-006.html android                    L4 U1-fixed                  0 / 0 / 0   keys 1
+      css-text-decor/text-decoration-inset-006.html ios                        L4 C-fixed                   0 / 0 / 0   keys 2
+      css-text-decor/text-decoration-inset-006.html ios                        L4 U1-fixed                  0 / 0 / 0   keys 2
+      css-text-decor/text-decoration-inset-011.html android                    L4 C-fixed                   0 / 0 / 0   keys 1
+      css-text-decor/text-decoration-inset-011.html ios                        L4 C-fixed                   0 / 0 / 0   keys 1
+      css-text-decor/text-decoration-inset-014.html android                    L4 C-fixed                   0 / 0 / 0   keys 2
+      css-text-decor/text-decoration-inset-014.html android                    L4 U1-fixed                  0 / 0 / 0   keys 2
+      css-text-decor/text-decoration-inset-014.html ios                        L4 C-fixed                   0 / 0 / 0   keys 2
+      css-text-decor/text-decoration-inset-014.html ios                        L4 U1-fixed                  0 / 0 / 0   keys 2
+      css-text/bidi/bidi-tab-001.html android                                  L3 bidi-fixed                0 / 0 / 0   keys 1
+      css-text/hyphens/hyphenate-character-001.html ios                        L1 fixed                     0 / 0 / 0   keys 2
+      css-text/hyphens/hyphenate-character-003.html ios                        L1 fixed                     0 / 0 / 0   keys 2
+      css-text/hyphens/hyphenate-character-004.html ios                        L1 fixed                     0 / 0 / 0   keys 1
+      css-writing-modes/dynamic-offset-rtl-001.html android                    L3 001-fixed                 0 / 0 / 0   keys 1
+      css-writing-modes/dynamic-offset-rtl-002.html android                    L3 002-fixed                 0 / 0 / 0   keys 1
+      css-writing-modes/dynamic-offset-vrl-rtl-001.html android                L3 r2-L3-vrl-rtl-001-fixed   0 / 0 / 0   keys 1
+      filter-effects/backdrop-filter-clip-rect.html android                    L6 PO-fixed                  0 / 0 / 0   keys 1
+      filter-effects/backdrop-filter-nested-border-radius-clip-2.html android  L2 U1-fixed                  0 / 0 / 0   keys 1
+      filter-effects/backdrop-filter-nested-border-radius-clip-3.html android  L2 U2-fixed                  0 / 0 / 0   keys 2
+      filter-effects/backdrop-filter-nested-border-radius-clip-4.html android  L2 U1-fixed                  0 / 0 / 0   keys 1
+      filter-effects/backdrop-filter-nested-border-radius-clip.html android    L2 U1-fixed                  0 / 0 / 0   keys 1
+      selectors/dir-style-02a.html android                                     L3 dir-row6-fixed            0 / 0 / 0   keys 3
+
+## 4. the anti-aliasing tolerances: the smallest value at which every fixed picture of the cells using it reads 0 (and with none)
+   NEUTRAL_TOL  (neutral  cells) non-zero px over the fixed pictures at: 0 → 0 · 1 → 0 · 2 → 0; with no AA allowance: 46726 non-class px; installed 2
+   RAMP_TOL     (ramp     cells) non-zero px over the fixed pictures at: 0 → 0 · 1 → 0 · 3 → 0; with no AA allowance: 1526 non-class px; installed 3
+   SEG_TOL      (segment  cells) non-zero px over the fixed pictures at: 0 → 0 · 1 → 0 · 3 → 0; with no AA allowance: 152 non-class px; installed 3
+   BOX_TOL      (box      cells) non-zero px over the fixed pictures at: 8 → 71 · 10 → 26 · 12 → 8 · 13 → 6 · 14 → 0; with no AA allowance: 933 non-class px; installed 14
+
+   cells with no fixed picture: none
+
+RESULT: 5 cells carry windows; 41 fixed pictures re-read, 0 not 0 / 0 / 0; WINDOWS literal in sync; cells without a declaration 0

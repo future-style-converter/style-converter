@@ -1,0 +1,9 @@
+wire-differential (classify)
+  PRE     <wt:wl7a-pre>
+  POST    <wt:wl7a-post>
+  OUT     /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave55-wl7a
+  EXPECT  <scratch>/wl7a-expect-cs.txt (1 expected line(s))
+  RUN     /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave55-open (sections: css-anchor-position css-backgrounds css-counter-styles css-text css-writing-modes selectors)
+MISSING CONTENT-CHANGED css-counter-styles/wpt__css-counter-styles__counter-suffix.json (expected, not observed)
+identical 288 · content-changed 0 · renumbered 0 · one-sided 0 · renumbered-anomalous 0
+verdict: exit 5 — changed set differs from the expect file

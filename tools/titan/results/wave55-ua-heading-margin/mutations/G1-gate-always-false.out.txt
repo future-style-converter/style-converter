@@ -1,0 +1,19 @@
+{
+ "name": "G1-gate-always-false",
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAHeadingFoldGate.kt",
+ "pre": "e0e3186dcbd7cddc05d80d32e3a4a582eee893ec40bee93889f47a66efccc578",
+ "mutated": "fd7cba53a0f825f9f0a65d5a4ddebe519af17dd8f0e2424fcae4c145189a2cc9",
+ "post": "e0e3186dcbd7cddc05d80d32e3a4a582eee893ec40bee93889f47a66efccc578",
+ "red_rc": 1,
+ "red_failures": [
+  "UAElementFontRuleTest > fold gate - the folded hosts take the face (005, 006 32, 014 26), the bailing 011 keeps its list",
+  "UAHeadingFoldGateTest > inset-011 - the bailing h1 host stands down (the control)",
+  "UAHeadingFoldGateTest > a heading with children but no runs stands down (the stacked block case)",
+  "UAHeadingFoldGateTest > a non-heading with children keeps the old flag (never read by the rule)",
+  "UAHeadingFoldGateTest > a relative heading host stands down even when its runs would fold"
+ ],
+ "red_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/1; UAHeadingFoldGateTest 9/4",
+ "green_rc": 0,
+ "green_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "verdict": "RED-THEN-GREEN"
+}

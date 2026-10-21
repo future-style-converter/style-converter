@@ -1,0 +1,99 @@
+=== U2-M1 — mutated tools/titan/wire-differential.mjs (python rc 0; sha256 now 0552504e5b59527b…)
+--- red run: node --test tools/titan/wire-differential.test.mjs
+not ok 2 - P2 one content change: expected → 0; unexpected → 5 UNEXPECTED; expected but absent → 5 MISSING (defect a)
+  error: |-
+  name: 'AssertionError'
+not ok 3 - P3 a uniform +2 shift after a +2 content change is RENUMBERED; a non-uniform or wrong shift is ANOMALOUS (defect e)
+  error: |-
+  name: 'AssertionError'
+not ok 4 - P4 a one-sided document → 4; a section present only on POST → 4 (defect d)
+  error: |-
+  name: 'AssertionError'
+# Subtest: P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+not ok 5 - P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+  error: |-
+  name: 'AssertionError'
+not ok 6 - P5b the wave-54 mis-invocation shape (no per-test-ir on either side) → 4; nothing at all → 3; --no-status is printed
+  error: |-
+  name: 'AssertionError'
+not ok 9 - P7 the run path: stub steps on both trees → status.tsv rows and exit 0; a failing convert on POST is never a WARN
+  error: |-
+  name: 'AssertionError'
+# pass 3
+# fail 6
+red run rc=1
+--- green run
+# Subtest: P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+ok 5 - P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+# pass 9
+# fail 0
+green run rc=0
+
+=== U2-M2 — mutated tools/titan/wire-differential.mjs (python rc 0; sha256 now ca558b3a010e82ec…)
+--- red run: node --test tools/titan/wire-differential.test.mjs
+not ok 4 - P4 a one-sided document → 4; a section present only on POST → 4 (defect d)
+  error: |-
+  name: 'AssertionError'
+# Subtest: P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+ok 5 - P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+# pass 8
+# fail 1
+red run rc=1
+--- green run
+# Subtest: P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+ok 5 - P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+# pass 9
+# fail 0
+green run rc=0
+
+=== U2-M3 — mutated tools/titan/wire-differential.mjs (python rc 0; sha256 now fc321d12e009619b…)
+--- red run: node --test tools/titan/wire-differential.test.mjs
+not ok 3 - P3 a uniform +2 shift after a +2 content change is RENUMBERED; a non-uniform or wrong shift is ANOMALOUS (defect e)
+  error: |-
+  name: 'AssertionError'
+# Subtest: P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+ok 5 - P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+# pass 8
+# fail 1
+red run rc=1
+--- green run
+# Subtest: P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+ok 5 - P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+# pass 9
+# fail 0
+green run rc=0
+
+=== U2-M4 — mutated tools/titan/wire-differential.sh (python rc 0; sha256 now a9eb6b8ae6e84455…)
+--- red run: node --test tools/titan/wire-differential.test.mjs
+# Subtest: P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+ok 5 - P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+not ok 7 - P6 --dry-run from another cwd with a relative OUT prints an absolute OUT equal to its realpath, and creates nothing
+  error: |-
+  name: 'AssertionError'
+# pass 8
+# fail 1
+red run rc=1
+--- green run
+# Subtest: P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+ok 5 - P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+# pass 9
+# fail 0
+green run rc=0
+
+=== U2-M5 — mutated tools/titan/wire-differential.sh (python rc 0; sha256 now d1053d9b63916b43…)
+--- red run: node --test tools/titan/wire-differential.test.mjs
+# Subtest: P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+ok 5 - P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+not ok 8 - P6 PRE == POST → 2; PRE = this script's own checkout → 2
+  error: |-
+  name: 'AssertionError'
+# pass 8
+# fail 1
+red run rc=1
+--- green run
+# Subtest: P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+ok 5 - P5 rc_convert=1 → 3; an asymmetric extract FAIL → 3; a symmetric FAIL → 0 + NOTE (defects c, f)
+# pass 9
+# fail 0
+green run rc=0
+

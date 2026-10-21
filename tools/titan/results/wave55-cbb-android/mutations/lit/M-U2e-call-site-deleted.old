@@ -1,0 +1,2 @@
+        if (PercentContentBoxBand.owns(rawW, config, config.contentBoxInflateX, pctW != null)) r = r.percentFillPlusBand(rawW, config.contentBoxInflateX, horizontal = true)
+        else if (pctW != null) r = r.percentWidthClamped(pctW.fraction, pctW.minDp, pctW.maxDp)

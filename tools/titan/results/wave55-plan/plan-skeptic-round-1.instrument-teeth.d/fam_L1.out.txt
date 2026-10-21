@@ -1,0 +1,21 @@
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 001 ios | fixed | PASS | hyphen-ios-linebox 001 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 003 ios | fixed | PASS | hyphen-ios-linebox 003 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 004 ios | fixed | PASS | hyphen-ios-linebox 004 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 001 ios | hyph-removed | PASS | hyphen-ios-linebox 001 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 003 ios | hyph-removed | PASS | hyphen-ios-linebox 003 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 004 ios | hyph-removed | PASS | hyphen-ios-linebox 004 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 001 ios | lines-2-3-swapped | FAIL | 0, 0] → LINEBOX WRONG (lines: groups [6, 4, 3, 3] vs ref [5, 4, 3, 3]; pitch: group 1 line 2 offset -3 vs its line 1 0 (run pitch ≠ the ref line box))
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 003 ios | lines-2-3-swapped | FAIL | 0, 0] → LINEBOX WRONG (lines: groups [6, 4, 3, 3] vs ref [5, 4, 3, 3]; pitch: group 1 line 2 offset -3 vs its line 1 0 (run pitch ≠ the ref line box))
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 004 ios | lines-2-3-swapped | PASS | hyphen-ios-linebox 004 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 001 ios | right-half-cut | FAIL | group-first [0, 0, 0, 0] in-group spread [1, 0, 0, 1] → LINEBOX WRONG (pitch: group 1 line 4 offset -1 vs its line 1 0 (run pitch ≠ the ref line box))
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 003 ios | right-half-cut | PASS | hyphen-ios-linebox 003 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 004 ios | right-half-cut | FAIL | : group 1 line 2 offset 0 vs its line 1 1 (run pitch ≠ the ref line box); drift: group-first offsets [1, 0, 1, 2] (want non-decreasing, each 0 or +1))
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 001 ios | text+3x | PASS | hyphen-ios-linebox 001 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 003 ios | text+3x | PASS | hyphen-ios-linebox 003 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 004 ios | text+3x | PASS | hyphen-ios-linebox 004 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 001 ios | text-2x | PASS | hyphen-ios-linebox 001 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 003 ios | text-2x | PASS | hyphen-ios-linebox 003 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 004 ios | text-2x | PASS | hyphen-ios-linebox 004 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 001 ios | g2l1+3x | PASS | hyphen-ios-linebox 001 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 003 ios | g2l1+3x | PASS | hyphen-ios-linebox 003 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK
+L1 | hyphen-ios-linebox.geometry.py | hyphen-ios-linebox 004 ios | g2l1+3x | PASS | hyphen-ios-linebox 004 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] → LINEBOX OK

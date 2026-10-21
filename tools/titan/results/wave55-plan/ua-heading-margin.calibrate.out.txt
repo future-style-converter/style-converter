@@ -1,0 +1,10 @@
+text-decoration-inset-001 ios real=0.9707 armC=0.9988 allowance=0.0281
+text-decoration-inset-001 android real=0.9848 armC=0.9978 allowance=0.0130
+text-decoration-inset-002 ios real=0.9706 armC=0.9988 allowance=0.0282
+text-decoration-inset-002 android real=0.9858 armC=0.9975 allowance=0.0117
+text-decoration-inset-003 ios real=0.9706 armC=0.9988 allowance=0.0282
+text-decoration-inset-003 android real=0.984 armC=0.9976 allowance=0.0136
+text-decoration-inset-004 ios real=0.9634 armC=0.9979 allowance=0.0345
+text-decoration-inset-004 android real=0.9859 armC=0.9966 allowance=0.0107
+ios allowance min=0.0281 max=0.0345 mean=0.0297
+android allowance min=0.0107 max=0.0136 mean=0.0123

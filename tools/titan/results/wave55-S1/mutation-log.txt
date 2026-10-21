@@ -1,0 +1,90 @@
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt sha256 f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0  (S1-L2a: L2 U1: a WPT content-box box subtracts its band again (ContainingBlockBands.subtracts always true); occurrences 1)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt sha256 f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0  (S1-L2a) BYTE-EXACT
+  mutated rc=1 (6s) DynamicValueResolverTest > CBB the dark stage breadcrumbs a declared content-box and still subtracts FAILED | DynamicValueResolverTest > CBB WPT nested clip chain keeps 200 by 100 at both levels FAILED | DynamicValueResolverTest > CBB WPT content-box container publishes its declared size FAILED | DynamicValueResolverTest > CBB census - the readers that see a different block are exactly the carriers and the control FAILED | 33 tests completed, 4 failed | BUILD FAILED in 6s
+  restored rc=0 (3s) BUILD SUCCESSFUL in 3s
+  VERDICT S1-L2a: OK (red -> restore byte-exact -> green)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9  (S1-L2b: L2 U2: PercentContentBoxBand.owns drops the zero-band guard; occurrences 1)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentContentBoxBand.kt sha256 ad266adf5ff9ebc188f795d098afb8e1085ae95739581bf5fb8fb436723b26a9  (S1-L2b) BYTE-EXACT
+  mutated rc=1 (2s) > Task :runtime:testDebugUnitTest FAILED | PercentContentBoxBandTest > P-U2-2 owns exactly the WPT content-box percent axis with a band FAILED | PercentContentBoxBandTest > P-U2-6 census - owns selects exactly middle W and H of clip-3 among the percentage axes FAILED | 8 tests completed, 2 failed | BUILD FAILED in 1s
+  restored rc=0 (2s) BUILD SUCCESSFUL in 1s
+  VERDICT S1-L2b: OK (red -> restore byte-exact -> green)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 754085db42a04caafc50a46f71b1fe21d83d528388e22deda84192db140ffc3a  (S1-L3a: L3 U1: the gate engages an RTL parent too (drops !parentRtl); occurrences 1)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentSlotGate.kt sha256 754085db42a04caafc50a46f71b1fe21d83d528388e22deda84192db140ffc3a  (S1-L3a) BYTE-EXACT
+  mutated rc=1 (2s) > Task :runtime:testDebugUnitTest FAILED | PositionedParentSlotGateTest > U1a engages - every row of the truth table FAILED | PositionedParentSlotGateTest > U1c slotModifier - identity, the one-element mount, the RTL breadcrumb FAILED | 3 tests completed, 2 failed | BUILD FAILED in 1s
+  restored rc=0 (1s) BUILD SUCCESSFUL in 1s
+  VERDICT S1-L3a: OK (red -> restore byte-exact -> green)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493  (S1-L3b: L3 U2: the RTL origin is +max instead of -max; occurrences 1)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionedParentRtlOrigin.kt sha256 dc7a408e1a27ada4188ca5ce497933419437266ac2fc5a1bbd62e27680bf6493  (S1-L3b) BYTE-EXACT
+  mutated rc=1 (2s) > Task :runtime:testDebugUnitTest FAILED | PositionedParentRtlOriginTest > U2a originPx is minus the bounded max width, none when unbounded FAILED | PositionedParentRtlOriginTest > U2c inkLeftPx - the physical-left origin and the element's place FAILED | 5 tests completed, 2 failed | BUILD FAILED in 1s
+  restored rc=0 (1s) BUILD SUCCESSFUL in 1s
+  VERDICT S1-L3b: OK (red -> restore byte-exact -> green)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMargin.kt sha256 3bb03d886fb06ced20e65dc170197cb27310068371d575c120554f809e998a65  (S1-L4a: L4 U1-android: the UA heading margin ignores the WPT-capture gate; occurrences 1)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/spacing/UaPositionedHeadingMargin.kt sha256 3bb03d886fb06ced20e65dc170197cb27310068371d575c120554f809e998a65  (S1-L4a) BYTE-EXACT
+  mutated rc=1 (2s) > Task :runtime:testDebugUnitTest FAILED | UaPositionedHeadingMarginTest > capture off - the SAME list FAILED | 13 tests completed, 1 failed | BUILD FAILED in 1s
+  restored rc=0 (2s) BUILD SUCCESSFUL in 1s
+  VERDICT S1-L4a: OK (red -> restore byte-exact -> green)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerSuffixGap.kt sha256 8076fff4e9967b80b6e75d144aa0428a770d6cba33b82df82b0236f4abb99622  (S1-L5a: L5 U2o-android: ListMarkerSuffixGap.gapDp never answers 0 after U+3001; occurrences 1)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerSuffixGap.kt sha256 8076fff4e9967b80b6e75d144aa0428a770d6cba33b82df82b0236f4abb99622  (S1-L5a) BYTE-EXACT
+  mutated rc=1 (1s) > Task :runtime:testDebugUnitTest FAILED | ListMarkerSuffixGapTest > an ideographic comma suffix takes no gap FAILED | 4 tests completed, 1 failed | BUILD FAILED in 1s
+  restored rc=0 (1s) BUILD SUCCESSFUL in 1s
+  VERDICT S1-L5a: OK (red -> restore byte-exact -> green)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 e0b379be0297725b5e865f9fb42c5b0290427a40589f4f49597e3f30f569f8ec  (S1-L6a: L6 U2 (fix-r1): a CLIPPING box also paints its band behind content (drops !shouldClip at the facade call); occurrences 1)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 e0b379be0297725b5e865f9fb42c5b0290427a40589f4f49597e3f30f569f8ec  (S1-L6a) BYTE-EXACT
+  mutated rc=1 (2s) > Task :runtime:testDebugUnitTest FAILED | BorderSidesBehindContentTest > P3i - a clipping SOLID box keeps androidx's band (drawn after its clipped content) FAILED | BorderSidesBehindContentTest > P3h - a clipping INSET input keeps its slow-path band outer of the background FAILED | 9 tests completed, 2 failed | BUILD FAILED in 1s
+  restored rc=0 (2s) BUILD SUCCESSFUL in 1s
+  VERDICT S1-L6a: OK (red -> restore byte-exact -> green)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAHeadingFoldGate.kt sha256 e0e3186dcbd7cddc05d80d32e3a4a582eee893ec40bee93889f47a66efccc578  (S1-L4b: L4 U2-android: a LEAF heading stands its face down (children-empty branch answers true); occurrences 1)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAHeadingFoldGate.kt sha256 e0e3186dcbd7cddc05d80d32e3a4a582eee893ec40bee93889f47a66efccc578  (S1-L4b) BYTE-EXACT
+  mutated rc=1 (2s) > Task :runtime:testDebugUnitTest FAILED | UAHeadingFoldGateTest > a leaf heading applies FAILED | 9 tests completed, 1 failed | BUILD FAILED in 2s
+  restored rc=0 (2s) BUILD SUCCESSFUL in 1s
+  VERDICT S1-L4b: OK (red -> restore byte-exact -> green)
+MUTATING runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 e0b379be0297725b5e865f9fb42c5b0290427a40589f4f49597e3f30f569f8ec  (S1-L6b: L6 U2: a NON-clipping box loses its re-chained band (the applySidesBehindContent line dropped); occurrences 1)
+RESTORED runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt sha256 e0b379be0297725b5e865f9fb42c5b0290427a40589f4f49597e3f30f569f8ec  (S1-L6b) BYTE-EXACT
+  mutated rc=1 (2s) BorderSidesBehindContentTest > P3b - with a background the fast-path band sits AFTER (inner of) the Background element FAILED | BorderSidesBehindContentTest > P3a - the verbatim flex wire chains the band INNER of the background-less colors step FAILED | BorderSidesBehindContentTest > P3d - under opacity the band joins the element's group (css-color-4 §3_3) FAILED | BorderSidesBehindContentTest > P3c - the verbatim DOTTED wire's slow-path draw node sits AFTER the Background element FAILED | 9 tests completed, 4 failed | BUILD FAILED in 1s
+  restored rc=0 (1s) BUILD SUCCESSFUL in 1s
+  VERDICT S1-L6b: OK (red -> restore byte-exact -> green)
+MUTATING tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b  (S1-L7a: L7 U2: wire-differential accepts ANY uniform shift as a renumbering (drops the running-delta equality); occurrences 1)
+RESTORED tools/titan/wire-differential.mjs sha256 97fc097b64cc7964800441c96e0760d3831d41f7eb151fd3fdd3f377cf63394b  (S1-L7a) BYTE-EXACT
+  mutated rc=1 (2s)   error: |- | # pass 8 | # fail 1
+  restored rc=0 (2s) # pass 9 | # fail 0
+  VERDICT S1-L7a: OK (red -> restore byte-exact -> green)
+MUTATING tools/titan/bidi-marker-paint.mjs sha256 f602e3c18435c1bb8f228e767966ddd6e09cd85ea9ced0d13b8071de42d32748  (S1-L7b: L7 U5: MARKER_PAINT_INITIAL loses mixBlendMode (a blended marker would no longer decline); occurrences 1)
+RESTORED tools/titan/bidi-marker-paint.mjs sha256 f602e3c18435c1bb8f228e767966ddd6e09cd85ea9ced0d13b8071de42d32748  (S1-L7b) BYTE-EXACT
+  mutated rc=1 (0s)   error: |- | # pass 67 | # fail 1
+  restored rc=0 (0s) # pass 68 | # fail 0
+  VERDICT S1-L7b: OK (red -> restore byte-exact -> green)
+MUTATING runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0  (S1-L7c: L7 U6-web: an inert out-of-flow member no longer requires transparent ink; occurrences 1)
+RESTORED runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0  (S1-L7c) BYTE-EXACT
+  mutated rc=0 (2s)       Tests  7 passed (7)
+  restored rc=0 (2s)       Tests  7 passed (7)
+  VERDICT S1-L7c: FAIL (red -> restore byte-exact -> green)
+MUTATING runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0  (S1-L7c2: L7 U6-web re-check: same mutation (transparent ink no longer required), run against BOTH word-join test files (wave-54 + U6-web); occurrences 1)
+RESTORED runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0  (S1-L7c2) BYTE-EXACT
+  mutated rc=1 (3s)       Tests  1 failed | 18 passed (19) | ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+  restored rc=0 (2s)       Tests  19 passed (19)
+  VERDICT S1-L7c2: OK (red -> restore byte-exact -> green)
+MUTATING runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0  (S1-L7d: L7 U6-web: a FIXED member is no longer out of flow (W2's branch); occurrences 1)
+RESTORED runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts sha256 e3982ec6d652cf0df4926b458b70adab47cf017a9306dd4d2aa45c63c2028ac0  (S1-L7d) BYTE-EXACT
+  mutated rc=1 (2s)       Tests  1 failed | 6 passed (7) | ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+  restored rc=0 (2s)       Tests  7 passed (7)
+  VERDICT S1-L7d: OK (red -> restore byte-exact -> green)
+MUTATING runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift sha256 929108b6946f5141cd80c3c40070a6fed020b8943a337b9b5c63cc67cd66c637  (S1-L1a: L1 NB-ios: the ascender rounds half-to-even (banker's) instead of away from zero; occurrences 1)
+RESTORED runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift sha256 929108b6946f5141cd80c3c40070a6fed020b8943a337b9b5c63cc67cd66c637  (S1-L1a) BYTE-EXACT
+  mutated rc=65 (27s) runtimes/swiftui/Tests/StyleConverterRuntimeTests/NormalLineBoxTests.swift:154: -[StyleConverterRuntimeTests.NormalLineBoxTests testSameControlsLogTheirLineCountInputs] : Test skipped - no run | Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testSameControlsLogTheirLineCountInputs]' skipped (0.074 seconds). | 	 Executed 9 tests, with 1 test skipped and 1 failure (0 unexpected) in 0.982 (0.984) seconds | 	 Executed 9 tests, with 1 test skipped and 1 failure (0 unexpected) in 0.982 (0.985) seconds | 	 Executed 9 tests, with 1 test skipped and 1 failure (0 unexpected) in 0.982 (0.986) seconds | ** TEST FAILED **
+  restored rc=0 (16s) runtimes/swiftui/Tests/StyleConverterRuntimeTests/NormalLineBoxTests.swift:154: -[StyleConverterRuntimeTests.NormalLineBoxTests testSameControlsLogTheirLineCountInputs] : Test skipped - no run | Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testSameControlsLogTheirLineCountInputs]' skipped (0.002 seconds). | 	 Executed 9 tests, with 1 test skipped and 0 failures (0 unexpected) in 0.118 (0.369) seconds | 	 Executed 9 tests, with 1 test skipped and 0 failures (0 unexpected) in 0.118 (0.370) seconds | 	 Executed 9 tests, with 1 test skipped and 0 failures (0 unexpected) in 0.118 (0.371) seconds | ** TEST SUCCEEDED **
+  VERDICT S1-L1a: OK (red -> restore byte-exact -> green)
+MUTATING runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift sha256 929108b6946f5141cd80c3c40070a6fed020b8943a337b9b5c63cc67cd66c637  (S1-L1b: L1 NB-ios: the horizontal-writing-mode guard dropped (D22); occurrences 1)
+RESTORED runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift sha256 929108b6946f5141cd80c3c40070a6fed020b8943a337b9b5c63cc67cd66c637  (S1-L1b) BYTE-EXACT
+  mutated rc=65 (25s) runtimes/swiftui/Tests/StyleConverterRuntimeTests/NormalLineBoxTests.swift:154: -[StyleConverterRuntimeTests.NormalLineBoxTests testSameControlsLogTheirLineCountInputs] : Test skipped - no run | Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testSameControlsLogTheirLineCountInputs]' skipped (0.076 seconds). | 	 Executed 9 tests, with 1 test skipped and 2 failures (0 unexpected) in 1.198 (1.200) seconds | 	 Executed 9 tests, with 1 test skipped and 2 failures (0 unexpected) in 1.198 (1.200) seconds | 	 Executed 9 tests, with 1 test skipped and 2 failures (0 unexpected) in 1.198 (1.201) seconds | ** TEST FAILED **
+  restored rc=0 (14s) runtimes/swiftui/Tests/StyleConverterRuntimeTests/NormalLineBoxTests.swift:154: -[StyleConverterRuntimeTests.NormalLineBoxTests testSameControlsLogTheirLineCountInputs] : Test skipped - no run | Test Case '-[StyleConverterRuntimeTests.NormalLineBoxTests testSameControlsLogTheirLineCountInputs]' skipped (0.002 seconds). | 	 Executed 9 tests, with 1 test skipped and 0 failures (0 unexpected) in 0.108 (0.157) seconds | 	 Executed 9 tests, with 1 test skipped and 0 failures (0 unexpected) in 0.108 (0.157) seconds | 	 Executed 9 tests, with 1 test skipped and 0 failures (0 unexpected) in 0.108 (0.158) seconds | ** TEST SUCCEEDED **
+  VERDICT S1-L1b: OK (red -> restore byte-exact -> green)
+MUTATING runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerBidi.swift sha256 074f227c4e6dabfed388b180d63926a5bae1b5a3f4d2c8f8353cc5b058d4353b  (S1-L5b: L5 U1-ios: the marker is isolated even when its natural direction AGREES with the item; occurrences 1)
+RESTORED runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerBidi.swift sha256 074f227c4e6dabfed388b180d63926a5bae1b5a3f4d2c8f8353cc5b058d4353b  (S1-L5b) BYTE-EXACT
+  mutated rc=65 (25s) runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerBidiTests.swift:64: error: -[StyleConverterRuntimeTests.ListMarkerBidiTests testPaintedIsIdempotent] : XCTAssertEqual failed: ("⁦⁦א.⁩⁩") is not equal to ("⁦א.⁩") | Test Case '-[StyleConverterRuntimeTests.ListMarkerBidiTests testPaintedIsIdempotent]' failed (0.001 seconds). | 	 Executed 10 tests, with 5 failures (0 unexpected) in 1.172 (1.174) seconds | 	 Executed 10 tests, with 5 failures (0 unexpected) in 1.172 (1.174) seconds | 	 Executed 10 tests, with 5 failures (0 unexpected) in 1.172 (1.256) seconds | ** TEST FAILED **
+  restored rc=0 (21s) Test Case '-[StyleConverterRuntimeTests.ListMarkerBidiTests testPaintedIsIdempotent]' started. | Test Case '-[StyleConverterRuntimeTests.ListMarkerBidiTests testPaintedIsIdempotent]' passed (0.001 seconds). | 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.282 (0.318) seconds | 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.282 (0.319) seconds | 	 Executed 10 tests, with 0 failures (0 unexpected) in 0.282 (0.320) seconds | ** TEST SUCCEEDED **
+  VERDICT S1-L5b: OK (red -> restore byte-exact -> green)
+MUTATING runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift sha256 2ca760a686e7b8cb13c87e9ba6275c34987ddea77b923c94b64852c3a5cbea31  (S1-L4c: L4 U2-ios: a non-bold-tag host no longer stands down (isBold guard answers false); occurrences 1)
+RESTORED runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift sha256 2ca760a686e7b8cb13c87e9ba6275c34987ddea77b923c94b64852c3a5cbea31  (S1-L4c) BYTE-EXACT
+  mutated rc=65 (26s) runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAHeadingFoldGateTests.swift:156: error: -[StyleConverterRuntimeTests.UAHeadingFoldGateTests testNonHeadingWithChildrenKeepsTheOldFlag] : XCTAssertTrue failed | Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testNonHeadingWithChildrenKeepsTheOldFlag]' failed (1.024 seconds). | 	 Executed 7 tests, with 1 failure (0 unexpected) in 1.038 (1.110) seconds | 	 Executed 7 tests, with 1 failure (0 unexpected) in 1.038 (1.111) seconds | 	 Executed 7 tests, with 1 failure (0 unexpected) in 1.038 (1.112) seconds | ** TEST FAILED **
+  restored rc=0 (15s) Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testNonHeadingWithChildrenKeepsTheOldFlag]' started. | Test Case '-[StyleConverterRuntimeTests.UAHeadingFoldGateTests testNonHeadingWithChildrenKeepsTheOldFlag]' passed (0.001 seconds). | 	 Executed 7 tests, with 0 failures (0 unexpected) in 0.093 (0.095) seconds | 	 Executed 7 tests, with 0 failures (0 unexpected) in 0.093 (0.095) seconds | 	 Executed 7 tests, with 0 failures (0 unexpected) in 0.093 (0.097) seconds | ** TEST SUCCEEDED **
+  VERDICT S1-L4c: OK (red -> restore byte-exact -> green)

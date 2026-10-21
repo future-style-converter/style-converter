@@ -1,0 +1,79 @@
+census wave54-final: 1435 per-test IR documents, 10719 components
+(1) text-bearing components whose effective LineHeight is the declared keyword 'normal': 60 in 19 documents (own declaration 40, inherited 20)
+    by iOS face × used size (per-line raw → chrome; Δ = chrome − raw):
+      dejavu 16px      components    7  documents    6  raw 18.625 → chrome 19  Δ/line 0.3750
+      dejavu 20px      components    2  documents    1  raw 23.2813 → chrome 24  Δ/line 0.7187
+      inter 16px       components   18  documents    1  raw 19.3594 → chrome 20  Δ/line 0.6406
+      inter 36px       components    3  documents    1  raw 43.5586 → chrome 44  Δ/line 0.4414
+      inter 92px       components    6  documents    2  raw 111.3164 → chrome 111  Δ/line -0.3164
+      libertine 36px   components   24  documents    8  raw 41.04 → chrome 41  Δ/line -0.0400
+(2) documents carrying such text, with their iOS cell (wave scorer; — = not scored on iOS):
+    documents 19; scored on iOS 19 (P 14 · f 5)
+    [css-cascade] 1
+      css-cascade/all-prop-001.html                                            ios P 0.9641  web P 0.9689  android P 0.9642  texts 2  faces dejavu@20
+    [css-counter-styles] 1
+      css-counter-styles/counter-style-at-rule/disclosure-styles.html          ios f 0.6127  web f 0.6454  android f 0.6255  texts 18  faces inter@16
+    [css-tables] 1
+      css-tables/anonymous-table-ws-001.html                                   ios P 0.9988  web P 1       android P 0.9936  texts 1  faces dejavu@16
+    [css-text] 14
+      css-text/boundary-shaping/boundary-shaping-001.html                      ios P 0.9792  web P 0.9787  android P 0.9791  texts 3  faces libertine@36
+      css-text/boundary-shaping/boundary-shaping-002.html                      ios P 0.9695  web P 0.9685  android P 0.9694  texts 3  faces libertine@36
+      css-text/boundary-shaping/boundary-shaping-003.html                      ios P 0.9781  web P 0.9777  android P 0.978   texts 3  faces libertine@36
+      css-text/boundary-shaping/boundary-shaping-004.html                      ios P 0.9774  web P 0.9769  android P 0.9774  texts 3  faces libertine@36
+      css-text/boundary-shaping/boundary-shaping-005.html                      ios P 0.9774  web P 0.9769  android P 0.9774  texts 3  faces libertine@36
+      css-text/boundary-shaping/boundary-shaping-006.html                      ios P 0.9714  web P 0.9708  android P 0.9715  texts 3  faces libertine@36
+      css-text/boundary-shaping/boundary-shaping-007.html                      ios P 0.9764  web P 0.976   android P 0.9763  texts 3  faces libertine@36
+      css-text/boundary-shaping/boundary-shaping-008.html                      ios P 0.9789  web P 0.9785  android P 0.9788  texts 3  faces libertine@36
+      css-text/boundary-shaping/boundary-shaping-010.html                      ios P 0.965   web P 0.9641  android P 0.961   texts 3  faces inter@36
+      css-text/hyphens/hyphenate-character-001.html                            ios P 0.9611  web P 0.985   android P 0.9802  texts 1  faces dejavu@16
+      css-text/hyphens/hyphenate-character-002.html                            ios P 0.9534  web f 0.9344  android f 0.9249  texts 1  faces dejavu@16
+      css-text/hyphens/hyphenate-character-003.html                            ios P 0.957   web P 0.9825  android P 0.9792  texts 1  faces dejavu@16
+      css-text/hyphens/hyphenate-character-004.html                            ios f 0.9477  web P 0.9832  android P 0.9774  texts 1  faces dejavu@16
+      css-text/hyphens/hyphens-vertical-001.html                               ios f 0.8801  web f 0.8909  android f 0.8819  texts 2  faces dejavu@16
+    [css-text-decor] 2
+      css-text-decor/text-decoration-dotted-001.html                           ios f 0.5318  web f 0.9027  android f 0.5459  texts 3  faces inter@92
+      css-text-decor/text-decoration-dotted-002.html                           ios f 0.5426  web P 1       android f 0.5924  texts 3  faces inter@92
+(3) <br> line-break boxes whose effective LineHeight is 'normal': 25 in 5 documents; heights:
+      0px      in wpt__css-text__hyphens__hyphenate-character-001.json, wpt__css-text__hyphens__hyphenate-character-002.json, wpt__css-text__hyphens__hyphenate-character-003.json, wpt__css-text__hyphens__hyphenate-character-004.json, wpt__css-text__hyphens__hyphens-vertical-001.json
+      19.2px   in wpt__css-text__hyphens__hyphenate-character-001.json, wpt__css-text__hyphens__hyphenate-character-002.json, wpt__css-text__hyphens__hyphenate-character-003.json, wpt__css-text__hyphens__hyphenate-character-004.json
+(4) iOS carrier classification per document (TARGET / MOVES = capture carrier; SAME = must-not-move by the model):
+      SAME   css-cascade/all-prop-001.html                                            ios P 0.9641  dejavu@20      1 line: box ceil(23.2813) = 24 → 24
+      SAME   css-counter-styles/counter-style-at-rule/disclosure-styles.html          ios f 0.6127  inter@16       1 line: box ceil(19.3594) = 20 → 20
+      SAME   css-tables/anonymous-table-ws-001.html                                   ios P 0.9988  dejavu@16      1 line: box ceil(18.625) = 19 → 19
+      MOVES  css-text-decor/text-decoration-dotted-001.html                           ios f 0.5318  inter@92       1 line: box ceil(111.3164) = 112 → 111
+      MOVES  css-text-decor/text-decoration-dotted-002.html                           ios f 0.5426  inter@92       1 line: box ceil(111.3164) = 112 → 111
+      MOVES  css-text/boundary-shaping/boundary-shaping-001.html                      ios P 0.9792  libertine@36   1 line: box ceil(41.04) = 42 → 41
+      MOVES  css-text/boundary-shaping/boundary-shaping-002.html                      ios P 0.9695  libertine@36   1 line: box ceil(41.04) = 42 → 41
+      MOVES  css-text/boundary-shaping/boundary-shaping-003.html                      ios P 0.9781  libertine@36   1 line: box ceil(41.04) = 42 → 41
+      MOVES  css-text/boundary-shaping/boundary-shaping-004.html                      ios P 0.9774  libertine@36   1 line: box ceil(41.04) = 42 → 41
+      MOVES  css-text/boundary-shaping/boundary-shaping-005.html                      ios P 0.9774  libertine@36   1 line: box ceil(41.04) = 42 → 41
+      MOVES  css-text/boundary-shaping/boundary-shaping-006.html                      ios P 0.9714  libertine@36   1 line: box ceil(41.04) = 42 → 41
+      MOVES  css-text/boundary-shaping/boundary-shaping-007.html                      ios P 0.9764  libertine@36   1 line: box ceil(41.04) = 42 → 41
+      MOVES  css-text/boundary-shaping/boundary-shaping-008.html                      ios P 0.9789  libertine@36   1 line: box ceil(41.04) = 42 → 41
+      SAME   css-text/boundary-shaping/boundary-shaping-010.html                      ios P 0.965   inter@36       1 line: box ceil(43.5586) = 44 → 44
+      TARGET css-text/hyphens/hyphenate-character-001.html                            ios P 0.9611  dejavu@16      multi-line pre-break, pitch 18.625 → 19
+      TARGET css-text/hyphens/hyphenate-character-002.html                            ios P 0.9534  dejavu@16      multi-line pre-break, pitch 18.625 → 19
+      TARGET css-text/hyphens/hyphenate-character-003.html                            ios P 0.957   dejavu@16      multi-line pre-break, pitch 18.625 → 19
+      TARGET css-text/hyphens/hyphenate-character-004.html                            ios f 0.9477  dejavu@16      multi-line pre-break, pitch 18.625 → 19
+      SAME   css-text/hyphens/hyphens-vertical-001.html                               ios f 0.8801  dejavu@16      vertical writing mode: declined by the NB-ios horizontal guard (TextKit draws several lines; the singleLineText proxy would have pinned it to one)
+    tally: TARGET 4 · MOVES 10 · SAME 5 (documents); web 0 · android 0 · wire 0 carriers
+(5) capture carriers: ios 14 · web 0 · android 0; wire carriers 0; in-radius must-not-move ios 5
+      carrier ios wpt__css-text-decor__text-decoration-dotted-001.png
+      carrier ios wpt__css-text-decor__text-decoration-dotted-002.png
+      carrier ios wpt__css-text__boundary-shaping__boundary-shaping-001.png
+      carrier ios wpt__css-text__boundary-shaping__boundary-shaping-002.png
+      carrier ios wpt__css-text__boundary-shaping__boundary-shaping-003.png
+      carrier ios wpt__css-text__boundary-shaping__boundary-shaping-004.png
+      carrier ios wpt__css-text__boundary-shaping__boundary-shaping-005.png
+      carrier ios wpt__css-text__boundary-shaping__boundary-shaping-006.png
+      carrier ios wpt__css-text__boundary-shaping__boundary-shaping-007.png
+      carrier ios wpt__css-text__boundary-shaping__boundary-shaping-008.png
+      carrier ios wpt__css-text__hyphens__hyphenate-character-001.png
+      carrier ios wpt__css-text__hyphens__hyphenate-character-002.png
+      carrier ios wpt__css-text__hyphens__hyphenate-character-003.png
+      carrier ios wpt__css-text__hyphens__hyphenate-character-004.png
+      control ios wpt__css-cascade__all-prop-001.png
+      control ios wpt__css-counter-styles__counter-style-at-rule__disclosure-styles.png
+      control ios wpt__css-tables__anonymous-table-ws-001.png
+      control ios wpt__css-text__boundary-shaping__boundary-shaping-010.png
+      control ios wpt__css-text__hyphens__hyphens-vertical-001.png

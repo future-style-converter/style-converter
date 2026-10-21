@@ -1,0 +1,255 @@
+# flex-zero-gap-rules: wave-54 probe (OLD, record) vs wave-55 copy (NEW), 2026-10-11T10:50:26Z, HEAD 0d0d3a3d
+# sha256 OLD f71565f13883438e…  NEW bd8d5c7f101e627c…
+## wave53-final
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (redPx 0 vs ref 2200)
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (redPx 0 vs ref 2200)
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (redPx 0 vs ref 2200)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (redPx 0 vs ref 2200)
+  NEW  exit=0
+## wave54-open
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (redPx 0 vs ref 2200)
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (redPx 0 vs ref 2200)
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (redPx 0 vs ref 2200)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (redPx 0 vs ref 2200)
+  NEW  exit=0
+## wave54-final
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY OK
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY OK
+  NEW  exit=0
+## ../results/wave54-plan/skeptic-r2/fake-gap
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs row 95 [(61, 70)] vs ref [(111, 120)])
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs row 95 [(61, 70)] vs ref [(111, 120)])
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs row 95 [(61, 70)] vs ref [(111, 120)])
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs row 95 [(61, 70)] vs ref [(111, 120)])
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs row 95 [(61, 70)] vs ref [(111, 120)])
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs row 95 [(61, 70)] vs ref [(111, 120)])
+  NEW  exit=0
+## ../results/wave54-plan/fix-r2/fake-gap-blue
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (blue runs col 90 [(71, 80), (111, 120)] vs ref [(61, 70), (111, 120)])
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (blue runs col 90 [(71, 80), (111, 120)] vs ref [(61, 70), (111, 120)])
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (blue runs col 90 [(71, 80), (111, 120)] vs ref [(61, 70), (111, 120)])
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (blue runs col 90 [(71, 80), (111, 120)] vs ref [(61, 70), (111, 120)])
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (blue runs col 90 [(71, 80), (111, 120)] vs ref [(61, 70), (111, 120)])
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (blue runs col 90 [(71, 80), (111, 120)] vs ref [(61, 70), (111, 120)])
+  NEW  exit=0
+## ../results/wave54-plan/fix-r2/fake-gap-line3
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs row 145 [(86, 95), (111, 120)] vs ref [(61, 70), (111, 120)])
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs row 145 [(86, 95), (111, 120)] vs ref [(61, 70), (111, 120)])
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs row 145 [(86, 95), (111, 120)] vs ref [(61, 70), (111, 120)])
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs row 145 [(86, 95), (111, 120)] vs ref [(61, 70), (111, 120)])
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs row 145 [(86, 95), (111, 120)] vs ref [(61, 70), (111, 120)])
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs row 145 [(86, 95), (111, 120)] vs ref [(61, 70), (111, 120)])
+  NEW  exit=0
+## ../results/wave54-plan/skeptic-r3/fake-gap-vshift5
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs col 115 [(16, 60), (76, 115), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs col 115 [(16, 60), (76, 115), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs col 115 [(16, 60), (76, 115), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs col 115 [(16, 60), (76, 115), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs col 115 [(16, 60), (76, 115), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs col 115 [(16, 60), (76, 115), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  NEW  exit=0
+## ../results/wave54-plan/skeptic-r3/fake-gap-line2-short4
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 106), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 106), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 106), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 106), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 106), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 106), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  NEW  exit=0
+## ../results/wave54-plan/skeptic-r3/fake-gap-short6
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (redPx 2140 vs ref 2200)
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (redPx 2140 vs ref 2200)
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (redPx 2140 vs ref 2200)
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (redPx 2140 vs ref 2200)
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (redPx 2140 vs ref 2200)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (redPx 2140 vs ref 2200)
+  NEW  exit=0
+## ../results/wave54-plan/skeptic-r3/fake-gap-line1-short4
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (redPx 2120 vs ref 2200)
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (redPx 2120 vs ref 2200)
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (redPx 2120 vs ref 2200)
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (redPx 2120 vs ref 2200)
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (redPx 2120 vs ref 2200)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (redPx 2120 vs ref 2200)
+  NEW  exit=0
+## ../results/wave54-plan/fix-r3/fake-gap-vshift3-up
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs col 115 [(16, 60), (68, 107), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs col 115 [(16, 60), (68, 107), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs col 115 [(16, 60), (68, 107), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs col 115 [(16, 60), (68, 107), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs col 115 [(16, 60), (68, 107), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs col 115 [(16, 60), (68, 107), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+  NEW  exit=0
+## ../results/wave54-plan/fix-r3/fake-gap-line3-short3
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs col 65 [(16, 60), (121, 162)] vs ref [(16, 60), (121, 165)]: flex line 3 column-rule vertical extent)
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs col 65 [(16, 60), (121, 162)] vs ref [(16, 60), (121, 165)]: flex line 3 column-rule vertical extent)
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs col 65 [(16, 60), (121, 162)] vs ref [(16, 60), (121, 165)]: flex line 3 column-rule vertical extent)
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs col 65 [(16, 60), (121, 162)] vs ref [(16, 60), (121, 165)]: flex line 3 column-rule vertical extent)
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs col 65 [(16, 60), (121, 162)] vs ref [(16, 60), (121, 165)]: flex line 3 column-rule vertical extent)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs col 65 [(16, 60), (121, 162)] vs ref [(16, 60), (121, 165)]: flex line 3 column-rule vertical extent)
+  NEW  exit=0
+## ../results/wave54-plan/verify-r3/gap/fake-ref-as-run
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY OK
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY OK
+  NEW  exit=0
+## ../results/wave54-plan/verify-r3/gap/fake-red-l1r-down2
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs col 115 [(18, 62), (71, 110), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 1 column-rule vertical extent)
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs col 115 [(18, 62), (71, 110), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 1 column-rule vertical extent)
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs col 115 [(18, 62), (71, 110), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 1 column-rule vertical extent)
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs col 115 [(18, 62), (71, 110), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 1 column-rule vertical extent)
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs col 115 [(18, 62), (71, 110), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 1 column-rule vertical extent)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs col 115 [(18, 62), (71, 110), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 1 column-rule vertical extent)
+  NEW  exit=0
+## ../results/wave54-plan/verify-r3/gap/fake-red-l3r-up2
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 110), (119, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 3 column-rule vertical extent)
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 110), (119, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 3 column-rule vertical extent)
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 110), (119, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 3 column-rule vertical extent)
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 110), (119, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 3 column-rule vertical extent)
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 110), (119, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 3 column-rule vertical extent)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 110), (119, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 3 column-rule vertical extent)
+  NEW  exit=0
+## ../results/wave54-plan/verify-r3/gap/fake-blue-r1-short5
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY OK
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (blue runs row 65 [(16, 160)] vs ref [(16, 165)]: row-rule horizontal extent)
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (blue runs row 65 [(16, 160)] vs ref [(16, 165)]: row-rule horizontal extent)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (blue runs row 65 [(16, 160)] vs ref [(16, 165)]: row-rule horizontal extent)
+  NEW  exit=0
+## ../results/wave54-plan/verify-r3/gap/fake-blue-r2-lshort4
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY OK
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (blue runs row 115 [(20, 165)] vs ref [(16, 165)]: row-rule horizontal extent)
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (blue runs row 115 [(20, 165)] vs ref [(16, 165)]: row-rule horizontal extent)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (blue runs row 115 [(20, 165)] vs ref [(16, 165)]: row-rule horizontal extent)
+  NEW  exit=0
+## ../results/wave55-plan/instruments-flex-gap-fakes/fake-blue-r1-lshort2
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY OK
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (blue runs row 65 [(18, 165)] vs ref [(16, 165)]: row-rule horizontal extent)
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (blue runs row 65 [(18, 165)] vs ref [(16, 165)]: row-rule horizontal extent)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (blue runs row 65 [(18, 165)] vs ref [(16, 165)]: row-rule horizontal extent)
+  NEW  exit=0
+## ../results/wave55-plan/instruments-flex-gap-fakes/fake-blue-r1-split1
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY OK
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (blue runs row 65 [(16, 99), (101, 165)] vs ref [(16, 165)]: row-rule horizontal extent)
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (blue runs row 65 [(16, 99), (101, 165)] vs ref [(16, 165)]: row-rule horizontal extent)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (blue runs row 65 [(16, 99), (101, 165)] vs ref [(16, 165)]: row-rule horizontal extent)
+  NEW  exit=0
+## ../results/wave55-plan/instruments-flex-gap-fakes/fake-blue-r1-moved5
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY OK
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (blue runs row 65 [(16, 160)] vs ref [(16, 165)]: row-rule horizontal extent)
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (blue runs row 65 [(16, 160)] vs ref [(16, 165)]: row-rule horizontal extent)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (blue runs row 65 [(16, 160)] vs ref [(16, 165)]: row-rule horizontal extent)
+  NEW  exit=0
+## ../results/wave55-plan/instruments-flex-gap-fakes/fake-blue-r2-hshift2
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (blue (16, 61, 167, 120) vs ref (16, 61, 165, 120))
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (blue (16, 61, 167, 120) vs ref (16, 61, 165, 120))
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (blue (16, 61, 167, 120) vs ref (16, 61, 165, 120))
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (blue (16, 61, 167, 120) vs ref (16, 61, 165, 120))
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (blue (16, 61, 167, 120) vs ref (16, 61, 165, 120))
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (blue (16, 61, 167, 120) vs ref (16, 61, 165, 120))
+  NEW  exit=0
+## ../results/wave55-plan/instruments-flex-gap-fakes/fake-blue-none
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (bluePx 0 vs ref 3000)
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (bluePx 0 vs ref 3000)
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (bluePx 0 vs ref 3000)
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY WRONG (bluePx 0 vs ref 3000)
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY WRONG (bluePx 0 vs ref 3000)
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY WRONG (bluePx 0 vs ref 3000)
+  NEW  exit=0
+## ../results/wave55-plan/instruments-flex-gap-fakes/fake-blue-r1-short1
+  OLD  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 web      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 ios      GEOMETRY OK
+  OLD  flex/flex-gap-decorations-033 android  GEOMETRY OK
+  OLD  exit=0
+  NEW  flex/flex-gap-decorations-033 ref      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 web      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 ios      GEOMETRY OK
+  NEW  flex/flex-gap-decorations-033 android  GEOMETRY OK
+  NEW  exit=0

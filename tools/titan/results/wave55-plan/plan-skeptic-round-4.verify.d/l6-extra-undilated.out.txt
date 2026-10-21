@@ -1,0 +1,5 @@
+flex-abspos-staticpos-align-self-safe-001 FIXED: dilated 0 / undilated 0 | c0_vd-tgt+1: dilated 0 / undilated 500 | c0_hd-tgt-1: dilated 0 / undilated 462 | c0_dg-first-smear: dilated 0 / undilated 125 | c0_st-vbar: dilated 0 / undilated 0
+grid-abspos-staticpos-align-self-001 FIXED: dilated 0 / undilated 0 | c0_vd-tgt+1: dilated 0 / undilated 57 | c0_hd-tgt-1: dilated 0 / undilated 51 | c0_dg-first-smear: dilated 0 / undilated 6 | c0_st-vbar: dilated 0 / undilated 4
+grid-abspos-staticpos-justify-self-001 FIXED: dilated 0 / undilated 0 | c0_vd-tgt+1: dilated 0 / undilated 78 | c0_hd-tgt-1: dilated 0 / undilated 91 | c0_dg-first-smear: dilated 0 / undilated 8 | c0_st-vbar: dilated 4 / undilated 4
+grid-abspos-staticpos-align-self-vertWM-001 FIXED: dilated 0 / undilated 0 | c0_vd-tgt+1: dilated 0 / undilated 71 | c0_hd-tgt-1: dilated 0 / undilated 92 | c0_dg-first-smear: dilated 0 / undilated 8 | c0_st-vbar: dilated 4 / undilated 4
+grid-abspos-staticpos-align-self-rtl-001 FIXED: dilated 0 / undilated 0 | c0_vd-tgt+1: dilated 0 / undilated 94 | c0_hd-tgt-1: dilated 0 / undilated 64 | c0_dg-first-smear: dilated 0 / undilated 6 | c0_st-vbar: dilated 0 / undilated 4

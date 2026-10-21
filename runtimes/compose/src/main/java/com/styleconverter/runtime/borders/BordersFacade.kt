@@ -29,7 +29,9 @@ import kotlinx.serialization.json.JsonElement
  *
  * ## Order of Operations
  * 1. Border radius (clip) is applied first to establish shape
- * 2. Border sides are drawn after to respect the clipped shape
+ * 2. Border sides are drawn after to respect the clipped shape — or, on
+ *    StyleApplier's legacy route (wave 55, L6 U2), skipped here and chained
+ *    INNER of the background by [applySidesBehindContent]
  */
 object BordersFacade {
 
@@ -80,22 +82,43 @@ object BordersFacade {
      *
      * @param modifier The modifier to apply borders to.
      * @param config The combined border configuration.
+     * @param sidesBehindContent Wave 55 (L6 U2): true leaves the sides out, so
+     *   the caller can chain them INNER of the background with
+     *   [applySidesBehindContent]. Default false keeps every caller as it was.
      * @return Modified modifier with borders and radius applied.
      */
-    fun apply(modifier: Modifier, config: BordersConfig): Modifier {
+    fun apply(modifier: Modifier, config: BordersConfig, sidesBehindContent: Boolean = false): Modifier {
         var result = modifier
 
         // Apply radius first (clip)
         result = BorderRadiusApplier.applyRadius(result, config.radius)
 
-        // Then apply borders
-        result = BorderSideApplier.applyBorders(result, config.sides)
+        // Then apply borders (unless the caller paints them behind content)
+        if (!sidesBehindContent) result = BorderSideApplier.applyBorders(result, config.sides)
 
         // Apply outline (drawn outside the element)
         result = OutlineApplier.applyOutline(result, config.outline)
 
         return result
     }
+
+    /**
+     * The border sides painted BEHIND the element's content (wave 55, L6 U2).
+     *
+     * CSS 2.1 Appendix E §E.2 paints a box's background, then its border,
+     * then its descendants. StyleApplier's legacy route chains this call
+     * just INNER of ColorApplier, so the band lands after the background
+     * (and inside its opacity group, css-color-4 §3.3: the element is
+     * composited as one group) and before the children — where androidx
+     * `Modifier.border` and the slow path's `drawContent()`-first order used
+     * to lay the parent's band over any child that crossed it. Only for a
+     * box that does not clip: a clipping box's content stops at its padding
+     * edge in CSS (css-overflow-3 §3), so StyleApplier keeps [apply]'s
+     * band-over-content order there (its clip sits at the border box).
+     */
+    fun applySidesBehindContent(modifier: Modifier, config: BordersConfig): Modifier =
+        // Same side painter, band first (BorderSideApplier's behindContent).
+        BorderSideApplier.applyBorders(modifier, config.sides, behindContent = true)
 
     /**
      * Check if a property type is a border-related property.

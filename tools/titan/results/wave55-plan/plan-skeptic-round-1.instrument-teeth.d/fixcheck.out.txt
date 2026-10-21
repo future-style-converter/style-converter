@@ -1,0 +1,93 @@
+F1 compose-wpt-content-box-cb: + |greenPx - ref| <= max(40, 0.005 * ref)
+  abspos-autopos-htb-ltr             web wave54-final               greenPx 10000 (ref 10000, tol 50)                    → OK
+  abspos-autopos-htb-ltr             ios wave54-final               greenPx 10000 (ref 10000, tol 50)                    → OK
+  abspos-autopos-htb-ltr             fixed (wave54-probe android)   greenPx 10000 (ref 10000, tol 50)                    → OK
+  abspos-autopos-htb-ltr             hollow                         greenPx 396 (ref 10000, tol 50)                      → WRONG
+  abspos-autopos-htb-ltr             corners2                       greenPx 2 (ref 10000, tol 50)                        → WRONG
+  abspos-autopos-htb-ltr             stripe30                       greenPx 7000 (ref 10000, tol 50)                     → WRONG
+  backdrop-filter-nested-border-radius-clip web wave54-final               greenPx 19374 (ref 19358, tol 97)                    → OK
+  backdrop-filter-nested-border-radius-clip ios wave54-final               greenPx 19376 (ref 19358, tol 97)                    → OK
+  backdrop-filter-nested-border-radius-clip fixed (wave54-probe android)   greenPx 19384 (ref 19358, tol 97)                    → OK
+  backdrop-filter-nested-border-radius-clip hollow                         greenPx 408 (ref 19358, tol 97)                      → WRONG
+  backdrop-filter-nested-border-radius-clip corners2                       greenPx 2 (ref 19358, tol 97)                        → WRONG
+  backdrop-filter-nested-border-radius-clip stripe30                       greenPx 16384 (ref 19358, tol 97)                    → WRONG
+  backdrop-filter-nested-border-radius-clip-4 web wave54-final               greenPx 12542 (ref 12542, tol 63)                    → OK
+  backdrop-filter-nested-border-radius-clip-4 ios wave54-final               greenPx 12545 (ref 12542, tol 63)                    → OK
+  backdrop-filter-nested-border-radius-clip-4 fixed (wave54-probe android)   greenPx 12559 (ref 12542, tol 63)                    → OK
+  backdrop-filter-nested-border-radius-clip-4 hollow                         greenPx 378 (ref 12542, tol 63)                      → WRONG
+  backdrop-filter-nested-border-radius-clip-4 corners2                       greenPx 2 (ref 12542, tol 63)                        → WRONG
+  backdrop-filter-nested-border-radius-clip-4 stripe30                       greenPx 10159 (ref 12542, tol 63)                    → WRONG
+  backdrop-filter-nested-border-radius-clip-3 web wave54-final               greenPx 19390 (ref 19365, tol 97)                    → OK
+  backdrop-filter-nested-border-radius-clip-3 ios wave54-final               greenPx 19384 (ref 19365, tol 97)                    → OK
+  backdrop-filter-nested-border-radius-clip-3 fixed (cbb replay)             greenPx 19384 (ref 19365, tol 97)                    → OK
+  backdrop-filter-nested-border-radius-clip-3 gut-cross                      greenPx 957 (ref 19365, tol 97)                      → WRONG
+  backdrop-filter-nested-border-radius-clip-3 square-3-corners               greenPx 19846 (ref 19365, tol 97)                    → WRONG
+F2 cbb-android clip-3: + all four 20x20 corner squares green count within +-8 of the ref
+  clip-3                             fixed (cbb replay)             corners [254, 254, 254, 254] (ref [251, 250, 252, 252]) → OK
+  clip-3                             square-3-corners               corners [400, 400, 400, 254] (ref [251, 250, 252, 252]) → WRONG
+  clip-3                             gut-cross                      corners [0, 0, 0, 254] (ref [251, 250, 252, 252])    → WRONG
+F3a dir-style-02a rows 6/7/9: + ink px within +-20 % of the ref row, and the row's ink-column set overlaps the ref's (Jaccard >= 0.75, x tolerance 1 px)
+  row6                               web wave54-final               ink 684 (ref 684) col-overlap 1.00                   → OK
+  row6                               fixed U1U2                     ink 582 (ref 684) col-overlap 1.00                   → OK
+  row6                               gut                            ink 9 (ref 684) col-overlap 0.10                     → WRONG
+  row6                               mirror-words                   ink 582 (ref 684) col-overlap 0.94                   → OK
+  row6                               text+2x                        ink 582 (ref 684) col-overlap 0.95                   → OK
+  row6                               text+3x                        ink 582 (ref 684) col-overlap 0.91                   → OK
+  row6                               text-3x                        ink 579 (ref 684) col-overlap 0.94                   → OK
+  row7                               web wave54-final               ink 1139 (ref 1139) col-overlap 1.00                 → OK
+  row7                               fixed U1U2                     ink 1003 (ref 1139) col-overlap 1.00                 → OK
+  row7                               gut                            ink 9 (ref 1139) col-overlap 0.05                    → WRONG
+  row7                               mirror-words                   ink 1003 (ref 1139) col-overlap 0.93                 → OK
+  row7                               text+2x                        ink 1003 (ref 1139) col-overlap 0.96                 → OK
+  row7                               text+3x                        ink 1003 (ref 1139) col-overlap 0.93                 → OK
+  row7                               text-3x                        ink 1000 (ref 1139) col-overlap 0.96                 → OK
+  row9                               web wave54-final               ink 684 (ref 684) col-overlap 1.00                   → OK
+  row9                               fixed U1U2                     ink 582 (ref 684) col-overlap 1.00                   → OK
+  row9                               gut                            ink 9 (ref 684) col-overlap 0.10                     → WRONG
+  row9                               mirror-words                   ink 582 (ref 684) col-overlap 0.94                   → OK
+  row9                               text+2x                        ink 582 (ref 684) col-overlap 0.95                   → OK
+  row9                               text+3x                        ink 582 (ref 684) col-overlap 0.91                   → OK
+  row9                               text-3x                        ink 579 (ref 684) col-overlap 0.94                   → OK
+F3b bidi-tab-001 rtl-rows: + blue px per band within +-20 % of the ref band's, left edge within +-1
+  bidi-tab                           fixed U1U2                     248/269@x16/16 266/273@x114/114 248/269@x16/16 248/2 → OK
+  bidi-tab                           gut                            20/269@x16/16 29/273@x114/114 20/269@x16/16 20/269@x → WRONG
+  bidi-tab                           rtl+2x                         248/269@x18/16 266/273@x116/114 248/269@x18/16 248/2 → WRONG
+F3c anchor-position-multicol-nested-001 stack: + green px in x150-420 y60-220 = 400 +- 8 (nothing but the four 10x10 squares)
+  stack                              ref                            green 3300                                           → WRONG
+  stack                              web wave54-final               green 700                                            → WRONG
+  stack                              fixed U1                       green 700                                            → WRONG
+  stack                              grown30                        green 3800                                           → WRONG
+  stack                              slab                           green 18000                                          → WRONG
+  stack                              dup-stacked                    green 1028                                           → WRONG
+F3d/e dynamic-offset-rtl-001 / -002: + magenta px = 100 +- 5 and (002) the FULL bbox = web's +-1
+  001                                web wave54-final               magenta n 100 bbox (86, 26, 95, 35) (web (86, 26, 95, 35)) → OK
+  001                                fixed U2                       magenta n 100 bbox (86, 26, 95, 35) (web (86, 26, 95, 35)) → OK
+  001                                hollow                         magenta n 36 bbox (86, 26, 95, 35) (web (86, 26, 95, 35)) → WRONG
+  002                                web wave54-final               magenta n 100 bbox (26, 26, 35, 35) (web (26, 26, 35, 35)) → OK
+  002                                fixed U2                       magenta n 100 bbox (26, 26, 35, 35) (web (26, 26, 35, 35)) → OK
+  002                                shift+3y                       magenta n 100 bbox (26, 29, 35, 38) (web (26, 26, 35, 35)) → WRONG
+  002                                shift-3y                       magenta n 100 bbox (26, 23, 35, 32) (web (26, 26, 35, 35)) → WRONG
+  002                                wider+5                        magenta n 150 bbox (26, 26, 40, 35) (web (26, 26, 35, 35)) → WRONG
+  002                                hollow                         magenta n 36 bbox (26, 26, 35, 35) (web (26, 26, 35, 35)) → WRONG
+F4 [X]: + dark (border) px >= 0.9 x ref, child-fill bbox within +-2 of the ref's, child fill >= 0.95 x ref
+  align-self-safe-001                fixed U2 replay                dark 1356/1308 fill 17748/17956 bbox Δ0              → OK
+  align-self-safe-001                border-erased                  dark 0/1308 fill 17748/17956 bbox Δ0                 → WRONG
+  align-self-safe-001                child+3x                       dark 1356/1308 fill 17748/17956 bbox Δ3              → WRONG
+  align-self-safe-001                child-3y                       dark 1188/1308 fill 17748/17956 bbox Δ3              → WRONG
+  align-self-safe-001                child-shrunk8%                 dark 1356/1308 fill 16287/17956 bbox Δ23             → WRONG
+  align-self-safe-001                child-scrambled                dark 789/1308 fill 17748/17956 bbox Δ203             → WRONG
+  align-self-001                     fixed U2 replay                dark 1542/1541 fill 1000/1056 bbox Δ10               → WRONG
+  align-self-001                     border-erased                  dark 0/1541 fill 1000/1056 bbox Δ10                  → WRONG
+  align-self-001                     child+3x                       dark 1536/1541 fill 1000/1056 bbox Δ10               → WRONG
+  align-self-001                     child-3y                       dark 1527/1541 fill 1000/1056 bbox Δ12               → WRONG
+  align-self-001                     child-shrunk8%                 dark 1542/1541 fill 904/1056 bbox Δ29                → WRONG
+  align-self-001                     child-scrambled                dark 1512/1541 fill 1000/1056 bbox Δ208              → WRONG
+  align-self-rtl-001                 fixed U2 replay                dark 1800/1828 fill 1234/1152 bbox Δ9                → WRONG
+  align-self-rtl-001                 border-erased                  dark 0/1828 fill 1234/1152 bbox Δ9                   → WRONG
+  align-self-rtl-001                 child+3x                       dark 1762/1828 fill 1234/1152 bbox Δ9                → WRONG
+  align-self-rtl-001                 child-3y                       dark 1714/1828 fill 1234/1152 bbox Δ12               → WRONG
+  align-self-rtl-001                 child-shrunk8%                 dark 1800/1828 fill 1042/1152 bbox Δ29               → WRONG
+  align-self-rtl-001                 child-scrambled                dark 1763/1828 fill 1234/1152 bbox Δ205              → WRONG
+F4b [PO]: + navbar band blue + overlap red >= 0.95 x the ref's (blue + red over the band rows)
+  clip-rect                          fixed U1 replay                navbar blue(+overlap red Δ) 851 (ref blue 866)       → OK
+  clip-rect                          navbar-sides-erased            navbar blue(+overlap red Δ) 320 (ref blue 866)       → WRONG

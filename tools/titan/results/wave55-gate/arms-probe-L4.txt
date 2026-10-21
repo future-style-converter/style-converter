@@ -1,0 +1,4 @@
+# tools/titan/results/wave55-gate/arms-probe-L4.txt — the probe-time arm (expectations.json abArms[1] drop-L4-U2, against wave55-pre):
+# U1 alone on css-text-decor (arm M) = the wave55-pre tree minus U2-ios (1dc521c1) and U2-android (69f95267), shas child first.
+# Run by ab-arms55.sh at HEAD == the wave55-pre tree (0fd26479 + records-only commits), BEFORE any stage-1 revert (abArms[1].when).
+drop-L4-U2 css-text-decor ios,android 1dc521c1 69f95267

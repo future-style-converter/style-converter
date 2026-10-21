@@ -1,0 +1,26 @@
+=== U6-T1 — mutated tools/visual/label-chrome-check.mjs (python rc 0; sha256 now 9f7da080400f877d…)
+--- red run: node --test tools/visual/label-chrome-check.test.mjs
+not ok 1 - T1 a name that is a container under P1 but a leaf under P2 cannot be exempted as "container" (X1)
+  error: |-
+  name: 'AssertionError'
+# pass 1
+# fail 1
+red run rc=1
+--- green run
+# pass 2
+# fail 0
+green run rc=0
+
+=== U6-T2 — mutated tools/visual/label-chrome-check.mjs (python rc 0; sha256 now 229657ece0bb6339…)
+--- red run: node --test tools/visual/label-chrome-check.test.mjs
+not ok 2 - T2 clause (iv): paint on SOME would-be glyph pixels is not a label; paint on ALL of them is (X8)
+  error: |-
+  name: 'AssertionError'
+# pass 1
+# fail 1
+red run rc=1
+--- green run
+# pass 2
+# fail 0
+green run rc=0
+

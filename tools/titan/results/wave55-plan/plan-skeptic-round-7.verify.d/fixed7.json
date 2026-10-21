@@ -1,0 +1,662 @@
+{
+ "L1-Rm|css-text/hyphens/hyphenate-character-001.html ios|hyphen-ios-linebox.geometry.py hyphen-ios-linebox 001 ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "hyphen-ios-linebox 001 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 1.000 \u2192 LINEBOX OK"
+ },
+ "L1-Rm|css-text/hyphens/hyphenate-character-001.html ios|hyphenate-character.geometry.py hyphenate-character-001 ios": {
+  "verdict": "PASS",
+  "class": "tally",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "hyphenate-character-001 ios groups 5 4 3 3 \u2192 GEOMETRY OK"
+ },
+ "L1-Rm|css-text/hyphens/hyphenate-character-003.html ios|hyphen-ios-linebox.geometry.py hyphen-ios-linebox 003 ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "hyphen-ios-linebox 003 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 1.000 \u2192 LINEBOX OK"
+ },
+ "L1-Rm|css-text/hyphens/hyphenate-character-003.html ios|hyphenate-character.geometry.py hyphenate-character-003 ios": {
+  "verdict": "PASS",
+  "class": "tally",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "hyphenate-character-003 ios groups 5 4 3 3 \u2192 GEOMETRY OK"
+ },
+ "L1-Rm|css-text/hyphens/hyphenate-character-004.html ios|hyphen-ios-linebox.geometry.py hyphen-ios-linebox 004 ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "hyphen-ios-linebox 004 ios group-first [0, 0, 0, 1] in-group spread [0, 0, 0, 0] glyphs 1.000 \u2192 LINEBOX OK"
+ },
+ "L2-U1|css-flexbox/abspos/abspos-autopos-htb-ltr.html android|compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-htb-ltr android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "abspos/abspos-autopos-htb-ltr android {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0, 'xorPx': 0, 'core': (0, 0)} \u2192 GEOMETRY OK"
+ },
+ "L2-U1|css-flexbox/abspos/abspos-autopos-vlr-ltr.html android|compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vlr-ltr android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "abspos/abspos-autopos-vlr-ltr android {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0, 'xorPx': 0, 'core': (0, 0)} \u2192 GEOMETRY OK"
+ },
+ "L2-U1|css-flexbox/abspos/abspos-autopos-vrl-ltr.html android|compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vrl-ltr android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "abspos/abspos-autopos-vrl-ltr android {'green': (16, 88, 115, 187), 'greenPx': 10000, 'failInkPx': 0, 'xorPx': 0, 'core': (0, 0)} \u2192 GEOMETRY OK"
+ },
+ "L2-U1|filter-effects/backdrop-filter-nested-border-radius-clip.html android|compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "backdrop-filter-nested-border-radius-clip android {'green': (26, 26, 225, 125), 'greenPx': 19384, 'failInkPx': 0, 'xorPx': 28, 'core': (0, 0)} \u2192 GEOMETRY OK"
+ },
+ "L2-U1|filter-effects/backdrop-filter-nested-border-radius-clip-2.html android|compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-2 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "backdrop-filter-nested-border-radius-clip-2 android {'green': (26, 26, 225, 125), 'greenPx': 19464, 'failInkPx': 0, 'xorPx': 8, 'core': (0, 0)} \u2192 GEOMETRY OK"
+ },
+ "L2-U1|filter-effects/backdrop-filter-nested-border-radius-clip-4.html android|compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-4 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "backdrop-filter-nested-border-radius-clip-4 android {'green': (26, 26, 185, 105), 'greenPx': 12559, 'failInkPx': 0, 'xorPx': 17, 'core': (0, 0)} \u2192 GEOMETRY OK"
+ },
+ "L2-U2|filter-effects/backdrop-filter-nested-border-radius-clip-3.html android|compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-3 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "backdrop-filter-nested-border-radius-clip-3 android {'green': (36, 36, 235, 135), 'greenPx': 19384, 'failInkPx': 0, 'xorPx': 23, 'core': (0, 0)} \u2192 GEOMETRY OK"
+ },
+ "L2-U2|filter-effects/backdrop-filter-nested-border-radius-clip-3.html android|cbb-android.geometry.py backdrop-filter-nested-border-radius-clip-3 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "-filter-nested-border-radius-clip-3 android {green (36, 36, 235, 135) greenPx 19384 corner [254, 254, 254, 254] row blue[16..25] grey[26..35] green[36..235] xor 23 core (0, 0) failInk 0} \u2192 GEOMETRY OK"
+ },
+ "L3-fixed|selectors/dir-style-02a.html android|positioned-parent-slot.geometry.py [S] dir-style-02a android row6": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[S] dir-style-02a android row6 ink (17, 120, 153, 131) dot 4px profile 0.92@+0 rows 1.00@+0 mass 577/577 lead 5/5 \u2192 GEOMETRY OK"
+ },
+ "L3-fixed|selectors/dir-style-02a.html android|positioned-parent-slot.geometry.py [S] dir-style-02a android row7": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px profile 0.92@+0 rows 1.00@+0 mass 998/998 lead 5/5 \u2192 GEOMETRY OK"
+ },
+ "L3-fixed|selectors/dir-style-02a.html android|positioned-parent-slot.geometry.py [S] dir-style-02a android row9": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px profile 0.92@+0 rows 1.00@+0 mass 577/577 lead 5/5 \u2192 GEOMETRY OK"
+ },
+ "L3-fixed|css-text/bidi/bidi-tab-001.html android|positioned-parent-slot.geometry.py [S] bidi-tab-001 android rtl-rows": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "i-tab-001 android rtl-rows y86:(16, 36, 248) y106:(114, 135, 266) y186:(16, 36, 248) y226:(16, 36, 248) order [0.904, 0.974, 0.904, 0.904] boxes [(16, 66, 136, 149), (16, 166, 136, 249)] \u2192 GEOMETRY OK"
+ },
+ "L3-fixed|css-anchor-position/anchor-position-multicol-nested-001.html android|positioned-parent-slot.geometry.py [W] anchor-position-multicol-nested-001 android stack": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] ring [0, 0, 0, 0] red 0 others 300 \u2192 GEOMETRY OK"
+ },
+ "L3-fixed|css-writing-modes/dynamic-offset-rtl-001.html android|positioned-parent-slot.geometry.py [S] dynamic-offset-rtl-001 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[S] dynamic-offset-rtl-001 android magenta (86, 26, 95, 35) n 100 parent (16, 16, 115, 115) n 10000 \u2192 GEOMETRY OK"
+ },
+ "L3-fixed|css-writing-modes/dynamic-offset-rtl-002.html android|positioned-parent-slot.geometry.py [W] dynamic-offset-rtl-002 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[W] dynamic-offset-rtl-002 android magenta (26, 26, 35, 35) n 100 parent (16, 16, 115, 115) n 10000 \u2192 GEOMETRY OK"
+ },
+ "L3-fixed|css-writing-modes/dynamic-offset-vrl-rtl-001.html android|positioned-parent-slot.geometry.py [S] dynamic-offset-vrl-rtl-001 android": {
+  "verdict": "PASS",
+  "class": "tally",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[S] dynamic-offset-vrl-rtl-001 android magenta (86, 26, 95, 35) n 100 parent (16, 16, 115, 115) n 10000 \u2192 GEOMETRY OK"
+ },
+ "L4-C|css-text-decor/text-decoration-inset-005.html ios|ua-heading-margin.geometry.py [M] text-decoration-inset-005 ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-005 ios bands [(134, 173, 16, 336), (188, 212, 16, 64)] \u0394x1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:0,b2:0 \u2192 GEOMETRY OK"
+ },
+ "L4-C|css-text-decor/text-decoration-inset-005.html ios|ua-heading-margin.geometry.py [F] text-decoration-inset-005 ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[F] text-decoration-inset-005 ios bands [(134, 173, 16, 336), (188, 212, 16, 64)] \u0394x1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:0,b2:0 \u2192 GEOMETRY OK"
+ },
+ "L4-C|css-text-decor/text-decoration-inset-005.html android|ua-heading-margin.geometry.py [M] text-decoration-inset-005 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-005 android bands [(134, 173, 16, 336), (188, 212, 16, 64)] \u0394x1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:0,b2:0 \u2192 GEOMETRY OK"
+ },
+ "L4-C|css-text-decor/text-decoration-inset-006.html ios|ua-heading-margin.geometry.py [M] text-decoration-inset-006 ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-006 ios bands [(134, 173, 16, 331), (188, 212, 16, 64)] \u0394x1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:0,b2:0 \u2192 GEOMETRY OK"
+ },
+ "L4-C|css-text-decor/text-decoration-inset-006.html ios|ua-heading-margin.geometry.py [F] text-decoration-inset-006 ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[F] text-decoration-inset-006 ios bands [(134, 173, 16, 331), (188, 212, 16, 64)] \u0394x1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:0,b2:0 \u2192 GEOMETRY OK"
+ },
+ "L4-C|css-text-decor/text-decoration-inset-006.html android|ua-heading-margin.geometry.py [M] text-decoration-inset-006 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-006 android bands [(134, 173, 16, 331), (188, 212, 16, 64)] \u0394x1 +0 profile 1.000 ink b1:22/22c+0.0%,b2:3/3c+0.0% xor b1:0,b2:0 \u2192 GEOMETRY OK"
+ },
+ "L4-C|css-text-decor/text-decoration-inset-014.html ios|ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-014 ios bands [(129, 154, 17, 258), (163, 186, 16, 155)] \u0394x1 +0 profile 1.000 ink b1:17/17c+0.0%,b2:9/9c+0.0% xor b1:0,b2:0 \u2192 GEOMETRY OK"
+ },
+ "L4-C|css-text-decor/text-decoration-inset-014.html ios|ua-heading-margin.geometry.py [F] text-decoration-inset-014 ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[F] text-decoration-inset-014 ios bands [(129, 154, 17, 258), (163, 186, 16, 155)] \u0394x1 +0 profile 1.000 ink b1:17/17c+0.0%,b2:9/9c+0.0% xor b1:0,b2:0 \u2192 GEOMETRY OK"
+ },
+ "L4-C|css-text-decor/text-decoration-inset-014.html android|ua-heading-margin.geometry.py [M] text-decoration-inset-014 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-014 android bands [(129, 154, 17, 258), (163, 186, 16, 155)] \u0394x1 +0 profile 1.000 ink b1:17/17c+0.0%,b2:9/9c+0.0% xor b1:0,b2:0 \u2192 GEOMETRY OK"
+ },
+ "L4-C|css-text-decor/text-decoration-inset-014.html android|ua-heading-margin.geometry.py [F] text-decoration-inset-014 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[F] text-decoration-inset-014 android bands [(129, 154, 17, 258), (163, 186, 16, 155)] \u0394x1 +0 profile 1.000 ink b1:17/17c+0.0%,b2:9/9c+0.0% xor b1:0,b2:0 \u2192 GEOMETRY OK"
+ },
+ "L4-C|css-text-decor/text-decoration-inset-011.html ios|ua-heading-margin.geometry.py [M] text-decoration-inset-011 ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-011 ios bands [(158, 172, 57, 184), (190, 207, 85, 183), (229, 229, 170, 185), (286, 303, 39, 184)] crop 1.000 xor 0 \u2192 GEOMETRY OK"
+ },
+ "L4-C|css-text-decor/text-decoration-inset-011.html android|ua-heading-margin.geometry.py [M] text-decoration-inset-011 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-011 android bands [(157, 176, 57, 184), (189, 208, 80, 184), (230, 230, 166, 180), (286, 304, 41, 184)] crop 1.000 xor 0 \u2192 GEOMETRY OK"
+ },
+ "L5-ok-all|css-counter-styles/counter-suffix.html ios|counter-suffix-rows.geometry.py [H] counter-suffix ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[H] counter-suffix ios row3:x46-53,x57-57 row4:x47-53,x57-57 ink 0 vs wave55-open android \u2192 GEOMETRY OK"
+ },
+ "L5-ok-all|css-counter-styles/counter-suffix.html ios|counter-suffix-rows.geometry.py [C] counter-suffix ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[C] counter-suffix ios row5:x33-46,x50-52|item x64|strokes 1 y(123, 124) row6:x33-46,x50-52|item x65|strokes 2 y(142, 153) \u2192 GEOMETRY OK"
+ },
+ "L5-ok-all|css-counter-styles/counter-suffix.html ios|counter-suffix-rows.geometry.py [T] counter-suffix ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[T] counter-suffix ios row9 digit (139, 145, 215, 225) ink 0 vs wave55-open android \u2192 GEOMETRY OK"
+ },
+ "L5-ok-all|css-counter-styles/counter-suffix.html ios|counter-suffix-rows.geometry.py [K] counter-suffix ios": {
+  "verdict": "PASS",
+  "class": "tally",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[K] counter-suffix ios zones y0-63,y160-207,y232-599,x64-389\u00d7y64-159,x0-135\u00d7y208-231,x151-end\u00d7y208-231 vs wave55-open \u2192 GEOMETRY OK"
+ },
+ "L5-ok-all|css-counter-styles/cjk-decimal/css3-counter-styles-005.html ios|counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[I] cjk-decimal/css3-counter-styles-005 ios y95:marker x217-249 (2, fill 0.96, strokes 1 y(102, 103)) item x267 y121:marker x218-249 (2, fill 0.2, strokes 2 y(125, 142)) item x268 \u2192 GEOMETRY OK"
+ },
+ "L5-ok-all|css-counter-styles/counter-suffix.html android|counter-suffix-rows.geometry.py [C] counter-suffix android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[C] counter-suffix android row5:x33-46,x49-52|item x65|strokes 1 y(123, 124) row6:x34-45,x49-52|item x65|strokes 2 y(143, 153) \u2192 GEOMETRY OK"
+ },
+ "L5-ok-all|css-counter-styles/counter-suffix.html android|counter-suffix-rows.geometry.py [K] counter-suffix android": {
+  "verdict": "PASS",
+  "class": "tally",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[K] counter-suffix android zones y0-111,y160-599,x64-389\u00d7y64-159 vs wave55-open \u2192 GEOMETRY OK"
+ },
+ "L5-ok-all|css-counter-styles/cjk-decimal/css3-counter-styles-005.html android|counter-suffix-rows.geometry.py [I] cjk-decimal/css3-counter-styles-005 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[I] cjk-decimal/css3-counter-styles-005 android y95:marker x217-248 (2, fill 0.98, strokes 1 y(104, 105)) item x267 y121:marker x218-248 (2, fill 0.11, strokes 2 y(128, 145)) item x268 \u2192 GEOMETRY OK"
+ },
+ "L6-X-U2|css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html android|android-paint-order.geometry.py [X] flex-abspos-staticpos-align-self-safe-001 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[X] flex-abspos-staticpos-align-self-safe-001 android | crossings 0 | child fill 17748 (ref 17956) base 16560 | bbox (20, 39, 107, 335) | band 1356 (floor 1308) | lost 0 extra 0 \u2192 GEOMETRY OK"
+ },
+ "L6-X-U2|css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html android|android-paint-order.geometry.py [X] flex-abspos-staticpos-align-self-safe-002 android": {
+  "verdict": "FAIL",
+  "class": "gating",
+  "residual": "FAIL",
+  "inproc": [
+   42,
+   0,
+   0
+  ],
+  "line": "| child fill 16826 (ref 17066) base 15852 | bbox (16, 44, 112, 340) | band 1432 (floor 1372) | lost 0 extra 0 \u2192 GEOMETRY WRONG (50 crossing px (a parent border painted over its child, CSS 2.1 App. E))"
+ },
+ "L6-X-U2|css-grid/abspos/grid-abspos-staticpos-align-self-001.html android|android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-001 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[X] grid-abspos-staticpos-align-self-001 android | crossings 0 | child fill 1000 (ref 1056) base 914 | bbox (19, 30, 158, 230) | band 1542 (floor 1541) | lost 0 extra 0 \u2192 GEOMETRY OK"
+ },
+ "L6-X-U2|css-grid/abspos/grid-abspos-staticpos-justify-self-001.html android|android-paint-order.geometry.py [X] grid-abspos-staticpos-justify-self-001 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[X] grid-abspos-staticpos-justify-self-001 android | crossings 0 | child fill 1248 (ref 1248) base 1118 | bbox (18, 19, 203, 213) | band 1794 (floor 1823) | lost 0 extra 0 \u2192 GEOMETRY OK"
+ },
+ "L6-X-U2|css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html android|android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-vertWM-001 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[X] grid-abspos-staticpos-align-self-vertWM-001 android | crossings 0 | child fill 1248 (ref 1200) base 1120 | bbox (18, 19, 179, 213) | band 1796 (floor 1828) | lost 0 extra 0 \u2192 GEOMETRY OK"
+ },
+ "L6-X-U2|css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html android|android-paint-order.geometry.py [X] grid-abspos-staticpos-align-self-rtl-001 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[X] grid-abspos-staticpos-align-self-rtl-001 android | crossings 0 | child fill 1234 (ref 1152) base 1110 | bbox (19, 18, 172, 230) | band 1800 (floor 1828) | lost 0 extra 0 \u2192 GEOMETRY OK"
+ },
+ "L6-PO-U1|filter-effects/backdrop-filter-clip-rect.html android|android-paint-order.geometry.py [PO] backdrop-filter-clip-rect android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[PO] backdrop-filter-clip-rect android | overlap red 416 blue 0 | navbar band blue 320/320 whole 851 | pink 10000 | red n 1552 \u2192 GEOMETRY OK"
+ },
+ "L4-U1|css-text-decor/text-decoration-inset-005.html ios|ua-heading-margin.geometry.py [M] text-decoration-inset-005 ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-005 ios bands [(130, 151, 16, 191)] crop 1.000 xor 0 \u2192 GEOMETRY OK"
+ },
+ "L4-U1|css-text-decor/text-decoration-inset-005.html ios|ua-heading-margin.geometry.py [F] text-decoration-inset-005 ios": {
+  "verdict": "FAIL",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[F] text-decoration-inset-005 ios bands [(130, 151, 16, 191)] \u0394x1 -145 profile 0.516 \u2192 GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(130, 151, 16, 191)]))"
+ },
+ "L4-U1|css-text-decor/text-decoration-inset-005.html android|ua-heading-margin.geometry.py [M] text-decoration-inset-005 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-005 android bands [(128, 152, 17, 191)] crop 1.000 xor 0 \u2192 GEOMETRY OK"
+ },
+ "L4-U1|css-text-decor/text-decoration-inset-006.html ios|ua-heading-margin.geometry.py [M] text-decoration-inset-006 ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-006 ios bands [(130, 151, 16, 194)] crop 1.000 xor 0 \u2192 GEOMETRY OK"
+ },
+ "L4-U1|css-text-decor/text-decoration-inset-006.html ios|ua-heading-margin.geometry.py [F] text-decoration-inset-006 ios": {
+  "verdict": "FAIL",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[F] text-decoration-inset-006 ios bands [(130, 151, 16, 194)] \u0394x1 -137 profile 0.498 \u2192 GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(130, 151, 16, 194)]))"
+ },
+ "L4-U1|css-text-decor/text-decoration-inset-006.html android|ua-heading-margin.geometry.py [M] text-decoration-inset-006 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-006 android bands [(128, 152, 17, 194)] crop 1.000 xor 0 \u2192 GEOMETRY OK"
+ },
+ "L4-U1|css-text-decor/text-decoration-inset-014.html ios|ua-heading-margin.geometry.py [M] text-decoration-inset-014 ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-014 ios bands [(128, 138, 17, 133), (145, 154, 16, 84)] crop 1.000 xor 0 \u2192 GEOMETRY OK"
+ },
+ "L4-U1|css-text-decor/text-decoration-inset-014.html ios|ua-heading-margin.geometry.py [F] text-decoration-inset-014 ios": {
+  "verdict": "FAIL",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[F] text-decoration-inset-014 ios bands [(128, 138, 17, 133), (145, 154, 16, 84)] \u0394x1 -125 profile 0.454 ink b1:36/17c-85.0% \u2192 GEOMETRY WRONG (line-1 band 11 px tall (< 20: the 2em face is missing))"
+ },
+ "L4-U1|css-text-decor/text-decoration-inset-014.html android|ua-heading-margin.geometry.py [M] text-decoration-inset-014 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-014 android bands [(128, 139, 17, 132), (144, 155, 16, 84)] crop 1.000 xor 0 \u2192 GEOMETRY OK"
+ },
+ "L4-U1|css-text-decor/text-decoration-inset-014.html android|ua-heading-margin.geometry.py [F] text-decoration-inset-014 android": {
+  "verdict": "FAIL",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "] text-decoration-inset-014 android bands [(128, 139, 17, 132), (144, 155, 16, 84)] \u0394x1 -126 profile 0.410 ink b1:31/17c-86.2% \u2192 GEOMETRY WRONG (line-1 band 12 px tall (< 20: the 2em face is missing))"
+ },
+ "L4-U1|css-text-decor/text-decoration-inset-011.html ios|ua-heading-margin.geometry.py [M] text-decoration-inset-011 ios": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-011 ios bands [(158, 172, 57, 184), (190, 207, 85, 183), (229, 229, 170, 185), (286, 303, 39, 184)] crop 1.000 xor 0 \u2192 GEOMETRY OK"
+ },
+ "L4-U1|css-text-decor/text-decoration-inset-011.html android|ua-heading-margin.geometry.py [M] text-decoration-inset-011 android": {
+  "verdict": "PASS",
+  "class": "gating",
+  "residual": "OK",
+  "inproc": [
+   0,
+   0,
+   0
+  ],
+  "line": "[M] text-decoration-inset-011 android bands [(157, 176, 57, 184), (189, 208, 80, 184), (230, 230, 166, 180), (286, 304, 41, 184)] crop 1.000 xor 0 \u2192 GEOMETRY OK"
+ }
+}

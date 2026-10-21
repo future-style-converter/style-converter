@@ -1,0 +1,59 @@
+# revert-states.txt — L5 reverify-r1: every revertOrder state (+ the contingency chain + rule 2b) on the lane's CURRENT patches,
+# built FORWARD (kept patches on a clean 611c9f93, landing order) and REVERSE (all 11 [+LRM], reverted patches reverse-applied in
+# revert order); 'forward==reverse' compares code snapshots (git diff + porcelain status + untracked runtime sha256s; comparable
+# across states: FULL = 95b372927a9a8b2e, all − U1-ios = 738efc0aec20955d). Suites: Swift = up to 17 L5 / list / fidelity classes
+# present (Catalyst -only-testing), Compose = :runtime:testDebugUnitTest --tests '*ListMarker*' '*SeamReachabilityTest*'
+# '*KoreanHangulFormal*' '*ListStyle*' (JUnit XML), node = counter-style-bake / -author tests. Runner: state.sh.txt (scrubbed).
+STATE FULL (before any mutation) snapshot 95b372927a9a8b2e
+SWIFT FULL rc=0 classes=17 Executed 113 tests, with 0 failures · COMPOSE FULL rc=0 tests=99 failures=0 · NODE FULL rc=0 # pass 44 # fail 0 # skipped 1
+STATE noU1 reverted=[seam-1 unit-U1-ios] contingency=0 apply=ok forward==reverse: yes (738efc0aec20955d)
+SWIFT noU1 rc=0 classes=15 Executed 102 tests, with 0 failures (0 unexpected) in 1.637 (1.658) seconds failing-assertions=0
+STATE noD reverted=[unit-D] contingency=0 apply=ok forward==reverse: yes (aa2b4563c448d1b8)
+SWIFT noD rc=0 classes=17 Executed 113 tests, with 0 failures (0 unexpected) in 10.522 (13.751) seconds failing-assertions=0
+COMPOSE noD rc=0 tests=99 failures=0 errors=0 skipped=0
+> Task :runtime:compileDebugKotlin
+> Task :runtime:compileDebugUnitTestKotlin UP-TO-DATE
+BUILD SUCCESSFUL in 3s
+NODE noD rc=0 # pass 44 # fail 0 # skipped 1 
+STATE noD-noU2i-ios reverted=[unit-D seam-3] contingency=0 apply=ok forward==reverse: yes (3eceba9fa0572f5c)
+SWIFT noD-noU2i-ios rc=0 classes=16 Executed 112 tests, with 0 failures (0 unexpected) in 10.159 (12.039) seconds failing-assertions=0
+STATE noD-noU2i-ios-noU2o-ios reverted=[unit-D seam-3 seam-2 unit-U2o-ios] contingency=0 apply=ok forward==reverse: yes (d07e39c847861ad2)
+SWIFT noD-noU2i-ios-noU2o-ios rc=0 classes=14 Executed 106 tests, with 0 failures (0 unexpected) in 1.473 (1.492) seconds failing-assertions=0
+STATE noU2i-ios reverted=[seam-3] contingency=0 apply=ok forward==reverse: yes (d801d7c73a6bc0ef)
+SWIFT noU2i-ios rc=0 classes=16 Executed 112 tests, with 0 failures (0 unexpected) in 8.226 (11.846) seconds failing-assertions=0
+STATE noD-noU2i-android reverted=[unit-D seam-5] contingency=0 apply=ok forward==reverse: yes (8325eb4402051df7)
+COMPOSE noD-noU2i-android rc=0 tests=98 failures=0 errors=0 skipped=0
+> Task :runtime:compileDebugKotlin
+> Task :runtime:compileDebugUnitTestKotlin
+BUILD SUCCESSFUL in 6s
+STATE noD-noU2i-android-noU2o-android reverted=[unit-D seam-5 seam-4 unit-U2o-android] contingency=0 apply=ok forward==reverse: yes (807df2c9240ba964)
+COMPOSE noD-noU2i-android-noU2o-android rc=0 tests=93 failures=0 errors=0 skipped=0
+> Task :runtime:compileDebugKotlin
+> Task :runtime:compileDebugUnitTestKotlin
+BUILD SUCCESSFUL in 3s
+STATE noU2i-android reverted=[seam-5] contingency=0 apply=ok forward==reverse: yes (0e680de352f583c4)
+COMPOSE noU2i-android rc=0 tests=98 failures=0 errors=0 skipped=0
+> Task :runtime:compileDebugKotlin
+> Task :runtime:compileDebugUnitTestKotlin
+BUILD SUCCESSFUL in 3s
+STATE noU3-ios reverted=[seam-6 unit-U3-ios] contingency=0 apply=ok forward==reverse: yes (8b76dab7b3ca78e6)
+SWIFT noU3-ios rc=0 classes=15 Executed 108 tests, with 0 failures (0 unexpected) in 6.623 (10.019) seconds failing-assertions=0
+STATE FULL+LRM reverted=[] contingency=1 apply=ok forward==reverse: yes (8fbc7c4e021d4e41)
+SWIFT FULL+LRM rc=0 classes=17 Executed 113 tests, with 0 failures (0 unexpected) in 6.305 (9.968) seconds failing-assertions=0
+STATE FULL+LRM-LRM reverted=[unit-U1-ios-LRM] contingency=1 apply=ok forward==reverse: yes (95b372927a9a8b2e)
+STATE FULL+LRM-LRM-U1 reverted=[unit-U1-ios-LRM seam-1 unit-U1-ios] contingency=1 apply=ok forward==reverse: yes (738efc0aec20955d)
+STATE FULL-final reverted=[] contingency=0 apply=ok forward==reverse: yes (95b372927a9a8b2e)
+SWIFT FULL-final rc=0 classes=17 Executed 113 tests, with 0 failures (0 unexpected) in 4.722 (7.513) seconds failing-assertions=0
+COMPOSE FULL-final rc=0 tests=99 failures=0 errors=0 skipped=0
+> Task :runtime:compileDebugKotlin
+> Task :runtime:compileDebugUnitTestKotlin
+BUILD SUCCESSFUL in 4s
+NODE FULL-final rc=0 # pass 44 # fail 0 # skipped 1 
+done
+STATE units-only-2b reverted=[seam-6 seam-5 seam-4 seam-3 seam-2 seam-1] contingency=0 apply=ok forward==reverse: yes (b82cda1c21b518aa)
+SWIFT units-only-2b rc=0 classes=13 Executed 108 tests, with 0 failures (0 unexpected) in 6.435 (9.440) seconds failing-assertions=0
+COMPOSE units-only-2b rc=0 tests=97 failures=0 errors=0 skipped=0
+> Task :runtime:compileDebugKotlin
+> Task :runtime:compileDebugUnitTestKotlin
+BUILD SUCCESSFUL in 4s
+STATE FULL-restored reverted=[] contingency=0 apply=ok forward==reverse: yes (95b372927a9a8b2e)

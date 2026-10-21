@@ -1,0 +1,11 @@
+# ab-arms55.against-proof — 2026-10-11T18:50:10Z; runner sha256 5cd6fccbc928768d…; throwaway at 640276a0 (detached)
+  as required  P1 --against wave55-open (its block's tree has no code difference to HEAD) — against: wave55-open's corpus launch ran tree 0d0d3a3d and installed it (MATCH) — no code difference to HEAD (runtimes, apps, converter, tools/titan outside results, Package.swift; *.md ex
+  as required  P1b …and no --against refusal — no line with "--against wave55-open"; against: against: wave55-open's corpus launch ran tree 0d0d3a3d and installed it (MATCH) — no code difference to HEAD (runtimes, apps, converter, tools/titan
+  as required  P2 a block naming wave 53's tree (7cce3b22): refused — - --against wave55-pre ran tree 7cce3b22, but HEAD differs from it in code ( 64 files changed, 5834 insertions(+), 171 deletions(-)): the arm's Δ would carry those commits — run the arm b
+  as required  P3 a block saying + uncommitted: refused — - --against wave55-probe ran with uncommitted code (a corpus-launch block says so): its tree is not a commit
+  as required  P4 a run directory with no block (wave54-pre): refused — - --against wave54-pre: tools/titan/runs/wave54-pre exists but build-hashes.txt has no '== wave54-pre corpus launch …' block naming its HEAD (a run without its hash is a score, not evidenc
+  as required  AB2 a corpus-launch block naming HEAD with 'ios MISMATCH' (built digest MISSING): refused — - --against wave55-ab2: its corpus-launch block reads ios MISMATCH; ios MISSING; for a platform an arm reads — the installed build was not that tree's build
+  as required  AB3 a corpus-launch block on wave 53's tree, then a net-launch block naming HEAD: the corpus block is read — refused — - --against wave55-ab3 ran tree 7cce3b22, but HEAD differs from it in code ( 64 files changed, 5834 insertions(+), 171 deletions(-)): the arm's Δ would carry those commits — run the arm b
+  as required  AB4 two corpus-launch blocks naming different trees: refused — - --against wave55-ab4: its corpus-launch blocks name different trees (640276a0 7cce3b22 )
+  as required  P5 MUTATION (the check removed): wave 53's tree passes silently — no line with "differs from it in code"; against: against: wave55-pre has not run yet (no run dir, no block) — its tree is checked once it has
+ab-arms55.against-proof: every probe behaved as required

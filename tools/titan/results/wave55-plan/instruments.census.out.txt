@@ -1,0 +1,75 @@
+# instruments.census.mjs — run wave54-final, HEAD 0d0d3a3d
+
+## (1) gate reach of every owned path
+gate-executed tools/titan scripts (closure of tools/titan/gate-driver.sh, tools/titan/section-runner.sh, test-all.sh + static/dynamic imports): 43
+  tools/titan/results/wave55-plan/flex-zero-gap-rules.geometry.py untracked  not executed by the gate  — U1 probe copy (reads PNGs only)
+  tools/titan/wire-differential.sh                               NEW  not executed by the gate  — U2 NEW instrument (orchestrator window only)
+  tools/titan/wire-differential.mjs                              NEW  not executed by the gate  — U2 NEW classifier
+  tools/titan/wire-differential.test.mjs                         NEW  suite only (never the gate)  — U2 NEW pins (tooling suite)
+  tools/titan/results/wave55-gate/ab-arms55.sh                   NEW  not executed by the gate  — U3 NEW A/B runner (orchestrator, after the closing gate)
+  tools/titan/results/wave55-gate/ab-arms55.selftest.sh          NEW  not executed by the gate  — U3 NEW self-test (throwaway git repo)
+  schema/spec/03-children.md                                     tracked  not executed by the gate  — U4 prose
+  runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts            tracked  EXECUTED (runtime: every capture of its platform)  — U4 comment line :32
+  runtimes/web/src/renderer/InlineRuns.ts                        tracked  EXECUTED (runtime: every capture of its platform)  — U4 comments :52/:167 + warn string :174
+  tools/titan/bidi-marker-paint.mjs                              tracked  EXECUTED (gate extract/convert/capture path)  — U5 two keys in MARKER_PAINT_INITIAL
+  tools/titan/bidi-bake.test.mjs                                 tracked  suite only (never the gate)  — U5 S6-2 effects table +2 entries
+  import chain: tools/titan/extract-fixture.mjs → tools/titan/bidi-bake.mjs → tools/titan/bidi-marker-paint.mjs
+  gate scripts naming "wire-differential": none
+  gate scripts naming "wl3-wire-differential": none
+  gate scripts naming "ab-arms": none
+  gate scripts naming "flex-zero-gap-rules": none
+
+## (2) U5 radius — the marker paint chain is read only for list items inside a bidi bake root
+documents in wave54-final: 1435 · bidiBaked: 17 · lossyReasons marker-not-baked: 0
+  css/css-anchor-position/anchor-center-safe-rtl.html              li-components  0 · root-owned marker runs 0 · source <li>/list-item false · mask/mix-blend-mode 0
+  css/css-backgrounds/background-attachment-local/attachment-local-positioning-3.html li-components  0 · root-owned marker runs 0 · source <li>/list-item false · mask/mix-blend-mode 0
+  css/css-backgrounds/background-attachment-local/attachment-local-positioning-4.html li-components  0 · root-owned marker runs 0 · source <li>/list-item false · mask/mix-blend-mode 0
+  css/css-counter-styles/arabic-indic/css3-counter-styles-101.html li-components  9 · root-owned marker runs 0 · source <li>/list-item true · mask/mix-blend-mode 0
+  css/css-counter-styles/arabic-indic/css3-counter-styles-102.html li-components 24 · root-owned marker runs 0 · source <li>/list-item true · mask/mix-blend-mode 0
+  css/css-counter-styles/arabic-indic/css3-counter-styles-103.html li-components  2 · root-owned marker runs 0 · source <li>/list-item true · mask/mix-blend-mode 0
+  css/css-counter-styles/counter-suffix.html                       li-components 12 · root-owned marker runs 6 [. 1 . 2 א. ב.] · source <li>/list-item true · mask/mix-blend-mode 0
+  css/css-text/bidi/bidi-lines-001.html                            li-components  0 · root-owned marker runs 0 · source <li>/list-item false · mask/mix-blend-mode 0
+  css/css-text/bidi/bidi-lines-002.html                            li-components  0 · root-owned marker runs 0 · source <li>/list-item false · mask/mix-blend-mode 0
+  css/css-text/bidi/bidi-tab-001.html                              li-components  0 · root-owned marker runs 0 · source <li>/list-item false · mask/mix-blend-mode 0
+  css/css-text/boundary-shaping/boundary-shaping-009.html          li-components  0 · root-owned marker runs 0 · source <li>/list-item false · mask/mix-blend-mode 0
+  css/css-text/hyphens/hyphenate-character-005.html                li-components  0 · root-owned marker runs 0 · source <li>/list-item false · mask/mix-blend-mode 0
+  css/css-writing-modes/bidi-plaintext-br-001.html                 li-components  0 · root-owned marker runs 0 · source <li>/list-item false · mask/mix-blend-mode 0
+  css/selectors/dir-selector-change-003.html                       li-components  0 · root-owned marker runs 0 · source <li>/list-item false · mask/mix-blend-mode 0
+  css/selectors/dir-selector-change-004.html                       li-components  0 · root-owned marker runs 0 · source <li>/list-item false · mask/mix-blend-mode 0
+  css/selectors/dir-style-02a.html                                 li-components  0 · root-owned marker runs 0 · source <li>/list-item false · mask/mix-blend-mode 0
+  css/selectors/dir-style-03a.html                                 li-components  0 · root-owned marker runs 0 · source <li>/list-item false · mask/mix-blend-mode 0
+bidi-baked documents with a list item in their source: 4 · with mask / mix-blend-mode in their source: 0
+=> U5 wire carriers predicted: NONE (no bake-root list item can meet a mask / blend; counter-suffix keeps its marker runs only if Chromium spells both initials as read)
+
+## (3) U4 — W1 join hosts (the InlineRuns.ts:174 console.warn fires once per such host; web only)
+own hyphens:auto runs hosts: 7 · hosts joined (approximate predicate: OOF + alpha-0 member between two non-space text runs): 4
+  css-text/wpt__css-text__hyphens__hyphens-out-of-flow-002.json wpt__css-text__hyphens__hyphens-out-of-flow-002__3-287 joined 1
+  css-text/wpt__css-text__hyphens__hyphens-out-of-flow-002.json wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289 joined 1
+  css-text/wpt__css-text__hyphens__hyphens-out-of-flow-002.json wpt__css-text__hyphens__hyphens-out-of-flow-002__5-291 joined 1
+  css-text/wpt__css-text__hyphens__hyphens-out-of-flow-002.json wpt__css-text__hyphens__hyphens-out-of-flow-002__6-293 joined 1
+recorded wave53-final census (tools/titan/results/wave54-web-tail/w1-joins.wave53-final.out.txt): 4 hosts — SAME host set
+=> U4 capture carriers predicted: NONE (a console string and comments; the manifest records no console output)
+
+## (4) spec 03 §4.1 rule citations in tracked source
+  converter/src/test/kotlin/app/irmodels/IRWireV2Test.kt:274                     rule 5 · comment
+  converter/src/test/kotlin/app/parsing/css/CssParsingTextAndChildrenTest.kt:528 rule 6 · comment
+  runtimes/compose/src/main/java/com/styleconverter/runtime/core/ir/IRDocumentDecoder.kt:528 rule 5 · comment
+  runtimes/swiftui/Sources/StyleConverterRuntime/Models/IRWireV2Reader.swift:395 rule 5 · comment
+  runtimes/swiftui/Tests/StyleConverterRuntimeTests/ConformanceTests.swift:381   rule 6 · comment
+  runtimes/web/src/core/ir/IRModels.ts:249                                       rule 4 · comment
+  runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts:32                         rule 1 · comment  ← W1 site to correct (rule 2)
+  runtimes/web/src/renderer/InlineRuns.ts:52                                     rule 1 · comment  ← W1 site to correct (rule 2)
+  runtimes/web/src/renderer/InlineRuns.ts:126                                    rule 6 · comment
+  runtimes/web/src/renderer/InlineRuns.ts:167                                    rule 1 · comment  ← W1 site to correct (rule 2)
+  runtimes/web/src/renderer/InlineRuns.ts:174                                    rule 1 · STRING LITERAL  ← W1 site to correct (rule 2)
+  runtimes/web/src/renderer/NodeRenderer.ts:342                                  rule 4 · comment
+  schema/spec/04-metadata-fields.md:102                                          rule 5 · doc
+  tools/titan/extract-fixture.mjs:3702                                           rule 6 · comment
+  tools/titan/extract-fixture.mjs:3719                                           rule 4 · OTHER SPEC (CSS Text §4.1, not spec 03)
+  tools/titan/extract-fixture.mjs:11839                                          rule 3 · comment
+  tools/titan/extract-fixture.test.mjs:3160                                      rule 6 · comment
+spec 03 §4.1 numbered rules today: 1 Order is the payload. · 2 Authoritative when present. · 3 Additive, not a break. · 4 Unreferenced children still render · 5 Dangling `child` keys are a renderer-side warn-and-skip · 6 Whitespace at a run boundary is meaningful · 7 An anonymous run is an INLINE box, not a block.
+
+## carriers (the lane predicts no corpus picture change)
+capture carriers: web {} · ios {} · android {}
+wire carriers: {} (U5 is the only owned path on the extract route; its predicted wire diff is empty — proven at its orchestrator window by the U2 differential)

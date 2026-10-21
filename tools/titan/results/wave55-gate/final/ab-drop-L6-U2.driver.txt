@@ -1,0 +1,27 @@
+[gate-driver 07:52:40] run-id=wave55-ab-drop-L6-U2 sections=7 max-tests=48 android=1 ios=1 timeout=50min resume=0
+[gate-driver 07:52:41] [own-processes] kill_own_gradle_daemons roots=[/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf]: stopped [] left []
+[gate-driver 07:52:46] host after stopping our processes: load1=2.50 free+inactive=3037MB (ceiling load 6, floor 2048MB)
+[gate-driver 07:56:42] provision rc=0 android=[emulator-5554 ] ios=[0BB986A6-1EAD-4916-9276-079235324DA1 ] ANDROID_SERIAL=emulator-5554
+[gate-driver 07:56:42] css-anchor-position: attempt 1 starting
+[gate-driver 08:00:12] css-anchor-position: attempt 1 rc=0 columns: web=48/48 android=48/48 ios=48/48 
+[gate-driver 08:00:12] css-flexbox: attempt 1 starting
+[gate-driver 08:02:42] css-flexbox: attempt 1 rc=0 columns: web=48/48 android=48/48 ios=48/48 
+[gate-driver 08:02:42] css-gaps: attempt 1 starting
+[gate-driver 08:05:12] css-gaps: attempt 1 rc=0 columns: web=48/48 android=48/48 ios=48/48 
+[gate-driver 08:05:12] css-grid: attempt 1 starting
+[gate-driver 08:07:42] css-grid: attempt 1 rc=0 columns: web=48/48 android=48/48 ios=48/48 
+[gate-driver 08:07:42] css-images: attempt 1 starting
+[gate-driver 08:10:12] css-images: attempt 1 rc=0 columns: web=48/48 android=48/48 ios=48/48 
+[gate-driver 08:10:12] css-position: attempt 1 starting
+[gate-driver 08:12:42] css-position: attempt 1 rc=0 columns: web=48/48 android=48/48 ios=48/48 
+[gate-driver 08:12:42] filter-effects: attempt 1 starting
+[gate-driver 08:15:13] filter-effects: attempt 1 rc=0 columns: web=48/48 android=48/48 ios=48/48 
+gate-driver summary — run-id wave55-ab-drop-L6-U2 — 2026-10-13T08:15:14Z
+css-anchor-position        OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-flexbox                OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-gaps                   OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-grid                   OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-images                 OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-position               OK attempt=1 web=48/48 android=48/48 ios=48/48 
+filter-effects             OK attempt=1 web=48/48 android=48/48 ios=48/48 
+score: node tools/titan/score-gate.mjs <previous-run-id> wave55-ab-drop-L6-U2

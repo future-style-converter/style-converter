@@ -1,0 +1,18 @@
+{
+ "name": "AS1-head-renderer",
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt",
+ "pre": "e30f443de13184cb1338bc7f38ef9ead192a312ab41d160ddb324a456bc6adef",
+ "mutated": "2445d9ea2674576fc0946e3f630f48b88d48f0f9d8c98df3249ba67d7a026aa5",
+ "post": "e30f443de13184cb1338bc7f38ef9ead192a312ab41d160ddb324a456bc6adef",
+ "red_rc": 1,
+ "red_failures": [
+  "UaPositionedHeadingMarginSeamWiringTest > the margin step runs once, capture-gated, on the font step's output",
+  "UaPositionedHeadingMarginSeamWiringTest > the margin step sits after the font step and before the resolver's input",
+  "UAElementFontRuleSeamWiringTest > DynamicValueResolver resolves the UA step's output, after it",
+  "UAElementFontRuleSeamWiringTest > the UA font step wraps the list UA rule's output with the tag, own list and stand-down verdict"
+ ],
+ "red_counts": "UaPositionedHeadingMarginSeamWiringTest 2/2; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/2; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "green_rc": 0,
+ "green_counts": "UaPositionedHeadingMarginSeamWiringTest 2/0; UaPositionedHeadingMarginTest 13/0; UAElementFontRuleSeamWiringTest 2/0; UAElementFontRuleTest 10/0; UAHeadingFoldGateTest 9/0",
+ "verdict": "RED-THEN-GREEN"
+}

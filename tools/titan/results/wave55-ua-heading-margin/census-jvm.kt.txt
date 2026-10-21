@@ -1,0 +1,104 @@
+package com.styleconverter.runtime.spacing
+
+// TEMPORARY census harness (wave 55 lane L4) — NOT part of any unit: run-census.sh
+// copies it into the lane worktree's Compose test tree as L4CensusTest.kt, runs it
+// once with the lane's patches applied, and deletes it. It walks EVERY per-test IR
+// document of a run through the production decoder + composer and replays the
+// renderer's cascade step at every node (mergeInherited → ListStyleUaRule →
+// UAElementFontRule with the HEAD gate AND with UAHeadingFoldGate → the margin
+// step), so the radius is BEHAVIOURAL: the shipped code decides, not a predicate.
+
+import com.styleconverter.runtime.core.ir.IRComponent
+import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.core.ir.IRProperty
+import com.styleconverter.runtime.core.renderer.ComponentRenderer
+import com.styleconverter.runtime.core.renderer.InlineRunPlan
+import com.styleconverter.runtime.core.renderer.SlotComposer
+import com.styleconverter.runtime.core.types.ValueExtractors
+import com.styleconverter.runtime.lists.ListStyleUaRule
+import com.styleconverter.runtime.typography.UAElementFontRule
+import com.styleconverter.runtime.typography.UAHeadingFoldGate
+import com.styleconverter.runtime.typography.inline.InlineRunFold
+import org.junit.Test
+import java.io.File
+
+class L4CensusTest {
+
+    // The shared tree holding the gitignored runs (the lane worktree has none).
+    // (run-census.sh substitutes the @@…@@ placeholders when it copies this file in.)
+    private val root = File("@@SHARED_ROOT@@")
+
+    // Does this host's run plan fold (RenderContent: runs, not relative, Folded)?
+    private fun folds(c: IRComponent, props: List<IRProperty>): Boolean {
+        if (c.children.isNullOrEmpty() || c.runs.isNullOrEmpty()) return false
+        val pos = props.firstOrNull { it.type == "Position" }
+        if (ValueExtractors.extractKeyword(pos?.data)?.uppercase() == "RELATIVE") return false
+        val plan = InlineRunPlan.resolve(c.runs, c.children) ?: return false
+        return InlineRunFold.fold(plan.entries, c.children!!, props, c.lang) is InlineRunFold.Outcome.Folded
+    }
+
+    @Test
+    fun census() {
+        val run = "@@RUN@@"
+        val out = StringBuilder()
+        val marginTags = setOf("p", "ul", "ol", "blockquote", "pre", "figure", "h1", "h2", "h3", "h4", "h5", "h6")
+        var docs = 0
+        val u1Docs = sortedSetOf<String>(); val u2Docs = sortedSetOf<String>()
+        val sections = File(root, "tools/titan/runs/$run/sections").listFiles()!!.sortedBy { it.name }
+        for (sec in sections) {
+            val dir = File(sec, "per-test-ir"); if (!dir.isDirectory) continue
+            for (f in dir.listFiles()!!.filter { it.name.endsWith(".json") }.sortedBy { it.name }) {
+                docs++
+                val doc = "${sec.name}/${f.name.removeSuffix(".json")}"
+                val roots = try { SlotComposer.compose(IRDocumentDecoder.decode(f.readText())) } catch (e: Exception) {
+                    out.append("DECODE-FAIL $doc ${e.message}\n"); continue
+                }
+                fun walk(node: IRComponent, inherited: List<IRProperty>, isRoot: Boolean, consumed: Boolean) {
+                    val own = node.properties
+                    val pre = ListStyleUaRule.apply(node._tag, own, ComponentRenderer.mergeInherited(own, inherited))
+                    val tag = node._tag?.lowercase()
+                    // The two face gates: HEAD's (GO-SMALL) and U2's (fold-aware).
+                    val oldStands = UAElementFontRule.headingStandsDown(node)
+                    val newStands = UAHeadingFoldGate.standsDown(node, pre)
+                    val fontOld = UAElementFontRule.apply(node._tag, own, pre, oldStands)
+                    val fontNew = UAElementFontRule.apply(node._tag, own, pre, newStands)
+                    // The margin step on both font outputs (it must not care which).
+                    val mOld = UaPositionedHeadingMargin.apply(node._tag, own, pre, fontOld, enabled = true)
+                    val mNew = UaPositionedHeadingMargin.apply(node._tag, own, pre, fontNew, enabled = true)
+                    val anomalies = mutableListOf<String>()
+                    if (node.properties.any { it.type == "All" }) anomalies += "All"
+                    if (node.selectors.isNotEmpty() || node.media.isNotEmpty()) anomalies += "buckets"
+                    val oof = ComponentRenderer.isOutOfFlowChild(own)
+                    if (tag in marginTags && oof) {
+                        val added = mNew.drop(fontNew.size).joinToString(",") { "${it.type}=${it.data}" }
+                        val sameOld = mOld.drop(fontOld.size) == mNew.drop(fontNew.size)
+                        val edges = (if (declaresUaChildTop(own.map { it.type })) "T" else "") +
+                            (if (declaresUaChildBottom(own.map { it.type })) "B" else "")
+                        val fires = mNew !== fontNew
+                        if (fires && !consumed) u1Docs += doc
+                        out.append("OOF $doc ${node.id} tag=$tag root=$isRoot decl=${edges.ifEmpty { "-" }} " +
+                            "fires=$fires consumed=$consumed faceIndependent=$sameOld added=[$added]" +
+                            (if (anomalies.isEmpty()) "" else " ANOMALY=$anomalies") + "\n")
+                    } else if (mNew !== fontNew || mOld !== fontOld) {
+                        out.append("UNEXPECTED-FIRE $doc ${node.id} tag=$tag oof=$oof\n")
+                    }
+                    // U2: a heading whose face verdict changes between the gates.
+                    if (UAElementFontRule.isBold(tag) && oldStands != newStands) {
+                        if (!consumed) u2Docs += doc
+                        out.append("U2-FLIP $doc ${node.id} tag=$tag old=$oldStands new=$newStands consumed=$consumed " +
+                            "faceChanged=${fontNew !== fontOld}\n")
+                    }
+                    // Children inherit the U1+U2 post-step list's inheritable subset.
+                    val inheritedNext = mNew.filter { it.type in ComponentRenderer.INHERITED_PROPERTY_TYPES }
+                    val folded = folds(node, mNew)
+                    node.children.orEmpty().forEach { walk(it, inheritedNext, false, consumed || folded) }
+                }
+                roots.forEach { walk(it, emptyList(), true, false) }
+            }
+        }
+        out.append("SUMMARY run=$run docs=$docs u1Docs=${u1Docs.size} u2Docs=${u2Docs.size}\n")
+        u1Docs.forEach { out.append("U1-DOC $it\n") }
+        u2Docs.forEach { out.append("U2-DOC $it\n") }
+        File("@@OUT@@").writeText(out.toString())
+    }
+}

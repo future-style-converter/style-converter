@@ -1,0 +1,5 @@
+K9 [NB-ios-b: verticalPads never splits (contingency state only)] pre a5f073ee8491af36 post a5f073ee8491af36
+   mutated: exit 65 buildFailed False failed ['testP9PadSplitOnlyForABlinkPinnedRun'] (want ['testP9PadSplitOnlyForABlinkPinnedRun']) -> RED as required
+   restored: exit 0 passed 10/10 failed [] skipped [] -> GREEN
+   verdict OK
+skeptic mutations: ALL OK

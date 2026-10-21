@@ -1,0 +1,112 @@
+// catalyst-u3-probe.swift.txt — L5 reverify-r1: the skeptic probe re-run; class renamed; two PNG writes to <scratch>/reverify-L5-out
+// (reverify-catalyst-u3-{with,without}.png) were added after the two pixel renders. Throwaway, never delivered.
+// THROWAWAY skeptic probe (L5 skeptic worktree only; never delivered). Run ALONE: it registers the
+// harness's Inter faces for this test process. Question: does U3-ios (monospacedDigit on a run that
+// declares FontVariantNumeric TABULAR_NUMS) change pixels OUTSIDE row 9's digit window — the '.' runs,
+// row 10's '2', rows 11-12's 'א.' / 'ב.' runs — i.e. inside the [K] ios / [T] ios base-identity zones?
+import XCTest
+import SwiftUI
+import CoreText
+@testable import StyleConverterRuntime
+
+final class ZZReL5ProbeTests: XCTestCase {
+    static let doc = "/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave54-final/sections/css-counter-styles/per-test-ir/wpt__css-counter-styles__counter-suffix.json"
+    static let fvn = #",{"type":"FontVariantNumeric","data":["TABULAR_NUMS"]}"#
+
+    private func register() {
+        var dir = URL(fileURLWithPath: #filePath)
+        for _ in 0..<5 { dir.deleteLastPathComponent() }
+        for f in ["Inter-Regular", "Inter-Medium", "Inter-Bold", "Inter-Black"] {
+            let url = dir.appendingPathComponent("apps/ios-harness/StyleConverterTest/Resources/\(f).otf")
+            CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+        }
+    }
+
+    @MainActor
+    private func pixels<V: View>(_ v: V) throws -> (px: [UInt8], w: Int, h: Int) {
+        let view = v.frame(width: 358, alignment: .topLeading).padding(16)
+            .frame(width: 390, height: 600, alignment: .topLeading).background(Color.white)
+            .environment(\.wptCaptureMode, true)
+            .environment(\.styleViewport, StyleViewport(width: 390, height: 844, rootContainingBlock: 358))
+        let r = ImageRenderer(content: view); r.scale = 1
+        let cg = try XCTUnwrap(r.cgImage)
+        var buf = [UInt8](repeating: 0, count: cg.width * cg.height * 4)
+        let ctx = try XCTUnwrap(CGContext(data: &buf, width: cg.width, height: cg.height, bitsPerComponent: 8,
+            bytesPerRow: cg.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: cg.width, height: cg.height))
+        return (buf, cg.width, cg.height)
+    }
+
+    @MainActor
+    private func render(_ json: String) throws -> (px: [UInt8], w: Int, h: Int) {
+        let d = try JSONDecoder().decode(IRDocument.self, from: Data(json.utf8))
+        return try pixels(VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(d.components.enumerated()), id: \.offset) { _, c in ComponentHost(component: c) }
+        })
+    }
+
+    /// Differing pixels grouped in 24-px y bands: (band, count, xmin, xmax, ymin, ymax).
+    private func diff(_ a: (px: [UInt8], w: Int, h: Int), _ b: (px: [UInt8], w: Int, h: Int)) -> [String] {
+        var bands: [Int: (Int, Int, Int, Int, Int)] = [:]
+        for y in 0..<min(a.h, b.h) { for x in 0..<min(a.w, b.w) {
+            let i = (y * a.w + x) * 4
+            if a.px[i] != b.px[i] || a.px[i+1] != b.px[i+1] || a.px[i+2] != b.px[i+2] {
+                let k = y / 24; var e = bands[k] ?? (0, Int.max, -1, Int.max, -1)
+                e.0 += 1; e.1 = min(e.1, x); e.2 = max(e.2, x); e.3 = min(e.3, y); e.4 = max(e.4, y)
+                bands[k] = e
+            } } }
+        return bands.keys.sorted().map { k in let e = bands[k]!
+            return "band y\(k*24)-\(k*24+23): \(e.0) px differ, x\(e.1)-\(e.2) y\(e.3)-\(e.4)" }
+    }
+
+    /// Ink columns (min channel < 160) in a y range, grouped into column blobs.
+    private func blobs(_ a: (px: [UInt8], w: Int, h: Int), y0: Int, y1: Int, x0: Int, x1: Int) -> String {
+        var cols: [Int] = []
+        for x in x0..<min(x1, a.w) { var hit = false
+            for y in y0..<min(y1, a.h) { let i = (y * a.w + x) * 4
+                if min(a.px[i], a.px[i+1], a.px[i+2]) < 160 { hit = true; break } }
+            if hit { cols.append(x) } }
+        var out: [(Int, Int)] = []
+        for x in cols { if let l = out.last, l.1 == x - 1 { out[out.count-1].1 = x } else { out.append((x, x)) } }
+        return out.map { "x\($0.0)-\($0.1)" }.joined(separator: ",")
+    }
+
+    @MainActor
+    func testU3OutsideTheDigitWindow() throws {
+        register()
+        let raw = try String(contentsOfFile: Self.doc, encoding: .utf8)
+        XCTAssertEqual(raw.components(separatedBy: Self.fvn).count - 1, 6, "6 FVN carriers in the verbatim doc")
+        let with = try render(raw)
+        let without = try render(raw.replacingOccurrences(of: Self.fvn, with: ""))
+        print("SKPROBE size", with.w, with.h)
+        for line in diff(with, without) { print("SKPROBE U3 diff", line) }
+        for k in 9...12 {
+            let y0 = 16 + 24 * (k - 1)
+            print("SKPROBE row\(k) with   ", blobs(with, y0: y0, y1: y0 + 24, x0: 100, x1: 160))
+            print("SKPROBE row\(k) without", blobs(without, y0: y0, y1: y0 + 24, x0: 100, x1: 160))
+        }
+    }
+
+    @MainActor
+    func testU3PerRun() throws {
+        register()
+        let fam = #"["Inter","-apple-system","system-ui","Segoe UI","Roboto","Oxygen","Ubuntu","sans-serif"]"#
+        for (text, dir) in [(".", "LTR"), ("1", "LTR"), ("2", "LTR"), ("\u{05D0}.", "RTL"), ("\u{05D1}.", "RTL")] {
+            func run(_ tab: Bool) throws -> IRComponent {
+                try JSONDecoder().decode(IRComponent.self, from: Data("""
+                {"id":"run","name":"run","text":"\(text)","properties":[{"type":"WhiteSpace","data":"PRE"},
+                 {"type":"LineHeight","data":{"original":{"type":"length","px":20}}},{"type":"Direction","data":"\(dir)"},
+                 {"type":"TextAlign","data":"LEFT"},
+                 {"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},
+                 {"type":"FontFamily","data":\(fam)},{"type":"FontSize","data":{"px":16,"original":{"type":"length","px":16}}},
+                 {"type":"FontStyle","data":"normal"},{"type":"FontWeight","data":400}\(tab ? Self.fvn : "")]}
+                """.utf8))
+            }
+            let a = try pixels(ComponentHost(component: try run(true)))
+            let b = try pixels(ComponentHost(component: try run(false)))
+            let d = diff(a, b)
+            print("SKPROBE perrun \(text) identical=\(d.isEmpty) tab[\(blobs(a, y0: 0, y1: 60, x0: 0, x1: 80))] prop[\(blobs(b, y0: 0, y1: 60, x0: 0, x1: 80))] \(d)")
+        }
+    }
+}

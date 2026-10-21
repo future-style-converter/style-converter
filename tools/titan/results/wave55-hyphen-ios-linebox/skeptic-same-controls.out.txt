@@ -1,0 +1,30 @@
+NB-ios P8 hyphens-vertical-001 __2-320 horizontal=false singleLineText=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME all-prop-001: 0 declared-normal run(s)
+NB-ios SAME anonymous-table-ws-001 wpt__css-tables__anonymous-table-ws-001__1-066 horizontal=true singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME anonymous-table-ws-001: 1 declared-normal run(s)
+NB-ios SAME boundary-shaping__boundary-shaping-010 wpt__css-text__boundary-shaping__boundary-shaping-010__2-157 horizontal=true singleLineText=true preBreak=false lineCountIsExact=true renderedLineCount=1
+NB-ios SAME boundary-shaping__boundary-shaping-010 wpt__css-text__boundary-shaping__boundary-shaping-010__3-158 horizontal=true singleLineText=true preBreak=false lineCountIsExact=true renderedLineCount=1
+NB-ios SAME boundary-shaping__boundary-shaping-010 wpt__css-text__boundary-shaping__boundary-shaping-010__4-159 horizontal=true singleLineText=true preBreak=false lineCountIsExact=true renderedLineCount=1
+NB-ios SAME boundary-shaping__boundary-shaping-010: 3 declared-normal run(s)
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__0__0__0-543 horizontal=true singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__0__0__1-544 horizontal=true singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__0__1__0-546 horizontal=true singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__0__1__1-547 horizontal=true singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__0__2-548 horizontal=true singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__0__3-549 horizontal=true singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__1__0__0-552 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__1__0__1-553 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__1__1__0-555 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__1__1__1-556 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__1__2-557 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__1__3-558 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__2__0__0-561 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__2__0__1-562 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__2__1__0-564 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__2__1__1-565 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__2__2-566 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles counter-style-at-rule__disclosure-styles__2__3-567 horizontal=false singleLineText=false preBreak=true lineCountIsExact=true renderedLineCount=1
+NB-ios SAME counter-style-at-rule__disclosure-styles: 18 declared-normal run(s)
+NB-ios SAME hyphens__hyphens-vertical-001 wpt__css-text__hyphens__hyphens-vertical-001__2-320 horizontal=false singleLineText=true preBreak=false lineCountIsExact=true renderedLineCount=1
+NB-ios SAME hyphens__hyphens-vertical-001 wpt__css-text__hyphens__hyphens-vertical-001__3-321 horizontal=false singleLineText=true preBreak=false lineCountIsExact=true renderedLineCount=1
+NB-ios SAME hyphens__hyphens-vertical-001: 2 declared-normal run(s)

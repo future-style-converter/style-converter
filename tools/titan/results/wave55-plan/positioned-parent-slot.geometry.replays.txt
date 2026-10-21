@@ -1,0 +1,55 @@
+# positioned-parent-slot.geometry.py wave54-final wave54-final --replay <ARM>: android captures replaced by the planning
+# replays (positioned-parent-slot.replay.py; per-document arms, a combined arm falls back to the single-unit replay).
+# Only android [S]/[W] keys and the two partial controls are shown; every other line equals .geometry.wave54-final.txt.
+=== --replay U1
+[S] dir-style-02a android row6 ink (246, 120, 373, 131) dot 0px → GEOMETRY WRONG (extent x246-373 vs ref x17-153; ink past the ref right edge (mirrored); dot: none at x15-19 y128-132)
+[S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px → GEOMETRY OK
+[S] dir-style-02a android row9 ink (246, 180, 373, 191) dot 0px → GEOMETRY WRONG (extent x246-373 vs ref x17-153; ink past the ref right edge (mirrored); dot: none at x15-19 y188-192)
+[S] bidi-tab-001 android rtl-rows y86:(16, 135) y106:(124, 219) y186:(16, 135) y226:(16, 135) → GEOMETRY WRONG (band y86 blue x(16, 135) vs ref x(16, 38); band y106 blue x(124, 219) vs ref x(114, 135); band y186 blue x(16, 135) vs ref x(16, 38); band y226 blue x(16, 135) vs ref x(16, 38))
+[W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] → GEOMETRY OK
+[S] dynamic-offset-rtl-001 android magenta (186, 26, 195, 35) → GEOMETRY WRONG (magenta (186, 26, 195, 35) vs ref (86, 26, 95, 35))
+[S] dynamic-offset-vrl-rtl-001 android magenta (186, 26, 195, 35) → GEOMETRY WRONG (magenta (186, 26, 195, 35) vs ref (86, 26, 95, 35))
+[W] dynamic-offset-rtl-002 android magenta (126, 26, 135, 35) → GEOMETRY WRONG (magenta x126 vs wire x26)
+[W] dynamic-offset-vrl-rtl-002 android magenta (186, 96, 195, 105) → GEOMETRY WRONG (magenta x186 vs wire x86)
+[C] dir-style-02a android unaffected-rows identical to wave54-final → GEOMETRY OK
+[C] bidi-tab-001 android ltr-rows identical to wave54-final → GEOMETRY OK
+exit=0
+=== --replay U2
+[S] dir-style-02a android row6 ink (246, 120, 373, 131) dot 0px → GEOMETRY WRONG (extent x246-373 vs ref x17-153; ink past the ref right edge (mirrored); dot: none at x15-19 y128-132)
+[S] dir-style-02a android row7 ink (22, 140, 243, 151) dot 0px → GEOMETRY WRONG (extent x22-243 vs ref x17-243; dot: none at x15-19 y148-152)
+[S] dir-style-02a android row9 ink (246, 180, 373, 191) dot 0px → GEOMETRY WRONG (extent x246-373 vs ref x17-153; ink past the ref right edge (mirrored); dot: none at x15-19 y188-192)
+[S] bidi-tab-001 android rtl-rows y86:(16, 135) y106:(124, 219) y186:(16, 135) y226:(16, 135) → GEOMETRY WRONG (band y86 blue x(16, 135) vs ref x(16, 38); band y106 blue x(124, 219) vs ref x(114, 135); band y186 blue x(16, 135) vs ref x(16, 38); band y226 blue x(16, 135) vs ref x(16, 38))
+[W] anchor-position-multicol-nested-001 android stack cells [100, 0, 0, 0] → GEOMETRY WRONG (cell (360,78) 0% green; cell (190,168) 0% green; cell (360,168) 0% green)
+[S] dynamic-offset-rtl-001 android magenta (86, 26, 95, 35) → GEOMETRY OK
+[S] dynamic-offset-vrl-rtl-001 android magenta (86, 26, 95, 35) → GEOMETRY OK
+[W] dynamic-offset-rtl-002 android magenta (26, 26, 35, 35) → GEOMETRY OK
+[W] dynamic-offset-vrl-rtl-002 android magenta (86, 96, 95, 105) → GEOMETRY OK
+[C] dir-style-02a android unaffected-rows identical to wave54-final → GEOMETRY OK
+[C] bidi-tab-001 android ltr-rows identical to wave54-final → GEOMETRY OK
+exit=0
+=== --replay U1U2
+[S] dir-style-02a android row6 ink (17, 120, 153, 131) dot 4px → GEOMETRY OK
+[S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px → GEOMETRY OK
+[S] dir-style-02a android row9 ink (17, 180, 153, 191) dot 4px → GEOMETRY OK
+[S] bidi-tab-001 android rtl-rows y86:(16, 36) y106:(114, 135) y186:(16, 36) y226:(16, 36) → GEOMETRY OK
+[W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] → GEOMETRY OK
+[S] dynamic-offset-rtl-001 android magenta (86, 26, 95, 35) → GEOMETRY OK
+[S] dynamic-offset-vrl-rtl-001 android magenta (86, 26, 95, 35) → GEOMETRY OK
+[W] dynamic-offset-rtl-002 android magenta (26, 26, 35, 35) → GEOMETRY OK
+[W] dynamic-offset-vrl-rtl-002 android magenta (86, 96, 95, 105) → GEOMETRY OK
+[C] dir-style-02a android unaffected-rows identical to wave54-final → GEOMETRY OK
+[C] bidi-tab-001 android ltr-rows identical to wave54-final → GEOMETRY OK
+exit=0
+=== --replay PLAIN
+[S] dir-style-02a android row6 ink None dot 0px → GEOMETRY WRONG (no ink in the row; dot: none at x15-19 y128-132)
+[S] dir-style-02a android row7 ink (17, 140, 243, 151) dot 4px → GEOMETRY OK
+[S] dir-style-02a android row9 ink None dot 0px → GEOMETRY WRONG (no ink in the row; dot: none at x15-19 y188-192)
+[S] bidi-tab-001 android rtl-rows y86:(16, 147) y106:(124, 231) y186:(16, 147) y226:(16, 147) → GEOMETRY WRONG (band y86 blue x(16, 147) vs ref x(16, 38); band y106 blue x(124, 231) vs ref x(114, 135); band y186 blue x(16, 147) vs ref x(16, 38); band y226 blue x(16, 147) vs ref x(16, 38))
+[W] anchor-position-multicol-nested-001 android stack cells [100, 100, 100, 100] → GEOMETRY OK
+[S] dynamic-offset-rtl-001 android magenta (186, 26, 195, 35) → GEOMETRY WRONG (magenta (186, 26, 195, 35) vs ref (86, 26, 95, 35))
+[S] dynamic-offset-vrl-rtl-001 android magenta (186, 26, 195, 35) → GEOMETRY WRONG (magenta (186, 26, 195, 35) vs ref (86, 26, 95, 35))
+[W] dynamic-offset-rtl-002 android magenta (126, 26, 135, 35) → GEOMETRY WRONG (magenta x126 vs wire x26)
+[W] dynamic-offset-vrl-rtl-002 android magenta (186, 96, 195, 105) → GEOMETRY WRONG (magenta x186 vs wire x86)
+[C] dir-style-02a android unaffected-rows identical to wave54-final → GEOMETRY OK
+[C] bidi-tab-001 android ltr-rows identical to wave54-final → GEOMETRY OK
+exit=0

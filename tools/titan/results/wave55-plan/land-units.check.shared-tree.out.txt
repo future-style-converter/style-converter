@@ -1,0 +1,117 @@
+land-units.sh — wave 55 (CHECK: read-only)
+root    /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+HEAD    640276a0 (campaign/applier-campaign)   export dir (private, removed at exit): /private/var/folders/34/h7173byn5kb_lddtbn4hqt9w0000gn/T/land-units.d0VGPq
+
+ORDER (26 unit commits + records; hold: none; only: all lanes)
+  00   records  the selected lane dirs → 1 commit
+  01   L7  U1           -- skipped: optional, no patch delivered (its files must be tracked at HEAD: checked below)
+  02   L7  U2           wave55-instruments/unit-U2.patch 
+  03   L7  U3           -- skipped: optional, no patch delivered (its files must be tracked at HEAD: checked below)
+  04   L7  U4           wave55-instruments/unit-U4.patch 
+  05   L7  U6-compose   wave55-instruments/unit-U6-compose.patch 
+  06   L7  U6-swift     wave55-instruments/unit-U6-swift.patch 
+  07   L7  U6-web       wave55-instruments/unit-U6-web.patch 
+  08   L7  U6-tooling   wave55-instruments/unit-U6-tooling.patch 
+  09   L7  U5           wave55-instruments/unit-U5.patch 
+  10   L6  U1           wave55-android-paint-order/unit-U1.patch 
+  11   L6  U2           wave55-android-paint-order/unit-U2.patch 
+  12   L6  U3           wave55-android-paint-order/unit-U3.patch 
+  13   L4  U1-android   wave55-ua-heading-margin/unit-U1-android.patch wave55-ua-heading-margin/seam-1.patch 
+  14   L4  U1-ios       wave55-ua-heading-margin/unit-U1-ios.patch wave55-ua-heading-margin/seam-2.patch 
+  15   L4  U2-android   wave55-ua-heading-margin/unit-U2-android.patch wave55-ua-heading-margin/seam-3.patch 
+  16   L4  U2-ios       wave55-ua-heading-margin/unit-U2-ios.patch wave55-ua-heading-margin/seam-4.patch 
+  17   L2  U1           wave55-cbb-android/unit-U1.patch wave55-cbb-android/seam-1.patch 
+  18   L2  U2           wave55-cbb-android/unit-U2.patch 
+  19   L3  U1           wave55-positioned-parent-slot/unit-U1.patch wave55-positioned-parent-slot/seam-1.patch 
+  20   L3  U2           wave55-positioned-parent-slot/unit-U2.patch 
+  21   L5  U1-ios       wave55-counter-suffix-rows/unit-U1-ios.patch wave55-counter-suffix-rows/seam-1.patch 
+  22   L5  U2o-ios      wave55-counter-suffix-rows/unit-U2o-ios.patch wave55-counter-suffix-rows/seam-2.patch 
+  23   L5  U2i-ios      wave55-counter-suffix-rows/seam-3.patch 
+  24   L5  U2o-android  wave55-counter-suffix-rows/unit-U2o-android.patch wave55-counter-suffix-rows/seam-4.patch 
+  25   L5  U2i-android  wave55-counter-suffix-rows/seam-5.patch 
+  26   L1  NB-ios       wave55-hyphen-ios-linebox/unit-NB-ios.patch wave55-hyphen-ios-linebox/seam-1.patch 
+  27   L5  U3-ios       wave55-counter-suffix-rows/unit-U3-ios.patch wave55-counter-suffix-rows/seam-6.patch 
+  28   L5  D            wave55-counter-suffix-rows/unit-D.patch 
+  29   L1  NB-ios-b     -- skipped: contingency (lands only by --contingency)
+
+HOST, INDEX, MANIFEST
+  host    no gate / probe / A/B arm process in this tree
+  index   nothing staged
+  manifest in sync with the tables (landing-manifest.json, sha256 0b46b9b2b673…)
+  plan    28 plan revert units (+ 1 contingency) agree with the table: lane dirs, unit names, revertOrders (expectations.json)
+
+RECORDS (committed first)
+  ERROR   lane dir MISSING: tools/titan/results/wave55-instruments/
+  ERROR   lane dir MISSING: tools/titan/results/wave55-android-paint-order/
+  ERROR   lane dir MISSING: tools/titan/results/wave55-ua-heading-margin/
+  ERROR   lane dir MISSING: tools/titan/results/wave55-cbb-android/
+  ERROR   lane dir MISSING: tools/titan/results/wave55-positioned-parent-slot/
+  ERROR   lane dir MISSING: tools/titan/results/wave55-counter-suffix-rows/
+  ERROR   lane dir MISSING: tools/titan/results/wave55-hyphen-ios-linebox/
+  ok      force-add tools/titan/results/wave54-oof-layout/fix/dry/h1h2/out/expectations.json
+  ok      force-add tools/titan/results/wave54-oof-layout/fix/dry/h1h2/out/watchlist.txt
+  ok      force-add tools/titan/results/wave54-oof-layout/fix/dry/h2/out/expectations.json
+  ok      force-add tools/titan/results/wave54-oof-layout/fix/dry/h2/out/watchlist.txt
+  ok      force-add tools/titan/results/wave54-oof-layout/reverify/dry/h1h2/out/expectations.json
+  ok      force-add tools/titan/results/wave54-oof-layout/reverify/dry/h1h2/out/watchlist.txt
+
+OPTIONAL UNITS WITH NO PATCH (their files must already be tracked at HEAD)
+  ok      L7:U1 (optional, no patch): tools/titan/results/wave55-plan/flex-zero-gap-rules.geometry.py tracked at HEAD
+  ok      L7:U1 (optional, no patch): tools/titan/results/wave55-plan/flex-zero-gap-rules.fakes-run.sh tracked at HEAD
+  ok      L7:U1 (optional, no patch): tools/titan/results/wave55-plan/flex-zero-gap-rules.geometry.out.txt tracked at HEAD
+  ERROR   L7:U3 delivered no patch and tools/titan/results/wave55-gate/ab-arms55.sh is NOT tracked at HEAD — commit it with the plan / gate records before landing, or deliver tools/titan/results/wave55-instruments/unit-U3.patch (after removing the loose copy)
+  ERROR   L7:U3 delivered no patch and tools/titan/results/wave55-gate/ab-arms55.selftest.sh is NOT tracked at HEAD — commit it with the plan / gate records before landing, or deliver tools/titan/results/wave55-instruments/unit-U3.patch (after removing the loose copy)
+  ERROR   L7:U3 delivered no patch and tools/titan/results/wave55-gate/ab-arms55.selftest.out.txt is NOT tracked at HEAD — commit it with the plan / gate records before landing, or deliver tools/titan/results/wave55-instruments/unit-U3.patch (after removing the loose copy)
+
+PATCHES (each: present · parsed · its paths · the rules · alone on the current tree)
+  ERROR   MISSING tools/titan/results/wave55-instruments/unit-U2.patch   (L7:U2)
+  ERROR   MISSING tools/titan/results/wave55-instruments/unit-U4.patch   (L7:U4)
+  ERROR   MISSING tools/titan/results/wave55-instruments/unit-U6-compose.patch   (L7:U6-compose)
+  ERROR   MISSING tools/titan/results/wave55-instruments/unit-U6-swift.patch   (L7:U6-swift)
+  ERROR   MISSING tools/titan/results/wave55-instruments/unit-U6-web.patch   (L7:U6-web)
+  ERROR   MISSING tools/titan/results/wave55-instruments/unit-U6-tooling.patch   (L7:U6-tooling)
+  ERROR   MISSING tools/titan/results/wave55-instruments/unit-U5.patch   (L7:U5)
+  ERROR   MISSING tools/titan/results/wave55-android-paint-order/unit-U1.patch   (L6:U1)
+  ERROR   MISSING tools/titan/results/wave55-android-paint-order/unit-U2.patch   (L6:U2)
+  ERROR   MISSING tools/titan/results/wave55-android-paint-order/unit-U3.patch   (L6:U3)
+  ERROR   MISSING tools/titan/results/wave55-ua-heading-margin/unit-U1-android.patch   (L4:U1-android)
+  ERROR   MISSING tools/titan/results/wave55-ua-heading-margin/seam-1.patch   (L4:U1-android)
+  ERROR   MISSING tools/titan/results/wave55-ua-heading-margin/unit-U1-ios.patch   (L4:U1-ios)
+  ERROR   MISSING tools/titan/results/wave55-ua-heading-margin/seam-2.patch   (L4:U1-ios)
+  ERROR   MISSING tools/titan/results/wave55-ua-heading-margin/unit-U2-android.patch   (L4:U2-android)
+  ERROR   MISSING tools/titan/results/wave55-ua-heading-margin/seam-3.patch   (L4:U2-android)
+  ERROR   MISSING tools/titan/results/wave55-ua-heading-margin/unit-U2-ios.patch   (L4:U2-ios)
+  ERROR   MISSING tools/titan/results/wave55-ua-heading-margin/seam-4.patch   (L4:U2-ios)
+  ERROR   MISSING tools/titan/results/wave55-cbb-android/unit-U1.patch   (L2:U1)
+  ERROR   MISSING tools/titan/results/wave55-cbb-android/seam-1.patch   (L2:U1)
+  ERROR   MISSING tools/titan/results/wave55-cbb-android/unit-U2.patch   (L2:U2)
+  ERROR   MISSING tools/titan/results/wave55-positioned-parent-slot/unit-U1.patch   (L3:U1)
+  ERROR   MISSING tools/titan/results/wave55-positioned-parent-slot/seam-1.patch   (L3:U1)
+  ERROR   MISSING tools/titan/results/wave55-positioned-parent-slot/unit-U2.patch   (L3:U2)
+  ERROR   MISSING tools/titan/results/wave55-counter-suffix-rows/unit-U1-ios.patch   (L5:U1-ios)
+  ERROR   MISSING tools/titan/results/wave55-counter-suffix-rows/seam-1.patch   (L5:U1-ios)
+  ERROR   MISSING tools/titan/results/wave55-counter-suffix-rows/unit-U2o-ios.patch   (L5:U2o-ios)
+  ERROR   MISSING tools/titan/results/wave55-counter-suffix-rows/seam-2.patch   (L5:U2o-ios)
+  ERROR   MISSING tools/titan/results/wave55-counter-suffix-rows/seam-3.patch   (L5:U2i-ios)
+  ERROR   MISSING tools/titan/results/wave55-counter-suffix-rows/unit-U2o-android.patch   (L5:U2o-android)
+  ERROR   MISSING tools/titan/results/wave55-counter-suffix-rows/seam-4.patch   (L5:U2o-android)
+  ERROR   MISSING tools/titan/results/wave55-counter-suffix-rows/seam-5.patch   (L5:U2i-android)
+  ERROR   MISSING tools/titan/results/wave55-hyphen-ios-linebox/unit-NB-ios.patch   (L1:NB-ios)
+  ERROR   MISSING tools/titan/results/wave55-hyphen-ios-linebox/seam-1.patch   (L1:NB-ios)
+  ERROR   MISSING tools/titan/results/wave55-counter-suffix-rows/unit-U3-ios.patch   (L5:U3-ios)
+  ERROR   MISSING tools/titan/results/wave55-counter-suffix-rows/seam-6.patch   (L5:U3-ios)
+  ERROR   MISSING tools/titan/results/wave55-counter-suffix-rows/unit-D.patch   (L5:D)
+
+TOUCHED PATHS (clean at HEAD on the current tree; a created path absent)
+  n/a     no delivered patch names a path yet
+
+CUMULATIVE (the series in landing order, `git apply --check` of one concatenated input on the current tree)
+  skipped: 37 patch(es) missing — the series is incomplete (check a delivered subset with --only / --hold)
+
+REVERT DRY-RUNS (every selected unit's revertOrder, reverse-applied on the fully landed series; export tree)
+  skipped: the forward series is not clean
+
+CONTINGENCY (not landed by this run)
+  note    L1:NB-ios-b (contingency): not delivered — expected until the stage-1 probe prints its trigger
+
+SUMMARY  47 error(s), 0 warning(s) — NOT landable as is (--check touched nothing: no checkout, no rm, no apply on the tree)

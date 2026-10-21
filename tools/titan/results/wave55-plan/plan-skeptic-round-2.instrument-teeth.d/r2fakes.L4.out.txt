@@ -1,0 +1,87 @@
+L6 picked: {'abspos/flex-abspos-staticpos-align-self-safe-001': 'child@39,39 -3,+0', 'abspos/flex-abspos-staticpos-align-self-safe-002': 'child@44,272 -3,+0', 'abspos/grid-abspos-staticpos-align-self-001': 'child@19,30 +3,+0', 'abspos/grid-abspos-staticpos-justify-self-001': 'child@30,19 +3,+0', 'abspos/grid-abspos-staticpos-align-self-vertWM-001': 'child@18,19 +3,+0', 'abspos/grid-abspos-staticpos-align-self-rtl-001': 'child@33,18 +3,+0'}
+L4-C-line1-clipped-10px                    gate-exit 1  [F] text-decoration-inset-005 ios                          PASS   ACCEPTED (defect)
+      [F] text-decoration-inset-005 ios bands [(134, 173, 16, 326), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-clipped-10px                    gate-exit 1  [F] text-decoration-inset-006 ios                          PASS   ACCEPTED (defect)
+      [F] text-decoration-inset-006 ios bands [(134, 173, 16, 321), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-clipped-10px                    gate-exit 1  [F] text-decoration-inset-014 android                      PASS   ACCEPTED (defect)
+      [F] text-decoration-inset-014 android bands [(129, 154, 17, 248), (163, 186, 16, 155)] → GEOMETRY OK
+L4-C-line1-clipped-10px                    gate-exit 1  [F] text-decoration-inset-014 ios                          PASS   ACCEPTED (defect)
+      [F] text-decoration-inset-014 ios bands [(129, 154, 17, 248), (163, 186, 16, 155)] → GEOMETRY OK
+L4-C-line1-clipped-10px                    gate-exit 1  [M] text-decoration-inset-005 android                      PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-005 android bands [(134, 173, 16, 326), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-clipped-10px                    gate-exit 1  [M] text-decoration-inset-005 ios                          PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-005 ios bands [(134, 173, 16, 326), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-clipped-10px                    gate-exit 1  [M] text-decoration-inset-006 android                      PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-006 android bands [(134, 173, 16, 321), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-clipped-10px                    gate-exit 1  [M] text-decoration-inset-006 ios                          PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-006 ios bands [(134, 173, 16, 321), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-clipped-10px                    gate-exit 1  [M] text-decoration-inset-014 android                      PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-014 android bands [(129, 154, 17, 248), (163, 186, 16, 155)] → GEOMETRY OK
+L4-C-line1-clipped-10px                    gate-exit 1  [M] text-decoration-inset-014 ios                          PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-014 ios bands [(129, 154, 17, 248), (163, 186, 16, 155)] → GEOMETRY OK
+L4-C-line1-mirrored                        gate-exit 1  [F] text-decoration-inset-005 ios                          PASS   ACCEPTED (defect)
+      [F] text-decoration-inset-005 ios bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-mirrored                        gate-exit 1  [F] text-decoration-inset-006 ios                          PASS   ACCEPTED (defect)
+      [F] text-decoration-inset-006 ios bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-mirrored                        gate-exit 1  [F] text-decoration-inset-014 android                      PASS   ACCEPTED (defect)
+      [F] text-decoration-inset-014 android bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+L4-C-line1-mirrored                        gate-exit 1  [F] text-decoration-inset-014 ios                          PASS   ACCEPTED (defect)
+      [F] text-decoration-inset-014 ios bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+L4-C-line1-mirrored                        gate-exit 1  [M] text-decoration-inset-005 android                      PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-005 android bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-mirrored                        gate-exit 1  [M] text-decoration-inset-005 ios                          PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-005 ios bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-mirrored                        gate-exit 1  [M] text-decoration-inset-006 android                      PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-006 android bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-mirrored                        gate-exit 1  [M] text-decoration-inset-006 ios                          PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-006 ios bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-mirrored                        gate-exit 1  [M] text-decoration-inset-014 android                      PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-014 android bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+L4-C-line1-mirrored                        gate-exit 1  [M] text-decoration-inset-014 ios                          PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-014 ios bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+L4-U1-line1-mirrored                       gate-exit 1  [M] text-decoration-inset-005 android                      PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-005 android bands [(128, 152, 17, 191)] → GEOMETRY OK
+L4-U1-line1-mirrored                       gate-exit 1  [M] text-decoration-inset-005 ios                          PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-005 ios bands [(130, 151, 16, 191)] → GEOMETRY OK
+L4-U1-line1-mirrored                       gate-exit 1  [M] text-decoration-inset-006 android                      PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-006 android bands [(128, 152, 17, 194)] → GEOMETRY OK
+L4-U1-line1-mirrored                       gate-exit 1  [M] text-decoration-inset-006 ios                          PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-006 ios bands [(130, 151, 16, 194)] → GEOMETRY OK
+L4-U1-line1-mirrored                       gate-exit 1  [M] text-decoration-inset-014 android                      PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-014 android bands [(128, 139, 17, 132), (144, 155, 16, 84)] → GEOMETRY OK
+L4-U1-line1-mirrored                       gate-exit 1  [M] text-decoration-inset-014 ios                          PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-014 ios bands [(128, 138, 17, 133), (145, 154, 16, 84)] → GEOMETRY OK
+L4-C-line1-thirds-swapped                  gate-exit 1  [F] text-decoration-inset-005 ios                          PASS   ACCEPTED (defect)
+      [F] text-decoration-inset-005 ios bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-thirds-swapped                  gate-exit 1  [F] text-decoration-inset-006 ios                          PASS   ACCEPTED (defect)
+      [F] text-decoration-inset-006 ios bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-thirds-swapped                  gate-exit 1  [F] text-decoration-inset-014 android                      PASS   ACCEPTED (defect)
+      [F] text-decoration-inset-014 android bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+L4-C-line1-thirds-swapped                  gate-exit 1  [F] text-decoration-inset-014 ios                          PASS   ACCEPTED (defect)
+      [F] text-decoration-inset-014 ios bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+L4-C-line1-thirds-swapped                  gate-exit 1  [M] text-decoration-inset-005 android                      PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-005 android bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-thirds-swapped                  gate-exit 1  [M] text-decoration-inset-005 ios                          PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-005 ios bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-thirds-swapped                  gate-exit 1  [M] text-decoration-inset-006 android                      PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-006 android bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-thirds-swapped                  gate-exit 1  [M] text-decoration-inset-006 ios                          PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-006 ios bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+L4-C-line1-thirds-swapped                  gate-exit 1  [M] text-decoration-inset-014 android                      PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-014 android bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+L4-C-line1-thirds-swapped                  gate-exit 1  [M] text-decoration-inset-014 ios                          PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-014 ios bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+L4-U1-line1-thirds-swapped                 gate-exit 1  [M] text-decoration-inset-005 android                      PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-005 android bands [(128, 152, 17, 191)] → GEOMETRY OK
+L4-U1-line1-thirds-swapped                 gate-exit 1  [M] text-decoration-inset-005 ios                          PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-005 ios bands [(130, 151, 16, 191)] → GEOMETRY OK
+L4-U1-line1-thirds-swapped                 gate-exit 1  [M] text-decoration-inset-006 android                      PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-006 android bands [(128, 152, 17, 194)] → GEOMETRY OK
+L4-U1-line1-thirds-swapped                 gate-exit 1  [M] text-decoration-inset-006 ios                          PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-006 ios bands [(130, 151, 16, 194)] → GEOMETRY OK
+L4-U1-line1-thirds-swapped                 gate-exit 1  [M] text-decoration-inset-014 android                      PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-014 android bands [(128, 139, 17, 132), (144, 155, 16, 84)] → GEOMETRY OK
+L4-U1-line1-thirds-swapped                 gate-exit 1  [M] text-decoration-inset-014 ios                          PASS   ACCEPTED (defect)
+      [M] text-decoration-inset-014 ios bands [(128, 138, 17, 133), (145, 154, 16, 84)] → GEOMETRY OK
+
+42 (fake, key) reads; ACCEPTED 42; rejected 0; other 0

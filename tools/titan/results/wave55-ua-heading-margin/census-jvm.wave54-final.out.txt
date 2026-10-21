@@ -1,0 +1,33 @@
+OOF CSS2/wpt__CSS2__css21-errata__s-11-1-1b-005 css21-errata__s-11-1-1b-005__0-140 tag=p root=false decl=- fires=false consumed=false faceIndependent=true added=[]
+OOF CSS2/wpt__CSS2__css21-errata__s-11-1-1b-006 wpt__css2__css21-errata__s-11-1-1b-006__3-144 tag=p root=true decl=- fires=false consumed=false faceIndependent=true added=[]
+OOF css-anchor-position/wpt__css-anchor-position__anchor-center-safe-rtl anchor-center-safe-rtl__1__0-476 tag=p root=false decl=- fires=false consumed=false faceIndependent=true added=[]
+OOF css-anchor-position/wpt__css-anchor-position__anchor-center-safe-rtl anchor-center-safe-rtl__3__0-481 tag=p root=false decl=- fires=false consumed=false faceIndependent=true added=[]
+OOF css-backgrounds/wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3 background-attachment-local__attachment-local-positioning-3__0__0__0-081 tag=p root=false decl=TB fires=false consumed=false faceIndependent=true added=[]
+OOF css-backgrounds/wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4 background-attachment-local__attachment-local-positioning-4__0__0__0-085 tag=p root=false decl=TB fires=false consumed=false faceIndependent=true added=[]
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-001 text-decoration-inset-001__1__0-053 tag=h1 root=false decl=TB fires=false consumed=false faceIndependent=true added=[]
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-002 text-decoration-inset-002__1__0-057 tag=h1 root=false decl=TB fires=false consumed=false faceIndependent=true added=[]
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-003 text-decoration-inset-003__1__0-061 tag=h1 root=false decl=TB fires=false consumed=false faceIndependent=true added=[]
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-004 text-decoration-inset-004__1__0-065 tag=h1 root=false decl=TB fires=false consumed=false faceIndependent=true added=[]
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-005 text-decoration-inset-005__1__0-069 tag=h1 root=false decl=- fires=true consumed=false faceIndependent=true added=[MarginTop={"px":21.44},MarginBottom={"px":21.44}]
+U2-FLIP css-text-decor/wpt__css-text-decor__text-decoration-inset-005 text-decoration-inset-005__1__0-069 tag=h1 old=true new=false consumed=false faceChanged=true
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-006 text-decoration-inset-006__1__0-076 tag=h1 root=false decl=- fires=true consumed=false faceIndependent=true added=[MarginTop={"px":21.44},MarginBottom={"px":21.44}]
+U2-FLIP css-text-decor/wpt__css-text-decor__text-decoration-inset-006 text-decoration-inset-006__1__0-076 tag=h1 old=true new=false consumed=false faceChanged=true
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-007 text-decoration-inset-007__1__0-083 tag=h1 root=false decl=TB fires=false consumed=false faceIndependent=true added=[]
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-008 text-decoration-inset-008__1__0-087 tag=h1 root=false decl=TB fires=false consumed=false faceIndependent=true added=[]
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-009 text-decoration-inset-009__1__0-091 tag=h1 root=false decl=TB fires=false consumed=false faceIndependent=true added=[]
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-011 text-decoration-inset-011__1__0-095 tag=h1 root=false decl=- fires=true consumed=false faceIndependent=true added=[MarginTop={"px":21.44},MarginBottom={"px":21.44}]
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-012 text-decoration-inset-012__1__0-102 tag=h1 root=false decl=TB fires=false consumed=false faceIndependent=true added=[]
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-013 text-decoration-inset-013__1__0-106 tag=h1 root=false decl=TB fires=false consumed=false faceIndependent=true added=[]
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-014 text-decoration-inset-014__1__0-110 tag=h1 root=false decl=- fires=true consumed=false faceIndependent=true added=[MarginTop={"px":17.42},MarginBottom={"px":17.42}]
+U2-FLIP css-text-decor/wpt__css-text-decor__text-decoration-inset-014 text-decoration-inset-014__1__0-110 tag=h1 old=true new=false consumed=false faceChanged=true
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-015 text-decoration-inset-015__1__0-115 tag=h1 root=false decl=TB fires=false consumed=false faceIndependent=true added=[]
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-016 text-decoration-inset-016__1__0-119 tag=h1 root=false decl=TB fires=false consumed=false faceIndependent=true added=[]
+OOF css-text-decor/wpt__css-text-decor__text-decoration-inset-024 text-decoration-inset-024__1__0-123 tag=h1 root=false decl=TB fires=false consumed=false faceIndependent=true added=[]
+SUMMARY run=wave54-final docs=1435 u1Docs=4 u2Docs=3
+U1-DOC css-text-decor/wpt__css-text-decor__text-decoration-inset-005
+U1-DOC css-text-decor/wpt__css-text-decor__text-decoration-inset-006
+U1-DOC css-text-decor/wpt__css-text-decor__text-decoration-inset-011
+U1-DOC css-text-decor/wpt__css-text-decor__text-decoration-inset-014
+U2-DOC css-text-decor/wpt__css-text-decor__text-decoration-inset-005
+U2-DOC css-text-decor/wpt__css-text-decor__text-decoration-inset-006
+U2-DOC css-text-decor/wpt__css-text-decor__text-decoration-inset-014

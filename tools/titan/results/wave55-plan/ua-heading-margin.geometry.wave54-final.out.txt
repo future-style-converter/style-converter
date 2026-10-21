@@ -1,0 +1,50 @@
+[M] text-decoration-inset-005            ref      bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+[F] text-decoration-inset-005            ref      bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+[M] text-decoration-inset-005            web      bands [(134, 173, 16, 328), (188, 212, 16, 64)] → GEOMETRY OK
+[F] text-decoration-inset-005            web      bands [(134, 173, 16, 328), (188, 212, 16, 64)] → GEOMETRY OK
+[M] text-decoration-inset-005            ios      bands [(109, 130, 16, 191)] → GEOMETRY WRONG (heading top y109 vs y130±2 (16px face: wave54-final y109 + the 21 px UA margin))
+[F] text-decoration-inset-005            ios      bands [(109, 130, 16, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(109, 130, 16, 191)]))
+[M] text-decoration-inset-005            android  bands [(107, 131, 17, 191)] → GEOMETRY WRONG (heading top y107 vs y128±2 (16px face: wave54-final y107 + the 21 px UA margin))
+[F] text-decoration-inset-005            android  bands [(107, 131, 17, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(107, 131, 17, 191)]))
+[M] text-decoration-inset-006            ref      bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+[F] text-decoration-inset-006            ref      bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+[M] text-decoration-inset-006            web      bands [(134, 173, 16, 333), (188, 212, 16, 64)] → GEOMETRY OK
+[F] text-decoration-inset-006            web      bands [(134, 173, 16, 333), (188, 212, 16, 64)] → GEOMETRY OK
+[M] text-decoration-inset-006            ios      bands [(109, 130, 16, 194)] → GEOMETRY WRONG (heading top y109 vs y130±2 (16px face: wave54-final y109 + the 21 px UA margin))
+[F] text-decoration-inset-006            ios      bands [(109, 130, 16, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(109, 130, 16, 194)]))
+[M] text-decoration-inset-006            android  bands [(107, 131, 17, 194)] → GEOMETRY WRONG (heading top y107 vs y128±2 (16px face: wave54-final y107 + the 21 px UA margin))
+[F] text-decoration-inset-006            android  bands [(107, 131, 17, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(107, 131, 17, 194)]))
+[M] text-decoration-inset-014            ref      bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+[F] text-decoration-inset-014            ref      bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+[M] text-decoration-inset-014            web      bands [(129, 154, 17, 250), (163, 186, 16, 155)] → GEOMETRY OK
+[F] text-decoration-inset-014            web      bands [(129, 154, 17, 250), (163, 186, 16, 155)] → GEOMETRY OK
+[M] text-decoration-inset-014            ios      bands [(111, 121, 17, 133), (128, 137, 16, 84)] → GEOMETRY WRONG (heading top y111 vs y128±2 (16px face: wave54-final y111 + the 17 px UA margin))
+[F] text-decoration-inset-014            ios      bands [(111, 121, 17, 133), (128, 137, 16, 84)] → GEOMETRY WRONG (line-1 band 11 px tall (< 20: the 2em face is missing))
+[M] text-decoration-inset-014            android  bands [(111, 122, 17, 132), (127, 138, 16, 84)] → GEOMETRY WRONG (heading top y111 vs y128±2 (16px face: wave54-final y111 + the 17 px UA margin))
+[F] text-decoration-inset-014            android  bands [(111, 122, 17, 132), (127, 138, 16, 84)] → GEOMETRY WRONG (line-1 band 12 px tall (< 20: the 2em face is missing))
+[M] text-decoration-inset-011            ref      bands [(144, 178, 31, 345), (192, 194, 30, 335), (206, 237, 245, 345), (256, 258, 295, 345)] → GEOMETRY OK
+[M] text-decoration-inset-011            web      bands [(144, 178, 31, 345), (192, 194, 30, 345), (206, 237, 245, 345), (256, 258, 286, 345)] → GEOMETRY OK
+[M] text-decoration-inset-011            ios      bands [(137, 151, 57, 184), (169, 186, 85, 183), (208, 208, 170, 185), (265, 282, 39, 184)] → GEOMETRY WRONG (band 1 y137–151 vs y158–172±1 (wave54-final + the 21 px UA margin))
+[M] text-decoration-inset-011            android  bands [(136, 155, 57, 184), (168, 187, 80, 184), (209, 209, 166, 180), (265, 283, 41, 184)] → GEOMETRY WRONG (band 1 y136–155 vs y157–176±1 (wave54-final + the 21 px UA margin))
+[C] text-decoration-inset-001            ios      bands [(117, 146, 16, 323)] → GEOMETRY OK
+[C] text-decoration-inset-001            android  bands [(116, 145, 16, 323)] → GEOMETRY OK
+[C] text-decoration-inset-002            ios      bands [(117, 146, 16, 323)] → GEOMETRY OK
+[C] text-decoration-inset-002            android  bands [(116, 145, 16, 323)] → GEOMETRY OK
+[C] text-decoration-inset-003            ios      bands [(117, 146, 16, 323)] → GEOMETRY OK
+[C] text-decoration-inset-003            android  bands [(116, 145, 16, 323)] → GEOMETRY OK
+[C] text-decoration-inset-004            ios      bands [(137, 166, 16, 246), (177, 200, 18, 169), (204, 206, 16, 171)] → GEOMETRY OK
+[C] text-decoration-inset-004            android  bands [(136, 165, 16, 246), (176, 203, 16, 171)] → GEOMETRY OK
+[C] text-decoration-inset-009            ios      bands [(96, 110, 17, 271), (157, 186, 16, 353), (197, 220, 16, 63), (224, 226, 16, 65)] → GEOMETRY OK
+[C] text-decoration-inset-009            android  bands [(97, 110, 17, 271), (156, 185, 16, 373)] → GEOMETRY OK
+[C] text-decoration-inset-015            ios      bands [(117, 146, 16, 323)] → GEOMETRY OK
+[C] text-decoration-inset-015            android  bands [(116, 145, 16, 323)] → GEOMETRY OK
+[C] text-decoration-inset-016            ios      bands [(117, 146, 16, 323)] → GEOMETRY OK
+[C] text-decoration-inset-016            android  bands [(116, 145, 16, 323)] → GEOMETRY OK
+[C] text-decoration-inset-024            ios      bands [(117, 146, 56, 363)] → GEOMETRY OK
+[C] text-decoration-inset-024            android  bands [(116, 145, 16, 363)] → GEOMETRY OK
+[C] block-in-inline-015-print            ref      bands [(29, 46, 17, 72), (65, 86, 16, 73), (103, 126, 16, 96), (142, 166, 16, 79)] → GEOMETRY OK
+[C] block-in-inline-015-print            ios      bands [(30, 47, 17, 72), (66, 87, 16, 72), (105, 127, 16, 96), (144, 167, 16, 79)] → GEOMETRY OK
+[C] block-in-inline-015-print            android  bands [(30, 46, 18, 72), (66, 86, 17, 72), (104, 126, 17, 96), (143, 166, 17, 79)] → GEOMETRY OK
+[C] s-11-1-1b-005                        ios      bands [(5, 16, 25, 40)] → GEOMETRY OK
+[C] s-11-1-1b-005                        android  bands [(20, 34, 20, 346)] → GEOMETRY OK
+exit 0

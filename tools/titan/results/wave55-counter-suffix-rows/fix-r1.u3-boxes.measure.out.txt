@@ -1,0 +1,44 @@
+# fix-r1.u3-boxes.measure.out.txt — U3-ios ink radius on counter-suffix rows 9-12 (x120-155), per picture
+row 9 y208-231:
+  ref          x120-126 y217-225, x134-134 y224-225, x138-144 y214-225
+  web          x120-126 y217-225, x134-134 y224-225, x138-144 y214-225
+  android      x120-126 y217-225, x134-134 y224-225, x139-145 y215-225
+  ios-base     x120-126 y217-225, x134-134 y224-225, x138-141 y214-225
+  cat-without  x120-126 y217-225, x133-134 y224-225, x138-141 y214-225
+  cat-with     x120-126 y217-225, x133-134 y224-225, x139-145 y214-225
+  skmodel      x120-126 y217-225, x133-134 y224-225, x139-145 y214-225
+  Catalyst delta (with != without): 78 px, x133-146 y214-226
+  period box x130-135: nested-mask XOR Catalyst with vs without 2 (dx +0 dy +0); skmodel vs ios-base 2 (dx +0 dy +0)
+  digit box x136-150: nested-mask XOR Catalyst with vs without 41 (dx +1 dy +0); skmodel vs ios-base 38 (dx +1 dy +0)
+row 10 y232-255:
+  ref          x120-120 y243-249, x123-127 y241-249, x134-134 y248-249, x138-144 y238-249
+  web          x120-120 y243-249, x123-127 y241-249, x134-134 y248-249, x138-144 y238-249
+  android      x120-120 y244-249, x123-126 y241-249, x134-134 y248-249, x139-145 y238-249
+  ios-base     x123-126 y241-249, x134-134 y248-249, x138-145 y238-249
+  cat-without  x123-126 y241-249, x133-134 y248-249, x138-145 y238-249
+  cat-with     x123-126 y241-249, x133-134 y248-249, x138-145 y238-249
+  skmodel      x123-126 y241-249, x133-134 y248-249, x138-145 y238-249
+  Catalyst delta (with != without): 64 px, x133-145 y237-250
+  period box x130-135: nested-mask XOR Catalyst with vs without 2 (dx +0 dy +0); skmodel vs ios-base 2 (dx +0 dy +0)
+  digit box x136-150: nested-mask XOR Catalyst with vs without 19 (dx +0 dy +0); skmodel vs ios-base 16 (dx +0 dy +0)
+row 11 y256-279:
+  ref          x120-126 y265-273, x134-134 y272-273, x137-145 y264-273
+  web          x120-126 y265-273, x134-134 y272-273, x137-145 y264-273
+  android      x120-126 y265-273, x134-134 y272-273, x138-145 y265-273
+  ios-base     x120-126 y265-273, x135-135 y272-273, x139-145 y266-273
+  cat-without  x120-126 y265-273, x133-134 y272-273, x138-145 y265-273
+  cat-with     x120-126 y265-273, x134-134 y272-273, x138-145 y265-273
+  skmodel      x120-126 y265-273, x134-134 y272-273, x139-145 y266-273
+  Catalyst delta (with != without): 8 px, x133-135 y271-273
+  period box x130-135: nested-mask XOR Catalyst with vs without 2 (dx +0 dy +0); skmodel vs ios-base 2 (dx -1 dy +0)
+row 12 y280-303:
+  ref          x120-120 y291-297, x123-127 y289-297, x134-134 y296-297, x137-144 y289-297
+  web          x120-120 y291-297, x123-127 y289-297, x134-134 y296-297, x137-144 y289-297
+  android      x120-120 y292-297, x123-126 y289-297, x134-134 y296-297, x138-144 y289-297
+  ios-base     x123-126 y289-297, x134-135 y296-297, x137-144 y290-297
+  cat-without  x123-126 y289-297, x134-135 y296-297, x137-144 y288-297
+  cat-with     x123-126 y289-297, x134-135 y296-297, x137-144 y288-297
+  skmodel      x123-126 y289-297, x134-135 y296-297, x137-144 y290-297
+  Catalyst delta (with != without): 10 px, x133-135 y295-298
+  period box x130-135: nested-mask XOR Catalyst with vs without 2 (dx +1 dy +0); skmodel vs ios-base 0 (dx +0 dy +0)
+Catalyst delta OUTSIDE the six run boxes (rows 9-12 × x130-150): 0 px

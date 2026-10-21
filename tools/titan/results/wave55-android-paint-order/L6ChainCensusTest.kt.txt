@@ -1,0 +1,91 @@
+package com.styleconverter.runtime
+
+// tools/titan/results/wave55-android-paint-order/L6ChainCensusTest.kt.txt — lane L6's OWN behavioural census.
+//
+// Not a delivered test (".kt.txt" so no tree compiles it by accident): census.sh copies it into the lane's throwaway
+// worktree as runtimes/compose/src/test/java/com/styleconverter/runtime/L6ChainCensusTest.kt, substitutes the two
+// @@ placeholders, runs it with `:runtime:testDebugUnitTest --tests '*L6ChainCensus*'`, and deletes it again.
+//
+// Why a JVM census: the brief's IR census mirrored BorderSideExtractor in JavaScript and under-counted (plan-skeptic
+// round 1, D21: logical sides, shorthands, the 3-dp medium default). This one runs Compose's OWN code — the real
+// StyleApplier.extractConfig → applyConfig chain the renderer builds for every component (ComponentRenderer.kt
+// `StyleApplier.applyProperties`) — over every component of every verbatim per-test IR document of the run, and prints
+// one TSV row per component: the route flags that decide where the band paints and the folded chain's element-class
+// signature. Run once on the base tree and once with the lane's patches, the rows that DIFFER are exactly the
+// components whose modifier chain U1 / U2 changed; census.py classifies them.
+
+import androidx.compose.ui.Modifier
+import com.styleconverter.runtime.borders.radius.BorderRadiusApplier
+import com.styleconverter.runtime.core.types.ValueExtractors.LineStyle
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import org.junit.Test
+import java.io.File
+
+class L6ChainCensusTest {
+
+    @Test fun census() {
+        val sections = File("@@RUN_SECTIONS@@")
+        val out = File("@@OUT_TSV@@")
+        val rows = StringBuilder()
+        rows.append("sec\tstem\tid\tband\tselfPaint\tfast\tshape\tpartialOpacity\toutline\tkids\ttext\truns\tpseudos\tmarker\ttag\tsig\n")
+        // Every per-test IR document of the run, in a stable order.
+        val files = sections.listFiles()!!.sortedBy { it.name }.flatMap { sec ->
+            (File(sec, "per-test-ir").listFiles() ?: emptyArray()).filter { it.name.endsWith(".json") }.sortedBy { it.name }
+                .map { sec.name to it }
+        }
+        for ((sec, f) in files) {
+            val root = Json.parseToJsonElement(f.readText()).jsonObject
+            val comps = (root["components"] as? JsonArray ?: JsonArray(emptyList())).map { it.jsonObject }
+            // Non-<br> children per parent id (slot.parent), as the brief's may-move rule counts them.
+            val kids = HashMap<String, Int>()
+            for (c in comps) {
+                val parent = ((c["slot"] as? JsonObject)?.get("parent") as? JsonPrimitive)?.takeIf { it !is JsonNull }?.content ?: continue
+                val role = ((c["meta"] as? JsonObject)?.get("role") as? JsonPrimitive)?.content
+                if (role != "line-break") kids[parent] = (kids[parent] ?: 0) + 1
+            }
+            for (c in comps) {
+                val id = c["id"]!!.jsonPrimitive.content
+                val meta = c["meta"] as? JsonObject
+                val pairs: List<Pair<String, JsonElement?>> = (c["properties"] as? JsonArray ?: JsonArray(emptyList()))
+                    .map { it.jsonObject["type"]!!.jsonPrimitive.content to it.jsonObject["data"] }
+                var band = "-"; var self = "-"; var fast = "-"; var shape = "-"; var partial = "-"; var outline = "-"
+                // The renderer's own extraction (WPT capture mode, as the TITAN captures run).
+                val sig = try {
+                    val cfg = StyleApplier.extractConfig(pairs, wptCaptureMode = true)
+                    val sides = cfg.borders.sides
+                    band = sides.hasBorders.toString()
+                    fast = (sides.isUniform && sides.top.hasBorder && sides.top.style == LineStyle.SOLID).toString()
+                    val selfPaint = BorderRadiusApplier.selfPaintsWithoutClip(
+                        radius = cfg.borders.radius, sides = sides, overflowClips = cfg.overflow.shouldClip,
+                        hasBackgroundLayers = cfg.colors.backgroundImages.isNotEmpty(),
+                        hasClipInsets = cfg.colors.backgroundClipInsets != null,
+                        hasPartialOpacity = (cfg.colors.opacity ?: 1f) < 1f,
+                    )
+                    self = selfPaint.toString()
+                    // Rounded = RoundedCornerShape (Outline.Rounded); generic = EllipticalCornerShape (Outline.Generic).
+                    if (selfPaint) shape = if (cfg.borders.radius.isCircular && !cfg.borders.radius.hasFraction) "rounded" else "generic"
+                    partial = ((cfg.colors.opacity ?: 1f) < 1f).toString()
+                    outline = cfg.borders.outline.hasOutline.toString()
+                    StyleApplier.applyConfig(Modifier, cfg, wptCaptureMode = true)
+                        .foldIn("") { acc, e -> if (acc.isEmpty()) e.javaClass.simpleName else acc + ">" + e.javaClass.simpleName }
+                } catch (t: Throwable) { "ERR:" + t.javaClass.simpleName }
+                val text = ((c["text"] as? JsonPrimitive)?.takeIf { it !is JsonNull }?.content ?: "").isNotBlank()
+                val runs = meta?.get("runs") != null
+                val pseudos = (c["pseudos"] as? JsonArray)?.isNotEmpty() ?: (c["pseudos"] != null)
+                val marker = meta?.get("markerText") != null
+                val tag = (meta?.get("sourceTag") as? JsonPrimitive)?.takeIf { it !is JsonNull }?.content ?: "-"
+                rows.append("$sec\t${f.name.removeSuffix(".json")}\t$id\t$band\t$self\t$fast\t$shape\t$partial\t$outline\t${kids[id] ?: 0}\t$text\t$runs\t$pseudos\t$marker\t$tag\t$sig\n")
+            }
+        }
+        out.parentFile.mkdirs()
+        out.writeText(rows.toString())
+    }
+}

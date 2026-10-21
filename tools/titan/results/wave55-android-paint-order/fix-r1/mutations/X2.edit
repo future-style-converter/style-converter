@@ -1,0 +1,3 @@
+val style = if (g.fillArea) Fill else Stroke(g.strokePx)
+=====
+val style = if (g.fillArea) Fill else Stroke(g.strokePx * 2f)

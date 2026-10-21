@@ -1,0 +1,26 @@
+### AB1-against-open: ab-arms55.sh <scratch>/arms-ok.txt --dry-run --against wave55-open -> exit 2  (status/HEAD/refs snapshot identical)
+  against: wave55-open ran tree a2a37a8e — no code difference to HEAD (runtimes, apps, converter, tools/titan outside results; *.md excluded)
+ab-arms55 (dry) — root <scratch>/wt-lu · branch DETACHED · BASE 640276a0 · arms 1 · read against wave55-open · pool /tmp/titan-device-pool
+REFUSED (2):
+  - detached HEAD: there is no branch to restore to
+  - arm drop-L6-U2: the revert of a2a37a8e does not apply to 640276a0: error: patch failed: tools/titan/results/wave55-gate/build-hashes.txt:1 error: tools/titan/results/wave55-gate/build-hashes.txt: patch does not apply error: pa
+### AB2-against-mismatch: ab-arms55.sh <scratch>/arms-ok.txt --dry-run --against wave55-pre -> exit 2  (status/HEAD/refs snapshot identical)
+  against: wave55-pre ran tree 640276a0 — no code difference to HEAD (runtimes, apps, converter, tools/titan outside results; *.md excluded)
+ab-arms55 (dry) — root <scratch>/wt-lu · branch DETACHED · BASE 640276a0 · arms 1 · read against wave55-pre · pool /tmp/titan-device-pool
+REFUSED (3):
+  - detached HEAD: there is no branch to restore to
+  - tracked changes in the tree (git status --porcelain --untracked-files=no):  M tools/titan/results/wave55-gate/build-hashes.txt 
+  - arm drop-L6-U2: the revert of a2a37a8e does not apply to 640276a0: error: patch failed: tools/titan/results/wave55-gate/build-hashes.txt:1 error: tools/titan/results/wave55-gate/build-hashes.txt: patch does not apply error: pa
+### AB3-corpus-block-differs: ab-arms55.sh <scratch>/arms-ok.txt --dry-run --against wave55-final -> exit 2  (status/HEAD/refs snapshot identical)
+  against: wave55-final ran tree 640276a0 — no code difference to HEAD (runtimes, apps, converter, tools/titan outside results; *.md excluded)
+ab-arms55 (dry) — root <scratch>/wt-lu · branch DETACHED · BASE 640276a0 · arms 1 · read against wave55-final · pool /tmp/titan-device-pool
+REFUSED (3):
+  - detached HEAD: there is no branch to restore to
+  - tracked changes in the tree (git status --porcelain --untracked-files=no):  M tools/titan/results/wave55-gate/build-hashes.txt 
+  - arm drop-L6-U2: the revert of a2a37a8e does not apply to 640276a0: error: patch failed: tools/titan/results/wave55-gate/build-hashes.txt:1 error: tools/titan/results/wave55-gate/build-hashes.txt: patch does not apply error: pa
+### AB4-default-against: ab-arms55.sh <scratch>/arms-ok.txt -> exit 2  (status/HEAD/refs snapshot identical)
+  against: wave55-final has not run yet (no run dir, no block) — its tree is checked once it has
+ab-arms55 (dry) — root <scratch>/wt-lu · branch DETACHED · BASE 640276a0 · arms 1 · read against wave55-final · pool /tmp/titan-device-pool
+REFUSED (2):
+  - detached HEAD: there is no branch to restore to
+  - arm drop-L6-U2: the revert of a2a37a8e does not apply to 640276a0: error: patch failed: tools/titan/results/wave55-gate/build-hashes.txt:1 error: tools/titan/results/wave55-gate/build-hashes.txt: patch does not apply error: pa

@@ -1,0 +1,6 @@
+# fix-r1.inter-tnum.out.txt — fontTools 4.60.2 over Inter-Regular.otf (upem 2048); 'tnum' single substitutions in the face: 61
+'1' [row 9 digit run (__0__4__3)]: one adv 6.508 px, ink x 0.75..5.10  --tnum-->  one.tf adv 10.375 px, ink x 1.76..8.95
+'2' [row 10 digit run (__0__4__5)]: two adv 9.758 px, ink x 1.20..8.62  --tnum-->  two.tf adv 10.375 px, ink x 1.48..8.89
+'.' [rows 9-10 '.' runs (__0__4__2 / __0__4__4) and the period of rows 11-12 (__0__5__2 / __0__5__3)]: period adv 4.609 px, ink x 1.25..3.36  --tnum-->  period.tf adv 4.297 px, ink x 1.12..3.23
+'א' [row 11 letter]: not in this face (cmap None) — drawn by the fallback face, no Inter tnum
+'ב' [row 12 letter]: not in this face (cmap None) — drawn by the fallback face, no Inter tnum

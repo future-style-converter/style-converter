@@ -1,0 +1,2 @@
+plan-prose --check tools/titan/results/wave55-plan/PLAN.md against expectations.json sha256 a1fdca7126867267…: 36 gen blocks · 30 decision ids · 46 wave54-final cell citations · 28 landing-order units (want 28)
+plan-prose --check: HOLDS

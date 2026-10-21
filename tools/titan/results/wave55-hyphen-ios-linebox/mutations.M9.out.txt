@@ -1,0 +1,6 @@
+M9 [NB-ios-b: verticalPads ignores blinkPinned (always symmetric)] pre a5f073ee8491af36 post a5f073ee8491af36
+   mutated: exit 65 red tests ['testP9PadSplitOnlyForABlinkPinnedRun'] (want ['testP9PadSplitOnlyForABlinkPinnedRun']) built True -> RED as required
+   restored: exit 0 passed 10/10 failed [] -> GREEN
+   verdict OK
+mutations: ALL OK
+exit 0

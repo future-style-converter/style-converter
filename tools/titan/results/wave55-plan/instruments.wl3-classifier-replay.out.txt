@@ -1,0 +1,11 @@
+# classifier = /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-hyphenate-character/wl3-wire-differential.sh:47-63 (sha256 of the script 54b7195389930103…)
+## (a) parked wave-54 [W-L3] trees: tools/titan/runs/wave54-wl3-diff
+identical 1397 · content-changed 23 · renumbered 15 · one-sided 0
+classifier exit=0
+  pre FAIL line: FAIL css/css-pseudo/first-letter-of-html-root-refcrash.html: Cannot read properties of null (reading 'appendChild')
+  pre: extract.log 'extracted' lines 1434 · 'FAIL' lines 1 over 30 sections
+  post FAIL line: FAIL css/css-pseudo/first-letter-of-html-root-refcrash.html: Cannot read properties of null (reading 'appendChild')
+  post: extract.log 'extracted' lines 1434 · 'FAIL' lines 1 over 30 sections
+## (b) synthetic mis-invocation (relative out dir: logs present, per-test-ir absent on BOTH sides, 30 sections)
+identical 0 · content-changed 0 · renumbered 0 · one-sided 30
+classifier exit=0   <- the record's mis-invoked first run: 30 one-sided, exit 0

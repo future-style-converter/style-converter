@@ -1,0 +1,21 @@
+#!/bin/bash
+# compose.sh <label> — the L5 focused Compose filters in the re-verify worktree; summary from the JUnit XML
+WT=<wt>
+SP=<scratch>/reverify-L5-out
+label=$1
+export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+R=$WT/runtimes/compose/build/test-results/testDebugUnitTest
+rm -rf $R
+cd $WT/apps/android-harness && nice ./gradlew :runtime:testDebugUnitTest --tests '*ListMarker*' --tests '*SeamReachabilityTest*' --tests '*KoreanHangulFormal*' --tests '*ListStyle*' --console=plain > $SP/compose-$label.log 2>&1
+rc=$?
+/opt/homebrew/bin/python3.12 -B - "$R" "$label" "$rc" <<'PY'
+import sys, glob, xml.etree.ElementTree as ET
+t=f=e=s=0; bad=[]
+for p in glob.glob(sys.argv[1]+'/*.xml'):
+    r=ET.parse(p).getroot(); t+=int(r.get('tests'));f+=int(r.get('failures'));e+=int(r.get('errors'));s+=int(r.get('skipped'))
+    for tc in r.iter('testcase'):
+        if tc.find('failure') is not None or tc.find('error') is not None: bad.append(tc.get('classname').split('.')[-1]+' :: '+tc.get('name'))
+print(f'COMPOSE {sys.argv[2]} rc={sys.argv[3]} tests={t} failures={f} errors={e} skipped={s}')
+for b in bad: print('  FAILED', b)
+PY
+grep -E "Task :runtime:compileDebugKotlin|Task :runtime:compileDebugUnitTestKotlin|BUILD" $SP/compose-$label.log | head -4

@@ -141,6 +141,12 @@ enum ListMarkerRow {
     /// space (~7dp at the 25px these items inherit) on top of its own 4dp
     /// padding. That extra space was a silent Android-vs-iOS divergence on
     /// every marker row; it is gone.
+    ///
+    /// Wave 55 (lane L5, U2): this is the STAND-IN for the suffix's
+    /// trimmed trailing space, so it is read through
+    /// `ListMarkerSuffixGap.points(forMarker:)`, which answers 0 for a
+    /// marker ending in U+3001 (the space-less `cjk-decimal` family suffix,
+    /// css-counter-styles-3 §6.1) and this constant otherwise.
     static let gapPt: CGFloat = 4
 
     /// Must this item's marker be painted INSIDE the item's own box — a

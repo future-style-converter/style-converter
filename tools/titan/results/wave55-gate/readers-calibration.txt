@@ -1,0 +1,44 @@
+# readers-calibration.txt — 2026-10-12T14:52:26Z; shared tree HEAD aaf51b1b; expectations sha256 e65366b69eebf745…
+
+## K. control-check.mjs (tools/titan/results/wave55-gate, run from the shared tree: read-only)
+  as required  K1 identity wave54-final → wave54-final (= wave54-final → wave55-open, which the opening gate measured byte-identical) — exit 0: CONTROL HOLDS: every changed capture and wire document is a carrier the plan named
+  as required  K2 the wave-54 pair wave54-open → wave54-final: wave 54's landed changes are not wave-55 carriers — exit 1: CONTROL FAILED: 83 capture(s) and 23 wire document(s) changed outside the carriers
+  as required  K3 --lane L7-instruments (empty carrier set) on the identity pair — exit 0: CONTROL HOLDS: every changed capture and wire document is a carrier the plan named
+  as required  K3 --lane L7-instruments on the wave-54 pair — exit 1: CONTROL FAILED: 90 capture(s) and 23 wire document(s) changed outside the carriers
+  synthetic post run <scratch>/cc-syn: may-move wpt__CSS2__abspos__static-inside-inline-002;ring-fenced wpt__filter-effects__backdrop-filter-basic-blur;complement wpt__CSS2__abspos__between-float-and-text;
+  as required  K4 synthetic: the complement nudge is a LEAK — exit 1: CONTROL FAILED: 1 capture(s) and 0 wire document(s) changed outside the carriers
+     its lines: LEAK  wpt__CSS2__abspos__between-float-and-text  1 px, max channel delta 8|may-move  wpt__CSS2__abspos__static-inside-inline-002  1 px, max channel delta 8|RING-FENCED  wpt__filter-effects__backdrop-filter-basic-blur  1 px, max channel |
+  as required  K5 synthetic without the complement nudge: may-move + ring-fenced only — exit 0: CONTROL HOLDS: every changed capture and wire document is a carrier the plan named
+  as required  K6 MUTATION (may-move class removed, worktree copy) turns K5 red — exit 1: CONTROL FAILED: 1 capture(s) and 0 wire document(s) changed outside the carriers
+  K7-K12 fake post runs under <scratch>/cc-*; the vanished capture / document: wpt__css-text__bidi__empty-span-001 (a complement stem: no carrier, no may-move)
+  as required  K7 a mistyped --sections name (css-txt) is refused, not a vacuous hold — exit 2: REFUSED — section(s) css-txt absent from wave54-final and <scratch path>
+  as required  K8 a listed section absent from the post run is refused — exit 2: REFUSED — section(s) CSS2 absent from <scratch path>
+  as required  K9 a capture that DISAPPEARS is a counted LEAK (absent after) — exit 1: CONTROL FAILED: 1 capture(s) and 0 wire document(s) changed outside the carriers
+  as required  K10 a per-test IR document that DISAPPEARS is a WIRE LEAK — exit 1: CONTROL FAILED: 0 capture(s) and 1 wire document(s) changed outside the carriers
+  as required  K11 a one-section post run read WITHOUT --sections is refused (29 sections absent from it) — exit 2: REFUSED — section(s) CSS2, css-anchor-position, css-backgrounds, css-break, css-cascade, css-color, css-contain, css-counter-styles, css-display, css-flexbox, css-gaps,
+  as required  K12 MUTATION (the pre side not read, worktree copy): K9's vanished capture HOLDS again — exit 0: CONTROL HOLDS: every changed capture and wire document is a carrier the plan named
+  K13's vanished carrier: wpt__css-text__bidi__bidi-tab-001 android (from unionCaptureCarriers)
+  as required  K13 a CARRIER capture that DISAPPEARS refuses the read (a carrier may change, never vanish) — exit 2: REFUSED — 1 carrier capture(s) present on one side only (android wpt__css-text__bidi__bidi-tab-001 absent after): a carrier that was not captured was not compared (exit
+  as required  K14 MUTATION (the round-1 branch: a vanished carrier counted 'changed (carrier)', worktree copy): K13 HOLDS again — exit 0: CONTROL HOLDS: every changed capture and wire document is a carrier the plan named
+  as required  K15 a flag without its value (--sections) is a usage error — exit 2:   REFUSED — --sections given without a value
+
+## J. adjudicate.mjs
+  synthetic records: allmet (the 27 gating rows predicted P set to P 0.97), mnm3 (allmet + complement CSS2/abspos/between-float-and-text.html android +0.003)
+  as required  J1 the identity record (nothing landed): the 2 gating flip rows are missed — exit 1: FAIL R4  gating predictions 27, missed 2
+  as required  J2 all-met synthetic: R1-R5 hold — exit 0: ADJUDICATION: R1–R5 hold
+  as required  J3 all-met + one complement cell +0.003: R5 FAIL, labelled complement — exit 1:     must-not-move MOVED (complement): CSS2/abspos/between-float-and-text.html android  0.9527 → 0.9557 [movers]
+  as required  J4 a record whose prev is not the base is refused — exit 2: ORDER: this record is score-gate.mjs wave54-open → wave54-final; adjudication needs wave55-open FIRST (node tools/titan/score-gate.mjs wave55-open wave55-final --watch 
+  as required  J4b a thresholded (--movers 0.005) record is refused — exit 2: NOT A --movers 0 RECORD: 81 cells listed against 4096 scored on wave55-open (81 against 4096 on wave55-final); a same-verdict cell below the record's mover threshold is a
+  as required  J5 MUTATION (complement not read, worktree copy): J3's move is no longer seen — exit 0: ok   R5  must-not-move cells 735, moved 0
+  as required  J6 (after stage 1: L4 reverted) the R6 synthetic: neither inset-005 gain is RETIRED — DEGENERATE-BY-CONSTRUCTION gains (not fixes): 2 — degenerateRetirement does not hold for them
+  as required  J6b (after stage 1) MUTATION copy reads as the installed reader: neither gain RETIRED (the branch's proof is the planning-tree record) — exit 1: DEGENERATE-BY-CONSTRUCTION gains (not fixes): 2 — degenerateRetirement does not hold for them
+  as required  J7 adjudicate --exp without a value is a usage error — exit 2:   REFUSED — --exp given without a value
+
+## F. final55-analysis.sh (generated; the closing read-out) — red on the identity record, holds on the all-met one
+  as required  F0 the installed script is in sync with expectations.json — exit 0: final55-analysis.sh in sync with expectations.json sha256 e65366b69eebf745…
+  as required  F1 the identity record (J1's relabelling) and the pre-fix geometry: the read-out FAILS — exit 1: FINAL READ-OUT FAILS — R6 (geometry gate) exit 1 · adjudicate exit 1 · union control exit 0 (outputs: <scratch path>
+  as required  F2 the all-met record and an all-PASS geometry over an identity control: the read-out HOLDS — exit 0: FINAL READ-OUT HOLDS — R6 (geometry gate) exit 0 · adjudicate exit 0 · union control exit 0 (outputs: <scratch path>
+  as required  F3 a hand-edited (drifted) script is caught by --check (worktree copy) — exit 1: final55-analysis.sh DRIFT: it differs from its rendering of tools/titan/results/wave55-plan/expectations.json — re-run final55-analysis.gen.py
+  as required  F4 final55-analysis.sh on an expectations.json with another sha256 refuses to run (STALE, exit 2) — exit 2: STALE: final55-analysis.sh was generated from expectations.json sha256 e65366b69eebf745…; the installed one differs — re-run final55-analysis.gen.py, then --check
+
+readers-calibration: every calibration behaved as required

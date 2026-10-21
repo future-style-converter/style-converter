@@ -1,0 +1,165 @@
+# fix-r4.verifier-rerun.out.txt — the round-4 VERIFIER's own generator re-run, unchanged, on this tree's round-4 bytes
+# plan-skeptic-round-4.verify.d/fakes4.py 379b3a1ee46c876b… (its plan dir hard-coded = this tree) + zones4.py 3c3cc0b5b1a0c79b…, `fakes4.py --scratch <scratch>/<lane> --groups <lane>` then `zones4.py`, one lane at a time, pinned interpreter; HEAD 611c9f93; expectations.json 980542d01c175500…
+# probes: hyphen-ios-linebox.geometry.py 0dc54c73924e205e… · compose-wpt-content-box-cb.geometry.py c52fe610cb166a1e… · cbb-android.geometry.py 76abeb24470b3cf2… · positioned-parent-slot.geometry.py 134d16f229b1bd84… · ua-heading-margin.geometry.py 50344dc6ba6d2ccf… · counter-suffix-rows.geometry.py bd2f001ae6a8ea5b… · android-paint-order.geometry.py 360e6e288f908434…
+# the fake runs live under the scratch dir only; per-lane records: the generator's summary line, its HOLE / CTRL-ONLY / GATE-PASS lines, zones4's IN-ZONE / benign adjudication
+
+| lane | before: the verifier's record (round-3 bytes) | after: this re-run (round-4 bytes) |
+|---|---|---|
+| L1 | 213 fake runs, 625 reads · IN-ZONE 0 · HOLES 19 (9 with > 2 new-ink px) | 213 fake runs, 625 reads · **IN-ZONE 0** · HOLES 10 (**0** with > 2 new-ink px) |
+| L2 | 78 fake runs, 311 reads · IN-ZONE 0 · HOLES 0 (0 with > 2 new-ink px) | 78 fake runs, 311 reads · **IN-ZONE 0** · HOLES 0 (**0** with > 2 new-ink px) |
+| L3 | 377 fake runs, 540 reads · IN-ZONE 0 · HOLES 18 (0 with > 2 new-ink px) | 377 fake runs, 540 reads · **IN-ZONE 0** · HOLES 18 (**0** with > 2 new-ink px) |
+| L4 | 254 fake runs, 1819 reads · IN-ZONE 98 · HOLES 177 (79 with > 2 new-ink px) | 254 fake runs, 1819 reads · **IN-ZONE 0** · HOLES 81 (**0** with > 2 new-ink px) |
+| L5 | 83 fake runs, 417 reads · IN-ZONE 10 · HOLES 15 (8 with > 2 new-ink px) | 83 fake runs, 417 reads · **IN-ZONE 0** · HOLES 6 (**0** with > 2 new-ink px) |
+| L6 | 155 fake runs, 333 reads · IN-ZONE 28 · HOLES 33 (28 with > 2 new-ink px) | 155 fake runs, 333 reads · **IN-ZONE 0** · HOLES 5 (**0** with > 2 new-ink px) |
+
+TOTAL (round-4 bytes): IN-ZONE acceptances 0; HOLES with > 2 new-ink px (the generator's any-mask count) 0; HOLES ≤ 2 px (the named 2-px floor) 120
+
+## L1
+  213 fake runs; 625 reads of a faked capture by a gating key under test (3 distinct keys); HOLES 10 (0 with > 2 new-ink px); CTRL-ONLY 0 (0 > 2); GATE-PASS 0 (0 > 2)
+  HOLE(<=2) L1 fixed+r2-L1-tally-fixed c0:dg-mid-smear — hyphenate-character-004 ios +3 px, new ink 2, bbox (18, 309, 21, 311); readers ['hyphen-ios-linebox 004 ios', 'hyphenate-character-004 ios']
+  HOLE(<=2) L1 fixed+r2-L1-tally-fixed c0:st1-far4 — hyphenate-character-001 ios +1 px, new ink 1, bbox (65, 441, 65, 441); readers ['hyphen-ios-linebox 001 ios', 'hyphenate-character-001 ios']
+  HOLE(<=2) L1 fixed+r2-L1-tally-fixed c0:st1-far4 — hyphenate-character-003 ios +1 px, new ink 1, bbox (65, 421, 65, 421); readers ['hyphen-ios-linebox 003 ios', 'hyphenate-character-003 ios']
+  HOLE(<=2) L1 fixed+r2-L1-tally-fixed c0:st1-far4 — hyphenate-character-004 ios +1 px, new ink 1, bbox (65, 421, 65, 421); readers ['hyphen-ios-linebox 004 ios', 'hyphenate-character-004 ios']
+  HOLE(<=2) L1 fixed+r2-L1-tally-fixed c1:dg-mid-smear — hyphenate-character-001 ios +2 px, new ink 1, bbox (29, 330, 29, 331); readers ['hyphen-ios-linebox 001 ios', 'hyphenate-character-001 ios']
+  HOLE(<=2) L1 fixed+r2-L1-tally-fixed c1:dg-mid-smear — hyphenate-character-003 ios +2 px, new ink 1, bbox (29, 310, 29, 311); readers ['hyphen-ios-linebox 003 ios', 'hyphenate-character-003 ios']
+  HOLE(<=2) L1 fixed+r2-L1-tally-fixed c1:dg-mid-smear — hyphenate-character-004 ios +2 px, new ink 1, bbox (29, 291, 29, 292); readers ['hyphen-ios-linebox 004 ios', 'hyphenate-character-004 ios']
+  HOLE(<=2) L1 fixed+r2-L1-tally-fixed c1:st1-far4 — hyphenate-character-001 ios +1 px, new ink 1, bbox (65, 440, 65, 440); readers ['hyphen-ios-linebox 001 ios', 'hyphenate-character-001 ios']
+  HOLE(<=2) L1 fixed+r2-L1-tally-fixed c1:st1-far4 — hyphenate-character-003 ios +1 px, new ink 1, bbox (65, 420, 65, 420); readers ['hyphen-ios-linebox 003 ios', 'hyphenate-character-003 ios']
+  HOLE(<=2) L1 fixed+r2-L1-tally-fixed c1:st1-far4 — hyphenate-character-004 ios +1 px, new ink 1, bbox (65, 420, 65, 420); readers ['hyphen-ios-linebox 004 ios', 'hyphenate-character-004 ios']
+  zones4: ## IN-ZONE: 0
+  zones4 benign (key, new ink px in its OWN zone under its probe mask → count): "hyphen-ios-linebox 001 ios" 0px ×1, "hyphen-ios-linebox 001 ios" 1px ×2, "hyphen-ios-linebox 003 ios" 0px ×1, "hyphen-ios-linebox 003 ios" 1px ×2, "hyphen-ios-linebox 004 ios" 0px ×2, "hyphen-ios-linebox 004 ios" 1px ×2
+
+## L2
+  78 fake runs; 311 reads of a faked capture by a gating key under test (8 distinct keys); HOLES 0 (0 with > 2 new-ink px); CTRL-ONLY 0 (0 > 2); GATE-PASS 0 (0 > 2)
+  zones4: ## IN-ZONE: 0
+  zones4 benign (key, new ink px in its OWN zone under its probe mask → count): 
+
+## L3
+  377 fake runs; 540 reads of a faked capture by a gating key under test (7 distinct keys); HOLES 18 (0 with > 2 new-ink px); CTRL-ONLY 33 (8 > 2); GATE-PASS 122 (120 > 2)
+  HOLE(<=2) L3 dir-row6-fixed+dir-row7-fixed+dir-row9-fixed c0:dg-last-adj — dir-style-02a android +3 px, new ink 2, bbox (151, 190, 152, 191); readers ['[C] dir-style-02a android unaffected-rows', '[S] dir-style-02a android row6', 
+  HOLE(<=2) L3 dir-row6-fixed+dir-row7-fixed+dir-row9-fixed c0:st1-far4 — dir-style-02a android +1 px, new ink 1, bbox (154, 185, 154, 185); readers ['[C] dir-style-02a android unaffected-rows', '[S] dir-style-02a android row6', '[S
+  HOLE(<=2) L3 dir-row6-fixed+dir-row7-fixed+dir-row9-fixed c0:dg-band0-last — dir-style-02a android +3 px, new ink 2, bbox (151, 130, 152, 131); readers ['[C] dir-style-02a android unaffected-rows', '[S] dir-style-02a android row6'
+  HOLE(<=2) L3 dir-row6-fixed+dir-row7-fixed+dir-row9-fixed c0:dg-band2-last — dir-style-02a android +3 px, new ink 2, bbox (151, 190, 152, 191); readers ['[C] dir-style-02a android unaffected-rows', '[S] dir-style-02a android row6'
+  HOLE(<=2) L3 dir-row6-fixed+dir-row7-fixed+dir-row9-fixed c1:dg-mid-smear — dir-style-02a android +4 px, new ink 2, bbox (145, 143, 149, 145); readers ['[C] dir-style-02a android unaffected-rows', '[S] dir-style-02a android row6',
+  HOLE(<=2) L3 dir-row6-fixed+dir-row7-fixed+dir-row9-fixed c1:dg-first-smear — dir-style-02a android +13 px, new ink 0, bbox (25, 120, 30, 131); readers ['[C] dir-style-02a android unaffected-rows', '[S] dir-style-02a android row6'
+  HOLE(<=2) L3 bidi-fixed c1:st1-far4 — bidi-tab-001 android +1 px, new ink 0, bbox (40, 237, 40, 237); readers ['[C] bidi-tab-001 android ltr-rows', '[S] bidi-tab-001 android rtl-rows']
+  HOLE(<=2) L3 bidi-fixed c1:st-uline — bidi-tab-001 android +6 px, new ink 0, bbox (115, 86, 120, 86); readers ['[C] bidi-tab-001 android ltr-rows', '[S] bidi-tab-001 android rtl-rows']
+  HOLE(<=2) L3 bidi-fixed c1:vd-band0@+3 — bidi-tab-001 android +2 px, new ink 0, bbox (115, 87, 120, 87); readers ['[C] bidi-tab-001 android ltr-rows', '[S] bidi-tab-001 android rtl-rows']
+  HOLE(<=2) L3 bidi-fixed c1:hd-band1@+5 — bidi-tab-001 android +21 px, new ink 2, bbox (32, 90, 41, 104); readers ['[C] bidi-tab-001 android ltr-rows', '[S] bidi-tab-001 android rtl-rows']
+  HOLE(<=2) L3 bidi-fixed c1:st2-band1-end3 — bidi-tab-001 android +4 px, new ink 0, bbox (39, 97, 40, 98); readers ['[C] bidi-tab-001 android ltr-rows', '[S] bidi-tab-001 android rtl-rows']
+  HOLE(<=2) L3 bidi-fixed c1:hd-band2@+5 — bidi-tab-001 android +21 px, new ink 0, bbox (118, 110, 127, 124); readers ['[C] bidi-tab-001 android ltr-rows', '[S] bidi-tab-001 android rtl-rows']
+  HOLE(<=2) L3 bidi-fixed c1:st2-band2-end3 — bidi-tab-001 android +4 px, new ink 0, bbox (125, 117, 126, 118); readers ['[C] bidi-tab-001 android ltr-rows', '[S] bidi-tab-001 android rtl-rows']
+  HOLE(<=2) L3 bidi-fixed c1:hd-band5@+5 — bidi-tab-001 android +21 px, new ink 2, bbox (32, 190, 41, 204); readers ['[C] bidi-tab-001 android ltr-rows', '[S] bidi-tab-001 android rtl-rows']
+  HOLE(<=2) L3 bidi-fixed c1:st2-band5-end3 — bidi-tab-001 android +4 px, new ink 0, bbox (39, 197, 40, 198); readers ['[C] bidi-tab-001 android ltr-rows', '[S] bidi-tab-001 android rtl-rows']
+  HOLE(<=2) L3 bidi-fixed c1:hd-band7@+5 — bidi-tab-001 android +21 px, new ink 2, bbox (32, 230, 41, 244); readers ['[C] bidi-tab-001 android ltr-rows', '[S] bidi-tab-001 android rtl-rows']
+  HOLE(<=2) L3 bidi-fixed c1:st2-band7-end3 — bidi-tab-001 android +4 px, new ink 0, bbox (39, 237, 40, 238); readers ['[C] bidi-tab-001 android ltr-rows', '[S] bidi-tab-001 android rtl-rows']
+  HOLE(<=2) L3 stack-fixed c0:st1-far4 — anchor-position-multicol-nested-001 android +1 px, new ink 1, bbox (373, 172, 373, 172); readers ['[W] anchor-position-multicol-nested-001 android stack']
+  zones4: ## IN-ZONE: 0
+  zones4 benign (key, new ink px in its OWN zone under its probe mask → count): "[S] bidi-tab-001 android rtl-rows" 0px ×44, "[S] dir-style-02a android row6" 0px ×40, "[S] dir-style-02a android row6" 2px ×1, "[S] dir-style-02a android row7" 0px ×49, "[S] dir-style-02a android row7" 2px ×1, "[S] dir-style-02a android row9" 0px ×46, "[S] dir-style-02a android row9" 1px ×1, "[S] dir-style-02a android row9" 2px ×2, "[W] anchor-position-multicol-nested-001 android stack" 1px ×1
+
+## L4
+  254 fake runs; 1819 reads of a faked capture by a gating key under test (12 distinct keys); HOLES 81 (0 with > 2 new-ink px); CTRL-ONLY 0 (0 > 2); GATE-PASS 0 (0 > 2)
+  HOLE(<=2) L4 C-fixed c0:dg-mid-smear — text-decoration-inset-011 ios +1 px, new ink 1, bbox (162, 196, 162, 196); readers ['[M] text-decoration-inset-011 ios']
+  HOLE(<=2) L4 C-fixed c0:st1-far4 — text-decoration-inset-005 ios +1 px, new ink 1, bbox (68, 200, 68, 200); readers ['[F] text-decoration-inset-005 ios', '[M] text-decoration-inset-005 ios', 'text-decoration-inset-005 ios']
+  HOLE(<=2) L4 C-fixed c0:st1-far4 — text-decoration-inset-005 android +1 px, new ink 1, bbox (68, 200, 68, 200); readers ['[F] text-decoration-inset-005 android', '[M] text-decoration-inset-005 android', 'text-decoration-inset-005 
+  HOLE(<=2) L4 C-fixed c0:st1-far4 — text-decoration-inset-006 ios +1 px, new ink 1, bbox (68, 200, 68, 200); readers ['[F] text-decoration-inset-006 ios', '[M] text-decoration-inset-006 ios', 'text-decoration-inset-006 ios']
+  HOLE(<=2) L4 C-fixed c0:st1-far4 — text-decoration-inset-006 android +1 px, new ink 1, bbox (68, 200, 68, 200); readers ['[F] text-decoration-inset-006 android', '[M] text-decoration-inset-006 android', 'text-decoration-inset-006 
+  HOLE(<=2) L4 C-fixed c0:st1-far4 — text-decoration-inset-014 ios +1 px, new ink 1, bbox (159, 174, 159, 174); readers ['[F] text-decoration-inset-014 ios', '[M] text-decoration-inset-014 ios', 'text-decoration-inset-014 ios']
+  HOLE(<=2) L4 C-fixed c0:st1-far4 — text-decoration-inset-014 android +1 px, new ink 1, bbox (159, 174, 159, 174); readers ['[F] text-decoration-inset-014 android', '[M] text-decoration-inset-014 android', 'text-decoration-inset-01
+  HOLE(<=2) L4 C-fixed c1:dg-first-adj — text-decoration-inset-005 ios +5 px, new ink 0, bbox (20, 149, 22, 152); readers ['[F] text-decoration-inset-005 ios', '[M] text-decoration-inset-005 ios', 'text-decoration-inset-005 ios']
+  HOLE(<=2) L4 C-fixed c1:dg-first-adj — text-decoration-inset-005 android +5 px, new ink 0, bbox (20, 149, 22, 152); readers ['[F] text-decoration-inset-005 android', '[M] text-decoration-inset-005 android', 'text-decoration-inset-
+  HOLE(<=2) L4 C-fixed c1:dg-first-adj — text-decoration-inset-006 ios +5 px, new ink 0, bbox (20, 149, 22, 152); readers ['[F] text-decoration-inset-006 ios', '[M] text-decoration-inset-006 ios', 'text-decoration-inset-006 ios']
+  HOLE(<=2) L4 C-fixed c1:dg-first-adj — text-decoration-inset-006 android +5 px, new ink 0, bbox (20, 149, 22, 152); readers ['[F] text-decoration-inset-006 android', '[M] text-decoration-inset-006 android', 'text-decoration-inset-
+  HOLE(<=2) L4 C-fixed c1:dg-largest-adj — text-decoration-inset-005 ios +23 px, new ink 0, bbox (99, 144, 99, 166); readers ['[F] text-decoration-inset-005 ios', '[M] text-decoration-inset-005 ios', 'text-decoration-inset-005 ios']
+  HOLE(<=2) L4 C-fixed c1:dg-largest-adj — text-decoration-inset-005 android +23 px, new ink 0, bbox (99, 144, 99, 166); readers ['[F] text-decoration-inset-005 android', '[M] text-decoration-inset-005 android', 'text-decoration-ins
+  HOLE(<=2) L4 C-fixed c1:dg-largest-adj — text-decoration-inset-006 ios +23 px, new ink 0, bbox (99, 144, 99, 166); readers ['[F] text-decoration-inset-006 ios', '[M] text-decoration-inset-006 ios', 'text-decoration-inset-006 ios']
+  HOLE(<=2) L4 C-fixed c1:dg-largest-adj — text-decoration-inset-006 android +23 px, new ink 0, bbox (99, 144, 99, 166); readers ['[F] text-decoration-inset-006 android', '[M] text-decoration-inset-006 android', 'text-decoration-ins
+  HOLE(<=2) L4 C-fixed c1:dg-largest-adj — text-decoration-inset-011 ios +2 px, new ink 2, bbox (141, 295, 141, 296); readers ['[M] text-decoration-inset-011 ios']
+  HOLE(<=2) L4 C-fixed c1:dg-mid-smear — text-decoration-inset-005 ios +1 px, new ink 1, bbox (200, 140, 200, 140); readers ['[F] text-decoration-inset-005 ios', '[M] text-decoration-inset-005 ios', 'text-decoration-inset-005 ios']
+  HOLE(<=2) L4 C-fixed c1:dg-mid-smear — text-decoration-inset-005 android +1 px, new ink 1, bbox (200, 140, 200, 140); readers ['[F] text-decoration-inset-005 android', '[M] text-decoration-inset-005 android', 'text-decoration-inse
+  HOLE(<=2) L4 C-fixed c1:dg-mid-smear — text-decoration-inset-006 ios +1 px, new ink 1, bbox (193, 140, 193, 140); readers ['[F] text-decoration-inset-006 ios', '[M] text-decoration-inset-006 ios', 'text-decoration-inset-006 ios']
+  HOLE(<=2) L4 C-fixed c1:dg-mid-smear — text-decoration-inset-006 android +1 px, new ink 1, bbox (193, 140, 193, 140); readers ['[F] text-decoration-inset-006 android', '[M] text-decoration-inset-006 android', 'text-decoration-inse
+  HOLE(<=2) L4 C-fixed c1:dg-mid-smear — text-decoration-inset-011 android +1 px, new ink 0, bbox (60, 294, 60, 294); readers ['[M] text-decoration-inset-011 android']
+  HOLE(<=2) L4 C-fixed c1:dg-first-smear — text-decoration-inset-005 ios +4 px, new ink 0, bbox (17, 149, 19, 152); readers ['[F] text-decoration-inset-005 ios', '[M] text-decoration-inset-005 ios', 'text-decoration-inset-005 ios']
+  HOLE(<=2) L4 C-fixed c1:dg-first-smear — text-decoration-inset-005 android +4 px, new ink 0, bbox (17, 149, 19, 152); readers ['[F] text-decoration-inset-005 android', '[M] text-decoration-inset-005 android', 'text-decoration-inse
+  HOLE(<=2) L4 C-fixed c1:dg-first-smear — text-decoration-inset-006 ios +4 px, new ink 0, bbox (17, 149, 19, 152); readers ['[F] text-decoration-inset-006 ios', '[M] text-decoration-inset-006 ios', 'text-decoration-inset-006 ios']
+  HOLE(<=2) L4 C-fixed c1:dg-first-smear — text-decoration-inset-006 android +4 px, new ink 0, bbox (17, 149, 19, 152); readers ['[F] text-decoration-inset-006 android', '[M] text-decoration-inset-006 android', 'text-decoration-inse
+  HOLE(<=2) L4 C-fixed c1:dg-first-smear — text-decoration-inset-011 android +3 px, new ink 0, bbox (61, 173, 63, 174); readers ['[M] text-decoration-inset-011 android']
+  HOLE(<=2) L4 C-fixed c1:dg-last-below — text-decoration-inset-005 ios +4 px, new ink 1, bbox (60, 197, 63, 197); readers ['[F] text-decoration-inset-005 ios', '[M] text-decoration-inset-005 ios', 'text-decoration-inset-005 ios']
+  HOLE(<=2) L4 C-fixed c1:dg-last-below — text-decoration-inset-005 android +4 px, new ink 1, bbox (60, 197, 63, 197); readers ['[F] text-decoration-inset-005 android', '[M] text-decoration-inset-005 android', 'text-decoration-inset
+  HOLE(<=2) L4 C-fixed c1:dg-last-below — text-decoration-inset-006 ios +4 px, new ink 1, bbox (60, 197, 63, 197); readers ['[F] text-decoration-inset-006 ios', '[M] text-decoration-inset-006 ios', 'text-decoration-inset-006 ios']
+  HOLE(<=2) L4 C-fixed c1:dg-last-below — text-decoration-inset-006 android +4 px, new ink 1, bbox (60, 197, 63, 197); readers ['[F] text-decoration-inset-006 android', '[M] text-decoration-inset-006 android', 'text-decoration-inset
+  HOLE(<=2) L4 C-fixed c1:st1-far4 — text-decoration-inset-005 ios +1 px, new ink 1, bbox (68, 201, 68, 201); readers ['[F] text-decoration-inset-005 ios', '[M] text-decoration-inset-005 ios', 'text-decoration-inset-005 ios']
+  HOLE(<=2) L4 C-fixed c1:st1-far4 — text-decoration-inset-005 android +1 px, new ink 1, bbox (68, 201, 68, 201); readers ['[F] text-decoration-inset-005 android', '[M] text-decoration-inset-005 android', 'text-decoration-inset-005 
+  HOLE(<=2) L4 C-fixed c1:st1-far4 — text-decoration-inset-006 ios +1 px, new ink 1, bbox (68, 201, 68, 201); readers ['[F] text-decoration-inset-006 ios', '[M] text-decoration-inset-006 ios', 'text-decoration-inset-006 ios']
+  HOLE(<=2) L4 C-fixed c1:st1-far4 — text-decoration-inset-006 android +1 px, new ink 1, bbox (68, 201, 68, 201); readers ['[F] text-decoration-inset-006 android', '[M] text-decoration-inset-006 android', 'text-decoration-inset-006 
+  HOLE(<=2) L4 C-fixed c1:st1-far4 — text-decoration-inset-014 ios +1 px, new ink 1, bbox (158, 172, 158, 172); readers ['[F] text-decoration-inset-014 ios', '[M] text-decoration-inset-014 ios', 'text-decoration-inset-014 ios']
+  HOLE(<=2) L4 C-fixed c1:st1-far4 — text-decoration-inset-014 android +1 px, new ink 1, bbox (158, 172, 158, 172); readers ['[F] text-decoration-inset-014 android', '[M] text-decoration-inset-014 android', 'text-decoration-inset-01
+  HOLE(<=2) L4 C-fixed c1:st1-far4 — text-decoration-inset-011 ios +1 px, new ink 1, bbox (152, 335, 152, 335); readers ['[M] text-decoration-inset-011 ios']
+  HOLE(<=2) L4 C-fixed c1:st-uline — text-decoration-inset-005 ios +1 px, new ink 1, bbox (196, 138, 196, 138); readers ['[F] text-decoration-inset-005 ios', '[M] text-decoration-inset-005 ios', 'text-decoration-inset-005 ios']
+  HOLE(<=2) L4 C-fixed c1:st-uline — text-decoration-inset-005 android +1 px, new ink 1, bbox (196, 138, 196, 138); readers ['[F] text-decoration-inset-005 android', '[M] text-decoration-inset-005 android', 'text-decoration-inset-00
+  HOLE(<=2) L4 C-fixed c1:st-uline — text-decoration-inset-006 ios +1 px, new ink 1, bbox (196, 138, 196, 138); readers ['[F] text-decoration-inset-006 ios', '[M] text-decoration-inset-006 ios', 'text-decoration-inset-006 ios']
+  HOLE(<=2) L4 C-fixed c1:st-uline — text-decoration-inset-006 android +1 px, new ink 1, bbox (196, 138, 196, 138); readers ['[F] text-decoration-inset-006 android', '[M] text-decoration-inset-006 android', 'text-decoration-inset-00
+  HOLE(<=2) L4 C-fixed c1:vd-band0@+3 — text-decoration-inset-005 ios +1 px, new ink 1, bbox (196, 139, 196, 139); readers ['[F] text-decoration-inset-005 ios', '[M] text-decoration-inset-005 ios', 'text-decoration-inset-005 ios']
+  HOLE(<=2) L4 C-fixed c1:vd-band0@+3 — text-decoration-inset-005 android +1 px, new ink 1, bbox (196, 139, 196, 139); readers ['[F] text-decoration-inset-005 android', '[M] text-decoration-inset-005 android', 'text-decoration-inset
+  HOLE(<=2) L4 C-fixed c1:vd-band0@+3 — text-decoration-inset-006 ios +1 px, new ink 1, bbox (196, 139, 196, 139); readers ['[F] text-decoration-inset-006 ios', '[M] text-decoration-inset-006 ios', 'text-decoration-inset-006 ios']
+  HOLE(<=2) L4 C-fixed c1:vd-band0@+3 — text-decoration-inset-006 android +1 px, new ink 1, bbox (196, 139, 196, 139); readers ['[F] text-decoration-inset-006 android', '[M] text-decoration-inset-006 android', 'text-decoration-inset
+  HOLE(<=2) L4 C-fixed c1:vd-band0@-3 — text-decoration-inset-005 ios +1 px, new ink 1, bbox (196, 133, 196, 133); readers ['[F] text-decoration-inset-005 ios', '[M] text-decoration-inset-005 ios', 'text-decoration-inset-005 ios']
+  HOLE(<=2) L4 C-fixed c1:vd-band0@-3 — text-decoration-inset-005 android +1 px, new ink 1, bbox (196, 133, 196, 133); readers ['[F] text-decoration-inset-005 android', '[M] text-decoration-inset-005 android', 'text-decoration-inset
+  HOLE(<=2) L4 C-fixed c1:vd-band0@-3 — text-decoration-inset-006 ios +1 px, new ink 1, bbox (196, 133, 196, 133); readers ['[F] text-decoration-inset-006 ios', '[M] text-decoration-inset-006 ios', 'text-decoration-inset-006 ios']
+  HOLE(<=2) L4 C-fixed c1:vd-band0@-3 — text-decoration-inset-006 android +1 px, new ink 1, bbox (196, 133, 196, 133); readers ['[F] text-decoration-inset-006 android', '[M] text-decoration-inset-006 android', 'text-decoration-inset
+  HOLE(<=2) L4 C-fixed c1:hd-band0@+2 — text-decoration-inset-005 ios +1 px, new ink 0, bbox (198, 136, 198, 136); readers ['[F] text-decoration-inset-005 ios', '[M] text-decoration-inset-005 ios', 'text-decoration-inset-005 ios']
+  HOLE(<=2) L4 C-fixed c1:hd-band0@+2 — text-decoration-inset-005 android +1 px, new ink 0, bbox (198, 136, 198, 136); readers ['[F] text-decoration-inset-005 android', '[M] text-decoration-inset-005 android', 'text-decoration-inset
+  HOLE(<=2) L4 C-fixed c1:hd-band0@+2 — text-decoration-inset-006 ios +1 px, new ink 0, bbox (198, 136, 198, 136); readers ['[F] text-decoration-inset-006 ios', '[M] text-decoration-inset-006 ios', 'text-decoration-inset-006 ios']
+  HOLE(<=2) L4 C-fixed c1:hd-band0@+2 — text-decoration-inset-006 android +1 px, new ink 0, bbox (198, 136, 198, 136); readers ['[F] text-decoration-inset-006 android', '[M] text-decoration-inset-006 android', 'text-decoration-inset
+  HOLE(<=2) L4 C-fixed c1:hd-band0@+5 — text-decoration-inset-005 ios +1 px, new ink 1, bbox (201, 136, 201, 136); readers ['[F] text-decoration-inset-005 ios', '[M] text-decoration-inset-005 ios', 'text-decoration-inset-005 ios']
+  HOLE(<=2) L4 C-fixed c1:hd-band0@+5 — text-decoration-inset-005 android +1 px, new ink 1, bbox (201, 136, 201, 136); readers ['[F] text-decoration-inset-005 android', '[M] text-decoration-inset-005 android', 'text-decoration-inset
+  HOLE(<=2) L4 C-fixed c1:hd-band0@+5 — text-decoration-inset-006 ios +1 px, new ink 1, bbox (201, 136, 201, 136); readers ['[F] text-decoration-inset-006 ios', '[M] text-decoration-inset-006 ios', 'text-decoration-inset-006 ios']
+  HOLE(<=2) L4 C-fixed c1:hd-band0@+5 — text-decoration-inset-006 android +1 px, new ink 1, bbox (201, 136, 201, 136); readers ['[F] text-decoration-inset-006 android', '[M] text-decoration-inset-006 android', 'text-decoration-inset
+  HOLE(<=2) L4 C-fixed c1:dg-band0-last — text-decoration-inset-014 ios +7 px, new ink 0, bbox (212, 139, 212, 145); readers ['[F] text-decoration-inset-014 ios', '[M] text-decoration-inset-014 ios', 'text-decoration-inset-014 ios']
+  HOLE(<=2) L4 C-fixed c1:dg-band0-last — text-decoration-inset-014 android +7 px, new ink 0, bbox (212, 139, 212, 145); readers ['[F] text-decoration-inset-014 android', '[M] text-decoration-inset-014 android', 'text-decoration-ins
+  HOLE(<=2) L4 C-fixed c1:dg-band1-last — text-decoration-inset-011 ios +4 px, new ink 2, bbox (177, 199, 178, 200); readers ['[M] text-decoration-inset-011 ios']
+  HOLE(<=2) L4 C-fixed c1:dg-band3-last — text-decoration-inset-011 android +2 px, new ink 1, bbox (177, 294, 178, 294); readers ['[M] text-decoration-inset-011 android']
+  HOLE(<=2) L4 C-fixed c1:vd-band4@-3 — text-decoration-inset-011 ios +1 px, new ink 1, bbox (148, 332, 148, 332); readers ['[M] text-decoration-inset-011 ios']
+  HOLE(<=2) L4 C-fixed c1:hd-band4@+2 — text-decoration-inset-011 ios +1 px, new ink 1, bbox (150, 335, 150, 335); readers ['[M] text-decoration-inset-011 ios']
+  HOLE(<=2) L4 C-fixed c1:hd-band4@+5 — text-decoration-inset-011 ios +1 px, new ink 1, bbox (153, 335, 153, 335); readers ['[M] text-decoration-inset-011 ios']
+  HOLE(<=2) L4 U1-fixed c0:dg-first-adj — text-decoration-inset-005 ios +4 px, new ink 1, bbox (21, 136, 23, 137); readers ['[M] text-decoration-inset-005 ios']
+  HOLE(<=2) L4 U1-fixed c0:dg-first-adj — text-decoration-inset-006 ios +4 px, new ink 1, bbox (21, 136, 23, 137); readers ['[M] text-decoration-inset-006 ios']
+  HOLE(<=2) L4 U1-fixed c0:dg-mid-smear — text-decoration-inset-005 ios +2 px, new ink 1, bbox (88, 137, 90, 138); readers ['[M] text-decoration-inset-005 ios']
+  HOLE(<=2) L4 U1-fixed c0:dg-mid-smear — text-decoration-inset-011 ios +1 px, new ink 1, bbox (162, 196, 162, 196); readers ['[M] text-decoration-inset-011 ios']
+  HOLE(<=2) L4 U1-fixed c0:dg-first-smear — text-decoration-inset-005 ios +2 px, new ink 2, bbox (19, 136, 20, 137); readers ['[M] text-decoration-inset-005 ios']
+  HOLE(<=2) L4 U1-fixed c0:dg-first-smear — text-decoration-inset-006 ios +2 px, new ink 2, bbox (19, 136, 20, 137); readers ['[M] text-decoration-inset-006 ios']
+  HOLE(<=2) L4 U1-fixed c1:dg-largest-adj — text-decoration-inset-011 ios +2 px, new ink 2, bbox (141, 295, 141, 296); readers ['[M] text-decoration-inset-011 ios']
+  HOLE(<=2) L4 U1-fixed c1:dg-mid-smear — text-decoration-inset-014 ios +2 px, new ink 0, bbox (99, 135, 100, 136); readers ['[M] text-decoration-inset-014 ios']
+  HOLE(<=2) L4 U1-fixed c1:dg-mid-smear — text-decoration-inset-014 android +1 px, new ink 1, bbox (92, 134, 92, 134); readers ['[M] text-decoration-inset-014 android']
+  HOLE(<=2) L4 U1-fixed c1:dg-mid-smear — text-decoration-inset-011 android +1 px, new ink 0, bbox (60, 294, 60, 294); readers ['[M] text-decoration-inset-011 android']
+  HOLE(<=2) L4 U1-fixed c1:dg-first-smear — text-decoration-inset-011 android +3 px, new ink 0, bbox (61, 173, 63, 174); readers ['[M] text-decoration-inset-011 android']
+  HOLE(<=2) L4 U1-fixed c1:st1-far4 — text-decoration-inset-011 ios +1 px, new ink 1, bbox (152, 335, 152, 335); readers ['[M] text-decoration-inset-011 ios']
+  HOLE(<=2) L4 U1-fixed c1:dg-band1-last — text-decoration-inset-011 ios +4 px, new ink 2, bbox (177, 199, 178, 200); readers ['[M] text-decoration-inset-011 ios']
+  HOLE(<=2) L4 U1-fixed c1:dg-band3-last — text-decoration-inset-011 android +2 px, new ink 1, bbox (177, 294, 178, 294); readers ['[M] text-decoration-inset-011 android']
+  HOLE(<=2) L4 U1-fixed c1:vd-band4@-3 — text-decoration-inset-011 ios +1 px, new ink 1, bbox (148, 332, 148, 332); readers ['[M] text-decoration-inset-011 ios']
+  HOLE(<=2) L4 U1-fixed c1:hd-band4@+2 — text-decoration-inset-011 ios +1 px, new ink 1, bbox (150, 335, 150, 335); readers ['[M] text-decoration-inset-011 ios']
+  HOLE(<=2) L4 U1-fixed c1:hd-band4@+5 — text-decoration-inset-011 ios +1 px, new ink 1, bbox (153, 335, 153, 335); readers ['[M] text-decoration-inset-011 ios']
+  zones4: ## IN-ZONE: 0
+  zones4 benign (key, new ink px in its OWN zone under its probe mask → count): "[F] text-decoration-inset-005 ios" 0px ×4, "[F] text-decoration-inset-005 ios" 1px ×8, "[F] text-decoration-inset-006 ios" 0px ×4, "[F] text-decoration-inset-006 ios" 1px ×8, "[F] text-decoration-inset-014 android" 0px ×1, "[F] text-decoration-inset-014 android" 1px ×2, "[F] text-decoration-inset-014 ios" 0px ×1, "[F] text-decoration-inset-014 ios" 1px ×2, "[M] text-decoration-inset-005 android" 0px ×4, "[M] text-decoration-inset-005 android" 1px ×8, "[M] text-decoration-inset-005 ios" 0px ×6, "[M] text-decoration-inset-005 ios" 1px ×9, "[M] text-decoration-inset-006 android" 0px ×4, "[M] text-decoration-inset-006 android" 1px ×8, "[M] text-decoration-inset-006 ios" 0px ×5, "[M] text-decoration-inset-006 ios" 1px ×9, "[M] text-decoration-inset-011 android" 0px ×4, "[M] text-decoration-inset-011 android" 1px ×2, "[M] text-decoration-inset-011 ios" 0px ×10, "[M] text-decoration-inset-011 ios" 1px ×4, "[M] text-decoration-inset-014 android" 0px ×1, "[M] text-decoration-inset-014 android" 1px ×3, "[M] text-decoration-inset-014 ios" 0px ×2, "[M] text-decoration-inset-014 ios" 1px ×2
+
+## L5
+  83 fake runs; 417 reads of a faked capture by a gating key under test (6 distinct keys); HOLES 6 (0 with > 2 new-ink px); CTRL-ONLY 52 (50 > 2); GATE-PASS 64 (64 > 2)
+  HOLE(<=2) L5 fixed c0:dg-mid-smear — css3-counter-styles-005 ios +1 px, new ink 1, bbox (287, 126, 287, 126); readers ['[I] cjk-decimal/css3-counter-styles-005 ios']
+  HOLE(<=2) L5 fixed c0:dg-mid-smear — css3-counter-styles-005 android +1 px, new ink 1, bbox (287, 129, 287, 129); readers ['[I] cjk-decimal/css3-counter-styles-005 android']
+  HOLE(<=2) L5 fixed c0:dg-first-smear — css3-counter-styles-005 ios +1 px, new ink 0, bbox (239, 102, 239, 102); readers ['[I] cjk-decimal/css3-counter-styles-005 ios']
+  HOLE(<=2) L5 fixed c0:dg-first-smear — css3-counter-styles-005 android +1 px, new ink 1, bbox (240, 105, 240, 105); readers ['[I] cjk-decimal/css3-counter-styles-005 android']
+  HOLE(<=2) L5 fixed c0:st1-far4 — css3-counter-styles-005 ios +1 px, new ink 1, bbox (303, 142, 303, 142); readers ['[I] cjk-decimal/css3-counter-styles-005 ios']
+  HOLE(<=2) L5 fixed c0:st1-far4 — css3-counter-styles-005 android +1 px, new ink 1, bbox (301, 143, 301, 143); readers ['[I] cjk-decimal/css3-counter-styles-005 android']
+  zones4: ## IN-ZONE: 0
+  zones4 benign (key, new ink px in its OWN zone under its probe mask → count): "[C] counter-suffix android" 0px ×20, "[C] counter-suffix android" 1px ×2, "[C] counter-suffix ios" 0px ×56, "[C] counter-suffix ios" 1px ×2, "[H] counter-suffix ios" 0px ×46, "[I] cjk-decimal/css3-counter-styles-005 android" 0px ×1, "[I] cjk-decimal/css3-counter-styles-005 android" 1px ×2, "[I] cjk-decimal/css3-counter-styles-005 ios" 0px ×2, "[I] cjk-decimal/css3-counter-styles-005 ios" 1px ×1, "[T] counter-suffix ios" 0px ×49, "[T] counter-suffix ios" 1px ×1
+
+## L6
+  155 fake runs; 333 reads of a faked capture by a gating key under test (6 distinct keys); HOLES 5 (0 with > 2 new-ink px); CTRL-ONLY 0 (0 > 2); GATE-PASS 0 (0 > 2)
+  HOLE(<=2) L6 X-fixed c0:st1-far4 — flex-abspos-staticpos-align-self-safe-001 android +1 px, new ink 1, bbox (92, 301, 92, 301); readers ['[X] flex-abspos-staticpos-align-self-safe-001 android']
+  HOLE(<=2) L6 X-fixed c0:st1-far4 — grid-abspos-staticpos-align-self-001 android +1 px, new ink 1, bbox (45, 225, 45, 225); readers ['[X] grid-abspos-staticpos-align-self-001 android']
+  HOLE(<=2) L6 X-fixed c0:st1-far4 — grid-abspos-staticpos-justify-self-001 android +1 px, new ink 1, bbox (75, 209, 75, 209); readers ['[X] grid-abspos-staticpos-justify-self-001 android']
+  HOLE(<=2) L6 X-fixed c0:st1-far4 — grid-abspos-staticpos-align-self-vertWM-001 android +1 px, new ink 1, bbox (75, 207, 75, 207); readers ['[X] grid-abspos-staticpos-align-self-vertWM-001 android']
+  HOLE(<=2) L6 X-fixed c0:st1-far4 — grid-abspos-staticpos-align-self-rtl-001 android +1 px, new ink 1, bbox (75, 225, 75, 225); readers ['[X] grid-abspos-staticpos-align-self-rtl-001 android']
+  zones4: ## IN-ZONE: 0
+  zones4 benign (key, new ink px in its OWN zone under its probe mask → count): "[X] flex-abspos-staticpos-align-self-safe-001 android" 1px ×1, "[X] grid-abspos-staticpos-align-self-001 android" 1px ×1, "[X] grid-abspos-staticpos-align-self-rtl-001 android" 1px ×1, "[X] grid-abspos-staticpos-align-self-vertWM-001 android" 1px ×1, "[X] grid-abspos-staticpos-justify-self-001 android" 1px ×1

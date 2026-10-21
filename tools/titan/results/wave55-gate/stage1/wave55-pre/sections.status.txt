@@ -1,0 +1,9 @@
+css-counter-styles: OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-flexbox: OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-grid: OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-masking: OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-text-decor: OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-text: OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-writing-modes: OK attempt=1 web=48/48 android=48/48 ios=48/48 
+filter-effects: OK attempt=1 web=48/48 android=48/48 ios=48/48 
+selectors: OK attempt=1 web=48/48 android=48/48 ios=48/48 

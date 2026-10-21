@@ -1,0 +1,72 @@
+land-units.sh — wave 55 (CHECK: read-only)
+root    <scratch>/wt-lu
+HEAD    640276a0 (detached)   export dir (private, removed at exit): <scratch>/teeth/lu-tmp/land-units.5b53kA
+
+ORDER (3 unit commits + records; hold: none; only: L6)
+  00   records  the selected lane dirs → 1 commit
+  01   L7  U1           -- skipped: not in --only
+  02   L7  U2           -- skipped: not in --only
+  03   L7  U3           -- skipped: not in --only
+  04   L7  U4           -- skipped: not in --only
+  05   L7  U6-compose   -- skipped: not in --only
+  06   L7  U6-swift     -- skipped: not in --only
+  07   L7  U6-web       -- skipped: not in --only
+  08   L7  U6-tooling   -- skipped: not in --only
+  09   L7  U5           -- skipped: not in --only
+  10   L6  U1           wave55-android-paint-order/unit-U1.patch 
+  11   L6  U2           wave55-android-paint-order/unit-U2.patch 
+  12   L6  U3           wave55-android-paint-order/unit-U3.patch 
+  13   L4  U1-android   -- skipped: not in --only
+  14   L4  U1-ios       -- skipped: not in --only
+  15   L4  U2-android   -- skipped: not in --only
+  16   L4  U2-ios       -- skipped: not in --only
+  17   L2  U1           -- skipped: not in --only
+  18   L2  U2           -- skipped: not in --only
+  19   L3  U1           -- skipped: not in --only
+  20   L3  U2           -- skipped: not in --only
+  21   L5  U1-ios       -- skipped: not in --only
+  22   L5  U2o-ios      -- skipped: not in --only
+  23   L5  U2i-ios      -- skipped: not in --only
+  24   L5  U2o-android  -- skipped: not in --only
+  25   L5  U2i-android  -- skipped: not in --only
+  26   L1  NB-ios       -- skipped: not in --only
+  27   L5  U3-ios       -- skipped: not in --only
+  28   L5  D            -- skipped: not in --only
+  29   L1  NB-ios-b     -- skipped: not in --only
+
+HOST, INDEX, MANIFEST
+  host    no gate / probe / A/B arm process in this tree
+  index   nothing staged
+  manifest in sync with the tables (landing-manifest.json, sha256 0b46b9b2b673…)
+  plan    28 plan revert units (+ 1 contingency) agree with the table: lane dirs, unit names, revertOrders (expectations.json)
+
+RECORDS (committed first)
+  ok      tools/titan/results/wave55-android-paint-order/  (4 files)
+  WARN    written less than 120s ago (an instrument may still be writing; the landing refuses): tools/titan/results/wave55-android-paint-order/unit-U2.patch tools/titan/results/wave55-android-paint-order/unit-U1.patch tools/titan/results/wave55-android-paint-order/unit-U3.patch tools/titan/results/wave55-android-paint-order/_note.md
+
+PATCHES (each: present · parsed · its paths · the rules · alone on the current tree)
+  wave55-android-paint-order/unit-U1.patch                       (L6:U1)
+            + runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BehindContentBorder.kt
+            alone: applies on the current tree
+  wave55-android-paint-order/unit-U2.patch                       (L6:U2)
+            ~ runtimes/compose/src/main/java/com/styleconverter/runtime/borders/BordersFacade.kt
+            alone: applies on the current tree
+  wave55-android-paint-order/unit-U3.patch                       (L6:U3)
+            + runtimes/compose/src/test/java/com/styleconverter/runtime/effects/EffectsClipFilterOrderTest.kt
+            alone: applies on the current tree
+
+TOUCHED PATHS (clean at HEAD on the current tree; a created path absent)
+  ok      3 paths (2 created, the rest clean at HEAD 640276a0)
+
+CUMULATIVE (the series in landing order, `git apply --check` of one concatenated input on the current tree)
+  ok      3 patches apply in order on 640276a0 (+ the records commit, which touches no patched path)
+
+REVERT DRY-RUNS (every selected unit's revertOrder, reverse-applied on the fully landed series; export tree)
+  ok      L6:U1           revert [ U2 U1 ] reverse-applies on the landed series
+  ok      L6:U2           revert [ U2 ] reverse-applies on the landed series
+  ok      L6:U3           revert [ U3 ] reverse-applies on the landed series
+
+CONTINGENCY (not landed by this run)
+  none in the selected lanes
+
+SUMMARY  0 error(s), 1 warning(s) — landable (--check touched nothing: no checkout, no rm, no apply on the tree)

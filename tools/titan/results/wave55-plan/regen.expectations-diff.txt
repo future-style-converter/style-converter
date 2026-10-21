@@ -1,0 +1,125 @@
+# regen.expectations-diff.txt — the structural diff of expectations.json, 8fbfc83a (fix-r6, installed before this pass) → the pre-landing regeneration (plan-build.py, never hand-edited)
+# before sha256 8fbfc83a9ba3fdaa6e0c2159ba50ec283a2a1323db1eb9a9571d8f5c9dd4e9a9 · after sha256 b773904f788d023d651977e381e36c72865c94019925ba5f9b25607db709f5c6 (plan-build.py ef4df5f89edbaac7…)
+# 26 difference(s); every other value identical (the JSON is the indent-1 rendering both times)
+
++ /generatedWith/inputs/tools/titan/results/wave55-android-paint-order/fix-r1/census.out.txt    [INTENDED: L6: the growth stem is asserted from the lane census (§10 item 2)]
+  after:  6efaf1f3610b9ad458c78d628b757c848f375a2937cea4abb9f462101afcba7f
+
++ /generatedWith/inputs/tools/titan/results/wave55-android-paint-order/reverify-r1/census.out.txt    [INTENDED: L6: … and from the re-verifier's census]
+  after:  d18d0452a4786ccd4a0de97240536d9aedf94eb3d62a81e2c58dd93d2d6adff5
+
++ /generatedWith/inputs/tools/titan/results/wave55-hyphen-ios-linebox/census.out.txt    [INTENDED: L1: the radius 58 / 18 / 4 SAME is asserted from the lane census (§10 item 3)]
+  after:  801953b3822ddea3c6b29f86a939742e6506b003caae0a2817713f43cd9af44b
+
+~ /lanes/L1-hyphen-ios-linebox/carrierRule/NB-ios    [INTENDED: L1 SHOULD: 60 / 19 / 5 SAME → 58 / 18 / 4 SAME, all-prop-001 outside]
+  common prefix 129 chars, common suffix 314 chars
+  before (span): '60 text components in 19 documents (40 own, 20 inherited); 14 iOS captures move (4 TARGET multi-line runs + 10 MOVES stacked one-line runs: Libertine 36 42→41, Inter 92 112→111); 5 SAME ('
+  after  (span): 58 text components (71 declared-normal runs) in 18 documents — the lane's census (wave55-hyphen-ios-linebox/census.out.txt): all-prop-001 is OUTSIDE the radius (`all: initial` resets its line-height), the brief's 60 in 19 counted it; 14 iOS captures move (4 TARGET multi-line runs + 10 MOVES stacked one-line runs: Libertine 36 42→41, Inter 92 112→111); 4 SAME / DECLINED (disclosure-styles — L5's U1-ios carrier by C5 —, anonymous-table-ws-001 and boundary-shaping-010: 
+
+~ /lanes/L1-hyphen-ios-linebox/contingencyUnits/NB-ios-b/trigger    [INTENDED: L1 SHOULD (skeptic should-fix 1): the R1 signature]
+  common prefix 118 chars, common suffix 0 chars
+  before (span): ''
+  after  (span): ; the iOS css-text movers outside the 12 carriers, if any, are only the in-radius one-line SAME controls (boundary-shaping-010; anonymous-table-ws-001, read at wave55-probe), each EXACTLY one row low — the R1 signature (pre-landing regeneration, L1 skeptic should-fix 1): NB-ios-b's top pad 0 restores them too
+
+~ /lanes/L1-hyphen-ios-linebox/revertUnits/NB-ios/commit    [INTENDED: L1: "the 5 SAME controls" → the in-radius SAME controls + all-prop-001 (0 runs)]
+  common prefix 310 chars, common suffix 318 chars
+  before (span): '5 SAME control'
+  after  (span): in-radius SAME controls and all-prop-001 — 0 declared-normal runs: outside the radiu
+
+~ /lanes/L1-hyphen-ios-linebox/stage1Decision    [INTENDED: L1 SHOULD: the R1 signature routes to --contingency L1:NB-ios-b, re-probe requires the SAME controls byte-identical]
+  common prefix 698 chars, common suffix 529 chars
+  before (span): 'Any other WRONG on the 3 gating rows or an iOS clause → revert NB-ios (one commit'
+  after  (span): The R1 SIGNATURE — the gating reason is `anchor: group 1 line 1 offset 1` only AND the iOS movers outside the carriers are only in-radius one-line SAME controls (boundary-shaping-010 at stage 1; anonymous-table-ws-001 at wave55-probe), each exactly one row low (disclosure-styles ios's horizontal runs are SAME too: on L5's U1-ios carrier the same one-row move is R1's, never an L5 revert by itself) — is the world NB-ios-b was built for: it routes to `land-units.sh --contingency L1:NB-ios-b` (never a revert of NB-ios), and the pre-registered wave55-pre-r1 re-probe must then print the 3 gating rows `→ LINEBOX OK` and those SAME controls byte-identical to wave55-open (pre-landing regeneration, L1 skeptic should-fix 1; PLAN §10 item 4). Any other WRONG on the 3 gating rows or an iOS clause → revert NB-ios (one commit; after NB-ios-b, its revertOrder
+
+~ /lanes/L4-ua-heading-margin/ownership/owned[3]    [INTENDED: L4 NIT: headingStandsDown KEPT (the lane's decision 1), not removed]
+  common prefix 65 chars, common suffix 1 chars
+  before (span): 'headingStandsDown removed'
+  after  (span): kdoc: headingStandsDown KEPT — superseded at seam 3, no caller after it; deletion queued, PLAN §10 item 7
+
+~ /lanes/L4-ua-heading-margin/revertUnits/U2-android/commit    [INTENDED: L4 NIT: the same, in the unit commit text]
+  common prefix 110 chars, common suffix 258 chars
+  before (span): 'remov'
+  after  (span): KEPT for rule 2b — the unit compiles without seam 3; its kdoc says superseded; deletion queu
+
+~ /lanes/L5-counter-suffix-rows/carrierRule/U3-ios    [INTENDED: L5 MUST (fix-r1): U3-ios repaints 6 glyphs in 4 rows; the capture set is unchanged]
+  common prefix 110 chars, common suffix 0 chars
+  before (span): ''
+  after  (span): ; pre-landing regeneration (L5 fix-r1, skeptic defect 1): Font.monospacedDigit() turns on Inter's WHOLE `tnum` for the run, so inside its one capture U3-ios repaints 6 glyphs in 4 rows — row 9's '1' (one.tf), the periods of rows 9-12 (period.tf) and row 10's '2' (two.tf) (fix-r1.inter-tnum / u3-glyph-census / u3-boxes.measure); the capture set is unchanged (1)
+
+~ /lanes/L5-counter-suffix-rows/geometryProbes[0]/teeth    [INTENDED: L5 R1-R3: the probe edit, the residual SPEC and the re-grafted replays (proofs named)]
+  common prefix 1983 chars, common suffix 0 chars
+  before (span): ''
+  after  (span): . Pre-landing regeneration (L5 fix-r1 R1-R3; regen.l5-proof.out.txt): U3-ios's `tnum` is run-wide, so ios's base-identity zones skip the five other run boxes (rows 9-12 x130-135, row 10 x136-150) and [T] ios reads them — one dot / one digit blob at the ref's place ±1 (fill ≤ 60 %) and the twin `ink:` summed with the digit window; the residual SPEC declares the two rects; the standing replays re-graft the boxes from Android's base (regen.replay-regraft.py): the correct-U3 picture reads [T] ios `ink:` only without a decided twin and OK with it, [K] ios OK, residual 0 / 0 / 0; the lane's 11 wrong pictures (a period / the '2' erased, moved ±2, a block, a 2×2 blob, copied 1 px down, the row-11 letter erased) are each rejected; every committed replay's verdicts are unchanged
+
+~ /lanes/L5-counter-suffix-rows/predictions[0]/confidence    [INTENDED: L5 MUST (fix-r1 a): MED-HIGH → MED]
+  common prefix 3 chars, common suffix 0 chars
+  before (span): '-HIGH'
+  after  (span): 
+
+~ /lanes/L5-counter-suffix-rows/predictions[0]/geometry    [INTENDED: L5 R5: [H] / [T] ios twin-only WRONG at wave55-pre → the look; OK from wave55-probe]
+  common prefix 11 chars, common suffix 0 chars
+  before (span): ''
+  after  (span):  from wave55-probe on; at wave55-pre [H] ios and [T] ios are predicted WRONG on the twin `ink:` read only (no same-rasterizer twin before stage 1) → the step-8 recorded look → TWIN_RUN_DEFAULT = 'wave55-pre' (L5 fix-r1 R5)
+
+~ /lanes/L5-counter-suffix-rows/predictions[0]/kind    [INTENDED: L5: rows 3-6 and 9 → 9-12]
+  common prefix 40 chars, common suffix 73 chars
+  before (span): ''
+  after  (span): -12
+
+~ /lanes/L5-counter-suffix-rows/predictions[0]/to    [INTENDED: L5 MUST (fix-r1 a): the replay grafted only the 1]
+  common prefix 84 chars, common suffix 1 chars
+  before (span): ''
+  after  (span):  — the replay grafted only row 9's '1': U3-ios's five other tabular glyphs, ≤ 0.31 px each toward the ref's advances, are not modelled (L5 fix-r1)
+
+~ /lanes/L5-counter-suffix-rows/stage1Decision    [INTENDED: L5 R4 / R5: the precedence and the wave55-pre key predictions]
+  common prefix 89 chars, common suffix 732 chars
+  before (span): 'all 6 gating keys OK, the 10 controls OK, [L] natives WRONG; counter-suffix ios ≈0.993 / android ≈0.992 / web 1, -005 ios ≈0.997 / android ≈0.974, every carrier P and ≥ 0.95; the other css-counter-styles captures decoded-pixel identical to wave55-open (disclosure-styles android: L6 may-move, |Δ| ≤ 0.002); per-test IR of all 48 documents byte-identical. A gating key not OK reverts ITS unit (U2i before U2o); a [K] FAIL is diagnosed in the picture (U1 first); U2i-android kept iff [I] android OK and ≥ 0.95; [H] ios WRONG or H-low-shaped → the LRM fallback re-cut of U1 (contingencyUnits U1-ios-LRM: an appended probe-decisions/contingency.json row, landed by land-units.sh --contingency L5:U1-ios-LRM), re-probe (a pre-registered stage1Probe.reprobes id); both fail'
+  after  (span): [C] ios / android and [I] ios / android OK; [H] ios and [T] ios predicted WRONG on the twin `ink:` read ONLY (no same-rasterizer twin draws the reordered marker glyphs or the tabular run before stage 1) → the step-8 recorded look, then TWIN_RUN_DEFAULT = 'wave55-pre' and OK from wave55-probe on (pre-landing regeneration, L5 fix-r1 R5); the 10 controls OK ([K] ios included: U3-ios's five run boxes are carved out of it and read by [T] ios, R1), [L] natives WRONG; the residual read 0 / 0 / 0 on counter-suffix ios / android and -005 ×2 (R3); counter-suffix ios ≈0.993 (MED: U3-ios's other glyphs are not in the replay) / android ≈0.992 / web 1, -005 ios ≈0.997 / android ≈0.974, every carrier P and ≥ 0.95; the other css-counter-styles captures decoded-pixel identical to wave55-open (disclosure-styles android: L6 may-move, |Δ| ≤ 0.002); per-test IR of all 48 documents byte-identical. PRECEDENCE (pre-registered before stage 1, L5 fix-r1 R4): (i) an [H] ios / [T] ios line whose only reason is `ink:` (the twin) or `residual:` goes to the step-8 recorded look FIRST — a right picture sets TWIN_RUN_DEFAULT = 'wave55-pre' (for `residual:`, the D40 fix-r6.zones.py --also record), a wrong one counts as that key's GEOMETRY reason ((ii) for [H] ios, (iii) for [T] ios); (ii) the LRM contingency fires only on an [H] ios GEOMETRY reason (blob count, the period before the letter, the letter or the period off the ref's x ±2 / rows ±1, the letter fill) or on a look that shows the H-low shape — never on a twin-only `ink:` or `residual:` line (the LRM re-cut also reorders the glyphs: its re-probe would be twin-only WRONG again); (iii) a [T] ios GEOMETRY reason (the digit's width / position / rows / fill, a U3 run-box glyph, a row-9 zone) reverts U3-ios; (iv) a [K] ios FAIL whose differing pixels all lie in U3-ios's run boxes (rows 9-12 x130-135, row 10 x136-150) is U3-ios's, never U1-ios's — "U1 first" applies to rows 3-4 x0-63. Any other non-OK gating key reverts ITS unit (U2i before U2o; D first on a U2o revert); U2i-android kept iff [I] android OK and ≥ 0.95; (ii) fired → the LRM fallback re-cut of U1 (contingencyUnits U1-ios-LRM: an appended probe-decisions/contingency.json row, landed by land-units.sh --contingency L5:U1-ios-LRM), re-probe (a pre-registered stage1Probe.reprobes id) — OK, or twin-only with a right look, keeps U1-ios + U1-ios-LRM; a geometry reason again
+
+~ /lanes/L6-android-paint-order/carrierRule/U2    [INTENDED: L6 MUST: the growth stem by rule + U2's clip condition (29 bands / 26 documents keep the base chain)]
+  common prefix 579 chars, common suffix 0 chars
+  before (span): ''
+  after  (span):  + the fix-r1 census growth by rule: a kept `display: contents` box with pseudos whose band now paints behind its ::after (1; wave55-android-paint-order/fix-r1/census.out.txt, reverify-r1). Pre-landing regeneration (L6 fix-r1, skeptic D1): the band paints behind content only on a box that does NOT clip (`!config.overflow.shouldClip` — css-overflow-3 §3: a clipping box's content stops at its padding edge, so the base content-then-band chain is the faithful one there): the 29 clipping legacy bands in 26 documents keep the base chain byte-for-byte (census I1-I5; pins P3h / P3i), and 19 may-move stems are now over-coverage (harmless)
+
+~ /lanes/L6-android-paint-order/mayMove/android    [INTENDED: L6 MUST: + wpt__css-display__display-contents-dynamic-pseudo-insertion-001 (unscored)]
+  list of 240 → 241: added ['wpt__css-display__display-contents-dynamic-pseudo-insertion-001'] · removed [] · order: sorted both times True
+
+~ /lanes/L6-android-paint-order/mayMoveRule    [INTENDED: L6 MUST (fix-r1 item 4): the opacity-group and UA-widget-replica pictures]
+  common prefix 369 chars, common suffix 222 chars
+  before (span): 'a band now under its child (android-paint-order §6)'
+  after  (span): one of three pre-registered pictures: a band now under its child (android-paint-order §6); the band now inside the element's opacity group (css-color-4 §3.3: anchor-center-overflow-003, 48 bands into their 20 % groups; basic-blur too, ring-fenced); or a UA-widget replica now over the band (flex-gap-decorations-023: the BUTTON replica overflows its band, replay Δ +0.0007, DEGENERATE, never claimed) — pre-landing regeneration, L6 fix-r1 item 4
+
+~ /lanes/L6-android-paint-order/revertUnits/U1/commit    [INTENDED: L6: + P5a-f]
+  common prefix 201 chars, common suffix 41 chars
+  before (span): ''
+  after  (span): ; fix-r1 P5a-f: the rect / rounded painters' draw and clip calls through a recording DrawScope, the cache dropped on a width / brush / shape change, the generic branch's tint and mask config
+
+~ /lanes/L6-android-paint-order/revertUnits/U2/commit    [INTENDED: L6: the clip condition + P3h / P3i]
+  common prefix 205 chars, common suffix 1 chars
+  before (span): ' + NEW BorderSidesBehindContentTest.kt (P3'
+  after  (span): , gated on `!config.overflow.shouldClip` (fix-r1: a clipping box keeps the base chain — css-overflow-3 §3) + NEW BorderSidesBehindContentTest.kt (P3a-g; fix-r1 P3h / P3i: a clipping INSET input and a clipping SOLID box keep their base bands
+
+~ /lanes/L6-android-paint-order/stage1Decision    [INTENDED: L6 MUST: the same three pictures in the decision]
+  common prefix 637 chars, common suffix 704 chars
+  before (span): 'anything but a band now under its child'
+  after  (span): none of mayMoveRule's three pictures (a band now under its child; the band now inside the element's opacity group; a UA-widget replica now over the band — pre-landing regeneration, L6 fix-r1)
+
+~ /planDecisions[id=C5]/resolution    [INTENDED: L1: the tripwire keeps 3 in-radius controls (all-prop-001 outside), not 4]
+  common prefix 89 chars, common suffix 83 chars
+  before (span): '4 controls remain'
+  after  (span): 3 in-radius controls remain: anonymous-table-ws-001, boundary-shaping-010, hyphens-vertical-001 — all-prop-001 is outside the radius, D41
+
++ /planDecisions[id=D41]    [INTENDED: the regeneration's own decision row]
+  after:  {"id": "D41", "conflict": "pre-landing audit (wave55-gate/prelanding/citations.md, censuses-and-deliveries.md): after the plan was cut the lane hand-offs changed a census, a prediction, a probe zone and two decision rules — L6 census GROWTH 1 (display-contents-dynamic-pseudo-insertion-001 android) and two may-move pictures mayMoveRule did not name; L5 U3-ios repaints 6 glyphs in 4 rows, not 1 (the probe, the residual SPEC and the replays modelled 1: a correct U3 would have been reverted); L1 radius 58 / 18 with all-prop-001 outside, and a stage-1 rule that reverted NB-ios in the R1 world NB-ios-b was built for; L4 headingStandsDown kept (the plan said removed)", "resolution": "L6: +1 mayMove stem by an asserted rule (both lane censuses + the run-of-record IR; unscored: complement unchanged), mayMoveRule / stage1Decision name the opacity-group and UA-widget-replica pictures, U2's clip condition and P3h / P3i, U1's P5a-f; L5 (fix-r1 R1-R5): the probe carves U3's five run boxes out of ios's base-identity zones and reads them in [T] ios, residual-read.py declares them, the 10 standing replays re-graft them from Android's base (regen.replay-regraft.py), the counter-suffix ios row is MED and its stage1Decision pre-registers the [H] / [T] precedence (twin-only / residual → the look first; LRM only on an [H] geometry reason; a [K] FAIL inside U3's boxes is U3's) — proven by regen.l5-proof.py and probes-selfcheck.txt §RG; L1: carrierRule 58 / 18 / 4 SAME asserted from the lane census, the R1 signature routes to --contingency L1:NB-ios-b (never a revert of NB-ios) with a re-probe requiring the SAME controls byte-identical; L4: the U2 strings say kept; L2 clip-3 android stays MED-HIGH (§10). No carrier, unit, floor or must-not-move cell changed"}
+
+~ /stayDegenerateEvenIfPass[6]    [INTENDED: L5: the honesty-list note reads rows 3-6 and 9-12 (U3-ios is run-wide)]
+  common prefix 58 chars, common suffix 87 chars
+  before (span): ''
+  after  (span): -12
+
+~ /unionMayMoveCaptures/android    [INTENDED: L6: + wpt__css-display__display-contents-dynamic-pseudo-insertion-001 (the union may-move set is L6's)]
+  list of 240 → 241: added ['wpt__css-display__display-contents-dynamic-pseudo-insertion-001'] · removed [] · order: sorted both times True
+
+# top-level keys: before 37 · after 37; planDecisions ids: before 42 · after 43
+# intended paths 26 · changed paths 26 · NOT intended 0 [] · intended but unchanged 0 []
+# the structural diff is exactly the intended set: YES

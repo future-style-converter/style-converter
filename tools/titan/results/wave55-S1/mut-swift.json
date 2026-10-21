@@ -1,0 +1,34 @@
+[
+ {
+  "label": "S1-L1a",
+  "what": "L1 NB-ios: the ascender rounds half-to-even (banker's) instead of away from zero",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift",
+  "old": "        let a = ascender.rounded(.toNearestOrAwayFromZero)",
+  "new": "        let a = ascender.rounded(.toNearestOrEven)",
+  "test": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath <scratchpad>/wave55-S1-skeptic/.dd -only-testing:StyleConverterRuntimeTests/NormalLineBoxTests"
+ },
+ {
+  "label": "S1-L1b",
+  "what": "L1 NB-ios: the horizontal-writing-mode guard dropped (D22)",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/line/NormalLineBox.swift",
+  "old": "        guard declaredNormal, wptCapture, lineCountIsExact, horizontalWritingMode",
+  "new": "        guard declaredNormal, wptCapture, lineCountIsExact",
+  "test": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath <scratchpad>/wave55-S1-skeptic/.dd -only-testing:StyleConverterRuntimeTests/NormalLineBoxTests"
+ },
+ {
+  "label": "S1-L5b",
+  "what": "L5 U1-ios: the marker is isolated even when its natural direction AGREES with the item",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerBidi.swift",
+  "old": "        if naturalIsRTL(s) == itemIsRTL { return s }",
+  "new": "",
+  "test": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath <scratchpad>/wave55-S1-skeptic/.dd -only-testing:StyleConverterRuntimeTests/ListMarkerBidiTests"
+ },
+ {
+  "label": "S1-L4c",
+  "what": "L4 U2-ios: a non-bold-tag host no longer stands down (isBold guard answers false)",
+  "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift",
+  "old": "        guard UAElementFontRule.isBold(forTag: component.meta?.sourceTag) else { return true }",
+  "new": "        guard UAElementFontRule.isBold(forTag: component.meta?.sourceTag) else { return false }",
+  "test": "xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath <scratchpad>/wave55-S1-skeptic/.dd -only-testing:StyleConverterRuntimeTests/UAHeadingFoldGateTests"
+ }
+]

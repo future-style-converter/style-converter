@@ -1,0 +1,3 @@
+            if (!config.overflow.shouldClip) result = BordersFacade.applySidesBehindContent(result, paint.borders)
+=====
+            result = BordersFacade.applySidesBehindContent(result, paint.borders)

@@ -1,0 +1,38 @@
+# seam-4.patch — wave 55 lane L4 (ua-heading-margin), revert unit U2-ios
+# seam file: runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+# base tree: 611c9f93 + unit-U1-ios.patch + seam-2.patch (seam 4 reads seam 2's `mergedPreUA`: apply 2 → 4, revert 4 → 2)
+# seam file sha256 at base 611c9f93: 417853cefdc7627fadc21003efa735d99d47ed0c545b6c1747d7292403fd26f3
+# anchor (PLAN §3 .swift row 2): :352-356 the `hasElementChildren: component.children?.isEmpty == false)` argument (+ its
+#   4-line comment) → UAHeadingFoldGate.standsDown(component:inFlowChildren:mergedPreUA:) (`inFlowChildren` :781);
+#   regenerated from wave54-ua-heading-face/held/seam-2.foldgate.patch (whose hoist seam-2 already carries) on top of seam 2
+# patch-borne: none
+# needs, in the SAME commit: unit-U2-ios.patch (StyleEngine/typography/UAHeadingFoldGate.swift); needs U1-ios landed first
+# check: git apply --check tools/titan/results/wave55-ua-heading-margin/seam-4.patch (on HEAD + U1-ios)
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+index 66c74b74..f77a32e3 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+@@ -353,11 +353,18 @@ public struct ComponentRenderer: View {
+             sourceTag: component.meta?.sourceTag,
+             own: ownProperties,
+             merged: mergedPreUA,
+-            // The heading half stands down for a heading that hosts child
+-            // boxes — this container stacks them, and a 2em face only
+-            // magnifies that (UAElementFontRule.headingAppliesTo carries the
+-            // measured cells). sup/sub are unaffected by the flag.
+-            hasElementChildren: component.children?.isEmpty == false)
++            // Wave 55 (lane L4, U2-ios; the wave-54 held seam): the heading
++            // half stands down only for a heading whose children would still
++            // paint STACKED — a host whose `meta.runs` FOLD into one paragraph
++            // (the wave-44/45 inline flow) takes the 2em face like a leaf
++            // does. The wave-40 all-children stand-down was measured on the
++            // pre-fold stacked render (UAElementFontRule.headingAppliesTo);
++            // UAHeadingFoldGate carries the re-measured cells. sup/sub are
++            // unaffected.
++            hasElementChildren: UAHeadingFoldGate.standsDown(
++                component: component,
++                inFlowChildren: inFlowChildren,
++                mergedPreUA: mergedPreUA))
+         // Wave 55 (lane L4, U1-ios) — the THIRD tag-keyed UA step: an
+         // OUT-OF-FLOW h1…h6 takes its UA `margin-block` (HTML §15.3, .67em
+         // for h1) over its UA-cascade face. MarginCollapsePlanner bails on

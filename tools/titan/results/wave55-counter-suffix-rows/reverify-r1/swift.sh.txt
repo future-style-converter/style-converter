@@ -1,0 +1,12 @@
+#!/bin/bash
+# swift.sh <label> [class...] — focused Catalyst classes present in the re-verify worktree (default: the 17 L5 / list / fidelity classes)
+WT=<wt>
+SP=<scratch>/reverify-L5-out
+label=$1; shift
+cls=("$@"); [ ${#cls[@]} -eq 0 ] && cls=(ListMarkerBidiTests ListMarkerBidiSeamRasterTests ListMarkerSuffixGapTests ListMarkerSuffixGapHangRasterTests ListMarkerSuffixGapInsideRasterTests FontVariantNumericTabularTests FontVariantNumericTabularRasterTests ListMarkerTests ListMarkerOutsideHangTests ListMarkerOutsideHangRasterTests ListMarkerAbsposItemRasterTests ListMarkerInFlowItemRasterTests ListMarkerEmptyItemTests ListMarkerEmptyItemRasterTests ListMarkerSymbolTests ListItemMarkerGateTests FidelityWave2Tests)
+T=$WT/runtimes/swiftui/Tests/StyleConverterRuntimeTests
+args=(); for c in "${cls[@]}"; do grep -rqs "class $c\b" $T && args+=(-only-testing:StyleConverterRuntimeTests/$c); done
+cd $WT && nice xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath $WT/.dd "${args[@]}" > $SP/swift-$label.log 2>&1
+rc=$?
+echo "SWIFT $label rc=$rc classes=${#args[@]} $(grep -E 'Executed [0-9]+ tests' $SP/swift-$label.log | tail -1 | sed 's/^[[:space:]]*//') failing-assertions=$(grep -c 'error: -\[' $SP/swift-$label.log)"
+grep -E 'error: -\[' $SP/swift-$label.log | sed -E 's#^.*/Tests/#Tests/#' | cut -c1-260 | sort -u | head -20

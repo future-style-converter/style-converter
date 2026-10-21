@@ -1,0 +1,54 @@
+U1 backdrop-filter-clip-rect android: 416 px repainted
+U2 css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001 android: 1188 px repainted
+U2 css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002 android: 1016 px repainted
+U2 css-flexbox/abspos/flex-abspos-staticpos-justify-self-001 android: 140 px repainted
+U2 css-flexbox/abspos/flex-abspos-staticpos-margin-001 android: 82 px repainted
+U2 css-flexbox/abspos/flex-abspos-staticpos-margin-002 android: 90 px repainted
+U2 css-flexbox/abspos/flex-abspos-staticpos-margin-003 android: 125 px repainted
+U2 css-flexbox/abspos/flex-abspos-staticpos-fallback-justify-content-001 android: 36 px repainted
+U2 css-grid/abspos/grid-abspos-staticpos-align-self-001 android: 86 px repainted
+U2 css-grid/abspos/grid-abspos-staticpos-align-self-002 android: 86 px repainted
+U2 css-grid/abspos/grid-abspos-staticpos-align-self-img-001 android: 79 px repainted
+U2 css-grid/abspos/grid-abspos-staticpos-align-self-img-002 android: 79 px repainted
+U2 css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001 android: 124 px repainted
+U2 css-grid/abspos/grid-abspos-staticpos-align-self-rtl-002 android: 124 px repainted
+U2 css-grid/abspos/grid-abspos-staticpos-align-self-rtl-003 android: 124 px repainted
+U2 css-grid/abspos/grid-abspos-staticpos-align-self-rtl-004 android: 124 px repainted
+U2 css-grid/abspos/grid-abspos-staticpos-align-self-safe-001 android: 121 px repainted
+U2 css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001 android: 128 px repainted
+U2 css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-002 android: 128 px repainted
+U2 css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-003 android: 128 px repainted
+U2 css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-004 android: 128 px repainted
+U2 css-grid/abspos/grid-abspos-staticpos-justify-self-001 android: 130 px repainted
+U2 css-grid/abspos/grid-abspos-staticpos-justify-self-002 android: 130 px repainted
+U2 css-images/gradient/gradient-powerless-hue-hsl android: 77 px repainted
+U2 css-images/gradient/gradient-powerless-hue-hwb android: 67 px repainted
+U2 css-images/gradient/gradient-powerless-hue-lch android: 92 px repainted
+U2 css-images/gradient/gradient-powerless-hue-oklch android: 139 px repainted
+filter-effects/backdrop-filter-clip-rect android  capture 0.9559  U1 0.9574  Δ 0.0015
+css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001 android  capture 0.9619  U2 0.9938  Δ 0.0319
+css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002 android  capture 0.9635  U2 0.991  Δ 0.0275
+css-flexbox/abspos/flex-abspos-staticpos-justify-self-001 android  capture 0.9997  U2 1  Δ 0.0003
+css-flexbox/abspos/flex-abspos-staticpos-margin-001 android  capture 0.9998  U2 1  Δ 0.0002
+css-flexbox/abspos/flex-abspos-staticpos-margin-002 android  capture 0.9778  U2 0.9775  Δ -0.0003
+css-flexbox/abspos/flex-abspos-staticpos-margin-003 android  capture 0.9798  U2 0.9795  Δ -0.0003
+css-flexbox/abspos/flex-abspos-staticpos-fallback-justify-content-001 android  capture 0.9873  U2 0.9873  Δ 0.0000
+css-grid/abspos/grid-abspos-staticpos-align-self-001 android  capture 0.9673  U2 0.9672  Δ -0.0001
+css-grid/abspos/grid-abspos-staticpos-align-self-002 android  capture 0.9791  U2 0.979  Δ -0.0001
+css-grid/abspos/grid-abspos-staticpos-align-self-img-001 android  capture 0.964  U2 0.964  Δ 0.0000
+css-grid/abspos/grid-abspos-staticpos-align-self-img-002 android  capture 0.9998  U2 1  Δ 0.0002
+css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001 android  capture 0.9646  U2 0.9645  Δ -0.0001
+css-grid/abspos/grid-abspos-staticpos-align-self-rtl-002 android  capture 0.9646  U2 0.9645  Δ -0.0001
+css-grid/abspos/grid-abspos-staticpos-align-self-rtl-003 android  capture 0.9778  U2 0.9778  Δ 0.0000
+css-grid/abspos/grid-abspos-staticpos-align-self-rtl-004 android  capture 0.9778  U2 0.9778  Δ 0.0000
+css-grid/abspos/grid-abspos-staticpos-align-self-safe-001 android  capture 0.9441  U2 0.9448  Δ 0.0007
+css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001 android  capture 0.9612  U2 0.9613  Δ 0.0001
+css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-002 android  capture 0.9614  U2 0.9615  Δ 0.0001
+css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-003 android  capture 0.9667  U2 0.9669  Δ 0.0002
+css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-004 android  capture 0.9682  U2 0.9683  Δ 0.0001
+css-grid/abspos/grid-abspos-staticpos-justify-self-001 android  capture 0.9667  U2 0.9667  Δ 0.0000
+css-grid/abspos/grid-abspos-staticpos-justify-self-002 android  capture 0.9823  U2 0.9823  Δ 0.0000
+css-images/gradient/gradient-powerless-hue-hsl android  capture 0.7542  U2 0.7544  Δ 0.0002
+css-images/gradient/gradient-powerless-hue-hwb android  capture 0.755  U2 0.7553  Δ 0.0003
+css-images/gradient/gradient-powerless-hue-lch android  capture 0.7013  U2 0.7016  Δ 0.0003
+css-images/gradient/gradient-powerless-hue-oklch android  capture 0.6991  U2 0.6996  Δ 0.0005

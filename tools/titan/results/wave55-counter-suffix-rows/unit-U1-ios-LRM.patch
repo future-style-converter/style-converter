@@ -1,0 +1,107 @@
+# unit-U1-ios-LRM.patch — wave55 L5 (counter-suffix-rows) CONTINGENCY unit U1-ios-LRM: ListMarkerBidi.painted wraps in LRM … LRM / RLM … RLM instead of LRI/RLI … PDI (+ its pins)
+# base tree 611c9f93; cut ON TOP of unit-U1-ios.patch + seam-1.patch (it edits the file U1-ios creates). Lands ONLY via land-units.sh --contingency L5:U1-ios-LRM after the stage-1 trigger (expectations.json contingencyUnits.U1-ios-LRM). Lane note: tools/titan/results/wave55-counter-suffix-rows/_note.md
+# fix-r1 re-cut (PLAN §8 step 3): every hunk identical to the builder's cut (only the index line's hash abbreviation may differ)
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerBidi.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerBidi.swift
+index 6dc2b12c..dbee0c3a 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerBidi.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/lists/ListMarkerBidi.swift
+@@ -34,6 +34,17 @@
+ //  marker under an ltr item. Census: tools/titan/results/
+ //  wave55-counter-suffix-rows/census-l5.out.txt (U1 section).
+ //
++//  ## Contingency U1-ios-LRM (counter-suffix-rows §9 R1, PLAN contingencyUnits)
++//  Landed only if the stage-1 device probe printed `[H] counter-suffix ios`
++//  WRONG or H-low-shaped (CoreText growing the marker's line box for the
++//  isolate controls) while `[C]` / `[T]` / `[K]` ios were OK: the marker is
++//  then wrapped in a pair of strong MARKS — LRM U+200E … LRM (ltr item) or
++//  RLM U+200F … RLM (rtl item) — instead of LRI/RLI … PDI. UAX #9 P2 then
++//  finds the item's direction at once, and the trailing mark keeps a final
++//  neutral (the `.` of `א.`) between two strong characters of the item's
++//  direction (N1 / N2), so the order is the isolate's for a one-paragraph
++//  marker Text — with no isolate run for CoreText to resolve a face for.
++//
+ //  ## Scope boundary (no silent fallthrough)
+ //  TODO(wave55-L5): `ComponentRenderer.ownListMarker` (`display: list-item`
+ //  on a non-`<li>` box, css-lists-3 §3.1) still hands its bare string to
+@@ -46,12 +57,10 @@ import Foundation
+ 
+ enum ListMarkerBidi {
+ 
+-    /// LEFT-TO-RIGHT ISOLATE — css-writing-modes-4 §2.2, isolate + ltr.
+-    static let lri = "\u{2066}"
+-    /// RIGHT-TO-LEFT ISOLATE — css-writing-modes-4 §2.2, isolate + rtl.
+-    static let rli = "\u{2067}"
+-    /// POP DIRECTIONAL ISOLATE — closes either initiator above.
+-    static let pdi = "\u{2069}"
++    /// LEFT-TO-RIGHT MARK — strong L, no isolate run (contingency U1-ios-LRM).
++    static let lrm = "\u{200E}"
++    /// RIGHT-TO-LEFT MARK — strong R, no isolate run (contingency U1-ios-LRM).
++    static let rlm = "\u{200F}"
+ 
+     /// Is the list ITEM right-to-left? `direction` is "Inherited: yes"
+     /// (css-writing-modes-4 §2.1) and rides InheritedText's channel, so the
+@@ -118,14 +127,16 @@ enum ListMarkerBidi {
+     /// The marker string SwiftUI must paint for an item of the given
+     /// direction: unchanged when its natural direction already equals the
+     /// item's (the isolate would be the identity), otherwise wrapped in the
+-    /// §2.2 isolate controls for the item's direction.
++    /// item direction's strong mark on both sides (contingency U1-ios-LRM:
++    /// the §2.2 isolate's order without the isolate controls).
+     static func painted(_ s: String, itemIsRTL: Bool) -> String {
+         // An empty marker is no marker box at all (css-lists-3 §3.1).
+         guard !s.isEmpty else { return s }
+         // P2/P3 already pick the item's direction: byte-identical Text.
+         if naturalIsRTL(s) == itemIsRTL { return s }
+-        // Isolate + the item's direction (css-writing-modes-4 §2.2 table).
+-        return (itemIsRTL ? rli : lri) + s + pdi
++        // The item direction's strong mark, before and after (UAX #9 P2, N1).
++        let mark = itemIsRTL ? rlm : lrm
++        return mark + s + mark
+     }
+ 
+     /// General category L* — the strong-character stand-in (see above).
+diff --git a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerBidiTests.swift b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerBidiTests.swift
+index 4aa5ba8b..2b500081 100644
+--- a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerBidiTests.swift
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerBidiTests.swift
+@@ -16,6 +16,10 @@
+ //  same `ScriptFallbackFonts.annotate` call the three marker placements
+ //  use, and read which side of the letter the period's ink lands on.
+ //
++//  Contingency U1-ios-LRM: the wrap is the item direction's strong MARK on
++//  both sides (LRM … LRM / RLM … RLM) instead of LRI/RLI … PDI; the pins
++//  below carry the marks, the raster pins are unchanged.
++//
+ //  Mutations EXECUTED by the lane (bracketed in tools/titan/results/
+ //  wave55-counter-suffix-rows/_note.md): `painted` returning its input
+ //  turns the first pure pin and the painted raster pin red; dropping the
+@@ -31,9 +35,9 @@ final class ListMarkerBidiTests: XCTestCase {
+ 
+     // MARK: - painted: the conditional isolate (pure)
+ 
+-    /// The defect's string under an ltr item: natural R ≠ item ltr → LRI…PDI.
++    /// The defect's string under an ltr item: natural R ≠ item ltr → LRM…LRM.
+     func testHebrewMarkerUnderAnLtrItemIsLtrIsolated() {
+-        XCTAssertEqual(ListMarkerBidi.painted("א.", itemIsRTL: false), "\u{2066}א.\u{2069}")
++        XCTAssertEqual(ListMarkerBidi.painted("א.", itemIsRTL: false), "\u{200E}א.\u{200E}")
+     }
+ 
+     /// Natural direction already the item's → the identity, byte-for-byte.
+@@ -50,7 +54,7 @@ final class ListMarkerBidiTests: XCTestCase {
+ 
+     /// The disclosure-styles reach: a neutral bullet under an rtl item.
+     func testNeutralBulletUnderAnRtlItemIsRtlIsolated() {
+-        XCTAssertEqual(ListMarkerBidi.painted("•", itemIsRTL: true), "\u{2067}•\u{2069}")
++        XCTAssertEqual(ListMarkerBidi.painted("•", itemIsRTL: true), "\u{200F}•\u{200F}")
+     }
+ 
+     /// No marker box, nothing to isolate (css-lists-3 §3.1).
+@@ -58,7 +62,7 @@ final class ListMarkerBidiTests: XCTestCase {
+         XCTAssertEqual(ListMarkerBidi.painted("", itemIsRTL: true), "")
+     }
+ 
+-    /// Wrapping twice is wrapping once: P2 skips the isolate it added.
++    /// Wrapping twice is wrapping once: P2 finds the mark it added first.
+     func testPaintedIsIdempotent() {
+         let once = ListMarkerBidi.painted("א.", itemIsRTL: false)
+         XCTAssertEqual(ListMarkerBidi.painted(once, itemIsRTL: false), once)

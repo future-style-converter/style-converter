@@ -1,0 +1,11 @@
+L6 picked: {'abspos/flex-abspos-staticpos-align-self-safe-001': 'child@39,39 -3,+0', 'abspos/flex-abspos-staticpos-align-self-safe-002': 'child@44,272 -3,+0', 'abspos/grid-abspos-staticpos-align-self-001': 'child@19,30 +3,+0', 'abspos/grid-abspos-staticpos-justify-self-001': 'child@30,19 +3,+0', 'abspos/grid-abspos-staticpos-align-self-vertWM-001': 'child@18,19 +3,+0', 'abspos/grid-abspos-staticpos-align-self-rtl-001': 'child@33,18 +3,+0'}
+L2-c3-pink-sliver-off-scanlines            gate-exit 1  backdrop-filter-nested-border-radius-clip-3 android        PASS   ACCEPTED (defect)
+      filter-nested-border-radius-clip-3 android {green (36, 36, 235, 135) greenPx 19384 corner [254, 254, 254, 254] row blue[16..25] grey[26..35] green[36..235]} → GEOMETRY OK
+L2-c3-pink-sliver-off-scanlines            gate-exit 1  backdrop-filter-nested-border-radius-clip-3 android        PASS   ACCEPTED (defect)
+      backdrop-filter-nested-border-radius-clip-3 android {'green': (36, 36, 235, 135), 'greenPx': 19384, 'failInkPx': 80} → GEOMETRY OK
+L2-c3-notch-off-scanlines                  gate-exit 1  backdrop-filter-nested-border-radius-clip-3 android        PASS   ACCEPTED (defect)
+      filter-nested-border-radius-clip-3 android {green (36, 36, 235, 135) greenPx 19335 corner [254, 254, 254, 254] row blue[16..25] grey[26..35] green[36..235]} → GEOMETRY OK
+L2-c3-notch-off-scanlines                  gate-exit 1  backdrop-filter-nested-border-radius-clip-3 android        PASS   ACCEPTED (defect)
+      backdrop-filter-nested-border-radius-clip-3 android {'green': (36, 36, 235, 135), 'greenPx': 19335, 'failInkPx': 0} → GEOMETRY OK
+
+4 (fake, key) reads; ACCEPTED 4; rejected 0; other 0
