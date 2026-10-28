@@ -63,7 +63,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
 
     // IR document decoding (core/ir).
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0")
 
     // Image loading for background-image: url()/data-URI support
     // (background/BackgroundImageRenderer.kt, effects/mask/MaskApplier.kt,
