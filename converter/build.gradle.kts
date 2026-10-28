@@ -10,7 +10,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0")
     // kotlin-test runs on the JUnit Platform via the Kotlin stdlib's test
     // shim, picking up the same kotlinx-serialization JSON parser used by
     // production code. JUnit Jupiter chosen over 4 for matching modern
