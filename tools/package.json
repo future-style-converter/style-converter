@@ -15,7 +15,7 @@
     "fft.js": "^4.0.4",
     "pixelmatch": "^7.2.0",
     "pngjs": "^7.0.0",
-    "puppeteer": "^25.13.0",
+    "puppeteer": "^25.16.0",
     "sharp": "^0.35.5",
     "sharp-phash": "^2.2.0",
     "ssim.js": "^3.5.0"
