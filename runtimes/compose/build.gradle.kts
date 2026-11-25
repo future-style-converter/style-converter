@@ -55,7 +55,7 @@ tasks.withType<Test>().configureEach {
 
 dependencies {
     // Compose runtime surface used by the per-property Appliers.
-    implementation(platform("androidx.compose:compose-bom:2026.09.00"))
+    implementation(platform("androidx.compose:compose-bom:2026.11.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.foundation:foundation")
@@ -63,7 +63,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
 
     // IR document decoding (core/ir).
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.13.0")
 
     // Image loading for background-image: url()/data-URI support
     // (background/BackgroundImageRenderer.kt, effects/mask/MaskApplier.kt,
